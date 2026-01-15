@@ -480,6 +480,7 @@ export default function ChronicProfessionalReport({
   const [validationStatus, setValidationStatus] = useState<'draft' | 'validated'>('draft')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isSendingDocuments, setIsSendingDocuments] = useState(false)
+  const [editingDoctor, setEditingDoctor] = useState(false)
 
   // Sick leave state
   const [sickLeaveData, setSickLeaveData] = useState({
@@ -5224,8 +5225,133 @@ export default function ChronicProfessionalReport({
     )
   }
   
+  // ==================== DOCTOR INFO EDITOR ====================
+
+  const DoctorInfoEditor = () => {
+    const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' &&
+      !doctorInfo.numeroEnregistrement.includes('[')
+
+    const [localDoctorInfo, setLocalDoctorInfo] = useState(doctorInfo)
+
+    const handleDoctorFieldChange = (field: string, value: string) => {
+      setLocalDoctorInfo(prev => ({ ...prev, [field]: value }))
+      setHasUnsavedChanges(true)
+    }
+
+    // Save changes when done editing
+    useEffect(() => {
+      if (!editingDoctor && JSON.stringify(localDoctorInfo) !== JSON.stringify(doctorInfo)) {
+        setDoctorInfo(localDoctorInfo)
+      }
+    }, [editingDoctor])
+
+    return (
+      <Card className="mb-6 print:hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditingDoctor(!editingDoctor)}
+              className="w-fit text-xs sm:text-sm"
+            >
+              {editingDoctor ? <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> : <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />}
+              {editingDoctor ? 'Done' : 'Complete Profile'}
+            </Button>
+            <span className="flex items-center text-base sm:text-lg">
+              <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+              Doctor Information
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {editingDoctor ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div>
+                <Label>Full name *</Label>
+                <Input
+                  value={localDoctorInfo.nom}
+                  onChange={(e) => handleDoctorFieldChange('nom', e.target.value)}
+                  placeholder="Dr. Full Name"
+                  className={localDoctorInfo.nom.includes('[') ? 'border-blue-500' : ''}
+                />
+              </div>
+              <div>
+                <Label>Qualifications</Label>
+                <Input
+                  value={localDoctorInfo.qualifications}
+                  onChange={(e) => handleDoctorFieldChange('qualifications', e.target.value)}
+                  placeholder="MBBS, MD"
+                />
+              </div>
+              <div>
+                <Label>Speciality</Label>
+                <Input
+                  value={localDoctorInfo.specialite}
+                  onChange={(e) => handleDoctorFieldChange('specialite', e.target.value)}
+                  placeholder="General Medicine"
+                />
+              </div>
+              <div>
+                <Label>Medical Council Registration No. *</Label>
+                <Input
+                  value={localDoctorInfo.numeroEnregistrement}
+                  onChange={(e) => handleDoctorFieldChange('numeroEnregistrement', e.target.value)}
+                  placeholder="MCM/12345"
+                  className={localDoctorInfo.numeroEnregistrement.includes('[') ? 'border-blue-500' : ''}
+                />
+              </div>
+              <div>
+                <Label>Email *</Label>
+                <Input
+                  value={localDoctorInfo.email}
+                  onChange={(e) => handleDoctorFieldChange('email', e.target.value)}
+                  placeholder="doctor@email.com"
+                  className={localDoctorInfo.email.includes('[') ? 'border-blue-500' : ''}
+                />
+              </div>
+              <div className="col-span-2">
+                <Label>Clinic Address</Label>
+                <Input
+                  value={localDoctorInfo.adresseCabinet}
+                  onChange={(e) => handleDoctorFieldChange('adresseCabinet', e.target.value)}
+                  placeholder="Clinic address or Teleconsultation"
+                />
+              </div>
+              <div className="col-span-2">
+                <Label>Consultation Hours</Label>
+                <Input
+                  value={localDoctorInfo.heuresConsultation}
+                  onChange={(e) => handleDoctorFieldChange('heuresConsultation', e.target.value)}
+                  placeholder="Teleconsultation Hours: 8:00 AM - 8:00 PM"
+                />
+              </div>
+              <div className="col-span-2">
+                <p className="text-sm text-blue-600">* Required fields must be completed before validation</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
+              <div><strong>Name:</strong> {doctorInfo.nom}</div>
+              <div><strong>Qualifications:</strong> {doctorInfo.qualifications}</div>
+              <div><strong>Speciality:</strong> {doctorInfo.specialite}</div>
+              <div><strong>Medical Council No.:</strong> {doctorInfo.numeroEnregistrement}</div>
+              <div><strong>Email:</strong> {doctorInfo.email}</div>
+              {doctorInfo.adresseCabinet && !doctorInfo.adresseCabinet.toLowerCase().includes('tibok') && (
+                <div className="col-span-2"><strong>Clinic Address:</strong> {doctorInfo.adresseCabinet}</div>
+              )}
+              {doctorInfo.heuresConsultation && (
+                <div className="col-span-2"><strong>Consultation Hours:</strong> {doctorInfo.heuresConsultation}</div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    )
+  }
+
   // ==================== ACTIONS BAR ====================
-  
+
   const ActionsBar = () => {
     return (
       <Card className="print:hidden">
@@ -5371,6 +5497,7 @@ export default function ChronicProfessionalReport({
   return (
     <div className="space-y-6 print:space-y-4">
       <ActionsBar />
+      <DoctorInfoEditor />
       <PrescriptionStats />
       
       {/* Section selector dropdown */}

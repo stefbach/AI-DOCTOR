@@ -285,32 +285,56 @@ I will suggest precise improvements that you can review and apply!`,
   
   const transcribeAudio = async (audioBlob: Blob) => {
     setIsTranscribing(true)
-    
+
     try {
       const audioFile = new File([audioBlob], `tibok_voice_${Date.now()}.webm`, { type: 'audio/webm' })
-      
+
       const formData = new FormData()
       formData.append('audioFile', audioFile)
       formData.append('doctorInfo', JSON.stringify({}))
-      
+
+      console.log('🎤 AI Assistant: Sending audio for transcription...')
+
       const response = await fetch('/api/voice-dictation-transcribe', {
         method: 'POST',
         body: formData
       })
-      
+
       if (!response.ok) {
         throw new Error(`Transcription failed: ${response.status}`)
       }
-      
+
       const result = await response.json()
-      const transcribedText = result.transcription?.text || ''
-      
+      console.log('🎤 AI Assistant: Transcription result:', result)
+
+      // Use normalized text if available, otherwise use raw text
+      const transcribedText = result.transcription?.normalizedText || result.transcription?.text || ''
+
+      console.log('🎤 AI Assistant: Transcribed text:', transcribedText)
+
       if (transcribedText) {
         setInputMessage(transcribedText)
         inputRef.current?.focus()
+        toast({
+          title: "✅ Transcription réussie",
+          description: transcribedText.length > 50 ? transcribedText.substring(0, 50) + '...' : transcribedText,
+          duration: 3000
+        })
+      } else {
+        toast({
+          title: "⚠️ Aucun texte détecté",
+          description: "Veuillez parler plus clairement et réessayer",
+          duration: 3000
+        })
       }
     } catch (error: any) {
       console.error('Error transcribing audio:', error)
+      toast({
+        title: "❌ Erreur de transcription",
+        description: "Impossible de transcrire l'audio. Veuillez réessayer.",
+        variant: "destructive",
+        duration: 5000
+      })
     } finally {
       setIsTranscribing(false)
     }
