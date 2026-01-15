@@ -29,14 +29,14 @@ async function transcribeAudio(audioFile: File): Promise<{
   console.log('🔊 Step 1: Starting audio transcription...');
   console.log(`   Audio file: ${audioFile.name} (${audioFile.size} bytes)`);
 
-  // Medical prompt to help Whisper recognize French medical terms and medications
-  const medicalPrompt = `Transcription médicale en français. Médicaments courants: Doliprane, Paracétamol, Metformine, Metformin, Amoxicilline, Augmentin, Clamoxyl, Ibuprofène, Aspirine, Oméprazole, Pantoprazole, Atorvastatine, Simvastatine, Amlodipine, Ramipril, Lisinopril, Bisoprolol, Furosémide, Spironolactone, Lévothyrox, Levothyroxine, Prednisone, Prednisolone, Insuline, Lantus, Novorapid, Glucophage, Diamicron, Gliclazide, Januvia, Sitagliptine, Kardégic, Plavix, Clopidogrel, Xarelto, Eliquis, Pradaxa, Ventoline, Salbutamol, Seretide, Symbicort, Singulair, Montelukast, Inexium, Gaviscon, Smecta, Imodium, Spasfon, Débridat, Mopral, Vogalène, Motilium, Primperan, Lysanxia, Lexomil, Xanax, Stilnox, Zolpidem, Imovane, Zopiclone, Deroxat, Seroplex, Prozac, Effexor, Cymbalta, Laroxyl, Lyrica, Neurontin, Rivotril, Dépakine, Tégrétol, Keppra. Dosages: milligrammes, mg, grammes, g, microgrammes, µg, millilitres, ml.`;
+  // Medical prompt to help Whisper recognize medical terms (bilingual French/English)
+  const medicalPrompt = `Medical transcription. Common medications: Doliprane, Paracetamol, Acetaminophen, Metformin, Metformine, Amoxicillin, Amoxicilline, Augmentin, Ibuprofen, Ibuprofène, Aspirin, Aspirine, Omeprazole, Oméprazole, Pantoprazole, Atorvastatin, Simvastatin, Amlodipine, Ramipril, Lisinopril, Bisoprolol, Furosemide, Spironolactone, Levothyroxine, Lévothyrox, Prednisone, Prednisolone, Insulin, Insuline, Lantus, Novorapid, Glucophage, Diamicron, Gliclazide, Januvia, Sitagliptin, Aspirin, Plavix, Clopidogrel, Xarelto, Eliquis, Pradaxa, Ventolin, Ventoline, Salbutamol, Albuterol, Seretide, Symbicort, Singulair, Montelukast, Nexium, Gaviscon, Imodium, Xanax, Zolpidem, Zopiclone, Sertraline, Fluoxetine, Prozac, Effexor, Venlafaxine, Cymbalta, Duloxetine, Lyrica, Pregabalin, Gabapentin, Neurontin. Dosages: milligrams, mg, grams, g, micrograms, mcg, milliliters, ml.`;
 
   try {
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: 'whisper-1',
-      language: 'fr', // French by default, Whisper will auto-detect if needed
+      // No language specified - Whisper will auto-detect English or French
       response_format: 'verbose_json',
       prompt: medicalPrompt, // Help Whisper recognize medical terms
     });
