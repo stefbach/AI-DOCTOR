@@ -458,6 +458,21 @@ function sanitizeMedications(medications: any[]): any[] {
   })
 }
 
+// ==================== CHRONIC DISEASE SECTION DEFINITIONS ====================
+const CHRONIC_SECTION_KEYS = [
+  { key: 'chiefComplaint', title: 'CHIEF COMPLAINT' },
+  { key: 'historyOfPresentIllness', title: 'HISTORY OF PRESENT ILLNESS' },
+  { key: 'pastMedicalHistory', title: 'PAST MEDICAL HISTORY' },
+  { key: 'physicalExamination', title: 'PHYSICAL EXAMINATION' },
+  { key: 'diagnosticSynthesis', title: 'DIAGNOSTIC SYNTHESIS' },
+  { key: 'diagnosticConclusion', title: 'DIAGNOSTIC CONCLUSION' },
+  { key: 'managementPlan', title: 'MANAGEMENT PLAN' },
+  { key: 'dietaryPlan', title: 'DIETARY PLAN' },
+  { key: 'selfMonitoringInstructions', title: 'SELF-MONITORING INSTRUCTIONS' },
+  { key: 'followUpPlan', title: 'FOLLOW-UP PLAN' },
+  { key: 'conclusion', title: 'CONCLUSION' }
+] as const
+
 // ==================== MAIN COMPONENT ====================
 
 export default function ChronicProfessionalReport({
@@ -541,21 +556,6 @@ export default function ChronicProfessionalReport({
 
   // Local state for narrative text (completely independent like sick leave)
   const [editableNarrative, setEditableNarrative] = useState('')
-
-  // Chronic disease sections - individual editable sections
-  const chronicSectionKeys = [
-    { key: 'chiefComplaint', title: 'CHIEF COMPLAINT' },
-    { key: 'historyOfPresentIllness', title: 'HISTORY OF PRESENT ILLNESS' },
-    { key: 'pastMedicalHistory', title: 'PAST MEDICAL HISTORY' },
-    { key: 'physicalExamination', title: 'PHYSICAL EXAMINATION' },
-    { key: 'diagnosticSynthesis', title: 'DIAGNOSTIC SYNTHESIS' },
-    { key: 'diagnosticConclusion', title: 'DIAGNOSTIC CONCLUSION' },
-    { key: 'managementPlan', title: 'MANAGEMENT PLAN' },
-    { key: 'dietaryPlan', title: 'DIETARY PLAN' },
-    { key: 'selfMonitoringInstructions', title: 'SELF-MONITORING INSTRUCTIONS' },
-    { key: 'followUpPlan', title: 'FOLLOW-UP PLAN' },
-    { key: 'conclusion', title: 'CONCLUSION' }
-  ]
 
   // State for individual chronic disease sections
   const [chronicSections, setChronicSections] = useState<Record<string, string>>({
@@ -2795,7 +2795,7 @@ export default function ChronicProfessionalReport({
       }
 
       // Get section title for context
-      const sectionDef = chronicSectionKeys.find(s => s.key === sectionKey)
+      const sectionDef = CHRONIC_SECTION_KEYS.find(s => s.key === sectionKey)
       const sectionTitle = sectionDef?.title || sectionKey
 
       // Reformat with OpenAI for medical documentation
@@ -2838,12 +2838,12 @@ export default function ChronicProfessionalReport({
     } finally {
       setIsTranscribingSection(null)
     }
-  }, [chronicSections, chronicSectionKeys])
+  }, [chronicSections])
 
   const clearSection = useCallback((sectionKey: string) => {
     if (validationStatus === 'validated') return
 
-    const sectionDef = chronicSectionKeys.find(s => s.key === sectionKey)
+    const sectionDef = CHRONIC_SECTION_KEYS.find(s => s.key === sectionKey)
     const sectionTitle = sectionDef?.title || sectionKey
 
     setChronicSections(prev => ({
@@ -2856,7 +2856,7 @@ export default function ChronicProfessionalReport({
       description: `${sectionTitle} has been cleared`,
       duration: 2000
     })
-  }, [validationStatus, chronicSectionKeys])
+  }, [validationStatus])
 
   const updateChronicSection = useCallback((sectionKey: string, value: string) => {
     setChronicSections(prev => ({
@@ -2879,7 +2879,7 @@ export default function ChronicProfessionalReport({
     }
 
     // Add each section with its title
-    chronicSectionKeys.forEach(section => {
+    CHRONIC_SECTION_KEYS.forEach(section => {
       const content = chronicSections[section.key]
       if (content && content.trim()) {
         parts.push(`\n═══════════════════════════════════════════════════════════════\n${section.title}\n═══════════════════════════════════════════════════════════════\n${content}`)
@@ -2887,7 +2887,7 @@ export default function ChronicProfessionalReport({
     })
 
     return parts.join('\n')
-  }, [chronicSections, chronicSectionKeys, report?.medicalReport?.narrative])
+  }, [chronicSections, report?.medicalReport?.narrative])
 
   // Computed narrative from sections (for saving)
   const computedNarrative = useMemo(() => {
@@ -3325,7 +3325,7 @@ export default function ChronicProfessionalReport({
         
         {/* MEDICAL REPORT SECTIONS - Individual editable sections */}
         <div className="mb-6 space-y-6">
-          {chronicSectionKeys.map((section) => {
+          {CHRONIC_SECTION_KEYS.map((section) => {
             const content = chronicSections[section.key]
             // Show section if: has content, OR in edit mode, OR not validated (so user can use Voice)
             if (!content && !editMode && validationStatus === 'validated') return null
