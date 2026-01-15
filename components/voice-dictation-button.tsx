@@ -1,221 +1,170 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Mic, MicOff, Loader2 } from "lucide-react"
+import { Mic, Square, Loader2 } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 
 interface VoiceDictationButtonProps {
   onTranscript: (text: string) => void
   language?: string
-  continuous?: boolean
   disabled?: boolean
-}
-
-// Check if browser supports Web Speech API
-const isSpeechRecognitionSupported = () => {
-  if (typeof window === 'undefined') return false
-  return 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window
 }
 
 export function VoiceDictationButton({
   onTranscript,
-  language = "en-US",
-  continuous = true,
+  language = "fr",
   disabled = false
 }: VoiceDictationButtonProps) {
-  const [isListening, setIsListening] = useState(false)
-  const [isSupported, setIsSupported] = useState(true)
-  const recognitionRef = useRef<any>(null)
-  const interimTranscriptRef = useRef<string>("")
+  const [isRecording, setIsRecording] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
 
-  useEffect(() => {
-    // Check browser support on mount
-    setIsSupported(isSpeechRecognitionSupported())
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+  const streamRef = useRef<MediaStream | null>(null)
 
-    if (!isSpeechRecognitionSupported()) {
-      return
-    }
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      streamRef.current = stream
 
-    // Initialize Speech Recognition
-    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
-    const recognition = new SpeechRecognition()
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
 
-    recognition.continuous = continuous
-    recognition.interimResults = true
-    recognition.lang = language
-    recognition.maxAlternatives = 1
-
-    recognition.onstart = () => {
-      console.log('🎤 Voice recognition started')
-      setIsListening(true)
-      toast({
-        title: "🎤 Listening...",
-        description: "Speak clearly into your microphone",
-        duration: 2000
-      })
-    }
-
-    recognition.onresult = (event: any) => {
-      let interimTranscript = ''
-      let finalTranscript = ''
-
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript + ' '
-        } else {
-          interimTranscript += transcript
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data)
         }
       }
 
-      // Store interim transcript
-      interimTranscriptRef.current = interimTranscript
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        await transcribeAudio(audioBlob)
 
-      // Send final transcript to parent
-      if (finalTranscript) {
-        console.log('📝 Final transcript:', finalTranscript)
-        onTranscript(finalTranscript.trim())
+        // Stop and cleanup stream
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop())
+          streamRef.current = null
+        }
       }
-    }
 
-    recognition.onerror = (event: any) => {
-      console.error('❌ Speech recognition error:', event.error)
-      
-      let errorMessage = "An error occurred during voice recognition"
-      
-      switch (event.error) {
-        case 'no-speech':
-          errorMessage = "No speech detected. Please try again."
-          break
-        case 'audio-capture':
-          errorMessage = "No microphone found. Please check your device."
-          break
-        case 'not-allowed':
-          errorMessage = "Microphone access denied. Please allow microphone access in browser settings."
-          break
-        case 'network':
-          errorMessage = "Network error. Please check your internet connection."
-          break
-        case 'aborted':
-          // User stopped recording, don't show error
-          return
-        default:
-          errorMessage = `Voice recognition error: ${event.error}`
+      mediaRecorder.start()
+      setIsRecording(true)
+
+      toast({
+        title: "🎤 Recording...",
+        description: "Speak clearly into your microphone. Click again to stop.",
+        duration: 2000
+      })
+
+      console.log('🎤 Recording started (Whisper mode)')
+    } catch (error: any) {
+      console.error('Error starting recording:', error)
+
+      let errorMessage = "Could not start recording"
+      if (error.name === 'NotAllowedError') {
+        errorMessage = "Microphone access denied. Please allow microphone access in browser settings."
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = "No microphone found. Please check your device."
       }
 
       toast({
-        title: "❌ Voice Recognition Error",
+        title: "❌ Recording Error",
         description: errorMessage,
         variant: "destructive",
         duration: 5000
       })
-      
-      setIsListening(false)
     }
+  }
 
-    recognition.onend = () => {
-      console.log('🎤 Voice recognition ended')
-      setIsListening(false)
-      
-      // Auto-restart if continuous and user didn't stop manually
-      if (continuous && recognitionRef.current && isListening) {
-        try {
-          recognition.start()
-        } catch (err) {
-          console.log('Recognition already started or error:', err)
-        }
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
+      console.log('🎤 Recording stopped')
+    }
+  }
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    setIsTranscribing(true)
+
+    try {
+      const audioFile = new File(
+        [audioBlob],
+        `voice_${Date.now()}.webm`,
+        { type: 'audio/webm' }
+      )
+
+      const formData = new FormData()
+      formData.append('audioFile', audioFile)
+      formData.append('doctorInfo', JSON.stringify({}))
+
+      console.log('📤 Sending audio to Whisper API...')
+
+      const response = await fetch('/api/voice-dictation-transcribe', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        throw new Error(`Transcription failed: ${response.status}`)
       }
-    }
 
-    recognitionRef.current = recognition
+      const result = await response.json()
+      const transcribedText = result.transcription?.text || ''
 
-    return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop()
-        } catch (err) {
-          console.log('Error stopping recognition:', err)
-        }
+      console.log('✅ Whisper transcription:', transcribedText)
+
+      if (transcribedText) {
+        onTranscript(transcribedText)
+        toast({
+          title: "✅ Transcription Complete",
+          description: `${transcribedText.length} characters transcribed`,
+          duration: 2000
+        })
+      } else {
+        toast({
+          title: "⚠️ No Speech Detected",
+          description: "Please try again and speak clearly",
+          duration: 3000
+        })
       }
-    }
-  }, [language, continuous, onTranscript, isListening])
-
-  const startListening = () => {
-    if (!recognitionRef.current || !isSupported) {
+    } catch (error: any) {
+      console.error('Error transcribing audio:', error)
       toast({
-        title: "❌ Not Supported",
-        description: "Voice recognition is not supported in this browser. Please use Chrome, Edge, or Safari.",
+        title: "❌ Transcription Error",
+        description: "Could not transcribe audio. Please try again.",
         variant: "destructive",
         duration: 5000
       })
-      return
-    }
-
-    try {
-      recognitionRef.current.start()
-    } catch (err) {
-      console.error('Error starting recognition:', err)
-      toast({
-        title: "❌ Error",
-        description: "Could not start voice recognition. Please try again.",
-        variant: "destructive",
-        duration: 3000
-      })
+    } finally {
+      setIsTranscribing(false)
     }
   }
 
-  const stopListening = () => {
-    if (!recognitionRef.current) return
-
-    try {
-      recognitionRef.current.stop()
-      setIsListening(false)
-      
-      toast({
-        title: "✅ Recording Stopped",
-        description: "Voice dictation has been stopped",
-        duration: 2000
-      })
-    } catch (err) {
-      console.error('Error stopping recognition:', err)
-    }
-  }
-
-  const toggleListening = () => {
-    if (isListening) {
-      stopListening()
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording()
     } else {
-      startListening()
+      startRecording()
     }
-  }
-
-  if (!isSupported) {
-    return (
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        disabled
-        title="Voice recognition not supported in this browser"
-      >
-        <MicOff className="h-4 w-4 text-gray-400" />
-      </Button>
-    )
   }
 
   return (
     <Button
       type="button"
-      variant={isListening ? "destructive" : "outline"}
+      variant={isRecording ? "destructive" : "outline"}
       size="icon"
-      onClick={toggleListening}
-      disabled={disabled}
-      title={isListening ? "Stop voice dictation" : "Start voice dictation"}
-      className={isListening ? "animate-pulse" : ""}
+      onClick={toggleRecording}
+      disabled={disabled || isTranscribing}
+      title={isRecording ? "Stop recording" : isTranscribing ? "Transcribing..." : "Start voice dictation (Whisper)"}
+      className={isRecording ? "animate-pulse" : ""}
     >
-      {isListening ? (
-        <Mic className="h-4 w-4 animate-pulse" />
+      {isTranscribing ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : isRecording ? (
+        <Square className="h-4 w-4" />
       ) : (
         <Mic className="h-4 w-4" />
       )}

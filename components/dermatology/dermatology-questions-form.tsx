@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
+import { VoiceDictationButton } from "@/components/voice-dictation-button"
 
 interface Props {
   patientData: any
@@ -102,12 +103,23 @@ export default function DermatologyQuestionsForm({ patientData, imageData, ocrAn
             </Label>
             
             {q.type === 'open' && (
-              <Textarea
-                value={answers[q.id] || ''}
-                onChange={(e) => handleAnswer(q.id, e.target.value)}
-                placeholder="Your answer..."
-                className="min-h-[100px]"
-              />
+              <div className="space-y-2">
+                <div className="flex items-center justify-end">
+                  <VoiceDictationButton
+                    onTranscript={(text) => {
+                      const currentText = answers[q.id] || ''
+                      const newText = currentText ? `${currentText} ${text}` : text
+                      handleAnswer(q.id, newText)
+                    }}
+                  />
+                </div>
+                <Textarea
+                  value={answers[q.id] || ''}
+                  onChange={(e) => handleAnswer(q.id, e.target.value)}
+                  placeholder="Your answer..."
+                  className="min-h-[100px]"
+                />
+              </div>
             )}
 
             {q.type === 'closed' && (
