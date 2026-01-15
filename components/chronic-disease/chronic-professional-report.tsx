@@ -542,6 +542,42 @@ export default function ChronicProfessionalReport({
   // Local state for narrative text (completely independent like sick leave)
   const [editableNarrative, setEditableNarrative] = useState('')
 
+  // Chronic disease sections - individual editable sections
+  const chronicSectionKeys = [
+    { key: 'chiefComplaint', title: 'CHIEF COMPLAINT' },
+    { key: 'historyOfPresentIllness', title: 'HISTORY OF PRESENT ILLNESS' },
+    { key: 'pastMedicalHistory', title: 'PAST MEDICAL HISTORY' },
+    { key: 'physicalExamination', title: 'PHYSICAL EXAMINATION' },
+    { key: 'diagnosticSynthesis', title: 'DIAGNOSTIC SYNTHESIS' },
+    { key: 'diagnosticConclusion', title: 'DIAGNOSTIC CONCLUSION' },
+    { key: 'managementPlan', title: 'MANAGEMENT PLAN' },
+    { key: 'dietaryPlan', title: 'DIETARY PLAN' },
+    { key: 'selfMonitoringInstructions', title: 'SELF-MONITORING INSTRUCTIONS' },
+    { key: 'followUpPlan', title: 'FOLLOW-UP PLAN' },
+    { key: 'conclusion', title: 'CONCLUSION' }
+  ]
+
+  // State for individual chronic disease sections
+  const [chronicSections, setChronicSections] = useState<Record<string, string>>({
+    chiefComplaint: '',
+    historyOfPresentIllness: '',
+    pastMedicalHistory: '',
+    physicalExamination: '',
+    diagnosticSynthesis: '',
+    diagnosticConclusion: '',
+    managementPlan: '',
+    dietaryPlan: '',
+    selfMonitoringInstructions: '',
+    followUpPlan: '',
+    conclusion: ''
+  })
+
+  // Recording state for individual sections
+  const [recordingSection, setRecordingSection] = useState<string | null>(null)
+  const [isTranscribingSection, setIsTranscribingSection] = useState<string | null>(null)
+  const sectionMediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const sectionAudioChunksRef = useRef<Blob[]>([])
+
   // Local state for editable medications (independent, no auto-sync)
   const [localMedications, setLocalMedications] = useState<any>(null)
 
@@ -585,6 +621,83 @@ export default function ChronicProfessionalReport({
   useEffect(() => {
     if (report?.medicalReport?.narrative && editableNarrative === '') {
       setEditableNarrative(report.medicalReport.narrative)
+    }
+  }, [report?.medicalReport?.narrative])
+
+  // Parse narrative into individual sections when report loads
+  useEffect(() => {
+    if (report?.medicalReport?.narrative) {
+      const narrative = report.medicalReport.narrative
+      const parsedSections: Record<string, string> = {
+        chiefComplaint: '',
+        historyOfPresentIllness: '',
+        pastMedicalHistory: '',
+        physicalExamination: '',
+        diagnosticSynthesis: '',
+        diagnosticConclusion: '',
+        managementPlan: '',
+        dietaryPlan: '',
+        selfMonitoringInstructions: '',
+        followUpPlan: '',
+        conclusion: ''
+      }
+
+      // Define section mappings (narrative header -> state key)
+      const sectionMappings: Record<string, string> = {
+        'CHIEF COMPLAINT': 'chiefComplaint',
+        'HISTORY OF PRESENT ILLNESS': 'historyOfPresentIllness',
+        'PAST MEDICAL HISTORY': 'pastMedicalHistory',
+        'PHYSICAL EXAMINATION': 'physicalExamination',
+        'DIAGNOSTIC SYNTHESIS': 'diagnosticSynthesis',
+        'DIAGNOSTIC SUMMARY': 'diagnosticSynthesis',
+        'DIAGNOSTIC CONCLUSION': 'diagnosticConclusion',
+        'MANAGEMENT PLAN': 'managementPlan',
+        'TREATMENT PLAN': 'managementPlan',
+        'DIETARY PLAN': 'dietaryPlan',
+        'DIETARY RECOMMENDATIONS': 'dietaryPlan',
+        'SELF-MONITORING INSTRUCTIONS': 'selfMonitoringInstructions',
+        'PATIENT EDUCATION': 'selfMonitoringInstructions',
+        'FOLLOW-UP PLAN': 'followUpPlan',
+        'CONCLUSION': 'conclusion',
+        'PROGNOSIS': 'conclusion'
+      }
+
+      // Parse the narrative - find sections by their headers
+      const lines = narrative.split('\n')
+      let currentSection = ''
+      let currentContent: string[] = []
+
+      for (const line of lines) {
+        const trimmedLine = line.trim()
+
+        // Check if this line is a section header
+        const sectionKey = sectionMappings[trimmedLine]
+        if (sectionKey) {
+          // Save previous section content
+          if (currentSection && currentContent.length > 0) {
+            parsedSections[currentSection] = currentContent.join('\n').trim()
+          }
+          // Start new section
+          currentSection = sectionKey
+          currentContent = []
+        } else if (currentSection) {
+          // Skip separator lines and empty lines at start
+          if (!trimmedLine.match(/^═+$/) && (currentContent.length > 0 || trimmedLine)) {
+            currentContent.push(line)
+          }
+        }
+      }
+
+      // Save last section
+      if (currentSection && currentContent.length > 0) {
+        parsedSections[currentSection] = currentContent.join('\n').trim()
+      }
+
+      // Update state only if we parsed any content
+      const hasContent = Object.values(parsedSections).some(v => v.trim())
+      if (hasContent) {
+        setChronicSections(parsedSections)
+      }
     }
   }, [report?.medicalReport?.narrative])
 
@@ -1697,7 +1810,7 @@ export default function ChronicProfessionalReport({
         ...report,
         medicalReport: {
           ...report.medicalReport,
-          narrative: editableNarrative
+          narrative: computedNarrative
         },
         ...(localMedications && { medicationPrescription: localMedications }),
         ...(localLabTests && { laboratoryTests: localLabTests }),
@@ -1868,7 +1981,7 @@ export default function ChronicProfessionalReport({
     } finally {
       setSaving(false)
     }
-  }, [validationStatus, consultationId, report, sickLeaveData, invoiceData, patientData, clinicalData, diagnosisData, editableNarrative, localMedications, localLabTests, localParaclinicalExams, doctorInfo])
+  }, [validationStatus, consultationId, report, sickLeaveData, invoiceData, patientData, clinicalData, diagnosisData, computedNarrative, chronicSections, localMedications, localLabTests, localParaclinicalExams, doctorInfo])
 
   // ==================== SEND DOCUMENTS ====================
   const handleSendDocuments = async () => {
@@ -2601,6 +2714,190 @@ export default function ChronicProfessionalReport({
     }
   }, [validationStatus])
 
+  // ==================== SECTION-SPECIFIC AUDIO RECORDING ====================
+  const startSectionRecording = useCallback(async (sectionKey: string) => {
+    if (validationStatus === 'validated') return
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+
+      sectionAudioChunksRef.current = []
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          sectionAudioChunksRef.current.push(event.data)
+        }
+      }
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(track => track.stop())
+        const audioBlob = new Blob(sectionAudioChunksRef.current, { type: 'audio/webm' })
+        await transcribeAndUpdateSection(sectionKey, audioBlob)
+      }
+
+      sectionMediaRecorderRef.current = mediaRecorder
+      mediaRecorder.start()
+      setRecordingSection(sectionKey)
+
+      toast({
+        title: "Recording started",
+        description: "Speak now. Click again to stop.",
+        duration: 2000
+      })
+    } catch (error) {
+      console.error('Failed to start recording:', error)
+      toast({
+        title: "Recording failed",
+        description: "Could not access microphone. Please check permissions.",
+        variant: "destructive",
+        duration: 3000
+      })
+    }
+  }, [validationStatus])
+
+  const stopSectionRecording = useCallback(() => {
+    if (sectionMediaRecorderRef.current && sectionMediaRecorderRef.current.state === 'recording') {
+      sectionMediaRecorderRef.current.stop()
+      setRecordingSection(null)
+    }
+  }, [])
+
+  const transcribeAndUpdateSection = useCallback(async (sectionKey: string, audioBlob: Blob) => {
+    setIsTranscribingSection(sectionKey)
+
+    try {
+      // Transcribe the audio
+      const formData = new FormData()
+      formData.append('audioFile', audioBlob, 'recording.webm')
+
+      const transcribeResponse = await fetch('/api/voice-dictation-transcribe', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!transcribeResponse.ok) {
+        throw new Error('Transcription failed')
+      }
+
+      const transcribeData = await transcribeResponse.json()
+      const rawText = transcribeData.transcription?.normalizedText || transcribeData.transcription?.text || ''
+
+      if (!rawText) {
+        toast({
+          title: "No speech detected",
+          description: "Please try again and speak clearly",
+          variant: "destructive",
+          duration: 3000
+        })
+        setIsTranscribingSection(null)
+        return
+      }
+
+      // Get section title for context
+      const sectionDef = chronicSectionKeys.find(s => s.key === sectionKey)
+      const sectionTitle = sectionDef?.title || sectionKey
+
+      // Reformat with OpenAI for medical documentation
+      const reformatResponse = await fetch('/api/reformat-medical-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: rawText,
+          sectionType: sectionTitle,
+          currentContent: chronicSections[sectionKey]
+        })
+      })
+
+      let formattedText = rawText
+      if (reformatResponse.ok) {
+        const reformatData = await reformatResponse.json()
+        formattedText = reformatData.formattedText || rawText
+      }
+
+      // Update the specific section
+      setChronicSections(prev => ({
+        ...prev,
+        [sectionKey]: prev[sectionKey] ? prev[sectionKey] + '\n\n' + formattedText : formattedText
+      }))
+      setHasUnsavedChanges(true)
+
+      toast({
+        title: "Text added",
+        description: `Voice input added to ${sectionTitle}`,
+        duration: 2000
+      })
+    } catch (error) {
+      console.error('Transcription error:', error)
+      toast({
+        title: "Error",
+        description: "Failed to process audio. Please try again.",
+        variant: "destructive",
+        duration: 3000
+      })
+    } finally {
+      setIsTranscribingSection(null)
+    }
+  }, [chronicSections, chronicSectionKeys])
+
+  const clearSection = useCallback((sectionKey: string) => {
+    if (validationStatus === 'validated') return
+
+    const sectionDef = chronicSectionKeys.find(s => s.key === sectionKey)
+    const sectionTitle = sectionDef?.title || sectionKey
+
+    setChronicSections(prev => ({
+      ...prev,
+      [sectionKey]: ''
+    }))
+    setHasUnsavedChanges(true)
+    toast({
+      title: "Section cleared",
+      description: `${sectionTitle} has been cleared`,
+      duration: 2000
+    })
+  }, [validationStatus, chronicSectionKeys])
+
+  const updateChronicSection = useCallback((sectionKey: string, value: string) => {
+    setChronicSections(prev => ({
+      ...prev,
+      [sectionKey]: value
+    }))
+    setHasUnsavedChanges(true)
+  }, [])
+
+  // Build narrative from individual sections for saving
+  const buildNarrativeFromSections = useCallback(() => {
+    const parts: string[] = []
+
+    // Add document header info from existing narrative if available
+    if (report?.medicalReport?.narrative) {
+      const headerMatch = report.medicalReport.narrative.match(/^([\s\S]*?)(?=CHIEF COMPLAINT)/i)
+      if (headerMatch && headerMatch[1]) {
+        parts.push(headerMatch[1].trim())
+      }
+    }
+
+    // Add each section with its title
+    chronicSectionKeys.forEach(section => {
+      const content = chronicSections[section.key]
+      if (content && content.trim()) {
+        parts.push(`\n═══════════════════════════════════════════════════════════════\n${section.title}\n═══════════════════════════════════════════════════════════════\n${content}`)
+      }
+    })
+
+    return parts.join('\n')
+  }, [chronicSections, chronicSectionKeys, report?.medicalReport?.narrative])
+
+  // Computed narrative from sections (for saving)
+  const computedNarrative = useMemo(() => {
+    const hasAnySectionContent = Object.values(chronicSections).some(v => v && v.trim())
+    if (hasAnySectionContent) {
+      return buildNarrativeFromSections()
+    }
+    return editableNarrative
+  }, [chronicSections, editableNarrative, buildNarrativeFromSections])
+
   const handleSave = useCallback(async () => {
     if (!hasUnsavedChanges) {
       toast({
@@ -2626,7 +2923,7 @@ export default function ChronicProfessionalReport({
         ...report,
         medicalReport: {
           ...report.medicalReport,
-          narrative: editableNarrative
+          narrative: computedNarrative
         },
         ...(localMedications && { medicationPrescription: localMedications }),
         ...(localLabTests && { laboratoryTests: localLabTests }),
@@ -2636,9 +2933,10 @@ export default function ChronicProfessionalReport({
       // Validate report data before saving
       const validationErrors: string[] = []
 
-      // Validate medical report
-      if (!editableNarrative || editableNarrative.trim() === '') {
-        validationErrors.push("Medical report narrative cannot be empty")
+      // Validate medical report - check if any section has content
+      const hasAnySectionContent = Object.values(chronicSections).some(v => v && v.trim())
+      if (!hasAnySectionContent && (!computedNarrative || computedNarrative.trim() === '')) {
+        validationErrors.push("Medical report sections cannot all be empty")
       }
 
       if (validationErrors.length > 0) {
@@ -2702,7 +3000,7 @@ export default function ChronicProfessionalReport({
     } finally {
       setSaving(false)
     }
-  }, [hasUnsavedChanges, report, consultationId, sickLeaveData, invoiceData, validationStatus, editableNarrative, localMedications, localLabTests, localParaclinicalExams])
+  }, [hasUnsavedChanges, report, consultationId, sickLeaveData, invoiceData, validationStatus, computedNarrative, chronicSections, localMedications, localLabTests, localParaclinicalExams])
   
   // Handle on-demand dietary plan generation
   const handleGenerateDietaryPlan = useCallback(async () => {
@@ -3025,137 +3323,120 @@ export default function ChronicProfessionalReport({
           </div>
         </div>
         
-        {/* NARRATIVE REPORT - PROFESSIONAL FORMAT FROM API */}
-        {medicalReport.narrative && (
-          <div className="mb-6">
-            {/* Narrative controls - Voice and Delete buttons */}
-            {validationStatus !== 'validated' && (
-              <div className="flex items-center justify-between mb-3 print:hidden">
-                <Label className="text-sm font-medium">Medical Report Narrative</Label>
-                <div className="flex items-center gap-2">
-                  {/* Voice recording button */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      if (isRecordingNarrative) {
-                        stopNarrativeRecording()
-                      } else {
-                        startNarrativeRecording()
-                      }
-                    }}
-                    disabled={isTranscribingNarrative}
-                    className={`${isRecordingNarrative ? 'bg-red-100 border-red-300 text-red-700' : ''}`}
-                    title={isRecordingNarrative ? "Stop recording" : "Record voice to add content"}
-                  >
-                    {isTranscribingNarrative ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="ml-1 text-xs">Processing...</span>
-                      </>
-                    ) : isRecordingNarrative ? (
-                      <>
-                        <MicOff className="h-4 w-4" />
-                        <span className="ml-1 text-xs">Stop</span>
-                      </>
-                    ) : (
-                      <>
-                        <Mic className="h-4 w-4" />
-                        <span className="ml-1 text-xs hidden sm:inline">Voice</span>
-                      </>
-                    )}
-                  </Button>
-                  {/* Clear narrative button */}
-                  {editableNarrative && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={clearNarrative}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      title="Clear narrative content"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="ml-1 text-xs hidden sm:inline">Clear</span>
-                    </Button>
+        {/* MEDICAL REPORT SECTIONS - Individual editable sections */}
+        <div className="mb-6 space-y-6">
+          {chronicSectionKeys.map((section) => {
+            const content = chronicSections[section.key]
+            // Show section if: has content, OR in edit mode, OR not validated (so user can use Voice)
+            if (!content && !editMode && validationStatus === 'validated') return null
+
+            return (
+              <div key={section.key} className="border-b border-gray-200 pb-4 last:border-b-0">
+                {/* Section header with Voice/Clear buttons */}
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-bold text-gray-900">{section.title}</h3>
+                  {validationStatus !== 'validated' && (
+                    <div className="flex items-center gap-2 print:hidden">
+                      {/* Voice recording button */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (recordingSection === section.key) {
+                            stopSectionRecording()
+                          } else {
+                            startSectionRecording(section.key)
+                          }
+                        }}
+                        disabled={isTranscribingSection === section.key || (recordingSection !== null && recordingSection !== section.key)}
+                        className={`${recordingSection === section.key ? 'bg-red-100 border-red-300 text-red-700' : ''}`}
+                        title={recordingSection === section.key ? "Stop recording" : "Record voice to add content"}
+                      >
+                        {isTranscribingSection === section.key ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span className="ml-1 text-xs">Processing...</span>
+                          </>
+                        ) : recordingSection === section.key ? (
+                          <>
+                            <MicOff className="h-4 w-4" />
+                            <span className="ml-1 text-xs">Stop</span>
+                          </>
+                        ) : (
+                          <>
+                            <Mic className="h-4 w-4" />
+                            <span className="ml-1 text-xs hidden sm:inline">Voice</span>
+                          </>
+                        )}
+                      </Button>
+                      {/* Clear section button */}
+                      {content && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to clear "${section.title}"?`)) {
+                              clearSection(section.key)
+                            }
+                          }}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          title="Clear section content"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="ml-1 text-xs hidden sm:inline">Clear</span>
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </div>
+                {/* Section content */}
+                {editMode && validationStatus !== 'validated' ? (
+                  <Textarea
+                    value={content || ''}
+                    onChange={(e) => updateChronicSection(section.key, e.target.value)}
+                    className="min-h-[100px] font-sans text-gray-700"
+                    placeholder={`Enter ${section.title.toLowerCase()}...`}
+                  />
+                ) : content ? (
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+                ) : (
+                  <p className="text-gray-400 italic text-sm">No content - use voice button to add</p>
+                )}
               </div>
-            )}
-            {editMode ? (
-              // EDIT MODE - Editable Textarea
-              <div className="space-y-2">
-                <Textarea
-                  id="narrative-edit"
-                  value={editableNarrative}
-                  onChange={(e) => {
-                    setEditableNarrative(e.target.value)
-                    setHasUnsavedChanges(true)
-                  }}
-                  className="min-h-[600px] font-mono text-sm bg-white"
-                  disabled={validationStatus === 'validated'}
-                />
-              </div>
-            ) : (
-              // VIEW MODE - Formatted display
-              <>
-                <style jsx>{`
-                  .professional-narrative {
-                    font-family: system-ui, -apple-system, sans-serif;
-                    font-size: 14px;
-                    line-height: 1.6;
-                    white-space: pre-wrap;
-                  }
-                  /* Make section headers bold - targets ALL CAPS lines after separator */
-                  .professional-narrative::before {
-                    content: '';
-                    display: block;
-                  }
-                  /* Target lines that are section headers (ALL CAPS, no colon at start) */
-                  .professional-narrative {
-                    /* This will be handled by processing the text */
-                  }
-                `}</style>
-                <div
-                  className="prose prose-sm max-w-none bg-white p-3 sm:p-6 md:p-8 rounded border border-gray-200 professional-narrative text-sm sm:text-base"
-                  dangerouslySetInnerHTML={{
-                    __html: formatNarrativeWithBoldHeaders(medicalReport.narrative)
-                  }}
-                />
+            )
+          })}
 
-                {/* Signature Section for Main Report */}
-                <div className="mt-4 sm:mt-8 pt-4 sm:pt-6 border-t-2 border-gray-800 bg-white p-3 sm:p-6 md:p-8 rounded border border-gray-200">
-                  <div className="text-right">
-                    <p className="font-bold text-lg mb-4">PHYSICIAN AUTHENTICATION</p>
-                    <p className="font-semibold">{medicalReport.practitioner.name}</p>
-                    <p className="text-sm text-gray-600">{medicalReport.practitioner.qualifications}</p>
-                    <p className="text-sm text-gray-600">{medicalReport.practitioner.specialty}</p>
-                    <p className="text-sm text-gray-600">MCM Registration: {medicalReport.practitioner.registrationNumber}</p>
+          {/* Signature Section for Main Report */}
+          <div className="mt-4 sm:mt-8 pt-4 sm:pt-6 border-t-2 border-gray-800">
+            <div className="text-right">
+              <p className="font-bold text-lg mb-4">PHYSICIAN AUTHENTICATION</p>
+              <p className="font-semibold">{medicalReport.practitioner.name}</p>
+              <p className="text-sm text-gray-600">{medicalReport.practitioner.qualifications}</p>
+              <p className="text-sm text-gray-600">{medicalReport.practitioner.specialty}</p>
+              <p className="text-sm text-gray-600">MCM Registration: {medicalReport.practitioner.registrationNumber}</p>
 
-                    {validationStatus === 'validated' && documentSignatures.consultation ? (
-                      <div className="mt-4">
-                        <img
-                          src={documentSignatures.consultation}
-                          alt="Doctor's Signature"
-                          className="ml-auto h-20 w-auto"
-                          style={{ maxWidth: '300px' }}
-                        />
-                        <p className="text-sm text-gray-600 mt-2">
-                          Digitally signed on {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="mt-6">
-                        <p className="text-sm">_______________________________</p>
-                        <p className="text-sm">Medical Practitioner's Signature</p>
-                        <p className="text-sm mt-2">Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                      </div>
-                    )}
-                  </div>
+              {validationStatus === 'validated' && documentSignatures.consultation ? (
+                <div className="mt-4">
+                  <img
+                    src={documentSignatures.consultation}
+                    alt="Doctor's Signature"
+                    className="ml-auto h-20 w-auto"
+                    style={{ maxWidth: '300px' }}
+                  />
+                  <p className="text-sm text-gray-600 mt-2">
+                    Digitally signed on {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
                 </div>
-              </>
-            )}
+              ) : (
+                <div className="mt-6">
+                  <p className="text-sm">_______________________________</p>
+                  <p className="text-sm">Medical Practitioner's Signature</p>
+                  <p className="text-sm mt-2">Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                </div>
+              )}
+            </div>
           </div>
-        )}
+        </div>
 
         {/* HIDE ALL REDUNDANT SECTIONS - They are already in narrative */}
         {false && (
