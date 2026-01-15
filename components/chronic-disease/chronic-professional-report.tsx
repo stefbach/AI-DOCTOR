@@ -615,6 +615,10 @@ export default function ChronicProfessionalReport({
     if (storedDoctorInfo) {
       try {
         const doctorData = JSON.parse(storedDoctorInfo)
+        // Clean up old cached values - replace "[Email Required]" with "Email"
+        if (doctorData.email === '[Email Required]') {
+          doctorData.email = 'Email'
+        }
         console.log('✅ Loaded doctor info from sessionStorage:', doctorData)
         setDoctorInfo(doctorData)
       } catch (error) {
@@ -5500,12 +5504,11 @@ export default function ChronicProfessionalReport({
                 />
               </div>
               <div>
-                <Label>Email *</Label>
+                <Label>Email</Label>
                 <Input
                   value={localDoctorInfo.email}
                   onChange={(e) => handleDoctorFieldChange('email', e.target.value)}
                   placeholder="doctor@email.com"
-                  className={localDoctorInfo.email.includes('[') ? 'border-blue-500' : ''}
                 />
               </div>
               <div className="col-span-2">

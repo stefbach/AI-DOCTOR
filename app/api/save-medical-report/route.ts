@@ -265,24 +265,10 @@ export async function POST(request: NextRequest) {
         
       } else {
         // Normal strict validation for regular consultations
-        
-        // Ensure all required patient fields are present
-        if (!patientData?.email || patientData.email === '') {
-          return NextResponse.json({
-            success: false,
-            error: "Patient email is required for document finalization",
-            validationError: true
-          }, { status: 400 })
-        }
-        
-        if (!patientData?.phone || patientData.phone === '') {
-          return NextResponse.json({
-            success: false,
-            error: "Patient phone number is required for document finalization",
-            validationError: true
-          }, { status: 400 })
-        }
-        
+
+        // Patient email and phone are now optional for finalization
+        // They can be added later if needed for sending documents
+
         // Check if report has actual medical content (support both structures)
         const hasNormalContent = report?.compteRendu?.rapport?.motifConsultation &&
                                 report?.compteRendu?.rapport?.conclusionDiagnostique

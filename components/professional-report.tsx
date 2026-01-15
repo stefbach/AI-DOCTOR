@@ -1832,6 +1832,10 @@ const doctorInfoFromTibok = {
  if (!doctorDataParam && storedDoctorInfo) {
  try {
  const doctorData = JSON.parse(storedDoctorInfo)
+ // Clean up old cached values - replace "[Email Required]" with "Email"
+ if (doctorData.email === '[Email Required]') {
+   doctorData.email = 'Email'
+ }
  setDoctorInfo(doctorData)
  console.log('✅ Doctor information loaded from session')
  } catch (error) {
