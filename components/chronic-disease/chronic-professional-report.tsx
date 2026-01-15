@@ -18,7 +18,7 @@ import {
   FileText, Download, Printer, CheckCircle, Loader2, Pill, TestTube,
   Scan, AlertTriangle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
   Trash2, AlertCircle, Lock, Unlock, Calendar, User, Stethoscope,
-  Activity, Utensils, ClipboardList, HeartPulse, Send
+  Activity, Utensils, ClipboardList, HeartPulse, Send, Mic, MicOff
 } from "lucide-react"
 import { createClient } from '@supabase/supabase-js'
 
@@ -574,6 +574,12 @@ export default function ChronicProfessionalReport({
   const [dietaryLoading, setDietaryLoading] = useState(false)
   const [dietaryError, setDietaryError] = useState<string | null>(null)
   const [detailedDietaryGenerated, setDetailedDietaryGenerated] = useState(false)
+
+  // Audio recording state for narrative editing
+  const [isRecordingNarrative, setIsRecordingNarrative] = useState(false)
+  const [isTranscribingNarrative, setIsTranscribingNarrative] = useState(false)
+  const narrativeMediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const narrativeAudioChunksRef = useRef<Blob[]>([])
 
   // Initialize editable narrative once when report loads
   useEffect(() => {
@@ -2452,7 +2458,145 @@ export default function ChronicProfessionalReport({
     // Simple print-based PDF export
     window.print()
   }, [])
-  
+
+  // ==================== NARRATIVE AUDIO RECORDING ====================
+  const startNarrativeRecording = useCallback(async () => {
+    if (validationStatus === 'validated') return
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+
+      narrativeAudioChunksRef.current = []
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          narrativeAudioChunksRef.current.push(event.data)
+        }
+      }
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(track => track.stop())
+        const audioBlob = new Blob(narrativeAudioChunksRef.current, { type: 'audio/webm' })
+        await transcribeAndAppendNarrative(audioBlob)
+      }
+
+      narrativeMediaRecorderRef.current = mediaRecorder
+      mediaRecorder.start()
+      setIsRecordingNarrative(true)
+
+      toast({
+        title: "Recording started",
+        description: "Speak now. Click again to stop.",
+        duration: 2000
+      })
+    } catch (error) {
+      console.error('Failed to start recording:', error)
+      toast({
+        title: "Recording failed",
+        description: "Could not access microphone. Please check permissions.",
+        variant: "destructive",
+        duration: 3000
+      })
+    }
+  }, [validationStatus])
+
+  const stopNarrativeRecording = useCallback(() => {
+    if (narrativeMediaRecorderRef.current && narrativeMediaRecorderRef.current.state === 'recording') {
+      narrativeMediaRecorderRef.current.stop()
+      setIsRecordingNarrative(false)
+    }
+  }, [])
+
+  const transcribeAndAppendNarrative = useCallback(async (audioBlob: Blob) => {
+    setIsTranscribingNarrative(true)
+
+    try {
+      // Transcribe the audio
+      const formData = new FormData()
+      formData.append('audio', audioBlob, 'recording.webm')
+
+      const transcribeResponse = await fetch('/api/voice-dictation-transcribe', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!transcribeResponse.ok) {
+        throw new Error('Transcription failed')
+      }
+
+      const transcribeData = await transcribeResponse.json()
+      const rawText = transcribeData.transcription?.normalizedText || transcribeData.transcription?.text || ''
+
+      if (!rawText) {
+        toast({
+          title: "No speech detected",
+          description: "Please try again and speak clearly",
+          variant: "destructive",
+          duration: 3000
+        })
+        setIsTranscribingNarrative(false)
+        return
+      }
+
+      // Reformat with OpenAI for medical documentation
+      const reformatResponse = await fetch('/api/reformat-medical-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: rawText,
+          sectionType: 'Medical Report Narrative',
+          currentContent: editableNarrative
+        })
+      })
+
+      let formattedText = rawText
+      if (reformatResponse.ok) {
+        const reformatData = await reformatResponse.json()
+        formattedText = reformatData.formattedText || rawText
+      }
+
+      // Append to existing narrative
+      setEditableNarrative(prev => {
+        if (prev && prev.trim()) {
+          return prev + '\n\n' + formattedText
+        }
+        return formattedText
+      })
+      setHasUnsavedChanges(true)
+
+      toast({
+        title: "Text added",
+        description: "Voice input transcribed and added to narrative",
+        duration: 2000
+      })
+    } catch (error) {
+      console.error('Transcription error:', error)
+      toast({
+        title: "Error",
+        description: "Failed to process audio. Please try again.",
+        variant: "destructive",
+        duration: 3000
+      })
+    } finally {
+      setIsTranscribingNarrative(false)
+    }
+  }, [editableNarrative])
+
+  const clearNarrative = useCallback(() => {
+    if (validationStatus === 'validated') return
+
+    if (confirm('Are you sure you want to clear the entire medical report narrative?')) {
+      setEditableNarrative('')
+      setHasUnsavedChanges(true)
+      toast({
+        title: "Narrative cleared",
+        description: "The medical report narrative has been cleared",
+        duration: 2000
+      })
+    }
+  }, [validationStatus])
+
   const handleSave = useCallback(async () => {
     if (!hasUnsavedChanges) {
       toast({
@@ -2880,10 +3024,62 @@ export default function ChronicProfessionalReport({
         {/* NARRATIVE REPORT - PROFESSIONAL FORMAT FROM API */}
         {medicalReport.narrative && (
           <div className="mb-6">
+            {/* Narrative controls - Voice and Delete buttons */}
+            {validationStatus !== 'validated' && (
+              <div className="flex items-center justify-between mb-3 print:hidden">
+                <Label className="text-sm font-medium">Medical Report Narrative</Label>
+                <div className="flex items-center gap-2">
+                  {/* Voice recording button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (isRecordingNarrative) {
+                        stopNarrativeRecording()
+                      } else {
+                        startNarrativeRecording()
+                      }
+                    }}
+                    disabled={isTranscribingNarrative}
+                    className={`${isRecordingNarrative ? 'bg-red-100 border-red-300 text-red-700' : ''}`}
+                    title={isRecordingNarrative ? "Stop recording" : "Record voice to add content"}
+                  >
+                    {isTranscribingNarrative ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="ml-1 text-xs">Processing...</span>
+                      </>
+                    ) : isRecordingNarrative ? (
+                      <>
+                        <MicOff className="h-4 w-4" />
+                        <span className="ml-1 text-xs">Stop</span>
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="h-4 w-4" />
+                        <span className="ml-1 text-xs hidden sm:inline">Voice</span>
+                      </>
+                    )}
+                  </Button>
+                  {/* Clear narrative button */}
+                  {editableNarrative && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={clearNarrative}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      title="Clear narrative content"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="ml-1 text-xs hidden sm:inline">Clear</span>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
             {editMode ? (
               // EDIT MODE - Editable Textarea
               <div className="space-y-2">
-                <Label htmlFor="narrative-edit" className="text-sm font-medium">Medical Report Narrative</Label>
                 <Textarea
                   id="narrative-edit"
                   value={editableNarrative}
@@ -5461,33 +5657,43 @@ export default function ChronicProfessionalReport({
   
   const PrescriptionStats = () => {
     const medicationCount = report.medicationPrescription?.prescription.medications?.length || 0
-    const labTestsCount = report.laboratoryTests ? 
+    const labTestsCount = report.laboratoryTests ?
       Object.values(report.laboratoryTests.prescription.tests || {})
         .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0) : 0
     const paraclinicalCount = report.paraclinicalExams?.prescription.exams?.length || 0
-    
+
     return (
       <Card className="print:hidden">
         <CardHeader>
           <CardTitle className="text-lg">Prescription Summary</CardTitle>
+          <p className="text-sm text-gray-500">Click on a card to go to the corresponding tab</p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-center">
-            <div className="p-4 bg-teal-50 rounded">
+            <button
+              onClick={() => setActiveTab("medications")}
+              className="p-4 bg-teal-50 rounded hover:bg-teal-100 transition-colors cursor-pointer w-full border-2 border-transparent hover:border-teal-300"
+            >
               <Pill className="h-8 w-8 mx-auto mb-2 text-teal-600" />
               <p className="text-2xl font-bold text-teal-600">{medicationCount}</p>
               <p className="text-sm text-gray-600">Medications</p>
-            </div>
-            <div className="p-4 bg-blue-50 rounded">
+            </button>
+            <button
+              onClick={() => setActiveTab("laboratory")}
+              className="p-4 bg-blue-50 rounded hover:bg-blue-100 transition-colors cursor-pointer w-full border-2 border-transparent hover:border-blue-300"
+            >
               <TestTube className="h-8 w-8 mx-auto mb-2 text-blue-600" />
               <p className="text-2xl font-bold text-blue-600">{labTestsCount}</p>
               <p className="text-sm text-gray-600">Lab Tests</p>
-            </div>
-            <div className="p-4 bg-indigo-50 rounded">
+            </button>
+            <button
+              onClick={() => setActiveTab("paraclinical")}
+              className="p-4 bg-indigo-50 rounded hover:bg-indigo-100 transition-colors cursor-pointer w-full border-2 border-transparent hover:border-indigo-300"
+            >
               <Scan className="h-8 w-8 mx-auto mb-2 text-indigo-600" />
               <p className="text-2xl font-bold text-indigo-600">{paraclinicalCount}</p>
               <p className="text-sm text-gray-600">Paraclinical</p>
-            </div>
+            </button>
           </div>
         </CardContent>
       </Card>
