@@ -5500,12 +5500,11 @@ export default function ChronicProfessionalReport({
                 />
               </div>
               <div>
-                <Label>Email *</Label>
+                <Label>Email</Label>
                 <Input
                   value={localDoctorInfo.email}
                   onChange={(e) => handleDoctorFieldChange('email', e.target.value)}
                   placeholder="doctor@email.com"
-                  className={localDoctorInfo.email.includes('[') ? 'border-blue-500' : ''}
                 />
               </div>
               <div className="col-span-2">
