@@ -724,11 +724,11 @@ const COMMON_SYMPTOMS = useMemo(() => [
  const newErrors: ValidationErrors = {}
  
  if (!localData.chiefComplaint.trim()) {
- newErrors.chiefComplaint = "Chief complaint is required"
+ newErrors.chiefComplaint = "Le motif de consultation est requis"
  }
  
  if (!localData.diseaseHistory.trim()) {
- newErrors.diseaseHistory = "Disease history is required"
+ newErrors.diseaseHistory = "L'histoire de la maladie est requise"
  }
  
  if (!localData.symptomDuration) {
@@ -966,20 +966,20 @@ const COMMON_SYMPTOMS = useMemo(() => [
  <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
  <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
  <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
- Chief Complaint
+ Motif de Consultation
  </CardTitle>
  </CardHeader>
  <CardContent className="p-3 sm:p-4 md:p-6">
  <div className="space-y-2">
  <div className="flex items-center justify-between">
  <Label htmlFor="chiefComplaint" className="font-medium">
- What is the main reason for your consultation?
+ Quel est le motif principal de votre consultation ?
  </Label>
  <VoiceDictationButton
  onTranscript={(text) => {
  const currentText = localData.chiefComplaint
- const newText = currentText 
- ? `${currentText} ${text}` 
+ const newText = currentText
+ ? `${currentText} ${text}`
  : text
  updateData({ chiefComplaint: newText })
  }}
@@ -991,7 +991,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
  value={localData.chiefComplaint}
  onChange={(e) => updateData({ chiefComplaint: e.target.value })}
  onKeyDown={handleKeyDown}
- placeholder="Describe your main concern or symptom..."
+ placeholder="Décrivez votre préoccupation ou symptôme principal..."
  rows={3}
  className={`resize-none ${errors.chiefComplaint ? 'border-blue-500' : ''}`}
  />
@@ -1002,7 +1002,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
  </p>
  )}
  <p className="text-xs text-gray-500">
- Please provide a clear and concise summary of your main health concern.
+ Veuillez fournir un résumé clair et concis de votre préoccupation de santé.
  </p>
  </div>
  </CardContent>
@@ -1013,14 +1013,14 @@ const COMMON_SYMPTOMS = useMemo(() => [
  <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg p-3 sm:p-4 md:p-6">
  <CardTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
  <Heart className="h-5 w-5 sm:h-6 sm:w-6" />
- Disease History
+ Histoire de la Maladie
  </CardTitle>
  </CardHeader>
  <CardContent className="p-3 sm:p-4 md:p-6">
  <div className="space-y-2">
  <div className="flex items-center justify-between">
  <Label htmlFor="diseaseHistory" className="font-medium">
- How have your symptoms evolved?
+ Comment vos symptômes ont-ils évolué ?
  </Label>
  <VoiceDictationButton
  onTranscript={(text) => {
@@ -1037,7 +1037,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
  id="diseaseHistory"
  value={localData.diseaseHistory}
  onChange={(e) => updateData({ diseaseHistory: e.target.value })}
- placeholder="Describe how your symptoms started and how they have progressed over time..."
+ placeholder="Décrivez comment vos symptômes ont commencé et comment ils ont évolué..."
  rows={5}
  className={`resize-none ${errors.diseaseHistory ? 'border-blue-500' : ''}`}
  />
@@ -1048,7 +1048,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
  </p>
  )}
  <p className="text-xs text-gray-500">
- Include details about when symptoms started, what makes them better or worse, and any treatments you've tried.
+ Incluez des détails sur le début des symptômes, ce qui les améliore ou les aggrave, et les traitements essayés.
  </p>
  </div>
 
@@ -1056,10 +1056,10 @@ const COMMON_SYMPTOMS = useMemo(() => [
  <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
    <div className="flex items-center gap-2 mb-3">
      <Download className="h-5 w-5 text-gray-600" />
-     <p className="font-semibold text-gray-800">Import Previous Results</p>
+     <p className="font-semibold text-gray-800">Importer les Résultats Précédents</p>
    </div>
    <p className="text-xs text-gray-500 mb-3">
-     Import the patient's last laboratory or radiology results to include in the disease history.
+     Importez les derniers résultats de laboratoire ou radiologie du patient dans l'histoire de la maladie.
    </p>
    <div className="flex flex-wrap gap-3">
      {/* Lab Results Button */}
@@ -1078,7 +1078,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
        ) : (
          <FlaskConical className="h-4 w-4" />
        )}
-       {labResults ? 'Lab Results Imported' : 'Import Lab Results'}
+       {labResults ? 'Résultats Labo Importés' : 'Importer Résultats Labo'}
      </Button>
 
      {/* Radiology Results Button */}
@@ -1097,7 +1097,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
        ) : (
          <ImageIcon className="h-4 w-4" />
        )}
-       {radiologyResults ? 'Radiology Results Imported' : 'Import Radiology Results'}
+       {radiologyResults ? 'Résultats Radio Importés' : 'Importer Résultats Radio'}
      </Button>
    </div>
 
@@ -1125,7 +1125,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
        <div className="flex items-center gap-2">
          <CheckCircle className="h-4 w-4 text-green-600" />
          <p className="text-sm text-green-700">
-           Results have been added to the disease history above.
+           Les résultats ont été ajoutés à l'histoire de la maladie ci-dessus.
          </p>
        </div>
      </div>
@@ -1137,7 +1137,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
  <div className="flex items-center gap-2">
  <CheckCircle className="h-4 w-4 text-blue-600" />
  <p className="font-semibold text-blue-800">
- History documented ({localData.diseaseHistory.length} characters)
+ Histoire documentée ({localData.diseaseHistory.length} caractères)
  </p>
  </div>
  </div>
