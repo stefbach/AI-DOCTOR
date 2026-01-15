@@ -983,7 +983,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
  : text
  updateData({ chiefComplaint: newText })
  }}
- language="en-US"
+ language="en"
  />
  </div>
  <Textarea
@@ -1030,7 +1030,7 @@ const COMMON_SYMPTOMS = useMemo(() => [
  : text
  updateData({ diseaseHistory: newText })
  }}
- language="en-US"
+ language="en"
  />
  </div>
  <Textarea

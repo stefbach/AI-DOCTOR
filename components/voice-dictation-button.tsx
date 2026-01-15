@@ -13,7 +13,7 @@ interface VoiceDictationButtonProps {
 
 export function VoiceDictationButton({
   onTranscript,
-  language = "fr",
+  language = "en", // Default to English
   disabled = false
 }: VoiceDictationButtonProps) {
   const [isRecording, setIsRecording] = useState(false)
@@ -99,6 +99,7 @@ export function VoiceDictationButton({
       const formData = new FormData()
       formData.append('audioFile', audioFile)
       formData.append('doctorInfo', JSON.stringify({}))
+      formData.append('language', language) // Pass language to API
 
       console.log('📤 Sending audio to Whisper API...')
 

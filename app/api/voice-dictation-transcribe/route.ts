@@ -30,13 +30,15 @@ async function transcribeAudio(audioFile: File): Promise<{
   console.log(`   Audio file: ${audioFile.name} (${audioFile.size} bytes)`);
 
   // Medical prompt to help Whisper recognize medical terms (bilingual French/English)
-  const medicalPrompt = `Medical transcription. Common medications: Doliprane, Paracetamol, Acetaminophen, Metformin, Metformine, Amoxicillin, Amoxicilline, Augmentin, Ibuprofen, Ibuprofène, Aspirin, Aspirine, Omeprazole, Oméprazole, Pantoprazole, Atorvastatin, Simvastatin, Amlodipine, Ramipril, Lisinopril, Bisoprolol, Furosemide, Spironolactone, Levothyroxine, Lévothyrox, Prednisone, Prednisolone, Insulin, Insuline, Lantus, Novorapid, Glucophage, Diamicron, Gliclazide, Januvia, Sitagliptin, Aspirin, Plavix, Clopidogrel, Xarelto, Eliquis, Pradaxa, Ventolin, Ventoline, Salbutamol, Albuterol, Seretide, Symbicort, Singulair, Montelukast, Nexium, Gaviscon, Imodium, Xanax, Zolpidem, Zopiclone, Sertraline, Fluoxetine, Prozac, Effexor, Venlafaxine, Cymbalta, Duloxetine, Lyrica, Pregabalin, Gabapentin, Neurontin. Dosages: milligrams, mg, grams, g, micrograms, mcg, milliliters, ml.`;
+  const medicalPrompt = `Medical transcription. Common medications: Doliprane, Paracetamol, Acetaminophen, Metformin, Metformine, Amoxicillin, Amoxicilline, Augmentin, Ibuprofen, Ibuprofène, Aspirin, Aspirine, Omeprazole, Pantoprazole, Atorvastatin, Simvastatin, Amlodipine, Ramipril, Lisinopril, Bisoprolol, Furosemide, Spironolactone, Levothyroxine, Prednisone, Prednisolone, Insulin, Insuline, Lantus, Novorapid, Glucophage, Diamicron, Gliclazide, Januvia, Sitagliptin, Plavix, Clopidogrel, Xarelto, Eliquis, Pradaxa, Ventolin, Ventoline, Salbutamol, Albuterol, Seretide, Symbicort, Singulair, Montelukast, Nexium, Gaviscon, Imodium, Xanax, Zolpidem, Zopiclone, Sertraline, Fluoxetine, Prozac, Effexor, Venlafaxine, Cymbalta, Duloxetine, Lyrica, Pregabalin, Gabapentin, Neurontin. Dosages: milligrams, mg, grams, g, micrograms, mcg, milliliters, ml.`;
 
   try {
+    // Auto-detect language - Whisper will detect French or English
+    // The normalizer will then convert French terms to English
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: 'whisper-1',
-      // No language specified - Whisper will auto-detect English or French
+      // No language parameter = auto-detect (French or English)
       response_format: 'verbose_json',
       prompt: medicalPrompt, // Help Whisper recognize medical terms
     });
@@ -243,6 +245,7 @@ export async function POST(request: NextRequest) {
     const audioFile = formData.get('audioFile') as File;
     const doctorInfo = JSON.parse(formData.get('doctorInfo') as string || '{}');
     const patientId = formData.get('patientId') as string | null;
+    // Language auto-detected by Whisper, then normalized to English
 
     // Validate audio file
     if (!audioFile) {
@@ -259,10 +262,10 @@ export async function POST(request: NextRequest) {
 
     const startTime = Date.now();
 
-    // STEP 1: Transcribe audio
+    // STEP 1: Transcribe audio (auto-detect language)
     let transcription;
     try {
-      console.log('\n📝 STEP 1/3: Audio Transcription');
+      console.log('\n📝 STEP 1/3: Audio Transcription (auto-detect language)');
       transcription = await transcribeAudio(audioFile);
     } catch (error: any) {
       console.error('❌ STEP 1 FAILED:', error.message);

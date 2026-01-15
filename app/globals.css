@@ -94,9 +94,13 @@ h3 { font-size: 1rem; }
   box-sizing: border-box;
 }
 
-html,
+/* Only hide horizontal overflow on body, not html (fixes scroll issues) */
 body {
   overflow-x: hidden;
+  width: 100%;
+}
+
+html {
   width: 100%;
 }
 
