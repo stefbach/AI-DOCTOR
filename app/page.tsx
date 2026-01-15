@@ -705,62 +705,6 @@ const handlePrevious = () => {
       </div>
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
-        {/* Quick Navigation Card */}
-        <Card className="glass-card shadow-xl border-0 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
-          <h3 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
-            <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-            Accès Rapide aux Consultations
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            <Button
-              variant="outline"
-              className="h-auto py-3 sm:py-4 px-3 sm:px-6 flex flex-col items-start gap-1 sm:gap-2 hover:bg-blue-50 hover:border-blue-300"
-              onClick={() => window.location.href = '/consultation-hub'}
-            >
-              <div className="flex items-center gap-2 w-full">
-                <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
-                <span className="font-semibold text-sm sm:text-base">Consultation Hub</span>
-              </div>
-              <span className="text-[10px] sm:text-xs text-gray-600 text-left">
-                Routage intelligent • Historique patient • Suivi automatique
-              </span>
-            </Button>
-
-            <Button
-              variant="outline"
-              className="h-auto py-3 sm:py-4 px-3 sm:px-6 flex flex-col items-start gap-1 sm:gap-2 hover:bg-indigo-50 hover:border-indigo-300"
-              onClick={() => window.location.href = '/dermatology'}
-            >
-              <div className="flex items-center gap-2 w-full">
-                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span className="font-semibold text-sm sm:text-base">Dermatologie</span>
-              </div>
-              <span className="text-[10px] sm:text-xs text-gray-600 text-left">
-                Analyse d'images • OCR • Diagnostic dermatologique
-              </span>
-            </Button>
-
-            <Button
-              variant="outline"
-              className="h-auto py-3 sm:py-4 px-3 sm:px-6 flex flex-col items-start gap-1 sm:gap-2 hover:bg-red-50 hover:border-red-300 sm:col-span-2 lg:col-span-1"
-              onClick={() => window.location.href = '/chronic-disease'}
-            >
-              <div className="flex items-center gap-2 w-full">
-                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <span className="font-semibold text-sm sm:text-base">Maladies Chroniques</span>
-              </div>
-              <span className="text-[10px] sm:text-xs text-gray-600 text-left">
-                Diabète • Hypertension • Suivi long terme
-              </span>
-            </Button>
-          </div>
-        </Card>
-
         {/* Progress Section - Modern Design */}
         <Card className="glass-card shadow-2xl border-0 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6 md:mb-8 smooth-transition hover-lift">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
