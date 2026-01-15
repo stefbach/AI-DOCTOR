@@ -8,6 +8,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -194,7 +195,7 @@ I will suggest precise improvements that you can review and apply!`,
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [conversationId, setConversationId] = useState('')
-  const [showQuickActions, setShowQuickActions] = useState(true)
+  const [showQuickActions, setShowQuickActions] = useState(false)
   const [activeAnalysisTab, setActiveAnalysisTab] = useState<'chat' | 'alerts' | 'suggestions'>('chat')
   const [pendingAlerts, setPendingAlerts] = useState<AssistantAlert[]>([])
   const [pendingSuggestions, setPendingSuggestions] = useState<AssistantSuggestion[]>([])
@@ -204,7 +205,7 @@ I will suggest precise improvements that you can review and apply!`,
   const [isTranscribing, setIsTranscribing] = useState(false)
   
   const scrollAreaRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const streamRef = useRef<MediaStream | null>(null)
@@ -584,14 +585,6 @@ I will suggest precise improvements that you can review and apply!`,
       })
     }
   }, [onUpdateSection, onAddMedication, onRemoveMedication, onUpdateMedication, onAddLabTest, onRemoveLabTest, onAddImaging, onRemoveImaging])
-
-  // ==================== HANDLE KEY PRESS ====================
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
-    }
-  }
 
   // ==================== GET ICON FOR ACTION ====================
   const getActionIcon = (type: string) => {
@@ -1000,56 +993,68 @@ I will suggest precise improvements that you can review and apply!`,
         </Tabs>
 
         {/* Input Area */}
-        <div className="border-t border-gray-200 p-4 bg-gray-50 flex-shrink-0">
-          <div className="flex gap-2">
-            <Input
+        <div className="border-t border-gray-200 p-3 bg-gray-50 flex-shrink-0">
+          <div className="flex flex-col gap-2">
+            {/* Text input - larger and more readable */}
+            <Textarea
               ref={inputRef}
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  sendMessage()
+                }
+              }}
               placeholder="Posez une question ou demandez une modification..."
               disabled={isLoading || isTranscribing}
-              className="flex-1"
+              className="w-full min-h-[60px] max-h-[120px] text-base resize-none"
+              rows={2}
             />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => sendMessage(QUICK_ACTIONS[0].prompt)}
-              disabled={isLoading || isTranscribing}
-              title="Analyser la cohérence"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-            
-            {/* Voice Recording Button */}
-            <Button
-              variant={isRecording ? "destructive" : "outline"}
-              size="icon"
-              onClick={isRecording ? stopRecording : startRecording}
-              disabled={isLoading || isTranscribing}
-              className={isRecording ? "animate-pulse" : ""}
-              title={isRecording ? "Arrêter l'enregistrement" : "Enregistrer un message vocal"}
-            >
-              {isTranscribing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : isRecording ? (
-                <Square className="h-4 w-4" />
-              ) : (
-                <Mic className="h-4 w-4" />
-              )}
-            </Button>
-            
-            <Button 
-              onClick={() => sendMessage()}
-              disabled={isLoading || isTranscribing || !inputMessage.trim()}
-              className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Send className="h-5 w-5" />
-              )}
-            </Button>
+
+            {/* Action buttons row */}
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => sendMessage(QUICK_ACTIONS[0].prompt)}
+                disabled={isLoading || isTranscribing}
+                title="Analyser la cohérence"
+                className="h-10 w-10"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+
+              {/* Voice Recording Button */}
+              <Button
+                variant={isRecording ? "destructive" : "outline"}
+                size="icon"
+                onClick={isRecording ? stopRecording : startRecording}
+                disabled={isLoading || isTranscribing}
+                className={`h-10 w-10 ${isRecording ? "animate-pulse" : ""}`}
+                title={isRecording ? "Arrêter l'enregistrement" : "Enregistrer un message vocal"}
+              >
+                {isTranscribing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : isRecording ? (
+                  <Square className="h-4 w-4" />
+                ) : (
+                  <Mic className="h-4 w-4" />
+                )}
+              </Button>
+
+              <Button
+                onClick={() => sendMessage()}
+                disabled={isLoading || isTranscribing || !inputMessage.trim()}
+                className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 h-10 px-4"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
