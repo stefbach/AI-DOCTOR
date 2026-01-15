@@ -120,7 +120,7 @@ export default function ConsultationHubPage() {
             qualifications: tibokDoctorData.qualifications || 'MBBS',
             specialite: tibokDoctorData.specialty || 'General Medicine',
             adresseCabinet: tibokDoctorData.clinic_address || tibokDoctorData.clinicAddress || 'Tibok Teleconsultation Platform',
-            email: tibokDoctorData.email || '[Email Required]',
+            email: tibokDoctorData.email || 'Email',
             heuresConsultation: tibokDoctorData.consultation_hours || tibokDoctorData.consultationHours || 'Teleconsultation Hours: 8:00 AM - 8:00 PM',
             numeroEnregistrement: (() => {
               const mcmNumber = tibokDoctorData.mcm_reg_no ||
