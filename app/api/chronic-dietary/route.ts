@@ -216,43 +216,73 @@ VITAL SIGNS:
 Generate complete 7-day meal plan with EXACTLY ${Math.round(targetCalories)} kcal per day.`
 
     console.log('🥗 Calling OpenAI API with gpt-4o for professional-quality dietary protocol...')
-    
+
     const result = await generateText({
       model: openai("gpt-4o"),  // ✅ UPGRADED to gpt-4o for superior dietary plan quality
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: patientContext }
       ],
-      maxTokens: 4000,  // ✅ INCREASED for more detailed meal plans and guidance
+      maxTokens: 8000,  // ✅ INCREASED for complete 7-day meal plans
       temperature: 0.3,
     })
 
     const content = result.text
-    
+
     if (!content) {
+      console.error('❌ No content received from AI')
       return NextResponse.json(
         { error: "No content received from AI" },
         { status: 500 }
       )
     }
-    
+
     console.log('✅ Dietary protocol response received, length:', content.length)
+    console.log('📝 Response preview:', content.substring(0, 300))
 
     let dietaryData
     try {
       // Clean response - remove markdown code blocks if present
       let cleanedContent = content.trim()
       cleanedContent = cleanedContent.replace(/```json\n?/g, '').replace(/```\n?/g, '')
-      
+      cleanedContent = cleanedContent.replace(/^[^{]*/, '').replace(/[^}]*$/, '') // Remove any text before first { or after last }
+
+      // Find JSON object
       const jsonMatch = cleanedContent.match(/\{[\s\S]*\}/)
       if (!jsonMatch) {
-        console.error("❌ No JSON found in response:", content.substring(0, 500))
-        return NextResponse.json(
-          { error: "Invalid response format - no JSON found" },
-          { status: 500 }
-        )
+        console.error("❌ No JSON found in response")
+        console.error("Raw content:", content.substring(0, 1000))
+
+        // Try to create a fallback response
+        return NextResponse.json({
+          success: true,
+          dietaryProtocol: {
+            protocolHeader: {
+              protocolType: "7-Day Personalized Dietary Protocol",
+              issueDate: new Date().toISOString().split('T')[0]
+            },
+            nutritionalAssessment: {
+              currentWeight: `${weight} kg`,
+              bmi: parseFloat(bmi.toFixed(1)),
+              bmiCategory: bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese',
+              targetWeight: `${targetWeight.toFixed(1)} kg`,
+              bmr: `${Math.round(bmr)} kcal/day`,
+              tdee: `${Math.round(tdee)} kcal/day`,
+              dailyCaloricNeeds: {
+                targetCalories: `${Math.round(targetCalories)} kcal/day`,
+                caloricAdjustment: caloricAdjustment,
+                macroDistribution: {
+                  carbs: `${carbsPercent}%`,
+                  protein: `${proteinPercent}%`,
+                  fat: `${fatPercent}%`
+                }
+              }
+            },
+            error: "AI response parsing failed - please regenerate the diet plan"
+          }
+        })
       }
-      
+
       console.log('🔍 Attempting to parse JSON...')
       dietaryData = JSON.parse(jsonMatch[0])
       console.log('✅ JSON parsed successfully')
