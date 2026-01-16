@@ -14,11 +14,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import TibokMedicalAssistant from '../tibok-medical-assistant'
-import { 
- FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube, 
- Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus, 
- Trash2, AlertCircle, Lock, Unlock, Copy, ClipboardCheck, Stethoscope, 
- Calendar, User, Building, CreditCard, Receipt
+import {
+ FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube,
+ Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
+ Trash2, AlertCircle, Lock, Unlock, Copy, ClipboardCheck, Stethoscope,
+ Calendar, User, Building, CreditCard, Receipt, Mic, MicOff
 } from "lucide-react"
 
 // ==================== HELPER FUNCTIONS ====================
@@ -918,6 +918,12 @@ export default function ProfessionalReportEditable({
  invoice?: string
  }>({})
 
+ // Audio recording state for section-specific voice input
+ const [recordingSection, setRecordingSection] = useState<string | null>(null)
+ const [isTranscribing, setIsTranscribing] = useState<string | null>(null)
+ const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+ const audioChunksRef = useRef<Blob[]>([])
+
  const [sickLeaveData, setSickLeaveData] = useState({
  startDate: '',
  endDate: '',
@@ -1029,6 +1035,152 @@ const updateRapportSection = useCallback((section: string, value: string) => {
  })
  trackModification(`rapport.${section}`)
 }, [validationStatus, trackModification])
+
+// ==================== DELETE SECTION CONTENT ====================
+const deleteSectionContent = useCallback((section: string) => {
+ if (validationStatus === 'validated') return
+
+ updateRapportSection(section, '')
+ toast({
+ title: "Content deleted",
+ description: `${section} section has been cleared`,
+ duration: 2000
+ })
+}, [validationStatus, updateRapportSection])
+
+// ==================== AUDIO RECORDING & REFORMATTING ====================
+const startRecordingForSection = useCallback(async (section: string) => {
+ if (validationStatus === 'validated') return
+
+ try {
+ const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+ const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+
+ audioChunksRef.current = []
+
+ mediaRecorder.ondataavailable = (event) => {
+   if (event.data.size > 0) {
+   audioChunksRef.current.push(event.data)
+   }
+ }
+
+ mediaRecorder.onstop = async () => {
+   stream.getTracks().forEach(track => track.stop())
+   const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+   await transcribeAndReformatSection(section, audioBlob)
+ }
+
+ mediaRecorderRef.current = mediaRecorder
+ mediaRecorder.start()
+ setRecordingSection(section)
+
+ toast({
+   title: "Recording started",
+   description: "Speak now. Click again to stop.",
+   duration: 2000
+ })
+ } catch (error) {
+ console.error('Failed to start recording:', error)
+ toast({
+   title: "Recording failed",
+   description: "Could not access microphone. Please check permissions.",
+   variant: "destructive",
+   duration: 3000
+ })
+ }
+}, [validationStatus])
+
+const stopRecordingForSection = useCallback(() => {
+ if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+ mediaRecorderRef.current.stop()
+ setRecordingSection(null)
+ }
+}, [])
+
+const transcribeAndReformatSection = useCallback(async (section: string, audioBlob: Blob) => {
+ setIsTranscribing(section)
+
+ try {
+ // First, transcribe the audio
+ const formData = new FormData()
+ formData.append('audioFile', audioBlob, 'recording.webm')
+
+ const transcribeResponse = await fetch('/api/voice-dictation-transcribe', {
+   method: 'POST',
+   body: formData
+ })
+
+ if (!transcribeResponse.ok) {
+   throw new Error('Transcription failed')
+ }
+
+ const transcribeData = await transcribeResponse.json()
+ const rawText = transcribeData.transcription?.normalizedText || transcribeData.transcription?.text || ''
+
+ if (!rawText) {
+   toast({
+   title: "No speech detected",
+   description: "Please try again and speak clearly",
+   variant: "destructive",
+   duration: 3000
+   })
+   setIsTranscribing(null)
+   return
+ }
+
+ // Get the section title for context
+ const sectionTitles: Record<string, string> = {
+   motifConsultation: 'Chief Complaint',
+   anamnese: 'History of Present Illness',
+   antecedents: 'Past Medical History',
+   examenClinique: 'Physical Examination',
+   syntheseDiagnostique: 'Diagnostic Synthesis',
+   conclusionDiagnostique: 'Diagnostic Conclusion',
+   priseEnCharge: 'Management Plan',
+   surveillance: 'Follow-up Plan',
+   conclusion: 'Final Remarks'
+ }
+
+ // Now reformat with OpenAI
+ const reformatResponse = await fetch('/api/reformat-medical-text', {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({
+   text: rawText,
+   sectionType: sectionTitles[section] || section,
+   currentContent: report?.compteRendu?.rapport?.[section as keyof typeof report.compteRendu.rapport] || ''
+   })
+ })
+
+ let formattedText = rawText
+ if (reformatResponse.ok) {
+   const reformatData = await reformatResponse.json()
+   formattedText = reformatData.formattedText || rawText
+ }
+
+ // Update the section
+ const currentContent = report?.compteRendu?.rapport?.[section as keyof typeof report.compteRendu.rapport] || ''
+ const newContent = currentContent ? `${currentContent}\n\n${formattedText}` : formattedText
+ updateRapportSection(section, newContent)
+ setHasUnsavedChanges(true)
+
+ toast({
+   title: "Text added",
+   description: `Voice input transcribed and added to ${sectionTitles[section] || section}`,
+   duration: 2000
+ })
+ } catch (error) {
+ console.error('Transcription/reformatting error:', error)
+ toast({
+   title: "Error",
+   description: "Failed to process audio. Please try again.",
+   variant: "destructive",
+   duration: 3000
+ })
+ } finally {
+ setIsTranscribing(null)
+ }
+}, [report, updateRapportSection])
 
 // ==================== UPDATE PATIENT FIELDS ====================
 const updatePatientField = useCallback((field: string, value: string) => {
@@ -4215,26 +4367,85 @@ const ConsultationReport = () => {
  <div className={`space-y-6 ${!showFullReport && !editMode ? 'max-h-96 overflow-hidden relative' : ''} print:max-h-none`}>
  {sections.map((section) => {
  const content = rapport[section.key as keyof typeof rapport]
- if (!content) return null
- 
+ // Show section if: has content, OR in edit mode, OR not validated (so user can use Voice)
+ if (!content && !editMode && validationStatus === 'validated') return null
+
  return (
  <section key={section.key} className="space-y-2 section">
+ <div className="flex items-center justify-between print:justify-start">
  <h2 className="text-xl font-bold text-gray-900">{section.title}</h2>
+ {/* Section controls - visible when not validated */}
+ {validationStatus !== 'validated' && (
+   <div className="flex items-center gap-2 print:hidden">
+   {/* Audio recording button */}
+   <Button
+     variant="outline"
+     size="sm"
+     onClick={() => {
+     if (recordingSection === section.key) {
+       stopRecordingForSection()
+     } else {
+       startRecordingForSection(section.key)
+     }
+     }}
+     disabled={isTranscribing === section.key || (recordingSection !== null && recordingSection !== section.key)}
+     className={`${recordingSection === section.key ? 'bg-red-100 border-red-300 text-red-700' : ''}`}
+     title={recordingSection === section.key ? "Stop recording" : "Record voice to add/update content"}
+   >
+     {isTranscribing === section.key ? (
+     <>
+       <Loader2 className="h-4 w-4 animate-spin" />
+       <span className="ml-1 text-xs">Processing...</span>
+     </>
+     ) : recordingSection === section.key ? (
+     <>
+       <MicOff className="h-4 w-4" />
+       <span className="ml-1 text-xs">Stop</span>
+     </>
+     ) : (
+     <>
+       <Mic className="h-4 w-4" />
+       <span className="ml-1 text-xs hidden sm:inline">Voice</span>
+     </>
+     )}
+   </Button>
+   {/* Delete content button */}
+   {content && (
+     <Button
+     variant="outline"
+     size="sm"
+     onClick={() => {
+       if (confirm(`Are you sure you want to delete the content of "${section.title}"?`)) {
+       deleteSectionContent(section.key)
+       }
+     }}
+     className="text-red-600 hover:text-red-700 hover:bg-red-50"
+     title="Delete section content"
+     >
+     <Trash2 className="h-4 w-4" />
+     <span className="ml-1 text-xs hidden sm:inline">Clear</span>
+     </Button>
+   )}
+   </div>
+ )}
+ </div>
  {editMode && validationStatus !== 'validated' ? (
  <DebouncedTextarea
- value={content}
+ value={content || ''}
  onUpdate={stableUpdateHandlers[section.key]}
  onLocalChange={stableLocalChangeHandler} // Use the local stable handler
  className="min-h-[200px] font-sans text-gray-700"
  placeholder="Enter text..."
  sectionKey={section.key}
  />
- ) : (
+ ) : content ? (
  <div className="prose pcyan-lg max-w-none">
  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
  {content}
  </p>
  </div>
+ ) : (
+ <div className="text-gray-400 italic text-sm">No content - use voice button to add</div>
  )}
  </section>
  )
@@ -5267,21 +5478,30 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-center">
- <div className="p-4 bg-teal-50 rounded">
+ <button
+   onClick={() => setActiveTab("medicaments")}
+   className="p-4 bg-teal-50 rounded hover:bg-teal-100 transition-colors cursor-pointer"
+ >
  <Pill className="h-8 w-8 mx-auto mb-2 text-teal-600" />
  <p className="text-2xl font-bold text-teal-600">{medicamentCount}</p>
  <p className="text-sm text-gray-600">Medications</p>
- </div>
- <div className="p-4 bg-blue-50 rounded">
+ </button>
+ <button
+   onClick={() => setActiveTab("biologie")}
+   className="p-4 bg-blue-50 rounded hover:bg-blue-100 transition-colors cursor-pointer"
+ >
  <TestTube className="h-8 w-8 mx-auto mb-2 text-blue-600" />
  <p className="text-2xl font-bold text-blue-600">{bioCount}</p>
  <p className="text-sm text-gray-600">Lab Tests</p>
- </div>
- <div className="p-4 bg-blue-50 rounded">
+ </button>
+ <button
+   onClick={() => setActiveTab("imagerie")}
+   className="p-4 bg-blue-50 rounded hover:bg-blue-100 transition-colors cursor-pointer"
+ >
  <Scan className="h-8 w-8 mx-auto mb-2 text-blue-600" />
  <p className="text-2xl font-bold text-blue-600">{imagingCount}</p>
  <p className="text-sm text-gray-600">Imaging</p>
- </div>
+ </button>
  </div>
  </CardContent>
  </Card>
