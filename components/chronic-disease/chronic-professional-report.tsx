@@ -3404,6 +3404,14 @@ export default function ChronicProfessionalReport({
             )
           })}
 
+          {/* Examination Date and Time */}
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+              <div><strong>📅 Examination Date:</strong> {medicalReport.patient.examinationDate || new Date().toISOString().split('T')[0]}</div>
+              <div><strong>🕐 Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+          </div>
+
           {/* Signature Section for Main Report */}
           <div className="mt-4 sm:mt-8 pt-4 sm:pt-6 border-t-2 border-gray-800">
             <div className="text-right">
@@ -4991,10 +4999,11 @@ export default function ChronicProfessionalReport({
             </div>
           )}
           
-          {/* Report Date */}
+          {/* Report Date and Time */}
           <div className="mt-4 pt-4 border-t border-cyan-200">
-            <div className="text-sm">
-              <strong>📅 Report Date / Date du rapport:</strong> {dietaryProtocol.header.date}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+              <div><strong>📅 Examination Date:</strong> {dietaryProtocol.header.date}</div>
+              <div><strong>🕐 Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
             </div>
           </div>
         </div>
