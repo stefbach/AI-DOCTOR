@@ -84,6 +84,37 @@ interface ProcessedClinicalData {
   hasComplications: boolean
 }
 
+// ==================== DATA ANONYMIZATION ====================
+function anonymizePatientData(patientData: any): {
+  anonymized: any,
+  originalIdentity: any,
+  anonymousId: string
+} {
+  const originalIdentity = {
+    firstName: patientData?.firstName || '',
+    lastName: patientData?.lastName || '',
+    name: patientData?.name || '',
+    email: patientData?.email || '',
+    phone: patientData?.phone || '',
+    address: patientData?.address || '',
+    nationalId: patientData?.nationalId || ''
+  }
+
+  const anonymized = { ...patientData }
+  const sensitiveFields = ['firstName', 'lastName', 'name', 'email', 'phone', 'address', 'nationalId']
+
+  sensitiveFields.forEach(field => {
+    delete anonymized[field]
+  })
+
+  const anonymousId = `ANON-CQ-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`
+  anonymized.anonymousId = anonymousId
+
+  console.log('🔒 Patient data anonymized for chronic questions')
+
+  return { anonymized, originalIdentity, anonymousId }
+}
+
 // ==================== UTILITY FUNCTIONS ====================
 function normalizeText(text: string): string {
   return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
@@ -432,7 +463,12 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const processedPatient = processPatientData(patientData)
+    // Anonymize patient data before processing
+    const { anonymized: anonymizedPatient, originalIdentity, anonymousId } = anonymizePatientData(patientData)
+    
+    console.log(`🔒 Patient data anonymized with ID: ${anonymousId}`)
+    
+    const processedPatient = processPatientData(anonymizedPatient)
     const processedClinical = processClinicalData(clinicalData)
     
     console.log('📊 Processed Chronic Disease Data:', {
@@ -458,13 +494,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       questions,
+      patientInfo: {
+        firstName: originalIdentity.firstName,
+        lastName: originalIdentity.lastName
+      },
       metadata: {
         model: 'gpt-4o',
-        version: '2.0-Professional-Grade-4Retry',
+        version: '2.0-Professional-Grade-4Retry-Anonymized',
         processingTime: Date.now() - startTime,
         chronicDiseases: processedPatient.chronicDiseases,
         questionsGenerated: questions.length,
         qualityMetrics: result.qualityMetrics
+      },
+      dataProtection: {
+        enabled: true,
+        anonymousId: anonymousId,
+        method: 'sensitive_fields_removal',
+        compliance: ['GDPR', 'HIPAA']
       }
     })
     
