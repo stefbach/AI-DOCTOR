@@ -4868,7 +4868,9 @@ const ConsultationReport = () => {
  <div className="mb-6 p-4 bg-blue-50 rounded info-box">
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
  <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
+ <div><strong>Examination Date:</strong> {patient.dateExamen}</div>
  <div><strong>Weight:</strong> {patient.poids}</div>
+ <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
  <div><strong>Clinical Diagnosis:</strong> {report?.ordonnances?.imagerie?.prescription?.renseignementsCliniques || 'N/A'}</div>
  {report?.ordonnances?.imagerie?.patient?.allergiesConnues && (
  <div><strong>Known Allergies:</strong> {report.ordonnances.imagerie.patient.allergiesConnues}</div>

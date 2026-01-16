@@ -4533,12 +4533,13 @@ export default function ChronicProfessionalReport({
         <div className="mb-6 p-4 bg-gray-50 rounded">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
             <div><strong>Patient:</strong> {report.medicalReport.patient.fullName}</div>
-            <div><strong>Date:</strong> {paraclinicalExams.prescription.datePrescription}</div>
+            <div><strong>Examination Date:</strong> {paraclinicalExams.prescription.datePrescription}</div>
             <div><strong>Age:</strong> {report.medicalReport.patient.age}</div>
+            <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
             <div><strong>Gender:</strong> {report.medicalReport.patient.gender}</div>
           </div>
         </div>
-        
+
         {/* Exams List */}
         <div className="space-y-6">
           {exams.length > 0 ? (
