@@ -4048,6 +4048,7 @@ const ConsultationReport = () => {
  <div><span className="font-medium">NID:</span> {patient.identifiantNational}</div>
  )}
  <div><span className="font-medium">Examination Date:</span> {patient.dateExamen}</div>
+ <div><span className="font-medium">Examination Time:</span> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
  </div>
  </div>
 
@@ -4538,8 +4539,9 @@ const ConsultationReport = () => {
  <div className="mb-6 p-4 bg-gray-50 rounded info-box">
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
  <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
- <div><strong>Date:</strong> {patient.dateExamen}</div>
+ <div><strong>Examination Date:</strong> {patient.dateExamen}</div>
  <div><strong>Address:</strong> {patient.adresse}</div>
+ <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
  {patient.identifiantNational && (
  <div><strong>NID:</strong> {patient.identifiantNational}</div>
  )}
@@ -4718,7 +4720,8 @@ const ConsultationReport = () => {
  <div className="mb-6 p-4 bg-blue-50 rounded info-box">
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
  <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
- <div><strong>Date:</strong> {patient.dateExamen}</div>
+ <div><strong>Examination Date:</strong> {patient.dateExamen}</div>
+ <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
  <div><strong>Clinical Information:</strong> {report?.ordonnances?.biologie?.patient?.diagnosticProvisoire || rapport.conclusionDiagnostique?.substring(0, 100) + '...' || 'N/A'}</div>
  </div>
  </div>
@@ -5111,6 +5114,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <div><strong>Date of Birth:</strong> {patient.dateNaissance}</div>
  <div><strong>Address:</strong> {patient.adresse}</div>
  <div><strong>Examination Date:</strong> {patient.dateExamen}</div>
+ <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
  </div>
  </div>
 

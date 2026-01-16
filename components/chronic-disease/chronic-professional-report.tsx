@@ -3856,14 +3856,15 @@ export default function ChronicProfessionalReport({
         <div className="mb-6 p-4 bg-gray-50 rounded">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
             <div><strong>Patient:</strong> {report.medicalReport.patient.fullName}</div>
-            <div><strong>Date:</strong> {medicationPrescription.prescription.datePrescription}</div>
+            <div><strong>Examination Date:</strong> {medicationPrescription.prescription.datePrescription}</div>
             <div><strong>Address:</strong> {report.medicalReport.patient.address}</div>
+            <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
             {report.medicalReport.patient.nationalId && (
               <div><strong>NID:</strong> {report.medicalReport.patient.nationalId}</div>
             )}
           </div>
         </div>
-        
+
         {/* Medications List */}
         <div className="space-y-6">
           {medications.length > 0 ? (
@@ -4193,12 +4194,13 @@ export default function ChronicProfessionalReport({
         <div className="mb-6 p-4 bg-gray-50 rounded">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
             <div><strong>Patient:</strong> {report.medicalReport.patient.fullName}</div>
-            <div><strong>Date:</strong> {laboratoryTests.prescription.datePrescription}</div>
+            <div><strong>Examination Date:</strong> {laboratoryTests.prescription.datePrescription}</div>
             <div><strong>Age:</strong> {report.medicalReport.patient.age}</div>
+            <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
             <div><strong>Gender:</strong> {report.medicalReport.patient.gender}</div>
           </div>
         </div>
-        
+
         {/* Clinical Indication */}
         <div className="mb-6 p-4 bg-blue-50 rounded">
           <h3 className="font-bold mb-2">Clinical Indication:</h3>
@@ -5390,11 +5392,14 @@ export default function ChronicProfessionalReport({
                 <strong>Contact:</strong> {report.medicalReport.practitioner.contact}
               </div>
               <div className="text-left">
-                <strong>Date:</strong> {followUpPlan.header.date}
+                <strong>Examination Date:</strong> {followUpPlan.header.date}
+              </div>
+              <div className="text-left">
+                <strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
           </div>
-          
+
           {/* Export Button */}
           <div className="flex justify-center print:hidden mt-4">
             <Button
@@ -6187,6 +6192,12 @@ export default function ChronicProfessionalReport({
                         </div>
                         <div>
                           <span className="font-semibold">Gender / Sexe:</span> {report.medicalReport.patient.gender}
+                        </div>
+                        <div>
+                          <span className="font-semibold">Examination Date:</span> {report.medicalReport.patient.examinationDate || new Date().toISOString().split('T')[0]}
+                        </div>
+                        <div>
+                          <span className="font-semibold">Examination Time:</span> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                         <div className="col-span-2">
                           <span className="font-semibold">Address / Adresse:</span> {report.medicalReport.patient.address}
