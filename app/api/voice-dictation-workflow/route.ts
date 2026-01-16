@@ -300,7 +300,7 @@ async function transcribeAudio(audioFile: File): Promise<{
   const transcription = await openai.audio.transcriptions.create({
     file: audioFile,
     model: 'whisper-1',
-    language: 'fr', // Auto-detect français/anglais
+    language: 'en', // Force English transcription for consistency
     response_format: 'verbose_json',
     temperature: 0.2
   });
