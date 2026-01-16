@@ -23,8 +23,10 @@ export const maxDuration = 180; // 3 minutes max
 // ============================================
 async function transcribeAudio(audioFile: File): Promise<{
   text: string;
+  translatedText: string;
   duration: number;
   language: string;
+  wasTranslated: boolean;
 }> {
   console.log('🔊 Step 1: Starting audio transcription...');
   console.log(`   Audio file: ${audioFile.name} (${audioFile.size} bytes)`);
@@ -34,11 +36,10 @@ async function transcribeAudio(audioFile: File): Promise<{
 
   try {
     // Auto-detect language - Whisper will detect French or English
-    // The normalizer will then convert French terms to English
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: 'whisper-1',
-      language: 'en', // Force English transcription to avoid misdetection
+      // No language parameter = auto-detect
       response_format: 'verbose_json',
       prompt: medicalPrompt, // Help Whisper recognize medical terms
     });
@@ -46,16 +47,65 @@ async function transcribeAudio(audioFile: File): Promise<{
     console.log('✅ Transcription completed');
     console.log(`   Text length: ${transcription.text.length} characters`);
     console.log(`   Duration: ${transcription.duration} seconds`);
-    console.log(`   Language: ${transcription.language}`);
+    console.log(`   Language detected: ${transcription.language}`);
+
+    let translatedText = transcription.text;
+    let wasTranslated = false;
+
+    // If French detected, translate to English
+    if (transcription.language === 'fr' || transcription.language === 'french') {
+      console.log('🇫🇷 French detected - translating to English...');
+      translatedText = await translateToEnglish(transcription.text);
+      wasTranslated = true;
+      console.log('✅ Translation completed');
+    }
 
     return {
       text: transcription.text,
+      translatedText,
       duration: transcription.duration || 0,
-      language: transcription.language || 'fr',
+      language: transcription.language || 'unknown',
+      wasTranslated,
     };
   } catch (error: any) {
     console.error('❌ Transcription failed:', error.message);
     throw new Error(`Transcription failed: ${error.message}`);
+  }
+}
+
+// ============================================
+// FUNCTION 1b: TRANSLATE FRENCH TO ENGLISH
+// ============================================
+async function translateToEnglish(frenchText: string): Promise<string> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `You are a medical translator. Translate the following French medical text to English.
+
+RULES:
+1. Translate accurately while maintaining medical terminology
+2. Use INN/generic drug names in English (e.g., "Paracétamol" → "Paracetamol", "Amoxicilline" → "Amoxicillin")
+3. Use standard UK/US medical abbreviations
+4. Keep the same structure and meaning
+5. Return ONLY the translated text, nothing else`
+        },
+        {
+          role: 'user',
+          content: frenchText
+        }
+      ],
+      temperature: 0.2,
+      max_tokens: 2000,
+    });
+
+    return response.choices[0]?.message?.content?.trim() || frenchText;
+  } catch (error: any) {
+    console.error('❌ Translation failed:', error.message);
+    // Return original text if translation fails
+    return frenchText;
   }
 }
 
@@ -281,10 +331,12 @@ export async function POST(request: NextRequest) {
     }
 
     // STEP 2: Normalize transcription to Anglo-Saxon nomenclature
+    // Use translated text if available, otherwise use original
+    const textToNormalize = transcription.translatedText || transcription.text;
     let normalization;
     try {
       console.log('\n🔄 STEP 2/3: Normalization to Anglo-Saxon Nomenclature');
-      normalization = await normalizeTranscription(transcription.text);
+      normalization = await normalizeTranscription(textToNormalize);
     } catch (error: any) {
       console.error('❌ STEP 2 FAILED:', error.message);
       // Continue with original text if normalization fails
@@ -330,11 +382,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       transcription: {
-        text: transcription.text,
-        originalText: transcription.text,
+        text: transcription.translatedText, // Always return English text
+        originalText: transcription.text, // Original transcription (may be French)
+        translatedText: transcription.translatedText, // Translated to English
         normalizedText: normalization.normalizedText,
         duration: transcription.duration,
         language: transcription.language,
+        wasTranslated: transcription.wasTranslated,
       },
       normalization: {
         corrections: normalization.corrections,
