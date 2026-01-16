@@ -3320,7 +3320,18 @@ export default function ChronicProfessionalReport({
             </div>
           </div>
         </div>
-        
+
+        {/* Patient Information Header */}
+        <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1">
+            <div><strong>Patient:</strong> {medicalReport.patient.fullName}</div>
+            <div><strong>Examination Date:</strong> {medicalReport.patient.examinationDate || new Date().toISOString().split('T')[0]}</div>
+            <div><strong>Age:</strong> {medicalReport.patient.age}</div>
+            <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
+            <div><strong>Gender:</strong> {medicalReport.patient.gender}</div>
+          </div>
+        </div>
+
         {/* MEDICAL REPORT SECTIONS - Individual editable sections */}
         <div className="mb-6 space-y-6">
           {CHRONIC_SECTION_KEYS.map((section) => {
