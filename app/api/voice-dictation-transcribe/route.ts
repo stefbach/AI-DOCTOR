@@ -31,17 +31,22 @@ async function transcribeAudio(audioFile: File): Promise<{
   console.log('🔊 Step 1: Starting audio transcription...');
   console.log(`   Audio file: ${audioFile.name} (${audioFile.size} bytes)`);
 
-  // Medical prompt to help Whisper recognize medical terms (bilingual French/English)
-  const medicalPrompt = `Medical transcription. Common medications: Doliprane, Paracetamol, Acetaminophen, Metformin, Metformine, Amoxicillin, Amoxicilline, Augmentin, Ibuprofen, Ibuprofène, Aspirin, Aspirine, Omeprazole, Pantoprazole, Atorvastatin, Simvastatin, Amlodipine, Ramipril, Lisinopril, Bisoprolol, Furosemide, Spironolactone, Levothyroxine, Prednisone, Prednisolone, Insulin, Insuline, Lantus, Novorapid, Glucophage, Diamicron, Gliclazide, Januvia, Sitagliptin, Plavix, Clopidogrel, Xarelto, Eliquis, Pradaxa, Ventolin, Ventoline, Salbutamol, Albuterol, Seretide, Symbicort, Singulair, Montelukast, Nexium, Gaviscon, Imodium, Xanax, Zolpidem, Zopiclone, Sertraline, Fluoxetine, Prozac, Effexor, Venlafaxine, Cymbalta, Duloxetine, Lyrica, Pregabalin, Gabapentin, Neurontin. Dosages: milligrams, mg, grams, g, micrograms, mcg, milliliters, ml.`;
+  // Bilingual medical prompt (French + English) to help Whisper recognize medical terms in both languages
+  const medicalPrompt = `Medical transcription. Transcription médicale.
+French symptoms: douleur abdominale, douleur thoracique, céphalée, migraine, nausée, vomissement, diarrhée, constipation, fièvre, toux, dyspnée, fatigue, asthénie, vertige, palpitations, mal de tête, mal au ventre, mal à la poitrine.
+English symptoms: abdominal pain, chest pain, headache, migraine, nausea, vomiting, diarrhea, constipation, fever, cough, shortness of breath, fatigue, dizziness, palpitations.
+Medications: Doliprane, Paracetamol, Paracétamol, Metformin, Metformine, Amoxicillin, Amoxicilline, Augmentin, Ibuprofen, Ibuprofène, Aspirin, Aspirine, Omeprazole, Oméprazole, Pantoprazole, Atorvastatin, Atorvastatine, Amlodipine, Ramipril, Lisinopril, Bisoprolol, Furosemide, Furosémide, Levothyroxine, Lévothyroxine, Prednisone, Prednisolone, Insulin, Insuline, Ventolin, Ventoline, Salbutamol.
+Medical history: diabète, diabetes, hypertension, asthme, asthma, BPCO, COPD, insuffisance cardiaque, heart failure, insuffisance rénale, kidney failure.
+Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
 
   try {
-    // Auto-detect language - Whisper will detect French or English
+    // Auto-detect language with bilingual medical prompt
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: 'whisper-1',
-      // No language parameter = auto-detect
+      // No language parameter = auto-detect French or English
       response_format: 'verbose_json',
-      prompt: medicalPrompt, // Help Whisper recognize medical terms
+      prompt: medicalPrompt,
     });
 
     console.log('✅ Transcription completed');
