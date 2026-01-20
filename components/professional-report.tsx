@@ -6360,7 +6360,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
           <SelectTrigger>
             <SelectValue placeholder="Sélectionner une spécialité" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="z-[9999]">
             {loadingSpecialties ? (
               <div className="flex items-center justify-center py-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -6386,7 +6386,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
           <SelectTrigger>
             <SelectValue placeholder={selectedSpecialty ? "Sélectionner un correspondant" : "Sélectionnez d'abord une spécialité"} />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="z-[9999]">
             {loadingSpecialists ? (
               <div className="flex items-center justify-center py-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
