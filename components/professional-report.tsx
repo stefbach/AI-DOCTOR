@@ -2909,14 +2909,20 @@ const loadSpecialists = useCallback(async (specialty: string) => {
     console.log('Loading specialists for specialty:', specialty)
     const { data, error } = await supabase
       .from('specialists')
-      .select('id, name, phone, specialties')
+      .select('id, first_name, last_name, phone, specialties')
       .eq('is_active', true)
       .contains('specialties', [specialty])
-      .order('name')
+      .order('last_name')
 
     if (error) throw error
     console.log('Specialists loaded:', data?.length || 0)
-    setSpecialists(data || [])
+    // Map to expected format with combined name
+    const mappedData = (data || []).map((s: any) => ({
+      id: s.id,
+      name: `Dr. ${s.first_name} ${s.last_name}`,
+      phone: s.phone
+    }))
+    setSpecialists(mappedData)
   } catch (error) {
     console.error('Error loading specialists:', error)
     toast({
