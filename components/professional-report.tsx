@@ -2873,13 +2873,19 @@ const loadSpecialties = useCallback(async () => {
     console.log('Loading specialties from Supabase...')
     const { data, error } = await supabase
       .from('specialty_types')
-      .select('id, name, name_fr')
+      .select('id, name_en, name_fr')
       .eq('is_active', true)
-      .order('name_fr')
+      .order('display_order')
 
     if (error) throw error
     console.log('Specialties loaded:', data?.length || 0)
-    setSpecialties(data || [])
+    // Map to expected format (name_en as name for compatibility)
+    const mappedData = (data || []).map((s: any) => ({
+      id: s.id,
+      name: s.name_en,
+      name_fr: s.name_fr
+    }))
+    setSpecialties(mappedData)
   } catch (error) {
     console.error('Error loading specialties:', error)
     toast({
