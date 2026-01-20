@@ -2926,17 +2926,17 @@ const loadSpecialists = useCallback(async (specialty: string) => {
     console.log('Loading specialists for specialty:', specialty)
     const { data, error } = await supabase
       .from('specialists')
-      .select('id, first_name, last_name, phone, specialties')
+      .select('id, full_name, phone, specialties')
       .eq('is_active', true)
       .contains('specialties', [specialty])
-      .order('last_name')
+      .order('full_name')
 
     if (error) throw error
     console.log('Specialists loaded:', data?.length || 0)
-    // Map to expected format with combined name
+    // Map to expected format
     const mappedData = (data || []).map((s: any) => ({
       id: s.id,
-      name: `Dr. ${s.first_name} ${s.last_name}`,
+      name: s.full_name ? `Dr. ${s.full_name}` : 'Dr. (Nom non disponible)',
       phone: s.phone
     }))
     setSpecialists(mappedData)
@@ -2979,40 +2979,24 @@ const loadAvailableSlots = useCallback(async (specialistId: string, date: string
   setSelectedSlot(null)
 
   try {
-    const dayOfWeek = new Date(date + 'T00:00:00').getDay()
-    console.log('📅 Loading slots for:', { specialistId, date, dayOfWeek })
+    console.log('📅 Loading slots for:', { specialistId, date })
 
-    // 1. Check for exceptions (blocked days)
-    const { data: exception } = await supabase
-      .from('specialist_availability_exceptions')
-      .select('*')
-      .eq('specialist_id', specialistId)
-      .eq('exception_date', date)
-      .single()
-
-    if (exception && !exception.is_available) {
-      console.log('🚫 Day is blocked')
-      setAvailableSlots([])
-      setLoadingSlots(false)
-      return
-    }
-
-    // 2. Get weekly availability for this day
+    // 1. Get availability for this specific date (new structure uses specific_date)
     const { data: availability, error: availError } = await supabase
       .from('specialist_availability')
       .select('*')
       .eq('specialist_id', specialistId)
-      .eq('day_of_week', dayOfWeek)
-      .eq('is_active', true)
+      .eq('specific_date', date)
+      .eq('is_available', true)
 
     if (availError || !availability || availability.length === 0) {
-      console.log('📅 No availability for this day')
+      console.log('📅 No availability for this date')
       setAvailableSlots([])
       setLoadingSlots(false)
       return
     }
 
-    // 3. Get already booked appointments
+    // 2. Get already booked appointments
     const { data: bookedAppointments } = await supabase
       .from('specialist_appointments')
       .select('start_time, end_time')
@@ -3020,12 +3004,12 @@ const loadAvailableSlots = useCallback(async (specialistId: string, date: string
       .eq('appointment_date', date)
       .neq('status', 'cancelled')
 
-    // 4. Generate available slots
+    // 3. Generate available slots
     const slots: Array<{start: string, end: string}> = []
     const booked = bookedAppointments || []
 
     for (const avail of availability) {
-      const slotDuration = avail.slot_duration_minutes || 30
+      const slotDuration = avail.slot_duration || 30
       let currentTime = avail.start_time
 
       while (currentTime < avail.end_time) {
@@ -3600,6 +3584,34 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
    console.log('📤 Saving referral to Supabase...')
    try {
      const rapport = getReportRapport()
+     let appointmentId: string | null = null
+
+     // Create appointment first if slot was selected (to get appointment_id for referral)
+     if (referralData.appointmentDate && referralData.appointmentSlot) {
+       console.log('📅 Creating appointment first...')
+       const { data: savedAppointment, error: appointmentError } = await supabaseClient
+         .from('specialist_appointments')
+         .insert({
+           specialist_id: referralData.specialistId,
+           patient_name: patientName || 'Unknown',
+           patient_phone: patientPhone || null,
+           appointment_date: referralData.appointmentDate,
+           start_time: referralData.appointmentSlot.start,
+           end_time: referralData.appointmentSlot.end,
+           status: 'scheduled'
+         })
+         .select('id')
+         .single()
+
+       if (appointmentError) {
+         console.error('❌ Error creating appointment:', appointmentError)
+       } else {
+         appointmentId = savedAppointment?.id || null
+         console.log('✅ Appointment created successfully, id:', appointmentId)
+       }
+     }
+
+     // Now create the referral with the appointment_id (if appointment was created)
      const { data: savedReferral, error: referralError } = await supabaseClient
        .from('referrals')
        .insert({
@@ -3614,7 +3626,8 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
          patient_gender: patient?.sexe || null,
          reason: referralData.reason,
          tibok_diagnosis: rapport?.conclusionDiagnostique || '',
-         status: 'pending'
+         status: 'pending',
+         appointment_id: appointmentId
        })
        .select()
        .single()
@@ -3624,27 +3637,13 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
      } else {
        console.log('✅ Referral saved successfully:', savedReferral?.id)
 
-       // Create appointment if slot was selected
-       if (referralData.appointmentDate && referralData.appointmentSlot && savedReferral?.id) {
-         console.log('📅 Creating appointment...')
-         const { error: appointmentError } = await supabaseClient
+       // Update appointment with referral_id for bidirectional link
+       if (appointmentId && savedReferral?.id) {
+         await supabaseClient
            .from('specialist_appointments')
-           .insert({
-             referral_id: savedReferral.id,
-             specialist_id: referralData.specialistId,
-             patient_name: patientName || 'Unknown',
-             patient_phone: patientPhone || null,
-             appointment_date: referralData.appointmentDate,
-             start_time: referralData.appointmentSlot.start,
-             end_time: referralData.appointmentSlot.end,
-             status: 'scheduled'
-           })
-
-         if (appointmentError) {
-           console.error('❌ Error creating appointment:', appointmentError)
-         } else {
-           console.log('✅ Appointment created successfully')
-         }
+           .update({ referral_id: savedReferral.id })
+           .eq('id', appointmentId)
+         console.log('✅ Appointment linked to referral')
        }
      }
    } catch (err) {
