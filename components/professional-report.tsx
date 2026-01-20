@@ -1010,14 +1010,14 @@ const [selectedFollowUpTypes, setSelectedFollowUpTypes] = useState<string[]>([])
 const [showFollowUpModal, setShowFollowUpModal] = useState(false)
 
 // Supabase client for referral/follow-up
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-const supabase = useMemo(() => {
-  if (supabaseUrl && supabaseAnonKey) {
-    return createClient(supabaseUrl, supabaseAnonKey)
+const getSupabaseClient = useCallback(() => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (url && key) {
+    return createClient(url, key)
   }
   return null
-}, [supabaseUrl, supabaseAnonKey])
+}, [])
 
 // Helper function to get full Supabase storage URL
 const getFullSignatureUrl = (signatureUrl: string | null): string | null => {
@@ -2857,10 +2857,20 @@ const signatures = {
 // ==================== REFERRAL & FOLLOW-UP FUNCTIONS ====================
 // Load specialties from Supabase
 const loadSpecialties = useCallback(async () => {
-  if (!supabase) return
+  const supabase = getSupabaseClient()
+  if (!supabase) {
+    console.error('Supabase client not available')
+    toast({
+      title: "Erreur",
+      description: "Configuration Supabase manquante",
+      variant: "destructive"
+    })
+    return
+  }
 
   setLoadingSpecialties(true)
   try {
+    console.log('Loading specialties from Supabase...')
     const { data, error } = await supabase
       .from('specialty_types')
       .select('id, name, name_fr')
@@ -2868,6 +2878,7 @@ const loadSpecialties = useCallback(async () => {
       .order('name_fr')
 
     if (error) throw error
+    console.log('Specialties loaded:', data?.length || 0)
     setSpecialties(data || [])
   } catch (error) {
     console.error('Error loading specialties:', error)
@@ -2879,15 +2890,17 @@ const loadSpecialties = useCallback(async () => {
   } finally {
     setLoadingSpecialties(false)
   }
-}, [supabase])
+}, [getSupabaseClient])
 
 // Load specialists by specialty from Supabase
 const loadSpecialists = useCallback(async (specialty: string) => {
+  const supabase = getSupabaseClient()
   if (!supabase || !specialty) return
 
   setLoadingSpecialists(true)
   setSpecialists([])
   try {
+    console.log('Loading specialists for specialty:', specialty)
     const { data, error } = await supabase
       .from('specialists')
       .select('id, name, phone, specialties')
@@ -2896,6 +2909,7 @@ const loadSpecialists = useCallback(async (specialty: string) => {
       .order('name')
 
     if (error) throw error
+    console.log('Specialists loaded:', data?.length || 0)
     setSpecialists(data || [])
   } catch (error) {
     console.error('Error loading specialists:', error)
@@ -2907,7 +2921,7 @@ const loadSpecialists = useCallback(async (specialty: string) => {
   } finally {
     setLoadingSpecialists(false)
   }
-}, [supabase])
+}, [getSupabaseClient])
 
 // Handle specialty selection
 const handleSpecialtyChange = useCallback((specialty: string) => {
@@ -2954,6 +2968,29 @@ const handleClearReferral = useCallback(() => {
   setReferralReason('')
   setSpecialists([])
 }, [])
+
+// Open referral modal with pre-filled diagnosis
+const handleOpenReferralModal = useCallback(() => {
+  // Load specialties
+  loadSpecialties()
+
+  // Pre-fill the reason with diagnostic synthesis and conclusion
+  const rapport = getReportRapport()
+  let prefillText = ''
+
+  if (rapport?.syntheseDiagnostique) {
+    prefillText += `SYNTHÈSE DIAGNOSTIQUE:\n${rapport.syntheseDiagnostique}\n\n`
+  }
+  if (rapport?.conclusionDiagnostique) {
+    prefillText += `CONCLUSION DIAGNOSTIQUE:\n${rapport.conclusionDiagnostique}`
+  }
+
+  if (prefillText.trim()) {
+    setReferralReason(prefillText.trim())
+  }
+
+  setShowReferralModal(true)
+}, [loadSpecialties, getReportRapport])
 
 // Save follow-up data (called from modal)
 const handleSaveFollowUp = useCallback(() => {
@@ -3414,11 +3451,12 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  console.log('🎉 Documents sent successfully!')
 
  // Save referral if configured
- if (referralData && supabase) {
+ const supabaseClient = getSupabaseClient()
+ if (referralData && supabaseClient) {
    console.log('📤 Saving referral to Supabase...')
    try {
      const rapport = getReportRapport()
-     const { error: referralError } = await supabase
+     const { error: referralError } = await supabaseClient
        .from('referrals')
        .insert({
          patient_id: patientId,
@@ -3442,7 +3480,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  }
 
  // Save follow-ups if configured
- if (followUpData && followUpData.types.length > 0 && supabase) {
+ if (followUpData && followUpData.types.length > 0 && supabaseClient) {
    console.log('📤 Saving follow-ups to Supabase...')
    try {
      const followUps = followUpData.types.map(type => ({
@@ -3458,7 +3496,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
        next_reminder_at: new Date().toISOString()
      }))
 
-     const { error: followUpError } = await supabase
+     const { error: followUpError } = await supabaseClient
        .from('patient_follow_ups')
        .insert(followUps)
 
@@ -5928,7 +5966,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
          <div className="text-center py-8">
            <UserPlus className="h-12 w-12 mx-auto text-gray-300 mb-4" />
            <p className="text-gray-500 mb-4">Aucune référence enregistrée</p>
-           <Button onClick={() => { loadSpecialties(); setShowReferralModal(true); }}>
+           <Button onClick={handleOpenReferralModal}>
              <UserPlus className="h-4 w-4 mr-2" />
              Référer ce patient
            </Button>
