@@ -165,14 +165,15 @@ export default function SpecialistConsultationPage() {
       if (referralData.specialist_id) {
         const { data: specialistData, error: specialistError } = await supabase
           .from('specialists')
-          .select('id, first_name, last_name, phone, email, specialties, medical_license_number, clinic_name')
+          .select('id, full_name, phone, email, specialties, medical_license_number, clinic_name')
           .eq('id', referralData.specialist_id)
           .single()
 
         if (!specialistError && specialistData) {
+          const doctorFullName = specialistData.full_name ? `Dr. ${specialistData.full_name}` : 'Dr. (Nom non disponible)'
           setDoctorData({
-            fullName: `Dr. ${specialistData.first_name} ${specialistData.last_name}`,
-            nom: `Dr. ${specialistData.first_name} ${specialistData.last_name}`,
+            fullName: doctorFullName,
+            nom: doctorFullName,
             qualifications: specialistData.specialties?.join(', ') || '',
             specialty: referralData.specialty_requested,
             medicalCouncilNumber: specialistData.medical_license_number || '',
