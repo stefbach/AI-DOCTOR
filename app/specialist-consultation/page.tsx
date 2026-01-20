@@ -156,7 +156,33 @@ export default function SpecialistConsultationPage() {
 
       setReferral(referralData)
 
-      // 2. Set patient data for the consultation
+      // 2. Load specialist (doctor) data
+      if (referralData.specialist_id) {
+        const { data: specialistData, error: specialistError } = await supabase
+          .from('specialists')
+          .select('id, first_name, last_name, phone, email, specialties, medical_license_number, clinic_name')
+          .eq('id', referralData.specialist_id)
+          .single()
+
+        if (!specialistError && specialistData) {
+          setDoctorData({
+            fullName: `Dr. ${specialistData.first_name} ${specialistData.last_name}`,
+            nom: `Dr. ${specialistData.first_name} ${specialistData.last_name}`,
+            qualifications: specialistData.specialties?.join(', ') || '',
+            specialty: referralData.specialty_requested,
+            medicalCouncilNumber: specialistData.medical_license_number || '',
+            numeroEnregistrement: specialistData.medical_license_number || '',
+            email: specialistData.email || '',
+            phone: specialistData.phone || '',
+            clinicName: specialistData.clinic_name || ''
+          })
+          console.log('✅ Specialist data loaded:', specialistData)
+        } else {
+          console.warn('⚠️ Could not load specialist data:', specialistError)
+        }
+      }
+
+      // 3. Set patient data for the consultation
       setPatientData({
         firstName: referralData.patient_name?.split(' ')[0] || '',
         lastName: referralData.patient_name?.split(' ').slice(1).join(' ') || '',
@@ -166,7 +192,7 @@ export default function SpecialistConsultationPage() {
         patientId: referralData.patient_id
       })
 
-      // 3. Mark referral as in_progress if pending
+      // 4. Mark referral as in_progress if pending
       if (referralData.status === 'pending') {
         await supabase
           .from('referrals')
@@ -177,10 +203,8 @@ export default function SpecialistConsultationPage() {
           .eq('id', referralId)
       }
 
-      // 4. Load consultation history via patient phone
-      if (referralData.patient_phone) {
-        await loadConsultationHistory(referralData.patient_phone)
-      }
+      // 5. Load consultation history via patient_id or phone
+      await loadConsultationHistory(referralData.patient_id, referralData.patient_phone)
 
       setLoading(false)
     } catch (err) {
@@ -190,16 +214,31 @@ export default function SpecialistConsultationPage() {
     }
   }
 
-  async function loadConsultationHistory(patientPhone: string) {
+  async function loadConsultationHistory(patientId: string | null, patientPhone: string | null) {
     setLoadingHistory(true)
     try {
+      // Try with patient_id first, then phone
+      const searchCriteria: any = { limit: 20 }
+      if (patientId) {
+        searchCriteria.patientId = patientId
+      } else if (patientPhone) {
+        searchCriteria.phone = patientPhone
+      } else {
+        setLoadingHistory(false)
+        return
+      }
+
+      console.log('🔍 Loading consultation history with:', searchCriteria)
+
       const response = await fetch('/api/patient-history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: patientPhone, limit: 20 })
+        body: JSON.stringify(searchCriteria)
       })
 
       const data = await response.json()
+      console.log('📋 History response:', data)
+
       if (data.success && data.consultations) {
         setConsultationHistory(data.consultations)
       }
