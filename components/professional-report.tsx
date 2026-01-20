@@ -6373,7 +6373,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
               </div>
             ) : (
               specialties.map(spec => (
-                <SelectItem key={spec.id} value={spec.name.toLowerCase()}>
+                <SelectItem key={spec.id} value={spec.id}>
                   {spec.name_fr}
                 </SelectItem>
               ))
