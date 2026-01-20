@@ -11,13 +11,17 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { toast } from "@/components/ui/use-toast"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { createClient } from '@supabase/supabase-js'
 import {
  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube,
  Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
  Trash2, AlertCircle, Lock, Unlock, Copy, ClipboardCheck, Stethoscope,
- Calendar, User, Building, CreditCard, Receipt, Brain, Mic, MicOff, RefreshCw
+ Calendar, User, Building, CreditCard, Receipt, Brain, Mic, MicOff, RefreshCw,
+ UserPlus, Activity, Heart, Scale, Droplets
 } from "lucide-react"
 import TibokMedicalAssistant from './tibok-medical-assistant'
 
@@ -980,6 +984,40 @@ export default function ProfessionalReportEditable({
  workRestrictions: '',
  returnToWork: ''
 })
+
+// ==================== REFERRAL & FOLLOW-UP STATE ====================
+// Referral to specialist state
+const [referralData, setReferralData] = useState<{
+  specialty: string
+  specialistId: string
+  specialistName: string
+  reason: string
+} | null>(null)
+const [specialties, setSpecialties] = useState<Array<{id: string, name: string, name_fr: string}>>([])
+const [specialists, setSpecialists] = useState<Array<{id: string, name: string, phone: string, specialties: string[]}>>([])
+const [loadingSpecialties, setLoadingSpecialties] = useState(false)
+const [loadingSpecialists, setLoadingSpecialists] = useState(false)
+const [selectedSpecialty, setSelectedSpecialty] = useState('')
+const [selectedSpecialistId, setSelectedSpecialistId] = useState('')
+const [referralReason, setReferralReason] = useState('')
+const [showReferralModal, setShowReferralModal] = useState(false)
+
+// Chronic follow-up state
+const [followUpData, setFollowUpData] = useState<{
+  types: string[]
+} | null>(null)
+const [selectedFollowUpTypes, setSelectedFollowUpTypes] = useState<string[]>([])
+const [showFollowUpModal, setShowFollowUpModal] = useState(false)
+
+// Supabase client for referral/follow-up
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const supabase = useMemo(() => {
+  if (supabaseUrl && supabaseAnonKey) {
+    return createClient(supabaseUrl, supabaseAnonKey)
+  }
+  return null
+}, [supabaseUrl, supabaseAnonKey])
 
 // Helper function to get full Supabase storage URL
 const getFullSignatureUrl = (signatureUrl: string | null): string | null => {
@@ -2816,6 +2854,144 @@ const signatures = {
 }
  }
 
+// ==================== REFERRAL & FOLLOW-UP FUNCTIONS ====================
+// Load specialties from Supabase
+const loadSpecialties = useCallback(async () => {
+  if (!supabase) return
+
+  setLoadingSpecialties(true)
+  try {
+    const { data, error } = await supabase
+      .from('specialty_types')
+      .select('id, name, name_fr')
+      .eq('is_active', true)
+      .order('name_fr')
+
+    if (error) throw error
+    setSpecialties(data || [])
+  } catch (error) {
+    console.error('Error loading specialties:', error)
+    toast({
+      title: "Erreur",
+      description: "Impossible de charger les spécialités",
+      variant: "destructive"
+    })
+  } finally {
+    setLoadingSpecialties(false)
+  }
+}, [supabase])
+
+// Load specialists by specialty from Supabase
+const loadSpecialists = useCallback(async (specialty: string) => {
+  if (!supabase || !specialty) return
+
+  setLoadingSpecialists(true)
+  setSpecialists([])
+  try {
+    const { data, error } = await supabase
+      .from('specialists')
+      .select('id, name, phone, specialties')
+      .eq('is_active', true)
+      .contains('specialties', [specialty])
+      .order('name')
+
+    if (error) throw error
+    setSpecialists(data || [])
+  } catch (error) {
+    console.error('Error loading specialists:', error)
+    toast({
+      title: "Erreur",
+      description: "Impossible de charger les correspondants",
+      variant: "destructive"
+    })
+  } finally {
+    setLoadingSpecialists(false)
+  }
+}, [supabase])
+
+// Handle specialty selection
+const handleSpecialtyChange = useCallback((specialty: string) => {
+  setSelectedSpecialty(specialty)
+  setSelectedSpecialistId('')
+  if (specialty) {
+    loadSpecialists(specialty)
+  } else {
+    setSpecialists([])
+  }
+}, [loadSpecialists])
+
+// Save referral data (called from modal)
+const handleSaveReferral = useCallback(() => {
+  if (!selectedSpecialty || !selectedSpecialistId || !referralReason.trim()) {
+    toast({
+      title: "Champs requis",
+      description: "Veuillez remplir tous les champs obligatoires",
+      variant: "destructive"
+    })
+    return
+  }
+
+  const specialist = specialists.find(s => s.id === selectedSpecialistId)
+  setReferralData({
+    specialty: selectedSpecialty,
+    specialistId: selectedSpecialistId,
+    specialistName: specialist?.name || '',
+    reason: referralReason
+  })
+  setShowReferralModal(false)
+
+  toast({
+    title: "✅ Référence enregistrée",
+    description: "La référence sera envoyée lors de la finalisation"
+  })
+}, [selectedSpecialty, selectedSpecialistId, referralReason, specialists])
+
+// Clear referral data
+const handleClearReferral = useCallback(() => {
+  setReferralData(null)
+  setSelectedSpecialty('')
+  setSelectedSpecialistId('')
+  setReferralReason('')
+  setSpecialists([])
+}, [])
+
+// Save follow-up data (called from modal)
+const handleSaveFollowUp = useCallback(() => {
+  if (selectedFollowUpTypes.length === 0) {
+    toast({
+      title: "Sélection requise",
+      description: "Veuillez sélectionner au moins un type de suivi",
+      variant: "destructive"
+    })
+    return
+  }
+
+  setFollowUpData({
+    types: selectedFollowUpTypes
+  })
+  setShowFollowUpModal(false)
+
+  toast({
+    title: "✅ Suivi chronique enregistré",
+    description: `${selectedFollowUpTypes.length} type(s) de suivi activé(s)`
+  })
+}, [selectedFollowUpTypes])
+
+// Clear follow-up data
+const handleClearFollowUp = useCallback(() => {
+  setFollowUpData(null)
+  setSelectedFollowUpTypes([])
+}, [])
+
+// Toggle follow-up type selection
+const toggleFollowUpType = useCallback((type: string) => {
+  setSelectedFollowUpTypes(prev =>
+    prev.includes(type)
+      ? prev.filter(t => t !== type)
+      : [...prev, type]
+  )
+}, [])
+
 // ==================== SEND DOCUMENTS ====================
 const handleSendDocuments = async () => {
  console.log('📤 Starting handleSendDocuments...')
@@ -3236,8 +3412,68 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
 
  if (result?.success) {
  console.log('🎉 Documents sent successfully!')
+
+ // Save referral if configured
+ if (referralData && supabase) {
+   console.log('📤 Saving referral to Supabase...')
+   try {
+     const rapport = getReportRapport()
+     const { error: referralError } = await supabase
+       .from('referrals')
+       .insert({
+         patient_id: patientId,
+         specialist_id: referralData.specialistId,
+         specialty: referralData.specialty,
+         referring_doctor_id: doctorId,
+         reason: referralData.reason,
+         tibok_diagnosis: rapport?.conclusionDiagnostique || '',
+         consultation_id: consultationId,
+         status: 'pending'
+       })
+
+     if (referralError) {
+       console.error('❌ Error saving referral:', referralError)
+     } else {
+       console.log('✅ Referral saved successfully')
+     }
+   } catch (err) {
+     console.error('❌ Error saving referral:', err)
+   }
+ }
+
+ // Save follow-ups if configured
+ if (followUpData && followUpData.types.length > 0 && supabase) {
+   console.log('📤 Saving follow-ups to Supabase...')
+   try {
+     const followUps = followUpData.types.map(type => ({
+       patient_id: patientId,
+       doctor_id: doctorId,
+       consultation_id: consultationId,
+       follow_up_type: type,
+       frequency: 'daily',
+       reminder_time: '08:00:00',
+       duration_days: 30,
+       status: 'active',
+       started_at: new Date().toISOString(),
+       next_reminder_at: new Date().toISOString()
+     }))
+
+     const { error: followUpError } = await supabase
+       .from('patient_follow_ups')
+       .insert(followUps)
+
+     if (followUpError) {
+       console.error('❌ Error saving follow-ups:', followUpError)
+     } else {
+       console.log(`✅ ${followUps.length} follow-up(s) saved successfully`)
+     }
+   } catch (err) {
+     console.error('❌ Error saving follow-ups:', err)
+   }
+ }
+
  setIsSendingDocuments(false)
- 
+
  toast({
  title: "✅ Documents envoyés avec succès",
  description: "Les documents sont maintenant disponibles dans le tableau de bord du patient"
@@ -5541,6 +5777,14 @@ const [localSickLeave, setLocalSickLeave] = useState({
        <SelectItem value="invoice">
          🧾 Invoice
        </SelectItem>
+       <SelectItem value="referral">
+         🩺 Référer
+         {referralData && " ✓"}
+       </SelectItem>
+       <SelectItem value="followup">
+         📊 Suivi Chronique
+         {followUpData && " ✓"}
+       </SelectItem>
        <SelectItem value="ai-assistant">
          🤖 AI Assistant
        </SelectItem>
@@ -5593,6 +5837,20 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <Receipt className="h-4 w-4 mr-2" />
  Invoice
  </TabsTrigger>
+ <TabsTrigger value="referral" className={referralData ? "bg-green-50 border-green-300" : ""}>
+ <UserPlus className="h-4 w-4 mr-2" />
+ Référer
+ {referralData && (
+ <Badge variant="secondary" className="ml-2 bg-green-100">✓</Badge>
+ )}
+ </TabsTrigger>
+ <TabsTrigger value="followup" className={followUpData ? "bg-green-50 border-green-300" : ""}>
+ <Activity className="h-4 w-4 mr-2" />
+ Suivi Chronique
+ {followUpData && (
+ <Badge variant="secondary" className="ml-2 bg-green-100">{followUpData.types.length}</Badge>
+ )}
+ </TabsTrigger>
  <TabsTrigger value="ai-assistant" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold shadow-lg hover:from-teal-600 hover:to-cyan-600 data-[state=active]:ring-2 data-[state=active]:ring-yellow-400">
  <Brain className="h-4 w-4 mr-2 animate-pulse" />
  🤖 AI Assistant
@@ -5622,7 +5880,127 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <TabsContent value="invoice">
  <InvoiceComponent />
  </TabsContent>
- 
+
+ {/* Referral Tab Content */}
+ <TabsContent value="referral">
+   <Card>
+     <CardHeader>
+       <CardTitle className="flex items-center gap-2">
+         <UserPlus className="h-5 w-5 text-blue-600" />
+         Référer à un Correspondant
+       </CardTitle>
+     </CardHeader>
+     <CardContent>
+       {referralData ? (
+         <div className="space-y-4">
+           <Alert className="bg-green-50 border-green-200">
+             <CheckCircle className="h-4 w-4 text-green-600" />
+             <AlertDescription className="text-green-800">
+               <strong>Référence enregistrée</strong> - sera envoyée lors de la finalisation
+             </AlertDescription>
+           </Alert>
+           <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+             <div>
+               <Label className="text-gray-500 text-sm">Spécialité</Label>
+               <p className="font-medium">{specialties.find(s => s.id === referralData.specialty)?.name_fr || referralData.specialty}</p>
+             </div>
+             <div>
+               <Label className="text-gray-500 text-sm">Correspondant</Label>
+               <p className="font-medium">{referralData.specialistName}</p>
+             </div>
+             <div className="col-span-2">
+               <Label className="text-gray-500 text-sm">Motif</Label>
+               <p className="font-medium">{referralData.reason}</p>
+             </div>
+           </div>
+           <div className="flex gap-2">
+             <Button variant="outline" onClick={() => setShowReferralModal(true)}>
+               <Edit className="h-4 w-4 mr-2" />
+               Modifier
+             </Button>
+             <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={handleClearReferral}>
+               <Trash2 className="h-4 w-4 mr-2" />
+               Supprimer
+             </Button>
+           </div>
+         </div>
+       ) : (
+         <div className="text-center py-8">
+           <UserPlus className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+           <p className="text-gray-500 mb-4">Aucune référence enregistrée</p>
+           <Button onClick={() => { loadSpecialties(); setShowReferralModal(true); }}>
+             <UserPlus className="h-4 w-4 mr-2" />
+             Référer ce patient
+           </Button>
+         </div>
+       )}
+     </CardContent>
+   </Card>
+ </TabsContent>
+
+ {/* Follow-up Tab Content */}
+ <TabsContent value="followup">
+   <Card>
+     <CardHeader>
+       <CardTitle className="flex items-center gap-2">
+         <Activity className="h-5 w-5 text-purple-600" />
+         Suivi Chronique
+       </CardTitle>
+     </CardHeader>
+     <CardContent>
+       {followUpData ? (
+         <div className="space-y-4">
+           <Alert className="bg-green-50 border-green-200">
+             <CheckCircle className="h-4 w-4 text-green-600" />
+             <AlertDescription className="text-green-800">
+               <strong>Suivi activé</strong> - sera créé lors de la finalisation
+             </AlertDescription>
+           </Alert>
+           <div className="p-4 bg-gray-50 rounded-lg">
+             <Label className="text-gray-500 text-sm">Types de suivi sélectionnés</Label>
+             <div className="flex flex-wrap gap-2 mt-2">
+               {followUpData.types.includes('blood_pressure') && (
+                 <Badge className="bg-red-100 text-red-800">
+                   <Droplets className="h-3 w-3 mr-1" /> Tension Artérielle
+                 </Badge>
+               )}
+               {followUpData.types.includes('glycemia') && (
+                 <Badge className="bg-orange-100 text-orange-800">
+                   <Activity className="h-3 w-3 mr-1" /> Glycémie
+                 </Badge>
+               )}
+               {followUpData.types.includes('weight') && (
+                 <Badge className="bg-blue-100 text-blue-800">
+                   <Scale className="h-3 w-3 mr-1" /> Poids
+                 </Badge>
+               )}
+             </div>
+           </div>
+           <div className="flex gap-2">
+             <Button variant="outline" onClick={() => setShowFollowUpModal(true)}>
+               <Edit className="h-4 w-4 mr-2" />
+               Modifier
+             </Button>
+             <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={handleClearFollowUp}>
+               <Trash2 className="h-4 w-4 mr-2" />
+               Supprimer
+             </Button>
+           </div>
+         </div>
+       ) : (
+         <div className="text-center py-8">
+           <Activity className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+           <p className="text-gray-500 mb-4">Aucun suivi chronique activé</p>
+           <Button onClick={() => setShowFollowUpModal(true)}>
+             <Activity className="h-4 w-4 mr-2" />
+             Activer un suivi
+           </Button>
+         </div>
+       )}
+     </CardContent>
+   </Card>
+ </TabsContent>
+
  <TabsContent value="ai-assistant">
  <TibokMedicalAssistant
  reportData={report}
@@ -5921,6 +6299,178 @@ const [localSickLeave, setLocalSickLeave] = useState({
  )}
 
 {/* TIBOK Medical Assistant is now integrated as a tab - see AI Assistant tab */}
+
+{/* Referral Modal */}
+<Dialog open={showReferralModal} onOpenChange={setShowReferralModal}>
+  <DialogContent className="sm:max-w-[500px]">
+    <DialogHeader>
+      <DialogTitle className="flex items-center gap-2">
+        <UserPlus className="h-5 w-5 text-blue-600" />
+        Référer ce patient
+      </DialogTitle>
+    </DialogHeader>
+    <div className="space-y-4 py-4">
+      <div className="space-y-2">
+        <Label htmlFor="specialty">Spécialité *</Label>
+        <Select value={selectedSpecialty} onValueChange={handleSpecialtyChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner une spécialité" />
+          </SelectTrigger>
+          <SelectContent>
+            {loadingSpecialties ? (
+              <div className="flex items-center justify-center py-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </div>
+            ) : (
+              specialties.map(spec => (
+                <SelectItem key={spec.id} value={spec.id}>
+                  {spec.name_fr}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="specialist">Correspondant *</Label>
+        <Select
+          value={selectedSpecialistId}
+          onValueChange={setSelectedSpecialistId}
+          disabled={!selectedSpecialty || loadingSpecialists}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={selectedSpecialty ? "Sélectionner un correspondant" : "Sélectionnez d'abord une spécialité"} />
+          </SelectTrigger>
+          <SelectContent>
+            {loadingSpecialists ? (
+              <div className="flex items-center justify-center py-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </div>
+            ) : specialists.length === 0 ? (
+              <div className="text-center py-2 text-gray-500 text-sm">
+                Aucun correspondant disponible
+              </div>
+            ) : (
+              specialists.map(spec => (
+                <SelectItem key={spec.id} value={spec.id}>
+                  {spec.name} {spec.phone && `(${spec.phone})`}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="reason">Motif de la référence *</Label>
+        <Textarea
+          id="reason"
+          value={referralReason}
+          onChange={(e) => setReferralReason(e.target.value)}
+          placeholder="Décrivez le motif de cette référence..."
+          rows={4}
+        />
+      </div>
+    </div>
+    <DialogFooter>
+      <Button variant="outline" onClick={() => setShowReferralModal(false)}>
+        Annuler
+      </Button>
+      <Button onClick={handleSaveReferral}>
+        Enregistrer
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
+{/* Follow-up Modal */}
+<Dialog open={showFollowUpModal} onOpenChange={setShowFollowUpModal}>
+  <DialogContent className="sm:max-w-[400px]">
+    <DialogHeader>
+      <DialogTitle className="flex items-center gap-2">
+        <Activity className="h-5 w-5 text-purple-600" />
+        Activer Suivi Chronique
+      </DialogTitle>
+    </DialogHeader>
+    <div className="space-y-4 py-4">
+      <Label>Type de suivi * (peut sélectionner plusieurs)</Label>
+
+      <div className="space-y-3">
+        <div
+          className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+            selectedFollowUpTypes.includes('blood_pressure')
+              ? 'bg-red-50 border-red-300'
+              : 'hover:bg-gray-50'
+          }`}
+          onClick={() => toggleFollowUpType('blood_pressure')}
+        >
+          <Checkbox
+            id="blood_pressure"
+            checked={selectedFollowUpTypes.includes('blood_pressure')}
+            onCheckedChange={() => toggleFollowUpType('blood_pressure')}
+          />
+          <div className="flex items-center gap-2 flex-1">
+            <Droplets className="h-5 w-5 text-red-600" />
+            <Label htmlFor="blood_pressure" className="cursor-pointer">
+              Tension Artérielle
+            </Label>
+          </div>
+        </div>
+
+        <div
+          className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+            selectedFollowUpTypes.includes('glycemia')
+              ? 'bg-orange-50 border-orange-300'
+              : 'hover:bg-gray-50'
+          }`}
+          onClick={() => toggleFollowUpType('glycemia')}
+        >
+          <Checkbox
+            id="glycemia"
+            checked={selectedFollowUpTypes.includes('glycemia')}
+            onCheckedChange={() => toggleFollowUpType('glycemia')}
+          />
+          <div className="flex items-center gap-2 flex-1">
+            <Activity className="h-5 w-5 text-orange-600" />
+            <Label htmlFor="glycemia" className="cursor-pointer">
+              Glycémie
+            </Label>
+          </div>
+        </div>
+
+        <div
+          className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+            selectedFollowUpTypes.includes('weight')
+              ? 'bg-blue-50 border-blue-300'
+              : 'hover:bg-gray-50'
+          }`}
+          onClick={() => toggleFollowUpType('weight')}
+        >
+          <Checkbox
+            id="weight"
+            checked={selectedFollowUpTypes.includes('weight')}
+            onCheckedChange={() => toggleFollowUpType('weight')}
+          />
+          <div className="flex items-center gap-2 flex-1">
+            <Scale className="h-5 w-5 text-blue-600" />
+            <Label htmlFor="weight" className="cursor-pointer">
+              Poids
+            </Label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <DialogFooter>
+      <Button variant="outline" onClick={() => setShowFollowUpModal(false)}>
+        Annuler
+      </Button>
+      <Button onClick={handleSaveFollowUp}>
+        Activer
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
  </div>
  )
 }
