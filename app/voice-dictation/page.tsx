@@ -20,7 +20,7 @@ import {
   FileSignature,
   ArrowRight
 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import DiagnosisForm from "@/components/diagnosis-form"
 import ProfessionalReport from "@/components/professional-report"
 
@@ -41,7 +41,20 @@ const STEPS = [
 
 export default function VoiceDictationPage() {
   const router = useRouter()
-  
+  const searchParams = useSearchParams()
+
+  // Check for specialist mode and redirect
+  const referralId = searchParams.get('referral_id')
+  const mode = searchParams.get('mode')
+
+  useEffect(() => {
+    // Redirect to specialist consultation page if mode=specialist
+    if (mode === 'specialist' && referralId) {
+      router.replace(`/specialist-consultation?referral_id=${referralId}`)
+      return
+    }
+  }, [mode, referralId, router])
+
   const [currentStep, setCurrentStep] = useState(1)
   const [patientData, setPatientData] = useState<any>(null)
   const [doctorData, setDoctorData] = useState<any>(null)
