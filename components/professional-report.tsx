@@ -3477,6 +3477,9 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
          referring_doctor_id: doctorId,
          referring_consultation_id: consultationId,
          patient_name: patientName || 'Unknown',
+         patient_phone: patientPhone || null,
+         patient_age: patient?.age ? parseInt(patient.age) : null,
+         patient_gender: patient?.sexe || null,
          reason: referralData.reason,
          tibok_diagnosis: rapport?.conclusionDiagnostique || '',
          status: 'pending'
