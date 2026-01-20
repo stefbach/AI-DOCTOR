@@ -186,10 +186,15 @@ interface ProfessionalReportProps {
  diagnosisData: any
  editedDocuments?: any
  onComplete?: () => void
+ onPrevious?: () => void
+ doctorData?: any
  // IDs for document sending (passed from parent when coming from hub)
  consultationId?: string | null
  patientId?: string | null
  doctorId?: string | null
+ // Specialist mode props
+ specialistMode?: boolean
+ referralId?: string
 }
 
 // ==================== HELPER FUNCTIONS ====================
@@ -917,9 +922,13 @@ export default function ProfessionalReportEditable({
  diagnosisData,
  editedDocuments,
  onComplete,
+ onPrevious,
+ doctorData,
  consultationId: propConsultationId,
  patientId: propPatientId,
- doctorId: propDoctorId
+ doctorId: propDoctorId,
+ specialistMode = false,
+ referralId
 }: ProfessionalReportProps) {
 
 // ==================== STATE MANAGEMENT ====================
@@ -3526,11 +3535,47 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
    }
  }
 
+ // Update referral if in specialist mode
+ if (specialistMode && referralId && supabaseClient) {
+   console.log('📤 Updating referral as specialist...')
+   try {
+     const rapport = getReportRapport()
+     const { error: updateError } = await supabaseClient
+       .from('referrals')
+       .update({
+         status: 'completed',
+         specialist_report: {
+           medicalReport: rapport,
+           clinicalData: clinicalData,
+           diagnosisData: diagnosisData,
+           consultationId: result?.consultationId || consultationId
+         },
+         specialist_diagnosis: rapport?.conclusionDiagnostique || diagnosisData?.primaryDiagnosis || '',
+         specialist_notes: rapport?.syntheseDiagnostique || '',
+         specialist_consultation_ended_at: new Date().toISOString(),
+         report_sent_to_tibok: true,
+         report_sent_at: new Date().toISOString(),
+         updated_at: new Date().toISOString()
+       })
+       .eq('id', referralId)
+
+     if (updateError) {
+       console.error('❌ Error updating referral:', updateError)
+     } else {
+       console.log('✅ Referral updated successfully (specialist consultation completed)')
+     }
+   } catch (err) {
+     console.error('❌ Error updating referral:', err)
+   }
+ }
+
  setIsSendingDocuments(false)
 
  toast({
  title: "✅ Documents envoyés avec succès",
- description: "Les documents sont maintenant disponibles dans le tableau de bord du patient"
+ description: specialistMode
+   ? "Le rapport a été envoyé au médecin référent"
+   : "Les documents sont maintenant disponibles dans le tableau de bord du patient"
  })
 
  // Show success modal
