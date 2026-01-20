@@ -85,6 +85,11 @@ export default function SpecialistConsultationPage() {
   const [loadingHistory, setLoadingHistory] = useState(false)
   const [selectedConsultation, setSelectedConsultation] = useState<ConsultationHistoryItem | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
+  const [historyHasMore, setHistoryHasMore] = useState(false)
+  const [historyTotalCount, setHistoryTotalCount] = useState(0)
+  const [historyOffset, setHistoryOffset] = useState(0)
+  const [currentPatientId, setCurrentPatientId] = useState<string | null>(null)
+  const [currentPatientPhone, setCurrentPatientPhone] = useState<string | null>(null)
 
   // State for voice dictation (right panel)
   const [currentStep, setCurrentStep] = useState(1)
@@ -214,11 +219,15 @@ export default function SpecialistConsultationPage() {
     }
   }
 
-  async function loadConsultationHistory(patientId: string | null, patientPhone: string | null) {
+  async function loadConsultationHistory(patientId: string | null, patientPhone: string | null, offset: number = 0) {
     setLoadingHistory(true)
+    // Store for pagination
+    setCurrentPatientId(patientId)
+    setCurrentPatientPhone(patientPhone)
+
     try {
       // Try with patient_id first, then phone
-      const searchCriteria: any = { limit: 20 }
+      const searchCriteria: any = { limit: 10, offset }
       if (patientId) {
         searchCriteria.patientId = patientId
       } else if (patientPhone) {
@@ -240,13 +249,25 @@ export default function SpecialistConsultationPage() {
       console.log('📋 History response:', data)
 
       if (data.success && data.consultations) {
-        setConsultationHistory(data.consultations)
+        if (offset === 0) {
+          setConsultationHistory(data.consultations)
+        } else {
+          setConsultationHistory(prev => [...prev, ...data.consultations])
+        }
+        setHistoryHasMore(data.hasMore || false)
+        setHistoryTotalCount(data.totalCount || 0)
+        setHistoryOffset(offset + data.consultations.length)
       }
     } catch (err) {
       console.error('Error loading history:', err)
     } finally {
       setLoadingHistory(false)
     }
+  }
+
+  async function loadMoreHistory() {
+    if (loadingHistory || !historyHasMore) return
+    await loadConsultationHistory(currentPatientId, currentPatientPhone, historyOffset)
   }
 
   // Recording functions
@@ -540,18 +561,55 @@ export default function SpecialistConsultationPage() {
 
         {/* Consultation History Section */}
         <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-          {loadingHistory ? (
+          {/* History Header with Count */}
+          {historyTotalCount > 0 && (
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-gray-600">
+                Historique des Consultations
+                <Badge variant="outline" className="ml-2">
+                  {consultationHistory.length} sur {historyTotalCount}
+                </Badge>
+              </h3>
+            </div>
+          )}
+
+          {loadingHistory && consultationHistory.length === 0 ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
               <span className="ml-2 text-gray-600">Chargement de l'historique...</span>
             </div>
           ) : (
-            <HistoryList
-              history={consultationHistory}
-              onSelectConsultation={handleSelectConsultation}
-              selectedId={selectedConsultation?.id}
-              showTimeline={true}
-            />
+            <>
+              <HistoryList
+                history={consultationHistory}
+                onSelectConsultation={handleSelectConsultation}
+                selectedId={selectedConsultation?.id}
+                showTimeline={true}
+              />
+
+              {/* Load More Button */}
+              {historyHasMore && (
+                <div className="flex justify-center mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={loadMoreHistory}
+                    disabled={loadingHistory}
+                    className="w-full max-w-xs"
+                  >
+                    {loadingHistory ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Chargement...
+                      </>
+                    ) : (
+                      <>
+                        Charger plus ({historyTotalCount - consultationHistory.length} restants)
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
