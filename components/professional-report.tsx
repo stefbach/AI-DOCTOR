@@ -3473,11 +3473,12 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
        .insert({
          patient_id: patientId,
          specialist_id: referralData.specialistId,
-         specialty: referralData.specialty,
+         specialty_requested: referralData.specialty,
          referring_doctor_id: doctorId,
+         referring_consultation_id: consultationId,
+         patient_name: patientName || 'Unknown',
          reason: referralData.reason,
          tibok_diagnosis: rapport?.conclusionDiagnostique || '',
-         consultation_id: consultationId,
          status: 'pending'
        })
 
