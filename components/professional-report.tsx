@@ -1001,6 +1001,8 @@ const [referralData, setReferralData] = useState<{
   specialistId: string
   specialistName: string
   reason: string
+  appointmentDate?: string | null
+  appointmentSlot?: { start: string; end: string } | null
 } | null>(null)
 const [specialties, setSpecialties] = useState<Array<{id: string, name: string, name_fr: string}>>([])
 const [specialists, setSpecialists] = useState<Array<{id: string, name: string, phone: string, specialties: string[]}>>([])
@@ -1010,6 +1012,12 @@ const [selectedSpecialty, setSelectedSpecialty] = useState('')
 const [selectedSpecialistId, setSelectedSpecialistId] = useState('')
 const [referralReason, setReferralReason] = useState('')
 const [showReferralModal, setShowReferralModal] = useState(false)
+
+// Appointment booking state
+const [appointmentDate, setAppointmentDate] = useState<string>('')
+const [availableSlots, setAvailableSlots] = useState<Array<{start: string, end: string}>>([])
+const [selectedSlot, setSelectedSlot] = useState<{start: string, end: string} | null>(null)
+const [loadingSlots, setLoadingSlots] = useState(false)
 
 // Chronic follow-up state
 const [followUpData, setFollowUpData] = useState<{
@@ -2948,12 +2956,119 @@ const loadSpecialists = useCallback(async (specialty: string) => {
 const handleSpecialtyChange = useCallback((specialty: string) => {
   setSelectedSpecialty(specialty)
   setSelectedSpecialistId('')
+  // Reset appointment when specialty changes
+  setAppointmentDate('')
+  setAvailableSlots([])
+  setSelectedSlot(null)
   if (specialty) {
     loadSpecialists(specialty)
   } else {
     setSpecialists([])
   }
 }, [loadSpecialists])
+
+// Load available slots for a specialist on a given date
+const loadAvailableSlots = useCallback(async (specialistId: string, date: string) => {
+  const supabase = getSupabaseClient()
+  if (!supabase || !specialistId || !date) {
+    setAvailableSlots([])
+    return
+  }
+
+  setLoadingSlots(true)
+  setSelectedSlot(null)
+
+  try {
+    const dayOfWeek = new Date(date + 'T00:00:00').getDay()
+    console.log('📅 Loading slots for:', { specialistId, date, dayOfWeek })
+
+    // 1. Check for exceptions (blocked days)
+    const { data: exception } = await supabase
+      .from('specialist_availability_exceptions')
+      .select('*')
+      .eq('specialist_id', specialistId)
+      .eq('exception_date', date)
+      .single()
+
+    if (exception && !exception.is_available) {
+      console.log('🚫 Day is blocked')
+      setAvailableSlots([])
+      setLoadingSlots(false)
+      return
+    }
+
+    // 2. Get weekly availability for this day
+    const { data: availability, error: availError } = await supabase
+      .from('specialist_availability')
+      .select('*')
+      .eq('specialist_id', specialistId)
+      .eq('day_of_week', dayOfWeek)
+      .eq('is_active', true)
+
+    if (availError || !availability || availability.length === 0) {
+      console.log('📅 No availability for this day')
+      setAvailableSlots([])
+      setLoadingSlots(false)
+      return
+    }
+
+    // 3. Get already booked appointments
+    const { data: bookedAppointments } = await supabase
+      .from('specialist_appointments')
+      .select('start_time, end_time')
+      .eq('specialist_id', specialistId)
+      .eq('appointment_date', date)
+      .neq('status', 'cancelled')
+
+    // 4. Generate available slots
+    const slots: Array<{start: string, end: string}> = []
+    const booked = bookedAppointments || []
+
+    for (const avail of availability) {
+      const slotDuration = avail.slot_duration_minutes || 30
+      let currentTime = avail.start_time
+
+      while (currentTime < avail.end_time) {
+        const [hours, minutes] = currentTime.split(':').map(Number)
+        const endMinutes = hours * 60 + minutes + slotDuration
+        const endHours = Math.floor(endMinutes / 60)
+        const endMins = endMinutes % 60
+        const endTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}:00`
+
+        // Check if this slot overlaps with any booked appointment
+        const isBooked = booked.some(b => {
+          return !(endTime <= b.start_time || currentTime >= b.end_time)
+        })
+
+        if (!isBooked && endTime <= avail.end_time) {
+          slots.push({ start: currentTime, end: endTime })
+        }
+
+        // Move to next slot
+        currentTime = endTime
+      }
+    }
+
+    console.log('✅ Available slots:', slots.length)
+    setAvailableSlots(slots)
+  } catch (err) {
+    console.error('Error loading slots:', err)
+    setAvailableSlots([])
+  } finally {
+    setLoadingSlots(false)
+  }
+}, [getSupabaseClient])
+
+// Handle date selection for appointment
+const handleAppointmentDateChange = useCallback((date: string) => {
+  setAppointmentDate(date)
+  setSelectedSlot(null)
+  if (date && selectedSpecialistId) {
+    loadAvailableSlots(selectedSpecialistId, date)
+  } else {
+    setAvailableSlots([])
+  }
+}, [selectedSpecialistId, loadAvailableSlots])
 
 // Save referral data (called from modal)
 const handleSaveReferral = useCallback(() => {
@@ -2971,15 +3086,19 @@ const handleSaveReferral = useCallback(() => {
     specialty: selectedSpecialty,
     specialistId: selectedSpecialistId,
     specialistName: specialist?.name || '',
-    reason: referralReason
+    reason: referralReason,
+    appointmentDate: appointmentDate || null,
+    appointmentSlot: selectedSlot
   })
   setShowReferralModal(false)
 
   toast({
     title: "✅ Référence enregistrée",
-    description: "La référence sera envoyée lors de la finalisation"
+    description: selectedSlot
+      ? `RDV prévu le ${appointmentDate} à ${selectedSlot.start.slice(0, 5)}`
+      : "La référence sera envoyée lors de la finalisation"
   })
-}, [selectedSpecialty, selectedSpecialistId, referralReason, specialists])
+}, [selectedSpecialty, selectedSpecialistId, referralReason, specialists, appointmentDate, selectedSlot])
 
 // Clear referral data
 const handleClearReferral = useCallback(() => {
@@ -2988,6 +3107,10 @@ const handleClearReferral = useCallback(() => {
   setSelectedSpecialistId('')
   setReferralReason('')
   setSpecialists([])
+  // Reset appointment fields
+  setAppointmentDate('')
+  setAvailableSlots([])
+  setSelectedSlot(null)
 }, [])
 
 // Open referral modal with pre-filled diagnosis
@@ -3477,7 +3600,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
    console.log('📤 Saving referral to Supabase...')
    try {
      const rapport = getReportRapport()
-     const { error: referralError } = await supabaseClient
+     const { data: savedReferral, error: referralError } = await supabaseClient
        .from('referrals')
        .insert({
          patient_id: patientId,
@@ -3493,11 +3616,36 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
          tibok_diagnosis: rapport?.conclusionDiagnostique || '',
          status: 'pending'
        })
+       .select()
+       .single()
 
      if (referralError) {
        console.error('❌ Error saving referral:', referralError)
      } else {
-       console.log('✅ Referral saved successfully')
+       console.log('✅ Referral saved successfully:', savedReferral?.id)
+
+       // Create appointment if slot was selected
+       if (referralData.appointmentDate && referralData.appointmentSlot && savedReferral?.id) {
+         console.log('📅 Creating appointment...')
+         const { error: appointmentError } = await supabaseClient
+           .from('specialist_appointments')
+           .insert({
+             referral_id: savedReferral.id,
+             specialist_id: referralData.specialistId,
+             patient_name: patientName || 'Unknown',
+             patient_phone: patientPhone || null,
+             appointment_date: referralData.appointmentDate,
+             start_time: referralData.appointmentSlot.start,
+             end_time: referralData.appointmentSlot.end,
+             status: 'scheduled'
+           })
+
+         if (appointmentError) {
+           console.error('❌ Error creating appointment:', appointmentError)
+         } else {
+           console.log('✅ Appointment created successfully')
+         }
+       }
      }
    } catch (err) {
      console.error('❌ Error saving referral:', err)
@@ -6471,6 +6619,69 @@ const [localSickLeave, setLocalSickLeave] = useState({
           rows={4}
         />
       </div>
+
+      {/* Appointment Booking Section (Optional) */}
+      {selectedSpecialistId && (
+        <div className="space-y-3 pt-2 border-t">
+          <div className="flex items-center justify-between">
+            <Label className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-blue-600" />
+              Prendre rendez-vous (optionnel)
+            </Label>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="appointmentDate" className="text-sm text-gray-600">Date du rendez-vous</Label>
+            <input
+              type="date"
+              id="appointmentDate"
+              value={appointmentDate}
+              onChange={(e) => handleAppointmentDateChange(e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Available Slots */}
+          {appointmentDate && (
+            <div className="space-y-2">
+              <Label className="text-sm text-gray-600">Créneaux disponibles</Label>
+              {loadingSlots ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                  <span className="ml-2 text-sm text-gray-600">Chargement des créneaux...</span>
+                </div>
+              ) : availableSlots.length === 0 ? (
+                <div className="text-center py-4 text-gray-500 text-sm bg-gray-50 rounded-md">
+                  Aucun créneau disponible pour cette date
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto p-1">
+                  {availableSlots.map((slot, idx) => (
+                    <Button
+                      key={idx}
+                      type="button"
+                      variant={selectedSlot?.start === slot.start ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedSlot(selectedSlot?.start === slot.start ? null : slot)}
+                      className={`text-xs ${selectedSlot?.start === slot.start ? 'bg-blue-600' : ''}`}
+                    >
+                      {slot.start.slice(0, 5)}
+                    </Button>
+                  ))}
+                </div>
+              )}
+
+              {selectedSlot && (
+                <div className="flex items-center gap-2 p-2 bg-green-50 rounded-md text-sm text-green-700">
+                  <CheckCircle className="h-4 w-4" />
+                  RDV sélectionné: {appointmentDate} à {selectedSlot.start.slice(0, 5)}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
     <DialogFooter>
       <Button variant="outline" onClick={() => setShowReferralModal(false)}>
