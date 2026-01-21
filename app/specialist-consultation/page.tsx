@@ -539,15 +539,28 @@ export default function SpecialistConsultationPage() {
       setTranscriptionText(result.transcription.text)
 
       // Merge extracted data with referral patient data
+      // Only use extracted values if they are meaningful (not placeholders)
       const extractedPatient = result.extractedData.patientInfo
+      const isValidValue = (val: string | undefined) => {
+        if (!val) return false
+        const lower = val.toLowerCase().trim()
+        return lower !== '' &&
+               lower !== 'not provided' &&
+               lower !== 'n/a' &&
+               lower !== 'unknown' &&
+               lower !== 'non spécifié' &&
+               lower !== 'non fourni'
+      }
+
       setPatientData(prev => ({
         ...prev,
-        firstName: extractedPatient.firstName || prev?.firstName || '',
-        lastName: extractedPatient.lastName || prev?.lastName || '',
+        // Keep referral data if extracted data is a placeholder
+        firstName: isValidValue(extractedPatient.firstName) ? extractedPatient.firstName : (prev?.firstName || ''),
+        lastName: isValidValue(extractedPatient.lastName) ? extractedPatient.lastName : (prev?.lastName || ''),
         age: extractedPatient.age || prev?.age || '',
         gender: extractedPatient.gender || prev?.gender || '',
-        email: extractedPatient.email || prev?.email || '',
-        phone: extractedPatient.phone || prev?.phone || '',
+        email: isValidValue(extractedPatient.email) ? extractedPatient.email : (prev?.email || ''),
+        phone: isValidValue(extractedPatient.phone) ? extractedPatient.phone : (prev?.phone || ''),
       }))
 
       const extractedClinical = result.extractedData.clinicalData
@@ -1139,19 +1152,21 @@ export default function SpecialistConsultationPage() {
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <span className="text-gray-600">Nom:</span>{' '}
-                        <span className="font-medium">{patientData?.firstName} {patientData?.lastName}</span>
+                        <span className="font-medium">
+                          {patientData?.name || `${patientData?.firstName || ''} ${patientData?.lastName || ''}`.trim() || referral?.patient_name || 'N/A'}
+                        </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Âge:</span>{' '}
-                        <span className="font-medium">{patientData?.age} ans</span>
+                        <span className="font-medium">{patientData?.age || referral?.patient_age || 'N/A'} ans</span>
                       </div>
                       <div>
                         <span className="text-gray-600">Genre:</span>{' '}
-                        <span className="font-medium">{patientData?.gender}</span>
+                        <span className="font-medium">{patientData?.gender || referral?.patient_gender || 'N/A'}</span>
                       </div>
                       <div>
                         <span className="text-gray-600">Téléphone:</span>{' '}
-                        <span className="font-medium">{patientData?.phone || 'N/A'}</span>
+                        <span className="font-medium">{patientData?.phone || referral?.patient_phone || 'N/A'}</span>
                       </div>
                     </div>
                   </div>
