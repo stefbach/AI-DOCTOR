@@ -57,6 +57,7 @@ interface Referral {
   status: string
   created_at: string
   referring_doctor_id: string | null
+  specialist_id: string | null
 }
 
 // Steps for voice dictation
@@ -1237,6 +1238,9 @@ export default function SpecialistConsultationPage() {
                 onPrevious={() => setCurrentStep(3)}
                 specialistMode={true}
                 referralId={referralId || undefined}
+                consultationId={referralId ? `specialist-${referralId}` : undefined}
+                patientId={referral?.patient_id || patientData?.patientId || undefined}
+                doctorId={referral?.specialist_id || undefined}
               />
             </div>
           )}
