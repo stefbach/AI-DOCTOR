@@ -6554,14 +6554,14 @@ const [localSickLeave, setLocalSickLeave] = useState({
 
 {/* Referral Modal */}
 <Dialog open={showReferralModal} onOpenChange={setShowReferralModal}>
-  <DialogContent className="sm:max-w-[500px]">
-    <DialogHeader>
+  <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
+    <DialogHeader className="flex-shrink-0">
       <DialogTitle className="flex items-center gap-2">
         <UserPlus className="h-5 w-5 text-blue-600" />
         Référer ce patient
       </DialogTitle>
     </DialogHeader>
-    <div className="space-y-4 py-4">
+    <div className="space-y-4 py-4 overflow-y-auto flex-1 pr-2">
       <div className="space-y-2">
         <Label htmlFor="specialty">Spécialité *</Label>
         <Select value={selectedSpecialty} onValueChange={handleSpecialtyChange}>
@@ -6688,7 +6688,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
         </div>
       )}
     </div>
-    <DialogFooter>
+    <DialogFooter className="flex-shrink-0 border-t pt-4">
       <Button variant="outline" onClick={() => setShowReferralModal(false)}>
         Annuler
       </Button>
