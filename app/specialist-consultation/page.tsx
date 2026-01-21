@@ -26,7 +26,10 @@ import {
   Clock,
   FileText,
   AlertTriangle,
-  Send
+  Send,
+  ChevronDown,
+  ChevronUp,
+  History
 } from 'lucide-react'
 import { HistoryList } from '@/lib/follow-up/shared/components/history-list'
 import { ConsultationDetailModal } from '@/lib/follow-up/shared/components/consultation-detail-modal'
@@ -85,6 +88,8 @@ export default function SpecialistConsultationPage() {
   const [loadingHistory, setLoadingHistory] = useState(false)
   const [selectedConsultation, setSelectedConsultation] = useState<ConsultationHistoryItem | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
+  const [isReferralExpanded, setIsReferralExpanded] = useState(true)
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false)
   const [historyHasMore, setHistoryHasMore] = useState(false)
   const [historyTotalCount, setHistoryTotalCount] = useState(0)
   const [historyOffset, setHistoryOffset] = useState(0)
@@ -474,172 +479,219 @@ export default function SpecialistConsultationPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* ========== LEFT PANEL (50%) - Referral Details + Hub ========== */}
-      <div className="w-1/2 flex flex-col border-r border-gray-300 overflow-hidden">
-        {/* Referral Details Section */}
-        <div className="p-4 bg-white border-b shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-purple-800 flex items-center gap-2">
-              <FileText className="h-5 w-5" />
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100">
+      {/* ========== LEFT PANEL - Referral Details + Hub ========== */}
+      {/* Mobile: Full width, collapsible | Tablet: 35% | Desktop: 40% */}
+      <div className="w-full lg:w-[35%] xl:w-[40%] flex flex-col border-b lg:border-b-0 lg:border-r border-gray-300 lg:h-screen lg:overflow-hidden">
+        {/* Referral Details Section - Collapsible on mobile */}
+        <div className="bg-white border-b shadow-sm">
+          {/* Header - Always visible, clickable on mobile */}
+          <div
+            className="p-3 md:p-4 flex items-center justify-between cursor-pointer lg:cursor-default"
+            onClick={() => setIsReferralExpanded(!isReferralExpanded)}
+          >
+            <h2 className="text-base md:text-lg font-semibold text-purple-800 flex items-center gap-2">
+              <FileText className="h-4 w-4 md:h-5 md:w-5" />
               Détails de la Référence
             </h2>
-            <Badge className={
-              referral?.priority === 'urgent' ? 'bg-red-500' :
-              referral?.priority === 'high' ? 'bg-orange-500' :
-              'bg-green-500'
-            }>
-              {referral?.priority === 'urgent' ? 'Urgent' :
-               referral?.priority === 'high' ? 'Haute priorité' : 'Normal'}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge className={`text-xs ${
+                referral?.priority === 'urgent' ? 'bg-red-500' :
+                referral?.priority === 'high' ? 'bg-orange-500' :
+                'bg-green-500'
+              }`}>
+                {referral?.priority === 'urgent' ? 'Urgent' :
+                 referral?.priority === 'high' ? 'Haute priorité' : 'Normal'}
+              </Badge>
+              {/* Collapse toggle - only visible on mobile */}
+              <button className="lg:hidden p-1 rounded hover:bg-gray-100">
+                {isReferralExpanded ? (
+                  <ChevronUp className="h-5 w-5 text-gray-500" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-gray-500" />
+                )}
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-gray-400" />
+          {/* Collapsible content */}
+          <div className={`px-3 md:px-4 pb-3 md:pb-4 ${isReferralExpanded ? 'block' : 'hidden'} lg:block`}>
+            {/* Patient info grid - responsive columns */}
+            <div className="grid grid-cols-2 gap-2 md:gap-3 text-sm">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                <div className="min-w-0">
+                  <span className="text-gray-500 text-xs">Patient:</span>
+                  <p className="font-medium truncate">{referral?.patient_name}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                <div className="min-w-0">
+                  <span className="text-gray-500 text-xs">Téléphone:</span>
+                  <p className="font-medium truncate">{referral?.patient_phone || 'N/A'}</p>
+                </div>
+              </div>
               <div>
-                <span className="text-gray-500">Patient:</span>
-                <p className="font-medium">{referral?.patient_name}</p>
+                <span className="text-gray-500 text-xs">Âge:</span>
+                <p className="font-medium">{referral?.patient_age || 'N/A'} ans</p>
+              </div>
+              <div>
+                <span className="text-gray-500 text-xs">Genre:</span>
+                <p className="font-medium">
+                  {referral?.patient_gender === 'male' ? 'Homme' :
+                   referral?.patient_gender === 'female' ? 'Femme' :
+                   referral?.patient_gender || 'N/A'}
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-gray-400" />
-              <div>
-                <span className="text-gray-500">Téléphone:</span>
-                <p className="font-medium">{referral?.patient_phone || 'N/A'}</p>
-              </div>
-            </div>
+
+            <Separator className="my-2 md:my-3" />
+
+            {/* Referral reason - scrollable on mobile */}
             <div>
-              <span className="text-gray-500">Âge:</span>
-              <p className="font-medium">{referral?.patient_age || 'N/A'} ans</p>
-            </div>
-            <div>
-              <span className="text-gray-500">Genre:</span>
-              <p className="font-medium">
-                {referral?.patient_gender === 'male' ? 'Homme' :
-                 referral?.patient_gender === 'female' ? 'Femme' :
-                 referral?.patient_gender || 'N/A'}
+              <span className="text-gray-500 text-xs md:text-sm flex items-center gap-1">
+                <Stethoscope className="h-4 w-4" />
+                Motif de référence:
+              </span>
+              <p className="font-medium text-gray-800 mt-1 text-sm max-h-24 md:max-h-32 overflow-y-auto">
+                {referral?.reason}
               </p>
             </div>
-          </div>
 
-          <Separator className="my-3" />
+            {referral?.tibok_diagnosis && (
+              <div className="mt-2 md:mt-3 p-2 md:p-3 bg-blue-50 rounded-lg">
+                <span className="text-blue-700 text-xs md:text-sm font-medium flex items-center gap-1">
+                  <Brain className="h-4 w-4" />
+                  Diagnostic Tibok:
+                </span>
+                <p className="text-blue-900 mt-1 text-xs md:text-sm max-h-20 overflow-y-auto">
+                  {referral.tibok_diagnosis}
+                </p>
+              </div>
+            )}
 
-          <div>
-            <span className="text-gray-500 text-sm flex items-center gap-1">
-              <Stethoscope className="h-4 w-4" />
-              Motif de référence:
-            </span>
-            <p className="font-medium text-gray-800 mt-1">{referral?.reason}</p>
-          </div>
+            {referral?.tibok_notes && (
+              <div className="mt-2 p-2 md:p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-600 text-xs md:text-sm font-medium">Notes Tibok:</span>
+                <p className="text-gray-700 mt-1 text-xs md:text-sm">{referral.tibok_notes}</p>
+              </div>
+            )}
 
-          {referral?.tibok_diagnosis && (
-            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-              <span className="text-blue-700 text-sm font-medium flex items-center gap-1">
-                <Brain className="h-4 w-4" />
-                Diagnostic Tibok:
-              </span>
-              <p className="text-blue-900 mt-1 text-sm">{referral.tibok_diagnosis}</p>
+            <div className="mt-2 md:mt-3 flex flex-wrap items-center gap-2 text-xs text-gray-400">
+              <div className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                Référé le {new Date(referral?.created_at || '').toLocaleDateString('fr-FR')}
+              </div>
+              <Badge variant="outline" className="text-xs">
+                {referral?.specialty_requested}
+              </Badge>
             </div>
-          )}
-
-          {referral?.tibok_notes && (
-            <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-600 text-sm font-medium">Notes Tibok:</span>
-              <p className="text-gray-700 mt-1 text-sm">{referral.tibok_notes}</p>
-            </div>
-          )}
-
-          <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
-            <Calendar className="h-3 w-3" />
-            Référé le {new Date(referral?.created_at || '').toLocaleDateString('fr-FR')}
-            <span className="mx-1">•</span>
-            <Badge variant="outline" className="text-xs">
-              {referral?.specialty_requested}
-            </Badge>
           </div>
         </div>
 
-        {/* Consultation History Section */}
-        <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-          {/* History Header with Count */}
-          {historyTotalCount > 0 && (
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-gray-600">
-                Historique des Consultations
-                <Badge variant="outline" className="ml-2">
-                  {consultationHistory.length} sur {historyTotalCount}
+        {/* Consultation History Section - Collapsible on mobile */}
+        <div className="flex-1 lg:overflow-y-auto bg-gray-50">
+          {/* History Header - Clickable on mobile */}
+          <div
+            className="p-3 md:p-4 flex items-center justify-between cursor-pointer lg:cursor-default bg-gray-100 border-b"
+            onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+          >
+            <h3 className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <History className="h-4 w-4" />
+              Historique des Consultations
+              {historyTotalCount > 0 && (
+                <Badge variant="outline" className="ml-1 text-xs">
+                  {consultationHistory.length}/{historyTotalCount}
                 </Badge>
-              </h3>
-            </div>
-          )}
-
-          {loadingHistory && consultationHistory.length === 0 ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
-              <span className="ml-2 text-gray-600">Chargement de l'historique...</span>
-            </div>
-          ) : (
-            <>
-              <HistoryList
-                history={consultationHistory}
-                onSelectConsultation={handleSelectConsultation}
-                selectedId={selectedConsultation?.id}
-                showTimeline={true}
-              />
-
-              {/* Load More Button */}
-              {historyHasMore && (
-                <div className="flex justify-center mt-4">
-                  <Button
-                    variant="outline"
-                    onClick={loadMoreHistory}
-                    disabled={loadingHistory}
-                    className="w-full max-w-xs"
-                  >
-                    {loadingHistory ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Chargement...
-                      </>
-                    ) : (
-                      <>
-                        Charger plus ({historyTotalCount - consultationHistory.length} restants)
-                      </>
-                    )}
-                  </Button>
-                </div>
               )}
-            </>
-          )}
+            </h3>
+            {/* Collapse toggle - only visible on mobile */}
+            <button className="lg:hidden p-1 rounded hover:bg-gray-200">
+              {isHistoryExpanded ? (
+                <ChevronUp className="h-5 w-5 text-gray-500" />
+              ) : (
+                <ChevronDown className="h-5 w-5 text-gray-500" />
+              )}
+            </button>
+          </div>
+
+          {/* History content - collapsible on mobile */}
+          <div className={`p-3 md:p-4 ${isHistoryExpanded ? 'block' : 'hidden'} lg:block max-h-[40vh] lg:max-h-none overflow-y-auto`}>
+            {loadingHistory && consultationHistory.length === 0 ? (
+              <div className="flex items-center justify-center py-6 md:py-8">
+                <Loader2 className="h-5 w-5 md:h-6 md:w-6 animate-spin text-purple-600" />
+                <span className="ml-2 text-gray-600 text-sm">Chargement...</span>
+              </div>
+            ) : consultationHistory.length === 0 ? (
+              <div className="text-center py-6 text-gray-500 text-sm">
+                Aucun historique de consultation
+              </div>
+            ) : (
+              <>
+                <HistoryList
+                  history={consultationHistory}
+                  onSelectConsultation={handleSelectConsultation}
+                  selectedId={selectedConsultation?.id}
+                  showTimeline={true}
+                />
+
+                {/* Load More Button */}
+                {historyHasMore && (
+                  <div className="flex justify-center mt-3 md:mt-4">
+                    <Button
+                      variant="outline"
+                      onClick={loadMoreHistory}
+                      disabled={loadingHistory}
+                      size="sm"
+                      className="w-full max-w-xs text-sm"
+                    >
+                      {loadingHistory ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Chargement...
+                        </>
+                      ) : (
+                        <>
+                          Charger plus ({historyTotalCount - consultationHistory.length} restants)
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* ========== RIGHT PANEL (50%) - Voice Dictation ========== */}
-      <div className="w-1/2 flex flex-col bg-white overflow-hidden">
+      {/* ========== RIGHT PANEL - Voice Dictation ========== */}
+      {/* Mobile: Full width | Tablet: 65% | Desktop: 60% */}
+      <div className="w-full lg:w-[65%] xl:w-[60%] flex flex-col bg-white lg:h-screen lg:overflow-hidden">
         {/* Header */}
-        <div className="p-4 border-b bg-purple-50">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-purple-800">
+        <div className="p-3 md:p-4 border-b bg-purple-50">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-base md:text-lg font-semibold text-purple-800 truncate">
                 Consultation Spécialiste
               </h2>
-              <p className="text-sm text-purple-600">
+              <p className="text-xs md:text-sm text-purple-600 truncate">
                 {referral?.specialty_requested} - Dictée Vocale
               </p>
             </div>
-            <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+            <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-xs flex-shrink-0">
               {STEPS[currentStep - 1].name}
             </Badge>
           </div>
 
           {/* Progress Bar */}
-          <div className="mt-4 space-y-2">
-            <div className="flex justify-between items-center text-sm">
+          <div className="mt-3 md:mt-4 space-y-2">
+            <div className="flex justify-between items-center text-xs md:text-sm">
               <span className="text-gray-600">Progression</span>
               <span className="font-semibold">{Math.round(progress)}%</span>
             </div>
             <Progress value={progress} className="h-2" />
+            {/* Step indicators - icons only on mobile, with labels on larger screens */}
             <div className="flex justify-between pt-1">
               {STEPS.map((step) => (
                 <div
@@ -652,8 +704,8 @@ export default function SpecialistConsultationPage() {
                       : 'text-gray-400'
                   }`}
                 >
-                  <step.icon className="h-4 w-4" />
-                  <span className="text-xs hidden sm:block">{step.name}</span>
+                  <step.icon className="h-4 w-4 md:h-5 md:w-5" />
+                  <span className="text-[10px] md:text-xs hidden sm:block">{step.name}</span>
                 </div>
               ))}
             </div>
@@ -662,9 +714,9 @@ export default function SpecialistConsultationPage() {
 
         {/* Error Alert */}
         {error && (
-          <Alert variant="destructive" className="m-4">
+          <Alert variant="destructive" className="mx-3 md:mx-4 mt-3 md:mt-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription className="text-sm">{error}</AlertDescription>
           </Alert>
         )}
 
@@ -672,57 +724,57 @@ export default function SpecialistConsultationPage() {
         <div className="flex-1 overflow-y-auto">
           {/* STEP 1: Audio Recording */}
           {currentStep === 1 && (
-            <div className="p-6 space-y-6">
+            <div className="p-3 md:p-6 space-y-4 md:space-y-6">
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Mic className="h-6 w-6 text-purple-600" />
+                <CardHeader className="p-4 md:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                    <Mic className="h-5 w-5 md:h-6 md:w-6 text-purple-600" />
                     Enregistrement Audio
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs md:text-sm">
                     Dictez votre consultation. Le système extraira automatiquement les données cliniques.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Recording Controls */}
-                  <div className="flex flex-col items-center gap-6 py-8">
+                <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6 pt-0 md:pt-0">
+                  {/* Recording Controls - Responsive sizes */}
+                  <div className="flex flex-col items-center gap-4 md:gap-6 py-4 md:py-8">
                     {!recordingState.isRecording && !recordingState.audioBlob && (
                       <Button
                         onClick={startRecording}
                         size="lg"
-                        className="h-24 w-24 rounded-full bg-red-500 hover:bg-red-600"
+                        className="h-20 w-20 md:h-24 md:w-24 rounded-full bg-blue-500 hover:bg-blue-600"
                       >
-                        <Mic className="h-8 w-8" />
+                        <Mic className="h-7 w-7 md:h-8 md:w-8" />
                       </Button>
                     )}
 
                     {recordingState.isRecording && (
                       <>
-                        <div className="flex flex-col items-center gap-4">
-                          <div className="h-24 w-24 rounded-full bg-red-500 flex items-center justify-center animate-pulse">
-                            <Square className="h-8 w-8 text-white" />
+                        <div className="flex flex-col items-center gap-3 md:gap-4">
+                          <div className="h-20 w-20 md:h-24 md:w-24 rounded-full bg-red-500 flex items-center justify-center animate-pulse">
+                            <Square className="h-7 w-7 md:h-8 md:w-8 text-white" />
                           </div>
-                          <div className="text-3xl font-mono font-bold">
+                          <div className="text-2xl md:text-3xl font-mono font-bold">
                             {formatTime(recordingState.duration)}
                           </div>
                         </div>
-                        <Button onClick={stopRecording} size="lg" variant="destructive">
-                          <Square className="h-5 w-5 mr-2" />
+                        <Button onClick={stopRecording} size="default" variant="destructive" className="text-sm md:text-base">
+                          <Square className="h-4 w-4 md:h-5 md:w-5 mr-2" />
                           Arrêter l'enregistrement
                         </Button>
                       </>
                     )}
 
                     {recordingState.audioBlob && !recordingState.isRecording && (
-                      <div className="w-full space-y-4">
-                        <div className="flex items-center justify-center gap-3 text-green-600">
-                          <CheckCircle className="h-6 w-6" />
-                          <span className="font-medium">
+                      <div className="w-full space-y-3 md:space-y-4">
+                        <div className="flex items-center justify-center gap-2 md:gap-3 text-green-600">
+                          <CheckCircle className="h-5 w-5 md:h-6 md:w-6" />
+                          <span className="font-medium text-sm md:text-base">
                             Enregistrement terminé ({formatTime(recordingState.duration)})
                           </span>
                         </div>
 
-                        <div className="flex gap-3 justify-center">
+                        <div className="flex flex-col sm:flex-row gap-2 md:gap-3 justify-center">
                           <Button
                             onClick={() => {
                               setRecordingState({
@@ -733,23 +785,28 @@ export default function SpecialistConsultationPage() {
                               })
                             }}
                             variant="outline"
+                            size="sm"
+                            className="text-sm"
                           >
                             Réenregistrer
                           </Button>
                           <Button
                             onClick={processAudio}
                             disabled={isProcessing}
-                            className="bg-purple-600 hover:bg-purple-700"
+                            size="sm"
+                            className="bg-purple-600 hover:bg-purple-700 text-sm"
                           >
                             {isProcessing ? (
                               <>
-                                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                                Traitement en cours...
+                                <Loader2 className="h-4 w-4 md:h-5 md:w-5 mr-2 animate-spin" />
+                                <span className="hidden sm:inline">Traitement en cours...</span>
+                                <span className="sm:hidden">Traitement...</span>
                               </>
                             ) : (
                               <>
-                                Traiter l'audio
-                                <ArrowRight className="h-5 w-5 ml-2" />
+                                <span className="hidden sm:inline">Traiter l'audio</span>
+                                <span className="sm:hidden">Traiter</span>
+                                <ArrowRight className="h-4 w-4 md:h-5 md:w-5 ml-2" />
                               </>
                             )}
                           </Button>
@@ -764,22 +821,22 @@ export default function SpecialistConsultationPage() {
 
           {/* STEP 2: Review Extracted Data */}
           {currentStep === 2 && (
-            <div className="p-6">
+            <div className="p-3 md:p-6">
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-6 w-6 text-purple-600" />
+                <CardHeader className="p-4 md:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                    <User className="h-5 w-5 md:h-6 md:w-6 text-purple-600" />
                     Révision des Données Extraites
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs md:text-sm">
                     Vérifiez les données extraites de la dictée vocale.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6 pt-0 md:pt-0">
                   {/* Transcription */}
                   <div>
-                    <h3 className="font-semibold mb-2">Transcription</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-700 max-h-32 overflow-y-auto">
+                    <h3 className="font-semibold mb-2 text-sm md:text-base">Transcription</h3>
+                    <div className="bg-gray-50 p-3 md:p-4 rounded-lg text-xs md:text-sm text-gray-700 max-h-24 md:max-h-32 overflow-y-auto">
                       {transcriptionText}
                     </div>
                   </div>
