@@ -548,33 +548,39 @@ export default function SpecialistConsultationPage() {
 
             <Separator className="my-2 md:my-3" />
 
-            {/* Referral reason - scrollable on mobile */}
+            {/* Referral reason - scrollable container */}
             <div>
-              <span className="text-gray-500 text-xs md:text-sm flex items-center gap-1">
+              <span className="text-gray-500 text-xs md:text-sm flex items-center gap-1 mb-1">
                 <Stethoscope className="h-4 w-4" />
                 Motif de référence:
               </span>
-              <p className="font-medium text-gray-800 mt-1 text-sm max-h-24 md:max-h-32 overflow-y-auto">
-                {referral?.reason}
-              </p>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-2 md:p-3 max-h-32 md:max-h-40 overflow-y-auto overscroll-contain touch-pan-y">
+                <p className="font-medium text-gray-800 text-sm whitespace-pre-wrap">
+                  {referral?.reason}
+                </p>
+              </div>
             </div>
 
             {referral?.tibok_diagnosis && (
-              <div className="mt-2 md:mt-3 p-2 md:p-3 bg-blue-50 rounded-lg">
-                <span className="text-blue-700 text-xs md:text-sm font-medium flex items-center gap-1">
+              <div className="mt-2 md:mt-3 p-2 md:p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <span className="text-blue-700 text-xs md:text-sm font-medium flex items-center gap-1 mb-1">
                   <Brain className="h-4 w-4" />
                   Diagnostic Tibok:
                 </span>
-                <p className="text-blue-900 mt-1 text-xs md:text-sm max-h-20 overflow-y-auto">
-                  {referral.tibok_diagnosis}
-                </p>
+                <div className="max-h-24 md:max-h-32 overflow-y-auto overscroll-contain touch-pan-y">
+                  <p className="text-blue-900 text-xs md:text-sm whitespace-pre-wrap">
+                    {referral.tibok_diagnosis}
+                  </p>
+                </div>
               </div>
             )}
 
             {referral?.tibok_notes && (
-              <div className="mt-2 p-2 md:p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-600 text-xs md:text-sm font-medium">Notes Tibok:</span>
-                <p className="text-gray-700 mt-1 text-xs md:text-sm">{referral.tibok_notes}</p>
+              <div className="mt-2 p-2 md:p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <span className="text-gray-600 text-xs md:text-sm font-medium mb-1 block">Notes Tibok:</span>
+                <div className="max-h-20 overflow-y-auto overscroll-contain touch-pan-y">
+                  <p className="text-gray-700 text-xs md:text-sm whitespace-pre-wrap">{referral.tibok_notes}</p>
+                </div>
               </div>
             )}
 
