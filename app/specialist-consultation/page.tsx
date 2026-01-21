@@ -539,7 +539,8 @@ export default function SpecialistConsultationPage() {
       setTranscriptionText(result.transcription.text)
 
       // Merge extracted data with referral patient data
-      // Only use extracted values if they are meaningful (not placeholders)
+      // PRIORITY: Always prefer existing referral data over extracted data
+      // Only use extracted values as fallback when referral data is missing
       const extractedPatient = result.extractedData.patientInfo
       const isValidValue = (val: string | undefined) => {
         if (!val) return false
@@ -554,13 +555,13 @@ export default function SpecialistConsultationPage() {
 
       setPatientData(prev => ({
         ...prev,
-        // Keep referral data if extracted data is a placeholder
-        firstName: isValidValue(extractedPatient.firstName) ? extractedPatient.firstName : (prev?.firstName || ''),
-        lastName: isValidValue(extractedPatient.lastName) ? extractedPatient.lastName : (prev?.lastName || ''),
-        age: extractedPatient.age || prev?.age || '',
-        gender: isValidValue(extractedPatient.gender) ? extractedPatient.gender : (prev?.gender || ''),
-        email: isValidValue(extractedPatient.email) ? extractedPatient.email : (prev?.email || ''),
-        phone: isValidValue(extractedPatient.phone) ? extractedPatient.phone : (prev?.phone || ''),
+        // Keep referral data - only use extracted as fallback
+        firstName: prev?.firstName || (isValidValue(extractedPatient.firstName) ? extractedPatient.firstName : ''),
+        lastName: prev?.lastName || (isValidValue(extractedPatient.lastName) ? extractedPatient.lastName : ''),
+        age: prev?.age || extractedPatient.age || '',
+        gender: prev?.gender || (isValidValue(extractedPatient.gender) ? extractedPatient.gender : ''),
+        email: prev?.email || (isValidValue(extractedPatient.email) ? extractedPatient.email : ''),
+        phone: prev?.phone || (isValidValue(extractedPatient.phone) ? extractedPatient.phone : ''),
       }))
 
       const extractedClinical = result.extractedData.clinicalData
