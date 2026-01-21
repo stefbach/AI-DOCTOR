@@ -183,7 +183,7 @@ export default function SpecialistConsultationPage() {
       if (referralData.specialist_id) {
         const { data: specialistData, error: specialistError } = await supabase
           .from('specialists')
-          .select('id, full_name, phone, email, specialties, medical_license_number, clinic_name')
+          .select('id, full_name, phone, email, specialties, medical_license_number, clinic_name, signature_url')
           .eq('id', referralData.specialist_id)
           .single()
 
@@ -194,11 +194,13 @@ export default function SpecialistConsultationPage() {
             nom: doctorFullName,
             qualifications: specialistData.specialties?.join(', ') || '',
             specialty: referralData.specialty_requested,
+            specialite: referralData.specialty_requested,
             medicalCouncilNumber: specialistData.medical_license_number || '',
             numeroEnregistrement: specialistData.medical_license_number || '',
             email: specialistData.email || '',
             phone: specialistData.phone || '',
-            clinicName: specialistData.clinic_name || ''
+            clinicName: specialistData.clinic_name || '',
+            signatureUrl: specialistData.signature_url || null
           })
           console.log('✅ Specialist data loaded:', specialistData)
         } else {
