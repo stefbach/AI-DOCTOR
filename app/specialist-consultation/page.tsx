@@ -29,7 +29,11 @@ import {
   Send,
   ChevronDown,
   ChevronUp,
-  History
+  History,
+  Download,
+  FlaskConical,
+  Image as ImageIcon,
+  Info
 } from 'lucide-react'
 import { HistoryList } from '@/lib/follow-up/shared/components/history-list'
 import { ConsultationDetailModal } from '@/lib/follow-up/shared/components/consultation-detail-modal'
@@ -114,6 +118,15 @@ export default function SpecialistConsultationPage() {
     audioBlob: null as Blob | null
   })
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // State for imported lab/radiology results
+  const [labResults, setLabResults] = useState<any>(null)
+  const [radiologyResults, setRadiologyResults] = useState<any>(null)
+  const [isLoadingLabResults, setIsLoadingLabResults] = useState(false)
+  const [isLoadingRadiologyResults, setIsLoadingRadiologyResults] = useState(false)
+  const [labResultsError, setLabResultsError] = useState<string | null>(null)
+  const [radiologyResultsError, setRadiologyResultsError] = useState<string | null>(null)
+  const [importedResultsText, setImportedResultsText] = useState<string>('')
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
@@ -276,6 +289,170 @@ export default function SpecialistConsultationPage() {
     await loadConsultationHistory(currentPatientId, currentPatientPhone, historyOffset)
   }
 
+  // Format lab results for display
+  const formatLabResultsForHistory = (labResult: any): string => {
+    if (!labResult) return ''
+    const lines: string[] = []
+    const resultsData = labResult.results_data
+    const order = labResult.lab_orders
+
+    if (labResult.validated_at) {
+      lines.push(`Date: ${new Date(labResult.validated_at).toLocaleDateString()}`)
+    } else if (labResult.created_at) {
+      lines.push(`Date: ${new Date(labResult.created_at).toLocaleDateString()}`)
+    }
+
+    if (order?.order_number) {
+      lines.push(`Order: ${order.order_number}`)
+    }
+
+    if (resultsData?.tests && Array.isArray(resultsData.tests)) {
+      lines.push('\nTest Results:')
+      resultsData.tests.forEach((test: any) => {
+        const abnormalFlag = test.is_abnormal ? ' ⚠️' : ''
+        lines.push(`• ${test.test_name}: ${test.value} ${test.unit || ''}${abnormalFlag}`)
+        if (test.reference_range) {
+          lines.push(`  (Ref: ${test.reference_range})`)
+        }
+      })
+    }
+
+    if (labResult.interpretation_notes) {
+      lines.push(`\nInterpretation: ${labResult.interpretation_notes}`)
+    }
+
+    return lines.join('\n')
+  }
+
+  // Format radiology results for display
+  const formatRadiologyResultsForHistory = (radioResult: any): string => {
+    if (!radioResult) return ''
+    const lines: string[] = []
+    const resultsData = radioResult.results_data
+    const order = radioResult.radiology_orders
+
+    if (radioResult.validated_at) {
+      lines.push(`Date: ${new Date(radioResult.validated_at).toLocaleDateString()}`)
+    } else if (radioResult.created_at) {
+      lines.push(`Date: ${new Date(radioResult.created_at).toLocaleDateString()}`)
+    }
+
+    if (order?.order_number) {
+      lines.push(`Order: ${order.order_number}`)
+    }
+
+    if (order?.exams_ordered) {
+      const exams = Array.isArray(order.exams_ordered)
+        ? order.exams_ordered.map((e: any) => e.name || e).join(', ')
+        : order.exams_ordered
+      lines.push(`Exam: ${exams}`)
+    }
+
+    if (resultsData?.findings) {
+      lines.push(`\nFindings: ${resultsData.findings}`)
+    }
+
+    if (resultsData?.conclusion) {
+      lines.push(`\nConclusion: ${resultsData.conclusion}`)
+    }
+
+    return lines.join('\n')
+  }
+
+  // Fetch lab results for the patient
+  const fetchLabResults = async () => {
+    if (!referral?.patient_id && !referral?.patient_name) {
+      setLabResultsError("Informations patient non disponibles")
+      return
+    }
+
+    setIsLoadingLabResults(true)
+    setLabResultsError(null)
+
+    try {
+      const params = new URLSearchParams({ type: 'lab' })
+      if (referral.patient_id) {
+        params.append('patientId', referral.patient_id)
+      } else if (referral.patient_name) {
+        params.append('patientName', referral.patient_name)
+      }
+
+      const response = await fetch(`/api/patient-results?${params.toString()}`)
+      const data = await response.json()
+
+      console.log('📋 Lab Results API Response:', data)
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Échec de la récupération des résultats')
+      }
+
+      if (data.hasLabResults && data.labResults) {
+        setLabResults(data.labResults)
+        const labText = formatLabResultsForHistory(data.labResults)
+        if (labText) {
+          setImportedResultsText(prev =>
+            prev ? `${prev}\n\n--- RÉSULTATS LABORATOIRE ---\n${labText}`
+                 : `--- RÉSULTATS LABORATOIRE ---\n${labText}`
+          )
+        }
+      } else {
+        setLabResultsError("Aucun résultat de laboratoire trouvé pour ce patient")
+      }
+    } catch (error: any) {
+      console.error('Error fetching lab results:', error)
+      setLabResultsError(error.message || 'Échec de la récupération')
+    } finally {
+      setIsLoadingLabResults(false)
+    }
+  }
+
+  // Fetch radiology results for the patient
+  const fetchRadiologyResults = async () => {
+    if (!referral?.patient_id && !referral?.patient_name) {
+      setRadiologyResultsError("Informations patient non disponibles")
+      return
+    }
+
+    setIsLoadingRadiologyResults(true)
+    setRadiologyResultsError(null)
+
+    try {
+      const params = new URLSearchParams({ type: 'radiology' })
+      if (referral.patient_id) {
+        params.append('patientId', referral.patient_id)
+      } else if (referral.patient_name) {
+        params.append('patientName', referral.patient_name)
+      }
+
+      const response = await fetch(`/api/patient-results?${params.toString()}`)
+      const data = await response.json()
+
+      console.log('🩻 Radiology Results API Response:', data)
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Échec de la récupération des résultats')
+      }
+
+      if (data.hasRadiologyResults && data.radiologyResults) {
+        setRadiologyResults(data.radiologyResults)
+        const radioText = formatRadiologyResultsForHistory(data.radiologyResults)
+        if (radioText) {
+          setImportedResultsText(prev =>
+            prev ? `${prev}\n\n--- RÉSULTATS RADIOLOGIE ---\n${radioText}`
+                 : `--- RÉSULTATS RADIOLOGIE ---\n${radioText}`
+          )
+        }
+      } else {
+        setRadiologyResultsError("Aucun résultat de radiologie trouvé pour ce patient")
+      }
+    } catch (error: any) {
+      console.error('Error fetching radiology results:', error)
+      setRadiologyResultsError(error.message || 'Échec de la récupération')
+    } finally {
+      setIsLoadingRadiologyResults(false)
+    }
+  }
+
   // Recording functions
   const startRecording = async () => {
     try {
@@ -371,6 +548,15 @@ export default function SpecialistConsultationPage() {
       }))
 
       const extractedClinical = result.extractedData.clinicalData
+
+      // Combine imported results with disease history if available
+      let combinedHistory = extractedClinical.diseaseHistory || ''
+      if (importedResultsText) {
+        combinedHistory = combinedHistory
+          ? `${combinedHistory}\n\n${importedResultsText}`
+          : importedResultsText
+      }
+
       setClinicalData({
         chiefComplaint: extractedClinical.chiefComplaint || referral?.reason || '',
         symptoms: extractedClinical.symptoms || [],
@@ -380,6 +566,10 @@ export default function SpecialistConsultationPage() {
         currentMedications: extractedClinical.currentMedications || [],
         allergies: extractedClinical.allergies || [],
         vitalSigns: extractedClinical.vitalSigns || {},
+        diseaseHistory: combinedHistory,
+        // Store imported results separately for reference
+        importedLabResults: labResults,
+        importedRadiologyResults: radiologyResults,
       })
 
       setQuestionsData(result.extractedData.aiQuestions || {})
@@ -820,6 +1010,99 @@ export default function SpecialistConsultationPage() {
                       </div>
                     )}
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Import Previous Results Card */}
+              <Card className="border-blue-200 bg-blue-50/30">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Download className="h-5 w-5 text-blue-600" />
+                    <p className="font-semibold text-gray-800 text-sm md:text-base">Importer Résultats Précédents</p>
+                  </div>
+                  <p className="text-xs md:text-sm text-gray-500 mb-4">
+                    Importez les derniers résultats de laboratoire ou radiologie du patient pour les inclure dans l'analyse.
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 md:gap-3">
+                    {/* Lab Results Button */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={fetchLabResults}
+                      disabled={isLoadingLabResults || !!labResults}
+                      className={`flex items-center gap-2 text-xs md:text-sm ${labResults ? 'bg-green-50 border-green-300 text-green-700' : ''}`}
+                    >
+                      {isLoadingLabResults ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : labResults ? (
+                        <CheckCircle className="h-4 w-4" />
+                      ) : (
+                        <FlaskConical className="h-4 w-4" />
+                      )}
+                      {labResults ? 'Labo importé' : 'Importer Labo'}
+                    </Button>
+
+                    {/* Radiology Results Button */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={fetchRadiologyResults}
+                      disabled={isLoadingRadiologyResults || !!radiologyResults}
+                      className={`flex items-center gap-2 text-xs md:text-sm ${radiologyResults ? 'bg-green-50 border-green-300 text-green-700' : ''}`}
+                    >
+                      {isLoadingRadiologyResults ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : radiologyResults ? (
+                        <CheckCircle className="h-4 w-4" />
+                      ) : (
+                        <ImageIcon className="h-4 w-4" />
+                      )}
+                      {radiologyResults ? 'Radio importé' : 'Importer Radio'}
+                    </Button>
+                  </div>
+
+                  {/* Error messages */}
+                  {labResultsError && (
+                    <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <Info className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs md:text-sm text-amber-700">{labResultsError}</p>
+                      </div>
+                    </div>
+                  )}
+                  {radiologyResultsError && (
+                    <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <Info className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs md:text-sm text-amber-700">{radiologyResultsError}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Success indicator with preview */}
+                  {(labResults || radiologyResults) && (
+                    <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <p className="text-sm font-medium text-green-700">
+                          Résultats importés avec succès
+                        </p>
+                      </div>
+                      {importedResultsText && (
+                        <div className="mt-2 max-h-24 overflow-y-auto">
+                          <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono bg-white/50 p-2 rounded">
+                            {importedResultsText.slice(0, 300)}{importedResultsText.length > 300 ? '...' : ''}
+                          </pre>
+                        </div>
+                      )}
+                      <p className="text-xs text-green-600 mt-2">
+                        Ces résultats seront inclus dans l'analyse diagnostique.
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
