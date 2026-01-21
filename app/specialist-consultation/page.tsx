@@ -210,6 +210,7 @@ export default function SpecialistConsultationPage() {
 
       // 3. Set patient data for the consultation
       setPatientData({
+        name: referralData.patient_name || '',
         firstName: referralData.patient_name?.split(' ')[0] || '',
         lastName: referralData.patient_name?.split(' ').slice(1).join(' ') || '',
         age: referralData.patient_age,
