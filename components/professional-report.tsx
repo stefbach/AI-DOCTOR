@@ -3533,91 +3533,98 @@ const handleSendDocuments = async () => {
  }
 
  console.log('📝 Saving to database...')
- 
- // Save final version to consultation_records table
- const saveResponse = await fetch('/api/save-medical-report', {
- method: 'POST',
- headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({
- consultationId,
- patientId,
- doctorId,
- doctorName: finalDoctorInfo.nom,
- patientName: patientName,
- report: report,
- action: 'finalize',
- metadata: {
- wordCount: getReportMetadata().wordCount,
- signatures: documentSignatures,
- validationStatus: 'validated',
- finalizedAt: new Date().toISOString(),
- documentValidations: {
- consultation: true,
- prescription: !!report?.ordonnances?.medicaments,
- laboratory: !!report?.ordonnances?.biologie,
- imaging: !!report?.ordonnances?.imagerie,
- invoice: !!report?.invoice
- }
- },
- patientData: {
- ...patientData,
- name: patientName,
- email: patientEmail,
- phone: patientPhone,
- address: patientAddress
- },
- clinicalData: clinicalData || {},
- diagnosisData: diagnosisData || {}
- })
- })
 
- const saveResult = await saveResponse.json()
- console.log('💾 Save response:', { status: saveResponse.status, result: saveResult })
-
- if (!saveResponse.ok) {
- console.log('❌ Save failed:', saveResult)
- 
- if (saveResult.validationError) {
- toast({
- title: "❌ Validation Failed",
- description: saveResult.error || "Document validation failed",
- variant: "destructive"
- })
+ // Skip local save for specialist mode - Tibok endpoint handles consultation_records
+ if (specialistMode) {
+   console.log('⏭️ Skipping local save - specialist mode uses Tibok endpoint')
  } else {
- toast({
- title: "❌ Save Failed",
- description: saveResult.error || 'Failed to save report',
- variant: "destructive"
- })
- }
- return
+   // Save final version to consultation_records table (non-specialist only)
+   const saveResponse = await fetch('/api/save-medical-report', {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({
+   consultationId,
+   patientId,
+   doctorId,
+   doctorName: finalDoctorInfo.nom,
+   patientName: patientName,
+   report: report,
+   action: 'finalize',
+   metadata: {
+   wordCount: getReportMetadata().wordCount,
+   signatures: documentSignatures,
+   validationStatus: 'validated',
+   finalizedAt: new Date().toISOString(),
+   documentValidations: {
+   consultation: true,
+   prescription: !!report?.ordonnances?.medicaments,
+   laboratory: !!report?.ordonnances?.biologie,
+   imaging: !!report?.ordonnances?.imagerie,
+   invoice: !!report?.invoice
+   }
+   },
+   patientData: {
+   ...patientData,
+   name: patientName,
+   email: patientEmail,
+   phone: patientPhone,
+   address: patientAddress
+   },
+   clinicalData: clinicalData || {},
+   diagnosisData: diagnosisData || {}
+   })
+   })
+
+   const saveResult = await saveResponse.json()
+   console.log('💾 Save response:', { status: saveResponse.status, result: saveResult })
+
+   if (!saveResponse.ok) {
+   console.log('❌ Save failed:', saveResult)
+
+   if (saveResult.validationError) {
+   toast({
+   title: "❌ Validation Failed",
+   description: saveResult.error || "Document validation failed",
+   variant: "destructive"
+   })
+   } else {
+   toast({
+   title: "❌ Save Failed",
+   description: saveResult.error || 'Failed to save report',
+   variant: "destructive"
+   })
+   }
+   return
+   }
+
+   console.log('✅ Report saved successfully')
  }
 
- console.log('✅ Report saved successfully')
+ // Update draft as finalized (skip for specialist mode)
+ if (!specialistMode) {
+   console.log('📝 Marking draft as finalized...')
 
- // Update draft as finalized
- console.log('📝 Marking draft as finalized...')
- 
- await fetch('/api/save-draft', {
- method: 'POST',
- headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({
- consultationId,
- reportContent: {
- ...report,
- compteRendu: {
- ...report.compteRendu,
- metadata: {
- ...report.compteRendu.metadata,
- finalized: true,
- finalizedAt: new Date().toISOString()
+   await fetch('/api/save-draft', {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({
+   consultationId,
+   reportContent: {
+   ...report,
+   compteRendu: {
+   ...report.compteRendu,
+   metadata: {
+   ...report.compteRendu.metadata,
+   finalized: true,
+   finalizedAt: new Date().toISOString()
+   }
+   }
+   },
+   doctorInfo: finalDoctorInfo,
+   modifiedSections: []
+   })
+   })
  }
- }
- },
- doctorInfo: finalDoctorInfo,
- modifiedSections: []
- })
- })
 
  // Get Tibok URL
  const getTibokUrl = () => {
@@ -3715,10 +3722,16 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  }
  }
 
+ // Skip normal Tibok endpoint for specialist mode - uses specialist-specific endpoint instead
+ if (specialistMode) {
+   console.log('⏭️ Skipping normal Tibok endpoint - specialist mode uses dedicated endpoint')
+ }
+
  console.log('📨 Sending to Tibok at:', tibokUrl)
  console.log('📦 Payload size:', JSON.stringify(documentsPayload).length, 'bytes')
 
- const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+ // Only call normal Tibok endpoint for non-specialist consultations
+ const response = specialistMode ? { ok: true, status: 200, text: async () => '{"success":true}' } : await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify(documentsPayload)
