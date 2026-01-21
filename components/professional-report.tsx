@@ -3194,65 +3194,48 @@ const sendToTibokSpecialistEndpoint = async (
   specialistName: string,
   patientName: string,
   reportData: any,
-  patientDataObj: any
+  patientDataObj: any,
+  clinicalDataObj: any,
+  diagnosisDataObj: any,
+  signaturesObj: any
 ) => {
   console.log('📤 Sending to Tibok specialist endpoint...')
 
   const tibokUrl = process.env.NEXT_PUBLIC_TIBOK_URL || 'https://v0-tibokmain2.vercel.app'
   const endpoint = `${tibokUrl}/api/specialist/send-to-patient-dashboard`
 
-  // Get report sections
-  const rapport = reportData?.compteRendu?.rapport || {}
-  const praticien = reportData?.compteRendu?.praticien || {}
-  const patient = reportData?.compteRendu?.patient || {}
+  // Structure documents_data the same way as /api/save-medical-report does
+  // This ensures Tibok's frontend can properly display the documents
+  const documentsData = {
+    consultationReport: {
+      content: reportData?.compteRendu || {},
+    },
+    prescriptions: reportData?.ordonnances || {},
+    invoice: reportData?.invoice || null,
+    lastModified: new Date().toISOString()
+  }
+
+  // Extract prescription data for separate handling
   const ordonnances = reportData?.ordonnances || {}
+  const medications = ordonnances?.medicaments?.prescription?.medicaments || []
+  const labTests = ordonnances?.biologie?.prescription?.analyses || {}
+  const imagingExams = ordonnances?.imagerie?.prescription?.examens || []
+  const sickLeave = ordonnances?.arretMaladie?.certificat || null
 
-  // Format medications
-  const medicaments = ordonnances?.medicaments?.prescription?.medicaments || []
-  const formattedMedications = medicaments.map((med: any) => ({
-    nom: med.nom || med.name,
-    dosage: med.dosage,
-    posologie: med.posologie || med.frequency,
-    duree: med.duree || med.duration,
-    instructions: med.instructions || med.notes || ''
-  }))
+  // Build prescription_data structure
+  const prescriptionData = {
+    medications: medications,
+    laboratoryTests: labTests,
+    imagingStudies: imagingExams,
+    sickLeave: sickLeave,
+    generatedAt: new Date().toISOString()
+  }
 
-  // Format laboratory tests
-  const biologie = ordonnances?.biologie?.prescription?.analyses || {}
-  const labTests: any[] = []
-  Object.entries(biologie).forEach(([category, tests]: [string, any]) => {
-    if (Array.isArray(tests)) {
-      tests.forEach((test: any) => {
-        labTests.push({
-          nom: test.nom || test.name || test,
-          code: test.code || '',
-          categorie: category,
-          aJeun: test.aJeun || test.fasting || false,
-          instructions: test.instructions || ''
-        })
-      })
-    }
-  })
-
-  // Format imaging exams
-  const imagerie = ordonnances?.imagerie?.prescription?.examens || []
-  const formattedImaging = imagerie.map((exam: any) => ({
-    nom: exam.nom || exam.name,
-    type: exam.type || exam.modalite,
-    zoneAnatomique: exam.zoneAnatomique || exam.zone || '',
-    produitContraste: exam.produitContraste || exam.contraste || false,
-    indicationClinique: exam.indication || exam.indicationClinique || ''
-  }))
-
-  // Format sick leave if present
-  const arretMaladie = ordonnances?.arretMaladie?.certificat
-  const sickLeaveCertificate = arretMaladie ? {
-    dateDebut: arretMaladie.dateDebut,
-    dateFin: arretMaladie.dateFin,
-    nombreJours: arretMaladie.nombreJours,
-    motifMedical: arretMaladie.motifMedical,
-    remarques: arretMaladie.remarques || ''
-  } : null
+  // Determine what documents are available
+  const hasMedications = medications && medications.length > 0
+  const hasLabTests = Object.values(labTests || {}).some((tests: any) => Array.isArray(tests) && tests.length > 0)
+  const hasImaging = imagingExams && imagingExams.length > 0
+  const hasSickLeave = !!(sickLeave && sickLeave.nombreJours > 0)
 
   const requestBody = {
     referralId,
@@ -3261,63 +3244,54 @@ const sendToTibokSpecialistEndpoint = async (
     specialistName,
     patientName,
     generatedAt: new Date().toISOString(),
+
+    // Patient data
     patientData: {
       name: patientName,
-      firstName: patientDataObj?.firstName || patient?.nom?.split(' ')[0] || '',
-      lastName: patientDataObj?.lastName || patient?.nom?.split(' ').slice(1).join(' ') || '',
-      age: String(patientDataObj?.age || patient?.age || ''),
-      gender: patientDataObj?.gender || patient?.sexe || '',
-      birthDate: patientDataObj?.dateOfBirth || patient?.dateNaissance || '',
-      phone: patientDataObj?.phone || patient?.telephone || ''
+      firstName: patientDataObj?.firstName || '',
+      lastName: patientDataObj?.lastName || '',
+      age: String(patientDataObj?.age || ''),
+      gender: patientDataObj?.gender || '',
+      birthDate: patientDataObj?.dateOfBirth || '',
+      phone: patientDataObj?.phone || '',
+      email: patientDataObj?.email || ''
     },
-    documents: {
-      consultationReport: {
-        type: 'consultation-report',
-        content: {
-          rapport: {
-            motifConsultation: rapport.motifConsultation || '',
-            examenClinique: rapport.examenPhysique || rapport.examenClinique || '',
-            conclusionDiagnostique: rapport.conclusionDiagnostique || '',
-            recommandations: rapport.recommandations || rapport.planDeTraitement || ''
-          },
-          patient: {
-            nom: patientName,
-            age: String(patientDataObj?.age || patient?.age || ''),
-            sexe: patientDataObj?.gender || patient?.sexe || ''
-          },
-          praticien: {
-            nom: specialistName,
-            specialite: praticien.specialite || ''
-          }
-        }
-      },
-      prescriptions: formattedMedications.length > 0 ? {
-        type: 'prescription',
-        content: {
-          medicaments: formattedMedications
-        }
-      } : null,
-      laboratoryRequests: labTests.length > 0 ? {
-        type: 'laboratory-request',
-        content: {
-          examens: labTests,
-          urgent: ordonnances?.biologie?.urgent || false
-        }
-      } : null,
-      imagingRequests: formattedImaging.length > 0 ? {
-        type: 'imaging-request',
-        content: {
-          examens: formattedImaging,
-          urgent: ordonnances?.imagerie?.urgent || false
-        }
-      } : null,
-      sickLeaveCertificate,
-      dietPlan: reportData?.dietaryPlan || null,
-      followUp: reportData?.followUpPlan || null
-    }
+
+    // Full report object - same structure as normal consultation
+    report: reportData,
+
+    // Structured documents_data for consultation_records
+    documents_data: documentsData,
+
+    // Structured prescription_data for orders
+    prescription_data: prescriptionData,
+
+    // Clinical and diagnosis data
+    clinical_data: clinicalDataObj || {},
+    diagnosis_data: diagnosisDataObj || {},
+
+    // Document availability flags
+    has_prescriptions: hasMedications,
+    has_lab_requests: hasLabTests,
+    has_imaging_requests: hasImaging,
+    has_sick_leave: hasSickLeave,
+
+    // Signatures
+    signatures: signaturesObj || {},
+
+    // Status
+    documents_status: 'finalized'
   }
 
-  console.log('📦 Tibok specialist request body:', requestBody)
+  console.log('📦 Tibok specialist request body:', {
+    referralId,
+    patientId,
+    specialistId,
+    hasMedications,
+    hasLabTests,
+    hasImaging,
+    hasSickLeave
+  })
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -3885,7 +3859,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
      const specialistId = propDoctorId || ''
      const patientIdForTibok = propPatientId || patientData?.patientId || ''
 
-     // Call the Tibok specialist endpoint
+     // Call the Tibok specialist endpoint with full data
      const tibokResult = await sendToTibokSpecialistEndpoint(
        referralId,
        patientIdForTibok,
@@ -3893,7 +3867,10 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
        specialistName,
        patientName,
        report,
-       patientData
+       patientData,
+       clinicalData,
+       diagnosisData,
+       documentSignatures
      )
 
      console.log('✅ Tibok specialist endpoint response:', tibokResult)
