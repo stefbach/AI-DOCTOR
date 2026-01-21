@@ -2979,30 +2979,36 @@ const loadAvailableSlots = useCallback(async (specialistId: string, date: string
   setSelectedSlot(null)
 
   try {
-    console.log('📅 Loading slots for:', { specialistId, date })
+    // Calculate day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+    const dayOfWeek = new Date(date + 'T00:00:00').getDay()
+    console.log('📅 Loading slots for:', { specialistId, date, dayOfWeek })
 
-    // 1. Get availability for this specific date (new structure uses specific_date)
+    // 1. Get weekly availability for this day of week
     const { data: availability, error: availError } = await supabase
       .from('specialist_availability')
       .select('*')
       .eq('specialist_id', specialistId)
-      .eq('specific_date', date)
-      .eq('is_available', true)
+      .eq('day_of_week', dayOfWeek)
+      .eq('is_active', true)
+
+    console.log('📅 Availability query result:', { availability, error: availError })
 
     if (availError || !availability || availability.length === 0) {
-      console.log('📅 No availability for this date')
+      console.log('📅 No availability for day of week:', dayOfWeek)
       setAvailableSlots([])
       setLoadingSlots(false)
       return
     }
 
-    // 2. Get already booked appointments
+    // 2. Get already booked appointments for this specific date
     const { data: bookedAppointments } = await supabase
       .from('specialist_appointments')
       .select('start_time, end_time')
       .eq('specialist_id', specialistId)
       .eq('appointment_date', date)
       .neq('status', 'cancelled')
+
+    console.log('📅 Booked appointments:', bookedAppointments)
 
     // 3. Generate available slots
     const slots: Array<{start: string, end: string}> = []
@@ -3033,7 +3039,7 @@ const loadAvailableSlots = useCallback(async (specialistId: string, date: string
       }
     }
 
-    console.log('✅ Available slots:', slots.length)
+    console.log('✅ Available slots generated:', slots.length)
     setAvailableSlots(slots)
   } catch (err) {
     console.error('Error loading slots:', err)
