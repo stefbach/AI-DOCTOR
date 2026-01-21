@@ -3186,179 +3186,6 @@ const toggleFollowUpType = useCallback((type: string) => {
   )
 }, [])
 
-// ==================== SEND TO TIBOK SPECIALIST ENDPOINT ====================
-const sendToTibokSpecialistEndpoint = async (
-  referralId: string,
-  patientId: string,
-  specialistId: string,
-  specialistName: string,
-  patientName: string,
-  reportData: any,
-  patientDataObj: any,
-  clinicalDataObj: any,
-  diagnosisDataObj: any,
-  signaturesObj: any
-) => {
-  console.log('📤 Sending to Tibok specialist endpoint...')
-
-  const tibokUrl = process.env.NEXT_PUBLIC_TIBOK_URL || 'https://v0-tibokmain2.vercel.app'
-  const endpoint = `${tibokUrl}/api/specialist/send-to-patient-dashboard`
-
-  // Extract prescription data
-  const ordonnances = reportData?.ordonnances || {}
-  const medications = ordonnances?.medicaments?.prescription?.medicaments || []
-  const labTests = ordonnances?.biologie?.prescription?.analyses || {}
-  const imagingExams = ordonnances?.imagerie?.prescription?.examens || []
-  const sickLeave = ordonnances?.arretMaladie?.certificat || null
-
-  // Determine what documents are available
-  const hasMedications = medications && medications.length > 0
-  const hasLabTests = Object.values(labTests || {}).some((tests: any) => Array.isArray(tests) && tests.length > 0)
-  const hasImaging = imagingExams && imagingExams.length > 0
-  const hasSickLeave = !!(sickLeave && sickLeave.nombreJours > 0)
-
-  // Get report sections for documents structure
-  const rapport = reportData?.compteRendu?.rapport || {}
-  const praticien = reportData?.compteRendu?.praticien || {}
-  const patient = reportData?.compteRendu?.patient || {}
-
-  // Format medications for API
-  const formattedMedications = medications.map((med: any) => ({
-    nom: med.nom || med.name,
-    dosage: med.dosage,
-    posologie: med.posologie || med.frequency,
-    duree: med.duree || med.duration,
-    instructions: med.instructions || med.notes || ''
-  }))
-
-  // Format lab tests for API
-  const formattedLabTests: any[] = []
-  Object.entries(labTests).forEach(([category, tests]: [string, any]) => {
-    if (Array.isArray(tests)) {
-      tests.forEach((test: any) => {
-        formattedLabTests.push({
-          nom: test.nom || test.name || test,
-          code: test.code || '',
-          categorie: category,
-          aJeun: test.aJeun || test.fasting || false,
-          instructions: test.instructions || ''
-        })
-      })
-    }
-  })
-
-  // Format imaging exams for API
-  const formattedImaging = imagingExams.map((exam: any) => ({
-    nom: exam.nom || exam.name,
-    type: exam.type || exam.modalite,
-    zoneAnatomique: exam.zoneAnatomique || exam.zone || '',
-    produitContraste: exam.produitContraste || exam.contraste || false,
-    indicationClinique: exam.indication || exam.indicationClinique || ''
-  }))
-
-  // Build request body matching API spec
-  const requestBody = {
-    referralId,
-    patientId,
-    specialistId,
-    specialistName,
-    patientName,
-    generatedAt: new Date().toISOString(),
-
-    // Patient data
-    patientData: {
-      name: patientName,
-      firstName: patientDataObj?.firstName || '',
-      lastName: patientDataObj?.lastName || '',
-      age: String(patientDataObj?.age || ''),
-      gender: patientDataObj?.gender || '',
-      birthDate: patientDataObj?.dateOfBirth || '',
-      phone: patientDataObj?.phone || ''
-    },
-
-    // Documents structure as per API spec
-    documents: {
-      consultationReport: {
-        type: 'consultation-report',
-        content: {
-          rapport: {
-            motifConsultation: rapport.motifConsultation || '',
-            examenClinique: rapport.examenPhysique || rapport.examenClinique || '',
-            conclusionDiagnostique: rapport.conclusionDiagnostique || '',
-            recommandations: rapport.recommandations || rapport.planDeTraitement || ''
-          },
-          patient: {
-            nom: patientName,
-            age: String(patientDataObj?.age || patient?.age || ''),
-            sexe: patientDataObj?.gender || patient?.sexe || ''
-          },
-          praticien: {
-            nom: specialistName,
-            specialite: praticien.specialite || ''
-          }
-        }
-      },
-      prescriptions: hasMedications ? {
-        type: 'prescription',
-        content: {
-          medicaments: formattedMedications
-        }
-      } : null,
-      laboratoryRequests: hasLabTests ? {
-        type: 'laboratory-request',
-        content: {
-          examens: formattedLabTests,
-          urgent: ordonnances?.biologie?.urgent || false
-        }
-      } : null,
-      imagingRequests: hasImaging ? {
-        type: 'imaging-request',
-        content: {
-          examens: formattedImaging,
-          urgent: ordonnances?.imagerie?.urgent || false
-        }
-      } : null,
-      sickLeaveCertificate: hasSickLeave ? {
-        dateDebut: sickLeave.dateDebut,
-        dateFin: sickLeave.dateFin,
-        nombreJours: sickLeave.nombreJours,
-        motifMedical: sickLeave.motifMedical,
-        remarques: sickLeave.remarques || ''
-      } : null,
-      dietPlan: reportData?.dietaryPlan || null,
-      followUp: reportData?.followUpPlan || null
-    }
-  }
-
-  console.log('📦 Tibok specialist request body:', {
-    referralId,
-    patientId,
-    specialistId,
-    hasMedications,
-    hasLabTests,
-    hasImaging,
-    hasSickLeave
-  })
-
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(requestBody)
-  })
-
-  const result = await response.json()
-
-  if (!response.ok) {
-    console.error('❌ Tibok specialist endpoint error:', result)
-    throw new Error(result.error || 'Failed to send to Tibok')
-  }
-
-  console.log('✅ Tibok specialist endpoint success:', result)
-  return result
-}
-
 // ==================== SEND DOCUMENTS ====================
 const handleSendDocuments = async () => {
  console.log('📤 Starting handleSendDocuments...')
@@ -3555,71 +3382,66 @@ const handleSendDocuments = async () => {
 
  console.log('📝 Saving to database...')
 
- // Skip local save for specialist mode - Tibok endpoint handles consultation_records
- if (specialistMode) {
-   console.log('⏭️ Skipping local save - specialist mode uses Tibok endpoint')
- } else {
-   // Save final version to consultation_records table (non-specialist only)
-   const saveResponse = await fetch('/api/save-medical-report', {
-   method: 'POST',
-   headers: { 'Content-Type': 'application/json' },
-   body: JSON.stringify({
-   consultationId,
-   patientId,
-   doctorId,
-   doctorName: finalDoctorInfo.nom,
-   patientName: patientName,
-   report: report,
-   action: 'finalize',
-   metadata: {
-   wordCount: getReportMetadata().wordCount,
-   signatures: documentSignatures,
-   validationStatus: 'validated',
-   finalizedAt: new Date().toISOString(),
-   documentValidations: {
-   consultation: true,
-   prescription: !!report?.ordonnances?.medicaments,
-   laboratory: !!report?.ordonnances?.biologie,
-   imaging: !!report?.ordonnances?.imagerie,
-   invoice: !!report?.invoice
-   }
-   },
-   patientData: {
-   ...patientData,
-   name: patientName,
-   email: patientEmail,
-   phone: patientPhone,
-   address: patientAddress
-   },
-   clinicalData: clinicalData || {},
-   diagnosisData: diagnosisData || {}
-   })
-   })
-
-   const saveResult = await saveResponse.json()
-   console.log('💾 Save response:', { status: saveResponse.status, result: saveResult })
-
-   if (!saveResponse.ok) {
-   console.log('❌ Save failed:', saveResult)
-
-   if (saveResult.validationError) {
-   toast({
-   title: "❌ Validation Failed",
-   description: saveResult.error || "Document validation failed",
-   variant: "destructive"
-   })
-   } else {
-   toast({
-   title: "❌ Save Failed",
-   description: saveResult.error || 'Failed to save report',
-   variant: "destructive"
-   })
-   }
-   return
-   }
-
-   console.log('✅ Report saved successfully')
+ // Save final version to consultation_records table (for ALL consultation types)
+ const saveResponse = await fetch('/api/save-medical-report', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({
+ consultationId,
+ patientId,
+ doctorId,
+ doctorName: finalDoctorInfo.nom,
+ patientName: patientName,
+ report: report,
+ action: 'finalize',
+ metadata: {
+ wordCount: getReportMetadata().wordCount,
+ signatures: documentSignatures,
+ validationStatus: 'validated',
+ finalizedAt: new Date().toISOString(),
+ documentValidations: {
+ consultation: true,
+ prescription: !!report?.ordonnances?.medicaments,
+ laboratory: !!report?.ordonnances?.biologie,
+ imaging: !!report?.ordonnances?.imagerie,
+ invoice: !!report?.invoice
  }
+ },
+ patientData: {
+ ...patientData,
+ name: patientName,
+ email: patientEmail,
+ phone: patientPhone,
+ address: patientAddress
+ },
+ clinicalData: clinicalData || {},
+ diagnosisData: diagnosisData || {}
+ })
+ })
+
+ const saveResult = await saveResponse.json()
+ console.log('💾 Save response:', { status: saveResponse.status, result: saveResult })
+
+ if (!saveResponse.ok) {
+ console.log('❌ Save failed:', saveResult)
+
+ if (saveResult.validationError) {
+ toast({
+ title: "❌ Validation Failed",
+ description: saveResult.error || "Document validation failed",
+ variant: "destructive"
+ })
+ } else {
+ toast({
+ title: "❌ Save Failed",
+ description: saveResult.error || 'Failed to save report',
+ variant: "destructive"
+ })
+ }
+ return
+ }
+
+ console.log('✅ Report saved successfully')
 
  // Update draft as finalized (skip for specialist mode)
  if (!specialistMode) {
@@ -3743,16 +3565,11 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  }
  }
 
- // Skip normal Tibok endpoint for specialist mode - uses specialist-specific endpoint instead
- if (specialistMode) {
-   console.log('⏭️ Skipping normal Tibok endpoint - specialist mode uses dedicated endpoint')
- }
-
  console.log('📨 Sending to Tibok at:', tibokUrl)
  console.log('📦 Payload size:', JSON.stringify(documentsPayload).length, 'bytes')
 
- // Only call normal Tibok endpoint for non-specialist consultations
- const response = specialistMode ? { ok: true, status: 200, text: async () => '{"success":true}' } : await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+ // Call Tibok endpoint for ALL consultation types
+ const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify(documentsPayload)
@@ -3897,64 +3714,32 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
    }
  }
 
- // Send to Tibok specialist endpoint if in specialist mode
- if (specialistMode && referralId) {
-   console.log('📤 Sending specialist report to Tibok...')
+ // Update referral status if in specialist mode
+ if (specialistMode && referralId && supabaseClient) {
+   console.log('📤 Updating referral status...')
    try {
-     // Get patient and specialist info
-     const specialistName = doctorInfo.nom || 'Dr. Specialist'
-     const specialistId = propDoctorId || ''
-     const patientIdForTibok = propPatientId || patientData?.patientId || ''
-
-     // Call the Tibok specialist endpoint with full data
-     const tibokResult = await sendToTibokSpecialistEndpoint(
-       referralId,
-       patientIdForTibok,
-       specialistId,
-       specialistName,
-       patientName,
-       report,
-       patientData,
-       clinicalData,
-       diagnosisData,
-       documentSignatures
-     )
-
-     console.log('✅ Tibok specialist endpoint response:', tibokResult)
-
-     // Also update the referral locally as backup
-     if (supabaseClient) {
-       const rapport = getReportRapport()
-       await supabaseClient
-         .from('referrals')
-         .update({
-           status: 'completed',
-           specialist_report: {
-             medicalReport: rapport,
-             clinicalData: clinicalData,
-             diagnosisData: diagnosisData,
-             consultationId: result?.consultationId || consultationId,
-             tibokConsultationRecordId: tibokResult?.consultationRecordId
-           },
-           specialist_diagnosis: rapport?.conclusionDiagnostique || diagnosisData?.primaryDiagnosis || '',
-           specialist_notes: rapport?.syntheseDiagnostique || '',
-           specialist_consultation_ended_at: new Date().toISOString(),
-           report_sent_to_tibok: true,
-           report_sent_at: new Date().toISOString(),
-           updated_at: new Date().toISOString()
-         })
-         .eq('id', referralId)
-     }
-
-     console.log('✅ Specialist consultation completed and sent to patient dashboard')
+     const rapport = getReportRapport()
+     await supabaseClient
+       .from('referrals')
+       .update({
+         status: 'completed',
+         specialist_report: {
+           medicalReport: rapport,
+           clinicalData: clinicalData,
+           diagnosisData: diagnosisData,
+           consultationId: consultationId
+         },
+         specialist_diagnosis: rapport?.conclusionDiagnostique || diagnosisData?.primaryDiagnosis || '',
+         specialist_notes: rapport?.syntheseDiagnostique || '',
+         specialist_consultation_ended_at: new Date().toISOString(),
+         report_sent_to_tibok: true,
+         report_sent_at: new Date().toISOString(),
+         updated_at: new Date().toISOString()
+       })
+       .eq('id', referralId)
+     console.log('✅ Referral status updated to completed')
    } catch (err) {
-     console.error('❌ Error sending to Tibok specialist endpoint:', err)
-     // Show error but don't block - the local save already succeeded
-     toast({
-       title: "⚠️ Avertissement",
-       description: "Le rapport a été sauvegardé mais l'envoi au tableau de bord patient a échoué. Veuillez réessayer.",
-       variant: "destructive"
-     })
+     console.error('❌ Error updating referral:', err)
    }
  }
 
