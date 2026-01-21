@@ -1899,6 +1899,29 @@ const doctorInfoFromTibok = {
  }
  }, [])
 
+// ==================== HANDLE DOCTOR DATA PROP (SPECIALIST MODE) ====================
+useEffect(() => {
+  // Only apply doctorData prop when in specialist mode and doctorData is provided
+  if (specialistMode && doctorData) {
+    console.log('👨‍⚕️ Loading specialist doctor data from prop:', doctorData)
+
+    const specialistDoctorInfo = {
+      nom: doctorData.nom || doctorData.fullName || 'Dr. [Name Required]',
+      qualifications: doctorData.qualifications || 'Specialist',
+      specialite: doctorData.specialite || doctorData.specialty || 'Specialist',
+      adresseCabinet: doctorData.clinicName || doctorData.adresseCabinet || '',
+      email: doctorData.email || '',
+      heuresConsultation: doctorData.heuresConsultation || '',
+      numeroEnregistrement: doctorData.numeroEnregistrement || doctorData.medicalCouncilNumber || '[MCM Registration Required]',
+      signatureUrl: doctorData.signatureUrl || null,
+      digitalSignature: doctorData.digitalSignature || null
+    }
+
+    console.log('✅ Specialist doctor info prepared:', specialistDoctorInfo)
+    setDoctorInfo(specialistDoctorInfo)
+  }
+}, [specialistMode, doctorData])
+
 // ==================== LOAD DRAFT FROM DATABASE ====================
 useEffect(() => {
  // Prevent multiple loads
