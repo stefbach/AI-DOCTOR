@@ -3204,32 +3204,12 @@ const sendToTibokSpecialistEndpoint = async (
   const tibokUrl = process.env.NEXT_PUBLIC_TIBOK_URL || 'https://v0-tibokmain2.vercel.app'
   const endpoint = `${tibokUrl}/api/specialist/send-to-patient-dashboard`
 
-  // Structure documents_data the same way as /api/save-medical-report does
-  // This ensures Tibok's frontend can properly display the documents
-  const documentsData = {
-    consultationReport: {
-      content: reportData?.compteRendu || {},
-    },
-    prescriptions: reportData?.ordonnances || {},
-    invoice: reportData?.invoice || null,
-    lastModified: new Date().toISOString()
-  }
-
-  // Extract prescription data for separate handling
+  // Extract prescription data
   const ordonnances = reportData?.ordonnances || {}
   const medications = ordonnances?.medicaments?.prescription?.medicaments || []
   const labTests = ordonnances?.biologie?.prescription?.analyses || {}
   const imagingExams = ordonnances?.imagerie?.prescription?.examens || []
   const sickLeave = ordonnances?.arretMaladie?.certificat || null
-
-  // Build prescription_data structure
-  const prescriptionData = {
-    medications: medications,
-    laboratoryTests: labTests,
-    imagingStudies: imagingExams,
-    sickLeave: sickLeave,
-    generatedAt: new Date().toISOString()
-  }
 
   // Determine what documents are available
   const hasMedications = medications && medications.length > 0
@@ -3237,6 +3217,46 @@ const sendToTibokSpecialistEndpoint = async (
   const hasImaging = imagingExams && imagingExams.length > 0
   const hasSickLeave = !!(sickLeave && sickLeave.nombreJours > 0)
 
+  // Get report sections for documents structure
+  const rapport = reportData?.compteRendu?.rapport || {}
+  const praticien = reportData?.compteRendu?.praticien || {}
+  const patient = reportData?.compteRendu?.patient || {}
+
+  // Format medications for API
+  const formattedMedications = medications.map((med: any) => ({
+    nom: med.nom || med.name,
+    dosage: med.dosage,
+    posologie: med.posologie || med.frequency,
+    duree: med.duree || med.duration,
+    instructions: med.instructions || med.notes || ''
+  }))
+
+  // Format lab tests for API
+  const formattedLabTests: any[] = []
+  Object.entries(labTests).forEach(([category, tests]: [string, any]) => {
+    if (Array.isArray(tests)) {
+      tests.forEach((test: any) => {
+        formattedLabTests.push({
+          nom: test.nom || test.name || test,
+          code: test.code || '',
+          categorie: category,
+          aJeun: test.aJeun || test.fasting || false,
+          instructions: test.instructions || ''
+        })
+      })
+    }
+  })
+
+  // Format imaging exams for API
+  const formattedImaging = imagingExams.map((exam: any) => ({
+    nom: exam.nom || exam.name,
+    type: exam.type || exam.modalite,
+    zoneAnatomique: exam.zoneAnatomique || exam.zone || '',
+    produitContraste: exam.produitContraste || exam.contraste || false,
+    indicationClinique: exam.indication || exam.indicationClinique || ''
+  }))
+
+  // Build request body matching API spec
   const requestBody = {
     referralId,
     patientId,
@@ -3253,34 +3273,61 @@ const sendToTibokSpecialistEndpoint = async (
       age: String(patientDataObj?.age || ''),
       gender: patientDataObj?.gender || '',
       birthDate: patientDataObj?.dateOfBirth || '',
-      phone: patientDataObj?.phone || '',
-      email: patientDataObj?.email || ''
+      phone: patientDataObj?.phone || ''
     },
 
-    // Full report object - same structure as normal consultation
-    report: reportData,
-
-    // Structured documents_data for consultation_records
-    documents_data: documentsData,
-
-    // Structured prescription_data for orders
-    prescription_data: prescriptionData,
-
-    // Clinical and diagnosis data
-    clinical_data: clinicalDataObj || {},
-    diagnosis_data: diagnosisDataObj || {},
-
-    // Document availability flags
-    has_prescriptions: hasMedications,
-    has_lab_requests: hasLabTests,
-    has_imaging_requests: hasImaging,
-    has_sick_leave: hasSickLeave,
-
-    // Signatures
-    signatures: signaturesObj || {},
-
-    // Status
-    documents_status: 'finalized'
+    // Documents structure as per API spec
+    documents: {
+      consultationReport: {
+        type: 'consultation-report',
+        content: {
+          rapport: {
+            motifConsultation: rapport.motifConsultation || '',
+            examenClinique: rapport.examenPhysique || rapport.examenClinique || '',
+            conclusionDiagnostique: rapport.conclusionDiagnostique || '',
+            recommandations: rapport.recommandations || rapport.planDeTraitement || ''
+          },
+          patient: {
+            nom: patientName,
+            age: String(patientDataObj?.age || patient?.age || ''),
+            sexe: patientDataObj?.gender || patient?.sexe || ''
+          },
+          praticien: {
+            nom: specialistName,
+            specialite: praticien.specialite || ''
+          }
+        }
+      },
+      prescriptions: hasMedications ? {
+        type: 'prescription',
+        content: {
+          medicaments: formattedMedications
+        }
+      } : null,
+      laboratoryRequests: hasLabTests ? {
+        type: 'laboratory-request',
+        content: {
+          examens: formattedLabTests,
+          urgent: ordonnances?.biologie?.urgent || false
+        }
+      } : null,
+      imagingRequests: hasImaging ? {
+        type: 'imaging-request',
+        content: {
+          examens: formattedImaging,
+          urgent: ordonnances?.imagerie?.urgent || false
+        }
+      } : null,
+      sickLeaveCertificate: hasSickLeave ? {
+        dateDebut: sickLeave.dateDebut,
+        dateFin: sickLeave.dateFin,
+        nombreJours: sickLeave.nombreJours,
+        motifMedical: sickLeave.motifMedical,
+        remarques: sickLeave.remarques || ''
+      } : null,
+      dietPlan: reportData?.dietaryPlan || null,
+      followUp: reportData?.followUpPlan || null
+    }
   }
 
   console.log('📦 Tibok specialist request body:', {
