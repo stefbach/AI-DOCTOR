@@ -1082,7 +1082,7 @@ export default function SpecialistConsultationPage() {
                     </div>
                   )}
 
-                  {/* Success indicator with preview */}
+                  {/* Success indicator with full results view */}
                   {(labResults || radiologyResults) && (
                     <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
@@ -1092,9 +1092,9 @@ export default function SpecialistConsultationPage() {
                         </p>
                       </div>
                       {importedResultsText && (
-                        <div className="mt-2 max-h-24 overflow-y-auto">
-                          <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono bg-white/50 p-2 rounded">
-                            {importedResultsText.slice(0, 300)}{importedResultsText.length > 300 ? '...' : ''}
+                        <div className="mt-2 max-h-64 md:max-h-80 overflow-y-auto overscroll-contain touch-pan-y border border-gray-200 rounded">
+                          <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono bg-white p-3">
+                            {importedResultsText}
                           </pre>
                         </div>
                       )}
