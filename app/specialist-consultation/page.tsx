@@ -558,7 +558,7 @@ export default function SpecialistConsultationPage() {
         firstName: isValidValue(extractedPatient.firstName) ? extractedPatient.firstName : (prev?.firstName || ''),
         lastName: isValidValue(extractedPatient.lastName) ? extractedPatient.lastName : (prev?.lastName || ''),
         age: extractedPatient.age || prev?.age || '',
-        gender: extractedPatient.gender || prev?.gender || '',
+        gender: isValidValue(extractedPatient.gender) ? extractedPatient.gender : (prev?.gender || ''),
         email: isValidValue(extractedPatient.email) ? extractedPatient.email : (prev?.email || ''),
         phone: isValidValue(extractedPatient.phone) ? extractedPatient.phone : (prev?.phone || ''),
       }))
