@@ -3186,11 +3186,163 @@ const toggleFollowUpType = useCallback((type: string) => {
   )
 }, [])
 
+// ==================== SEND TO TIBOK SPECIALIST ENDPOINT ====================
+const sendToTibokSpecialistEndpoint = async (
+  referralId: string,
+  patientId: string,
+  specialistId: string,
+  specialistName: string,
+  patientName: string,
+  reportData: any,
+  patientDataObj: any
+) => {
+  console.log('📤 Sending to Tibok specialist endpoint...')
+
+  const tibokUrl = process.env.NEXT_PUBLIC_TIBOK_URL || 'https://v0-tibokmain2.vercel.app'
+  const endpoint = `${tibokUrl}/api/specialist/send-to-patient-dashboard`
+
+  // Get report sections
+  const rapport = reportData?.compteRendu?.rapport || {}
+  const praticien = reportData?.compteRendu?.praticien || {}
+  const patient = reportData?.compteRendu?.patient || {}
+  const ordonnances = reportData?.ordonnances || {}
+
+  // Format medications
+  const medicaments = ordonnances?.medicaments?.prescription?.medicaments || []
+  const formattedMedications = medicaments.map((med: any) => ({
+    nom: med.nom || med.name,
+    dosage: med.dosage,
+    posologie: med.posologie || med.frequency,
+    duree: med.duree || med.duration,
+    instructions: med.instructions || med.notes || ''
+  }))
+
+  // Format laboratory tests
+  const biologie = ordonnances?.biologie?.prescription?.analyses || {}
+  const labTests: any[] = []
+  Object.entries(biologie).forEach(([category, tests]: [string, any]) => {
+    if (Array.isArray(tests)) {
+      tests.forEach((test: any) => {
+        labTests.push({
+          nom: test.nom || test.name || test,
+          code: test.code || '',
+          categorie: category,
+          aJeun: test.aJeun || test.fasting || false,
+          instructions: test.instructions || ''
+        })
+      })
+    }
+  })
+
+  // Format imaging exams
+  const imagerie = ordonnances?.imagerie?.prescription?.examens || []
+  const formattedImaging = imagerie.map((exam: any) => ({
+    nom: exam.nom || exam.name,
+    type: exam.type || exam.modalite,
+    zoneAnatomique: exam.zoneAnatomique || exam.zone || '',
+    produitContraste: exam.produitContraste || exam.contraste || false,
+    indicationClinique: exam.indication || exam.indicationClinique || ''
+  }))
+
+  // Format sick leave if present
+  const arretMaladie = ordonnances?.arretMaladie?.certificat
+  const sickLeaveCertificate = arretMaladie ? {
+    dateDebut: arretMaladie.dateDebut,
+    dateFin: arretMaladie.dateFin,
+    nombreJours: arretMaladie.nombreJours,
+    motifMedical: arretMaladie.motifMedical,
+    remarques: arretMaladie.remarques || ''
+  } : null
+
+  const requestBody = {
+    referralId,
+    patientId,
+    specialistId,
+    specialistName,
+    patientName,
+    generatedAt: new Date().toISOString(),
+    patientData: {
+      name: patientName,
+      firstName: patientDataObj?.firstName || patient?.nom?.split(' ')[0] || '',
+      lastName: patientDataObj?.lastName || patient?.nom?.split(' ').slice(1).join(' ') || '',
+      age: String(patientDataObj?.age || patient?.age || ''),
+      gender: patientDataObj?.gender || patient?.sexe || '',
+      birthDate: patientDataObj?.dateOfBirth || patient?.dateNaissance || '',
+      phone: patientDataObj?.phone || patient?.telephone || ''
+    },
+    documents: {
+      consultationReport: {
+        type: 'consultation-report',
+        content: {
+          rapport: {
+            motifConsultation: rapport.motifConsultation || '',
+            examenClinique: rapport.examenPhysique || rapport.examenClinique || '',
+            conclusionDiagnostique: rapport.conclusionDiagnostique || '',
+            recommandations: rapport.recommandations || rapport.planDeTraitement || ''
+          },
+          patient: {
+            nom: patientName,
+            age: String(patientDataObj?.age || patient?.age || ''),
+            sexe: patientDataObj?.gender || patient?.sexe || ''
+          },
+          praticien: {
+            nom: specialistName,
+            specialite: praticien.specialite || ''
+          }
+        }
+      },
+      prescriptions: formattedMedications.length > 0 ? {
+        type: 'prescription',
+        content: {
+          medicaments: formattedMedications
+        }
+      } : null,
+      laboratoryRequests: labTests.length > 0 ? {
+        type: 'laboratory-request',
+        content: {
+          examens: labTests,
+          urgent: ordonnances?.biologie?.urgent || false
+        }
+      } : null,
+      imagingRequests: formattedImaging.length > 0 ? {
+        type: 'imaging-request',
+        content: {
+          examens: formattedImaging,
+          urgent: ordonnances?.imagerie?.urgent || false
+        }
+      } : null,
+      sickLeaveCertificate,
+      dietPlan: reportData?.dietaryPlan || null,
+      followUp: reportData?.followUpPlan || null
+    }
+  }
+
+  console.log('📦 Tibok specialist request body:', requestBody)
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(requestBody)
+  })
+
+  const result = await response.json()
+
+  if (!response.ok) {
+    console.error('❌ Tibok specialist endpoint error:', result)
+    throw new Error(result.error || 'Failed to send to Tibok')
+  }
+
+  console.log('✅ Tibok specialist endpoint success:', result)
+  return result
+}
+
 // ==================== SEND DOCUMENTS ====================
 const handleSendDocuments = async () => {
  console.log('📤 Starting handleSendDocuments...')
  setIsSendingDocuments(true)
- 
+
  // Check if report is validated
  if (!report || validationStatus !== 'validated') {
  console.log('❌ Report not validated', { hasReport: !!report, validationStatus })
@@ -3711,37 +3863,61 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
    }
  }
 
- // Update referral if in specialist mode
- if (specialistMode && referralId && supabaseClient) {
-   console.log('📤 Updating referral as specialist...')
+ // Send to Tibok specialist endpoint if in specialist mode
+ if (specialistMode && referralId) {
+   console.log('📤 Sending specialist report to Tibok...')
    try {
-     const rapport = getReportRapport()
-     const { error: updateError } = await supabaseClient
-       .from('referrals')
-       .update({
-         status: 'completed',
-         specialist_report: {
-           medicalReport: rapport,
-           clinicalData: clinicalData,
-           diagnosisData: diagnosisData,
-           consultationId: result?.consultationId || consultationId
-         },
-         specialist_diagnosis: rapport?.conclusionDiagnostique || diagnosisData?.primaryDiagnosis || '',
-         specialist_notes: rapport?.syntheseDiagnostique || '',
-         specialist_consultation_ended_at: new Date().toISOString(),
-         report_sent_to_tibok: true,
-         report_sent_at: new Date().toISOString(),
-         updated_at: new Date().toISOString()
-       })
-       .eq('id', referralId)
+     // Get patient and specialist info
+     const specialistName = doctorInfo.nom || 'Dr. Specialist'
+     const specialistId = propDoctorId || ''
+     const patientIdForTibok = propPatientId || patientData?.patientId || ''
 
-     if (updateError) {
-       console.error('❌ Error updating referral:', updateError)
-     } else {
-       console.log('✅ Referral updated successfully (specialist consultation completed)')
+     // Call the Tibok specialist endpoint
+     const tibokResult = await sendToTibokSpecialistEndpoint(
+       referralId,
+       patientIdForTibok,
+       specialistId,
+       specialistName,
+       patientName,
+       report,
+       patientData
+     )
+
+     console.log('✅ Tibok specialist endpoint response:', tibokResult)
+
+     // Also update the referral locally as backup
+     if (supabaseClient) {
+       const rapport = getReportRapport()
+       await supabaseClient
+         .from('referrals')
+         .update({
+           status: 'completed',
+           specialist_report: {
+             medicalReport: rapport,
+             clinicalData: clinicalData,
+             diagnosisData: diagnosisData,
+             consultationId: result?.consultationId || consultationId,
+             tibokConsultationRecordId: tibokResult?.consultationRecordId
+           },
+           specialist_diagnosis: rapport?.conclusionDiagnostique || diagnosisData?.primaryDiagnosis || '',
+           specialist_notes: rapport?.syntheseDiagnostique || '',
+           specialist_consultation_ended_at: new Date().toISOString(),
+           report_sent_to_tibok: true,
+           report_sent_at: new Date().toISOString(),
+           updated_at: new Date().toISOString()
+         })
+         .eq('id', referralId)
      }
+
+     console.log('✅ Specialist consultation completed and sent to patient dashboard')
    } catch (err) {
-     console.error('❌ Error updating referral:', err)
+     console.error('❌ Error sending to Tibok specialist endpoint:', err)
+     // Show error but don't block - the local save already succeeded
+     toast({
+       title: "⚠️ Avertissement",
+       description: "Le rapport a été sauvegardé mais l'envoi au tableau de bord patient a échoué. Veuillez réessayer.",
+       variant: "destructive"
+     })
    }
  }
 
@@ -3750,7 +3926,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  toast({
  title: "✅ Documents envoyés avec succès",
  description: specialistMode
-   ? "Le rapport a été envoyé au médecin référent"
+   ? "Le rapport spécialiste est maintenant disponible dans le tableau de bord du patient"
    : "Les documents sont maintenant disponibles dans le tableau de bord du patient"
  })
 
