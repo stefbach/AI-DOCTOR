@@ -978,12 +978,12 @@ const COMMON_SYMPTOMS = useMemo(() => [
  <VoiceDictationButton
  onTranscript={(text) => {
  const currentText = localData.chiefComplaint
- const newText = currentText 
- ? `${currentText} ${text}` 
+ const newText = currentText
+ ? `${currentText} ${text}`
  : text
  updateData({ chiefComplaint: newText })
  }}
- language="en"
+ language="auto"
  />
  </div>
  <Textarea
@@ -1025,12 +1025,12 @@ const COMMON_SYMPTOMS = useMemo(() => [
  <VoiceDictationButton
  onTranscript={(text) => {
  const currentText = localData.diseaseHistory
- const newText = currentText 
- ? `${currentText} ${text}` 
+ const newText = currentText
+ ? `${currentText} ${text}`
  : text
  updateData({ diseaseHistory: newText })
  }}
- language="en"
+ language="auto"
  />
  </div>
  <Textarea
