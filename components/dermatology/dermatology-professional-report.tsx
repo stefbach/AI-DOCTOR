@@ -2935,19 +2935,21 @@ const loadAvailableSlots = useCallback(async (specialistId: string, date: string
   setLoadingSlots(true)
   setAvailableSlots([])
   try {
-    console.log('📅 Loading slots for specialist:', specialistId, 'date:', date)
+    // Calculate day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+    const dayOfWeek = new Date(date + 'T00:00:00').getDay()
+    console.log('📅 Loading slots for specialist:', specialistId, 'date:', date, 'dayOfWeek:', dayOfWeek)
 
-    const dayOfWeek = new Date(date).getDay()
-    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-
-    const { data: availability } = await supabaseClient
+    // 1. Get weekly availability for this day of week
+    const { data: availability, error: availError } = await supabaseClient
       .from('specialist_availability')
       .select('*')
       .eq('specialist_id', specialistId)
-      .eq('day_of_week', dayNames[dayOfWeek])
-      .eq('is_available', true)
+      .eq('day_of_week', dayOfWeek)
+      .eq('is_active', true)
 
-    if (!availability || availability.length === 0) {
+    console.log('📅 Availability query result:', { availability, error: availError })
+
+    if (availError || !availability || availability.length === 0) {
       console.log('📅 No availability for day of week:', dayOfWeek)
       setAvailableSlots([])
       setLoadingSlots(false)
