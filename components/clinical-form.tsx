@@ -619,11 +619,12 @@ const COMMON_SYMPTOMS = useMemo(() => [
 
    setIsCheckingResultsAvailability(true)
    try {
-     // Build query params with checkOnly flag
+     // Build query params with checkOnly flag - send both ID and name for better matching
      const params = new URLSearchParams({ type: 'all', checkOnly: 'true' })
      if (patientId) {
        params.append('patientId', patientId)
-     } else if (patientName) {
+     }
+     if (patientName) {
        params.append('patientName', patientName)
      }
 
@@ -631,8 +632,11 @@ const COMMON_SYMPTOMS = useMemo(() => [
      const data = await response.json()
 
      console.log('📊 Results availability check:', {
+       searchedPatientId: patientId,
+       searchedPatientName: patientName,
        hasLabResults: data.hasLabResults,
-       hasRadiologyResults: data.hasRadiologyResults
+       hasRadiologyResults: data.hasRadiologyResults,
+       debug: data.debug
      })
 
      if (response.ok) {
