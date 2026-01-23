@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,7 +20,8 @@ import {
   FileText, Download, Printer, CheckCircle, Loader2, Pill, TestTube,
   Scan, AlertTriangle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
   Trash2, AlertCircle, Lock, Unlock, Calendar, User, Stethoscope,
-  Activity, Utensils, ClipboardList, HeartPulse, Send, Mic, MicOff
+  Activity, Utensils, ClipboardList, HeartPulse, Send, Mic, MicOff,
+  UserPlus, Droplets, Scale
 } from "lucide-react"
 import { createClient } from '@supabase/supabase-js'
 
@@ -610,6 +613,48 @@ export default function ChronicProfessionalReport({
   const [dietaryLoading, setDietaryLoading] = useState(false)
   const [dietaryError, setDietaryError] = useState<string | null>(null)
   const [detailedDietaryGenerated, setDetailedDietaryGenerated] = useState(false)
+
+  // ==================== REFERRAL & CHRONIC FOLLOW-UP STATE ====================
+  // Referral state
+  const [referralData, setReferralData] = useState<{
+    specialty: string
+    specialistId: string
+    specialistName: string
+    reason: string
+    appointmentDate?: string | null
+    appointmentSlot?: { start: string; end: string } | null
+  } | null>(null)
+  const [specialties, setSpecialties] = useState<Array<{id: string, name: string, name_fr: string}>>([])
+  const [specialists, setSpecialists] = useState<Array<{id: string, name: string, phone: string}>>([])
+  const [loadingSpecialties, setLoadingSpecialties] = useState(false)
+  const [loadingSpecialists, setLoadingSpecialists] = useState(false)
+  const [selectedSpecialty, setSelectedSpecialty] = useState('')
+  const [selectedSpecialistId, setSelectedSpecialistId] = useState('')
+  const [referralReason, setReferralReason] = useState('')
+  const [showReferralModal, setShowReferralModal] = useState(false)
+
+  // Appointment booking state
+  const [appointmentDate, setAppointmentDate] = useState<string>('')
+  const [availableSlots, setAvailableSlots] = useState<Array<{start: string, end: string}>>([])
+  const [selectedSlot, setSelectedSlot] = useState<{start: string, end: string} | null>(null)
+  const [loadingSlots, setLoadingSlots] = useState(false)
+
+  // Chronic follow-up state (blood pressure, glycemia, weight monitoring)
+  const [patientFollowUpData, setPatientFollowUpData] = useState<{
+    types: string[]
+  } | null>(null)
+  const [selectedFollowUpTypes, setSelectedFollowUpTypes] = useState<string[]>([])
+  const [showFollowUpModal, setShowFollowUpModal] = useState(false)
+
+  // Helper to get Supabase client
+  const getSupabaseClient = useCallback(() => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (url && key) {
+      return createClient(url, key)
+    }
+    return null
+  }, [])
 
   // Audio recording state for narrative editing
   const [isRecordingNarrative, setIsRecordingNarrative] = useState(false)
@@ -2013,6 +2058,273 @@ export default function ChronicProfessionalReport({
     }
   }, [validationStatus, consultationId, report, sickLeaveData, invoiceData, patientData, clinicalData, diagnosisData, computedNarrative, chronicSections, localMedications, localLabTests, localParaclinicalExams, doctorInfo])
 
+  // ==================== REFERRAL & FOLLOW-UP HANDLERS ====================
+
+  // Load specialties from Supabase
+  const loadSpecialties = useCallback(async () => {
+    const supabaseClient = getSupabaseClient()
+    if (!supabaseClient) return
+
+    setLoadingSpecialties(true)
+    try {
+      console.log('Loading specialties...')
+      const { data, error } = await supabaseClient
+        .from('specialties')
+        .select('id, name_fr, name_en')
+        .order('name_fr')
+
+      if (error) throw error
+      console.log('Specialties loaded:', data?.length || 0)
+      const mappedData = (data || []).map((s: any) => ({
+        id: s.id,
+        name: s.name_en,
+        name_fr: s.name_fr
+      }))
+      setSpecialties(mappedData)
+    } catch (error) {
+      console.error('Error loading specialties:', error)
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les spécialités",
+        variant: "destructive"
+      })
+    } finally {
+      setLoadingSpecialties(false)
+    }
+  }, [getSupabaseClient])
+
+  // Load specialists by specialty from Supabase
+  const loadSpecialists = useCallback(async (specialty: string) => {
+    const supabaseClient = getSupabaseClient()
+    if (!supabaseClient || !specialty) return
+
+    setLoadingSpecialists(true)
+    setSpecialists([])
+    try {
+      console.log('Loading specialists for specialty:', specialty)
+      const { data, error } = await supabaseClient
+        .from('specialists')
+        .select('id, full_name, phone, specialties')
+        .eq('is_active', true)
+        .contains('specialties', [specialty])
+        .order('full_name')
+
+      if (error) throw error
+      console.log('Specialists loaded:', data?.length || 0)
+      const mappedData = (data || []).map((s: any) => ({
+        id: s.id,
+        name: s.full_name ? `Dr. ${s.full_name}` : 'Dr. (Nom non disponible)',
+        phone: s.phone
+      }))
+      setSpecialists(mappedData)
+    } catch (error) {
+      console.error('Error loading specialists:', error)
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les correspondants",
+        variant: "destructive"
+      })
+    } finally {
+      setLoadingSpecialists(false)
+    }
+  }, [getSupabaseClient])
+
+  // Handle specialty selection
+  const handleSpecialtyChange = useCallback((specialty: string) => {
+    setSelectedSpecialty(specialty)
+    setSelectedSpecialistId('')
+    setAppointmentDate('')
+    setAvailableSlots([])
+    setSelectedSlot(null)
+    if (specialty) {
+      loadSpecialists(specialty)
+    } else {
+      setSpecialists([])
+    }
+  }, [loadSpecialists])
+
+  // Load available slots for a specialist on a given date
+  const loadAvailableSlots = useCallback(async (specialistId: string, date: string) => {
+    const supabaseClient = getSupabaseClient()
+    if (!supabaseClient || !specialistId || !date) {
+      setAvailableSlots([])
+      return
+    }
+
+    setLoadingSlots(true)
+    setSelectedSlot(null)
+
+    try {
+      const dayOfWeek = new Date(date + 'T00:00:00').getDay()
+      console.log('📅 Loading slots for:', { specialistId, date, dayOfWeek })
+
+      const { data: availability, error: availError } = await supabaseClient
+        .from('specialist_availability')
+        .select('*')
+        .eq('specialist_id', specialistId)
+        .eq('day_of_week', dayOfWeek)
+        .eq('is_active', true)
+
+      if (availError || !availability || availability.length === 0) {
+        console.log('📅 No availability for day of week:', dayOfWeek)
+        setAvailableSlots([])
+        setLoadingSlots(false)
+        return
+      }
+
+      const { data: bookedAppointments } = await supabaseClient
+        .from('specialist_appointments')
+        .select('start_time, end_time')
+        .eq('specialist_id', specialistId)
+        .eq('appointment_date', date)
+        .neq('status', 'cancelled')
+
+      const slots: Array<{start: string, end: string}> = []
+      const booked = bookedAppointments || []
+
+      for (const avail of availability) {
+        const slotDuration = avail.slot_duration || 30
+        let currentTime = avail.start_time
+
+        while (currentTime < avail.end_time) {
+          const [hours, minutes] = currentTime.split(':').map(Number)
+          const endMinutes = hours * 60 + minutes + slotDuration
+          const endHours = Math.floor(endMinutes / 60)
+          const endMins = endMinutes % 60
+          const endTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}:00`
+
+          const isBooked = booked.some(b => {
+            return !(endTime <= b.start_time || currentTime >= b.end_time)
+          })
+
+          if (!isBooked && endTime <= avail.end_time) {
+            slots.push({ start: currentTime, end: endTime })
+          }
+
+          currentTime = endTime
+        }
+      }
+
+      console.log('✅ Available slots generated:', slots.length)
+      setAvailableSlots(slots)
+    } catch (err) {
+      console.error('Error loading slots:', err)
+      setAvailableSlots([])
+    } finally {
+      setLoadingSlots(false)
+    }
+  }, [getSupabaseClient])
+
+  // Handle date selection for appointment
+  const handleAppointmentDateChange = useCallback((date: string) => {
+    setAppointmentDate(date)
+    setSelectedSlot(null)
+    if (date && selectedSpecialistId) {
+      loadAvailableSlots(selectedSpecialistId, date)
+    } else {
+      setAvailableSlots([])
+    }
+  }, [selectedSpecialistId, loadAvailableSlots])
+
+  // Save referral data
+  const handleSaveReferral = useCallback(() => {
+    if (!selectedSpecialty || !selectedSpecialistId || !referralReason.trim()) {
+      toast({
+        title: "Champs requis",
+        description: "Veuillez remplir tous les champs obligatoires",
+        variant: "destructive"
+      })
+      return
+    }
+
+    const specialist = specialists.find(s => s.id === selectedSpecialistId)
+    setReferralData({
+      specialty: selectedSpecialty,
+      specialistId: selectedSpecialistId,
+      specialistName: specialist?.name || '',
+      reason: referralReason,
+      appointmentDate: appointmentDate || null,
+      appointmentSlot: selectedSlot
+    })
+    setShowReferralModal(false)
+
+    toast({
+      title: "✅ Référence enregistrée",
+      description: selectedSlot
+        ? `RDV prévu le ${appointmentDate} à ${selectedSlot.start.slice(0, 5)}`
+        : "La référence sera envoyée lors de la finalisation"
+    })
+  }, [selectedSpecialty, selectedSpecialistId, referralReason, specialists, appointmentDate, selectedSlot])
+
+  // Clear referral data
+  const handleClearReferral = useCallback(() => {
+    setReferralData(null)
+    setSelectedSpecialty('')
+    setSelectedSpecialistId('')
+    setReferralReason('')
+    setSpecialists([])
+    setAppointmentDate('')
+    setAvailableSlots([])
+    setSelectedSlot(null)
+  }, [])
+
+  // Open referral modal with pre-filled diagnosis
+  const handleOpenReferralModal = useCallback(() => {
+    loadSpecialties()
+
+    // Pre-fill reason with diagnostic info
+    let prefillText = ''
+    const diagnosis = report?.medicalReport?.diagnosticSummary
+    if (diagnosis?.diagnosticConclusion) {
+      prefillText += `CONCLUSION DIAGNOSTIQUE:\n${diagnosis.diagnosticConclusion}\n\n`
+    }
+    if (diagnosis?.prognosticAssessment) {
+      prefillText += `ÉVALUATION PRONOSTIQUE:\n${diagnosis.prognosticAssessment}`
+    }
+    if (prefillText.trim()) {
+      setReferralReason(prefillText.trim())
+    }
+
+    setShowReferralModal(true)
+  }, [loadSpecialties, report])
+
+  // Save follow-up data
+  const handleSavePatientFollowUp = useCallback(() => {
+    if (selectedFollowUpTypes.length === 0) {
+      toast({
+        title: "Sélection requise",
+        description: "Veuillez sélectionner au moins un type de suivi",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setPatientFollowUpData({
+      types: selectedFollowUpTypes
+    })
+    setShowFollowUpModal(false)
+
+    toast({
+      title: "✅ Suivi chronique enregistré",
+      description: `${selectedFollowUpTypes.length} type(s) de suivi activé(s)`
+    })
+  }, [selectedFollowUpTypes])
+
+  // Clear follow-up data
+  const handleClearPatientFollowUp = useCallback(() => {
+    setPatientFollowUpData(null)
+    setSelectedFollowUpTypes([])
+  }, [])
+
+  // Toggle follow-up type selection
+  const toggleFollowUpType = useCallback((type: string) => {
+    setSelectedFollowUpTypes(prev =>
+      prev.includes(type)
+        ? prev.filter(t => t !== type)
+        : [...prev, type]
+    )
+  }, [])
+
   // ==================== SEND DOCUMENTS ====================
   const handleSendDocuments = async () => {
     console.log('📤 Starting handleSendDocuments for chronic disease...')
@@ -2479,6 +2791,110 @@ export default function ChronicProfessionalReport({
 
       if (result?.success) {
         console.log('🎉 Documents sent successfully!')
+
+        // Save referral if configured
+        const supabaseClient = getSupabaseClient()
+        if (referralData && supabaseClient) {
+          console.log('📤 Saving referral to Supabase...')
+          try {
+            let appointmentId: string | null = null
+
+            // Create appointment first if slot was selected
+            if (referralData.appointmentDate && referralData.appointmentSlot) {
+              console.log('📅 Creating appointment first...')
+              const { data: savedAppointment, error: appointmentError } = await supabaseClient
+                .from('specialist_appointments')
+                .insert({
+                  specialist_id: referralData.specialistId,
+                  patient_name: patientName || 'Unknown',
+                  patient_phone: patientPhone || null,
+                  appointment_date: referralData.appointmentDate,
+                  start_time: referralData.appointmentSlot.start,
+                  end_time: referralData.appointmentSlot.end,
+                  status: 'scheduled'
+                })
+                .select('id')
+                .single()
+
+              if (appointmentError) {
+                console.error('❌ Error creating appointment:', appointmentError)
+              } else {
+                appointmentId = savedAppointment?.id || null
+                console.log('✅ Appointment created successfully, id:', appointmentId)
+              }
+            }
+
+            // Create the referral with the appointment_id
+            const { data: savedReferral, error: referralError } = await supabaseClient
+              .from('referrals')
+              .insert({
+                patient_id: tibokPatientId || null,
+                specialist_id: referralData.specialistId,
+                specialty_requested: referralData.specialty,
+                referring_doctor_id: tibokDoctorId || null,
+                referring_consultation_id: consultationId || null,
+                patient_name: patientName || 'Unknown',
+                patient_phone: patientPhone || null,
+                patient_age: patient?.age ? parseInt(patient.age) : null,
+                patient_gender: patient?.gender || null,
+                reason: referralData.reason,
+                tibok_diagnosis: report?.medicalReport?.diagnosticSummary?.diagnosticConclusion || '',
+                status: 'pending',
+                appointment_id: appointmentId
+              })
+              .select()
+              .single()
+
+            if (referralError) {
+              console.error('❌ Error saving referral:', referralError)
+            } else {
+              console.log('✅ Referral saved successfully:', savedReferral?.id)
+
+              // Update appointment with referral_id for bidirectional link
+              if (appointmentId && savedReferral?.id) {
+                await supabaseClient
+                  .from('specialist_appointments')
+                  .update({ referral_id: savedReferral.id })
+                  .eq('id', appointmentId)
+                console.log('✅ Appointment linked to referral')
+              }
+            }
+          } catch (err) {
+            console.error('❌ Error saving referral:', err)
+          }
+        }
+
+        // Save patient follow-ups if configured
+        if (patientFollowUpData && patientFollowUpData.types.length > 0 && supabaseClient) {
+          console.log('📤 Saving follow-ups to Supabase...')
+          try {
+            const followUps = patientFollowUpData.types.map(type => ({
+              patient_id: tibokPatientId || null,
+              doctor_id: tibokDoctorId || null,
+              consultation_id: consultationId || null,
+              follow_up_type: type,
+              frequency: 'daily',
+              reminder_time: '08:00:00',
+              duration_days: 30,
+              status: 'active',
+              started_at: new Date().toISOString(),
+              next_reminder_at: new Date().toISOString()
+            }))
+
+            const { error: followUpError } = await supabaseClient
+              .from('patient_follow_ups')
+              .insert(followUps)
+
+            if (followUpError) {
+              console.error('❌ Error saving follow-ups:', followUpError)
+            } else {
+              console.log(`✅ ${followUps.length} follow-up(s) saved successfully`)
+            }
+          } catch (err) {
+            console.error('❌ Error saving follow-ups:', err)
+          }
+        }
+
         setIsSendingDocuments(false)
 
         toast({
@@ -6031,6 +6447,8 @@ export default function ChronicProfessionalReport({
           <option value="sick-leave">📅 Sick Leave {sickLeaveData.numberOfDays > 0 ? `(${sickLeaveData.numberOfDays}d)` : ''}</option>
           <option value="invoice">💰 Invoice</option>
           <option value="followup">📋 Follow-Up Plan</option>
+          <option value="referral">👨‍⚕️ Referral{referralData ? ' ✓' : ''}</option>
+          <option value="patient-monitoring">📊 Patient Monitoring{patientFollowUpData ? ` (${patientFollowUpData.types.length})` : ''}</option>
           <option value="ai-assistant">🤖 AI Assistant</option>
         </select>
       </div>
@@ -6511,7 +6929,133 @@ export default function ChronicProfessionalReport({
         <TabsContent value="followup">
           <FollowUpPlanSection />
         </TabsContent>
-        
+
+        {/* Referral Tab */}
+        <TabsContent value="referral">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-blue-600" />
+                Référer ce Patient
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {referralData ? (
+                <div className="space-y-4">
+                  <Alert className="bg-green-50 border-green-200">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                      <strong>Référence enregistrée</strong> - sera envoyée lors de la finalisation
+                    </AlertDescription>
+                  </Alert>
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <Label className="text-gray-500 text-sm">Spécialité</Label>
+                      <p className="font-medium">{specialties.find(s => s.id === referralData.specialty)?.name_fr || referralData.specialty}</p>
+                    </div>
+                    <div>
+                      <Label className="text-gray-500 text-sm">Correspondant</Label>
+                      <p className="font-medium">{referralData.specialistName}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <Label className="text-gray-500 text-sm">Motif</Label>
+                      <p className="font-medium whitespace-pre-wrap">{referralData.reason}</p>
+                    </div>
+                    {referralData.appointmentDate && referralData.appointmentSlot && (
+                      <div className="col-span-2">
+                        <Label className="text-gray-500 text-sm">Rendez-vous</Label>
+                        <p className="font-medium">{referralData.appointmentDate} à {referralData.appointmentSlot.start.slice(0, 5)}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setShowReferralModal(true)}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Modifier
+                    </Button>
+                    <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={handleClearReferral}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Supprimer
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <UserPlus className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                  <p className="text-gray-500 mb-4">Aucune référence enregistrée</p>
+                  <Button onClick={handleOpenReferralModal}>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Référer ce patient
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Patient Monitoring Tab */}
+        <TabsContent value="patient-monitoring">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-purple-600" />
+                Suivi Chronique du Patient
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {patientFollowUpData ? (
+                <div className="space-y-4">
+                  <Alert className="bg-green-50 border-green-200">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                      <strong>Suivi activé</strong> - sera créé lors de la finalisation
+                    </AlertDescription>
+                  </Alert>
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <Label className="text-gray-500 text-sm">Types de suivi sélectionnés</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {patientFollowUpData.types.includes('blood_pressure') && (
+                        <Badge className="bg-red-100 text-red-800">
+                          <Droplets className="h-3 w-3 mr-1" /> Tension Artérielle
+                        </Badge>
+                      )}
+                      {patientFollowUpData.types.includes('glycemia') && (
+                        <Badge className="bg-orange-100 text-orange-800">
+                          <Activity className="h-3 w-3 mr-1" /> Glycémie
+                        </Badge>
+                      )}
+                      {patientFollowUpData.types.includes('weight') && (
+                        <Badge className="bg-blue-100 text-blue-800">
+                          <Scale className="h-3 w-3 mr-1" /> Poids
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setShowFollowUpModal(true)}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Modifier
+                    </Button>
+                    <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={handleClearPatientFollowUp}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Supprimer
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Activity className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                  <p className="text-gray-500 mb-4">Aucun suivi chronique activé</p>
+                  <Button onClick={() => setShowFollowUpModal(true)}>
+                    <Activity className="h-4 w-4 mr-2" />
+                    Activer un suivi
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="ai-assistant">
           <TibokMedicalAssistant
             reportData={{
@@ -6870,6 +7414,241 @@ export default function ChronicProfessionalReport({
           </div>
         )}
       </div>
+
+      {/* Referral Modal */}
+    <Dialog open={showReferralModal} onOpenChange={setShowReferralModal}>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2">
+            <UserPlus className="h-5 w-5 text-blue-600" />
+            Référer ce patient
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4 overflow-y-auto flex-1 pr-2">
+          <div className="space-y-2">
+            <Label htmlFor="specialty">Spécialité *</Label>
+            <Select value={selectedSpecialty} onValueChange={handleSpecialtyChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner une spécialité" />
+              </SelectTrigger>
+              <SelectContent className="z-[9999]">
+                {loadingSpecialties ? (
+                  <div className="flex items-center justify-center py-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  </div>
+                ) : (
+                  specialties.map(spec => (
+                    <SelectItem key={spec.id} value={spec.id}>
+                      {spec.name_fr}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="specialist">Correspondant *</Label>
+            <Select
+              value={selectedSpecialistId}
+              onValueChange={setSelectedSpecialistId}
+              disabled={!selectedSpecialty || loadingSpecialists}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={selectedSpecialty ? "Sélectionner un correspondant" : "Sélectionnez d'abord une spécialité"} />
+              </SelectTrigger>
+              <SelectContent className="z-[9999]">
+                {loadingSpecialists ? (
+                  <div className="flex items-center justify-center py-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  </div>
+                ) : specialists.length === 0 ? (
+                  <div className="text-center py-2 text-gray-500 text-sm">
+                    Aucun correspondant disponible
+                  </div>
+                ) : (
+                  specialists.map(spec => (
+                    <SelectItem key={spec.id} value={spec.id}>
+                      {spec.name} {spec.phone && `(${spec.phone})`}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="reason">Motif de la référence *</Label>
+            <Textarea
+              id="reason"
+              value={referralReason}
+              onChange={(e) => setReferralReason(e.target.value)}
+              placeholder="Décrivez le motif de cette référence..."
+              rows={4}
+            />
+          </div>
+
+          {/* Appointment Booking Section (Optional) */}
+          {selectedSpecialistId && (
+            <div className="space-y-3 pt-2 border-t">
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  Prendre rendez-vous (optionnel)
+                </Label>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="appointmentDate" className="text-sm text-gray-600">Date du rendez-vous</Label>
+                <input
+                  type="date"
+                  id="appointmentDate"
+                  value={appointmentDate}
+                  onChange={(e) => handleAppointmentDateChange(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Available Slots */}
+              {appointmentDate && (
+                <div className="space-y-2">
+                  <Label className="text-sm text-gray-600">Créneaux disponibles</Label>
+                  {loadingSlots ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                      <span className="ml-2 text-sm text-gray-600">Chargement des créneaux...</span>
+                    </div>
+                  ) : availableSlots.length === 0 ? (
+                    <div className="text-center py-4 text-gray-500 text-sm bg-gray-50 rounded-md">
+                      Aucun créneau disponible pour cette date
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto p-1">
+                      {availableSlots.map((slot, idx) => (
+                        <Button
+                          key={idx}
+                          type="button"
+                          variant={selectedSlot?.start === slot.start ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setSelectedSlot(selectedSlot?.start === slot.start ? null : slot)}
+                          className={`text-xs ${selectedSlot?.start === slot.start ? 'bg-blue-600' : ''}`}
+                        >
+                          {slot.start.slice(0, 5)}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedSlot && (
+                    <div className="flex items-center gap-2 p-2 bg-green-50 rounded-md text-sm text-green-700">
+                      <CheckCircle className="h-4 w-4" />
+                      RDV sélectionné: {appointmentDate} à {selectedSlot.start.slice(0, 5)}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        <DialogFooter className="flex-shrink-0 border-t pt-4">
+          <Button variant="outline" onClick={() => setShowReferralModal(false)}>
+            Annuler
+          </Button>
+          <Button onClick={handleSaveReferral}>
+            Enregistrer
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    {/* Follow-up Modal */}
+    <Dialog open={showFollowUpModal} onOpenChange={setShowFollowUpModal}>
+      <DialogContent className="sm:max-w-[400px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5 text-purple-600" />
+            Activer Suivi Chronique
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <Label>Type de suivi * (peut sélectionner plusieurs)</Label>
+
+          <div className="space-y-3">
+            <div
+              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                selectedFollowUpTypes.includes('blood_pressure')
+                  ? 'bg-red-50 border-red-300'
+                  : 'hover:bg-gray-50'
+              }`}
+              onClick={() => toggleFollowUpType('blood_pressure')}
+            >
+              <Checkbox
+                id="blood_pressure"
+                checked={selectedFollowUpTypes.includes('blood_pressure')}
+                onCheckedChange={() => toggleFollowUpType('blood_pressure')}
+              />
+              <div className="flex items-center gap-2 flex-1">
+                <Droplets className="h-5 w-5 text-red-600" />
+                <Label htmlFor="blood_pressure" className="cursor-pointer">
+                  Tension Artérielle
+                </Label>
+              </div>
+            </div>
+
+            <div
+              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                selectedFollowUpTypes.includes('glycemia')
+                  ? 'bg-orange-50 border-orange-300'
+                  : 'hover:bg-gray-50'
+              }`}
+              onClick={() => toggleFollowUpType('glycemia')}
+            >
+              <Checkbox
+                id="glycemia"
+                checked={selectedFollowUpTypes.includes('glycemia')}
+                onCheckedChange={() => toggleFollowUpType('glycemia')}
+              />
+              <div className="flex items-center gap-2 flex-1">
+                <Activity className="h-5 w-5 text-orange-600" />
+                <Label htmlFor="glycemia" className="cursor-pointer">
+                  Glycémie
+                </Label>
+              </div>
+            </div>
+
+            <div
+              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                selectedFollowUpTypes.includes('weight')
+                  ? 'bg-blue-50 border-blue-300'
+                  : 'hover:bg-gray-50'
+              }`}
+              onClick={() => toggleFollowUpType('weight')}
+            >
+              <Checkbox
+                id="weight"
+                checked={selectedFollowUpTypes.includes('weight')}
+                onCheckedChange={() => toggleFollowUpType('weight')}
+              />
+              <div className="flex items-center gap-2 flex-1">
+                <Scale className="h-5 w-5 text-blue-600" />
+                <Label htmlFor="weight" className="cursor-pointer">
+                  Poids
+                </Label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setShowFollowUpModal(false)}>
+            Annuler
+          </Button>
+          <Button onClick={handleSavePatientFollowUp}>
+            Activer
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     </div>
   )
 }
