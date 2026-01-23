@@ -2067,11 +2067,12 @@ export default function ChronicProfessionalReport({
 
     setLoadingSpecialties(true)
     try {
-      console.log('Loading specialties...')
+      console.log('Loading specialties from Supabase...')
       const { data, error } = await supabaseClient
-        .from('specialties')
-        .select('id, name_fr, name_en')
-        .order('name_fr')
+        .from('specialty_types')
+        .select('id, name_en, name_fr')
+        .eq('is_active', true)
+        .order('display_order')
 
       if (error) throw error
       console.log('Specialties loaded:', data?.length || 0)
