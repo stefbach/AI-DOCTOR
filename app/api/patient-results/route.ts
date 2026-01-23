@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
     const patientId = searchParams.get('patientId')
     const patientName = searchParams.get('patientName')
     const type = searchParams.get('type') // 'lab', 'radiology', or 'all'
+    const checkOnly = searchParams.get('checkOnly') === 'true' // Only check if results exist, don't fetch full data
 
     if (!patientId && !patientName) {
       return NextResponse.json(
@@ -99,9 +100,14 @@ export async function GET(req: NextRequest) {
 
         // Step 2: If we found an order, get the results
         if (matchedOrder) {
+          // For checkOnly mode, just verify results exist
+          const selectFields = checkOnly
+            ? 'id'
+            : 'id, results_data, interpretation_notes, validated_by, validated_at, created_at'
+
           const { data: labResultData, error: labResultError } = await supabase
             .from('lab_results')
-            .select('id, results_data, interpretation_notes, validated_by, validated_at, created_at')
+            .select(selectFields)
             .eq('lab_order_id', matchedOrder.id)
             .order('created_at', { ascending: false })
             .limit(1)
@@ -112,11 +118,14 @@ export async function GET(req: NextRequest) {
           if (labResultError) {
             console.error('Error fetching lab results:', labResultError)
           } else if (labResultData && labResultData.length > 0) {
-            results.labResults = {
-              ...labResultData[0],
-              lab_orders: matchedOrder
-            }
             results.hasLabResults = true
+            // Only include full results if not in checkOnly mode
+            if (!checkOnly) {
+              results.labResults = {
+                ...labResultData[0],
+                lab_orders: matchedOrder
+              }
+            }
           }
         }
       }
@@ -165,9 +174,14 @@ export async function GET(req: NextRequest) {
 
         // Step 2: If we found an order, get the results
         if (matchedOrder) {
+          // For checkOnly mode, just verify results exist
+          const selectFields = checkOnly
+            ? 'id'
+            : 'id, results_data, radiologist_name, radiologist_notes, validated_at, created_at'
+
           const { data: radioResultData, error: radioResultError } = await supabase
             .from('radiology_results')
-            .select('id, results_data, radiologist_name, radiologist_notes, validated_at, created_at')
+            .select(selectFields)
             .eq('radiology_order_id', matchedOrder.id)
             .order('created_at', { ascending: false })
             .limit(1)
@@ -178,11 +192,14 @@ export async function GET(req: NextRequest) {
           if (radioResultError) {
             console.error('Error fetching radiology results:', radioResultError)
           } else if (radioResultData && radioResultData.length > 0) {
-            results.radiologyResults = {
-              ...radioResultData[0],
-              radiology_orders: matchedOrder
-            }
             results.hasRadiologyResults = true
+            // Only include full results if not in checkOnly mode
+            if (!checkOnly) {
+              results.radiologyResults = {
+                ...radioResultData[0],
+                radiology_orders: matchedOrder
+              }
+            }
           }
         }
       }
