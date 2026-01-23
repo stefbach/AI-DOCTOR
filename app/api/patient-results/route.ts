@@ -42,8 +42,11 @@ export async function GET(req: NextRequest) {
     // Debug info to track what's happening
     const debug: any = {
       searchedPatientName: patientName,
-      searchedPatientId: patientId
+      searchedPatientId: patientId,
+      checkOnly: checkOnly
     }
+
+    console.log('🔍 Patient Results API called with:', { patientId, patientName, type, checkOnly })
 
     const results: {
       labResults: any | null
@@ -70,11 +73,18 @@ export async function GET(req: NextRequest) {
       debug.labOrdersCount = allLabOrders?.length || 0
       debug.labOrdersError = labOrdersError?.message || null
 
+      console.log('📋 Lab orders query result:', {
+        count: allLabOrders?.length || 0,
+        error: labOrdersError?.message,
+        firstFewNames: allLabOrders?.slice(0, 5).map(o => ({ patient_name: o.patient_name, patient_id: o.patient_id }))
+      })
+
       if (labOrdersError) {
         console.error('Error fetching lab orders:', labOrdersError)
       } else if (allLabOrders && allLabOrders.length > 0) {
         // Log all patient names for debugging
         debug.labOrderPatientNames = allLabOrders.slice(0, 10).map(o => o.patient_name)
+        debug.labOrderPatientIds = allLabOrders.slice(0, 10).map(o => o.patient_id)
 
         // Find matching order by patient
         let matchedOrder = null
@@ -96,7 +106,13 @@ export async function GET(req: NextRequest) {
           }
         }
 
-        debug.matchedLabOrder = matchedOrder ? { id: matchedOrder.id, patient_name: matchedOrder.patient_name } : null
+        debug.matchedLabOrder = matchedOrder ? { id: matchedOrder.id, patient_name: matchedOrder.patient_name, patient_id: matchedOrder.patient_id } : null
+
+        console.log('🔎 Lab order matching result:', {
+          matchedOrder: matchedOrder ? { id: matchedOrder.id, patient_name: matchedOrder.patient_name, patient_id: matchedOrder.patient_id } : null,
+          searchedPatientId: patientId,
+          searchedPatientName: patientName
+        })
 
         // Step 2: If we found an order, get the results
         if (matchedOrder) {
@@ -114,6 +130,12 @@ export async function GET(req: NextRequest) {
 
           debug.labResultsCount = labResultData?.length || 0
           debug.labResultsError = labResultError?.message || null
+
+          console.log('🧪 Lab results query result:', {
+            orderId: matchedOrder.id,
+            resultsCount: labResultData?.length || 0,
+            error: labResultError?.message
+          })
 
           if (labResultError) {
             console.error('Error fetching lab results:', labResultError)
@@ -144,11 +166,18 @@ export async function GET(req: NextRequest) {
       debug.radioOrdersCount = allRadioOrders?.length || 0
       debug.radioOrdersError = radioOrdersError?.message || null
 
+      console.log('📋 Radiology orders query result:', {
+        count: allRadioOrders?.length || 0,
+        error: radioOrdersError?.message,
+        firstFewNames: allRadioOrders?.slice(0, 5).map(o => ({ patient_name: o.patient_name, patient_id: o.patient_id }))
+      })
+
       if (radioOrdersError) {
         console.error('Error fetching radiology orders:', radioOrdersError)
       } else if (allRadioOrders && allRadioOrders.length > 0) {
         // Log all patient names for debugging
         debug.radioOrderPatientNames = allRadioOrders.slice(0, 10).map(o => o.patient_name)
+        debug.radioOrderPatientIds = allRadioOrders.slice(0, 10).map(o => o.patient_id)
 
         // Find matching order by patient
         let matchedOrder = null
@@ -170,7 +199,13 @@ export async function GET(req: NextRequest) {
           }
         }
 
-        debug.matchedRadioOrder = matchedOrder ? { id: matchedOrder.id, patient_name: matchedOrder.patient_name } : null
+        debug.matchedRadioOrder = matchedOrder ? { id: matchedOrder.id, patient_name: matchedOrder.patient_name, patient_id: matchedOrder.patient_id } : null
+
+        console.log('🔎 Radiology order matching result:', {
+          matchedOrder: matchedOrder ? { id: matchedOrder.id, patient_name: matchedOrder.patient_name, patient_id: matchedOrder.patient_id } : null,
+          searchedPatientId: patientId,
+          searchedPatientName: patientName
+        })
 
         // Step 2: If we found an order, get the results
         if (matchedOrder) {
@@ -189,6 +224,12 @@ export async function GET(req: NextRequest) {
           debug.radioResultsCount = radioResultData?.length || 0
           debug.radioResultsError = radioResultError?.message || null
 
+          console.log('📷 Radiology results query result:', {
+            orderId: matchedOrder.id,
+            resultsCount: radioResultData?.length || 0,
+            error: radioResultError?.message
+          })
+
           if (radioResultError) {
             console.error('Error fetching radiology results:', radioResultError)
           } else if (radioResultData && radioResultData.length > 0) {
@@ -204,6 +245,21 @@ export async function GET(req: NextRequest) {
         }
       }
     }
+
+    console.log('✅ Patient Results API response:', {
+      patientId,
+      patientName,
+      hasLabResults: results.hasLabResults,
+      hasRadiologyResults: results.hasRadiologyResults,
+      debugSummary: {
+        labOrdersCount: debug.labOrdersCount,
+        matchedLabOrder: debug.matchedLabOrder,
+        labResultsCount: debug.labResultsCount,
+        radioOrdersCount: debug.radioOrdersCount,
+        matchedRadioOrder: debug.matchedRadioOrder,
+        radioResultsCount: debug.radioResultsCount
+      }
+    })
 
     return NextResponse.json({
       success: true,
