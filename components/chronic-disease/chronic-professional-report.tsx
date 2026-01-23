@@ -2156,18 +2156,20 @@ export default function ChronicProfessionalReport({
     setSelectedSlot(null)
 
     try {
-      const dayOfWeek = new Date(date + 'T00:00:00').getDay()
-      console.log('📅 Loading slots for:', { specialistId, date, dayOfWeek })
+      console.log('📅 Loading slots for:', { specialistId, date })
 
+      // Get availability for this specific date
       const { data: availability, error: availError } = await supabaseClient
         .from('specialist_availability')
         .select('*')
         .eq('specialist_id', specialistId)
-        .eq('day_of_week', dayOfWeek)
+        .eq('specific_date', date)
         .eq('is_active', true)
 
+      console.log('📅 Availability query result:', { availability, error: availError })
+
       if (availError || !availability || availability.length === 0) {
-        console.log('📅 No availability for day of week:', dayOfWeek)
+        console.log('📅 No availability for date:', date)
         setAvailableSlots([])
         setLoadingSlots(false)
         return
