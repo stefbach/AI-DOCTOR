@@ -234,6 +234,11 @@ export default function ModernClinicalForm({
  const [labResultsError, setLabResultsError] = useState<string | null>(null)
  const [radiologyResultsError, setRadiologyResultsError] = useState<string | null>(null)
 
+ // State to track if results are available (for indicators)
+ const [hasLabResultsAvailable, setHasLabResultsAvailable] = useState(false)
+ const [hasRadiologyResultsAvailable, setHasRadiologyResultsAvailable] = useState(false)
+ const [isCheckingResultsAvailability, setIsCheckingResultsAvailability] = useState(false)
+
  // ========== Memoization of translated lists ==========
 // Replace the COMMON_SYMPTOMS useMemo in your clinical-form.tsx (around line 139-163)
 // with this complete list of 51 symptoms:
@@ -602,6 +607,53 @@ const COMMON_SYMPTOMS = useMemo(() => [
      setIsLoadingRadiologyResults(false)
    }
  }, [getPatientIdentifier])
+
+ // Check if results are available (for indicators) - lightweight check
+ const checkResultsAvailability = useCallback(async () => {
+   const { patientId, patientName } = getPatientIdentifier()
+   if (!patientId && !patientName) {
+     setHasLabResultsAvailable(false)
+     setHasRadiologyResultsAvailable(false)
+     return
+   }
+
+   setIsCheckingResultsAvailability(true)
+   try {
+     // Build query params with checkOnly flag
+     const params = new URLSearchParams({ type: 'all', checkOnly: 'true' })
+     if (patientId) {
+       params.append('patientId', patientId)
+     } else if (patientName) {
+       params.append('patientName', patientName)
+     }
+
+     const response = await fetch(`/api/patient-results?${params.toString()}`)
+     const data = await response.json()
+
+     console.log('📊 Results availability check:', {
+       hasLabResults: data.hasLabResults,
+       hasRadiologyResults: data.hasRadiologyResults
+     })
+
+     if (response.ok) {
+       setHasLabResultsAvailable(data.hasLabResults || false)
+       setHasRadiologyResultsAvailable(data.hasRadiologyResults || false)
+     }
+   } catch (error) {
+     console.error('Error checking results availability:', error)
+   } finally {
+     setIsCheckingResultsAvailability(false)
+   }
+ }, [getPatientIdentifier])
+
+ // Check for results availability when patient data changes
+ useEffect(() => {
+   // Only check if we have patient identifying info and results haven't been imported yet
+   const { patientId, patientName } = getPatientIdentifier()
+   if ((patientId || patientName) && !labResults && !radiologyResults) {
+     checkResultsAvailability()
+   }
+ }, [patientData, tibokPatient, labResults, radiologyResults, getPatientIdentifier, checkResultsAvailability])
 
  // Format lab results for display in disease history
  const formatLabResultsForHistory = (labResult: any): string => {
@@ -1063,43 +1115,77 @@ const COMMON_SYMPTOMS = useMemo(() => [
    </p>
    <div className="flex flex-wrap gap-3">
      {/* Lab Results Button */}
-     <Button
-       type="button"
-       variant="outline"
-       size="sm"
-       onClick={fetchLabResults}
-       disabled={isLoadingLabResults || !!labResults}
-       className={`flex items-center gap-2 ${labResults ? 'bg-green-50 border-green-300 text-green-700' : ''}`}
-     >
-       {isLoadingLabResults ? (
-         <Loader2 className="h-4 w-4 animate-spin" />
-       ) : labResults ? (
-         <CheckCircle className="h-4 w-4" />
-       ) : (
-         <FlaskConical className="h-4 w-4" />
+     <div className="relative">
+       <Button
+         type="button"
+         variant="outline"
+         size="sm"
+         onClick={fetchLabResults}
+         disabled={isLoadingLabResults || !!labResults}
+         className={`flex items-center gap-2 ${labResults ? 'bg-green-50 border-green-300 text-green-700' : hasLabResultsAvailable && !labResults ? 'border-blue-400 bg-blue-50' : ''}`}
+       >
+         {isLoadingLabResults ? (
+           <Loader2 className="h-4 w-4 animate-spin" />
+         ) : labResults ? (
+           <CheckCircle className="h-4 w-4" />
+         ) : (
+           <FlaskConical className="h-4 w-4" />
+         )}
+         {labResults ? 'Lab Results Imported' : 'Import Lab Results'}
+       </Button>
+       {/* Availability indicator */}
+       {hasLabResultsAvailable && !labResults && (
+         <span className="absolute -top-1 -right-1 flex h-3 w-3">
+           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+           <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+         </span>
        )}
-       {labResults ? 'Lab Results Imported' : 'Import Lab Results'}
-     </Button>
+     </div>
 
      {/* Radiology Results Button */}
-     <Button
-       type="button"
-       variant="outline"
-       size="sm"
-       onClick={fetchRadiologyResults}
-       disabled={isLoadingRadiologyResults || !!radiologyResults}
-       className={`flex items-center gap-2 ${radiologyResults ? 'bg-green-50 border-green-300 text-green-700' : ''}`}
-     >
-       {isLoadingRadiologyResults ? (
-         <Loader2 className="h-4 w-4 animate-spin" />
-       ) : radiologyResults ? (
-         <CheckCircle className="h-4 w-4" />
-       ) : (
-         <ImageIcon className="h-4 w-4" />
+     <div className="relative">
+       <Button
+         type="button"
+         variant="outline"
+         size="sm"
+         onClick={fetchRadiologyResults}
+         disabled={isLoadingRadiologyResults || !!radiologyResults}
+         className={`flex items-center gap-2 ${radiologyResults ? 'bg-green-50 border-green-300 text-green-700' : hasRadiologyResultsAvailable && !radiologyResults ? 'border-purple-400 bg-purple-50' : ''}`}
+       >
+         {isLoadingRadiologyResults ? (
+           <Loader2 className="h-4 w-4 animate-spin" />
+         ) : radiologyResults ? (
+           <CheckCircle className="h-4 w-4" />
+         ) : (
+           <ImageIcon className="h-4 w-4" />
+         )}
+         {radiologyResults ? 'Radiology Results Imported' : 'Import Radiology Results'}
+       </Button>
+       {/* Availability indicator */}
+       {hasRadiologyResultsAvailable && !radiologyResults && (
+         <span className="absolute -top-1 -right-1 flex h-3 w-3">
+           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+           <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+         </span>
        )}
-       {radiologyResults ? 'Radiology Results Imported' : 'Import Radiology Results'}
-     </Button>
+     </div>
    </div>
+
+   {/* Results available message */}
+   {(hasLabResultsAvailable || hasRadiologyResultsAvailable) && !labResults && !radiologyResults && (
+     <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+       <div className="flex items-center gap-2">
+         <Info className="h-4 w-4 text-blue-600" />
+         <p className="text-sm text-blue-700">
+           {hasLabResultsAvailable && hasRadiologyResultsAvailable
+             ? 'Lab and radiology results are available for this patient'
+             : hasLabResultsAvailable
+               ? 'Lab results are available for this patient'
+               : 'Radiology results are available for this patient'}
+         </p>
+       </div>
+     </div>
+   )}
 
    {/* Error/Info messages */}
    {labResultsError && (
