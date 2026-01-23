@@ -21,7 +21,7 @@ export const maxDuration = 180; // 3 minutes max
 // ============================================
 // FUNCTION 1: TRANSCRIBE AUDIO
 // ============================================
-async function transcribeAudio(audioFile: File): Promise<{
+async function transcribeAudio(audioFile: File, preferredLanguage?: string): Promise<{
   text: string;
   translatedText: string;
   duration: number;
@@ -30,24 +30,45 @@ async function transcribeAudio(audioFile: File): Promise<{
 }> {
   console.log('🔊 Step 1: Starting audio transcription...');
   console.log(`   Audio file: ${audioFile.name} (${audioFile.size} bytes)`);
+  console.log(`   Preferred language: ${preferredLanguage || 'auto-detect'}`);
 
   // Bilingual medical prompt (French + English) to help Whisper recognize medical terms in both languages
-  const medicalPrompt = `Medical transcription. Transcription médicale.
+  // Short common phrases are listed first to help Whisper recognize them when dictated as standalone phrases
+  const medicalPrompt = `Medical dictation. Common short phrases: abdominal pain, chest pain, headache, back pain, sore throat, stomach ache, fever, cough, nausea, vomiting, diarrhea, constipation, fatigue, dizziness, shortness of breath.
+Douleur abdominale, douleur thoracique, mal de tête, mal au dos, mal de gorge, mal au ventre, fièvre, toux, nausée, vomissement, diarrhée, constipation, fatigue, vertige.
 French symptoms: douleur abdominale, douleur thoracique, céphalée, migraine, nausée, vomissement, diarrhée, constipation, fièvre, toux, dyspnée, fatigue, asthénie, vertige, palpitations, mal de tête, mal au ventre, mal à la poitrine.
-English symptoms: abdominal pain, chest pain, headache, migraine, nausea, vomiting, diarrhea, constipation, fever, cough, shortness of breath, fatigue, dizziness, palpitations.
+English symptoms: abdominal pain, chest pain, headache, migraine, nausea, vomiting, diarrhea, constipation, fever, cough, shortness of breath, fatigue, dizziness, palpitations, back pain, joint pain, muscle pain.
 Medications: Doliprane, Paracetamol, Paracétamol, Metformin, Metformine, Amoxicillin, Amoxicilline, Augmentin, Ibuprofen, Ibuprofène, Aspirin, Aspirine, Omeprazole, Oméprazole, Pantoprazole, Atorvastatin, Atorvastatine, Amlodipine, Ramipril, Lisinopril, Bisoprolol, Furosemide, Furosémide, Levothyroxine, Lévothyroxine, Prednisone, Prednisolone, Insulin, Insuline, Ventolin, Ventoline, Salbutamol.
 Medical history: diabète, diabetes, hypertension, asthme, asthma, BPCO, COPD, insuffisance cardiaque, heart failure, insuffisance rénale, kidney failure.
 Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
 
   try {
-    // Auto-detect language with bilingual medical prompt
-    const transcription = await openai.audio.transcriptions.create({
+    // Use specified language or auto-detect with bilingual medical prompt
+    // For short phrases, specifying language helps Whisper accuracy
+    const whisperOptions: any = {
       file: audioFile,
       model: 'whisper-1',
-      // No language parameter = auto-detect French or English
       response_format: 'verbose_json',
       prompt: medicalPrompt,
-    });
+    };
+
+    // If a preferred language is specified, use it to help Whisper
+    // This is especially important for short phrases like "abdominal pain"
+    if (preferredLanguage) {
+      // Map common language codes to Whisper's expected format
+      const langMap: { [key: string]: string } = {
+        'en': 'en',
+        'en-US': 'en',
+        'en-GB': 'en',
+        'fr': 'fr',
+        'fr-FR': 'fr',
+      };
+      const whisperLang = langMap[preferredLanguage] || preferredLanguage.split('-')[0];
+      whisperOptions.language = whisperLang;
+      console.log(`   Using specified language for Whisper: ${whisperLang}`);
+    }
+
+    const transcription = await openai.audio.transcriptions.create(whisperOptions);
 
     console.log('✅ Transcription completed');
     console.log(`   Text length: ${transcription.text.length} characters`);
@@ -300,7 +321,8 @@ export async function POST(request: NextRequest) {
     const audioFile = formData.get('audioFile') as File;
     const doctorInfo = JSON.parse(formData.get('doctorInfo') as string || '{}');
     const patientId = formData.get('patientId') as string | null;
-    // Language auto-detected by Whisper, then normalized to English
+    const preferredLanguage = formData.get('language') as string | null;
+    // Language can be specified to improve Whisper accuracy for short phrases
 
     // Validate audio file
     if (!audioFile) {
@@ -314,14 +336,15 @@ export async function POST(request: NextRequest) {
     console.log('✅ Request validated');
     console.log(`   Audio file: ${audioFile.name} (${audioFile.size} bytes)`);
     console.log(`   Patient ID: ${patientId || 'Not provided'}`);
+    console.log(`   Preferred language: ${preferredLanguage || 'auto-detect'}`);
 
     const startTime = Date.now();
 
-    // STEP 1: Transcribe audio (auto-detect language)
+    // STEP 1: Transcribe audio (use preferred language if specified)
     let transcription;
     try {
-      console.log('\n📝 STEP 1/3: Audio Transcription (auto-detect language)');
-      transcription = await transcribeAudio(audioFile);
+      console.log('\n📝 STEP 1/3: Audio Transcription');
+      transcription = await transcribeAudio(audioFile, preferredLanguage || undefined);
     } catch (error: any) {
       console.error('❌ STEP 1 FAILED:', error.message);
       return NextResponse.json(
