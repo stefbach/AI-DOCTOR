@@ -54,7 +54,8 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
 
     // If a preferred language is specified, use it to help Whisper
     // This is especially important for short phrases like "abdominal pain"
-    if (preferredLanguage) {
+    // Use "auto" to explicitly request auto-detection (useful for bilingual dictation)
+    if (preferredLanguage && preferredLanguage !== 'auto') {
       // Map common language codes to Whisper's expected format
       const langMap: { [key: string]: string } = {
         'en': 'en',
@@ -66,6 +67,8 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
       const whisperLang = langMap[preferredLanguage] || preferredLanguage.split('-')[0];
       whisperOptions.language = whisperLang;
       console.log(`   Using specified language for Whisper: ${whisperLang}`);
+    } else {
+      console.log('   Using auto-detection for language (bilingual support)');
     }
 
     const transcription = await openai.audio.transcriptions.create(whisperOptions);

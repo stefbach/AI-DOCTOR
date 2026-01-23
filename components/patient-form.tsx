@@ -1575,12 +1575,12 @@ useEffect(() => {
  <VoiceDictationButton
  onTranscript={(text) => {
  const currentText = formData.currentMedicationsText
- const newText = currentText 
- ? `${currentText}\n${text}` 
+ const newText = currentText
+ ? `${currentText}\n${text}`
  : text
  handleInputChange("currentMedicationsText", newText)
  }}
- language="en-US"
+ language="auto"
  />
  </div>
  <Textarea
