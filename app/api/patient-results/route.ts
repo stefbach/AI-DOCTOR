@@ -36,7 +36,6 @@ export async function GET(req: NextRequest) {
     }
 
     // Create Supabase client with anon key (same as other APIs)
-    // Note: RLS policies must allow SELECT for authenticated users on lab/radiology tables
     const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
     // Debug info to track what's happening
@@ -60,186 +59,194 @@ export async function GET(req: NextRequest) {
       hasRadiologyResults: false
     }
 
-    // Fetch Lab Results
-    // Step 1: Find lab_orders for this patient
-    // Step 2: Get lab_results for those orders
+    // ============ FETCH LAB RESULTS ============
     if (type === 'lab' || type === 'all' || !type) {
-      // Step 1: Query lab_orders to find patient's orders
-      const { data: allLabOrders, error: labOrdersError } = await supabase
-        .from('lab_orders')
-        .select('id, order_number, patient_id, patient_name, tests_ordered, scheduled_date, results_ready_at, clinical_notes')
-        .order('created_at', { ascending: false })
+      let matchedLabOrders: any[] = []
 
-      debug.labOrdersCount = allLabOrders?.length || 0
-      debug.labOrdersError = labOrdersError?.message || null
+      // Step 1: Try to find lab_orders by patient_id (exact match)
+      if (patientId) {
+        const { data: ordersByPatientId, error: ordersByIdError } = await supabase
+          .from('lab_orders')
+          .select('id, order_number, patient_id, patient_name, tests_ordered, scheduled_date, results_ready_at, clinical_notes')
+          .eq('patient_id', patientId)
+          .order('created_at', { ascending: false })
 
-      console.log('📋 Lab orders query result:', {
-        count: allLabOrders?.length || 0,
-        error: labOrdersError?.message,
-        firstFewNames: allLabOrders?.slice(0, 5).map(o => ({ patient_name: o.patient_name, patient_id: o.patient_id }))
-      })
+        debug.labOrdersByIdCount = ordersByPatientId?.length || 0
+        debug.labOrdersByIdError = ordersByIdError?.message || null
 
-      if (labOrdersError) {
-        console.error('Error fetching lab orders:', labOrdersError)
-      } else if (allLabOrders && allLabOrders.length > 0) {
-        // Log all patient names for debugging
-        debug.labOrderPatientNames = allLabOrders.slice(0, 10).map(o => o.patient_name)
-        debug.labOrderPatientIds = allLabOrders.slice(0, 10).map(o => o.patient_id)
-
-        // Find matching order by patient
-        let matchedOrder = null
-
-        for (const order of allLabOrders) {
-          if (patientId && order.patient_id === patientId) {
-            matchedOrder = order
-            break
-          } else if (patientName) {
-            const orderPatientName = (order.patient_name || '').toLowerCase()
-            const searchName = patientName.toLowerCase()
-            // Flexible matching
-            if (orderPatientName.includes(searchName) || searchName.includes(orderPatientName) ||
-                orderPatientName.split(' ').some((part: string) => searchName.includes(part)) ||
-                searchName.split(' ').some((part: string) => orderPatientName.includes(part))) {
-              matchedOrder = order
-              break
-            }
-          }
-        }
-
-        debug.matchedLabOrder = matchedOrder ? { id: matchedOrder.id, patient_name: matchedOrder.patient_name, patient_id: matchedOrder.patient_id } : null
-
-        console.log('🔎 Lab order matching result:', {
-          matchedOrder: matchedOrder ? { id: matchedOrder.id, patient_name: matchedOrder.patient_name, patient_id: matchedOrder.patient_id } : null,
-          searchedPatientId: patientId,
-          searchedPatientName: patientName
+        console.log('📋 Lab orders by patient_id:', {
+          patientId,
+          count: ordersByPatientId?.length || 0,
+          error: ordersByIdError?.message
         })
 
-        // Step 2: If we found an order, get the results
-        if (matchedOrder) {
-          // For checkOnly mode, just verify results exist
-          const selectFields = checkOnly
-            ? 'id'
-            : 'id, results_data, interpretation_notes, validated_by, validated_at, created_at'
+        if (ordersByPatientId && ordersByPatientId.length > 0) {
+          matchedLabOrders = ordersByPatientId
+        }
+      }
 
-          const { data: labResultData, error: labResultError } = await supabase
-            .from('lab_results')
-            .select(selectFields)
-            .eq('lab_order_id', matchedOrder.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
+      // Step 2: If no match by ID and we have a name, try by patient_name (case-insensitive)
+      if (matchedLabOrders.length === 0 && patientName) {
+        const { data: ordersByName, error: ordersByNameError } = await supabase
+          .from('lab_orders')
+          .select('id, order_number, patient_id, patient_name, tests_ordered, scheduled_date, results_ready_at, clinical_notes')
+          .ilike('patient_name', `%${patientName}%`)
+          .order('created_at', { ascending: false })
 
-          debug.labResultsCount = labResultData?.length || 0
-          debug.labResultsError = labResultError?.message || null
+        debug.labOrdersByNameCount = ordersByName?.length || 0
+        debug.labOrdersByNameError = ordersByNameError?.message || null
 
-          console.log('🧪 Lab results query result:', {
-            orderId: matchedOrder.id,
-            resultsCount: labResultData?.length || 0,
-            error: labResultError?.message
-          })
+        console.log('📋 Lab orders by patient_name:', {
+          patientName,
+          count: ordersByName?.length || 0,
+          error: ordersByNameError?.message,
+          matchedNames: ordersByName?.slice(0, 5).map(o => o.patient_name)
+        })
 
-          if (labResultError) {
-            console.error('Error fetching lab results:', labResultError)
-          } else if (labResultData && labResultData.length > 0) {
-            results.hasLabResults = true
-            // Only include full results if not in checkOnly mode
-            if (!checkOnly) {
-              results.labResults = {
-                ...labResultData[0],
-                lab_orders: matchedOrder
-              }
+        if (ordersByName && ordersByName.length > 0) {
+          matchedLabOrders = ordersByName
+        }
+      }
+
+      debug.totalMatchedLabOrders = matchedLabOrders.length
+
+      // Step 3: For matched orders, check if lab_results exist
+      if (matchedLabOrders.length > 0) {
+        // Get all order IDs
+        const orderIds = matchedLabOrders.map(o => o.id)
+
+        // Query lab_results for any of these orders
+        const selectFields = checkOnly
+          ? 'id, lab_order_id'
+          : 'id, lab_order_id, results_data, interpretation_notes, validated_by, validated_at, created_at'
+
+        const { data: labResultData, error: labResultError } = await supabase
+          .from('lab_results')
+          .select(selectFields)
+          .in('lab_order_id', orderIds)
+          .order('created_at', { ascending: false })
+          .limit(1)
+
+        debug.labResultsCount = labResultData?.length || 0
+        debug.labResultsError = labResultError?.message || null
+
+        console.log('🧪 Lab results query:', {
+          orderIds,
+          resultsCount: labResultData?.length || 0,
+          error: labResultError?.message
+        })
+
+        if (labResultError) {
+          console.error('Error fetching lab results:', labResultError)
+        } else if (labResultData && labResultData.length > 0) {
+          results.hasLabResults = true
+
+          // Only include full results if not in checkOnly mode
+          if (!checkOnly) {
+            // Find the corresponding order for this result
+            const resultOrderId = labResultData[0].lab_order_id
+            const matchedOrder = matchedLabOrders.find(o => o.id === resultOrderId)
+
+            results.labResults = {
+              ...labResultData[0],
+              lab_orders: matchedOrder
             }
           }
         }
       }
     }
 
-    // Fetch Radiology Results
-    // Step 1: Find radiology_orders for this patient
-    // Step 2: Get radiology_results for those orders
+    // ============ FETCH RADIOLOGY RESULTS ============
     if (type === 'radiology' || type === 'all' || !type) {
-      // Step 1: Query radiology_orders to find patient's orders
-      const { data: allRadioOrders, error: radioOrdersError } = await supabase
-        .from('radiology_orders')
-        .select('id, order_number, patient_id, patient_name, exams_ordered, scheduled_date, results_ready_at, clinical_notes')
-        .order('created_at', { ascending: false })
+      let matchedRadioOrders: any[] = []
 
-      debug.radioOrdersCount = allRadioOrders?.length || 0
-      debug.radioOrdersError = radioOrdersError?.message || null
+      // Step 1: Try to find radiology_orders by patient_id (exact match)
+      if (patientId) {
+        const { data: ordersByPatientId, error: ordersByIdError } = await supabase
+          .from('radiology_orders')
+          .select('id, order_number, patient_id, patient_name, exams_ordered, scheduled_date, results_ready_at, clinical_notes')
+          .eq('patient_id', patientId)
+          .order('created_at', { ascending: false })
 
-      console.log('📋 Radiology orders query result:', {
-        count: allRadioOrders?.length || 0,
-        error: radioOrdersError?.message,
-        firstFewNames: allRadioOrders?.slice(0, 5).map(o => ({ patient_name: o.patient_name, patient_id: o.patient_id }))
-      })
+        debug.radioOrdersByIdCount = ordersByPatientId?.length || 0
+        debug.radioOrdersByIdError = ordersByIdError?.message || null
 
-      if (radioOrdersError) {
-        console.error('Error fetching radiology orders:', radioOrdersError)
-      } else if (allRadioOrders && allRadioOrders.length > 0) {
-        // Log all patient names for debugging
-        debug.radioOrderPatientNames = allRadioOrders.slice(0, 10).map(o => o.patient_name)
-        debug.radioOrderPatientIds = allRadioOrders.slice(0, 10).map(o => o.patient_id)
-
-        // Find matching order by patient
-        let matchedOrder = null
-
-        for (const order of allRadioOrders) {
-          if (patientId && order.patient_id === patientId) {
-            matchedOrder = order
-            break
-          } else if (patientName) {
-            const orderPatientName = (order.patient_name || '').toLowerCase()
-            const searchName = patientName.toLowerCase()
-            // Flexible matching
-            if (orderPatientName.includes(searchName) || searchName.includes(orderPatientName) ||
-                orderPatientName.split(' ').some((part: string) => searchName.includes(part)) ||
-                searchName.split(' ').some((part: string) => orderPatientName.includes(part))) {
-              matchedOrder = order
-              break
-            }
-          }
-        }
-
-        debug.matchedRadioOrder = matchedOrder ? { id: matchedOrder.id, patient_name: matchedOrder.patient_name, patient_id: matchedOrder.patient_id } : null
-
-        console.log('🔎 Radiology order matching result:', {
-          matchedOrder: matchedOrder ? { id: matchedOrder.id, patient_name: matchedOrder.patient_name, patient_id: matchedOrder.patient_id } : null,
-          searchedPatientId: patientId,
-          searchedPatientName: patientName
+        console.log('📋 Radiology orders by patient_id:', {
+          patientId,
+          count: ordersByPatientId?.length || 0,
+          error: ordersByIdError?.message
         })
 
-        // Step 2: If we found an order, get the results
-        if (matchedOrder) {
-          // For checkOnly mode, just verify results exist
-          const selectFields = checkOnly
-            ? 'id'
-            : 'id, results_data, radiologist_name, radiologist_notes, validated_at, created_at'
+        if (ordersByPatientId && ordersByPatientId.length > 0) {
+          matchedRadioOrders = ordersByPatientId
+        }
+      }
 
-          const { data: radioResultData, error: radioResultError } = await supabase
-            .from('radiology_results')
-            .select(selectFields)
-            .eq('radiology_order_id', matchedOrder.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
+      // Step 2: If no match by ID and we have a name, try by patient_name (case-insensitive)
+      if (matchedRadioOrders.length === 0 && patientName) {
+        const { data: ordersByName, error: ordersByNameError } = await supabase
+          .from('radiology_orders')
+          .select('id, order_number, patient_id, patient_name, exams_ordered, scheduled_date, results_ready_at, clinical_notes')
+          .ilike('patient_name', `%${patientName}%`)
+          .order('created_at', { ascending: false })
 
-          debug.radioResultsCount = radioResultData?.length || 0
-          debug.radioResultsError = radioResultError?.message || null
+        debug.radioOrdersByNameCount = ordersByName?.length || 0
+        debug.radioOrdersByNameError = ordersByNameError?.message || null
 
-          console.log('📷 Radiology results query result:', {
-            orderId: matchedOrder.id,
-            resultsCount: radioResultData?.length || 0,
-            error: radioResultError?.message
-          })
+        console.log('📋 Radiology orders by patient_name:', {
+          patientName,
+          count: ordersByName?.length || 0,
+          error: ordersByNameError?.message,
+          matchedNames: ordersByName?.slice(0, 5).map(o => o.patient_name)
+        })
 
-          if (radioResultError) {
-            console.error('Error fetching radiology results:', radioResultError)
-          } else if (radioResultData && radioResultData.length > 0) {
-            results.hasRadiologyResults = true
-            // Only include full results if not in checkOnly mode
-            if (!checkOnly) {
-              results.radiologyResults = {
-                ...radioResultData[0],
-                radiology_orders: matchedOrder
-              }
+        if (ordersByName && ordersByName.length > 0) {
+          matchedRadioOrders = ordersByName
+        }
+      }
+
+      debug.totalMatchedRadioOrders = matchedRadioOrders.length
+
+      // Step 3: For matched orders, check if radiology_results exist
+      if (matchedRadioOrders.length > 0) {
+        // Get all order IDs
+        const orderIds = matchedRadioOrders.map(o => o.id)
+
+        // Query radiology_results for any of these orders
+        const selectFields = checkOnly
+          ? 'id, radiology_order_id'
+          : 'id, radiology_order_id, results_data, radiologist_name, radiologist_notes, validated_at, created_at'
+
+        const { data: radioResultData, error: radioResultError } = await supabase
+          .from('radiology_results')
+          .select(selectFields)
+          .in('radiology_order_id', orderIds)
+          .order('created_at', { ascending: false })
+          .limit(1)
+
+        debug.radioResultsCount = radioResultData?.length || 0
+        debug.radioResultsError = radioResultError?.message || null
+
+        console.log('📷 Radiology results query:', {
+          orderIds,
+          resultsCount: radioResultData?.length || 0,
+          error: radioResultError?.message
+        })
+
+        if (radioResultError) {
+          console.error('Error fetching radiology results:', radioResultError)
+        } else if (radioResultData && radioResultData.length > 0) {
+          results.hasRadiologyResults = true
+
+          // Only include full results if not in checkOnly mode
+          if (!checkOnly) {
+            // Find the corresponding order for this result
+            const resultOrderId = radioResultData[0].radiology_order_id
+            const matchedOrder = matchedRadioOrders.find(o => o.id === resultOrderId)
+
+            results.radiologyResults = {
+              ...radioResultData[0],
+              radiology_orders: matchedOrder
             }
           }
         }
@@ -252,11 +259,13 @@ export async function GET(req: NextRequest) {
       hasLabResults: results.hasLabResults,
       hasRadiologyResults: results.hasRadiologyResults,
       debugSummary: {
-        labOrdersCount: debug.labOrdersCount,
-        matchedLabOrder: debug.matchedLabOrder,
+        labOrdersByIdCount: debug.labOrdersByIdCount,
+        labOrdersByNameCount: debug.labOrdersByNameCount,
+        totalMatchedLabOrders: debug.totalMatchedLabOrders,
         labResultsCount: debug.labResultsCount,
-        radioOrdersCount: debug.radioOrdersCount,
-        matchedRadioOrder: debug.matchedRadioOrder,
+        radioOrdersByIdCount: debug.radioOrdersByIdCount,
+        radioOrdersByNameCount: debug.radioOrdersByNameCount,
+        totalMatchedRadioOrders: debug.totalMatchedRadioOrders,
         radioResultsCount: debug.radioResultsCount
       }
     })
