@@ -631,7 +631,12 @@ export default function ModernPatientForm({
    const urlParams = new URLSearchParams(window.location.search)
    let patientId = urlParams.get('patientId')
 
-   // If not in URL, check sessionStorage (for chronic/dermatology redirect flows)
+   // If not in URL, check data prop (passed from parent with hub/session data)
+   if (!patientId && (data as any)?.patientId) {
+     patientId = (data as any).patientId
+   }
+
+   // If not in data prop, check sessionStorage (for chronic/dermatology redirect flows)
    if (!patientId) {
      try {
        const storageKeys = ['chronicDiseasePatientData', 'dermatologyPatientData', 'consultationPatientData']
