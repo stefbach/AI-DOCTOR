@@ -107,9 +107,15 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
         address: historyDemographics?.address || tibokPatientInfo?.address || tibokPatientInfo?.adresse || '',
         weight: historyDemographics?.weight || tibokPatientInfo?.weight || tibokPatientInfo?.poids || '',
         height: historyDemographics?.height || tibokPatientInfo?.height || tibokPatientInfo?.taille || '',
-        allergies: historyDemographics?.allergies || tibokPatientInfo?.allergies || [],
-        medicalHistory: historyDemographics?.medicalHistory || tibokPatientInfo?.medicalHistory || tibokPatientInfo?.antecedentsMedicaux || [],
-        currentMedications: historyDemographics?.currentMedications || tibokPatientInfo?.currentMedications || tibokPatientInfo?.medicamentsActuels || ''
+        // For arrays, prefer the one with actual items (empty array is truthy in JS)
+        allergies: (historyDemographics?.allergies?.length ? historyDemographics.allergies : null) || tibokPatientInfo?.allergies || [],
+        medicalHistory: (historyDemographics?.medicalHistory?.length ? historyDemographics.medicalHistory : null) || tibokPatientInfo?.medicalHistory || tibokPatientInfo?.antecedentsMedicaux || [],
+        currentMedications: historyDemographics?.currentMedications || tibokPatientInfo?.currentMedications || tibokPatientInfo?.medicamentsActuels || '',
+        otherAllergies: tibokPatientInfo?.otherAllergies || tibokPatientInfo?.other_allergies || '',
+        otherMedicalHistory: tibokPatientInfo?.otherMedicalHistory || tibokPatientInfo?.other_medical_history || '',
+        smokingStatus: tibokPatientInfo?.smokingStatus || tibokPatientInfo?.smoking_status || '',
+        alcoholConsumption: tibokPatientInfo?.alcoholConsumption || tibokPatientInfo?.alcohol_consumption || '',
+        physicalActivity: tibokPatientInfo?.physicalActivity || tibokPatientInfo?.physical_activity || '',
       }
 
       if (prefillDemographics.firstName || prefillDemographics.lastName || prefillDemographics.age) {
@@ -124,6 +130,34 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
           if (maleVariants.includes(g)) return 'Male'
           if (femaleVariants.includes(g)) return 'Female'
           return gender // Return as-is if already correct format
+        }
+
+        // Normalize lifestyle values to match PatientForm expected format
+        const normalizeSmokingStatus = (value: string): string => {
+          if (!value) return ''
+          const v = value.toLowerCase().trim()
+          if (v.includes('current') || v === 'actuel') return 'actuel'
+          if (v.includes('non') || v === 'never' || v === 'non-smoker') return 'non'
+          if (v.includes('ex') || v.includes('former') || v === 'ancien') return 'ancien'
+          return ''
+        }
+
+        const normalizeAlcoholConsumption = (value: string): string => {
+          if (!value) return ''
+          const v = value.toLowerCase().trim()
+          if (v === 'never' || v === 'none' || v === 'jamais') return 'jamais'
+          if (v === 'occasional' || v === 'occasionnel') return 'occasionnel'
+          if (v === 'regular' || v === 'daily' || v === 'regulier') return 'regulier'
+          return ''
+        }
+
+        const normalizePhysicalActivity = (value: string): string => {
+          if (!value) return ''
+          const v = value.toLowerCase().trim()
+          if (v === 'sedentary' || v === 'none' || v === 'sedentaire') return 'sedentaire'
+          if (v === 'moderate' || v === 'moderee' || v === 'modérée') return 'moderee'
+          if (v === 'intense' || v === 'high') return 'intense'
+          return ''
         }
 
         // Prepare base data in PatientForm format
@@ -142,15 +176,20 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
           allergies: Array.isArray(prefillDemographics.allergies)
             ? prefillDemographics.allergies
             : (prefillDemographics.allergies ? [prefillDemographics.allergies] : []),
-          otherAllergies: '',
+          otherAllergies: prefillDemographics.otherAllergies || '',
           // Handle medical history - can be array or string
           medicalHistory: Array.isArray(prefillDemographics.medicalHistory)
             ? prefillDemographics.medicalHistory
             : (prefillDemographics.medicalHistory ? [prefillDemographics.medicalHistory] : []),
-          otherMedicalHistory: '',
+          otherMedicalHistory: prefillDemographics.otherMedicalHistory || '',
           currentMedicationsText: Array.isArray(prefillDemographics.currentMedications)
             ? prefillDemographics.currentMedications.join(', ')
-            : (prefillDemographics.currentMedications || '')
+            : (prefillDemographics.currentMedications || ''),
+          lifeHabits: {
+            smoking: normalizeSmokingStatus(prefillDemographics.smokingStatus),
+            alcohol: normalizeAlcoholConsumption(prefillDemographics.alcoholConsumption),
+            physicalActivity: normalizePhysicalActivity(prefillDemographics.physicalActivity),
+          }
         }
         
         // DERMATOLOGY WORKFLOW
