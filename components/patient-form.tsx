@@ -341,8 +341,8 @@ export default function ModernPatientForm({
  formData.lifeHabits.physicalActivity
  ]
  
- const requiredCompleted = requiredFields.filter(field => field && field.trim()).length
- const optionalCompleted = optionalFields.filter(field => field && field.trim()).length
+ const requiredCompleted = requiredFields.filter(field => field != null && field !== '' && String(field).trim().length > 0).length
+ const optionalCompleted = optionalFields.filter(field => field != null && field !== '' && String(field).trim().length > 0).length
  
  const totalFields = requiredFields.length + optionalFields.length
  const totalCompleted = requiredCompleted + optionalCompleted
