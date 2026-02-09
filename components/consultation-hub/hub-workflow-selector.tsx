@@ -160,7 +160,25 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
           return ''
         }
 
+        // Normalize array values to match PatientForm checkbox labels (case-insensitive)
+        const KNOWN_ALLERGIES = ['Penicillin', 'Aspirin', 'NSAIDs (Ibuprofen, Diclofenac)', 'Codeine', 'Latex', 'Iodine', 'Local anesthetics', 'Sulfonamides']
+        const KNOWN_MEDICAL_HISTORY = ['Hypertension', 'Type 2 Diabetes', 'Type 1 Diabetes', 'Asthma', 'Heart disease', 'Depression/Anxiety', 'Arthritis', 'Migraine', 'GERD (Gastroesophageal reflux)', 'High cholesterol']
+
+        const normalizeArrayToLabels = (values: string[], knownLabels: string[]): string[] => {
+          return values.map(value => {
+            const match = knownLabels.find(label => label.toLowerCase() === value.toLowerCase())
+            return match || value
+          })
+        }
+
         // Prepare base data in PatientForm format
+        const rawAllergies = Array.isArray(prefillDemographics.allergies)
+          ? prefillDemographics.allergies
+          : (prefillDemographics.allergies ? [prefillDemographics.allergies] : [])
+        const rawMedicalHistory = Array.isArray(prefillDemographics.medicalHistory)
+          ? prefillDemographics.medicalHistory
+          : (prefillDemographics.medicalHistory ? [prefillDemographics.medicalHistory] : [])
+
         const basePrefillData = {
           firstName: prefillDemographics.firstName || '',
           lastName: prefillDemographics.lastName || '',
@@ -172,15 +190,9 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
           address: prefillDemographics.address || '',
           weight: prefillDemographics.weight || '',
           height: prefillDemographics.height || '',
-          // Handle allergies - can be array or string
-          allergies: Array.isArray(prefillDemographics.allergies)
-            ? prefillDemographics.allergies
-            : (prefillDemographics.allergies ? [prefillDemographics.allergies] : []),
+          allergies: normalizeArrayToLabels(rawAllergies, KNOWN_ALLERGIES),
           otherAllergies: prefillDemographics.otherAllergies || '',
-          // Handle medical history - can be array or string
-          medicalHistory: Array.isArray(prefillDemographics.medicalHistory)
-            ? prefillDemographics.medicalHistory
-            : (prefillDemographics.medicalHistory ? [prefillDemographics.medicalHistory] : []),
+          medicalHistory: normalizeArrayToLabels(rawMedicalHistory, KNOWN_MEDICAL_HISTORY),
           otherMedicalHistory: prefillDemographics.otherMedicalHistory || '',
           currentMedicationsText: Array.isArray(prefillDemographics.currentMedications)
             ? prefillDemographics.currentMedications.join(', ')
