@@ -596,29 +596,34 @@ export default function ModernPatientForm({
  return Object.keys(newErrors).length === 0
  }, [formData, isChildbearingAge])
 
- // Save patient medical records to the patients table in Supabase
+ // Save patient medical records to the patients table via API
  const savePatientRecords = useCallback(async (patientId: string) => {
    try {
-     const { error } = await supabase
-       .from('patients')
-       .update({
-         weight: formData.weight ? parseFloat(formData.weight) : null,
-         height: formData.height ? parseFloat(formData.height) : null,
-         allergies: formData.allergies.length > 0 ? formData.allergies : null,
-         other_allergies: formData.otherAllergies || null,
-         medical_history: formData.medicalHistory.length > 0 ? formData.medicalHistory : null,
-         other_medical_history: formData.otherMedicalHistory || null,
-         current_medications: formData.currentMedicationsText || null,
-         smoking_status: formData.lifeHabits.smoking || null,
-         alcohol_consumption: formData.lifeHabits.alcohol || null,
-         physical_activity: formData.lifeHabits.physicalActivity || null,
+     const response = await fetch('/api/save-patient-records', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({
+         patientId,
+         records: {
+           weight: formData.weight ? parseFloat(formData.weight) : null,
+           height: formData.height ? parseFloat(formData.height) : null,
+           allergies: formData.allergies.length > 0 ? formData.allergies : null,
+           other_allergies: formData.otherAllergies || null,
+           medical_history: formData.medicalHistory.length > 0 ? formData.medicalHistory : null,
+           other_medical_history: formData.otherMedicalHistory || null,
+           current_medications: formData.currentMedicationsText || null,
+           smoking_status: formData.lifeHabits.smoking || null,
+           alcohol_consumption: formData.lifeHabits.alcohol || null,
+           physical_activity: formData.lifeHabits.physicalActivity || null,
+         }
        })
-       .eq('id', patientId)
+     })
 
-     if (error) {
-       console.error('Failed to save patient records:', error)
-     } else {
+     const result = await response.json()
+     if (result.success) {
        console.log('Patient records saved successfully for patient:', patientId)
+     } else {
+       console.error('Failed to save patient records:', result.error)
      }
    } catch (error) {
      console.error('Error saving patient records:', error)
