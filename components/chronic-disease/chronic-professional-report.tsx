@@ -2319,13 +2319,21 @@ export default function ChronicProfessionalReport({
     setSelectedFollowUpTypes([])
   }, [])
 
-  // Toggle follow-up type selection
+  // Toggle follow-up type selection (glycemia types are mutually exclusive)
   const toggleFollowUpType = useCallback((type: string) => {
-    setSelectedFollowUpTypes(prev =>
-      prev.includes(type)
-        ? prev.filter(t => t !== type)
-        : [...prev, type]
-    )
+    setSelectedFollowUpTypes(prev => {
+      if (prev.includes(type)) {
+        return prev.filter(t => t !== type)
+      }
+      // Glycemia types are mutually exclusive (patient can't be both T1 and T2)
+      if (type === 'glycemia_type_1') {
+        return [...prev.filter(t => t !== 'glycemia_type_2'), type]
+      }
+      if (type === 'glycemia_type_2') {
+        return [...prev.filter(t => t !== 'glycemia_type_1'), type]
+      }
+      return [...prev, type]
+    })
   }, [])
 
   // ==================== SEND DOCUMENTS ====================
@@ -2736,10 +2744,19 @@ export default function ChronicProfessionalReport({
             },
             signature: documentSignatures?.sickLeave || null
           } : null,
-          followUpPlan: report?.followUpPlan ? {
+          followUpPlan: (report?.followUpPlan || (patientFollowUpData && patientFollowUpData.types.length > 0)) ? {
             type: 'follow_up_plan',
             title: 'Chronic Disease Management / Follow-up Care Plan',
-            content: report.followUpPlan,
+            content: {
+              ...(typeof report?.followUpPlan === 'object' ? report.followUpPlan : { plan: report?.followUpPlan || null }),
+              disease_subtype: patientFollowUpData?.types.map(t => ({
+                blood_pressure: 'hypertension',
+                glycemia_type_1: 'diabetes_type_1',
+                glycemia_type_2: 'diabetes_type_2',
+                weight: 'obesity',
+              } as Record<string, string>)[t]).filter(Boolean) || [],
+              follow_up_types: patientFollowUpData?.types || [],
+            },
             signature: documentSignatures?.consultation || null
           } : null,
           invoice: invoiceData?.header?.invoiceNumber ? {
@@ -7019,17 +7036,22 @@ export default function ChronicProfessionalReport({
                     <div className="flex flex-wrap gap-2 mt-2">
                       {patientFollowUpData.types.includes('blood_pressure') && (
                         <Badge className="bg-red-100 text-red-800">
-                          <Droplets className="h-3 w-3 mr-1" /> Tension Artérielle
+                          <Droplets className="h-3 w-3 mr-1" /> Tension Artérielle (HTA)
                         </Badge>
                       )}
-                      {patientFollowUpData.types.includes('glycemia') && (
+                      {patientFollowUpData.types.includes('glycemia_type_1') && (
                         <Badge className="bg-orange-100 text-orange-800">
-                          <Activity className="h-3 w-3 mr-1" /> Glycémie
+                          <Activity className="h-3 w-3 mr-1" /> Glycémie - Diabète Type 1
+                        </Badge>
+                      )}
+                      {patientFollowUpData.types.includes('glycemia_type_2') && (
+                        <Badge className="bg-amber-100 text-amber-800">
+                          <Activity className="h-3 w-3 mr-1" /> Glycémie - Diabète Type 2
                         </Badge>
                       )}
                       {patientFollowUpData.types.includes('weight') && (
                         <Badge className="bg-blue-100 text-blue-800">
-                          <Scale className="h-3 w-3 mr-1" /> Poids
+                          <Scale className="h-3 w-3 mr-1" /> Poids (Obésité)
                         </Badge>
                       )}
                     </div>
@@ -7594,28 +7616,49 @@ export default function ChronicProfessionalReport({
               <div className="flex items-center gap-2 flex-1">
                 <Droplets className="h-5 w-5 text-red-600" />
                 <Label htmlFor="blood_pressure" className="cursor-pointer">
-                  Tension Artérielle
+                  Tension Artérielle (HTA)
                 </Label>
               </div>
             </div>
 
             <div
               className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                selectedFollowUpTypes.includes('glycemia')
+                selectedFollowUpTypes.includes('glycemia_type_1')
                   ? 'bg-orange-50 border-orange-300'
                   : 'hover:bg-gray-50'
               }`}
-              onClick={() => toggleFollowUpType('glycemia')}
+              onClick={() => toggleFollowUpType('glycemia_type_1')}
             >
               <Checkbox
-                id="glycemia"
-                checked={selectedFollowUpTypes.includes('glycemia')}
-                onCheckedChange={() => toggleFollowUpType('glycemia')}
+                id="glycemia_type_1"
+                checked={selectedFollowUpTypes.includes('glycemia_type_1')}
+                onCheckedChange={() => toggleFollowUpType('glycemia_type_1')}
               />
               <div className="flex items-center gap-2 flex-1">
                 <Activity className="h-5 w-5 text-orange-600" />
-                <Label htmlFor="glycemia" className="cursor-pointer">
-                  Glycémie
+                <Label htmlFor="glycemia_type_1" className="cursor-pointer">
+                  Glycémie - Diabète Type 1 (quotidien, matin et soir)
+                </Label>
+              </div>
+            </div>
+
+            <div
+              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                selectedFollowUpTypes.includes('glycemia_type_2')
+                  ? 'bg-amber-50 border-amber-300'
+                  : 'hover:bg-gray-50'
+              }`}
+              onClick={() => toggleFollowUpType('glycemia_type_2')}
+            >
+              <Checkbox
+                id="glycemia_type_2"
+                checked={selectedFollowUpTypes.includes('glycemia_type_2')}
+                onCheckedChange={() => toggleFollowUpType('glycemia_type_2')}
+              />
+              <div className="flex items-center gap-2 flex-1">
+                <Activity className="h-5 w-5 text-amber-600" />
+                <Label htmlFor="glycemia_type_2" className="cursor-pointer">
+                  Glycémie - Diabète Type 2 (2-3 fois/semaine, matin)
                 </Label>
               </div>
             </div>
@@ -7636,7 +7679,7 @@ export default function ChronicProfessionalReport({
               <div className="flex items-center gap-2 flex-1">
                 <Scale className="h-5 w-5 text-blue-600" />
                 <Label htmlFor="weight" className="cursor-pointer">
-                  Poids
+                  Poids (Obésité)
                 </Label>
               </div>
             </div>
