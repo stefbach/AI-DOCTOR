@@ -3677,6 +3677,12 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
        doctor_id: tibokDoctorId || null,
        consultation_id: consultationId || null,
        follow_up_type: type,
+       disease_subtype: ({
+         blood_pressure: 'hypertension',
+         glycemia_type_1: 'diabetes_type_1',
+         glycemia_type_2: 'diabetes_type_2',
+         weight: 'obesity',
+       } as Record<string, string>)[type] || null,
        frequency: 'daily',
        reminder_time: '08:00:00',
        duration_days: 30,
