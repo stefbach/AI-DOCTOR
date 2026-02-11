@@ -3174,7 +3174,7 @@ const fetchActiveFollowUps = useCallback(async () => {
 
 // Open follow-up modal and fetch active follow-ups
 const handleOpenFollowUpModal = useCallback(() => {
-  handleOpenFollowUpModal()
+  setShowFollowUpModal(true)
   fetchActiveFollowUps()
 }, [fetchActiveFollowUps])
 
