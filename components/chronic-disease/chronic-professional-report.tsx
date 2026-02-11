@@ -645,6 +645,8 @@ export default function ChronicProfessionalReport({
   } | null>(null)
   const [selectedFollowUpTypes, setSelectedFollowUpTypes] = useState<string[]>([])
   const [showFollowUpModal, setShowFollowUpModal] = useState(false)
+  const [activeFollowUpTypes, setActiveFollowUpTypes] = useState<string[]>([])
+  const [loadingActiveFollowUps, setLoadingActiveFollowUps] = useState(false)
 
   // Helper to get Supabase client
   const getSupabaseClient = useCallback(() => {
@@ -2290,6 +2292,35 @@ export default function ChronicProfessionalReport({
 
     setShowReferralModal(true)
   }, [loadSpecialties, report])
+
+  // Fetch active follow-ups for this patient when modal opens
+  const fetchActiveFollowUps = useCallback(async () => {
+    const patientId = tibokPatientId || patientData?.id || patientData?.patientId
+    if (!patientId) return
+    const supabaseClient = getSupabaseClient()
+    if (!supabaseClient) return
+    setLoadingActiveFollowUps(true)
+    try {
+      const { data, error } = await supabaseClient
+        .from('patient_follow_ups')
+        .select('follow_up_type')
+        .eq('patient_id', patientId)
+        .eq('status', 'active')
+      if (!error && data) {
+        setActiveFollowUpTypes(data.map(row => row.follow_up_type))
+      }
+    } catch (err) {
+      console.error('Error fetching active follow-ups:', err)
+    } finally {
+      setLoadingActiveFollowUps(false)
+    }
+  }, [tibokPatientId, patientData, getSupabaseClient])
+
+  // Open follow-up modal and fetch active follow-ups
+  const handleOpenFollowUpModal = useCallback(() => {
+    handleOpenFollowUpModal()
+    fetchActiveFollowUps()
+  }, [fetchActiveFollowUps])
 
   // Save follow-up data
   const handleSavePatientFollowUp = useCallback(() => {
@@ -7063,7 +7094,7 @@ export default function ChronicProfessionalReport({
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => setShowFollowUpModal(true)}>
+                    <Button variant="outline" onClick={() => handleOpenFollowUpModal()}>
                       <Edit className="h-4 w-4 mr-2" />
                       Modifier
                     </Button>
@@ -7077,7 +7108,7 @@ export default function ChronicProfessionalReport({
                 <div className="text-center py-8">
                   <Activity className="h-12 w-12 mx-auto text-gray-300 mb-4" />
                   <p className="text-gray-500 mb-4">Aucun suivi chronique activé</p>
-                  <Button onClick={() => setShowFollowUpModal(true)}>
+                  <Button onClick={() => handleOpenFollowUpModal()}>
                     <Activity className="h-4 w-4 mr-2" />
                     Activer un suivi
                   </Button>
@@ -7605,91 +7636,51 @@ export default function ChronicProfessionalReport({
         <div className="space-y-4 py-4">
           <Label>Type de suivi * (peut sélectionner plusieurs)</Label>
 
+          {loadingActiveFollowUps ? (
+            <div className="text-center py-4 text-gray-500 text-sm">Chargement...</div>
+          ) : (
           <div className="space-y-3">
-            <div
-              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                selectedFollowUpTypes.includes('blood_pressure')
-                  ? 'bg-red-50 border-red-300'
-                  : 'hover:bg-gray-50'
-              }`}
-              onClick={() => toggleFollowUpType('blood_pressure')}
-            >
-              <Checkbox
-                id="blood_pressure"
-                checked={selectedFollowUpTypes.includes('blood_pressure')}
-                onCheckedChange={() => toggleFollowUpType('blood_pressure')}
-              />
-              <div className="flex items-center gap-2 flex-1">
-                <Droplets className="h-5 w-5 text-red-600" />
-                <Label htmlFor="blood_pressure" className="cursor-pointer">
-                  Tension Artérielle (HTA)
-                </Label>
-              </div>
-            </div>
-
-            <div
-              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                selectedFollowUpTypes.includes('glycemia_type_1')
-                  ? 'bg-orange-50 border-orange-300'
-                  : 'hover:bg-gray-50'
-              }`}
-              onClick={() => toggleFollowUpType('glycemia_type_1')}
-            >
-              <Checkbox
-                id="glycemia_type_1"
-                checked={selectedFollowUpTypes.includes('glycemia_type_1')}
-                onCheckedChange={() => toggleFollowUpType('glycemia_type_1')}
-              />
-              <div className="flex items-center gap-2 flex-1">
-                <Activity className="h-5 w-5 text-orange-600" />
-                <Label htmlFor="glycemia_type_1" className="cursor-pointer">
-                  Glycémie - Diabète Type 1 (quotidien, matin et soir)
-                </Label>
-              </div>
-            </div>
-
-            <div
-              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                selectedFollowUpTypes.includes('glycemia_type_2')
-                  ? 'bg-amber-50 border-amber-300'
-                  : 'hover:bg-gray-50'
-              }`}
-              onClick={() => toggleFollowUpType('glycemia_type_2')}
-            >
-              <Checkbox
-                id="glycemia_type_2"
-                checked={selectedFollowUpTypes.includes('glycemia_type_2')}
-                onCheckedChange={() => toggleFollowUpType('glycemia_type_2')}
-              />
-              <div className="flex items-center gap-2 flex-1">
-                <Activity className="h-5 w-5 text-amber-600" />
-                <Label htmlFor="glycemia_type_2" className="cursor-pointer">
-                  Glycémie - Diabète Type 2 (2-3 fois/semaine, matin)
-                </Label>
-              </div>
-            </div>
-
-            <div
-              className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                selectedFollowUpTypes.includes('weight')
-                  ? 'bg-blue-50 border-blue-300'
-                  : 'hover:bg-gray-50'
-              }`}
-              onClick={() => toggleFollowUpType('weight')}
-            >
-              <Checkbox
-                id="weight"
-                checked={selectedFollowUpTypes.includes('weight')}
-                onCheckedChange={() => toggleFollowUpType('weight')}
-              />
-              <div className="flex items-center gap-2 flex-1">
-                <Scale className="h-5 w-5 text-blue-600" />
-                <Label htmlFor="weight" className="cursor-pointer">
-                  Poids (Obésité)
-                </Label>
-              </div>
-            </div>
+            {(() => {
+              const isGlycemiaActive = activeFollowUpTypes.includes('glycemia') || activeFollowUpTypes.includes('glycemia_type_1') || activeFollowUpTypes.includes('glycemia_type_2')
+              const options = [
+                { type: 'blood_pressure', label: 'Tension Artérielle (HTA)', icon: <Droplets className="h-5 w-5 text-red-600" />, activeColor: 'bg-red-50 border-red-300' },
+                { type: 'glycemia_type_1', label: 'Glycémie - Diabète Type 1 (quotidien, matin et soir)', icon: <Activity className="h-5 w-5 text-orange-600" />, activeColor: 'bg-orange-50 border-orange-300' },
+                { type: 'glycemia_type_2', label: 'Glycémie - Diabète Type 2 (2-3 fois/semaine, matin)', icon: <Activity className="h-5 w-5 text-amber-600" />, activeColor: 'bg-amber-50 border-amber-300' },
+                { type: 'weight', label: 'Poids (Obésité)', icon: <Scale className="h-5 w-5 text-blue-600" />, activeColor: 'bg-blue-50 border-blue-300' },
+              ]
+              return options.map(opt => {
+                const isAlreadyActive = opt.type.startsWith('glycemia') ? isGlycemiaActive : activeFollowUpTypes.includes(opt.type)
+                return (
+                  <div
+                    key={opt.type}
+                    className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${
+                      isAlreadyActive
+                        ? 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed'
+                        : selectedFollowUpTypes.includes(opt.type)
+                          ? opt.activeColor + ' cursor-pointer'
+                          : 'hover:bg-gray-50 cursor-pointer'
+                    }`}
+                    onClick={() => !isAlreadyActive && toggleFollowUpType(opt.type)}
+                  >
+                    <Checkbox
+                      id={opt.type}
+                      checked={isAlreadyActive || selectedFollowUpTypes.includes(opt.type)}
+                      disabled={isAlreadyActive}
+                      onCheckedChange={() => !isAlreadyActive && toggleFollowUpType(opt.type)}
+                    />
+                    <div className="flex items-center gap-2 flex-1">
+                      {opt.icon}
+                      <Label htmlFor={opt.type} className={isAlreadyActive ? 'cursor-not-allowed' : 'cursor-pointer'}>
+                        {opt.label}
+                        {isAlreadyActive && <span className="text-xs text-gray-500 ml-2">(déjà activé)</span>}
+                      </Label>
+                    </div>
+                  </div>
+                )
+              })
+            })()}
           </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setShowFollowUpModal(false)}>
