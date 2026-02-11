@@ -3751,7 +3751,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
        } as Record<string, string>)[type] || null,
        frequency: 'daily',
        reminder_time: '08:00:00',
-       duration_days: 30,
+       duration_days: null,
        status: 'active',
        started_at: new Date().toISOString(),
        next_reminder_at: new Date().toISOString()
@@ -3765,6 +3765,20 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
        console.error('❌ Error saving follow-ups:', followUpError)
      } else {
        console.log(`✅ ${followUps.length} follow-up(s) saved successfully`)
+       // Send WhatsApp activation notification via WATI
+       try {
+         const diseaseSubtypes = followUps.map(f => f.disease_subtype).filter(Boolean)
+         if (diseaseSubtypes.length > 0 && patientPhone) {
+           await fetch('/api/send-follow-up-notification', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({ patientPhone, diseaseSubtypes })
+           })
+           console.log('📱 Follow-up activation notification sent')
+         }
+       } catch (notifErr) {
+         console.error('❌ Error sending follow-up notification:', notifErr)
+       }
      }
    } catch (err) {
      console.error('❌ Error saving follow-ups:', err)
