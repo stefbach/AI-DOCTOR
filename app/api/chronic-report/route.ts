@@ -298,6 +298,7 @@ IMPORTANT: You are receiving PRE-ANALYZED medical data including:
 - Detailed management plan with therapeutic objectives
 - Dietary plan and self-monitoring instructions
 - Follow-up schedule with specialist referrals
+- When available: REAL PATIENT MEASUREMENT DATA from chronic disease follow-up monitoring (blood pressure, glycemia, weight readings collected via WhatsApp over days/weeks). This data is critical - use it to make the report specific and data-driven rather than generic.
 
 Your task is to STRUCTURE this existing analysis into narrative form, NOT to re-analyze.
 
@@ -319,7 +320,44 @@ ABSOLUTELY FORBIDDEN:
 CRITICAL: Any response containing emojis or icons will be rejected. Use ONLY words and standard punctuation.`
 }
 
-function createChronicDiseaseUserPrompt(enrichedData: any, patientData: any, doctorData: any): string {
+function createChronicDiseaseUserPrompt(enrichedData: any, patientData: any, doctorData: any, followUpContext?: any): string {
+  // Build follow-up measurement section if available
+  let followUpSection = ''
+  if (followUpContext && Array.isArray(followUpContext) && followUpContext.length > 0) {
+    followUpSection = `\n=== PATIENT FOLLOW-UP MEASUREMENT DATA (REAL DATA FROM HOME MONITORING) ===
+IMPORTANT: This is REAL measurement data collected from the patient via WhatsApp follow-up monitoring.
+Use this data to make the report SPECIFIC and DATA-DRIVEN. Reference actual values, trends, and statistics.
+
+`
+    for (const fu of followUpContext) {
+      const diseaseLabel = ({
+        hypertension: 'Hypertension (Blood Pressure)',
+        diabetes_type_1: 'Diabetes Type 1 (Glycemia)',
+        diabetes_type_2: 'Diabetes Type 2 (Glycemia)',
+        obesity: 'Obesity (Weight)',
+      } as Record<string, string>)[fu.disease_subtype] || fu.disease_subtype
+
+      followUpSection += `--- ${diseaseLabel} Follow-Up ---
+Status: Active since ${fu.started_at}
+Frequency: ${fu.frequency}
+Targets: ${JSON.stringify(fu.targets)}
+
+Statistics:
+- Measures: ${fu.stats.total_measures}/${fu.stats.expected_measures} (${fu.stats.adherence_percent}% adherence)
+- Average: ${fu.stats.average}
+- In range: ${fu.stats.in_range_percent}%
+- Min: ${fu.stats.min} | Max: ${fu.stats.max}
+- 7-day trend: ${fu.stats.trend} (${fu.stats.trend_delta})
+- Alerts: ${fu.stats.alert_count} out of ${fu.stats.total_measures} measures
+${fu.stats.last_alert ? `- Last alert: ${fu.stats.last_alert.level} on ${fu.stats.last_alert.date}` : '- No alerts'}
+
+Recent Measurements:
+${fu.formatted_table}
+
+`
+    }
+  }
+
   return `Based on this COMPLETE CHRONIC DISEASE ANALYSIS, generate a professional medical report in ENGLISH:
 
 === PATIENT INFORMATION ===
@@ -382,16 +420,16 @@ ${enrichedData.followUp.imaging?.map((img: any) =>
 === FOLLOW-UP PLAN ===
 Schedule: ${enrichedData.followUp.schedule}
 Warning Signs: ${enrichedData.followUp.warningSigns}
-
+${followUpSection}
 TASK: Structure this EXISTING analysis into these narrative sections:
 
 1. chiefComplaint - Use provided chief complaint, expand professionally
 2. historyOfPresentIllness - Use medical history + current disease status
 3. pastMedicalHistory - Use chronic diseases background
 4. physicalExamination - Use clinical examination findings
-5. diagnosticSynthesis - Use disease assessments (diabetes, hypertension, obesity) + complications screening (200+ words)
-6. diagnosticConclusion - Use overall assessment + therapeutic objectives (150+ words)
-7. managementPlan - Use therapeutic plan + mention ${enrichedData.summary.medicationsCount} medications, ${enrichedData.summary.labTestsCount} lab tests, ${enrichedData.summary.imagingCount} imaging studies
+5. diagnosticSynthesis - Use disease assessments (diabetes, hypertension, obesity) + complications screening + IF FOLLOW-UP DATA IS AVAILABLE, reference actual measurement statistics (averages, trends, alert counts, adherence) (200+ words)
+6. diagnosticConclusion - Use overall assessment + therapeutic objectives + IF FOLLOW-UP DATA IS AVAILABLE, cite specific measurement trends and control status (150+ words)
+7. managementPlan - Use therapeutic plan + mention ${enrichedData.summary.medicationsCount} medications, ${enrichedData.summary.labTestsCount} lab tests, ${enrichedData.summary.imagingCount} imaging studies + IF FOLLOW-UP DATA IS AVAILABLE, reference adherence and measurement patterns
 8. dietaryPlan - Use dietary plan summary (expand to 150+ words)
 9. selfMonitoring - Use self-monitoring instructions (expand to 150+ words)
 10. followUpPlan - Use follow-up schedule + warning signs (expand to 150+ words)
@@ -405,6 +443,7 @@ IMPORTANT:
 - Use Anglo-Saxon medical terminology in ENGLISH
 - NO EMOJIS, NO COLOR INDICATORS
 - Professional medical report style
+- If PATIENT FOLLOW-UP MEASUREMENT DATA is provided, INTEGRATE it into the relevant sections (diagnosticSynthesis, diagnosticConclusion, managementPlan, selfMonitoring, followUpPlan). Reference specific values, trends, and statistics to make the report data-driven.
 
 Return ONLY a JSON object with these 11 keys and their narrative content in ENGLISH.`
 }
@@ -616,12 +655,13 @@ export async function POST(req: NextRequest) {
   console.log("Starting PROFESSIONAL chronic disease report generation (consultation-report structure)")
   
   try {
-    const { 
-      patientData, 
-      clinicalData, 
-      questionsData, 
+    const {
+      patientData,
+      clinicalData,
+      questionsData,
       diagnosisData,
-      doctorData 
+      doctorData,
+      followUpContext
     } = await req.json()
 
     console.log("\nRECEIVED DATA:")
@@ -655,7 +695,7 @@ export async function POST(req: NextRequest) {
     console.log("STEP 3: Generating narrative report with gpt-4o-mini...")
     
     const systemPrompt = createChronicDiseaseSystemPrompt()
-    const userPrompt = createChronicDiseaseUserPrompt(enrichedData, patientData, doctorData)
+    const userPrompt = createChronicDiseaseUserPrompt(enrichedData, patientData, doctorData, followUpContext)
     
     let narrativeSections: any
     
