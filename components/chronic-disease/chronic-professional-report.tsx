@@ -642,8 +642,10 @@ export default function ChronicProfessionalReport({
   // Chronic follow-up state (blood pressure, glycemia, weight monitoring)
   const [patientFollowUpData, setPatientFollowUpData] = useState<{
     types: string[]
+    durations: Record<string, number>
   } | null>(null)
   const [selectedFollowUpTypes, setSelectedFollowUpTypes] = useState<string[]>([])
+  const [followUpDurations, setFollowUpDurations] = useState<Record<string, string>>({})
   const [showFollowUpModal, setShowFollowUpModal] = useState(false)
   const [activeFollowUpTypes, setActiveFollowUpTypes] = useState<string[]>([])
   const [loadingActiveFollowUps, setLoadingActiveFollowUps] = useState(false)
@@ -2333,8 +2335,28 @@ export default function ChronicProfessionalReport({
       return
     }
 
+    // Validate that all selected types have a duration
+    const missingDuration = selectedFollowUpTypes.some(type => {
+      const val = parseInt(followUpDurations[type] || '0', 10)
+      return !val || val <= 0
+    })
+    if (missingDuration) {
+      toast({
+        title: "Durée requise",
+        description: "Veuillez indiquer la durée pour chaque type de suivi sélectionné",
+        variant: "destructive"
+      })
+      return
+    }
+
+    const durations: Record<string, number> = {}
+    selectedFollowUpTypes.forEach(type => {
+      durations[type] = parseInt(followUpDurations[type], 10)
+    })
+
     setPatientFollowUpData({
-      types: selectedFollowUpTypes
+      types: selectedFollowUpTypes,
+      durations
     })
     setShowFollowUpModal(false)
 
@@ -2342,12 +2364,13 @@ export default function ChronicProfessionalReport({
       title: "✅ Suivi chronique enregistré",
       description: `${selectedFollowUpTypes.length} type(s) de suivi activé(s)`
     })
-  }, [selectedFollowUpTypes])
+  }, [selectedFollowUpTypes, followUpDurations])
 
   // Clear follow-up data
   const handleClearPatientFollowUp = useCallback(() => {
     setPatientFollowUpData(null)
     setSelectedFollowUpTypes([])
+    setFollowUpDurations({})
   }, [])
 
   // Toggle follow-up type selection (glycemia types are mutually exclusive)
@@ -2919,24 +2942,34 @@ export default function ChronicProfessionalReport({
         if (patientFollowUpData && patientFollowUpData.types.length > 0 && supabaseClient) {
           console.log('📤 Saving follow-ups to Supabase...')
           try {
-            const followUps = patientFollowUpData.types.map(type => ({
-              patient_id: tibokPatientId || null,
-              doctor_id: tibokDoctorId || null,
-              consultation_id: consultationId || null,
-              follow_up_type: type,
-              disease_subtype: ({
-                blood_pressure: 'hypertension',
-                glycemia_type_1: 'diabetes_type_1',
-                glycemia_type_2: 'diabetes_type_2',
-                weight: 'obesity',
-              } as Record<string, string>)[type] || null,
-              frequency: 'daily',
-              reminder_time: '08:00:00',
-              duration_days: null,
-              status: 'active',
-              started_at: new Date().toISOString(),
-              next_reminder_at: new Date().toISOString()
-            }))
+            const FOLLOW_UP_SCHEDULES: Record<string, { frequency: string; measurement_times: string[] }> = {
+              blood_pressure: { frequency: 'three_days_weekly', measurement_times: ['morning', 'evening'] },
+              glycemia_type_1: { frequency: 'three_days_weekly', measurement_times: ['morning', 'evening'] },
+              glycemia_type_2: { frequency: 'three_days_weekly', measurement_times: ['morning'] },
+              weight: { frequency: 'weekly', measurement_times: ['morning'] },
+            }
+            const followUps = patientFollowUpData.types.map(type => {
+              const schedule = FOLLOW_UP_SCHEDULES[type] || { frequency: 'daily', measurement_times: ['morning'] }
+              return {
+                patient_id: tibokPatientId || null,
+                doctor_id: tibokDoctorId || null,
+                consultation_id: consultationId || null,
+                follow_up_type: type,
+                disease_subtype: ({
+                  blood_pressure: 'hypertension',
+                  glycemia_type_1: 'diabetes_type_1',
+                  glycemia_type_2: 'diabetes_type_2',
+                  weight: 'obesity',
+                } as Record<string, string>)[type] || null,
+                frequency: schedule.frequency,
+                measurement_times: schedule.measurement_times,
+                reminder_time: '08:00:00',
+                duration_days: patientFollowUpData.durations?.[type] || null,
+                status: 'active',
+                started_at: new Date().toISOString(),
+                next_reminder_at: new Date().toISOString()
+              }
+            })
 
             const { error: followUpError } = await supabaseClient
               .from('patient_follow_ups')
@@ -7640,7 +7673,7 @@ export default function ChronicProfessionalReport({
 
     {/* Follow-up Modal */}
     <Dialog open={showFollowUpModal} onOpenChange={setShowFollowUpModal}>
-      <DialogContent className="sm:max-w-[400px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-purple-600" />
@@ -7657,38 +7690,58 @@ export default function ChronicProfessionalReport({
             {(() => {
               const isGlycemiaActive = activeFollowUpTypes.includes('glycemia') || activeFollowUpTypes.includes('glycemia_type_1') || activeFollowUpTypes.includes('glycemia_type_2')
               const options = [
-                { type: 'blood_pressure', label: 'Tension Artérielle (HTA)', icon: <Droplets className="h-5 w-5 text-red-600" />, activeColor: 'bg-red-50 border-red-300' },
-                { type: 'glycemia_type_1', label: 'Glycémie - Diabète Type 1 (quotidien, matin et soir)', icon: <Activity className="h-5 w-5 text-orange-600" />, activeColor: 'bg-orange-50 border-orange-300' },
-                { type: 'glycemia_type_2', label: 'Glycémie - Diabète Type 2 (2-3 fois/semaine, matin)', icon: <Activity className="h-5 w-5 text-amber-600" />, activeColor: 'bg-amber-50 border-amber-300' },
-                { type: 'weight', label: 'Poids (Obésité)', icon: <Scale className="h-5 w-5 text-blue-600" />, activeColor: 'bg-blue-50 border-blue-300' },
+                { type: 'blood_pressure', label: 'Tension Artérielle (HTA)', icon: <Droplets className="h-5 w-5 text-red-600" />, activeColor: 'bg-red-50 border-red-300', schedule: '3x/semaine, matin et soir' },
+                { type: 'glycemia_type_1', label: 'Glycémie - Diabète Type 1', icon: <Activity className="h-5 w-5 text-orange-600" />, activeColor: 'bg-orange-50 border-orange-300', schedule: '3x/semaine, matin et soir' },
+                { type: 'glycemia_type_2', label: 'Glycémie - Diabète Type 2', icon: <Activity className="h-5 w-5 text-amber-600" />, activeColor: 'bg-amber-50 border-amber-300', schedule: '3x/semaine, matin' },
+                { type: 'weight', label: 'Poids (Obésité)', icon: <Scale className="h-5 w-5 text-blue-600" />, activeColor: 'bg-blue-50 border-blue-300', schedule: '1x/semaine, matin' },
               ]
               return options.map(opt => {
                 const isAlreadyActive = opt.type.startsWith('glycemia') ? isGlycemiaActive : activeFollowUpTypes.includes(opt.type)
+                const isSelected = selectedFollowUpTypes.includes(opt.type)
                 return (
-                  <div
-                    key={opt.type}
-                    className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${
-                      isAlreadyActive
-                        ? 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed'
-                        : selectedFollowUpTypes.includes(opt.type)
-                          ? opt.activeColor + ' cursor-pointer'
-                          : 'hover:bg-gray-50 cursor-pointer'
-                    }`}
-                    onClick={() => !isAlreadyActive && toggleFollowUpType(opt.type)}
-                  >
-                    <Checkbox
-                      id={opt.type}
-                      checked={isAlreadyActive || selectedFollowUpTypes.includes(opt.type)}
-                      disabled={isAlreadyActive}
-                      onCheckedChange={() => !isAlreadyActive && toggleFollowUpType(opt.type)}
-                    />
-                    <div className="flex items-center gap-2 flex-1">
-                      {opt.icon}
-                      <Label htmlFor={opt.type} className={isAlreadyActive ? 'cursor-not-allowed' : 'cursor-pointer'}>
-                        {opt.label}
-                        {isAlreadyActive && <span className="text-xs text-gray-500 ml-2">(déjà activé)</span>}
-                      </Label>
+                  <div key={opt.type} className="space-y-2">
+                    <div
+                      className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${
+                        isAlreadyActive
+                          ? 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed'
+                          : isSelected
+                            ? opt.activeColor + ' cursor-pointer'
+                            : 'hover:bg-gray-50 cursor-pointer'
+                      }`}
+                      onClick={() => !isAlreadyActive && toggleFollowUpType(opt.type)}
+                    >
+                      <Checkbox
+                        id={opt.type}
+                        checked={isAlreadyActive || isSelected}
+                        disabled={isAlreadyActive}
+                        onCheckedChange={() => !isAlreadyActive && toggleFollowUpType(opt.type)}
+                      />
+                      <div className="flex items-center gap-2 flex-1">
+                        {opt.icon}
+                        <div>
+                          <Label htmlFor={opt.type} className={isAlreadyActive ? 'cursor-not-allowed' : 'cursor-pointer'}>
+                            {opt.label}
+                            {isAlreadyActive && <span className="text-xs text-gray-500 ml-2">(déjà activé)</span>}
+                          </Label>
+                          <p className="text-xs text-gray-500">{opt.schedule}</p>
+                        </div>
+                      </div>
                     </div>
+                    {isSelected && !isAlreadyActive && (
+                      <div className="ml-10 flex items-center gap-2">
+                        <Label className="text-sm text-gray-600 whitespace-nowrap">Durée:</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          placeholder="ex: 30"
+                          className="w-24 h-8 text-sm"
+                          value={followUpDurations[opt.type] || ''}
+                          onChange={(e) => setFollowUpDurations(prev => ({ ...prev, [opt.type]: e.target.value }))}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <span className="text-sm text-gray-500">jours</span>
+                      </div>
+                    )}
                   </div>
                 )
               })
@@ -7700,7 +7753,10 @@ export default function ChronicProfessionalReport({
           <Button variant="outline" onClick={() => setShowFollowUpModal(false)}>
             Annuler
           </Button>
-          <Button onClick={handleSavePatientFollowUp}>
+          <Button
+            onClick={handleSavePatientFollowUp}
+            disabled={selectedFollowUpTypes.length === 0 || selectedFollowUpTypes.some(t => !followUpDurations[t] || parseInt(followUpDurations[t], 10) <= 0)}
+          >
             Activer
           </Button>
         </DialogFooter>
