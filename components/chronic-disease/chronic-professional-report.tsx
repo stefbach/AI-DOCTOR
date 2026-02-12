@@ -390,6 +390,34 @@ function formatNarrativeWithBoldHeaders(narrative: string): string {
   return formattedLines.join('\n')
 }
 
+// Format measurements for report context (simplified table for AI prompt)
+function formatMeasurementsForReport(followUpType: string, measurements: any[]): string {
+  if (!measurements || measurements.length === 0) return 'No measurements available.'
+  const sorted = [...measurements].sort(
+    (a: any, b: any) => new Date(b.measured_at).getTime() - new Date(a.measured_at).getTime()
+  ).slice(0, 30)
+
+  if (followUpType === 'blood_pressure') {
+    return sorted.map((m: any) => {
+      const date = new Date(m.measured_at).toISOString().slice(0, 10)
+      return `${date} | ${Math.round(m.value_1)}/${Math.round(m.value_2 || 0)} mmHg | HR:${m.heart_rate || '-'} | ${m.is_alert ? 'ALERT' : 'ok'}`
+    }).join('\n')
+  }
+  if (followUpType.startsWith('glycemia')) {
+    return sorted.map((m: any) => {
+      const date = new Date(m.measured_at).toISOString().slice(0, 10)
+      return `${date} | ${m.value_1} g/L | ${m.measurement_tag || '-'} | ${m.is_alert ? 'ALERT' : 'ok'}`
+    }).join('\n')
+  }
+  if (followUpType === 'weight') {
+    return sorted.map((m: any) => {
+      const date = new Date(m.measured_at).toISOString().slice(0, 10)
+      return `${date} | ${m.value_1} kg | waist:${m.waist_cm || '-'} cm | ${m.is_alert ? 'ALERT' : 'ok'}`
+    }).join('\n')
+  }
+  return 'Unknown measurement type.'
+}
+
 // Helper to normalize patient data from form to API format
 function normalizePatientData(patientData: any): any {
   if (!patientData) return null
@@ -1412,6 +1440,33 @@ export default function ChronicProfessionalReport({
         }
 
         // Update progress: Starting API calls
+        setLoadingProgress(15)
+        setLoadingMessage('Fetching follow-up data...')
+
+        // Fetch follow-up measurement data for context (non-blocking, best-effort)
+        let followUpContext: any[] | undefined
+        try {
+          const followUpPatientId = tibokPatientId || normalizedPatientData?.patientId
+          if (followUpPatientId) {
+            const fuRes = await fetch(`/api/follow-ups/doctor-summary?patientId=${encodeURIComponent(followUpPatientId)}`)
+            const fuData = await fuRes.json()
+            if (fuData.success && fuData.follow_ups && fuData.follow_ups.length > 0) {
+              followUpContext = fuData.follow_ups.map((fu: any) => ({
+                disease_subtype: fu.disease_subtype,
+                follow_up_type: fu.follow_up_type,
+                started_at: fu.started_at,
+                frequency: fu.frequency,
+                targets: fu.targets,
+                stats: fu.stats,
+                formatted_table: fu.measurements ? formatMeasurementsForReport(fu.follow_up_type, fu.measurements) : '',
+              }))
+              console.log(`📊 Follow-up context loaded: ${followUpContext.length} active follow-up(s)`)
+            }
+          }
+        } catch (fuErr) {
+          console.log('⚠️ Could not load follow-up context (non-critical):', fuErr)
+        }
+
         setLoadingProgress(20)
         setLoadingMessage('Generating medical report and prescription...')
 
@@ -1424,7 +1479,8 @@ export default function ChronicProfessionalReport({
               clinicalData,
               questionsData,
               diagnosisData,
-              doctorData: doctorPayload
+              doctorData: doctorPayload,
+              followUpContext
             })
           }),
           fetch("/api/chronic-prescription", {
