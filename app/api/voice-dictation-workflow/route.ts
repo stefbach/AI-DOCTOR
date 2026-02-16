@@ -358,7 +358,6 @@ RULES:
       ],
       temperature: 0.2,
       max_tokens: 2000,
-      reasoning_effort: "none" as any,
     });
 
     return response.choices[0]?.message?.content?.trim() || frenchText;
@@ -390,7 +389,6 @@ async function extractClinicalData(
     ],
     temperature: 0.1,
     max_tokens: 3000,
-    reasoning_effort: "none" as any,
     response_format: { type: "json_object" }
   });
   

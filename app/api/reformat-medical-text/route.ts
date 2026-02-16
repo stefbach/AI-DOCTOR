@@ -55,7 +55,6 @@ Return ONLY the formatted medical text as a paragraph IN ENGLISH, nothing else. 
       ],
       max_tokens: 1000,
       temperature: 0.3,
-      reasoning_effort: "none" as any,
     })
 
     const formattedText = response.choices[0]?.message?.content?.trim() || text
