@@ -108,7 +108,7 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
 async function translateToEnglish(frenchText: string): Promise<string> {
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-5.2-mini',
+      model: 'gpt-5.2',
       messages: [
         {
           role: 'system',

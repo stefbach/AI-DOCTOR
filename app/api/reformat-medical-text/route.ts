@@ -48,7 +48,7 @@ ${currentContent ? `EXISTING CONTENT IN THIS SECTION:\n${currentContent}\n\nAppe
 Return ONLY the formatted medical text as a paragraph IN ENGLISH, nothing else. No titles, no bullet points.`
 
     const response = await openai.chat.completions.create({
-      model: "gpt-5.2-mini",
+      model: "gpt-5.2",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: `Please format this voice-transcribed text for the ${sectionType} section:\n\n${text}` }
