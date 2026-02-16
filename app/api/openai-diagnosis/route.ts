@@ -2200,7 +2200,6 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
             content: finalPrompt
           }
         ],
-        temperature: qualityLevel === 0 ? 0.3 : 0.05,
         max_completion_tokens: 16000,
         reasoning_effort: 'low',
         response_format: { type: "json_object" },
