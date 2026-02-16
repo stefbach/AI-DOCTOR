@@ -531,7 +531,7 @@ CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON medical nomenclature in EN
         { role: "user", content: prompt }
       ],
       temperature: 0.3,
-      max_tokens: 3000
+      max_completion_tokens: 3000
     })
 
     const text = (completion.choices[0].message.content || '[]').trim()
@@ -585,7 +585,7 @@ CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON nomenclature. NO EMOJIS.`
         { role: "user", content: prompt }
       ],
       temperature: 0.3,
-      max_tokens: 3000
+      max_completion_tokens: 3000
     })
 
     const text = (completion.choices[0].message.content || '[]').trim()
@@ -636,7 +636,7 @@ CRITICAL: Return ONLY the JSON array. Professional terminology. NO EMOJIS.`
         { role: "user", content: prompt }
       ],
       temperature: 0.3,
-      max_tokens: 2500
+      max_completion_tokens: 2500
     })
 
     const text = (completion.choices[0].message.content || '[]').trim()
