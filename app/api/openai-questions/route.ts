@@ -359,7 +359,6 @@ async function callOpenAIWithRetry(
           ],
           temperature: attempt === 0 ? baseTemperature : attempt === 1 ? baseTemperature * 0.7 : 0.1,
           max_tokens: 8000,
-          reasoning_effort: "none",
           response_format: { type: 'json_object' },
           top_p: 0.9,
           frequency_penalty: 0.1,
