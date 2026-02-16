@@ -62,7 +62,7 @@ async function callOpenAI(
         { role: "user", content: userPrompt }
       ],
       temperature: 0.2,
-      max_tokens: maxTokens,
+      max_completion_tokens: maxTokens,
       response_format: { type: "json_object" }
     }),
   })

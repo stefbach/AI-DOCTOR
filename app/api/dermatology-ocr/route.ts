@@ -352,7 +352,7 @@ GENERATE comprehensive professional dermatological image analysis.`
             ]
           }
         ],
-        max_tokens: 3500,
+        max_completion_tokens: 3500,
         temperature: attempt === 0 ? 0.3 : 0.2, // Stricter on retries
         response_format: { type: "json_object" }
       })
