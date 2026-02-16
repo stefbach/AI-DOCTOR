@@ -43,7 +43,6 @@ Medical history: diabète, diabetes, hypertension, asthme, asthma, BPCO, COPD, i
 Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
 
   try {
-    // Use specified language or auto-detect with bilingual medical prompt
     // For short phrases, specifying language helps Whisper accuracy
     const whisperOptions: any = {
       file: audioFile,
@@ -53,10 +52,7 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
     };
 
     // If a preferred language is specified, use it to help Whisper
-    // This is especially important for short phrases like "abdominal pain"
-    // Use "auto" to explicitly request auto-detection (useful for bilingual dictation)
     if (preferredLanguage && preferredLanguage !== 'auto') {
-      // Map common language codes to Whisper's expected format
       const langMap: { [key: string]: string } = {
         'en': 'en',
         'en-US': 'en',
@@ -71,6 +67,7 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
       console.log('   Using auto-detection for language (bilingual support)');
     }
 
+    // Step 1: First transcribe to detect the language
     const transcription = await openai.audio.transcriptions.create(whisperOptions);
 
     console.log('✅ Transcription completed');
@@ -81,12 +78,29 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
     let translatedText = transcription.text;
     let wasTranslated = false;
 
-    // If French detected, translate to English
-    if (transcription.language === 'fr' || transcription.language === 'french') {
-      console.log('🇫🇷 French detected - translating to English...');
-      translatedText = await translateToEnglish(transcription.text);
-      wasTranslated = true;
-      console.log('✅ Translation completed');
+    // Step 2: If non-English detected, use Whisper's native translation endpoint
+    // This is more reliable than a separate GPT call and has no extra cost
+    const detectedLang = (transcription.language || '').toLowerCase();
+    const isNonEnglish = detectedLang && detectedLang !== 'en' && detectedLang !== 'english';
+
+    if (isNonEnglish) {
+      console.log(`🌐 Non-English detected (${detectedLang}) - using Whisper translation endpoint...`);
+      try {
+        const translationResult = await openai.audio.translations.create({
+          file: audioFile,
+          model: 'whisper-1',
+          prompt: 'Medical dictation. Translate to English. ' + medicalPrompt.split('\n')[0],
+        });
+        translatedText = translationResult.text;
+        wasTranslated = true;
+        console.log(`✅ Whisper translation completed: "${translatedText}"`);
+      } catch (translationError: any) {
+        console.error('⚠️ Whisper translation failed, falling back to GPT translation:', translationError.message);
+        // Fallback to GPT-5.2 translation
+        translatedText = await translateToEnglish(transcription.text);
+        wasTranslated = true;
+        console.log(`✅ GPT fallback translation completed: "${translatedText}"`);
+      }
     }
 
     return {
