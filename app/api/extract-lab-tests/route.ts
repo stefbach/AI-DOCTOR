@@ -81,7 +81,6 @@ EXAMPLE OUTPUT FORMAT:
       ],
       temperature: 0.3,
       max_tokens: 1500,
-      reasoning_effort: "none" as any
     })
 
     const responseText = completion.choices[0].message.content || '[]'
