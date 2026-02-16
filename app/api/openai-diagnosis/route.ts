@@ -2202,6 +2202,7 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
         ],
         temperature: qualityLevel === 0 ? 0.3 : 0.05,
         max_completion_tokens: 16000,
+        reasoning_effort: 'low',
         response_format: { type: "json_object" },
       })
 
@@ -5822,7 +5823,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       
       // Métadonnées
       metadata: {
-        ai_model: 'GPT-4o',
+        ai_model: 'GPT-5.2',
         system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise-System',
         features: [
           '🏝️ MAURITIUS ANGLO-SAXON NOMENCLATURE - Terminologie médicale UK',

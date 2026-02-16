@@ -256,7 +256,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-5.2',
         messages: [
           {
             role: 'system',
@@ -412,7 +412,7 @@ export async function POST(request: NextRequest) {
 
     // Ajouter des métadonnées système étendues
     parsedResponse.system_metadata = {
-      ai_model: 'GPT-4o',
+      ai_model: 'GPT-5.2',
       standards_applied: 'Medical Council of Mauritius + UK Anglo-Saxon',
       nomenclature: 'UK Medical Terminology',
       dci_enforcement: true,

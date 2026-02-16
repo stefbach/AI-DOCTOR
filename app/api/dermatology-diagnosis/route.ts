@@ -370,7 +370,7 @@ CLINICAL SUMMARY MUST INCLUDE:
       }
       
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5.2",
         messages: [
           {
             role: "system",
