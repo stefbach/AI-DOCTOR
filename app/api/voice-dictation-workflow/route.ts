@@ -859,7 +859,7 @@ export async function POST(request: NextRequest) {
         totalProcessingTime: `${processingTime}ms`,
         stepsCompleted: [
           '1. Audio transcription (Whisper)',
-          '2. Clinical data extraction (GPT-4o)',
+          '2. Clinical data extraction (GPT-5.2)',
           '3. Medical diagnosis (openai-diagnosis API)',
           '4. Report generation (generate-consultation-report API)'
         ],
@@ -901,7 +901,7 @@ export async function GET() {
     description: 'Complete voice dictation to consultation report workflow',
     workflow: [
       'Step 1: Whisper audio transcription',
-      'Step 2: GPT-4o clinical data extraction',
+      'Step 2: GPT-5.2 clinical data extraction',
       'Step 3: openai-diagnosis API call',
       'Step 4: generate-consultation-report API call'
     ],

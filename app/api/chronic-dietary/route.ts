@@ -215,10 +215,10 @@ VITAL SIGNS:
 
 Generate complete 7-day meal plan with EXACTLY ${Math.round(targetCalories)} kcal per day.`
 
-    console.log('🥗 Calling OpenAI API with gpt-4o for professional-quality dietary protocol...')
+    console.log('🥗 Calling OpenAI API with gpt-5.2 for professional-quality dietary protocol...')
 
     const result = await generateText({
-      model: openai("gpt-4o"),  // ✅ UPGRADED to gpt-4o for superior dietary plan quality
+      model: openai("gpt-5.2"),  // ✅ UPGRADED to gpt-5.2 for superior dietary plan quality
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: patientContext }

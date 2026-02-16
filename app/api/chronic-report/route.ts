@@ -522,7 +522,7 @@ Return format (professional prescription - NO EMOJIS):
 CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON medical nomenclature in ENGLISH. NO EMOJIS.`
 
     const completion = await openaiClient.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5.2",
       messages: [
         { 
           role: "system", 
@@ -576,7 +576,7 @@ Categories: hematology, clinicalChemistry, immunology, microbiology, endocrinolo
 CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON nomenclature. NO EMOJIS.`
 
     const completion = await openaiClient.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5.2",
       messages: [
         { 
           role: "system", 
@@ -627,7 +627,7 @@ Return format (professional imaging request - NO EMOJIS):
 CRITICAL: Return ONLY the JSON array. Professional terminology. NO EMOJIS.`
 
     const completion = await openaiClient.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5.2",
       messages: [
         { 
           role: "system", 
@@ -692,7 +692,7 @@ export async function POST(req: NextRequest) {
     const enrichedData = prepareChronicDiseaseGPTData(extractedData, patientData)
     
     // ===== STEP 3: GENERATE NARRATIVE REPORT WITH GPT-4 (like consultation-report) =====
-    console.log("STEP 3: Generating narrative report with gpt-4o-mini...")
+    console.log("STEP 3: Generating narrative report with gpt-5.2...")
     
     const systemPrompt = createChronicDiseaseSystemPrompt()
     const userPrompt = createChronicDiseaseUserPrompt(enrichedData, patientData, doctorData, followUpContext)
@@ -701,7 +701,7 @@ export async function POST(req: NextRequest) {
     
     try {
       const result = await generateText({
-        model: openai("gpt-4o-mini"),  // Same as consultation-report
+        model: openai("gpt-5.2"),  // Same as consultation-report
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }

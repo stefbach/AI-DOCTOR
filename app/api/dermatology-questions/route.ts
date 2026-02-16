@@ -83,7 +83,7 @@ ${systemMessage}
       }
       
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5.2",
         messages: [
           { role: "system", content: enhancedSystemMessage },
           { role: "user", content: prompt }
@@ -394,7 +394,7 @@ YOU MUST return a JSON object with "questions" array, NOT a single question!`
         lastName: originalIdentity.lastName
       },
       metadata: {
-        model: 'gpt-4o',
+        model: 'gpt-5.2',
         version: '2.0-Professional-Grade-4Retry',
         qualityMetrics: result.qualityMetrics
       },

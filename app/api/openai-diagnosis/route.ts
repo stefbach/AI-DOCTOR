@@ -5822,7 +5822,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       
       // Métadonnées
       metadata: {
-        ai_model: 'GPT-4o',
+        ai_model: 'GPT-5.2',
         system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise-System',
         features: [
           '🏝️ MAURITIUS ANGLO-SAXON NOMENCLATURE - Terminologie médicale UK',

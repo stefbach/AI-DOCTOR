@@ -438,7 +438,7 @@ export default function PatientAdviceCarousel({
  </div>
  </div>
  <div className="text-right">
- <p className="text-sm font-medium text-gray-700">AI Analysis GPT-4o</p>
+ <p className="text-sm font-medium text-gray-700">AI Analysis GPT-5.2</p>
  <p className="text-lg font-bold text-blue-600">{analysisProgress}%</p>
  </div>
  </div>
@@ -536,7 +536,7 @@ export default function PatientAdviceCarousel({
  <Brain className="h-5 w-5 text-blue-600 mt-0.5" />
  <div className="text-sm text-blue-800">
  <p className="font-medium mb-1">Maximize teleconsultation efficiency</p>
- <p>These suggestions help you gather valuable clinical information while GPT-4o AI analyzes the case. The complete analysis will be available in approximately {Math.ceil((100 - analysisProgress) * 0.6)} seconds.</p>
+ <p>These suggestions help you gather valuable clinical information while GPT-5.2 AI analyzes the case. The complete analysis will be available in approximately {Math.ceil((100 - analysisProgress) * 0.6)} seconds.</p>
  </div>
  </div>
  </div>

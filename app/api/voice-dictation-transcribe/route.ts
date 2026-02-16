@@ -189,7 +189,7 @@ async function extractClinicalData(normalizedText: string): Promise<{
   referralInfo?: any;
   consultationType: 'standard' | 'specialist_referral';
 }> {
-  console.log('📊 Step 3: Extracting clinical data with GPT-4o...');
+  console.log('📊 Step 3: Extracting clinical data with GPT-5.2...');
 
   const extractionPrompt = `You are an expert medical assistant. Analyze this medical consultation transcription and extract the following information in strict JSON format:
 
@@ -486,7 +486,7 @@ export async function GET() {
     description: 'Voice dictation transcription and extraction (Steps 1-2 only)',
     steps: [
       '1. Audio transcription (Whisper API)',
-      '2. Clinical data extraction (GPT-4o)',
+      '2. Clinical data extraction (GPT-5.2)',
     ],
     note: 'Frontend will then display DiagnosisForm and ProfessionalReport',
   });

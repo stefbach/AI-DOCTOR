@@ -12,7 +12,7 @@ import { openai } from '@ai-sdk/openai'
  * - New concerns or improvements
  * - Adjusted treatment plans
  * 
- * Uses GPT-4o for superior narrative quality and clinical reasoning.
+ * Uses GPT-5.2 for superior narrative quality and clinical reasoning.
  */
 export async function POST(req: NextRequest) {
   try {

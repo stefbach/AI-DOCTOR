@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const patientContext = buildPatientContext(patientDemographics, clinicalData, trendsData, previousConsultation, consultationHistory)
 
     const result = await generateText({
-      model: openai('gpt-4o'),
+      model: openai('gpt-5.2'),
       messages: [
         { role: 'system', content: CHRONIC_SYSTEM_PROMPT },
         { role: 'user', content: patientContext }

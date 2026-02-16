@@ -338,7 +338,7 @@ Generate the comprehensive chronic disease prescription now.`
     console.log('🤖 Calling OpenAI API using Vercel AI SDK...')
     
     const result = await generateText({
-      model: openai("gpt-4o-mini"),
+      model: openai("gpt-5.2"),
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: patientContext }
