@@ -2,7 +2,7 @@
 // - 4 retry attempts with progressive enhancement
 // - Auto-correction on final attempt
 // - 8000 max tokens for all modes
-// - Upgraded models: fast→gpt-4o-mini, balanced→gpt-4o, intelligent→gpt-4o
+// - Upgraded models: fast→gpt-5.2, balanced→gpt-5.2, intelligent→gpt-5.2
 // - Advanced OpenAI parameters
 import { type NextRequest, NextResponse } from "next/server"
 
@@ -359,6 +359,7 @@ async function callOpenAIWithRetry(
           ],
           temperature: attempt === 0 ? baseTemperature : attempt === 1 ? baseTemperature * 0.7 : 0.1,
           max_tokens: 8000,
+          reasoning_effort: "none",
           response_format: { type: 'json_object' },
           top_p: 0.9,
           frequency_penalty: 0.1,
@@ -1990,10 +1991,10 @@ export async function POST(request: NextRequest) {
     const prompt = generateModeSpecificPrompt(adjustedMode, context)
     
     const aiConfig = {
-      fast: { model: 'gpt-4o-mini', temperature: 0.2, maxTokens: 8000 },
-      balanced: { model: 'gpt-4o', temperature: 0.3, maxTokens: 8000 },
-      intelligent: { model: 'gpt-4o', temperature: 0.3, maxTokens: 8000 }
-    }[adjustedMode] || { model: 'gpt-4o', temperature: 0.3, maxTokens: 8000 }
+      fast: { model: 'gpt-5.2', temperature: 0.2, maxTokens: 8000 },
+      balanced: { model: 'gpt-5.2', temperature: 0.3, maxTokens: 8000 },
+      intelligent: { model: 'gpt-5.2', temperature: 0.3, maxTokens: 8000 }
+    }[adjustedMode] || { model: 'gpt-5.2', temperature: 0.3, maxTokens: 8000 }
     
     console.log(`Calling ${aiConfig.model} with ${adjustedMode} mode (history-enhanced) with retry mechanism`)
     

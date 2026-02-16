@@ -48,13 +48,14 @@ ${currentContent ? `EXISTING CONTENT IN THIS SECTION:\n${currentContent}\n\nAppe
 Return ONLY the formatted medical text as a paragraph IN ENGLISH, nothing else. No titles, no bullet points.`
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-5.2",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: `Please format this voice-transcribed text for the ${sectionType} section:\n\n${text}` }
       ],
       max_tokens: 1000,
       temperature: 0.3,
+      reasoning_effort: "none" as any,
     })
 
     const formattedText = response.choices[0]?.message?.content?.trim() || text

@@ -338,7 +338,7 @@ async function transcribeAudio(audioFile: File): Promise<{
 async function translateToEnglish(frenchText: string): Promise<string> {
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5.2',
       messages: [
         {
           role: 'system',
@@ -358,6 +358,7 @@ RULES:
       ],
       temperature: 0.2,
       max_tokens: 2000,
+      reasoning_effort: "none" as any,
     });
 
     return response.choices[0]?.message?.content?.trim() || frenchText;
@@ -373,10 +374,10 @@ RULES:
 async function extractClinicalData(
   transcriptionText: string
 ): Promise<ExtractedClinicalData> {
-  console.log('🧠 Step 2: Extracting clinical data with GPT-4o...');
-  
+  console.log('🧠 Step 2: Extracting clinical data with GPT-5.2...');
+
   const extraction = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-5.2',
     messages: [
       {
         role: 'system',
@@ -389,6 +390,7 @@ async function extractClinicalData(
     ],
     temperature: 0.1,
     max_tokens: 3000,
+    reasoning_effort: "none" as any,
     response_format: { type: "json_object" }
   });
   

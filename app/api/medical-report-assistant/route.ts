@@ -68,9 +68,9 @@ export async function POST(request: NextRequest) {
 
     console.log('📡 Calling GPT-4 for intelligent assistance...')
 
-    // Call GPT-4 with function calling for structured actions
+    // Call GPT-5.2 with function calling for structured actions
     const result = await generateText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-5.2", { reasoningEffort: "none" }),
       messages,
       maxTokens: 2000,
       temperature: 0.3,

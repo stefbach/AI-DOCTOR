@@ -207,7 +207,7 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
     },
     "technicalData": {
       "generationDate": "${new Date().toISOString()}",
-      "aiModel": "gpt-4o-diagnostic-imaging-expert",
+      "aiModel": "gpt-5.2-diagnostic-imaging-expert",
       "validationLevel": "Expert diagnostic validation"
     }
   }
@@ -217,7 +217,7 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
     console.log("🧠 Génération ordonnance examens experte avec OpenAI...")
 
     const result = await generateText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-5.2", { reasoningEffort: "none" }),
       prompt: expertExamensPrompt,
       maxTokens: 16000,
       temperature: 0.05, // Très faible pour maximiser la précision
@@ -272,7 +272,7 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
         patientId: `${patientData.lastName}-${patientData.firstName}`,
         prescriptionDate: new Date().toISOString(),
         generatedAt: new Date().toISOString(),
-        model: "gpt-4o-diagnostic-expert",
+        model: "gpt-5.2-diagnostic-expert",
         safetyLevel: "MAXIMUM",
         validationStatus: "EXPERT_VALIDATED",
         examinationsCount: calculateTotalExaminations(examensData),

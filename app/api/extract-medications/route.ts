@@ -66,7 +66,7 @@ EXAMPLE OUTPUT FORMAT:
 ]`
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5.2",
       messages: [
         {
           role: "system",
@@ -78,7 +78,8 @@ EXAMPLE OUTPUT FORMAT:
         }
       ],
       temperature: 0.3,
-      max_tokens: 2000
+      max_tokens: 2000,
+      reasoning_effort: "none" as any
     })
 
     const responseText = completion.choices[0].message.content || '[]'
