@@ -1,6 +1,7 @@
 // /app/api/openai-diagnosis/route.ts - VERSION 4.3 MAURITIUS MEDICAL SYSTEM - LOGIQUE COMPLÈTE + DCI PRÉCIS
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
+import OpenAI from 'openai'
 
 export const runtime = 'nodejs'
 export const maxDuration = 120 // 120 seconds for GPT-4 diagnosis generation (increased due to prompt size)
@@ -2113,18 +2114,14 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
         qualityLevel = 3
       }
       
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-5.2',
-          messages: [
-            {
-              role: 'system',
-              content: `🏥 YOU ARE A COMPLETE MEDICAL ENCYCLOPEDIA - EXPERT PHYSICIAN WITH EXHAUSTIVE KNOWLEDGE
+      const openaiClient = new OpenAI({ apiKey })
+
+      const completion = await openaiClient.chat.completions.create({
+        model: 'gpt-5.2',
+        messages: [
+          {
+            role: 'system',
+            content: `🏥 YOU ARE A COMPLETE MEDICAL ENCYCLOPEDIA - EXPERT PHYSICIAN WITH EXHAUSTIVE KNOWLEDGE
 
 You possess the complete knowledge equivalent to:
 📚 BNF (British National Formulary) - Complete UK pharmaceutical database
@@ -2154,25 +2151,18 @@ CRITICAL RULES:
 - MINIMUM 40 characters for each indication field
 
 You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC medical responses.`
-            },
-            {
-              role: 'user',
-              content: finalPrompt
-            }
-          ],
-          temperature: qualityLevel === 0 ? 0.3 : 0.05,
-          max_completion_tokens: 4000,
-          response_format: { type: "json_object" },
-        }),
+          },
+          {
+            role: 'user',
+            content: finalPrompt
+          }
+        ],
+        temperature: qualityLevel === 0 ? 0.3 : 0.05,
+        max_tokens: 4000,
+        response_format: { type: "json_object" },
       })
-      
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
-      }
-      
-      const data = await response.json()
-      const rawContent = data.choices[0]?.message?.content || ''
+
+      const rawContent = completion.choices[0]?.message?.content || ''
       
       console.log('🤖 GPT-4 response received, length:', rawContent.length)
       

@@ -3,8 +3,8 @@
 // - Auto-correction on final attempt
 // - 8000 max tokens for all modes
 // - Upgraded models: fast→gpt-5.2, balanced→gpt-5.2, intelligent→gpt-5.2
-// - Advanced OpenAI parameters
 import { type NextRequest, NextResponse } from "next/server"
+import OpenAI from 'openai'
 
 // ==================== CONFIGURATION ====================
 export const runtime = 'nodejs'
@@ -329,80 +329,64 @@ async function callOpenAIWithRetry(
   isPregnant: boolean,
   maxRetries: number = 3
 ): Promise<any> {
+  const openai = new OpenAI({ apiKey })
   let lastError: Error | null = null
-  
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1} (model: ${model})`)
-      
+
       let enhancedSystemMessage = systemMessage
-      
+
       if (attempt === 1) {
-        enhancedSystemMessage = `🚨 ATTEMPT 2/4 - ENHANCED QUALITY:\n\n${systemMessage}\n\n⚠️ CRITICAL: Questions must be:\n- Clinically specific and actionable\n- Evidence-based\n- Appropriate for patient context${isPregnant ? ' (pregnancy-safe)' : ''}`
-      } else if (attempt === 2) {
-        enhancedSystemMessage = `🚨🚨 ATTEMPT 3/4 - STRICT STANDARDS:\n\n${systemMessage}\n\n⚠️ MANDATORY:\n- All questions must have unique IDs\n- All questions must have clear priorities\n- All questions must be patient-appropriate\n- Minimum 6 questions required`
-      } else if (attempt >= 3) {
-        enhancedSystemMessage = `🆘 ATTEMPT 4/4 - MAXIMUM QUALITY:\n\n${systemMessage}\n\n🎯 FINAL ATTEMPT - response must be PERFECT:\n- Questions must be comprehensive and cover all clinical aspects\n- Each question must be specific and actionable\n- Response must be valid JSON with complete structure`
+        enhancedSystemMessage = `${systemMessage}\n\nCRITICAL: Questions must be clinically specific, actionable, and evidence-based.${isPregnant ? ' Consider pregnancy safety.' : ''}`
+      } else if (attempt >= 2) {
+        enhancedSystemMessage = `${systemMessage}\n\nAll questions must have unique IDs, clear priorities, and be patient-appropriate. Response must be valid JSON.`
       }
-      
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: 'system', content: enhancedSystemMessage },
-            { role: 'user', content: prompt }
-          ],
-          temperature: attempt === 0 ? baseTemperature : attempt === 1 ? baseTemperature * 0.7 : 0.1,
-          max_completion_tokens: 8000,
-          response_format: { type: 'json_object' },
-        }),
+
+      const completion = await openai.chat.completions.create({
+        model,
+        messages: [
+          { role: 'system', content: enhancedSystemMessage },
+          { role: 'user', content: prompt }
+        ],
+        temperature: attempt === 0 ? baseTemperature : attempt === 1 ? baseTemperature * 0.7 : 0.1,
+        max_tokens: 8000,
+        response_format: { type: 'json_object' },
       })
 
-      if (!response.ok) {
-        const errorBody = await response.text()
-        console.error(`❌ OpenAI API error ${response.status}:`, errorBody)
-        throw new Error(`OpenAI API error: ${response.status} - ${errorBody}`)
-      }
-      
-      const aiData = await response.json()
-      const content = aiData.choices[0]?.message?.content || '{}'
-      
+      const content = completion.choices[0]?.message?.content || '{}'
+
       let parsed
       try {
         parsed = JSON.parse(content)
       } catch (parseError) {
         throw new Error('Invalid JSON response')
       }
-      
+
       const questions = parsed.questions || []
-      
-      // Quality validation
-      const hasMinimumQuestions = questions.length >= 6
+
+      // Quality validation - minimum 3 questions (fast=3, balanced=5, intelligent=8)
+      const hasMinimumQuestions = questions.length >= 3
       const allHaveIds = questions.every((q: any) => q.id || q.question_id)
-      
+
       if ((!hasMinimumQuestions || !allHaveIds) && attempt < maxRetries) {
         console.log(`⚠️ Quality issues: ${questions.length} questions, all have IDs: ${allHaveIds}`)
         throw new Error('Quality validation failed')
       }
-      
+
       // Auto-correction on final attempt
-      if ((!hasMinimumQuestions || !allHaveIds) && attempt === maxRetries) {
-        console.log('🔧 AUTO-CORRECTION MODE')
+      if (!allHaveIds) {
         questions.forEach((q: any, idx: number) => {
           if (!q.id && !q.question_id) {
-            q.id = `q${idx + 1}`
+            q.id = idx + 1
           }
         })
-        console.log('✅ Auto-correction applied')
+        console.log('✅ Auto-correction applied for missing IDs')
       }
-      
+
       console.log(`✅ Generated ${questions.length} questions (attempt ${attempt + 1})`)
-      
+
       return {
         questions,
         qualityMetrics: {
@@ -411,11 +395,11 @@ async function callOpenAIWithRetry(
           allHaveIds
         }
       }
-      
-    } catch (error) {
-      lastError = error as Error
-      console.error(`❌ Attempt ${attempt + 1} failed:`, error)
-      
+
+    } catch (error: any) {
+      lastError = error
+      console.error(`❌ Attempt ${attempt + 1} failed:`, error?.message || error)
+
       if (attempt < maxRetries) {
         const waitTime = Math.pow(2, attempt) * 1000
         console.log(`⏳ Retrying in ${waitTime}ms...`)
@@ -423,7 +407,7 @@ async function callOpenAIWithRetry(
       }
     }
   }
-  
+
   throw new Error(`Failed after ${maxRetries + 1} attempts: ${lastError?.message}`)
 }
 
