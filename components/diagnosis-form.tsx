@@ -983,13 +983,18 @@ export default function DiagnosisForm({
 
  } catch (err) {
  console.error("❌ Generation error:", err)
- setError(err instanceof Error ? err.message : "Unknown error")
 
  console.log("⚠️ Generating fallback data...")
  const fallbackData = generateCompleteFallback()
  setLoading(false)
+ // Set diagnosis immediately to prevent error page flash
+ // (animateProgressiveAppearance sets it after 4s delay via setTimeout,
+ // which would leave diagnosis=null and trigger the error screen)
+ setDiagnosis(fallbackData.diagnosis)
+ setDiagnosticReasoning(fallbackData.diagnosticReasoning)
+ setExpertAnalysis(fallbackData.expertAnalysis)
  animateProgressiveAppearance(fallbackData)
- 
+
  } finally {
  // Loading is now handled in animateProgressiveAppearance
  console.log('🩺 ========== DIAGNOSIS GENERATION COMPLETE ==========')
