@@ -108,7 +108,7 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
 async function translateToEnglish(frenchText: string): Promise<string> {
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5.2-mini',
       messages: [
         {
           role: 'system',
@@ -128,6 +128,7 @@ RULES:
       ],
       temperature: 0.2,
       max_tokens: 2000,
+      reasoning_effort: "none" as any,
     });
 
     return response.choices[0]?.message?.content?.trim() || frenchText;
@@ -247,7 +248,7 @@ Respond ONLY with JSON, no additional text.`;
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5.2',
       messages: [
         {
           role: 'system',
@@ -259,6 +260,7 @@ Respond ONLY with JSON, no additional text.`;
         },
       ],
       temperature: 0.3,
+      reasoning_effort: "none" as any,
       response_format: { type: 'json_object' },
     });
 

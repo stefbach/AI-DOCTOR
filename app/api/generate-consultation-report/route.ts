@@ -1884,7 +1884,7 @@ export async function POST(request: NextRequest) {
       }
       
       const result = await generateText({
-        model: openai("gpt-4o"),
+        model: openai("gpt-5.2", { reasoningEffort: "none" }),
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }

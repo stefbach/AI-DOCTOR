@@ -496,7 +496,7 @@ export async function POST(request: NextRequest) {
 
     // Call GPT-4 with structured output (guarantees valid JSON)
     const result = await generateObject({
-      model: openai("gpt-4o"),
+      model: openai("gpt-5.2", { reasoningEffort: "none" }),
       schema: tibokResponseSchema,
       messages,
       maxTokens: 1500,

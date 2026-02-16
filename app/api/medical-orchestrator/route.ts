@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
         metadata: {
           timestamp: new Date().toISOString(),
           stepsCompleted: workflow.length,
-          aiModel: "gpt-4o-medical",
+          aiModel: "gpt-5.2-medical",
           version: "4.0-MAURITIAN",
           approach: "diagnosis-based-mauritian-documents"
         },
@@ -316,7 +316,7 @@ IMPORTANT: Adapte TOUTES les valeurs au cas clinique spécifique. Ce diagnostic 
 
   try {
     const result = await generateText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-5.2", { reasoningEffort: "none" }),
       prompt: diagnosticPrompt,
       temperature: 0.1,
       maxTokens: 3000,
@@ -407,7 +407,7 @@ Format JSON pour document modifiable:
 
   try {
     const result = await generateText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-5.2", { reasoningEffort: "none" }),
       prompt: summaryPrompt,
       temperature: 0.2,
       maxTokens: 2000,

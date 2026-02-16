@@ -107,7 +107,7 @@ export async function GET(req: NextRequest) {
     try {
       const aiPrompt = buildAIPrompt(followUpsWithStats)
       const result = await generateText({
-        model: openai('gpt-4o'),
+        model: openai('gpt-5.2', { reasoningEffort: 'none' }),
         messages: [
           { role: 'system', content: AI_SYSTEM_PROMPT },
           { role: 'user', content: aiPrompt },

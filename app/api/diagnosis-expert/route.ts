@@ -130,7 +130,7 @@ Réponds UNIQUEMENT avec ce JSON exact (sans markdown, sans texte supplémentair
   ],
   "metadata": {
     "analysisDate": "${new Date().toISOString()}",
-    "model": "gpt-4o",
+    "model": "gpt-5.2",
     "evidenceLevel": "Grade A"
   }
 }
@@ -139,7 +139,7 @@ Réponds UNIQUEMENT avec ce JSON exact (sans markdown, sans texte supplémentair
     console.log("🧠 Génération diagnostic avec OpenAI...")
 
     const result = await generateText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-5.2", { reasoningEffort: "none" }),
       prompt: diagnosticPrompt,
       maxTokens: 6000,
       temperature: 0.1,
@@ -211,7 +211,7 @@ Réponds UNIQUEMENT avec ce JSON exact (sans markdown, sans texte supplémentair
         redFlags: [{ sign: "Aggravation", significance: "Surveillance", action: "Réévaluation" }],
         metadata: {
           analysisDate: new Date().toISOString(),
-          model: "gpt-4o-fallback",
+          model: "gpt-5.2-fallback",
           evidenceLevel: "Grade C"
         }
       }
@@ -226,7 +226,7 @@ Réponds UNIQUEMENT avec ce JSON exact (sans markdown, sans texte supplémentair
         patientAge: patientData.age,
         patientGender: patientData.gender,
         generatedAt: new Date().toISOString(),
-        model: "gpt-4o"
+        model: "gpt-5.2"
       }
     })
 

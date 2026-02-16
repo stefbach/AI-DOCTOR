@@ -2120,7 +2120,7 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o',
+          model: 'gpt-5.2',
           messages: [
             {
               role: 'system',
@@ -2162,6 +2162,7 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
           ],
           temperature: qualityLevel === 0 ? 0.3 : 0.05,
           max_tokens: 4000,  // Reduced from 8000 to improve response time
+          reasoning_effort: "none",
           response_format: { type: "json_object" },
           top_p: 0.9,
           frequency_penalty: 0.1,
