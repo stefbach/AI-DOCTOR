@@ -1955,15 +1955,35 @@ function ensureCompleteStructure(analysis: any): any {
 function validateAndParseJSON(rawContent: string): { success: boolean, data?: any, error?: string } {
   try {
     let cleanContent = rawContent.trim()
+
+    // Remove markdown code blocks
     cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
-    
-    if (!cleanContent.startsWith('{') || !cleanContent.endsWith('}')) {
-      return { 
-        success: false, 
-        error: `Invalid JSON structure - doesn't start with { or end with }. Content preview: ${cleanContent.substring(0, 100)}...` 
+
+    // GPT-5.2 may include reasoning/thinking text before JSON - extract JSON object
+    if (!cleanContent.startsWith('{')) {
+      const firstBrace = cleanContent.indexOf('{')
+      if (firstBrace !== -1) {
+        console.log(`⚠️ JSON doesn't start at position 0, found '{' at position ${firstBrace}. Extracting JSON...`)
+        cleanContent = cleanContent.substring(firstBrace)
       }
     }
-    
+
+    // Find the last closing brace (in case there's trailing text)
+    if (!cleanContent.endsWith('}')) {
+      const lastBrace = cleanContent.lastIndexOf('}')
+      if (lastBrace !== -1) {
+        console.log(`⚠️ JSON doesn't end with '}', found last '}' at position ${lastBrace}. Trimming trailing text...`)
+        cleanContent = cleanContent.substring(0, lastBrace + 1)
+      }
+    }
+
+    if (!cleanContent.startsWith('{') || !cleanContent.endsWith('}')) {
+      return {
+        success: false,
+        error: `Invalid JSON structure - doesn't start with { or end with }. Content preview: ${rawContent.substring(0, 200)}...`
+      }
+    }
+
     const parsed = JSON.parse(cleanContent)
     
     const criticalFields = [
@@ -1986,9 +2006,24 @@ function validateAndParseJSON(rawContent: string): { success: boolean, data?: an
     return { success: true, data: parsed }
     
   } catch (parseError) {
-    return { 
-      success: false, 
-      error: `JSON parsing failed: ${parseError}. Raw content length: ${rawContent.length}` 
+    // Last resort: try to find and parse any JSON object in the content
+    try {
+      const jsonMatch = rawContent.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        console.log('🔄 Attempting last-resort JSON extraction...')
+        const parsed = JSON.parse(jsonMatch[0])
+        if (parsed && typeof parsed === 'object') {
+          console.log('✅ Last-resort JSON extraction succeeded')
+          return { success: true, data: parsed }
+        }
+      }
+    } catch (e) {
+      // Fall through to error return
+    }
+
+    return {
+      success: false,
+      error: `JSON parsing failed: ${parseError}. Raw content length: ${rawContent.length}. Preview: ${rawContent.substring(0, 200)}`
     }
   }
 }
@@ -2166,13 +2201,21 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
           }
         ],
         temperature: qualityLevel === 0 ? 0.3 : 0.05,
-        max_completion_tokens: 4000,
+        max_completion_tokens: 16000,
         response_format: { type: "json_object" },
       })
 
       const rawContent = completion.choices[0]?.message?.content || ''
-      
-      console.log('🤖 GPT-4 response received, length:', rawContent.length)
+      const finishReason = completion.choices[0]?.finish_reason || 'unknown'
+
+      console.log('🤖 GPT-5.2 response received, length:', rawContent.length, 'finish_reason:', finishReason)
+      console.log('🔍 Response starts with:', rawContent.substring(0, 100))
+      console.log('🔍 Response ends with:', rawContent.substring(Math.max(0, rawContent.length - 100)))
+
+      // If the response was truncated (length limit hit), the JSON may be incomplete
+      if (finishReason === 'length') {
+        console.log('⚠️ Response was truncated (finish_reason: length) - increasing max_completion_tokens may help')
+      }
       
       const jsonValidation = validateAndParseJSON(rawContent)
       
