@@ -358,16 +358,15 @@ async function callOpenAIWithRetry(
             { role: 'user', content: prompt }
           ],
           temperature: attempt === 0 ? baseTemperature : attempt === 1 ? baseTemperature * 0.7 : 0.1,
-          max_tokens: 8000,
+          max_completion_tokens: 8000,
           response_format: { type: 'json_object' },
-          top_p: 0.9,
-          frequency_penalty: 0.1,
-          presence_penalty: 0.2
         }),
       })
-      
+
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`)
+        const errorBody = await response.text()
+        console.error(`❌ OpenAI API error ${response.status}:`, errorBody)
+        throw new Error(`OpenAI API error: ${response.status} - ${errorBody}`)
       }
       
       const aiData = await response.json()
