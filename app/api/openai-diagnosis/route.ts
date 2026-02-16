@@ -2244,7 +2244,7 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
       console.log(`🏝️ Quality level used: ${qualityLevel}`)
       console.log(`📊 Medical specificity issues corrected: ${qualityCheck.issues.length}`)
       
-      return { data, analysis, mauritius_quality_level: qualityLevel }
+      return { data: rawContent, analysis, mauritius_quality_level: qualityLevel }
       
     } catch (error) {
       lastError = error as Error
