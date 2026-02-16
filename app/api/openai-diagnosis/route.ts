@@ -383,9 +383,9 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
   },
   "investigation_strategy": {
     "clinical_justification": "MANDATORY - Precise medical justification",
-    "laboratory_tests": [
+    "laboratory_tests (ONLY blood tests, urine tests, stool tests, swabs, biopsies - NEVER imaging like ultrasound, X-ray, CT, MRI, ECG)": [
       {
-        "test_name": "EXACT TEST NAME - UK/MAURITIUS NOMENCLATURE",
+        "test_name": "EXACT TEST NAME - UK/MAURITIUS NOMENCLATURE (MUST be a laboratory test, NOT imaging)",
         "clinical_justification": "SPECIFIC MEDICAL REASON - NOT generic",
         "expected_results": "SPECIFIC EXPECTED VALUES",
         "urgency": "routine/urgent/stat",
@@ -397,7 +397,7 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
         }
       }
     ],
-    "imaging_studies": [
+    "imaging_studies (ALL imaging goes here: ultrasound, X-ray, CT, MRI, ECG, echocardiogram, endoscopy etc.)": [
       {
         "study_name": "PRECISE IMAGING STUDY - UK NOMENCLATURE",
         "indication": "SPECIFIC MEDICAL INDICATION",
@@ -2201,7 +2201,7 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
           }
         ],
         max_completion_tokens: 16000,
-        reasoning_effort: 'low',
+        reasoning_effort: 'high',
         response_format: { type: "json_object" },
       })
 
