@@ -383,9 +383,9 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
   },
   "investigation_strategy": {
     "clinical_justification": "MANDATORY - Precise medical justification",
-    "laboratory_tests (ONLY blood tests, urine tests, stool tests, swabs, biopsies - NEVER imaging like ultrasound, X-ray, CT, MRI, ECG)": [
+    "laboratory_tests": [
       {
-        "test_name": "EXACT TEST NAME - UK/MAURITIUS NOMENCLATURE (MUST be a laboratory test, NOT imaging)",
+        "test_name": "EXACT TEST NAME - UK/MAURITIUS NOMENCLATURE",
         "clinical_justification": "SPECIFIC MEDICAL REASON - NOT generic",
         "expected_results": "SPECIFIC EXPECTED VALUES",
         "urgency": "routine/urgent/stat",
@@ -397,7 +397,7 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
         }
       }
     ],
-    "imaging_studies (ALL imaging goes here: ultrasound, X-ray, CT, MRI, ECG, echocardiogram, endoscopy etc.)": [
+    "imaging_studies": [
       {
         "study_name": "PRECISE IMAGING STUDY - UK NOMENCLATURE",
         "indication": "SPECIFIC MEDICAL INDICATION",
@@ -489,6 +489,24 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
 - ALL medication fields must be completed with specific medical content
 - ACCESS YOUR ENCYCLOPEDIC KNOWLEDGE for EVERY decision
 - INCLUDE interaction checks, contraindication verification, dose adjustments
+
+═══════════════════════════════════════════════════════════════════════════════
+🚫 DUPLICATE MEDICATION PREVENTION - CRITICAL
+═══════════════════════════════════════════════════════════════════════════════
+
+- If a patient is ALREADY TAKING a medication (listed in current medications), DO NOT prescribe the SAME drug again in treatment_plan.medications
+- Current medications go ONLY in "current_medications_validated" — they must NOT be repeated in "treatment_plan.medications"
+- Example: If patient takes Amlodipine 10mg OD, do NOT add Amlodipine again in treatment_plan.medications. Only validate it in current_medications_validated.
+- The ONLY exception is if you are changing the dose — in that case, put the NEW dose in treatment_plan.medications and note the change
+
+═══════════════════════════════════════════════════════════════════════════════
+🔬 INVESTIGATION CATEGORIZATION - STRICT RULES
+═══════════════════════════════════════════════════════════════════════════════
+
+- "laboratory_tests" is ONLY for: blood tests, urine tests, stool tests, microbiological swabs, biopsies, CSF analysis
+- "imaging_studies" is ONLY for: ultrasound, X-ray, CT scan, MRI, ECG, echocardiogram, endoscopy, colonoscopy, Doppler studies
+- NEVER put imaging (ultrasound, X-ray, CT, MRI, ECG) in laboratory_tests
+- NEVER put blood/urine tests in imaging_studies
 
 ═══════════════════════════════════════════════════════════════════════════════
 🏥 SPECIALIST REFERRAL RULES - WHEN TO REFER
@@ -5741,8 +5759,12 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       })),
       
       // ========== COMBINED PRESCRIPTION - ALL MEDICATIONS TO PRESCRIBE ==========
-      combinedPrescription: [
-        ...deduplicateMedications(finalAnalysis.current_medications_validated || []).map((med: any, idx: number) => ({
+      combinedPrescription: (() => {
+        const currentMeds = deduplicateMedications(finalAnalysis.current_medications_validated || [])
+        // Build a set of DCI names from current medications to prevent cross-list duplicates
+        const currentMedDCIs = new Set(currentMeds.map((med: any) => (med?.dci || med?.medication_name || '').toLowerCase().trim()).filter(Boolean))
+
+        const currentMedItems = currentMeds.map((med: any, idx: number) => ({
           id: idx + 1,
           name: med?.medication_name || "Médicament actuel",
           dci: med?.dci || "DCI",
@@ -5759,9 +5781,21 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
             dci_verified: true,
             validated_by_ai: true
           }
-        })),
-        ...deduplicateMedications(finalAnalysis.treatment_plan?.medications || []).map((med: any, idx: number) => {
-          const baseIndex = (finalAnalysis.current_medications_validated || []).length
+        }))
+
+        // Filter out new medications that duplicate current medications (by DCI)
+        const newMeds = deduplicateMedications(finalAnalysis.treatment_plan?.medications || [])
+          .filter((med: any) => {
+            const newDci = (med?.dci || med?.drug || med?.medication_name || '').toLowerCase().trim()
+            if (currentMedDCIs.has(newDci)) {
+              console.log(`🔄 Removing duplicate from new prescriptions (already in current meds): ${newDci}`)
+              return false
+            }
+            return true
+          })
+
+        const newMedItems = newMeds.map((med: any, idx: number) => {
+          const baseIndex = currentMedItems.length
           return {
             id: baseIndex + idx + 1,
             name: med?.drug || med?.medication_name || "Médicament",
@@ -5781,7 +5815,9 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
             }
           }
         })
-      ],
+
+        return [...currentMedItems, ...newMedItems]
+      })(),
       
       // Validation de la posologie
       posologyValidation: {
