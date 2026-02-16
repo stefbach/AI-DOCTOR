@@ -4,7 +4,7 @@ import crypto from 'crypto'
 import OpenAI from 'openai'
 
 export const runtime = 'nodejs'
-export const maxDuration = 120 // 120 seconds for GPT-4 diagnosis generation (increased due to prompt size)
+export const maxDuration = 300 // 300 seconds max for GPT-5.2 diagnosis generation (large prompt)
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
@@ -1998,14 +1998,22 @@ async function callOpenAIWithMauritiusQuality(
   apiKey: string,
   basePrompt: string,
   patientContext: PatientContext,
-  maxRetries: number = 3
+  maxRetries: number = 1
 ): Promise<any> {
-  
+
   let lastError: Error | null = null
   let qualityLevel = 0
-  
+  const functionStartTime = Date.now()
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
+      // Check elapsed time - don't retry if we've used more than 70 seconds
+      const elapsed = Date.now() - functionStartTime
+      if (attempt > 0 && elapsed > 70000) {
+        console.log(`⏰ Elapsed ${Math.round(elapsed/1000)}s - skipping retry to avoid timeout`)
+        break
+      }
+
       console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1} (Mauritius quality level: ${qualityLevel})`)
       
       let finalPrompt = basePrompt
@@ -2178,21 +2186,15 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
       analysis = ensureCompleteStructure(analysis)
       
       const qualityCheck = validateMauritiusMedicalSpecificity(analysis)
-      
-      if (qualityCheck.hasGenericContent && attempt < maxRetries) {
-        console.log(`⚠️ Generic content detected (${qualityCheck.issues.length} issues), retrying...`)
-        console.log('Issues:', qualityCheck.issues.slice(0, 3))
-        throw new Error(`Generic medical content detected: ${qualityCheck.issues.slice(0, 2).join(', ')}`)
-      } else if (qualityCheck.hasGenericContent && attempt === maxRetries) {
-        console.log(`⚠️ Final attempt - forcing corrections for ${qualityCheck.issues.length} issues`)
-        analysis = enhanceMauritiusMedicalSpecificity(analysis, patientContext)
-        
-        const finalQualityCheck = validateMauritiusMedicalSpecificity(analysis)
-        console.log(`✅ After enhancement: ${finalQualityCheck.issues.length} remaining issues`)
-      }
-      
+
+      // Always use local enhancement instead of retrying API call (to avoid timeout)
       if (qualityCheck.hasGenericContent) {
+        console.log(`⚠️ Generic content detected (${qualityCheck.issues.length} issues), applying local enhancement...`)
+        console.log('Issues:', qualityCheck.issues.slice(0, 3))
         analysis = enhanceMauritiusMedicalSpecificity(analysis, patientContext)
+
+        const finalQualityCheck = validateMauritiusMedicalSpecificity(analysis)
+        console.log(`✅ After local enhancement: ${finalQualityCheck.issues.length} remaining issues`)
       }
       
       console.log('✅ Mauritius quality validation successful')
@@ -2206,9 +2208,12 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
       console.error(`❌ Error attempt ${attempt + 1}:`, error)
       
       if (attempt < maxRetries) {
-        const waitTime = Math.pow(2, attempt) * 1000
-        console.log(`⏳ Retrying in ${waitTime}ms with enhanced Mauritius medical specificity prompt...`)
-        await new Promise(resolve => setTimeout(resolve, waitTime))
+        const elapsedSoFar = Date.now() - functionStartTime
+        if (elapsedSoFar > 70000) {
+          console.log(`⏰ Elapsed ${Math.round(elapsedSoFar/1000)}s - skipping retry to avoid timeout`)
+          break
+        }
+        console.log(`⏳ Retrying immediately with enhanced Mauritius medical specificity prompt...`)
       }
     }
   }
