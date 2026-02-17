@@ -382,7 +382,8 @@ CLINICAL SUMMARY MUST INCLUDE:
           }
         ],
         temperature: attempt === 0 ? 0.4 : attempt === 1 ? 0.2 : 0.1,
-        max_completion_tokens: 8000,
+        max_completion_tokens: 16000,
+        reasoning_effort: 'high',
         response_format: { type: "json_object" },
         top_p: 0.9,
         frequency_penalty: 0.1,
