@@ -1154,6 +1154,7 @@ const transcribeAndReformatSection = useCallback(async (section: string, audioBl
  // First, transcribe the audio
  const formData = new FormData()
  formData.append('audioFile', audioBlob, 'recording.webm')
+ formData.append('language', 'auto')
 
  const transcribeResponse = await fetch('/api/voice-dictation-transcribe', {
    method: 'POST',
