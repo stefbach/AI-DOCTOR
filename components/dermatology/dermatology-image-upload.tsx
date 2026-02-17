@@ -477,6 +477,7 @@ export default function DermatologyImageUpload({
               const newText = additionalNotes ? `${additionalNotes} ${text}` : text
               setAdditionalNotes(newText)
             }}
+            language="auto"
           />
         </div>
         <Textarea
