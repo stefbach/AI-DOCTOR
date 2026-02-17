@@ -111,6 +111,7 @@ export default function DermatologyQuestionsForm({ patientData, imageData, ocrAn
                       const newText = currentText ? `${currentText} ${text}` : text
                       handleAnswer(q.id, newText)
                     }}
+                    language="auto"
                   />
                 </div>
                 <Textarea
