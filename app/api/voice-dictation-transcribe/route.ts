@@ -78,30 +78,16 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
     let translatedText = transcription.text;
     let wasTranslated = false;
 
-    // Step 2: If non-English detected, use Whisper's native translation endpoint
-    // This is more reliable than a separate GPT call and has no extra cost
+    // Step 2: Always translate through GPT to ensure English output
+    // Whisper's language detection is unreliable for short phrases (e.g. "mal à la tête"
+    // can be misdetected as English), so we always run GPT translation which will
+    // return the text as-is if it's already in English
     const detectedLang = (transcription.language || '').toLowerCase();
-    const isNonEnglish = detectedLang && detectedLang !== 'en' && detectedLang !== 'english';
-
-    if (isNonEnglish) {
-      console.log(`🌐 Non-English detected (${detectedLang}) - using Whisper translation endpoint...`);
-      try {
-        const translationResult = await openai.audio.translations.create({
-          file: audioFile,
-          model: 'whisper-1',
-          prompt: 'Medical dictation. Translate to English. ' + medicalPrompt.split('\n')[0],
-        });
-        translatedText = translationResult.text;
-        wasTranslated = true;
-        console.log(`✅ Whisper translation completed: "${translatedText}"`);
-      } catch (translationError: any) {
-        console.error('⚠️ Whisper translation failed, falling back to GPT translation:', translationError.message);
-        // Fallback to GPT-5.2 translation
-        translatedText = await translateToEnglish(transcription.text);
-        wasTranslated = true;
-        console.log(`✅ GPT fallback translation completed: "${translatedText}"`);
-      }
-    }
+    console.log(`   Detected language: ${detectedLang}`);
+    console.log('🌐 Translating transcription to English via GPT...');
+    translatedText = await translateToEnglish(transcription.text);
+    wasTranslated = translatedText.toLowerCase().trim() !== transcription.text.toLowerCase().trim();
+    console.log(`✅ Translation completed (changed: ${wasTranslated}): "${translatedText}"`);
 
     return {
       text: transcription.text,
@@ -119,36 +105,38 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
 // ============================================
 // FUNCTION 1b: TRANSLATE FRENCH TO ENGLISH
 // ============================================
-async function translateToEnglish(frenchText: string): Promise<string> {
+async function translateToEnglish(text: string): Promise<string> {
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-5.2',
       messages: [
         {
           role: 'system',
-          content: `You are a medical translator. Translate the following French medical text to English.
+          content: `You are a medical translator. Translate the following medical text to English. If the text is already in English, return it exactly as-is without any modification.
 
 RULES:
-1. Translate accurately while maintaining medical terminology
-2. Use INN/generic drug names in English (e.g., "Paracétamol" → "Paracetamol", "Amoxicilline" → "Amoxicillin")
-3. Use standard UK/US medical abbreviations
-4. Keep the same structure and meaning
-5. Return ONLY the translated text, nothing else`
+1. If the text is already in English, return it UNCHANGED
+2. Translate accurately while maintaining medical terminology
+3. Keep medication names, dosages, and frequencies precise (e.g., "Amlodipine 10 1 fois par jour" → "Amlodipine 10, once a day")
+4. Use INN/generic drug names in English (e.g., "Paracétamol" → "Paracetamol", "Amoxicilline" → "Amoxicillin")
+5. Use standard UK/US medical abbreviations
+6. Keep the same structure and meaning
+7. Return ONLY the translated text, nothing else`
         },
         {
           role: 'user',
-          content: frenchText
+          content: text
         }
       ],
       temperature: 0.2,
       max_completion_tokens: 2000,
     });
 
-    return response.choices[0]?.message?.content?.trim() || frenchText;
+    return response.choices[0]?.message?.content?.trim() || text;
   } catch (error: any) {
     console.error('❌ Translation failed:', error.message);
     // Return original text if translation fails
-    return frenchText;
+    return text;
   }
 }
 
