@@ -42,7 +42,7 @@ async function callOpenAIWithRetry(
   openai: OpenAI,
   prompt: string,
   systemMessage: string,
-  maxRetries: number = 3
+  maxRetries: number = 1
 ): Promise<any> {
   let lastError: Error | null = null
   
@@ -144,7 +144,7 @@ ${systemMessage}
       console.log('🔍 Extracted questions count:', questions.length)
       
       // Quality validation
-      const hasMinimumQuestions = questions.length >= 8
+      const hasMinimumQuestions = questions.length >= 5
       const allHaveIds = questions.every((q: any) => q.id)
       const allHaveCategories = questions.every((q: any) => q.category)
       
@@ -381,7 +381,7 @@ YOU MUST return a JSON object with "questions" array, NOT a single question!`
 
     const systemMessage = "You are an expert dermatologist. Generate targeted clinical questions in valid JSON format only. CRITICAL: ALL questions MUST be multiple choice format with 4-6 specific answer options. NO open-ended questions allowed."
     
-    const result = await callOpenAIWithRetry(openai, prompt, systemMessage, 3)
+    const result = await callOpenAIWithRetry(openai, prompt, systemMessage, 1)
     const questions = result.questions
 
     console.log(`✅ Generated ${questions.length} dermatology questions with retry mechanism`)

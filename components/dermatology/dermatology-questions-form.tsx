@@ -73,8 +73,27 @@ export default function DermatologyQuestionsForm({ patientData, imageData, ocrAn
   if (isLoading) {
     console.log('🔄 FRONTEND: Still loading questions...')
     return (
-      <div className="flex items-center justify-center p-12">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+      <div className="flex flex-col items-center justify-center p-12 space-y-6">
+        <Loader2 className="h-10 w-10 animate-spin text-teal-600" />
+        <div className="text-center space-y-2">
+          <p className="text-lg font-semibold text-teal-700">Generating AI Questions</p>
+          <p className="text-sm text-gray-500">
+            Analyzing your images and clinical data to generate targeted dermatology questions. This may take a moment...
+          </p>
+        </div>
+        <div className="w-full max-w-md">
+          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full animate-[progress_2s_ease-in-out_infinite]"
+                 style={{ width: '100%', animation: 'progress 2s ease-in-out infinite' }} />
+          </div>
+        </div>
+        <style jsx>{`
+          @keyframes progress {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(0%); }
+            100% { transform: translateX(100%); }
+          }
+        `}</style>
       </div>
     )
   }
