@@ -5766,7 +5766,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  
  const InvoiceComponent = () => {
  const invoice = report?.invoice
- if (!invoice) return null
+ if (!invoice || !invoice.header || !invoice.provider || !invoice.patient || !invoice.services || !invoice.payment) return null
 
  return (
  <div id="invoice-document" className="bg-white p-3 sm:p-6 md:p-8 rounded-lg shadow print:shadow-none">
