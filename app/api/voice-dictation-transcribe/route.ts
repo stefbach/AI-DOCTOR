@@ -43,37 +43,71 @@ Medical history: diabète, diabetes, hypertension, asthme, asthma, BPCO, COPD, i
 Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
 
   try {
-    // Use Whisper's TRANSLATION endpoint as the primary call
-    // translations.create() ALWAYS outputs English text regardless of input language
-    // This eliminates the need for a second API call (no file re-read issues)
-    const translationOptions: any = {
+    // For short phrases, specifying language helps Whisper accuracy
+    const whisperOptions: any = {
       file: audioFile,
       model: 'whisper-1',
       response_format: 'verbose_json',
       prompt: medicalPrompt,
     };
 
-    console.log('   Using Whisper translation endpoint (always outputs English)...');
+    // If a preferred language is specified, use it to help Whisper
+    if (preferredLanguage && preferredLanguage !== 'auto') {
+      const langMap: { [key: string]: string } = {
+        'en': 'en',
+        'en-US': 'en',
+        'en-GB': 'en',
+        'fr': 'fr',
+        'fr-FR': 'fr',
+      };
+      const whisperLang = langMap[preferredLanguage] || preferredLanguage.split('-')[0];
+      whisperOptions.language = whisperLang;
+      console.log(`   Using specified language for Whisper: ${whisperLang}`);
+    } else {
+      console.log('   Using auto-detection for language (bilingual support)');
+    }
 
-    const translation: any = await openai.audio.translations.create(translationOptions);
+    // Step 1: First transcribe to detect the language
+    const transcription = await openai.audio.transcriptions.create(whisperOptions);
 
-    const translatedText = translation.text;
-    const duration = translation.duration || 0;
-    // translations endpoint detects source language in verbose_json
-    const detectedLang = (translation.language || '').toLowerCase();
-    const wasTranslated = detectedLang !== '' && detectedLang !== 'en' && detectedLang !== 'english';
+    console.log('✅ Transcription completed');
+    console.log(`   Text length: ${transcription.text.length} characters`);
+    console.log(`   Duration: ${transcription.duration} seconds`);
+    console.log(`   Language detected: ${transcription.language}`);
 
-    console.log('✅ Translation/Transcription completed');
-    console.log(`   Text: "${translatedText}"`);
-    console.log(`   Duration: ${duration} seconds`);
-    console.log(`   Source language: ${detectedLang || 'unknown'}`);
-    console.log(`   Was translated: ${wasTranslated}`);
+    let translatedText = transcription.text;
+    let wasTranslated = false;
+
+    // Step 2: If non-English detected, use Whisper's native translation endpoint
+    // This is more reliable than a separate GPT call and has no extra cost
+    const detectedLang = (transcription.language || '').toLowerCase();
+    const isNonEnglish = detectedLang && detectedLang !== 'en' && detectedLang !== 'english';
+
+    if (isNonEnglish) {
+      console.log(`🌐 Non-English detected (${detectedLang}) - using Whisper translation endpoint...`);
+      try {
+        const translationResult = await openai.audio.translations.create({
+          file: audioFile,
+          model: 'whisper-1',
+          prompt: 'Medical dictation. Translate to English. ' + medicalPrompt.split('\n')[0],
+        });
+        translatedText = translationResult.text;
+        wasTranslated = true;
+        console.log(`✅ Whisper translation completed: "${translatedText}"`);
+      } catch (translationError: any) {
+        console.error('⚠️ Whisper translation failed, falling back to GPT translation:', translationError.message);
+        // Fallback to GPT-5.2 translation
+        translatedText = await translateToEnglish(transcription.text);
+        wasTranslated = true;
+        console.log(`✅ GPT fallback translation completed: "${translatedText}"`);
+      }
+    }
 
     return {
-      text: translatedText, // Always English
-      translatedText, // Always English
-      duration,
-      language: detectedLang || 'unknown',
+      text: transcription.text,
+      translatedText,
+      duration: transcription.duration || 0,
+      language: transcription.language || 'unknown',
       wasTranslated,
     };
   } catch (error: any) {
