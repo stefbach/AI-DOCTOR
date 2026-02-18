@@ -47,24 +47,32 @@ async function callOpenAI(
   apiKey: string,
   systemPrompt: string,
   userPrompt: string,
-  maxTokens: number = 2000
+  maxTokens: number = 2000,
+  useReasoning: boolean = false
 ): Promise<any> {
+  const body: any = {
+    model: "gpt-5.2",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt }
+    ],
+    max_completion_tokens: maxTokens,
+    response_format: { type: "json_object" }
+  }
+
+  if (useReasoning) {
+    body.reasoning_effort = 'high'
+  } else {
+    body.temperature = 0.3
+  }
+
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({
-      model: "gpt-5.2",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
-      temperature: 0.3,
-      max_completion_tokens: maxTokens,
-      response_format: { type: "json_object" }
-    }),
+    body: JSON.stringify(body),
   })
 
   if (!response.ok) {
@@ -211,7 +219,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
     "mainConcerns": ["préoccupation 1", "préoccupation 2"],
     "priorityActions": ["action 1", "action 2"]
   }
-}`, patientContext, 1500)
+}`, patientContext, 4000, true)
 
           sendSSE('progress', { message: 'Évaluation complète...', progress: 25 })
 
