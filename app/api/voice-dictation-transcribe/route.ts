@@ -67,8 +67,34 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
       console.log('   Using auto-detection for language (bilingual support)');
     }
 
-    // Step 1: First transcribe to detect the language
-    const transcription = await openai.audio.transcriptions.create(whisperOptions);
+    // Read audio file into buffer so it can be used for both transcription and translation
+    const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
+    const audioFileName = audioFile.name || 'audio.webm';
+    const audioFileType = audioFile.type || 'audio/webm';
+
+    // Create fresh File objects for each API call (avoids stream exhaustion issues)
+    const makeAudioFile = () => new File([audioBuffer], audioFileName, { type: audioFileType });
+
+    // Step 1 & 2: Run transcription AND translation in parallel
+    // translations.create() ALWAYS outputs English, so it handles French→English automatically
+    console.log('   Running transcription + translation in parallel...');
+
+    const transcriptionFile = makeAudioFile();
+    whisperOptions.file = transcriptionFile;
+
+    const [transcription, translationResult] = await Promise.all([
+      // Transcription: get original text + language detection
+      openai.audio.transcriptions.create(whisperOptions),
+      // Translation: always outputs English (if input is English, returns English as-is)
+      openai.audio.translations.create({
+        file: makeAudioFile(),
+        model: 'whisper-1',
+        prompt: 'Medical dictation. Translate to English. ' + medicalPrompt.split('\n')[0],
+      }).catch((err: any) => {
+        console.error('⚠️ Whisper translation failed (will use fallback):', err.message);
+        return null; // Will handle fallback below
+      }),
+    ]);
 
     console.log('✅ Transcription completed');
     console.log(`   Text length: ${transcription.text.length} characters`);
@@ -78,28 +104,31 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
     let translatedText = transcription.text;
     let wasTranslated = false;
 
-    // Step 2: If non-English detected, use Whisper's native translation endpoint
-    // This is more reliable than a separate GPT call and has no extra cost
+    // Determine if non-English was detected
     const detectedLang = (transcription.language || '').toLowerCase();
     const isNonEnglish = detectedLang && detectedLang !== 'en' && detectedLang !== 'english';
 
     if (isNonEnglish) {
-      console.log(`🌐 Non-English detected (${detectedLang}) - using Whisper translation endpoint...`);
-      try {
-        const translationResult = await openai.audio.translations.create({
-          file: audioFile,
-          model: 'whisper-1',
-          prompt: 'Medical dictation. Translate to English. ' + medicalPrompt.split('\n')[0],
-        });
+      if (translationResult && translationResult.text) {
+        // Use the parallel Whisper translation result
         translatedText = translationResult.text;
         wasTranslated = true;
         console.log(`✅ Whisper translation completed: "${translatedText}"`);
-      } catch (translationError: any) {
-        console.error('⚠️ Whisper translation failed, falling back to GPT translation:', translationError.message);
-        // Fallback to GPT-5.2 translation
+      } else {
+        // Fallback to GPT translation if Whisper translation failed
+        console.log('🔄 Falling back to GPT translation...');
         translatedText = await translateToEnglish(transcription.text);
         wasTranslated = true;
         console.log(`✅ GPT fallback translation completed: "${translatedText}"`);
+      }
+    } else if (translationResult && translationResult.text) {
+      // Even if Whisper didn't detect non-English, use translation result if available
+      // This catches cases where language detection fails but speech was actually non-English
+      const translationDiffers = translationResult.text.trim().toLowerCase() !== transcription.text.trim().toLowerCase();
+      if (translationDiffers) {
+        console.log('🌐 Language detection said English, but translation differs - using translation');
+        translatedText = translationResult.text;
+        wasTranslated = true;
       }
     }
 
