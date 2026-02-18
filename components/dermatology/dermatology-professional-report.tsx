@@ -1908,7 +1908,14 @@ useEffect(() => {
  
  // Only update doctor info if it exists in the draft
  if (result.data.doctor_info) {
- setDoctorInfo(result.data.doctor_info)
+ setDoctorInfo(prev => ({
+ ...prev,
+ ...result.data.doctor_info,
+ nom: result.data.doctor_info.nom || prev.nom,
+ numeroEnregistrement: result.data.doctor_info.numeroEnregistrement || prev.numeroEnregistrement,
+ email: result.data.doctor_info.email || prev.email,
+ adresseCabinet: result.data.doctor_info.adresseCabinet || prev.adresseCabinet,
+ }))
  }
  
  setModifiedSections(new Set(result.data.modified_sections || []))
@@ -2612,8 +2619,8 @@ if (isRenewal) {
  // ==================== VALIDATION & SIGNATURE ====================
  const handleValidation = async () => {
  const requiredFieldsMissing = []
- if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
- if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
+ if ((doctorInfo.nom || '').includes('[')) requiredFieldsMissing.push('Doctor name')
+ if ((doctorInfo.numeroEnregistrement || '').includes('[')) requiredFieldsMissing.push('Registration number')
  // Email is now optional - removed from required fields
  
  if (requiredFieldsMissing.length > 0) {
@@ -3316,7 +3323,7 @@ const handleSendDocuments = async () => {
  const finalDoctorInfo = {
  ...doctorInfo,
  numeroEnregistrement: mcmNumber,
- email: doctorInfo.email.includes('[') ? 'doctor@tibok.mu' : doctorInfo.email
+ email: (doctorInfo.email || '').includes('[') ? 'doctor@tibok.mu' : doctorInfo.email
  }
 
  console.log(' Saving to database...')
@@ -4242,7 +4249,7 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
  // ==================== DOCTOR INFO EDITOR ====================
  const DoctorInfoEditor = memo(() => {
  const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' &&
- !doctorInfo.numeroEnregistrement.includes('[')
+ !(doctorInfo.numeroEnregistrement || '').includes('[')
 
  const [localDoctorInfo, setLocalDoctorInfo] = useState(doctorInfo)
  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
@@ -4295,7 +4302,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  value={localDoctorInfo.nom}
  onChange={(e) => handleDoctorFieldChange('nom', e.target.value)}
  placeholder="Dr. Full Name"
- className={localDoctorInfo.nom.includes('[') ? 'border-blue-500' : ''}
+ className={(localDoctorInfo.nom || '').includes('[') ? 'border-blue-500' : ''}
  />
  </div>
  <div>
@@ -4323,7 +4330,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  value={localDoctorInfo.numeroEnregistrement}
  onChange={(e) => handleDoctorFieldChange('numeroEnregistrement', e.target.value)}
  placeholder="MCM/12345"
- className={localDoctorInfo.numeroEnregistrement.includes('[') ? 'border-blue-500' : ''}
+ className={(localDoctorInfo.numeroEnregistrement || '').includes('[') ? 'border-blue-500' : ''}
  />
  </div>
  <div>
@@ -4333,7 +4340,7 @@ const handleDoctorFieldChange = useCallback((field: string, value: string) => {
  value={localDoctorInfo.email}
  onChange={(e) => handleDoctorFieldChange('email', e.target.value)}
  placeholder="doctor@email.com"
- className={localDoctorInfo.email.includes('[') ? 'border-blue-500' : ''}
+ className={(localDoctorInfo.email || '').includes('[') ? 'border-blue-500' : ''}
  />
  </div>
  <div className="col-span-2">
