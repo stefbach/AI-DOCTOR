@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -23,9 +23,23 @@ export default function DermatologyQuestionsForm({ patientData, imageData, ocrAn
   const [questions, setQuestions] = useState<any[]>([])
   const [answers, setAnswers] = useState<any>({})
   const [isLoading, setIsLoading] = useState(true)
+  const [progress, setProgress] = useState(0)
+  const progressInterval = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     fetchQuestions()
+    // Progress bar: ramp up to 90% over ~60s, then slow down
+    progressInterval.current = setInterval(() => {
+      setProgress(prev => {
+        if (prev < 60) return prev + 2       // 0-60% in ~30s
+        if (prev < 85) return prev + 0.5     // 60-85% in ~50s
+        if (prev < 95) return prev + 0.1     // slow crawl to 95%
+        return prev
+      })
+    }, 1000)
+    return () => {
+      if (progressInterval.current) clearInterval(progressInterval.current)
+    }
   }, [])
 
   const fetchQuestions = async () => {
@@ -72,6 +86,7 @@ export default function DermatologyQuestionsForm({ patientData, imageData, ocrAn
 
   if (isLoading) {
     console.log('🔄 FRONTEND: Still loading questions...')
+    const displayProgress = Math.round(progress)
     return (
       <div className="flex flex-col items-center justify-center p-12 space-y-6">
         <Loader2 className="h-10 w-10 animate-spin text-teal-600" />
@@ -82,18 +97,17 @@ export default function DermatologyQuestionsForm({ patientData, imageData, ocrAn
           </p>
         </div>
         <div className="w-full max-w-md">
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full animate-[progress_2s_ease-in-out_infinite]"
-                 style={{ width: '100%', animation: 'progress 2s ease-in-out infinite' }} />
+          <div className="flex justify-between text-sm text-gray-500 mb-1">
+            <span>Progress</span>
+            <span>{displayProgress}%</span>
+          </div>
+          <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full transition-all duration-1000 ease-out"
+              style={{ width: `${displayProgress}%` }}
+            />
           </div>
         </div>
-        <style jsx>{`
-          @keyframes progress {
-            0% { transform: translateX(-100%); }
-            50% { transform: translateX(0%); }
-            100% { transform: translateX(100%); }
-          }
-        `}</style>
       </div>
     )
   }
