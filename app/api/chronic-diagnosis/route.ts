@@ -8,7 +8,7 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
-export const maxDuration = 60
+export const maxDuration = 300
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -52,7 +52,7 @@ async function callOpenAI(
 ): Promise<any> {
   // For reasoning models, reasoning tokens count toward max_completion_tokens.
   // We need a much larger budget so reasoning doesn't exhaust the output capacity.
-  const effectiveMaxTokens = useReasoning ? Math.max(maxTokens, 16384) : maxTokens
+  const effectiveMaxTokens = useReasoning ? Math.max(maxTokens, 8192) : maxTokens
 
   const body: any = {
     model: "gpt-5.2",
@@ -199,7 +199,7 @@ QUESTIONNAIRE: ${JSON.stringify(questionsData, null, 2)}`
         }
 
         try {
-          // ========== CALL 1: Disease Assessment (20%) ==========
+          // ========== CALL 1: Disease Assessment (25%) ==========
           sendSSE('progress', { message: 'Analyse des maladies chroniques...', progress: 10 })
           console.log('📊 Call 1: Disease Assessment')
 
@@ -240,7 +240,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
 
           sendSSE('progress', { message: 'Évaluation complète...', progress: 25 })
 
-          // ========== CALL 2: Medication Management (40%) ==========
+          // ========== CALL 2: Medication Management (45%) ==========
           sendSSE('progress', { message: 'Analyse des médicaments...', progress: 30 })
           console.log('💊 Call 2: Medication Management')
 
@@ -268,7 +268,7 @@ Si pas de médicaments à modifier, retourne des tableaux vides.`, patientContex
 
           sendSSE('progress', { message: 'Plan médicamenteux établi...', progress: 45 })
 
-          // ========== CALL 3: Meal Plan (60%) ==========
+          // ========== CALL 3: Meal Plan (70%) ==========
           sendSSE('progress', { message: 'Création du plan nutritionnel...', progress: 50 })
           console.log('🍽️ Call 3: Meal Plan')
 
@@ -311,7 +311,7 @@ Retourne UNIQUEMENT un JSON valide:
 
           sendSSE('progress', { message: 'Plan nutritionnel créé...', progress: 70 })
 
-          // ========== CALL 4: Objectives & Follow-up (80%) ==========
+          // ========== CALL 4: Objectives & Follow-up (85%) ==========
           sendSSE('progress', { message: 'Définition des objectifs thérapeutiques...', progress: 75 })
           console.log('📋 Call 4: Objectives & Follow-up')
 
