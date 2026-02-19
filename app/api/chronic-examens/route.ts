@@ -1,14 +1,12 @@
 // app/api/chronic-examens/route.ts - Chronic Disease Laboratory and Paraclinical Exam Orders API
-// VERSION 3.0: Split into multiple smaller OpenAI calls for reliability (same pattern as chronic-diagnosis)
-// - Call 1: Laboratory Tests
-// - Call 2: Paraclinical Exams
-// - Call 3: Specialist Referrals + Monitoring Plan
-// - Call 4: Exam Summary
+// VERSION 4.0: 2-call approach for reliability (avoids Vercel timeout)
+// - Call 1: Laboratory Tests + Paraclinical Exams
+// - Call 2: Specialist Referrals + Monitoring Plan + Summary
 import { type NextRequest, NextResponse } from "next/server"
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
-export const maxDuration = 60
+export const maxDuration = 300
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -148,11 +146,11 @@ DIAGNOSTIC DATA: ${JSON.stringify(diagnosisData?.diseaseAssessment || {}, null, 
         }
 
         try {
-          // ========== CALL 1: Laboratory Tests (25%) ==========
-          sendSSE('progress', { message: 'Génération des analyses biologiques...', progress: 10 })
-          console.log('🔬 Call 1: Laboratory Tests')
+          // ========== CALL 1: Laboratory Tests + Paraclinical Exams (50%) ==========
+          sendSSE('progress', { message: 'Génération des analyses et examens paracliniques...', progress: 10 })
+          console.log('🔬 Call 1: Laboratory Tests + Paraclinical Exams')
 
-          const labTests = await callOpenAI(apiKey, `Tu es un endocrinologue senior. Génère les analyses biologiques pour le suivi des maladies chroniques.
+          const clinicalOrders = await callOpenAI(apiKey, `Tu es un endocrinologue senior. Génère les analyses biologiques ET les examens paracliniques (imagerie, explorations fonctionnelles) pour le suivi des maladies chroniques.
 Utilise la terminologie médicale anglaise (Anglo-Saxon standards).
 
 Retourne UNIQUEMENT un JSON valide avec cette structure:
@@ -169,7 +167,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
         "frequency": "tous les 3 mois|annuel|etc."
       },
       "preparation": {
-        "fasting": true|false,
+        "fasting": true/false,
         "fastingDuration": "12 heures si à jeun"
       },
       "expectedResults": {
@@ -181,25 +179,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
         "complicationScreening": "which complication if applicable"
       }
     }
-  ]
-}
-
-TESTS REQUIS selon les maladies:
-- DIABÈTE: HbA1c (tous les 3 mois), Glycémie à jeun, Bilan lipidique, Créatininémie + DFG, Microalbuminurie
-- HYPERTENSION: Ionogramme, Créatininémie + DFG, Bilan lipidique
-- OBÉSITÉ: Bilan lipidique, Glycémie + HbA1c, Bilan hépatique (ASAT/ALAT/GGT)`, patientContext, 2000)
-
-          sendSSE('progress', { message: 'Analyses biologiques générées...', progress: 30 })
-
-          // ========== CALL 2: Paraclinical Exams (50%) ==========
-          sendSSE('progress', { message: 'Génération des examens paracliniques...', progress: 35 })
-          console.log('🏥 Call 2: Paraclinical Exams')
-
-          const paraclinicalExams = await callOpenAI(apiKey, `Tu es un endocrinologue senior. Génère les examens paracliniques (imagerie, explorations fonctionnelles) pour le suivi des maladies chroniques.
-Utilise la terminologie médicale anglaise.
-
-Retourne UNIQUEMENT un JSON valide:
-{
+  ],
   "paraclinicalExams": [
     {
       "lineNumber": 1,
@@ -213,7 +193,7 @@ Retourne UNIQUEMENT un JSON valide:
         "frequency": "how often"
       },
       "preparation": {
-        "fastingRequired": true|false,
+        "fastingRequired": true/false,
         "contrastAllergy": "check if applicable"
       },
       "expectedFindings": {
@@ -224,18 +204,30 @@ Retourne UNIQUEMENT un JSON valide:
   ]
 }
 
-EXAMENS REQUIS:
+TESTS REQUIS selon les maladies:
+- DIABÈTE: HbA1c (tous les 3 mois), Glycémie à jeun, Bilan lipidique, Créatininémie + DFG, Microalbuminurie
+- HYPERTENSION: Ionogramme, Créatininémie + DFG, Bilan lipidique
+- OBÉSITÉ: Bilan lipidique, Glycémie + HbA1c, Bilan hépatique (ASAT/ALAT/GGT)
+
+EXAMENS PARACLINIQUES:
 - DIABÈTE: Fond d'œil (annuel), ECG (annuel), Examen des pieds, Écho-Doppler artères MI si nécessaire
 - HYPERTENSION: ECG (annuel), Échocardiographie si mal contrôlée, Holter tensionnel si suspicion
-- OBÉSITÉ: Échographie abdominale (stéatose)`, patientContext, 1500)
+- OBÉSITÉ: Échographie abdominale (stéatose)`, patientContext, 4000)
 
-          sendSSE('progress', { message: 'Examens paracliniques générés...', progress: 55 })
+          sendSSE('progress', { message: 'Analyses et examens générés, préparation du plan de suivi...', progress: 50 })
 
-          // ========== CALL 3: Specialist Referrals + Monitoring (70%) ==========
-          sendSSE('progress', { message: 'Génération des consultations spécialisées...', progress: 60 })
-          console.log('👨‍⚕️ Call 3: Specialist Referrals + Monitoring Plan')
+          // Extract counts from Call 1 for Call 2
+          const labCount = clinicalOrders.laboratoryTests?.length || 0
+          const paraCount = clinicalOrders.paraclinicalExams?.length || 0
 
-          const referralsAndMonitoring = await callOpenAI(apiKey, `Tu es un endocrinologue senior. Génère les consultations spécialisées et le plan de suivi.
+          // ========== CALL 2: Specialist Referrals + Monitoring + Summary (90%) ==========
+          sendSSE('progress', { message: 'Génération des consultations spécialisées et récapitulatif...', progress: 55 })
+          console.log('👨‍⚕️ Call 2: Specialist Referrals + Monitoring Plan + Summary')
+
+          const referralsAndSummary = await callOpenAI(apiKey, `Tu es un endocrinologue senior. Génère les consultations spécialisées, le plan de suivi, ET le récapitulatif des examens.
+
+Nombre d'analyses biologiques prescrites: ${labCount}
+Nombre d'examens paracliniques prescrits: ${paraCount}
 
 Retourne UNIQUEMENT un JSON valide:
 {
@@ -259,40 +251,15 @@ Retourne UNIQUEMENT un JSON valide:
   "laboratoryNotes": {
     "specimenCollection": "instructions de prélèvement",
     "criticalValueAlerts": "valeurs critiques nécessitant alerte"
-  }
-}
-
-CONSULTATIONS selon maladies:
-- DIABÈTE: Ophtalmologue (fond d'œil annuel), Podologue, Cardiologue si complications
-- HYPERTENSION: Cardiologue si mal contrôlée, Néphrologue si atteinte rénale
-- OBÉSITÉ: Diététicien, Endocrinologue`, patientContext, 1500)
-
-          sendSSE('progress', { message: 'Plan de suivi généré...', progress: 75 })
-
-          // ========== CALL 4: Exam Summary (85%) ==========
-          sendSSE('progress', { message: 'Génération du récapitulatif...', progress: 80 })
-          console.log('📊 Call 4: Exam Summary')
-
-          const labCount = labTests.laboratoryTests?.length || 0
-          const paraCount = paraclinicalExams.paraclinicalExams?.length || 0
-          const refCount = referralsAndMonitoring.specialistReferrals?.length || 0
-
-          const examSummary = await callOpenAI(apiKey, `Tu es un endocrinologue senior. Génère le récapitulatif des examens prescrits.
-
-Nombre d'analyses biologiques: ${labCount}
-Nombre d'examens paracliniques: ${paraCount}
-Nombre de consultations spécialisées: ${refCount}
-
-Retourne UNIQUEMENT un JSON valide:
-{
+  },
   "examSummary": {
     "totalLabTests": ${labCount},
     "totalParaclinicalExams": ${paraCount},
-    "totalSpecialistReferrals": ${refCount},
+    "totalSpecialistReferrals": "number you generated",
     "byUrgency": {
       "urgent": 0,
       "semiUrgent": 2,
-      "routine": ${labCount + paraCount - 2}
+      "routine": ${Math.max(labCount + paraCount - 2, 0)}
     },
     "byPurpose": {
       "diseaseMonitoring": ${Math.ceil((labCount + paraCount) * 0.5)},
@@ -310,12 +277,19 @@ Retourne UNIQUEMENT un JSON valide:
     "costEffective": "coût-efficacité considérée",
     "validationScore": 95
   }
-}`, patientContext, 1000)
+}
+
+CONSULTATIONS selon maladies:
+- DIABÈTE: Ophtalmologue (fond d'œil annuel), Podologue, Cardiologue si complications
+- HYPERTENSION: Cardiologue si mal contrôlée, Néphrologue si atteinte rénale
+- OBÉSITÉ: Diététicien, Endocrinologue`, patientContext, 3000)
 
           sendSSE('progress', { message: 'Finalisation...', progress: 90 })
 
-          // ========== COMBINE ALL RESULTS ==========
-          console.log('✅ All 4 calls completed, combining results...')
+          // ========== COMBINE RESULTS ==========
+          console.log('✅ Both calls completed, combining results...')
+
+          const refCount = referralsAndSummary.specialistReferrals?.length || 0
 
           const orderHeader = {
             orderId: orderId,
@@ -338,29 +312,29 @@ Retourne UNIQUEMENT un JSON valide:
 
           const combinedExamOrders = {
             orderHeader,
-            laboratoryTests: labTests.laboratoryTests || [],
-            paraclinicalExams: paraclinicalExams.paraclinicalExams || [],
-            specialistReferrals: referralsAndMonitoring.specialistReferrals || [],
-            monitoringPlan: referralsAndMonitoring.monitoringPlan || {
+            laboratoryTests: clinicalOrders.laboratoryTests || [],
+            paraclinicalExams: clinicalOrders.paraclinicalExams || [],
+            specialistReferrals: referralsAndSummary.specialistReferrals || [],
+            monitoringPlan: referralsAndSummary.monitoringPlan || {
               immediate: [],
               oneMonth: [],
               threeMonths: [],
               sixMonths: [],
               annual: []
             },
-            laboratoryNotes: referralsAndMonitoring.laboratoryNotes || {
+            laboratoryNotes: referralsAndSummary.laboratoryNotes || {
               specimenCollection: "Standard collection procedures",
               criticalValueAlerts: "Contact physician immediately for critical values"
             },
-            examSummary: examSummary.examSummary || {
+            examSummary: referralsAndSummary.examSummary || {
               totalLabTests: labCount,
               totalParaclinicalExams: paraCount,
               totalSpecialistReferrals: refCount,
-              byUrgency: { urgent: 0, semiUrgent: 2, routine: labCount + paraCount - 2 },
+              byUrgency: { urgent: 0, semiUrgent: 2, routine: Math.max(labCount + paraCount - 2, 0) },
               byPurpose: { diseaseMonitoring: 3, complicationScreening: 2, medicationMonitoring: 1, cardiovascularRisk: 2 },
               timelineOverview: "Examens répartis sur 12 mois selon le calendrier de suivi"
             },
-            orderValidation: examSummary.orderValidation || {
+            orderValidation: referralsAndSummary.orderValidation || {
               appropriateTests: "Tests appropriés",
               noRedundantTests: "Pas de redondance",
               timingAppropriate: "Timing approprié",
@@ -380,7 +354,7 @@ Retourne UNIQUEMENT un JSON valide:
             generatedAt: orderDate.toISOString()
           })
 
-          console.log('✅ Complete exam orders sent to client')
+          console.log('✅ Complete exam orders sent to client (2-call approach)')
 
         } catch (error: any) {
           console.error('Chronic examens error:', error)

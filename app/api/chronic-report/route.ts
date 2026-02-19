@@ -1,12 +1,11 @@
 // app/api/chronic-report/route.ts - PROFESSIONAL Chronic Disease Report with SAME STRUCTURE as consultation-report
 // Uses EXACT SAME LOGIC as generate-consultation-report for consistency (NO EMOJIS, NO COLORS)
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
 import OpenAI from "openai"
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
+export const maxDuration = 300
 
 // ==================== HELPER FUNCTIONS ====================
 function getString(value: any): string {
@@ -700,32 +699,40 @@ export async function POST(req: NextRequest) {
     let narrativeSections: any
     
     try {
-      const result = await generateText({
-        model: openai("gpt-5.2"),  // Same as consultation-report
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        maxTokens: 3000,
-        temperature: 0.3,
+      const narrativeResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-5.2",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
+          max_completion_tokens: 6000,
+          temperature: 0.3,
+          response_format: { type: "json_object" }
+        }),
       })
 
-      const content = result.text
-      
+      if (!narrativeResponse.ok) {
+        const errorText = await narrativeResponse.text()
+        throw new Error(`OpenAI API error (${narrativeResponse.status}): ${errorText.substring(0, 200)}`)
+      }
+
+      const narrativeData = await narrativeResponse.json()
+      const content = narrativeData.choices?.[0]?.message?.content
+      console.log(`📡 Narrative response - finish_reason: ${narrativeData.choices?.[0]?.finish_reason}, usage: ${JSON.stringify(narrativeData.usage || {})}`)
+
       if (!content) {
         console.warn("No content in AI response, using fallback")
         narrativeSections = useChronicDiseaseFallback(extractedData, patientData)
       } else {
         console.log("AI response received, length:", content.length)
-        
         try {
-          const jsonMatch = content.match(/\{[\s\S]*\}/)
-          if (!jsonMatch) {
-            console.warn("No JSON found in response, using fallback")
-            narrativeSections = useChronicDiseaseFallback(extractedData, patientData)
-          } else {
-            narrativeSections = JSON.parse(jsonMatch[0])
-          }
+          narrativeSections = JSON.parse(content)
         } catch (parseError: any) {
           console.warn("JSON parse error, using fallback:", parseError.message)
           narrativeSections = useChronicDiseaseFallback(extractedData, patientData)
