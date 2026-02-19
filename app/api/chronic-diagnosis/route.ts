@@ -50,13 +50,17 @@ async function callOpenAI(
   maxTokens: number = 2000,
   useReasoning: boolean = false
 ): Promise<any> {
+  // For reasoning models, reasoning tokens count toward max_completion_tokens.
+  // We need a much larger budget so reasoning doesn't exhaust the output capacity.
+  const effectiveMaxTokens = useReasoning ? Math.max(maxTokens, 16384) : maxTokens
+
   const body: any = {
     model: "gpt-5.2",
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt }
     ],
-    max_completion_tokens: maxTokens,
+    max_completion_tokens: effectiveMaxTokens,
     response_format: { type: "json_object" }
   }
 
@@ -81,10 +85,23 @@ async function callOpenAI(
   }
 
   const data = await response.json()
-  const content = data.choices?.[0]?.message?.content
+
+  // Log response structure for debugging
+  const choice = data.choices?.[0]
+  console.log(`   📡 OpenAI response - finish_reason: ${choice?.finish_reason}, has content: ${!!choice?.message?.content}, usage: ${JSON.stringify(data.usage || {})}`)
+
+  const content = choice?.message?.content
 
   if (!content) {
-    throw new Error('No content in OpenAI response')
+    // Log full response structure when content is missing
+    console.error('❌ No content in OpenAI response. Full response:', JSON.stringify(data, null, 2).substring(0, 500))
+
+    // Check if the model hit the token limit
+    if (choice?.finish_reason === 'length') {
+      throw new Error('OpenAI response truncated - model ran out of tokens. Try reducing prompt complexity.')
+    }
+
+    throw new Error(`No content in OpenAI response (finish_reason: ${choice?.finish_reason || 'unknown'})`)
   }
 
   return JSON.parse(content)

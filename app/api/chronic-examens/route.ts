@@ -73,10 +73,20 @@ async function callOpenAI(
   }
 
   const data = await response.json()
-  const content = data.choices?.[0]?.message?.content
+
+  const choice = data.choices?.[0]
+  console.log(`   📡 OpenAI response - finish_reason: ${choice?.finish_reason}, has content: ${!!choice?.message?.content}, usage: ${JSON.stringify(data.usage || {})}`)
+
+  const content = choice?.message?.content
 
   if (!content) {
-    throw new Error('No content in OpenAI response')
+    console.error('❌ No content in OpenAI response. Full response:', JSON.stringify(data, null, 2).substring(0, 500))
+
+    if (choice?.finish_reason === 'length') {
+      throw new Error('OpenAI response truncated - model ran out of tokens.')
+    }
+
+    throw new Error(`No content in OpenAI response (finish_reason: ${choice?.finish_reason || 'unknown'})`)
   }
 
   return JSON.parse(content)
