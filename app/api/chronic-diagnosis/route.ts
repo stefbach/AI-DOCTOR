@@ -199,15 +199,11 @@ QUESTIONNAIRE: ${JSON.stringify(questionsData, null, 2)}`
         }
 
         try {
-          // ========== RUN ALL 4 CALLS IN PARALLEL ==========
-          // All calls are independent (they only depend on patientContext),
-          // so running them in parallel cuts total time from ~90s to ~40s.
-          sendSSE('progress', { message: 'Lancement des analyses en parallèle...', progress: 10 })
-          console.log('🚀 Launching all 4 OpenAI calls in parallel')
+          // ========== CALL 1: Disease Assessment (25%) ==========
+          sendSSE('progress', { message: 'Analyse des maladies chroniques...', progress: 10 })
+          console.log('📊 Call 1: Disease Assessment')
 
-          const [diseaseAssessment, medicationManagement, mealPlan, followUpPlan] = await Promise.all([
-            // CALL 1: Disease Assessment
-            callOpenAI(apiKey, `Tu es un endocrinologue senior. Analyse les maladies chroniques du patient.
+          const diseaseAssessment = await callOpenAI(apiKey, `Tu es un endocrinologue senior. Analyse les maladies chroniques du patient.
 Retourne UNIQUEMENT un JSON valide avec cette structure:
 {
   "diabetes": {
@@ -240,14 +236,15 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
     "mainConcerns": ["préoccupation 1", "préoccupation 2"],
     "priorityActions": ["action 1", "action 2"]
   }
-}`, patientContext, 4000, true).then(result => {
-              console.log('✅ Call 1: Disease Assessment complete')
-              sendSSE('progress', { message: 'Analyse des maladies terminée...', progress: 30 })
-              return result
-            }),
+}`, patientContext, 4000, true)
 
-            // CALL 2: Medication Management
-            callOpenAI(apiKey, `Tu es un endocrinologue senior spécialisé en pharmacologie.
+          sendSSE('progress', { message: 'Évaluation complète...', progress: 25 })
+
+          // ========== CALL 2: Medication Management (45%) ==========
+          sendSSE('progress', { message: 'Analyse des médicaments...', progress: 30 })
+          console.log('💊 Call 2: Medication Management')
+
+          const medicationManagement = await callOpenAI(apiKey, `Tu es un endocrinologue senior spécialisé en pharmacologie.
 Analyse les médicaments du patient et propose des ajustements si nécessaire.
 UTILISE les noms DCI (Metformine, Périndopril, Amlodipine, etc.)
 Format posologie UK: OD (1x/jour), BD (2x/jour), TDS (3x/jour)
@@ -267,14 +264,15 @@ Retourne UNIQUEMENT un JSON valide:
     { "medication": "Nom", "rationale": "pourquoi arrêter" }
   ]
 }
-Si pas de médicaments à modifier, retourne des tableaux vides.`, patientContext, 1500).then(result => {
-              console.log('✅ Call 2: Medication Management complete')
-              sendSSE('progress', { message: 'Plan médicamenteux établi...', progress: 50 })
-              return result
-            }),
+Si pas de médicaments à modifier, retourne des tableaux vides.`, patientContext, 1500)
 
-            // CALL 3: Meal Plan
-            callOpenAI(apiKey, `Tu es un diététicien clinique spécialisé dans les maladies chroniques (diabète, HTA, obésité).
+          sendSSE('progress', { message: 'Plan médicamenteux établi...', progress: 45 })
+
+          // ========== CALL 3: Meal Plan (70%) ==========
+          sendSSE('progress', { message: 'Création du plan nutritionnel...', progress: 50 })
+          console.log('🍽️ Call 3: Meal Plan')
+
+          const mealPlan = await callOpenAI(apiKey, `Tu es un diététicien clinique spécialisé dans les maladies chroniques (diabète, HTA, obésité).
 Crée un plan alimentaire DÉTAILLÉ et PERSONNALISÉ pour ce patient.
 
 Retourne UNIQUEMENT un JSON valide:
@@ -309,14 +307,15 @@ Retourne UNIQUEMENT un JSON valide:
   "foodsToAvoid": ["aliment 1 + raison", "aliment 2 + raison"],
   "cookingMethods": ["méthode 1", "méthode 2"],
   "portionControlTips": ["conseil 1", "conseil 2"]
-}`, patientContext, 2000).then(result => {
-              console.log('✅ Call 3: Meal Plan complete')
-              sendSSE('progress', { message: 'Plan nutritionnel créé...', progress: 70 })
-              return result
-            }),
+}`, patientContext, 2000)
 
-            // CALL 4: Objectives & Follow-up
-            callOpenAI(apiKey, `Tu es un endocrinologue senior.
+          sendSSE('progress', { message: 'Plan nutritionnel créé...', progress: 70 })
+
+          // ========== CALL 4: Objectives & Follow-up (85%) ==========
+          sendSSE('progress', { message: 'Définition des objectifs thérapeutiques...', progress: 75 })
+          console.log('📋 Call 4: Objectives & Follow-up')
+
+          const followUpPlan = await callOpenAI(apiKey, `Tu es un endocrinologue senior.
 Définis les objectifs thérapeutiques et le plan de suivi pour ce patient.
 
 Retourne UNIQUEMENT un JSON valide:
@@ -350,12 +349,7 @@ Retourne UNIQUEMENT un JSON valide:
       "weight": { "frequency": "1x/semaine", "timing": "matin à jeun", "target": "perte progressive" }
     }
   }
-}`, patientContext, 1500).then(result => {
-              console.log('✅ Call 4: Objectives & Follow-up complete')
-              sendSSE('progress', { message: 'Objectifs thérapeutiques définis...', progress: 85 })
-              return result
-            })
-          ])
+}`, patientContext, 1500)
 
           sendSSE('progress', { message: 'Finalisation de l\'évaluation...', progress: 90 })
 
