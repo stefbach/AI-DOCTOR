@@ -1,11 +1,10 @@
-// app/api/chronic-dietary/route.ts - Simplified Dietary Protocol for Chronic Diseases
+// app/api/chronic-dietary/route.ts - Dietary Protocol for Chronic Diseases
+// Uses direct OpenAI fetch with JSON mode for reliability
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
-export const maxDuration = 60 // 60 seconds for GPT-4 dietary plan generation
+export const maxDuration = 300 // 7-day meal plan generation needs time with gpt-5.2
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -215,86 +214,71 @@ VITAL SIGNS:
 
 Generate complete 7-day meal plan with EXACTLY ${Math.round(targetCalories)} kcal per day.`
 
-    console.log('🥗 Calling OpenAI API with gpt-5.2 for professional-quality dietary protocol...')
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 })
+    }
 
-    const result = await generateText({
-      model: openai("gpt-5.2"),  // ✅ UPGRADED to gpt-5.2 for superior dietary plan quality
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: patientContext }
-      ],
-      maxTokens: 8000,  // ✅ INCREASED for complete 7-day meal plans
-      temperature: 0.3,
+    console.log('🥗 Calling OpenAI API (direct fetch, JSON mode) for 7-day dietary protocol...')
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-5.2",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: patientContext }
+        ],
+        max_completion_tokens: 10000,
+        temperature: 0.3,
+        response_format: { type: "json_object" }
+      }),
     })
 
-    const content = result.text
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`❌ OpenAI API error (${response.status}):`, errorText.substring(0, 300))
+      return NextResponse.json(
+        { error: `OpenAI API error (${response.status})`, details: errorText.substring(0, 200) },
+        { status: 502 }
+      )
+    }
+
+    const data = await response.json()
+    const choice = data.choices?.[0]
+    const content = choice?.message?.content
+
+    console.log(`📡 OpenAI response - finish_reason: ${choice?.finish_reason}, usage: ${JSON.stringify(data.usage || {})}`)
 
     if (!content) {
-      console.error('❌ No content received from AI')
+      console.error('❌ No content in OpenAI response:', JSON.stringify(data, null, 2).substring(0, 500))
+      if (choice?.finish_reason === 'length') {
+        return NextResponse.json(
+          { error: "Response truncated - model ran out of tokens" },
+          { status: 502 }
+        )
+      }
       return NextResponse.json(
-        { error: "No content received from AI" },
-        { status: 500 }
+        { error: "No content in OpenAI response" },
+        { status: 502 }
       )
     }
 
     console.log('✅ Dietary protocol response received, length:', content.length)
-    console.log('📝 Response preview:', content.substring(0, 300))
 
     let dietaryData
     try {
-      // Clean response - remove markdown code blocks if present
-      let cleanedContent = content.trim()
-      cleanedContent = cleanedContent.replace(/```json\n?/g, '').replace(/```\n?/g, '')
-      cleanedContent = cleanedContent.replace(/^[^{]*/, '').replace(/[^}]*$/, '') // Remove any text before first { or after last }
-
-      // Find JSON object
-      const jsonMatch = cleanedContent.match(/\{[\s\S]*\}/)
-      if (!jsonMatch) {
-        console.error("❌ No JSON found in response")
-        console.error("Raw content:", content.substring(0, 1000))
-
-        // Try to create a fallback response
-        return NextResponse.json({
-          success: true,
-          dietaryProtocol: {
-            protocolHeader: {
-              protocolType: "7-Day Personalized Dietary Protocol",
-              issueDate: new Date().toISOString().split('T')[0]
-            },
-            nutritionalAssessment: {
-              currentWeight: `${weight} kg`,
-              bmi: parseFloat(bmi.toFixed(1)),
-              bmiCategory: bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese',
-              targetWeight: `${targetWeight.toFixed(1)} kg`,
-              bmr: `${Math.round(bmr)} kcal/day`,
-              tdee: `${Math.round(tdee)} kcal/day`,
-              dailyCaloricNeeds: {
-                targetCalories: `${Math.round(targetCalories)} kcal/day`,
-                caloricAdjustment: caloricAdjustment,
-                macroDistribution: {
-                  carbs: `${carbsPercent}%`,
-                  protein: `${proteinPercent}%`,
-                  fat: `${fatPercent}%`
-                }
-              }
-            },
-            error: "AI response parsing failed - please regenerate the diet plan"
-          }
-        })
-      }
-
-      console.log('🔍 Attempting to parse JSON...')
-      dietaryData = JSON.parse(jsonMatch[0])
+      dietaryData = JSON.parse(content)
       console.log('✅ JSON parsed successfully')
     } catch (parseError: any) {
       console.error("❌ JSON parse error:", parseError.message)
-      console.error("Content sample:", content.substring(0, 1000))
+      console.error("Content sample:", content.substring(0, 500))
       return NextResponse.json(
-        { 
-          error: "Failed to parse dietary protocol",
-          details: parseError.message,
-          contentSample: content.substring(0, 200)
-        },
+        { error: "Failed to parse dietary protocol", details: parseError.message },
         { status: 500 }
       )
     }
