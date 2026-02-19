@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -83,10 +83,24 @@ export default function ChronicQuestionsForm({
  const [loading, setLoading] = useState(true)
  const [error, setError] = useState("")
  const [metadata, setMetadata] = useState<any>(null)
+ const [generationProgress, setGenerationProgress] = useState(0)
+ const progressInterval = useRef<NodeJS.Timeout | null>(null)
 
  // ========== Generate Questions on Mount ==========
  useEffect(() => {
  generateQuestions()
+ // Progress bar: ramp up to 90% over ~60s, then slow down
+ progressInterval.current = setInterval(() => {
+   setGenerationProgress(prev => {
+     if (prev < 60) return prev + 2       // 0-60% in ~30s
+     if (prev < 85) return prev + 0.5     // 60-85% in ~50s
+     if (prev < 95) return prev + 0.1     // slow crawl to 95%
+     return prev
+   })
+ }, 1000)
+ return () => {
+   if (progressInterval.current) clearInterval(progressInterval.current)
+ }
  }, [])
 
  const generateQuestions = async () => {
@@ -139,6 +153,8 @@ export default function ChronicQuestionsForm({
  variant: "destructive"
  })
  } finally {
+ if (progressInterval.current) clearInterval(progressInterval.current)
+ setGenerationProgress(100)
  setLoading(false)
  }
  }
@@ -183,14 +199,29 @@ export default function ChronicQuestionsForm({
 
  // ========== Render: Loading State ==========
  if (loading) {
+ const displayProgress = Math.round(generationProgress)
  return (
- <Card className="border-blue-200">
- <CardContent className="p-12 text-center">
- <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
- <p className="text-lg font-medium text-gray-700 mb-2">Generating Specialized Questions...</p>
- <p className="text-sm text-gray-500">AI is analyzing chronic disease data</p>
- </CardContent>
- </Card>
+ <div className="flex flex-col items-center justify-center p-12 space-y-6">
+   <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+   <div className="text-center space-y-2">
+     <p className="text-lg font-semibold text-blue-700">Generating Specialized Questions</p>
+     <p className="text-sm text-gray-500">
+       Analyzing chronic disease data and clinical parameters to generate targeted questions. This may take a moment...
+     </p>
+   </div>
+   <div className="w-full max-w-md">
+     <div className="flex justify-between text-sm text-gray-500 mb-1">
+       <span>Progress</span>
+       <span>{displayProgress}%</span>
+     </div>
+     <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+       <div
+         className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-1000 ease-out"
+         style={{ width: `${displayProgress}%` }}
+       />
+     </div>
+   </div>
+ </div>
  )
  }
 
