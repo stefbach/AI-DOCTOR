@@ -2685,25 +2685,10 @@ export default function ChronicProfessionalReport({
 
       console.log('✅ Report saved successfully')
 
-      // Update draft as finalized
-      console.log('📝 Marking draft as finalized...')
-
-      await fetch('/api/save-draft', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          consultationId: finalConsultationId,
-          reportContent: {
-            ...report,
-            metadata: {
-              finalized: true,
-              finalizedAt: new Date().toISOString()
-            }
-          },
-          doctorInfo: finalDoctorInfo,
-          modifiedSections: []
-        })
-      })
+      // NOTE: save-draft call removed here — save-medical-report already writes the
+      // finalized status and complete documents_data to consultation_records.
+      // The redundant save-draft call was overwriting documents_data with a less
+      // complete reconstruction, risking data integrity, and doubling Supabase load.
 
       // Get Tibok URL based on environment
       const getTibokUrl = () => {
