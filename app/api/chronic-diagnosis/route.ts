@@ -1,9 +1,7 @@
 // app/api/chronic-diagnosis/route.ts - Specialist-Level Chronic Disease Diagnosis API
-// VERSION 4.0: Split into multiple smaller OpenAI calls for reliability
-// - Call 1: Disease Assessment
-// - Call 2: Medication Management
-// - Call 3: Meal Plan
-// - Call 4: Follow-up Plan & Objectives
+// VERSION 5.0: 2-call hybrid approach for reliability + quality
+// - Call 1: Disease Assessment + Medication Management (reasoning: medium, 16K budget)
+// - Call 2: Meal Plan + Objectives & Follow-up (no reasoning, ~6K budget)
 import { type NextRequest, NextResponse } from "next/server"
 
 export const runtime = 'nodejs'
@@ -216,127 +214,132 @@ QUESTIONNAIRE: ${JSON.stringify(questionsData, null, 2)}`
         }
 
         try {
-          // ========== CALL 1: Disease Assessment (25%) ==========
-          sendSSE('progress', { message: 'Analyse des maladies chroniques...', progress: 10 })
-          console.log('📊 Call 1: Disease Assessment')
+          // ========== CALL 1: Clinical Reasoning — Disease Assessment + Medication Management (50%) ==========
+          sendSSE('progress', { message: 'Analyse clinique approfondie des maladies chroniques...', progress: 10 })
+          console.log('🧠 Call 1: Clinical Reasoning — Disease Assessment + Medication Management')
 
-          const diseaseAssessment = await callOpenAI(apiKey, `Tu es un endocrinologue senior. Analyse les maladies chroniques du patient.
+          const clinicalAnalysis = await callOpenAI(apiKey, `Tu es un endocrinologue senior spécialisé en pharmacologie.
+Analyse les maladies chroniques du patient ET propose la gestion médicamenteuse.
+UTILISE les noms DCI (Metformine, Périndopril, Amlodipine, etc.)
+Format posologie UK: OD (1x/jour), BD (2x/jour), TDS (3x/jour)
+
 Retourne UNIQUEMENT un JSON valide avec cette structure:
 {
-  "diabetes": {
-    "present": true/false,
-    "type": "Type 2",
-    "currentControl": "Good/Fair/Poor",
-    "currentHbA1c": "valeur estimée",
-    "targetHbA1c": "< 7.0%",
-    "complications": { "retinopathy": "None/Suspected", "nephropathy": "None/Suspected", "neuropathy": "None/Suspected" },
-    "riskFactors": ["facteur 1", "facteur 2"]
+  "diseaseAssessment": {
+    "diabetes": {
+      "present": true/false,
+      "type": "Type 2",
+      "currentControl": "Good/Fair/Poor",
+      "currentHbA1c": "valeur estimée",
+      "targetHbA1c": "< 7.0%",
+      "complications": { "retinopathy": "None/Suspected", "nephropathy": "None/Suspected", "neuropathy": "None/Suspected" },
+      "riskFactors": ["facteur 1", "facteur 2"]
+    },
+    "hypertension": {
+      "present": true/false,
+      "stage": "Stage 1/Stage 2/Controlled",
+      "currentBP": "valeur",
+      "targetBP": "< 130/80 mmHg",
+      "cardiovascularRisk": "Low/Moderate/High",
+      "riskFactors": ["facteur 1"]
+    },
+    "obesity": {
+      "present": true/false,
+      "currentBMI": "${bmi.toFixed(1)}",
+      "category": "Normal/Overweight/Obesity Class I/II/III",
+      "currentWeight": "${weight}",
+      "targetWeight": "target weight NUMBER ONLY without unit (e.g., 75)",
+      "riskFactors": ["facteur 1"]
+    }
   },
-  "hypertension": {
-    "present": true/false,
-    "stage": "Stage 1/Stage 2/Controlled",
-    "currentBP": "valeur",
-    "targetBP": "< 130/80 mmHg",
-    "cardiovascularRisk": "Low/Moderate/High",
-    "riskFactors": ["facteur 1"]
-  },
-  "obesity": {
-    "present": true/false,
-    "currentBMI": "${bmi.toFixed(1)}",
-    "category": "Normal/Overweight/Obesity Class I/II/III",
-    "currentWeight": "${weight}",
-    "targetWeight": "target weight NUMBER ONLY without unit (e.g., 75)",
-    "riskFactors": ["facteur 1"]
+  "medicationManagement": {
+    "continue": [
+      { "medication": "Nom DCI", "dosage": "dose", "frequency": "OD/BD/TDS", "rationale": "pourquoi continuer" }
+    ],
+    "add": [
+      { "medication": "Nom DCI", "dosage": "dose", "frequency": "OD/BD/TDS", "indication": "indication détaillée min 30 caractères", "monitoring": "surveillance" }
+    ],
+    "adjust": [
+      { "medication": "Nom DCI", "currentDosage": "dose actuelle", "newDosage": "nouvelle dose", "rationale": "pourquoi ajuster" }
+    ],
+    "stop": [
+      { "medication": "Nom", "rationale": "pourquoi arrêter" }
+    ]
   },
   "overallAssessment": {
     "globalControl": "Good/Fair/Poor",
     "mainConcerns": ["préoccupation 1", "préoccupation 2"],
     "priorityActions": ["action 1", "action 2"]
   }
-}`, patientContext, 4000, true)
-
-          sendSSE('progress', { message: 'Évaluation complète...', progress: 25 })
-
-          // ========== CALL 2: Medication Management (45%) ==========
-          sendSSE('progress', { message: 'Analyse des médicaments...', progress: 30 })
-          console.log('💊 Call 2: Medication Management')
-
-          const medicationManagement = await callOpenAI(apiKey, `Tu es un endocrinologue senior spécialisé en pharmacologie.
-Analyse les médicaments du patient et propose des ajustements si nécessaire.
-UTILISE les noms DCI (Metformine, Périndopril, Amlodipine, etc.)
-Format posologie UK: OD (1x/jour), BD (2x/jour), TDS (3x/jour)
-
-Retourne UNIQUEMENT un JSON valide:
-{
-  "continue": [
-    { "medication": "Nom DCI", "dosage": "dose", "frequency": "OD/BD/TDS", "rationale": "pourquoi continuer" }
-  ],
-  "add": [
-    { "medication": "Nom DCI", "dosage": "dose", "frequency": "OD/BD/TDS", "indication": "indication détaillée min 30 caractères", "monitoring": "surveillance" }
-  ],
-  "adjust": [
-    { "medication": "Nom DCI", "currentDosage": "dose actuelle", "newDosage": "nouvelle dose", "rationale": "pourquoi ajuster" }
-  ],
-  "stop": [
-    { "medication": "Nom", "rationale": "pourquoi arrêter" }
-  ]
 }
-Si pas de médicaments à modifier, retourne des tableaux vides.`, patientContext, 1500)
+Si pas de médicaments à modifier, retourne des tableaux vides pour continue/add/adjust/stop.`, patientContext, 8000, true)
 
-          sendSSE('progress', { message: 'Plan médicamenteux établi...', progress: 45 })
+          sendSSE('progress', { message: 'Évaluation clinique complète, création du plan de suivi...', progress: 50 })
 
-          // ========== CALL 3: Meal Plan (70%) ==========
-          sendSSE('progress', { message: 'Création du plan nutritionnel...', progress: 50 })
-          console.log('🍽️ Call 3: Meal Plan')
+          // Build clinical summary from Call 1 to inform Call 2
+          const diseaseSummary = []
+          if (clinicalAnalysis.diseaseAssessment?.diabetes?.present) {
+            diseaseSummary.push(`Diabète ${clinicalAnalysis.diseaseAssessment.diabetes.type || 'Type 2'} - Contrôle: ${clinicalAnalysis.diseaseAssessment.diabetes.currentControl || '?'}`)
+          }
+          if (clinicalAnalysis.diseaseAssessment?.hypertension?.present) {
+            diseaseSummary.push(`HTA ${clinicalAnalysis.diseaseAssessment.hypertension.stage || '?'} - PA: ${clinicalAnalysis.diseaseAssessment.hypertension.currentBP || '?'}`)
+          }
+          if (clinicalAnalysis.diseaseAssessment?.obesity?.present) {
+            diseaseSummary.push(`Obésité ${clinicalAnalysis.diseaseAssessment.obesity.category || '?'} - IMC: ${clinicalAnalysis.diseaseAssessment.obesity.currentBMI || bmi.toFixed(1)}`)
+          }
+          const medicationSummary = [
+            ...(clinicalAnalysis.medicationManagement?.continue || []).map((m: any) => `${m.medication} ${m.dosage} ${m.frequency}`),
+            ...(clinicalAnalysis.medicationManagement?.add || []).map((m: any) => `NOUVEAU: ${m.medication} ${m.dosage} ${m.frequency}`)
+          ].join(', ') || 'Aucun'
 
-          const mealPlan = await callOpenAI(apiKey, `Tu es un diététicien clinique spécialisé dans les maladies chroniques (diabète, HTA, obésité).
-Crée un plan alimentaire DÉTAILLÉ et PERSONNALISÉ pour ce patient.
+          // ========== CALL 2: Structured Plans — Meal Plan + Objectives & Follow-up (90%) ==========
+          sendSSE('progress', { message: 'Création du plan nutritionnel et objectifs thérapeutiques...', progress: 55 })
+          console.log('📋 Call 2: Structured Plans — Meal Plan + Objectives & Follow-up')
 
-Retourne UNIQUEMENT un JSON valide:
-{
-  "breakfast": {
-    "timing": "7:00-8:00",
-    "composition": "description nutritionnelle",
-    "portions": "portions précises",
-    "examples": ["Exemple 1 détaillé", "Exemple 2 détaillé", "Exemple 3 détaillé"],
-    "glycemicConsiderations": "impact glycémique"
-  },
-  "lunch": {
-    "timing": "12:30-13:30",
-    "composition": "description",
-    "portions": "portions précises",
-    "examples": ["Exemple 1", "Exemple 2"],
-    "macronutrientBalance": "répartition protéines/glucides/lipides"
-  },
-  "dinner": {
-    "timing": "19:00-20:00",
-    "composition": "description",
-    "portions": "portions précises",
-    "examples": ["Exemple 1", "Exemple 2"],
-    "eveningRecommendations": "conseils spécifiques soir"
-  },
-  "snacks": {
-    "midMorning": { "timing": "10:00", "options": ["snack 1", "snack 2"] },
-    "afternoon": { "timing": "16:00", "options": ["snack 1", "snack 2"] }
-  },
-  "hydration": "objectif hydratation détaillé",
-  "foodsToFavor": ["aliment 1 + raison", "aliment 2 + raison"],
-  "foodsToAvoid": ["aliment 1 + raison", "aliment 2 + raison"],
-  "cookingMethods": ["méthode 1", "méthode 2"],
-  "portionControlTips": ["conseil 1", "conseil 2"]
-}`, patientContext, 2000)
+          const structuredPlans = await callOpenAI(apiKey, `Tu es un diététicien clinique ET endocrinologue senior.
+Crée un plan alimentaire DÉTAILLÉ et PERSONNALISÉ + les objectifs thérapeutiques et le plan de suivi.
 
-          sendSSE('progress', { message: 'Plan nutritionnel créé...', progress: 70 })
+CONTEXTE CLINIQUE (résultat de l'évaluation):
+- Diagnostics: ${diseaseSummary.join(' | ') || 'Aucun diagnostic spécifique'}
+- Médicaments en cours: ${medicationSummary}
+- Préoccupations principales: ${(clinicalAnalysis.overallAssessment?.mainConcerns || []).join(', ') || 'Suivi général'}
 
-          // ========== CALL 4: Objectives & Follow-up (85%) ==========
-          sendSSE('progress', { message: 'Définition des objectifs thérapeutiques...', progress: 75 })
-          console.log('📋 Call 4: Objectives & Follow-up')
-
-          const followUpPlan = await callOpenAI(apiKey, `Tu es un endocrinologue senior.
-Définis les objectifs thérapeutiques et le plan de suivi pour ce patient.
+Adapte le plan nutritionnel aux pathologies et médicaments ci-dessus.
 
 Retourne UNIQUEMENT un JSON valide:
 {
+  "detailedMealPlan": {
+    "breakfast": {
+      "timing": "7:00-8:00",
+      "composition": "description nutritionnelle",
+      "portions": "portions précises",
+      "examples": ["Exemple 1 détaillé", "Exemple 2 détaillé", "Exemple 3 détaillé"],
+      "glycemicConsiderations": "impact glycémique"
+    },
+    "lunch": {
+      "timing": "12:30-13:30",
+      "composition": "description",
+      "portions": "portions précises",
+      "examples": ["Exemple 1", "Exemple 2"],
+      "macronutrientBalance": "répartition protéines/glucides/lipides"
+    },
+    "dinner": {
+      "timing": "19:00-20:00",
+      "composition": "description",
+      "portions": "portions précises",
+      "examples": ["Exemple 1", "Exemple 2"],
+      "eveningRecommendations": "conseils spécifiques soir"
+    },
+    "snacks": {
+      "midMorning": { "timing": "10:00", "options": ["snack 1", "snack 2"] },
+      "afternoon": { "timing": "16:00", "options": ["snack 1", "snack 2"] }
+    },
+    "hydration": "objectif hydratation détaillé",
+    "foodsToFavor": ["aliment 1 + raison", "aliment 2 + raison"],
+    "foodsToAvoid": ["aliment 1 + raison", "aliment 2 + raison"],
+    "cookingMethods": ["méthode 1", "méthode 2"],
+    "portionControlTips": ["conseil 1", "conseil 2"]
+  },
   "therapeuticObjectives": {
     "shortTerm": {
       "duration": "1-3 mois",
@@ -366,24 +369,26 @@ Retourne UNIQUEMENT un JSON valide:
       "weight": { "frequency": "1x/semaine", "timing": "matin à jeun", "target": "perte progressive" }
     }
   }
-}`, patientContext, 1500)
+}`, patientContext, 6000)
 
           sendSSE('progress', { message: 'Finalisation de l\'évaluation...', progress: 90 })
 
-          // ========== COMBINE ALL RESULTS ==========
-          console.log('✅ All 4 calls completed, combining results...')
+          // ========== COMBINE RESULTS ==========
+          console.log('✅ Both calls completed, combining results...')
 
           const combinedAssessment = {
             diseaseAssessment: {
-              diabetes: diseaseAssessment.diabetes || { present: false },
-              hypertension: diseaseAssessment.hypertension || { present: false },
-              obesity: diseaseAssessment.obesity || { present: false }
+              diabetes: clinicalAnalysis.diseaseAssessment?.diabetes || { present: false },
+              hypertension: clinicalAnalysis.diseaseAssessment?.hypertension || { present: false },
+              obesity: clinicalAnalysis.diseaseAssessment?.obesity || { present: false }
             },
-            detailedMealPlan: mealPlan,
-            therapeuticObjectives: followUpPlan.therapeuticObjectives,
-            followUpPlan: followUpPlan.followUpPlan,
-            medicationManagement: medicationManagement,
-            overallAssessment: diseaseAssessment.overallAssessment || {
+            detailedMealPlan: structuredPlans.detailedMealPlan,
+            therapeuticObjectives: structuredPlans.therapeuticObjectives,
+            followUpPlan: structuredPlans.followUpPlan,
+            medicationManagement: clinicalAnalysis.medicationManagement || {
+              continue: [], add: [], adjust: [], stop: []
+            },
+            overallAssessment: clinicalAnalysis.overallAssessment || {
               globalControl: "Fair",
               mainConcerns: ["Suivi requis"],
               priorityActions: ["Continuer le traitement"]
@@ -398,7 +403,7 @@ Retourne UNIQUEMENT un JSON valide:
             assessment: combinedAssessment
           })
 
-          console.log('✅ Complete assessment sent to client')
+          console.log('✅ Complete assessment sent to client (2-call hybrid)')
 
         } catch (error: any) {
           console.error('Chronic diagnosis error:', error)
