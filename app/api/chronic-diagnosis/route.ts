@@ -50,9 +50,10 @@ async function callOpenAI(
   maxTokens: number = 2000,
   useReasoning: boolean = false
 ): Promise<any> {
-  // For reasoning models, reasoning tokens count toward max_completion_tokens.
-  // We need a much larger budget so reasoning doesn't exhaust the output capacity.
-  const effectiveMaxTokens = useReasoning ? Math.max(maxTokens, 8192) : maxTokens
+  // For reasoning models (gpt-5.2), reasoning tokens count toward max_completion_tokens.
+  // With reasoning_effort 'medium', the model may use 6-10K reasoning tokens,
+  // so we need a 16K budget to leave enough room for the actual JSON output.
+  const effectiveMaxTokens = useReasoning ? Math.max(maxTokens, 16384) : maxTokens
 
   const body: any = {
     model: "gpt-5.2",
@@ -65,7 +66,7 @@ async function callOpenAI(
   }
 
   if (useReasoning) {
-    body.reasoning_effort = 'high'
+    body.reasoning_effort = 'medium'
   } else {
     body.temperature = 0.3
   }
@@ -96,15 +97,31 @@ async function callOpenAI(
     // Log full response structure when content is missing
     console.error('❌ No content in OpenAI response. Full response:', JSON.stringify(data, null, 2).substring(0, 500))
 
-    // Check if the model hit the token limit
+    // Check if the model hit the token limit (all tokens consumed by reasoning)
     if (choice?.finish_reason === 'length') {
-      throw new Error('OpenAI response truncated - model ran out of tokens. Try reducing prompt complexity.')
+      throw new Error(`OpenAI response truncated - reasoning consumed all ${effectiveMaxTokens} tokens, leaving none for output. Usage: ${JSON.stringify(data.usage || {})}`)
     }
 
     throw new Error(`No content in OpenAI response (finish_reason: ${choice?.finish_reason || 'unknown'})`)
   }
 
-  return JSON.parse(content)
+  // Warn if output was truncated (partial JSON) but still try to parse
+  if (choice?.finish_reason === 'length') {
+    console.warn(`⚠️ Response truncated (finish_reason: length) but content exists (${content.length} chars). Attempting parse...`)
+  }
+
+  try {
+    return JSON.parse(content)
+  } catch (parseError) {
+    // If JSON is truncated, try cleaning it first
+    console.warn(`⚠️ JSON parse failed, attempting cleanup. Content starts with: ${content.substring(0, 100)}...`)
+    try {
+      const cleaned = cleanJsonString(content)
+      return JSON.parse(cleaned)
+    } catch {
+      throw new Error(`Invalid JSON from OpenAI (finish_reason: ${choice?.finish_reason}). First 200 chars: ${content.substring(0, 200)}`)
+    }
+  }
 }
 
 // Clean JSON string to fix control characters
