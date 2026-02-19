@@ -1,11 +1,10 @@
 // app/api/chronic-prescription/route.ts - Chronic Disease Medication Prescription API
 // Generates prescriptions for chronic disease medications (antidiabetics, antihypertensives, statins, etc.)
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
+export const maxDuration = 300
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -334,51 +333,63 @@ PRESCRIPTION INSTRUCTIONS:
 
 Generate the comprehensive chronic disease prescription now.`
 
-    // Call OpenAI API using Vercel AI SDK (like generate-consultation-report)
-    console.log('🤖 Calling OpenAI API using Vercel AI SDK...')
-    
-    const result = await generateText({
-      model: openai("gpt-5.2"),
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: patientContext }
-      ],
-      maxTokens: 2500,
-      temperature: 0.2,
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 })
+    }
+
+    console.log('🤖 Calling OpenAI API (direct fetch, JSON mode) for chronic prescription...')
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-5.2",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: patientContext }
+        ],
+        max_completion_tokens: 8000,
+        temperature: 0.2,
+        response_format: { type: "json_object" }
+      }),
     })
 
-    const content = result.text
-    
-    if (!content) {
-      console.error("❌ No content in AI response")
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`❌ OpenAI API error (${response.status}):`, errorText.substring(0, 300))
       return NextResponse.json(
-        { error: "No content received from AI" },
-        { status: 500 }
+        { error: `OpenAI API error (${response.status})`, details: errorText.substring(0, 200) },
+        { status: 502 }
       )
     }
-    
+
+    const data = await response.json()
+    const choice = data.choices?.[0]
+    const content = choice?.message?.content
+
+    console.log(`📡 OpenAI response - finish_reason: ${choice?.finish_reason}, usage: ${JSON.stringify(data.usage || {})}`)
+
+    if (!content) {
+      console.error('❌ No content in OpenAI response:', JSON.stringify(data, null, 2).substring(0, 500))
+      return NextResponse.json(
+        { error: "No content in OpenAI response" },
+        { status: 502 }
+      )
+    }
+
     console.log('✅ AI response received, length:', content.length)
 
-    // Parse JSON response
     let prescriptionData
     try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (!jsonMatch) {
-        console.error("No JSON found in response:", content)
-        return NextResponse.json(
-          { error: "Invalid response format from AI - no JSON found" },
-          { status: 500 }
-        )
-      }
-      prescriptionData = JSON.parse(jsonMatch[0])
+      prescriptionData = JSON.parse(content)
     } catch (parseError: any) {
       console.error("JSON parse error:", parseError.message)
-      console.error("Content received:", content)
       return NextResponse.json(
-        { 
-          error: "Failed to parse prescription data",
-          details: parseError.message
-        },
+        { error: "Failed to parse prescription data", details: parseError.message },
         { status: 500 }
       )
     }
