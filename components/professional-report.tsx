@@ -3234,7 +3234,7 @@ const loadDoctorAvailableSlots = useCallback(async (targetDoctorId: string, date
     // 3. Generate available slots
     const slots: Array<{time: string, duration: number}> = []
     const booked = bookedSlots || []
-    const slotDuration = 30 // default 30 min
+    const slotDuration = 10 // 10-minute slots (standard Tibok booking)
 
     for (const sched of schedules) {
       let currentTime = sched.start_time as string
@@ -3952,20 +3952,54 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  if (doctorAppointmentData && supabaseClient) {
    console.log('📤 Saving doctor appointment to Supabase...')
    try {
-     const { error: apptError } = await supabaseClient
-       .from('booked_appointment_slots')
-       .insert({
-         consultation_id: consultationId,
-         doctor_id: doctorAppointmentData.doctorId,
-         schedule_date: doctorAppointmentData.appointmentDate,
-         scheduled_time: doctorAppointmentData.appointmentTime,
-         slot_duration_minutes: doctorAppointmentData.slotDuration
-       })
+     // Build scheduled_time as a full timestamp (date + time in Mauritius timezone)
+     const scheduledTimestamp = `${doctorAppointmentData.appointmentDate}T${doctorAppointmentData.appointmentTime}`
 
-     if (apptError) {
-       console.error('❌ Error saving doctor appointment:', apptError)
+     // 1. Create a new scheduled consultation record
+     const { data: newConsultation, error: consultError } = await supabaseClient
+       .from('consultations')
+       .insert({
+         patient_id: patientId,
+         doctor_id: doctorAppointmentData.doctorId,
+         status: 'scheduled',
+         payment_status: 'pending',
+         consultation_type: 'telemedicine',
+         scheduled_time: scheduledTimestamp,
+         scheduled_date: doctorAppointmentData.appointmentDate,
+         patient_first_name: patientData?.firstName || patient?.nom?.split(' ')[0] || '',
+         patient_last_name: patientData?.lastName || patient?.nom?.split(' ').slice(1).join(' ') || '',
+         patient_phone: patientPhone || null,
+         patient_age: patient?.age ? parseInt(patient.age) : null,
+         patient_gender: patient?.sexe || patientData?.gender || null,
+         consultation_reason: doctorAppointmentData.reason || 'Consultation de suivi',
+       })
+       .select('id')
+       .single()
+
+     if (consultError) {
+       console.error('❌ Error creating scheduled consultation:', consultError)
      } else {
-       console.log('✅ Doctor appointment saved successfully')
+       console.log('✅ Scheduled consultation created:', newConsultation?.id)
+
+       // 2. Insert into booked_appointment_slots with the NEW consultation ID
+       const { error: slotError } = await supabaseClient
+         .from('booked_appointment_slots')
+         .insert({
+           consultation_id: newConsultation.id,
+           doctor_id: doctorAppointmentData.doctorId,
+           schedule_date: doctorAppointmentData.appointmentDate,
+           scheduled_time: doctorAppointmentData.appointmentTime,
+           slot_duration_minutes: doctorAppointmentData.slotDuration
+         })
+
+       if (slotError) {
+         console.error('❌ Error booking appointment slot:', slotError)
+         // Rollback: delete the consultation if slot booking failed (likely double-booking)
+         await supabaseClient.from('consultations').delete().eq('id', newConsultation.id)
+         console.log('⚠️ Rolled back consultation due to slot booking failure')
+       } else {
+         console.log('✅ Doctor appointment slot booked successfully')
+       }
      }
    } catch (err) {
      console.error('❌ Error saving doctor appointment:', err)
