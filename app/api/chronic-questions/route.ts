@@ -8,7 +8,6 @@ import { type NextRequest, NextResponse } from "next/server"
 
 // ==================== CONFIGURATION ====================
 export const runtime = 'nodejs'
-export const preferredRegion = 'auto'
 
 // ==================== INTERFACES & TYPES ====================
 interface PatientData {

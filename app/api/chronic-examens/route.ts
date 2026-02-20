@@ -5,7 +5,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
 export const runtime = 'nodejs'
-export const preferredRegion = 'auto'
 export const maxDuration = 300
 
 // ==================== DATA ANONYMIZATION ====================
