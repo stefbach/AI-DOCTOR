@@ -74,17 +74,16 @@ export default function DermatologyImageUpload({
           }
 
           const blob = await response.blob()
-          const reader = new FileReader()
-
-          reader.onload = () => {
-            const dataUrl = reader.result as string
-
+          // Compress Tibok image using canvas to reduce payload size
+          const file = new File([blob], 'patient-image-tibok.jpg', { type: blob.type || 'image/jpeg' })
+          try {
+            const compressedDataUrl = await compressImage(file)
             const tibokImage = {
               id: Date.now(),
               name: 'patient-image-tibok.jpg',
-              size: blob.size,
-              type: blob.type || 'image/jpeg',
-              dataUrl: dataUrl,
+              size: Math.round(compressedDataUrl.length * 0.75),
+              type: 'image/jpeg',
+              dataUrl: compressedDataUrl,
               uploadedAt: patientData?.imageUploadedAt || new Date().toISOString(),
               source: 'tibok' as const
             }
@@ -96,18 +95,14 @@ export default function DermatologyImageUpload({
               title: "Image Patient Chargée",
               description: "L'image téléchargée par le patient depuis Tibok a été automatiquement chargée",
             })
-          }
-
-          reader.onerror = () => {
-            console.error('❌ Error reading image blob')
+          } catch (compressError) {
+            console.error('❌ Error compressing image:', compressError)
             toast({
               title: "Erreur de chargement",
               description: "Impossible de charger l'image du patient. Veuillez télécharger manuellement.",
               variant: "destructive"
             })
           }
-
-          reader.readAsDataURL(blob)
         } catch (error) {
           console.error('❌ Error loading Tibok image from URL:', error)
           toast({
@@ -148,11 +143,52 @@ export default function DermatologyImageUpload({
     }
   }, [dermatologyImage, tibokImageLoaded])
 
+  // Compress image using canvas to reduce base64 payload size
+  const compressImage = useCallback((file: File, maxWidth = 1920, quality = 0.7): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          let { width, height } = img
+
+          // Scale down if larger than maxWidth while maintaining aspect ratio
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width)
+            width = maxWidth
+          }
+
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          if (!ctx) {
+            // Fallback to original if canvas context fails
+            resolve(event.target?.result as string)
+            return
+          }
+          ctx.drawImage(img, 0, 0, width, height)
+
+          // Convert to JPEG for better compression (dermatology images are photos)
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality)
+          console.log(`🗜️ Image compressed: ${(file.size / 1024).toFixed(0)}KB → ${(compressedDataUrl.length * 0.75 / 1024).toFixed(0)}KB`)
+          resolve(compressedDataUrl)
+        }
+        img.onerror = () => reject(new Error('Failed to load image for compression'))
+        img.src = event.target?.result as string
+      }
+      reader.onerror = () => reject(new Error('Failed to read file'))
+      reader.readAsDataURL(file)
+    })
+  }, [])
+
   const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
     const newImages: any[] = []
+    let validFileCount = 0
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
 
@@ -176,31 +212,39 @@ export default function DermatologyImageUpload({
         continue
       }
 
-      // Convert to base64
-      const reader = new FileReader()
-      reader.onload = (event) => {
+      validFileCount++
+
+      // Compress and convert to base64
+      try {
+        const compressedDataUrl = await compressImage(file)
         newImages.push({
           id: Date.now() + i,
           name: file.name,
-          size: file.size,
-          type: file.type,
-          dataUrl: event.target?.result as string,
+          size: Math.round(compressedDataUrl.length * 0.75), // Approximate decoded size
+          type: 'image/jpeg',
+          dataUrl: compressedDataUrl,
           uploadedAt: new Date().toISOString(),
           source: 'manual' as const
         })
 
-        // Update state when all files are processed
-        if (newImages.length === files.length) {
+        // Update state when all valid files are processed
+        if (newImages.length === validFileCount) {
           setUploadedImages(prev => [...prev, ...newImages])
           toast({
             title: "Images uploaded",
-            description: `${newImages.length} image(s) added successfully`
+            description: `${newImages.length} image(s) added and compressed successfully`
           })
         }
+      } catch (error) {
+        console.error('Error compressing image:', error)
+        toast({
+          title: "Image processing failed",
+          description: `Failed to process ${file.name}`,
+          variant: "destructive"
+        })
       }
-      reader.readAsDataURL(file)
     }
-  }, [])
+  }, [compressImage])
 
   const handleRemoveImage = useCallback((imageId: number) => {
     setUploadedImages(prev => prev.filter(img => img.id !== imageId))
