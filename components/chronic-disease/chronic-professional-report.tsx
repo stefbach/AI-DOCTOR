@@ -533,7 +533,7 @@ export default function ChronicProfessionalReport({
     startDate: '',
     endDate: '',
     numberOfDays: 0,
-    medicalReason: '',
+    fitnessStatus: 'unfit' as 'unfit' | 'fit',
     remarks: ''
   })
 
@@ -895,45 +895,6 @@ export default function ChronicProfessionalReport({
     }
   }, [patientData])
 
-  // Auto-fill sick leave medical reason from diagnosis when report is generated
-  useEffect(() => {
-    if (report && !sickLeaveData.medicalReason) {
-      // Use full detailed text from consultation report
-      const historyOfPresentIllness = report.medicalReport?.clinicalEvaluation?.historyOfPresentIllness || ''
-      const diagnosticConclusion = report.medicalReport?.diagnosticSummary?.diagnosticConclusion || ''
-
-      console.log('🏥 Auto-filling sick leave medical reason:')
-      console.log('  - historyOfPresentIllness:', historyOfPresentIllness ? `${historyOfPresentIllness.substring(0, 100)}...` : 'EMPTY')
-      console.log('  - diagnosticConclusion:', diagnosticConclusion ? `${diagnosticConclusion.substring(0, 100)}...` : 'EMPTY')
-
-      // Combine full text from both sections with a blank line separator
-      const sections = []
-      if (historyOfPresentIllness) sections.push(historyOfPresentIllness)
-      if (diagnosticConclusion) sections.push(diagnosticConclusion)
-
-      if (sections.length > 0) {
-        console.log('  ✅ Using detailed text (both or one field available)')
-        setSickLeaveData(prev => ({ ...prev, medicalReason: sections.join('\n\n') }))
-      } else {
-        // Fallback to shorter fields if detailed ones don't exist
-        const chiefComplaint = report.medicalReport?.clinicalEvaluation?.chiefComplaint || ''
-        const primaryDiagnosis = report.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis || ''
-
-        console.log('  ⚠️ No detailed text found, using fallback:')
-        console.log('    - chiefComplaint:', chiefComplaint)
-        console.log('    - primaryDiagnosis:', primaryDiagnosis)
-
-        if (chiefComplaint && primaryDiagnosis) {
-          setSickLeaveData(prev => ({ ...prev, medicalReason: `${chiefComplaint}\n\n${primaryDiagnosis}` }))
-        } else {
-          const diagnosis = chiefComplaint || primaryDiagnosis
-          if (diagnosis) {
-            setSickLeaveData(prev => ({ ...prev, medicalReason: diagnosis }))
-          }
-        }
-      }
-    }
-  }, [report, sickLeaveData.medicalReason])
 
   // Initialize invoice data when report is generated
   useEffect(() => {
@@ -2034,7 +1995,7 @@ export default function ChronicProfessionalReport({
                 dateDebut: sickLeaveData.startDate,
                 dateFin: sickLeaveData.endDate,
                 nombreJours: sickLeaveData.numberOfDays,
-                motifMedical: sickLeaveData.medicalReason,
+                fitnessStatus: sickLeaveData.fitnessStatus,
                 remarques: sickLeaveData.remarks
               },
               authentification: {
@@ -2768,7 +2729,7 @@ export default function ChronicProfessionalReport({
                 dateDebut: sickLeaveData.startDate,
                 dateFin: sickLeaveData.endDate,
                 nombreJours: sickLeaveData.numberOfDays,
-                motifMedical: sickLeaveData.medicalReason,
+                fitnessStatus: sickLeaveData.fitnessStatus,
                 remarques: sickLeaveData.remarks
               },
               authentification: {
@@ -2976,29 +2937,7 @@ export default function ChronicProfessionalReport({
               dateDebut: sickLeaveData.startDate,
               dateFin: sickLeaveData.endDate,
               nombreJours: sickLeaveData.numberOfDays,
-              motifMedical: sickLeaveData.medicalReason || (() => {
-                // Build detailed medical reason from consultation report
-                const historyOfPresentIllness = report?.medicalReport?.clinicalEvaluation?.historyOfPresentIllness || ''
-                const diagnosticConclusion = report?.medicalReport?.diagnosticSummary?.diagnosticConclusion || ''
-
-                // Combine full text from both sections with a blank line separator
-                const sections = [];
-                if (historyOfPresentIllness) sections.push(historyOfPresentIllness);
-                if (diagnosticConclusion) sections.push(diagnosticConclusion);
-
-                if (sections.length > 0) {
-                  return sections.join('\n\n');
-                }
-
-                // Fallback to shorter fields if detailed ones don't exist
-                const chiefComplaint = report?.medicalReport?.clinicalEvaluation?.chiefComplaint || ''
-                const primaryDiagnosis = report?.medicalReport?.chronicDiseaseAssessment?.primaryDiagnosis || ''
-
-                if (chiefComplaint && primaryDiagnosis) {
-                  return `${chiefComplaint}\n\n${primaryDiagnosis}`
-                }
-                return chiefComplaint || primaryDiagnosis || 'Medical condition requiring rest'
-              })(),
+              fitnessStatus: sickLeaveData.fitnessStatus || 'unfit',
               remarques: sickLeaveData.remarks || ''
             },
             signature: documentSignatures?.sickLeave || null
@@ -6906,19 +6845,40 @@ export default function ChronicProfessionalReport({
                 />
               </div>
 
-              <div>
-                <Label htmlFor="medicalReason">Medical Reason (Motif Médical)</Label>
-                <Textarea
-                  id="medicalReason"
-                  value={sickLeaveData.medicalReason}
-                  onChange={(e) => {
-                    setSickLeaveData(prev => ({ ...prev, medicalReason: e.target.value }))
-                    setHasUnsavedChanges(true)
-                  }}
-                  placeholder="Medical reason for sick leave..."
-                  className="min-h-[100px]"
-                  disabled={validationStatus === 'validated'}
-                />
+              <div className="space-y-2">
+                <Label>Fitness Status *</Label>
+                <div className="flex gap-4">
+                  <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-colors ${sickLeaveData.fitnessStatus === 'unfit' ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                    <input
+                      type="radio"
+                      name="fitnessStatusChronic"
+                      value="unfit"
+                      checked={sickLeaveData.fitnessStatus === 'unfit'}
+                      onChange={() => {
+                        setSickLeaveData(prev => ({ ...prev, fitnessStatus: 'unfit' as const }))
+                        setHasUnsavedChanges(true)
+                      }}
+                      disabled={validationStatus === 'validated'}
+                      className="accent-red-600"
+                    />
+                    <span className={`font-medium ${sickLeaveData.fitnessStatus === 'unfit' ? 'text-red-700' : 'text-gray-700'}`}>Unfit for work</span>
+                  </label>
+                  <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-colors ${sickLeaveData.fitnessStatus === 'fit' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                    <input
+                      type="radio"
+                      name="fitnessStatusChronic"
+                      value="fit"
+                      checked={sickLeaveData.fitnessStatus === 'fit'}
+                      onChange={() => {
+                        setSickLeaveData(prev => ({ ...prev, fitnessStatus: 'fit' as const }))
+                        setHasUnsavedChanges(true)
+                      }}
+                      disabled={validationStatus === 'validated'}
+                      className="accent-green-600"
+                    />
+                    <span className={`font-medium ${sickLeaveData.fitnessStatus === 'fit' ? 'text-green-700' : 'text-gray-700'}`}>Fit for work</span>
+                  </label>
+                </div>
               </div>
 
               <div>
@@ -7023,10 +6983,10 @@ export default function ChronicProfessionalReport({
                           <strong>{report.medicalReport.patient.fullName}</strong>
                         </p>
                         <p className="text-sm mt-2">
-                          is medically unfit for work and requires rest for a period of:
+                          is medically <strong>{sickLeaveData.fitnessStatus === 'fit' ? 'fit for work' : 'unfit for work'}</strong>{sickLeaveData.fitnessStatus === 'unfit' ? ' and requires rest for a period of:' : '.'}
                         </p>
                         <p className="text-sm italic">
-                          est médicalement inapte au travail et nécessite un repos de:
+                          est médicalement <strong>{sickLeaveData.fitnessStatus === 'fit' ? 'apte au travail' : 'inapte au travail'}</strong>{sickLeaveData.fitnessStatus === 'unfit' ? ' et nécessite un repos de:' : '.'}
                         </p>
                       </div>
 
@@ -7044,13 +7004,6 @@ export default function ChronicProfessionalReport({
                           <p className="text-lg font-bold text-blue-600">{sickLeaveData.numberOfDays} days / jours</p>
                         </div>
                       </div>
-
-                      {sickLeaveData.medicalReason && (
-                        <div className="p-4 bg-gray-50 rounded">
-                          <p className="font-semibold text-sm mb-2">Medical Reason / Motif Médical:</p>
-                          <p className="text-sm">{sickLeaveData.medicalReason}</p>
-                        </div>
-                      )}
 
                       {sickLeaveData.remarks && (
                         <div className="p-4 bg-gray-50 rounded">

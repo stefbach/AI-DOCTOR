@@ -932,7 +932,7 @@ export default function ProfessionalReportEditable({
  startDate: '',
  endDate: '',
  numberOfDays: 0,
- medicalReason: '',
+ fitnessStatus: 'unfit',
  remarks: '',
  workRestrictions: '',
  returnToWork: ''
@@ -3742,12 +3742,8 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  dateDebut: report.ordonnances.arretMaladie.certificat?.dateDebut || '',
  dateFin: report.ordonnances.arretMaladie.certificat?.dateFin || '',
  nombreJours: report.ordonnances.arretMaladie.certificat?.nombreJours || 0,
- motifMedical: report.ordonnances.arretMaladie.certificat?.motifMedical || 
- report?.compteRendu?.rapport?.conclusionDiagnostique || 
- 'Medical condition requiring rest',
+ fitnessStatus: report.ordonnances.arretMaladie.certificat?.fitnessStatus || 'unfit',
  remarques: report.ordonnances.arretMaladie.certificat?.remarques || '',
- restrictionsTravail: report.ordonnances.arretMaladie.certificat?.restrictionsTravail || '',
- repriseAutorisee: report.ordonnances.arretMaladie.certificat?.repriseAutorisee || ''
  },
  signature: documentSignatures?.sickLeave || null,
  content: report.ordonnances.arretMaladie
@@ -5751,10 +5747,8 @@ const [localSickLeave, setLocalSickLeave] = useState({
  dateDebut: certificat?.dateDebut || '',
  dateFin: certificat?.dateFin || '',
  nombreJours: certificat?.nombreJours || 0,
- motifMedical: certificat?.motifMedical || rapport?.conclusionDiagnostique || '',
+ fitnessStatus: certificat?.fitnessStatus || 'unfit',
  remarques: certificat?.remarques || '',
- restrictionsTravail: certificat?.restrictionsTravail || '',
- repriseAutorisee: certificat?.repriseAutorisee || ''
 })
  
  // Track if there are unsaved changes
@@ -5903,15 +5897,33 @@ const [localSickLeave, setLocalSickLeave] = useState({
  />
  </div>
  </div>
- 
- <div>
- <Label>Medical Reason *</Label>
- <Textarea
- value={localSickLeave.motifMedical}
- onChange={(e) => handleFieldChange('motifMedical', e.target.value)}
- placeholder="E.g., Acute gastroenteritis, Influenza, etc."
- className="min-h-[80px]"
+
+ <div className="space-y-2">
+ <Label>Fitness Status *</Label>
+ <div className="flex gap-4">
+ <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-colors ${localSickLeave.fitnessStatus === 'unfit' ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-gray-300'}`}>
+ <input
+  type="radio"
+  name="fitnessStatus"
+  value="unfit"
+  checked={localSickLeave.fitnessStatus === 'unfit'}
+  onChange={() => handleFieldChange('fitnessStatus', 'unfit')}
+  className="accent-red-600"
  />
+ <span className={`font-medium ${localSickLeave.fitnessStatus === 'unfit' ? 'text-red-700' : 'text-gray-700'}`}>Unfit for work</span>
+ </label>
+ <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-colors ${localSickLeave.fitnessStatus === 'fit' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
+ <input
+  type="radio"
+  name="fitnessStatus"
+  value="fit"
+  checked={localSickLeave.fitnessStatus === 'fit'}
+  onChange={() => handleFieldChange('fitnessStatus', 'fit')}
+  className="accent-green-600"
+ />
+ <span className={`font-medium ${localSickLeave.fitnessStatus === 'fit' ? 'text-green-700' : 'text-gray-700'}`}>Fit for work</span>
+ </label>
+ </div>
  </div>
  
  </div>
@@ -5927,16 +5939,11 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </p>
  </div>
  
- <div className="space-y-2">
- <p><strong>Medical reason:</strong> {certificat.motifMedical}</p>
- 
- </div>
- 
  <div className="mt-4 p-3 bg-gray-50 rounded text-sm">
  <p className="font-medium">MEDICAL CERTIFICATE</p>
  <p className="mt-2">
  I, the undersigned, {praticien.nom}, {praticien.qualifications}, certify that I have examined {patient.nomComplet || patient.nom} today
- and confirm that their health condition requires sick leave for {certificat.nombreJours} day{certificat.nombreJours > 1 ? 's' : ''}.
+ and confirm that the patient is <strong>{certificat.fitnessStatus === 'fit' ? 'fit for work' : 'unfit for work'}</strong>{certificat.fitnessStatus === 'unfit' ? ` from ${new Date(certificat.dateDebut).toLocaleDateString('en-GB')} to ${new Date(certificat.dateFin).toLocaleDateString('en-GB')} (${certificat.nombreJours} day${certificat.nombreJours > 1 ? 's' : ''})` : ''}.
  </p>
  </div>
  </div>
