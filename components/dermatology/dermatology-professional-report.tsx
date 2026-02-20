@@ -3494,6 +3494,9 @@ const handleSendDocuments = async () => {
  console.log(' Saving to database...')
  
  // Save final version to consultation_records table
+ // NOTE: imageData and ocrAnalysisData are intentionally excluded from this payload
+ // to prevent oversized requests. The save-medical-report API does not use them.
+ // Dermatology diagnosis text is preserved in diagnosisData (without raw image bytes).
  const saveResponse = await fetch('/api/save-medical-report', {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
@@ -3525,9 +3528,15 @@ const handleSendDocuments = async () => {
  phone: patientPhone,
  address: patientAddress
  },
- imageData: imageData || {},
- ocrAnalysisData: ocrAnalysisData || {},
- diagnosisData: diagnosisData || {}
+ diagnosisData: diagnosisData ? {
+ // Only send text-based diagnosis data, strip any embedded image references
+ diagnosis: diagnosisData.diagnosis ? {
+   structured: diagnosisData.diagnosis.structured,
+   fullText: typeof diagnosisData.diagnosis.fullText === 'string'
+     ? diagnosisData.diagnosis.fullText.substring(0, 10000)
+     : undefined
+ } : undefined
+ } : {}
  })
  })
 
@@ -3671,12 +3680,31 @@ console.log('    - weight:', patient?.poids || patientData?.weight || 'MISSING')
  analysisSource = 'imageData.analysis'
  }
 
+ // Sanitize imageAnalysis to remove any base64 image data and cap size
  if (imageAnalysis) {
+ // Strip any base64 data that may have leaked into analysis
+ const sanitized = JSON.stringify(imageAnalysis)
+ if (sanitized.includes('data:image/') || sanitized.length > 50000) {
+   console.log('⚠️ imageAnalysis contains base64 or is oversized, trimming...')
+   // Keep only text-based analysis, strip dataUrl fields
+   if (typeof imageAnalysis === 'object') {
+     const clean = { ...imageAnalysis }
+     delete clean.dataUrl
+     delete clean.imageUrl
+     delete clean.base64
+     delete clean.images
+     // If it has a fullText field, cap it
+     if (typeof clean.fullText === 'string' && clean.fullText.length > 10000) {
+       clean.fullText = clean.fullText.substring(0, 10000) + '... [truncated]'
+     }
+     imageAnalysis = clean
+   } else if (typeof imageAnalysis === 'string' && imageAnalysis.length > 10000) {
+     imageAnalysis = imageAnalysis.substring(0, 10000) + '... [truncated]'
+   }
+ }
  console.log('🖼️ Including image analysis in payload')
  console.log('  Analysis source:', analysisSource)
- console.log('  Analysis preview:', typeof imageAnalysis === 'string' ?
-              imageAnalysis.substring(0, 100) + '...' :
-              JSON.stringify(imageAnalysis).substring(0, 100) + '...')
+ console.log('  Analysis size:', JSON.stringify(imageAnalysis).length, 'bytes')
  } else {
  console.log('⚠️ No image analysis found - patient may not have provided image')
  console.log('  Checked: ocrAnalysisData.analysis, diagnosisData.diagnosis, imageData.analysis')
@@ -3772,9 +3800,20 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  }
 
  console.log('📨 Sending dermatology documents to Tibok at:', tibokUrl)
- console.log('📦 Payload size:', JSON.stringify(documentsPayload).length, 'bytes')
+ const payloadStr = JSON.stringify(documentsPayload)
+ const payloadSizeKB = Math.round(payloadStr.length / 1024)
+ console.log('📦 Payload size:', payloadSizeKB, 'KB')
  console.log('🏥 Consultation type: dermatology')
 console.log('👤 Patient data in payload:', documentsPayload.patientData)
+
+ // Guard: Vercel serverless functions have a ~4.5MB body limit
+ const MAX_PAYLOAD_KB = 4000
+ if (payloadSizeKB > MAX_PAYLOAD_KB) {
+   console.error(`❌ Payload too large (${payloadSizeKB}KB > ${MAX_PAYLOAD_KB}KB limit). Stripping imageAnalysis.`)
+   // Remove the heaviest optional field to get under the limit
+   documentsPayload.imageAnalysis = null
+   console.log('📦 Reduced payload size:', Math.round(JSON.stringify(documentsPayload).length / 1024), 'KB')
+ }
 
  // Send to dedicated dermatology documents endpoint
  const response = await fetch(`${tibokUrl}/api/dermatology-documents`, {
@@ -3818,16 +3857,20 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
  if (result?.success) {
  console.log('🎉 Documents sent successfully!')
 
- // Save referral if configured
+ // Run secondary Supabase inserts sequentially with proper error isolation
+ // Each operation is independent - a failure in one should not block others
  const supabaseClient = getSupabaseClient()
+ const supabaseErrors: string[] = []
+
+ // 1. Save referral if configured
  if (referralData && supabaseClient) {
-   console.log('📤 Saving referral to Supabase...')
+   console.log('📤 [1/3] Saving referral to Supabase...')
    try {
      let appointmentId: string | null = null
 
      // Create appointment first if slot was selected
      if (referralData.appointmentDate && referralData.appointmentSlot) {
-       console.log('📅 Creating appointment first...')
+       console.log('📅 Creating appointment...')
        const { data: savedAppointment, error: appointmentError } = await supabaseClient
          .from('specialist_appointments')
          .insert({
@@ -3844,9 +3887,10 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
 
        if (appointmentError) {
          console.error('❌ Error creating appointment:', appointmentError)
+         supabaseErrors.push('Appointment creation failed')
        } else {
          appointmentId = savedAppointment?.id || null
-         console.log('✅ Appointment created successfully, id:', appointmentId)
+         console.log('✅ Appointment created, id:', appointmentId)
        }
      }
 
@@ -3873,9 +3917,14 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
 
      if (referralError) {
        console.error('❌ Error saving referral:', referralError)
+       supabaseErrors.push('Referral creation failed')
+       // Clean up orphaned appointment if referral failed
+       if (appointmentId) {
+         await supabaseClient.from('specialist_appointments').delete().eq('id', appointmentId)
+         console.log('⚠️ Rolled back orphaned appointment')
+       }
      } else {
-       console.log('✅ Referral saved successfully:', savedReferral?.id)
-
+       console.log('✅ Referral saved:', savedReferral?.id)
        // Update appointment with referral_id for bidirectional link
        if (appointmentId && savedReferral?.id) {
          await supabaseClient
@@ -3887,12 +3936,13 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
      }
    } catch (err) {
      console.error('❌ Error saving referral:', err)
+     supabaseErrors.push('Referral save error')
    }
  }
 
- // Save doctor appointment (RDV Médecin) if configured
+ // 2. Save doctor appointment (RDV Médecin) if configured
  if (doctorAppointmentData && supabaseClient) {
-   console.log('📤 Saving doctor appointment to Supabase...')
+   console.log('📤 [2/3] Saving doctor appointment to Supabase...')
    try {
      const scheduledTimestamp = `${doctorAppointmentData.appointmentDate}T${doctorAppointmentData.appointmentTime}`
 
@@ -3918,6 +3968,7 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
 
      if (consultError) {
        console.error('❌ Error creating scheduled consultation:', consultError)
+       supabaseErrors.push('Doctor appointment creation failed')
      } else {
        console.log('✅ Scheduled consultation created:', newConsultation?.id)
 
@@ -3935,26 +3986,34 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
          console.error('❌ Error booking appointment slot:', slotError)
          await supabaseClient.from('consultations').delete().eq('id', newConsultation.id)
          console.log('⚠️ Rolled back consultation due to slot booking failure')
+         supabaseErrors.push('Appointment slot booking failed')
        } else {
          console.log('✅ Doctor appointment slot booked successfully')
        }
      }
    } catch (err) {
      console.error('❌ Error saving doctor appointment:', err)
+     supabaseErrors.push('Doctor appointment save error')
    }
  }
 
- // Save patient follow-ups if configured
+ // 3. Save patient follow-ups if configured (cap at 10 to prevent unbounded inserts)
  if (patientFollowUpData && patientFollowUpData.types.length > 0 && supabaseClient) {
-   console.log('📤 Saving follow-ups to Supabase...')
+   console.log('📤 [3/3] Saving follow-ups to Supabase...')
    try {
+     const MAX_FOLLOW_UPS = 10
+     const followUpTypes = patientFollowUpData.types.slice(0, MAX_FOLLOW_UPS)
+     if (patientFollowUpData.types.length > MAX_FOLLOW_UPS) {
+       console.warn(`⚠️ Follow-up types capped at ${MAX_FOLLOW_UPS} (was ${patientFollowUpData.types.length})`)
+     }
+
      const FOLLOW_UP_SCHEDULES: Record<string, { frequency: string; measurement_times: string[] }> = {
        blood_pressure: { frequency: 'three_days_weekly', measurement_times: ['morning', 'evening'] },
        glycemia_type_1: { frequency: 'three_days_weekly', measurement_times: ['morning', 'evening'] },
        glycemia_type_2: { frequency: 'three_days_weekly', measurement_times: ['morning'] },
        weight: { frequency: 'weekly', measurement_times: ['morning'] },
      }
-     const followUps = patientFollowUpData.types.map(type => {
+     const followUps = followUpTypes.map(type => {
        const schedule = FOLLOW_UP_SCHEDULES[type] || { frequency: 'daily', measurement_times: ['morning'] }
        return {
          patient_id: tibokPatientId || null,
@@ -3983,18 +4042,19 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
 
      if (followUpError) {
        console.error('❌ Error saving follow-ups:', followUpError)
+       supabaseErrors.push('Follow-up creation failed')
      } else {
        console.log('✅ Follow-ups saved successfully:', savedFollowUps?.length)
-       // Send WhatsApp activation notification via WATI
+       // Send WhatsApp activation notification via WATI (fire and forget)
        try {
          const diseaseSubtypes = followUps.map(f => f.disease_subtype).filter(Boolean)
          if (diseaseSubtypes.length > 0 && patientPhone) {
-           await fetch('/api/send-follow-up-notification', {
+           fetch('/api/send-follow-up-notification', {
              method: 'POST',
              headers: { 'Content-Type': 'application/json' },
              body: JSON.stringify({ patientPhone, diseaseSubtypes })
-           })
-           console.log('📱 Follow-up activation notification sent')
+           }).catch(err => console.error('❌ Notification send failed:', err))
+           console.log('📱 Follow-up activation notification dispatched')
          }
        } catch (notifErr) {
          console.error('❌ Error sending follow-up notification:', notifErr)
@@ -4002,7 +4062,13 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
      }
    } catch (err) {
      console.error('❌ Error saving follow-ups:', err)
+     supabaseErrors.push('Follow-up save error')
    }
+ }
+
+ // Log any secondary errors (documents were sent successfully, these are non-critical)
+ if (supabaseErrors.length > 0) {
+   console.warn('⚠️ Documents sent but some secondary operations failed:', supabaseErrors)
  }
 
  setIsSendingDocuments(false)
