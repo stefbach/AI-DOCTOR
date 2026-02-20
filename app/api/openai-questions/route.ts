@@ -8,7 +8,6 @@ import OpenAI from 'openai'
 
 // ==================== CONFIGURATION ====================
 export const runtime = 'nodejs'
-export const preferredRegion = 'auto'
 
 // ==================== INTERFACES & TYPES ====================
 interface PatientData {

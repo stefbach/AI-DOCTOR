@@ -4,7 +4,6 @@ import { type NextRequest, NextResponse } from "next/server"
 import OpenAI from "openai"
 
 export const runtime = 'nodejs'
-export const preferredRegion = 'auto'
 export const maxDuration = 300
 
 // ==================== HELPER FUNCTIONS ====================

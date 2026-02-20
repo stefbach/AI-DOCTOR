@@ -12,7 +12,6 @@ const supabase = (supabaseUrl && supabaseAnonKey)
   : null
 
 export const runtime = 'nodejs'
-export const preferredRegion = 'auto'
 
 /**
  * POST /api/consultation-detail

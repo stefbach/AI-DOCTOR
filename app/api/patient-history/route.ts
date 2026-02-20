@@ -11,7 +11,6 @@ const supabase = (supabaseUrl && supabaseAnonKey)
   : null
 
 export const runtime = 'nodejs'
-export const preferredRegion = 'auto'
 
 interface PatientSearchCriteria {
   patientId?: string
