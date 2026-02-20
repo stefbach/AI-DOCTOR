@@ -667,6 +667,25 @@ export default function ChronicProfessionalReport({
   const [selectedSlot, setSelectedSlot] = useState<{start: string, end: string} | null>(null)
   const [loadingSlots, setLoadingSlots] = useState(false)
 
+  // Doctor appointment (RDV Médecin) state
+  const [doctorAppointmentData, setDoctorAppointmentData] = useState<{
+    doctorId: string
+    doctorName: string
+    appointmentDate: string
+    appointmentTime: string
+    slotDuration: number
+    reason: string
+  } | null>(null)
+  const [doctorsList, setDoctorsList] = useState<Array<{id: string, full_name: string, specialty: string | null}>>([])
+  const [loadingDoctors, setLoadingDoctors] = useState(false)
+  const [selectedDoctorForAppt, setSelectedDoctorForAppt] = useState('')
+  const [doctorApptDate, setDoctorApptDate] = useState('')
+  const [doctorAvailableSlots, setDoctorAvailableSlots] = useState<Array<{time: string, duration: number}>>([])
+  const [selectedDoctorSlot, setSelectedDoctorSlot] = useState<{time: string, duration: number} | null>(null)
+  const [loadingDoctorSlots, setLoadingDoctorSlots] = useState(false)
+  const [doctorApptReason, setDoctorApptReason] = useState('')
+  const [showDoctorApptModal, setShowDoctorApptModal] = useState(false)
+
   // Chronic follow-up state (blood pressure, glycemia, weight monitoring)
   const [patientFollowUpData, setPatientFollowUpData] = useState<{
     types: string[]
@@ -2351,6 +2370,151 @@ export default function ChronicProfessionalReport({
     setShowReferralModal(true)
   }, [loadSpecialties, report])
 
+  // ==================== DOCTOR APPOINTMENT (RDV MÉDECIN) FUNCTIONS ====================
+  // Load doctors list from Supabase
+  const loadDoctorsList = useCallback(async () => {
+    const supabase = getSupabaseClient()
+    if (!supabase) return
+
+    setLoadingDoctors(true)
+    try {
+      const { data, error } = await supabase
+        .from('doctors')
+        .select('id, full_name, specialty')
+        .order('full_name')
+
+      if (error) throw error
+      setDoctorsList(data || [])
+    } catch (error) {
+      console.error('Error loading doctors:', error)
+    } finally {
+      setLoadingDoctors(false)
+    }
+  }, [getSupabaseClient])
+
+  // Load available slots for a doctor on a given date
+  const loadDoctorAvailableSlots = useCallback(async (targetDoctorId: string, date: string) => {
+    const supabase = getSupabaseClient()
+    if (!supabase || !targetDoctorId || !date) {
+      setDoctorAvailableSlots([])
+      return
+    }
+
+    setLoadingDoctorSlots(true)
+    setSelectedDoctorSlot(null)
+
+    try {
+      const { data: schedules, error: schedError } = await supabase
+        .from('doctor_schedules')
+        .select('*')
+        .eq('doctor_id', targetDoctorId)
+        .eq('schedule_date', date)
+        .eq('is_available', true)
+
+      if (schedError || !schedules || schedules.length === 0) {
+        setDoctorAvailableSlots([])
+        setLoadingDoctorSlots(false)
+        return
+      }
+
+      const { data: bookedSlots } = await supabase
+        .from('booked_appointment_slots')
+        .select('scheduled_time, slot_duration_minutes')
+        .eq('doctor_id', targetDoctorId)
+        .eq('schedule_date', date)
+        .eq('is_cancelled', false)
+
+      const slots: Array<{time: string, duration: number}> = []
+      const booked = bookedSlots || []
+      const slotDuration = 10
+
+      for (const sched of schedules) {
+        let currentTime = sched.start_time as string
+
+        while (currentTime < (sched.end_time as string)) {
+          const [hours, minutes] = currentTime.split(':').map(Number)
+          const endMinutes = hours * 60 + minutes + slotDuration
+          const endHours = Math.floor(endMinutes / 60)
+          const endMins = endMinutes % 60
+          const endTime = `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}:00`
+
+          const isBooked = booked.some(b => {
+            const bDuration = b.slot_duration_minutes || 10
+            const [bH, bM] = (b.scheduled_time as string).split(':').map(Number)
+            const bEndMinutes = bH * 60 + bM + bDuration
+            const bEndH = Math.floor(bEndMinutes / 60)
+            const bEndM = bEndMinutes % 60
+            const bEndTime = `${bEndH.toString().padStart(2, '0')}:${bEndM.toString().padStart(2, '0')}:00`
+            return !(endTime <= b.scheduled_time || currentTime >= bEndTime)
+          })
+
+          if (!isBooked && endTime <= (sched.end_time as string)) {
+            slots.push({ time: currentTime, duration: slotDuration })
+          }
+
+          currentTime = endTime
+        }
+      }
+
+      setDoctorAvailableSlots(slots)
+    } catch (err) {
+      console.error('Error loading doctor slots:', err)
+      setDoctorAvailableSlots([])
+    } finally {
+      setLoadingDoctorSlots(false)
+    }
+  }, [getSupabaseClient])
+
+  const handleDoctorForApptChange = useCallback((targetDoctorId: string) => {
+    setSelectedDoctorForAppt(targetDoctorId)
+    setDoctorApptDate('')
+    setDoctorAvailableSlots([])
+    setSelectedDoctorSlot(null)
+  }, [])
+
+  const handleDoctorApptDateChange = useCallback((date: string) => {
+    setDoctorApptDate(date)
+    setSelectedDoctorSlot(null)
+    if (date && selectedDoctorForAppt) {
+      loadDoctorAvailableSlots(selectedDoctorForAppt, date)
+    } else {
+      setDoctorAvailableSlots([])
+    }
+  }, [selectedDoctorForAppt, loadDoctorAvailableSlots])
+
+  const handleSaveDoctorAppointment = useCallback(() => {
+    if (!selectedDoctorForAppt || !doctorApptDate || !selectedDoctorSlot) return
+
+    const doctor = doctorsList.find(d => d.id === selectedDoctorForAppt)
+    setDoctorAppointmentData({
+      doctorId: selectedDoctorForAppt,
+      doctorName: doctor?.full_name ? `Dr. ${doctor.full_name}` : 'Dr. (Nom non disponible)',
+      appointmentDate: doctorApptDate,
+      appointmentTime: selectedDoctorSlot.time,
+      slotDuration: selectedDoctorSlot.duration,
+      reason: doctorApptReason || 'Consultation de suivi'
+    })
+    setShowDoctorApptModal(false)
+  }, [selectedDoctorForAppt, doctorApptDate, selectedDoctorSlot, doctorApptReason, doctorsList])
+
+  const handleClearDoctorAppointment = useCallback(() => {
+    setDoctorAppointmentData(null)
+    setSelectedDoctorForAppt('')
+    setDoctorApptDate('')
+    setDoctorAvailableSlots([])
+    setSelectedDoctorSlot(null)
+    setDoctorApptReason('')
+  }, [])
+
+  const handleOpenDoctorApptModal = useCallback(() => {
+    loadDoctorsList()
+    const diagConclusion = report?.medicalReport?.diagnosticSummary?.diagnosticConclusion
+    if (diagConclusion && !doctorApptReason) {
+      setDoctorApptReason(`Consultation de suivi - ${diagConclusion}`)
+    }
+    setShowDoctorApptModal(true)
+  }, [loadDoctorsList, report, doctorApptReason])
+
   // Fetch active follow-ups for this patient when modal opens
   const fetchActiveFollowUps = useCallback(async () => {
     const patientId = tibokPatientId || patientData?.id || patientData?.patientId
@@ -2976,6 +3140,60 @@ export default function ChronicProfessionalReport({
             }
           } catch (err) {
             console.error('❌ Error saving referral:', err)
+          }
+        }
+
+        // Save doctor appointment (RDV Médecin) if configured
+        if (doctorAppointmentData && supabaseClient) {
+          console.log('📤 Saving doctor appointment to Supabase...')
+          try {
+            const scheduledTimestamp = `${doctorAppointmentData.appointmentDate}T${doctorAppointmentData.appointmentTime}`
+
+            const { data: newConsultation, error: consultError } = await supabaseClient
+              .from('consultations')
+              .insert({
+                patient_id: tibokPatientId || null,
+                doctor_id: doctorAppointmentData.doctorId,
+                status: 'scheduled',
+                payment_status: 'pending',
+                consultation_type: 'telemedicine',
+                scheduled_time: scheduledTimestamp,
+                scheduled_date: doctorAppointmentData.appointmentDate,
+                patient_first_name: patientData?.firstName || patient?.fullName?.split(' ')[0] || '',
+                patient_last_name: patientData?.lastName || patient?.fullName?.split(' ').slice(1).join(' ') || '',
+                patient_phone: patientPhone || null,
+                patient_age: patient?.age ? parseInt(patient.age) : null,
+                patient_gender: patient?.gender || patientData?.gender || null,
+                consultation_reason: doctorAppointmentData.reason || 'Consultation de suivi',
+              })
+              .select('id')
+              .single()
+
+            if (consultError) {
+              console.error('❌ Error creating scheduled consultation:', consultError)
+            } else {
+              console.log('✅ Scheduled consultation created:', newConsultation?.id)
+
+              const { error: slotError } = await supabaseClient
+                .from('booked_appointment_slots')
+                .insert({
+                  consultation_id: newConsultation.id,
+                  doctor_id: doctorAppointmentData.doctorId,
+                  schedule_date: doctorAppointmentData.appointmentDate,
+                  scheduled_time: doctorAppointmentData.appointmentTime,
+                  slot_duration_minutes: doctorAppointmentData.slotDuration
+                })
+
+              if (slotError) {
+                console.error('❌ Error booking appointment slot:', slotError)
+                await supabaseClient.from('consultations').delete().eq('id', newConsultation.id)
+                console.log('⚠️ Rolled back consultation due to slot booking failure')
+              } else {
+                console.log('✅ Doctor appointment slot booked successfully')
+              }
+            }
+          } catch (err) {
+            console.error('❌ Error saving doctor appointment:', err)
           }
         }
 
@@ -6593,6 +6811,7 @@ export default function ChronicProfessionalReport({
           <option value="invoice">💰 Invoice</option>
           <option value="followup">📋 Follow-Up Plan</option>
           <option value="referral">👨‍⚕️ Referral{referralData ? ' ✓' : ''}</option>
+          <option value="doctor-appointment">🗓️ RDV Médecin{doctorAppointmentData ? ' ✓' : ''}</option>
           <option value="patient-monitoring">📊 Patient Monitoring{patientFollowUpData ? ` (${patientFollowUpData.types.length})` : ''}</option>
           <option value="ai-assistant">🤖 AI Assistant</option>
         </select>
@@ -7131,6 +7350,71 @@ export default function ChronicProfessionalReport({
                   <Button onClick={handleOpenReferralModal}>
                     <UserPlus className="h-4 w-4 mr-2" />
                     Référer ce patient
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Doctor Appointment (RDV Médecin) Tab */}
+        <TabsContent value="doctor-appointment">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Stethoscope className="h-5 w-5 text-teal-600" />
+                RDV Médecin
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {doctorAppointmentData ? (
+                <div className="space-y-4">
+                  <Alert className="bg-green-50 border-green-200">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                      <strong>RDV enregistré</strong> - sera créé lors de la finalisation
+                    </AlertDescription>
+                  </Alert>
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <Label className="text-gray-500 text-sm">Médecin</Label>
+                      <p className="font-medium">{doctorAppointmentData.doctorName}</p>
+                    </div>
+                    <div>
+                      <Label className="text-gray-500 text-sm">Date</Label>
+                      <p className="font-medium">{doctorAppointmentData.appointmentDate}</p>
+                    </div>
+                    <div>
+                      <Label className="text-gray-500 text-sm">Heure</Label>
+                      <p className="font-medium">{doctorAppointmentData.appointmentTime.slice(0, 5)}</p>
+                    </div>
+                    <div>
+                      <Label className="text-gray-500 text-sm">Durée</Label>
+                      <p className="font-medium">{doctorAppointmentData.slotDuration} min</p>
+                    </div>
+                    <div className="col-span-2">
+                      <Label className="text-gray-500 text-sm">Motif</Label>
+                      <p className="font-medium">{doctorAppointmentData.reason}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => { loadDoctorsList(); setShowDoctorApptModal(true) }}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Modifier
+                    </Button>
+                    <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={handleClearDoctorAppointment}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Supprimer
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Stethoscope className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                  <p className="text-gray-500 mb-4">Aucun rendez-vous médecin enregistré</p>
+                  <Button onClick={handleOpenDoctorApptModal}>
+                    <Stethoscope className="h-4 w-4 mr-2" />
+                    Prendre un RDV Médecin
                   </Button>
                 </div>
               )}
@@ -7706,6 +7990,119 @@ export default function ChronicProfessionalReport({
             Annuler
           </Button>
           <Button onClick={handleSaveReferral}>
+            Enregistrer
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    {/* Doctor Appointment (RDV Médecin) Modal */}
+    <Dialog open={showDoctorApptModal} onOpenChange={setShowDoctorApptModal}>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2">
+            <Stethoscope className="h-5 w-5 text-teal-600" />
+            Prendre un RDV Médecin
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4 overflow-y-auto flex-1 pr-2">
+          <div className="space-y-2">
+            <Label>Médecin *</Label>
+            <Select value={selectedDoctorForAppt} onValueChange={handleDoctorForApptChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner un médecin" />
+              </SelectTrigger>
+              <SelectContent className="z-[9999]">
+                {loadingDoctors ? (
+                  <div className="flex items-center justify-center py-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  </div>
+                ) : doctorsList.length === 0 ? (
+                  <div className="text-center py-2 text-gray-500 text-sm">
+                    Aucun médecin disponible
+                  </div>
+                ) : (
+                  doctorsList.map(doc => {
+                    const isCurrentDoctor = doc.id === tibokDoctorId
+                    return (
+                      <SelectItem key={doc.id} value={doc.id}>
+                        Dr. {doc.full_name || '(Nom non disponible)'}{isCurrentDoctor ? ' (Moi-même)' : ''}{doc.specialty ? ` - ${doc.specialty}` : ''}
+                      </SelectItem>
+                    )
+                  })
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {selectedDoctorForAppt && (
+            <>
+              <div className="space-y-2">
+                <Label>Date du rendez-vous *</Label>
+                <input
+                  type="date"
+                  value={doctorApptDate}
+                  onChange={(e) => handleDoctorApptDateChange(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+
+              {doctorApptDate && (
+                <div className="space-y-2">
+                  <Label className="text-sm text-gray-600">Créneaux disponibles</Label>
+                  {loadingDoctorSlots ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-5 w-5 animate-spin text-teal-600" />
+                      <span className="ml-2 text-sm text-gray-600">Chargement des créneaux...</span>
+                    </div>
+                  ) : doctorAvailableSlots.length === 0 ? (
+                    <div className="text-center py-4 text-gray-500 text-sm bg-gray-50 rounded-md">
+                      Aucun créneau disponible pour cette date
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto p-1">
+                      {doctorAvailableSlots.map((slot, idx) => (
+                        <Button
+                          key={idx}
+                          type="button"
+                          variant={selectedDoctorSlot?.time === slot.time ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setSelectedDoctorSlot(selectedDoctorSlot?.time === slot.time ? null : slot)}
+                          className={`text-xs ${selectedDoctorSlot?.time === slot.time ? 'bg-teal-600' : ''}`}
+                        >
+                          {slot.time.slice(0, 5)}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedDoctorSlot && (
+                    <div className="flex items-center gap-2 p-2 bg-green-50 rounded-md text-sm text-green-700">
+                      <CheckCircle className="h-4 w-4" />
+                      RDV sélectionné: {doctorApptDate} à {selectedDoctorSlot.time.slice(0, 5)}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Motif (optionnel)</Label>
+                <Textarea
+                  value={doctorApptReason}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDoctorApptReason(e.target.value)}
+                  placeholder="Consultation de suivi..."
+                  rows={3}
+                />
+              </div>
+            </>
+          )}
+        </div>
+        <DialogFooter className="flex-shrink-0 border-t pt-4">
+          <Button variant="outline" onClick={() => setShowDoctorApptModal(false)}>
+            Annuler
+          </Button>
+          <Button onClick={handleSaveDoctorAppointment} className="bg-teal-600 hover:bg-teal-700">
             Enregistrer
           </Button>
         </DialogFooter>
