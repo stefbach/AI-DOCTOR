@@ -3356,7 +3356,7 @@ const handleSendDocuments = async () => {
    title: "Simulation terminée avec succès",
    description: "Mode simulation — aucun document n'a été envoyé ni enregistré"
  })
- showSuccessModal()
+ showSimulationEndModal()
  return
  }
 
@@ -4316,6 +4316,85 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
  if (e.target === modalContainer) {
  closeModal()
  }
+ })
+ }
+
+ // ==================== SIMULATION END MODAL ====================
+ const showSimulationEndModal = () => {
+ const modalContainer = document.createElement('div')
+ modalContainer.id = 'simulation-end-modal'
+ modalContainer.style.cssText = `
+ position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+ display: flex; align-items: center; justify-content: center;
+ z-index: 9999; animation: fadeIn 0.3s ease-out;
+ `
+ const modalContent = document.createElement('div')
+ modalContent.style.cssText = `
+ background: white; padding: 2rem; border-radius: 1rem; max-width: 500px;
+ margin: 1rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+ animation: slideUp 0.3s ease-out; position: relative;
+ `
+ modalContent.innerHTML = `
+ <div style="text-align:center;">
+ <div style="width:80px;height:80px;background:linear-gradient(135deg,#8b5cf6,#7c3aed);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;">
+ <svg width="40" height="40" fill="none" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+ </div>
+ <h2 style="font-size:1.5rem;font-weight:bold;color:#1f2937;margin-bottom:0.5rem;">Simulation terminée !</h2>
+ <p style="color:#6b7280;margin-bottom:1.5rem;line-height:1.5;">
+ Vous avez complété avec succès le parcours de consultation en mode simulation.<br>
+ <strong>Aucun document n'a été envoyé et aucune donnée n'a été enregistrée.</strong>
+ </p>
+ <div style="background:#f5f3ff;padding:1rem;border-radius:0.5rem;margin-bottom:1.5rem;border:1px solid #ddd6fe;">
+ <p style="font-size:0.875rem;color:#5b21b6;margin:0 0 0.5rem;font-weight:600;">Ce que vous avez pu tester :</p>
+ <ul style="text-align:left;font-size:0.875rem;color:#6b7280;margin:0;padding-left:1.5rem;">
+ <li>Saisie des informations patient</li>
+ <li>Upload et analyse d'image dermatologique</li>
+ <li>Questions IA et diagnostic assisté</li>
+ <li>Génération et édition du rapport professionnel</li>
+ </ul>
+ </div>
+ <button id="sim-close-btn" style="
+ width:100%;padding:0.75rem 1.5rem;
+ background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:white;
+ border:none;border-radius:0.5rem;font-weight:600;font-size:1rem;
+ cursor:pointer;transition:all 0.2s;display:flex;align-items:center;
+ justify-content:center;gap:0.5rem;
+ " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+ Fermer la simulation
+ </button>
+ <p style="font-size:0.75rem;color:#9ca3af;margin-top:0.75rem;">
+ L'onglet se fermera automatiquement, ou vous pouvez le fermer manuellement.
+ </p>
+ </div>
+ `
+ modalContainer.appendChild(modalContent)
+ document.body.appendChild(modalContainer)
+
+ const closeSimulation = () => {
+ sessionStorage.removeItem('isSimulation')
+ sessionStorage.removeItem('currentDoctorInfo')
+ if (window.opener) { window.close() } else {
+   window.close()
+   setTimeout(() => {
+   const modal = document.getElementById('simulation-end-modal')
+   if (modal) {
+     modal.innerHTML = `
+     <div style="background:white;padding:2rem;border-radius:1rem;max-width:400px;margin:auto;text-align:center;">
+     <h3 style="font-size:1.25rem;font-weight:bold;color:#1f2937;margin-bottom:0.5rem;">Simulation terminée</h3>
+     <p style="color:#6b7280;margin-bottom:1rem;">Veuillez fermer manuellement cet onglet.</p>
+     <button onclick="document.getElementById('simulation-end-modal').remove()" style="
+     padding:0.5rem 1rem;background:#7c3aed;color:white;border:none;border-radius:0.5rem;cursor:pointer;
+     ">OK, Compris</button>
+     </div>
+     `
+   }
+   }, 100)
+ }
+ }
+
+ document.getElementById('sim-close-btn')?.addEventListener('click', closeSimulation)
+ modalContainer.addEventListener('click', (e) => {
+ if (e.target === modalContainer) closeSimulation()
  })
  }
 
