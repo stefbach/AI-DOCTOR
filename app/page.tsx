@@ -44,6 +44,7 @@ export default function MedicalAIExpert() {
   const [currentConsultationId, setCurrentConsultationId] = useState<string | null>(null)
   const [currentPatientId, setCurrentPatientId] = useState<string | null>(null)
   const [currentDoctorId, setCurrentDoctorId] = useState<string | null>(null)
+  const [isSimulation, setIsSimulation] = useState(false)
 
   // Load doctor data from URL params (from Tibok) and save to sessionStorage
   useEffect(() => {
@@ -140,6 +141,13 @@ export default function MedicalAIExpert() {
       let patientPhone = urlParams.get('patientPhone')
       const consultationId = urlParams.get('consultationId')
       const doctorId = urlParams.get('doctorId')
+      const isSimulation = urlParams.get('mode') === 'simulation'
+
+      // SIMULATION: Store flag early so it propagates through the redirect
+      if (isSimulation) {
+        console.log('🎮 SIMULATION MODE detected at main page')
+        sessionStorage.setItem('isSimulation', 'true')
+      }
 
       // Also extract Tibok patient data from URL if available
       const patientDataParam = urlParams.get('patientData')
@@ -263,6 +271,12 @@ export default function MedicalAIExpert() {
   useEffect(() => {
     const savedPatientData = sessionStorage.getItem('consultationPatientData')
     const isExistingPatient = sessionStorage.getItem('isExistingPatientConsultation')
+
+    // Check simulation mode
+    if (sessionStorage.getItem('isSimulation') === 'true') {
+      setIsSimulation(true)
+      console.log('🎮 Normal consultation page: SIMULATION MODE active')
+    }
 
     if (savedPatientData && isExistingPatient === 'true') {
       try {
@@ -633,6 +647,7 @@ const handlePrevious = () => {
           diagnosisData,
           onComplete: handleFinalReportComplete,
           onPrevious: handlePrevious,
+          isSimulation,
         }
       default:
         return commonProps
@@ -672,6 +687,12 @@ const handlePrevious = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
+      {/* Simulation Banner */}
+      {isSimulation && (
+        <div className="bg-purple-100 text-purple-800 text-center py-2 text-sm font-medium sticky top-0 z-50 border-b border-purple-200">
+          Mode Simulation — Aucune donnée réelle ne sera affectée
+        </div>
+      )}
       {/* Modern Header with Gradient */}
       <div className="gradient-primary text-white shadow-xl">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 md:py-6">

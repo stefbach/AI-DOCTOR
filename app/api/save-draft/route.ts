@@ -29,6 +29,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing consultationId' }, { status: 400 })
     }
 
+    // SIMULATION MODE: Return mock success for sim- prefixed consultations
+    if (typeof consultationId === 'string' && consultationId.startsWith('sim-')) {
+      console.log('🎮 Simulation draft save — returning mock success for:', consultationId)
+      return NextResponse.json({
+        success: true,
+        data: { consultationId, status: 'draft', storage: 'simulation' }
+      })
+    }
+
     console.log('📝 Saving draft for consultation:', consultationId)
     console.log('📊 Report content size:', JSON.stringify(reportContent || {}).length, 'bytes')
 

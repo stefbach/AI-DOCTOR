@@ -145,6 +145,7 @@ interface ProfessionalReportProps {
  diagnosisData: any
  editedDocuments?: any
  onComplete?: () => void
+ isSimulation?: boolean
 }
 
 // ==================== HELPER FUNCTIONS ====================
@@ -872,7 +873,8 @@ export default function ProfessionalReportEditable({
  questionsData,
  diagnosisData,
  editedDocuments,
- onComplete
+ onComplete,
+ isSimulation = false
 }: ProfessionalReportProps) {
 
 // ==================== STATE MANAGEMENT ====================
@@ -3345,7 +3347,19 @@ const toggleFollowUpType = useCallback((type: string) => {
 const handleSendDocuments = async () => {
  console.log('📤 Starting handleSendDocuments...')
  setIsSendingDocuments(true)
- 
+
+ // SIMULATION MODE: Skip all API calls, Supabase writes, and external sends
+ if (isSimulation) {
+ console.log('🎮 SIMULATION MODE — skipping all sends and database writes')
+ setIsSendingDocuments(false)
+ toast({
+   title: "Simulation terminée avec succès",
+   description: "Mode simulation — aucun document n'a été envoyé ni enregistré"
+ })
+ showSuccessModal()
+ return
+ }
+
  // Check if report is validated
  if (!report || validationStatus !== 'validated') {
  console.log(' Report not validated', { hasReport: !!report, validationStatus })

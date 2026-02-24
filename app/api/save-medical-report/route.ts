@@ -194,6 +194,21 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
+    // SIMULATION MODE: Return mock success for sim- prefixed consultations
+    if (typeof consultationId === 'string' && consultationId.startsWith('sim-')) {
+      console.log('🎮 Simulation report save — returning mock success for:', consultationId)
+      return NextResponse.json({
+        success: true,
+        data: {
+          reportId: consultationId,
+          status: action === 'finalize' ? 'finalized' : 'draft',
+          savedAt: new Date().toISOString(),
+          storage: 'simulation',
+          action: 'simulation_mock'
+        }
+      })
+    }
+
     // Validate patient data
     const patientValidation = validatePatientData(patientName, patientData)
     if (!patientValidation.isValid) {

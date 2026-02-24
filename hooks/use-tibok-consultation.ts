@@ -196,6 +196,16 @@ export function useTibokConsultation(options: UseTibokConsultationOptions = {}):
     console.log('🔄 useTibokConsultation hook mounted, checking for consultationId...')
     console.log('🌐 Current URL:', typeof window !== 'undefined' ? window.location.href : 'SSR')
 
+    // SIMULATION MODE: Skip Supabase query — no real record exists in consultations table
+    if (typeof window !== 'undefined') {
+      const isSimulation = sessionStorage.getItem('isSimulation') === 'true'
+      if (isSimulation) {
+        console.log('🎮 Simulation mode — skipping Supabase consultation fetch (no real record)')
+        setLoading(false)
+        return
+      }
+    }
+
     // First check if consultationId was provided as prop
     let consultationId = providedConsultationId
 
