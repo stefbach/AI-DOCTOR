@@ -256,6 +256,7 @@ interface ChronicProfessionalReportProps {
   questionsData: any
   diagnosisData: any
   onComplete?: () => void
+  isSimulation?: boolean
 }
 
 // ==================== HELPER FUNCTIONS ====================
@@ -511,7 +512,8 @@ export default function ChronicProfessionalReport({
   clinicalData,
   questionsData,
   diagnosisData,
-  onComplete
+  onComplete,
+  isSimulation = false
 }: ChronicProfessionalReportProps) {
   
   // ==================== STATE MANAGEMENT ====================
@@ -2575,6 +2577,18 @@ export default function ChronicProfessionalReport({
   const handleSendDocuments = async () => {
     console.log('📤 Starting handleSendDocuments for chronic disease...')
     setIsSendingDocuments(true)
+
+    // SIMULATION MODE: Skip all API calls, Supabase writes, and external sends
+    if (isSimulation) {
+      console.log('🎮 SIMULATION MODE — skipping all sends and database writes')
+      setIsSendingDocuments(false)
+      toast({
+        title: "Simulation terminée avec succès",
+        description: "Mode simulation — aucun document n'a été envoyé ni enregistré"
+      })
+      showSuccessModal()
+      return
+    }
 
     // Check if report is validated
     if (!report || validationStatus !== 'validated') {

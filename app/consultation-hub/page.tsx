@@ -39,6 +39,8 @@ export default function ConsultationHubPage() {
       const urlParams = new URLSearchParams(window.location.search)
       const isReturning = urlParams.get('returning') === 'true'
       const consultationId = urlParams.get('consultationId')
+      const isSimulation = urlParams.get('mode') === 'simulation'
+      const simConsultationType = urlParams.get('consultationType') // 'general' | 'dermatology' | 'chronic_disease'
 
       // CRITICAL: If we have a consultationId in URL, this is a FRESH consultation from Tibok
       // Clear ALL stale sessionStorage data from previous sessions to force fresh API fetch
@@ -56,6 +58,14 @@ export default function ConsultationHubPage() {
         sessionStorage.removeItem('isDermatologyWorkflow')
         sessionStorage.removeItem('isExistingPatientDermatology')
         sessionStorage.removeItem('fromConsultationHub')
+        // Clear previous simulation flag
+        sessionStorage.removeItem('isSimulation')
+      }
+
+      // SIMULATION MODE: Store flag and use consultationType from URL directly
+      if (isSimulation) {
+        console.log('🎮 SIMULATION MODE detected — consultationType:', simConsultationType)
+        sessionStorage.setItem('isSimulation', 'true')
       }
 
       // Extract and save doctor data from URL params
@@ -154,21 +164,35 @@ export default function ConsultationHubPage() {
 
           // Fetch consultation specialty from Tibok if we have a consultationId
           if (consultationId) {
-            console.log('🔍 Fetching consultation specialty from Tibok...')
-            const tibokResult = await fetchTibokConsultationData(consultationId)
-            if (tibokResult.success && tibokResult.data) {
-              console.log('✅ Tibok consultation data:', tibokResult.data)
-              // Merge Tibok consultation data into tibokPatientInfo
+            if (isSimulation && simConsultationType) {
+              // SIMULATION: Use consultationType URL param directly — no DB record exists
+              console.log('🎮 Simulation: using consultationType from URL:', simConsultationType)
               returningPatientData = {
                 ...returningPatientData,
                 tibokPatientInfo: {
                   ...returningPatientData.tibokPatientInfo,
-                  consultation_specialty: tibokResult.data.consultation_specialty,
-                  temp_image_url: tibokResult.data.temp_image_url,
-                  has_temp_image: tibokResult.data.has_temp_image
+                  consultation_specialty: simConsultationType,
+                  temp_image_url: null,
+                  has_temp_image: false
                 }
               }
-              console.log('📋 Updated patientData with consultation_specialty:', tibokResult.data.consultation_specialty)
+            } else {
+              console.log('🔍 Fetching consultation specialty from Tibok...')
+              const tibokResult = await fetchTibokConsultationData(consultationId)
+              if (tibokResult.success && tibokResult.data) {
+                console.log('✅ Tibok consultation data:', tibokResult.data)
+                // Merge Tibok consultation data into tibokPatientInfo
+                returningPatientData = {
+                  ...returningPatientData,
+                  tibokPatientInfo: {
+                    ...returningPatientData.tibokPatientInfo,
+                    consultation_specialty: tibokResult.data.consultation_specialty,
+                    temp_image_url: tibokResult.data.temp_image_url,
+                    has_temp_image: tibokResult.data.has_temp_image
+                  }
+                }
+                console.log('📋 Updated patientData with consultation_specialty:', tibokResult.data.consultation_specialty)
+              }
             }
           }
 
@@ -270,18 +294,29 @@ export default function ConsultationHubPage() {
       try {
         // Fetch consultation specialty from Tibok if we have consultationId
         if (consultationId) {
-          console.log('🔍 Fetching consultation specialty from Tibok...')
-          const tibokResult = await fetchTibokConsultationData(consultationId)
-          if (tibokResult.success && tibokResult.data) {
-            console.log('✅ Tibok consultation data:', tibokResult.data)
-            // Merge Tibok consultation data into tibokPatientInfo
+          if (isSimulation && simConsultationType) {
+            // SIMULATION: Use consultationType URL param directly — no DB record exists
+            console.log('🎮 Simulation: using consultationType from URL:', simConsultationType)
             tibokPatientInfo = {
               ...tibokPatientInfo,
-              consultation_specialty: tibokResult.data.consultation_specialty,
-              temp_image_url: tibokResult.data.temp_image_url,
-              has_temp_image: tibokResult.data.has_temp_image
+              consultation_specialty: simConsultationType,
+              temp_image_url: null,
+              has_temp_image: false
             }
-            console.log('📋 Updated tibokPatientInfo with consultation_specialty:', tibokResult.data.consultation_specialty)
+          } else {
+            console.log('🔍 Fetching consultation specialty from Tibok...')
+            const tibokResult = await fetchTibokConsultationData(consultationId)
+            if (tibokResult.success && tibokResult.data) {
+              console.log('✅ Tibok consultation data:', tibokResult.data)
+              // Merge Tibok consultation data into tibokPatientInfo
+              tibokPatientInfo = {
+                ...tibokPatientInfo,
+                consultation_specialty: tibokResult.data.consultation_specialty,
+                temp_image_url: tibokResult.data.temp_image_url,
+                has_temp_image: tibokResult.data.has_temp_image
+              }
+              console.log('📋 Updated tibokPatientInfo with consultation_specialty:', tibokResult.data.consultation_specialty)
+            }
           }
         }
 

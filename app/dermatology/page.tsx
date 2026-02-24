@@ -32,12 +32,19 @@ export default function DermatologyWorkflow() {
   const [questionsData, setQuestionsData] = useState<any>(null)
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
   const [isExistingPatient, setIsExistingPatient] = useState(false)
+  const [isSimulation, setIsSimulation] = useState(false)
 
   // Load patient data from sessionStorage
   useEffect(() => {
     const savedPatientData = sessionStorage.getItem('dermatologyPatientData')
     const isDermatologyWorkflow = sessionStorage.getItem('isDermatologyWorkflow')
     const existingPatient = sessionStorage.getItem('isExistingPatientDermatology')
+
+    // Check simulation mode
+    if (sessionStorage.getItem('isSimulation') === 'true') {
+      setIsSimulation(true)
+      console.log('🎮 Dermatology page: SIMULATION MODE active')
+    }
     
     if (!savedPatientData || isDermatologyWorkflow !== 'true') {
       // Redirect back to consultation hub if no dermatology data
@@ -128,6 +135,12 @@ export default function DermatologyWorkflow() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50">
+      {/* Simulation Banner */}
+      {isSimulation && (
+        <div className="bg-purple-100 text-purple-800 text-center py-2 text-sm font-medium sticky top-0 z-50 border-b border-purple-200">
+          Mode Simulation — Aucune donnée réelle ne sera affectée
+        </div>
+      )}
       {/* Modern Header with Gradient */}
       <div className="gradient-accent text-white shadow-xl">
         <div className="container mx-auto px-4 py-6">
@@ -382,6 +395,7 @@ export default function DermatologyWorkflow() {
                   questionsData={questionsData}
                   diagnosisData={diagnosisData}
                   onComplete={handleBackToHome}
+                  isSimulation={isSimulation}
                 />
                 <div className="mt-4 flex justify-start">
                   <Button

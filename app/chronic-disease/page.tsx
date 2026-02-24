@@ -34,6 +34,7 @@ export default function ChronicDiseaseWorkflow() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isExistingPatient, setIsExistingPatient] = useState(false)
   const [chronicHistory, setChronicHistory] = useState<any[]>([])
+  const [isSimulation, setIsSimulation] = useState(false)
 
   // Load patient data from sessionStorage
   useEffect(() => {
@@ -41,6 +42,12 @@ export default function ChronicDiseaseWorkflow() {
     const isChronicWorkflow = sessionStorage.getItem('isChronicDiseaseWorkflow')
     const existingPatient = sessionStorage.getItem('isExistingPatientChronic')
     const history = sessionStorage.getItem('chronicDiseaseHistory')
+
+    // Check simulation mode
+    if (sessionStorage.getItem('isSimulation') === 'true') {
+      setIsSimulation(true)
+      console.log('🎮 Chronic disease page: SIMULATION MODE active')
+    }
 
     // Check if we're in a test environment
     const isTestEnvironment = typeof window !== 'undefined' && (
@@ -213,6 +220,12 @@ export default function ChronicDiseaseWorkflow() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
+      {/* Simulation Banner */}
+      {isSimulation && (
+        <div className="bg-purple-100 text-purple-800 text-center py-2 text-sm font-medium sticky top-0 z-50 border-b border-purple-200">
+          Mode Simulation — Aucune donnée réelle ne sera affectée
+        </div>
+      )}
       {/* Modern Header with Gradient - Mobile Optimized */}
       <div className="gradient-secondary text-white shadow-xl">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
@@ -492,6 +505,7 @@ export default function ChronicDiseaseWorkflow() {
                   questionsData={questionsData}
                   diagnosisData={diagnosisData}
                   onComplete={handleBackToHome}
+                  isSimulation={isSimulation}
                 />
                 <div className="mt-4 flex justify-start">
                   <Button

@@ -195,6 +195,8 @@ interface ProfessionalReportProps {
  // Specialist mode props
  specialistMode?: boolean
  referralId?: string
+ // Simulation mode — skip all writes and external calls
+ isSimulation?: boolean
 }
 
 // ==================== HELPER FUNCTIONS ====================
@@ -928,7 +930,8 @@ export default function ProfessionalReportEditable({
  patientId: propPatientId,
  doctorId: propDoctorId,
  specialistMode = false,
- referralId
+ referralId,
+ isSimulation = false
 }: ProfessionalReportProps) {
 
 // ==================== STATE MANAGEMENT ====================
@@ -3441,6 +3444,18 @@ const toggleFollowUpType = useCallback((type: string) => {
 const handleSendDocuments = async () => {
  console.log('📤 Starting handleSendDocuments...')
  setIsSendingDocuments(true)
+
+ // SIMULATION MODE: Skip all API calls, Supabase writes, and external sends
+ if (isSimulation) {
+ console.log('🎮 SIMULATION MODE — skipping all sends and database writes')
+ setIsSendingDocuments(false)
+ toast({
+   title: "Simulation terminée avec succès",
+   description: "Mode simulation — aucun document n'a été envoyé ni enregistré"
+ })
+ showSuccessModal()
+ return
+ }
 
  // Check if report is validated
  if (!report || validationStatus !== 'validated') {
