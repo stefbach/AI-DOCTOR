@@ -7052,23 +7052,25 @@ const [localSickLeave, setLocalSickLeave] = useState({
  )}
  </div>
 
-{validationStatus === 'validated' && (
+{(validationStatus === 'validated' || isSimulation) && (
  <div className="flex justify-center print:hidden mt-8">
- <Button 
+ <Button
  size="lg"
  onClick={handleSendDocuments}
  disabled={isSendingDocuments}
- className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+ className={isSimulation
+ ? "bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
+ : "bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"}
  >
  {isSendingDocuments ? (
  <>
  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
- Sending documents...
+ {isSimulation ? 'Closing simulation...' : 'Sending documents...'}
  </>
  ) : (
  <>
  <CheckCircle className="h-5 w-5 mr-2" />
- Finalize and Send documents
+ {isSimulation ? 'Finalise and close simulation' : 'Finalize and Send documents'}
  </>
  )}
  </Button>

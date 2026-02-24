@@ -6740,22 +6740,26 @@ export default function ChronicProfessionalReport({
                 {validationStatus === 'validated' ? 'Validated' : 'Validate & Sign'}
               </Button>
 
-              {validationStatus === 'validated' && (
+              {(validationStatus === 'validated' || isSimulation) && (
                 <Button
                   size="sm"
                   onClick={handleSendDocuments}
                   disabled={isSendingDocuments}
-                  className="w-full sm:w-auto text-xs sm:text-sm bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`w-full sm:w-auto text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+                    isSimulation
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800'
+                      : 'bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700'
+                  }`}
                 >
                   {isSendingDocuments ? (
                     <>
                       <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 animate-spin" />
-                      Sending...
+                      {isSimulation ? 'Closing...' : 'Sending...'}
                     </>
                   ) : (
                     <>
                       <Send className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                      Send
+                      {isSimulation ? 'Finalise & close simulation' : 'Send'}
                     </>
                   )}
                 </Button>
