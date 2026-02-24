@@ -3352,25 +3352,27 @@ const handleSendDocuments = async () => {
  if (isSimulation) {
  console.log('🎮 SIMULATION MODE — skipping all sends and database writes')
 
- // Notify Tibok to mark simulation as completed (via server-side proxy to avoid CORS)
+ // Notify Tibok to mark simulation as completed (direct Supabase update — same DB)
  try {
    const params = new URLSearchParams(window.location.search)
    const cId = consultationId || params.get('consultationId') || ''
    const simulationId = cId.startsWith('sim-') ? cId.replace('sim-', '') : cId
    if (simulationId) {
-     const res = await fetch('/api/simulation/end', {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify({ simulationId })
-     })
-     if (res.ok) {
-       console.log('✅ Simulation marked as completed in Tibok')
-     } else {
-       console.warn('⚠️ Tibok simulation end returned:', res.status)
+     const supabaseClient = getSupabaseClient()
+     if (supabaseClient) {
+       const { error: updateError } = await supabaseClient
+         .from('simulation_consultations')
+         .update({ status: 'completed', ended_at: new Date().toISOString() })
+         .eq('id', simulationId)
+       if (updateError) {
+         console.warn('⚠️ Failed to update simulation status:', updateError.message)
+       } else {
+         console.log('✅ Simulation marked as completed in Supabase')
+       }
      }
    }
  } catch (err) {
-   console.warn('⚠️ Failed to notify Tibok of simulation end:', err)
+   console.warn('⚠️ Failed to update simulation status:', err)
  }
 
  setIsSendingDocuments(false)
