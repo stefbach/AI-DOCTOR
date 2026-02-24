@@ -2581,6 +2581,25 @@ export default function ChronicProfessionalReport({
     // SIMULATION MODE: Skip all API calls, Supabase writes, and external sends
     if (isSimulation) {
       console.log('🎮 SIMULATION MODE — skipping all sends and database writes')
+
+      // Notify Tibok to mark simulation as completed
+      try {
+        const params = new URLSearchParams(window.location.search)
+        const cId = consultationId || params.get('consultationId') || ''
+        const simulationId = cId.startsWith('sim-') ? cId.replace('sim-', '') : cId
+        if (simulationId) {
+          const tibokUrl = process.env.NEXT_PUBLIC_TIBOK_URL || 'http://localhost:3001'
+          await fetch(`${tibokUrl}/api/doctor/simulation/end`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ simulationId })
+          })
+          console.log('✅ Simulation marked as completed in Tibok')
+        }
+      } catch (err) {
+        console.warn('⚠️ Failed to notify Tibok of simulation end:', err)
+      }
+
       setIsSendingDocuments(false)
       toast({
         title: "Simulation terminée avec succès",
