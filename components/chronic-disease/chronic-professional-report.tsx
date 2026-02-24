@@ -2582,19 +2582,22 @@ export default function ChronicProfessionalReport({
     if (isSimulation) {
       console.log('🎮 SIMULATION MODE — skipping all sends and database writes')
 
-      // Notify Tibok to mark simulation as completed
+      // Notify Tibok to mark simulation as completed (via server-side proxy to avoid CORS)
       try {
         const params = new URLSearchParams(window.location.search)
         const cId = consultationId || params.get('consultationId') || ''
         const simulationId = cId.startsWith('sim-') ? cId.replace('sim-', '') : cId
         if (simulationId) {
-          const tibokUrl = process.env.NEXT_PUBLIC_TIBOK_URL || 'http://localhost:3001'
-          await fetch(`${tibokUrl}/api/doctor/simulation/end`, {
+          const res = await fetch('/api/simulation/end', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ simulationId })
           })
-          console.log('✅ Simulation marked as completed in Tibok')
+          if (res.ok) {
+            console.log('✅ Simulation marked as completed in Tibok')
+          } else {
+            console.warn('⚠️ Tibok simulation end returned:', res.status)
+          }
         }
       } catch (err) {
         console.warn('⚠️ Failed to notify Tibok of simulation end:', err)
