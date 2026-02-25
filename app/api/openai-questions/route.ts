@@ -1972,10 +1972,10 @@ export async function POST(request: NextRequest) {
     const prompt = generateModeSpecificPrompt(adjustedMode, context)
     
     const aiConfig = {
-      fast: { model: 'gpt-5.2', temperature: 0.2, maxTokens: 8000 },
-      balanced: { model: 'gpt-5.2', temperature: 0.3, maxTokens: 8000 },
-      intelligent: { model: 'gpt-5.2', temperature: 0.3, maxTokens: 8000 }
-    }[adjustedMode] || { model: 'gpt-5.2', temperature: 0.3, maxTokens: 8000 }
+      fast: { model: 'gpt-4o', temperature: 0.2, maxTokens: 8000 },
+      balanced: { model: 'gpt-4o', temperature: 0.3, maxTokens: 8000 },
+      intelligent: { model: 'gpt-4o', temperature: 0.3, maxTokens: 8000 }
+    }[adjustedMode] || { model: 'gpt-4o', temperature: 0.3, maxTokens: 8000 }
     
     console.log(`Calling ${aiConfig.model} with ${adjustedMode} mode (history-enhanced) with retry mechanism`)
     
