@@ -21,9 +21,6 @@ jobs:
           echo "Node version: $(node --version)"
           echo "NPM version: $(npm --version)"
           
-          # Use SSH remote
-          git remote set-url origin git@github-tibok:stefbach/AI-DOCTOR.git
-          
           # Pull changes
           git pull origin main
           # Clean up corrupted dependencies and cache
