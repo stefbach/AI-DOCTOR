@@ -978,6 +978,7 @@ export default function ProfessionalReportEditable({
  prescription?: string
  laboratory?: string
  imaging?: string
+ sickLeave?: string
  invoice?: string
  }>({})
 
@@ -3695,7 +3696,26 @@ const handleSendDocuments = async () => {
  email: doctorInfo.email.includes('[') ? 'doctor@tibok.mu' : doctorInfo.email
  }
 
+ // Ensure report's praticien reflects finalDoctorInfo (MCM fallback, email cleanup)
+ const reportToSend = {
+ ...report,
+ compteRendu: {
+   ...report.compteRendu,
+   praticien: finalDoctorInfo
+ }
+ }
+
  console.log('📝 Saving to database...')
+ console.log('🔍 Pre-send debug:', {
+   doctorName: finalDoctorInfo.nom,
+   mcmNumber: finalDoctorInfo.numeroEnregistrement,
+   reportPraticienMCM: reportToSend?.compteRendu?.praticien?.numeroEnregistrement,
+   hasMotif: !!reportToSend?.compteRendu?.rapport?.motifConsultation,
+   hasDiagnosis: !!reportToSend?.compteRendu?.rapport?.conclusionDiagnostique,
+   signatureKeys: Object.keys(documentSignatures),
+   patientName,
+   patientEmail,
+ })
 
  // Save final version to consultation_records table (for ALL consultation types)
  const saveResponse = await fetch('/api/save-medical-report', {
@@ -3707,7 +3727,7 @@ const handleSendDocuments = async () => {
  doctorId,
  doctorName: finalDoctorInfo.nom,
  patientName: patientName,
- report: report,
+ report: reportToSend,
  action: 'finalize',
  metadata: {
  wordCount: getReportMetadata().wordCount,
@@ -3738,7 +3758,8 @@ const handleSendDocuments = async () => {
  console.log('💾 Save response:', { status: saveResponse.status, result: saveResult })
 
  if (!saveResponse.ok) {
- console.log('❌ Save failed:', saveResult)
+ console.error('❌ Save failed:', JSON.stringify(saveResult))
+ console.error('❌ Save error detail:', saveResult?.error, 'field:', saveResult?.field)
 
  if (saveResult.validationError) {
  toast({
@@ -3768,11 +3789,11 @@ const handleSendDocuments = async () => {
    body: JSON.stringify({
    consultationId,
    reportContent: {
-   ...report,
+   ...reportToSend,
    compteRendu: {
-   ...report.compteRendu,
+   ...reportToSend.compteRendu,
    metadata: {
-   ...report.compteRendu.metadata,
+   ...reportToSend.compteRendu.metadata,
    finalized: true,
    finalizedAt: new Date().toISOString()
    }
@@ -3824,53 +3845,53 @@ const handleSendDocuments = async () => {
  patientPhone: patientPhone,
  generatedAt: new Date().toISOString(),
  documents: {
- consultationReport: report?.compteRendu ? {
+ consultationReport: reportToSend?.compteRendu ? {
  type: 'consultation_report',
  title: 'Medical Consultation Report',
- content: report.compteRendu,
+ content: reportToSend.compteRendu,
  validated: true,
- validatedAt: report.compteRendu.metadata?.validatedAt || new Date().toISOString(),
+ validatedAt: reportToSend.compteRendu.metadata?.validatedAt || new Date().toISOString(),
  signature: documentSignatures?.consultation || null
  } : null,
- prescriptions: report?.ordonnances?.medicaments ? {
+ prescriptions: reportToSend?.ordonnances?.medicaments ? {
  type: 'prescription',
  title: 'Medical Prescription',
- medications: report.ordonnances.medicaments.prescription?.medicaments || [],
- validity: report.ordonnances.medicaments.prescription?.validite || '3 months',
+ medications: reportToSend.ordonnances.medicaments.prescription?.medicaments || [],
+ validity: reportToSend.ordonnances.medicaments.prescription?.validite || '3 months',
  signature: documentSignatures?.prescription || null,
- content: report.ordonnances.medicaments
+ content: reportToSend.ordonnances.medicaments
  } : null,
- laboratoryRequests: report?.ordonnances?.biologie ? {
+ laboratoryRequests: reportToSend?.ordonnances?.biologie ? {
  type: 'laboratory_request',
  title: 'Laboratory Request Form',
- tests: report.ordonnances.biologie.prescription?.analyses || {},
+ tests: reportToSend.ordonnances.biologie.prescription?.analyses || {},
  signature: documentSignatures?.laboratory || null,
- content: report.ordonnances.biologie
+ content: reportToSend.ordonnances.biologie
  } : null,
-imagingRequests: report?.ordonnances?.imagerie ? {
+imagingRequests: reportToSend?.ordonnances?.imagerie ? {
  type: 'imaging_request',
  title: 'Radiology Request Form',
- examinations: report.ordonnances.imagerie.prescription?.examens || [],
+ examinations: reportToSend.ordonnances.imagerie.prescription?.examens || [],
  signature: documentSignatures?.imaging || null,
- content: report.ordonnances.imagerie
+ content: reportToSend.ordonnances.imagerie
  } : null,
-sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
+sickLeaveCertificate: reportToSend?.ordonnances?.arretMaladie ? {
  type: 'sick_leave',
  title: 'Sick Leave Certificate',
  certificate: {
- dateDebut: report.ordonnances.arretMaladie.certificat?.dateDebut || '',
- dateFin: report.ordonnances.arretMaladie.certificat?.dateFin || '',
- nombreJours: report.ordonnances.arretMaladie.certificat?.nombreJours || 0,
- fitnessStatus: report.ordonnances.arretMaladie.certificat?.fitnessStatus || 'unfit',
- remarques: report.ordonnances.arretMaladie.certificat?.remarques || '',
+ dateDebut: reportToSend.ordonnances.arretMaladie.certificat?.dateDebut || '',
+ dateFin: reportToSend.ordonnances.arretMaladie.certificat?.dateFin || '',
+ nombreJours: reportToSend.ordonnances.arretMaladie.certificat?.nombreJours || 0,
+ fitnessStatus: reportToSend.ordonnances.arretMaladie.certificat?.fitnessStatus || 'unfit',
+ remarques: reportToSend.ordonnances.arretMaladie.certificat?.remarques || '',
  },
  signature: documentSignatures?.sickLeave || null,
- content: report.ordonnances.arretMaladie
+ content: reportToSend.ordonnances.arretMaladie
 } : null,
- invoice: report?.invoice ? {
+ invoice: reportToSend?.invoice ? {
  type: 'invoice',
- title: `Invoice ${report.invoice.header?.invoiceNumber || 'N/A'}`,
- content: report.invoice,
+ title: `Invoice ${reportToSend.invoice.header?.invoiceNumber || 'N/A'}`,
+ content: reportToSend.invoice,
  signature: documentSignatures?.invoice || null
  } : null,
  followUpPlan: (followUpData && followUpData.types.length > 0) ? {

@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
     }
     const body = await request.json()
     console.log('📝 POST request received')
-    
+
     const {
       consultationId,
       patientId,
@@ -188,6 +188,25 @@ export async function POST(request: NextRequest) {
       clinicalData,
       diagnosisData
     } = body
+
+    console.log('🔍 Validation inputs:', {
+      consultationId: !!consultationId,
+      patientId: !!patientId,
+      doctorId,
+      doctorName,
+      patientName,
+      action,
+      hasReport: !!report,
+      hasCompteRendu: !!report?.compteRendu,
+      hasPraticien: !!report?.compteRendu?.praticien,
+      mcmNumber: report?.compteRendu?.praticien?.numeroEnregistrement,
+      hasMotif: !!report?.compteRendu?.rapport?.motifConsultation,
+      hasDiagnosis: !!report?.compteRendu?.rapport?.conclusionDiagnostique,
+      signatureKeys: metadata?.signatures ? Object.keys(metadata.signatures) : 'none',
+      signatureCount: metadata?.signatures ? Object.keys(metadata.signatures).length : 0,
+      patientEmail: patientData?.email,
+      patientPhone: patientData?.phone,
+    })
 
     // Basic field validation
     if (!consultationId || !patientId) {
@@ -418,13 +437,25 @@ generatedAt: new Date().toISOString()
       }
       
       // Prevent overwriting completed records with empty data (unless renewal)
+      // Allow re-finalization if valid content is being sent
       if (!isRenewal && existingRecord.documents_status === 'completed' && !hasValidContent && action === 'finalize') {
-        console.error('❌ Cannot finalize completed record without content')
+        console.error('❌ Cannot finalize completed record without content', {
+          hasValidContent,
+          motif: !!documentsData.consultationReport?.content?.rapport?.motifConsultation,
+          diagnosis: !!documentsData.consultationReport?.content?.rapport?.conclusionDiagnostique,
+          existingStatus: existingRecord.documents_status
+        })
         return NextResponse.json({
           success: false,
           error: 'Cannot finalize consultation without medical content',
           validationError: true
         }, { status: 400 })
+      }
+
+      // If record is already completed/finalized and we're re-sending with content, allow it
+      if (existingRecord.documents_status === 'completed' && hasValidContent && action === 'finalize') {
+        console.log('📝 Re-finalizing completed record with valid content')
+        finalStatus = 'finalized'
       }
       
 const updateData = {
