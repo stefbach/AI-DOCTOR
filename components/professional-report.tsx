@@ -2229,13 +2229,16 @@ if (isRenewal) {
  }
 }
 
- // VALIDATE PATIENT DATA AT THE START
- const hasValidPatientData = patientData && 
- (patientData.name || (patientData.firstName && patientData.lastName)) &&
- patientData.name !== 'Patient' &&
- patientData.name !== 'Non spécifié' &&
- patientData.name !== '1 janvier 1970' &&
- !patientData.name?.includes('1970')
+ // VALIDATE PATIENT DATA AT THE START (support both camelCase and snake_case from Tibok)
+ const patientNameForValidation = patientData?.name ||
+   (patientData?.firstName && patientData?.lastName ? `${patientData.firstName} ${patientData.lastName}` : '') ||
+   (patientData?.first_name && patientData?.last_name ? `${patientData.first_name} ${patientData.last_name}` : '')
+ const hasValidPatientData = patientData &&
+ patientNameForValidation &&
+ patientNameForValidation !== 'Patient' &&
+ patientNameForValidation !== 'Non spécifié' &&
+ patientNameForValidation !== '1 janvier 1970' &&
+ !patientNameForValidation?.includes('1970')
  
  if (!hasValidPatientData) {
  console.error('❌ Cannot generate report without valid patient data')
@@ -2266,8 +2269,12 @@ if (isRenewal) {
  
  console.log("📤 Generating report with doctor info:", currentDoctorInfo)
  
- const validPatientData = patientData || {
- name: 'Patient',
+ const resolvedPatientName = patientData?.name ||
+   (patientData?.firstName && patientData?.lastName ? `${patientData.firstName} ${patientData.lastName}` : '') ||
+   (patientData?.first_name && patientData?.last_name ? `${patientData.first_name} ${patientData.last_name}` : '') ||
+   patientData?.firstName || patientData?.first_name || patientData?.lastName || patientData?.last_name || ''
+ const validPatientData = patientData ? { ...patientData, name: resolvedPatientName || patientData.name } : {
+ name: '',
  age: '',
  gender: '',
  dateOfBirth: '',
@@ -2350,8 +2357,8 @@ if (isRenewal) {
  },
  praticien: currentDoctorInfo,
  patient: {
- nom: apiReport.medicalReport?.patient?.name || validPatientData.name || 'Patient',
- nomComplet: apiReport.medicalReport?.patient?.fullName || apiReport.medicalReport?.patient?.name || validPatientData.name || 'Patient',
+ nom: apiReport.medicalReport?.patient?.name || validPatientData.name || '',
+ nomComplet: apiReport.medicalReport?.patient?.fullName || apiReport.medicalReport?.patient?.name || validPatientData.name || '',
  age: apiReport.medicalReport?.patient?.age || validPatientData.age || '',
  dateNaissance: apiReport.medicalReport?.patient?.birthDate || validPatientData.dateOfBirth || '',
  sexe: apiReport.medicalReport?.patient?.gender || validPatientData.gender || '',
@@ -3504,16 +3511,34 @@ const handleSendDocuments = async () => {
  })
  
  // More lenient patient name validation - just ensure we have something
- if (!patientName || patientName.trim() === '') {
- // Try to get from patientData as fallback
- patientName = patientData?.name || patientData?.firstName + ' ' + patientData?.lastName || 'Patient'
+ if (!patientName || patientName.trim() === '' || patientName === 'Patient' || patientName === 'Non spécifié') {
+ // Try to get from patientData as fallback (handle both camelCase and snake_case from Tibok)
+ const firstName = patientData?.firstName || patientData?.first_name
+ const lastName = patientData?.lastName || patientData?.last_name
+ if (patientData?.name && patientData.name !== 'Patient' && patientData.name !== 'Non spécifié') {
+   patientName = patientData.name
+ } else if (firstName && lastName) {
+   patientName = `${firstName} ${lastName}`
+ } else if (firstName) {
+   patientName = firstName
+ } else if (lastName) {
+   patientName = lastName
+ } else {
+   patientName = ''
+ }
  console.log('⚠️ Using fallback patient name:', patientName)
  }
- 
- // Remove strict validation that blocks test data
- // Just ensure the name isn't completely empty or placeholder
- if (patientName === '[Name Required]' || patientName === '') {
- patientName = 'Patient' // Use generic fallback
+
+ // If we still don't have a valid patient name, block the send with a clear message
+ if (!patientName || patientName.trim().length < 3 || patientName === '[Name Required]') {
+ console.log('❌ No valid patient name available')
+ toast({
+   title: "Missing Patient Name",
+   description: "Patient name is required to send documents. Please ensure patient information is complete.",
+   variant: "destructive"
+ })
+ setIsSendingDocuments(false)
+ return
  }
  
  // Email validation with fallback

@@ -9,24 +9,27 @@ const supabase = (supabaseUrl && supabaseAnonKey)
 
 // Validation function to check for fake/test data
 function validatePatientData(patientName: string, patientData: any): { isValid: boolean; error?: string } {
-  // Check for invalid patient names
-  const invalidNames = ['Patient', 'Non spécifié', 'Test', 'test', 'Demo', 'demo', '[Name Required]', 'undefined', 'null']
-  
+  // Check for invalid patient names (exact matches only for common words to avoid false positives)
+  const exactInvalidNames = ['Patient', 'Non spécifié', 'Test', 'test', 'Demo', 'demo', '[Name Required]', 'undefined', 'null', 'undefined undefined']
+
   if (!patientName || patientName.trim() === '') {
-    return { isValid: false, error: "Patient name is required" }
+    return { isValid: false, error: "Patient name is required. Please ensure patient information is filled in before sending documents." }
   }
-  
-  if (invalidNames.some(invalid => patientName.includes(invalid))) {
-    return { isValid: false, error: "Invalid patient name detected (test/demo data)" }
+
+  const trimmedName = patientName.trim()
+
+  // Use exact match for common words that could appear in real names
+  if (exactInvalidNames.includes(trimmedName)) {
+    return { isValid: false, error: `Patient name "${trimmedName}" appears to be placeholder data. Please enter the real patient name.` }
   }
-  
-  if (patientName.includes('1970') || patientName.includes('[') || patientName.includes(']')) {
+
+  if (trimmedName.includes('1970') || trimmedName.includes('[') || trimmedName.includes(']')) {
     return { isValid: false, error: "Patient name contains invalid characters or placeholder text" }
   }
-  
+
   // Check for suspiciously short names
-  if (patientName.trim().length < 3) {
-    return { isValid: false, error: "Patient name is too short" }
+  if (trimmedName.length < 3) {
+    return { isValid: false, error: "Patient name is too short (minimum 3 characters)" }
   }
   
   // Check for valid email if provided
@@ -212,22 +215,24 @@ export async function POST(request: NextRequest) {
     // Validate patient data
     const patientValidation = validatePatientData(patientName, patientData)
     if (!patientValidation.isValid) {
-      console.error('❌ Invalid patient data:', patientValidation.error)
+      console.error('❌ Invalid patient data:', patientValidation.error, { patientName, patientEmail: patientData?.email, patientPhone: patientData?.phone })
       return NextResponse.json({
         success: false,
         error: `Patient validation failed: ${patientValidation.error}`,
-        validationError: true
+        validationError: true,
+        field: 'patient'
       }, { status: 400 })
     }
 
     // Validate doctor data
     const doctorValidation = validateDoctorData(doctorName, doctorId, report)
     if (!doctorValidation.isValid) {
-      console.error('❌ Invalid doctor data:', doctorValidation.error)
+      console.error('❌ Invalid doctor data:', doctorValidation.error, { doctorName, doctorId })
       return NextResponse.json({
         success: false,
         error: `Doctor validation failed: ${doctorValidation.error}`,
-        validationError: true
+        validationError: true,
+        field: 'doctor'
       }, { status: 400 })
     }
 
@@ -292,19 +297,27 @@ export async function POST(request: NextRequest) {
                                   report?.medicalReport?.chronicDiseaseAssessment)
 
         if (!hasNormalContent && !hasChronicContent) {
+          console.error('❌ Missing medical content for finalization:', {
+            hasMotif: !!report?.compteRendu?.rapport?.motifConsultation,
+            hasDiagnosis: !!report?.compteRendu?.rapport?.conclusionDiagnostique,
+            hasNarrative: !!report?.medicalReport?.narrative
+          })
           return NextResponse.json({
             success: false,
             error: "Medical report must contain consultation details and diagnosis",
-            validationError: true
+            validationError: true,
+            field: 'content'
           }, { status: 400 })
         }
-        
+
         // Verify signatures exist for finalized documents (not for renewals)
         if (!metadata?.signatures || Object.keys(metadata.signatures).length === 0) {
+          console.error('❌ Missing signatures for finalization:', { signatureKeys: metadata?.signatures ? Object.keys(metadata.signatures) : 'none' })
           return NextResponse.json({
             success: false,
-            error: "Document signatures are required for finalization",
-            validationError: true
+            error: "Document signatures are required for finalization. Please validate the documents first.",
+            validationError: true,
+            field: 'signatures'
           }, { status: 400 })
         }
       }
