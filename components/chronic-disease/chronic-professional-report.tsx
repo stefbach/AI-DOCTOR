@@ -2792,6 +2792,23 @@ export default function ChronicProfessionalReport({
         })
       }
 
+      // 🚨 Detect emergency status early (used in both save-medical-report and documents payload)
+      const emergencyTextToCheck = [
+        report?.medicalReport?.narrative || '',
+        report?.medicalReport?.patient?.chiefComplaint || '',
+        JSON.stringify(report?.medicalReport?.diagnosis || '')
+      ].join(' ').toUpperCase()
+      const emergencyKeywordsList = [
+        'IMMEDIATE HOSPITAL REFERRAL', 'EMERGENCY REFERRAL', 'EMERGENCY',
+        'URGENT REFERRAL', 'SAMU 114', 'CALL AMBULANCE', 'LIFE-THREATENING',
+        'ACUTE CORONARY SYNDROME', 'ACS', 'STEMI', 'NSTEMI', 'STROKE',
+        'PULMONARY EMBOLISM', 'AORTIC DISSECTION', 'SEPSIS',
+        'DIABETIC KETOACIDOSIS', 'HYPOGLYCEMIC COMA', 'ANAPHYLAXIS',
+        'STATUS EPILEPTICUS', 'HYPERTENSIVE EMERGENCY', 'ACUTE ABDOMEN',
+        'URGENCES', 'URGENCE MÉDICALE', 'ORIENTATION URGENCES'
+      ]
+      const isEmergencyCase = emergencyKeywordsList.some(keyword => emergencyTextToCheck.includes(keyword))
+
       // Save final version to consultation_records table
       const saveResponse = await fetch('/api/save-medical-report', {
         method: 'POST',
@@ -2913,26 +2930,6 @@ export default function ChronicProfessionalReport({
 
       // Prepare documents payload for chronic disease
       console.log('📦 Preparing documents payload...')
-
-      // 🚨 Detect emergency status to include in payload for patient side
-      const detectEmergencyForPayload = () => {
-        const textToCheck = [
-          report?.medicalReport?.narrative || '',
-          report?.medicalReport?.patient?.chiefComplaint || '',
-          JSON.stringify(report?.medicalReport?.diagnosis || '')
-        ].join(' ').toUpperCase()
-        const emergencyKeywords = [
-          'IMMEDIATE HOSPITAL REFERRAL', 'EMERGENCY REFERRAL', 'EMERGENCY',
-          'URGENT REFERRAL', 'SAMU 114', 'CALL AMBULANCE', 'LIFE-THREATENING',
-          'ACUTE CORONARY SYNDROME', 'ACS', 'STEMI', 'NSTEMI', 'STROKE',
-          'PULMONARY EMBOLISM', 'AORTIC DISSECTION', 'SEPSIS',
-          'DIABETIC KETOACIDOSIS', 'HYPOGLYCEMIC COMA', 'ANAPHYLAXIS',
-          'STATUS EPILEPTICUS', 'HYPERTENSIVE EMERGENCY', 'ACUTE ABDOMEN',
-          'URGENCES', 'URGENCE MÉDICALE', 'ORIENTATION URGENCES'
-        ]
-        return emergencyKeywords.some(keyword => textToCheck.includes(keyword))
-      }
-      const isEmergencyCase = detectEmergencyForPayload()
 
       const documentsPayload = {
         consultationId: finalConsultationId,
