@@ -416,8 +416,8 @@ export default function DermatologyImageUpload({
         </Alert>
       )}
 
-      {/* Upload Section - Only show when no Tibok image loaded */}
-      {!tibokImageLoaded && shouldShowImageUpload && (
+      {/* Upload Section - Show when no Tibok image loaded AND (shouldShowImageUpload OR no consultationId i.e. non-Tibok flow) */}
+      {!tibokImageLoaded && (shouldShowImageUpload || !patientData?.consultationId) && (
         <Card className="border-2 border-dashed border-teal-300 bg-teal-50/30">
           <CardContent className="p-8">
             <div className="text-center">
