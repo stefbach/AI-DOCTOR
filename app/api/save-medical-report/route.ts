@@ -186,7 +186,8 @@ export async function POST(request: NextRequest) {
       metadata,
       patientData,
       clinicalData,
-      diagnosisData
+      diagnosisData,
+      isEmergency
     } = body
 
     // Basic field validation
@@ -464,6 +465,7 @@ const updateData = {
                           report?.medicalReport?.practitioner?.specialty ||
                           existingRecord.doctor_specialty ||
                           null,
+        is_emergency: isEmergency === true,
         updated_at: new Date().toISOString()
       }
       
@@ -534,10 +536,11 @@ const insertData = {
                           report?.compteRendu?.praticien?.specialite ||
                           report?.medicalReport?.practitioner?.specialty ||
                           null,
+        is_emergency: isEmergency === true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }
-      
+
       const { data, error } = await supabase
         .from('consultation_records')
         .insert(insertData)
