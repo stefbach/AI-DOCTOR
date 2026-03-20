@@ -1746,10 +1746,10 @@ export default function ChronicProfessionalReport({
       }
     }
     
-    if (patientData && diagnosisData && doctorInfo.nom !== "Dr. [Name Required]") {
+    if (patientData && diagnosisData) {
       generateReport()
     }
-  }, [patientData, clinicalData, questionsData, diagnosisData, doctorInfo])
+  }, [patientData, clinicalData, questionsData, diagnosisData])
 
   // ==================== COMPUTED VALUES ====================
 
