@@ -40,7 +40,7 @@ async function testVoiceWorkflow() {
   console.log('✅ STRUCTURE DU TEST VALIDÉE\n');
   console.log('📋 Workflow attendu:');
   console.log('   1. Transcription (Whisper API)');
-  console.log('   2. Extraction des données (GPT-5.2)');
+  console.log('   2. Extraction des données (GPT-5.4)');
   console.log('   3. Préparation des données');
   console.log('   4. Diagnostic (/api/openai-diagnosis)');
   console.log('   5. Génération du rapport (/api/generate-consultation-report)');

@@ -108,7 +108,7 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
 async function translateToEnglish(text: string): Promise<string> {
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-5.2',
+      model: 'gpt-5.4',
       messages: [
         {
           role: 'system',
@@ -177,7 +177,7 @@ async function extractClinicalData(normalizedText: string): Promise<{
   referralInfo?: any;
   consultationType: 'standard' | 'specialist_referral';
 }> {
-  console.log('📊 Step 3: Extracting clinical data with GPT-5.2...');
+  console.log('📊 Step 3: Extracting clinical data with GPT-5.4...');
 
   const extractionPrompt = `You are an expert medical assistant. Analyze this medical consultation transcription and extract the following information in strict JSON format:
 
@@ -249,7 +249,7 @@ Respond ONLY with JSON, no additional text.`;
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-5.2',
+      model: 'gpt-5.4',
       messages: [
         {
           role: 'system',
@@ -474,7 +474,7 @@ export async function GET() {
     description: 'Voice dictation transcription and extraction (Steps 1-2 only)',
     steps: [
       '1. Audio transcription (Whisper API)',
-      '2. Clinical data extraction (GPT-5.2)',
+      '2. Clinical data extraction (GPT-5.4)',
     ],
     note: 'Frontend will then display DiagnosisForm and ProfessionalReport',
   });

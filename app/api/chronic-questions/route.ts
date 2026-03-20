@@ -247,7 +247,7 @@ ${systemMessage}
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-5.2',
+          model: 'gpt-5.4',
           messages: [
             { role: 'system', content: enhancedSystemMessage },
             { role: 'user', content: prompt }
@@ -445,7 +445,7 @@ export async function POST(request: NextRequest) {
     
     const prompt = generateChronicDiseasePrompt(processedPatient, processedClinical)
     
-    console.log('🤖 Calling GPT-5.2 with retry mechanism for chronic disease questions...')
+    console.log('🤖 Calling GPT-5.4 with retry mechanism for chronic disease questions...')
     
     const systemMessage = 'You are an expert endocrinologist and diabetologist conducting a chronic disease follow-up assessment. Generate diagnostic questions based on evidence-based medicine. CRITICAL: ALL questions MUST be multiple choice format with EXACTLY 4 specific answer options. NO open-ended questions. Always respond with valid JSON only.'
     
@@ -458,7 +458,7 @@ export async function POST(request: NextRequest) {
       success: true,
       questions,
       metadata: {
-        model: 'gpt-5.2',
+        model: 'gpt-5.4',
         version: '2.0-Professional-Grade-4Retry',
         processingTime: Date.now() - startTime,
         chronicDiseases: processedPatient.chronicDiseases,

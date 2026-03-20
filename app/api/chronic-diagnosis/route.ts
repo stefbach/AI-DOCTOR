@@ -47,13 +47,13 @@ async function callOpenAI(
   maxTokens: number = 2000,
   useReasoning: boolean = false
 ): Promise<any> {
-  // For reasoning models (gpt-5.2), reasoning tokens count toward max_completion_tokens.
+  // For reasoning models (gpt-5.4), reasoning tokens count toward max_completion_tokens.
   // With reasoning_effort 'medium', the model may use 6-10K reasoning tokens,
   // so we need a 16K budget to leave enough room for the actual JSON output.
   const effectiveMaxTokens = useReasoning ? Math.max(maxTokens, 16384) : maxTokens
 
   const body: any = {
-    model: "gpt-5.2",
+    model: "gpt-5.4",
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt }

@@ -3,7 +3,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 
 export const runtime = 'nodejs'
-export const maxDuration = 300 // 7-day meal plan generation needs time with gpt-5.2
+export const maxDuration = 300 // 7-day meal plan generation needs time with gpt-5.4
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -227,7 +227,7 @@ Generate complete 7-day meal plan with EXACTLY ${Math.round(targetCalories)} kca
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-5.2",
+        model: "gpt-5.4",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: patientContext }

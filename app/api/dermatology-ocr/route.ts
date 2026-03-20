@@ -335,7 +335,7 @@ GENERATE comprehensive professional dermatological image analysis.`
       
       // Call OpenAI Vision API
       const completion = await openai.chat.completions.create({
-        model: "gpt-5.2",
+        model: "gpt-5.4",
         messages: [
           {
             role: "system",

@@ -4,7 +4,7 @@ import crypto from 'crypto'
 import OpenAI from 'openai'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300 // 300 seconds max for GPT-5.2 diagnosis generation (large prompt)
+export const maxDuration = 300 // 300 seconds max for GPT-5.4 diagnosis generation (large prompt)
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
@@ -1977,7 +1977,7 @@ function validateAndParseJSON(rawContent: string): { success: boolean, data?: an
     // Remove markdown code blocks
     cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
 
-    // GPT-5.2 may include reasoning/thinking text before JSON - extract JSON object
+    // GPT-5.4 may include reasoning/thinking text before JSON - extract JSON object
     if (!cleanContent.startsWith('{')) {
       const firstBrace = cleanContent.indexOf('{')
       if (firstBrace !== -1) {
@@ -2178,7 +2178,7 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
       const openaiClient = new OpenAI({ apiKey })
 
       const completion = await openaiClient.chat.completions.create({
-        model: 'gpt-5.2',
+        model: 'gpt-5.4',
         messages: [
           {
             role: 'system',
@@ -2226,7 +2226,7 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
       const rawContent = completion.choices[0]?.message?.content || ''
       const finishReason = completion.choices[0]?.finish_reason || 'unknown'
 
-      console.log('🤖 GPT-5.2 response received, length:', rawContent.length, 'finish_reason:', finishReason)
+      console.log('🤖 GPT-5.4 response received, length:', rawContent.length, 'finish_reason:', finishReason)
       console.log('🔍 Response starts with:', rawContent.substring(0, 100))
       console.log('🔍 Response ends with:', rawContent.substring(Math.max(0, rawContent.length - 100)))
 
@@ -5858,7 +5858,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       
       // Métadonnées
       metadata: {
-        ai_model: 'GPT-5.2',
+        ai_model: 'GPT-5.4',
         system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise-System',
         features: [
           '🏝️ MAURITIUS ANGLO-SAXON NOMENCLATURE - Terminologie médicale UK',
