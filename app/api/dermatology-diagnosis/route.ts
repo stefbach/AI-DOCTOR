@@ -381,8 +381,8 @@ CLINICAL SUMMARY MUST INCLUDE:
             content: diagnosticPrompt
           }
         ],
-        max_completion_tokens: 16000,
-        reasoning_effort: 'high',
+        max_completion_tokens: 32000,
+        reasoning_effort: 'medium',
         response_format: { type: "json_object" },
       })
       

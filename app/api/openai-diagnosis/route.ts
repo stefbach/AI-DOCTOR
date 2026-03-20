@@ -2218,8 +2218,8 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
             content: finalPrompt
           }
         ],
-        max_completion_tokens: 16000,
-        reasoning_effort: 'high',
+        max_completion_tokens: 32000,
+        reasoning_effort: 'medium',
         response_format: { type: "json_object" },
       })
 
