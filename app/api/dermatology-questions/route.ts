@@ -3,6 +3,9 @@
 // - Auto-correction on final attempt
 // - 8000 max tokens for comprehensive questions
 // - Advanced OpenAI parameters
+export const runtime = 'nodejs'
+export const maxDuration = 120 // 120 seconds for dermatology questions generation
+
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 

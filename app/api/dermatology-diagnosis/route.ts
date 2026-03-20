@@ -8,6 +8,9 @@
 // - Auto-correction on final attempt
 // - 8000 max tokens for comprehensive responses
 // - Enhanced context awareness
+export const runtime = 'nodejs'
+export const maxDuration = 300 // 300 seconds max for GPT-5.4 dermatology diagnosis generation
+
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
