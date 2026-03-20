@@ -4977,14 +4977,16 @@ const [localSickLeave, setLocalSickLeave] = useState({
  const bioCount = Object.values(report?.ordonnances?.biologie?.prescription?.analyses || {})
  .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)
  const imagingCount = report?.ordonnances?.imagerie?.prescription?.examens?.length || 0
+ const sickLeaveDays = report?.ordonnances?.arretMaladie?.certificat?.nombreJours || 0
 
  return (
  <Card className="print:hidden">
  <CardHeader>
  <CardTitle className="text-lg">Prescription Summary</CardTitle>
+ <p className="text-sm text-gray-500">Click on a card to go to the corresponding tab</p>
  </CardHeader>
  <CardContent>
- <div className="grid grid-cols-3 gap-4 text-center">
+ <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center">
  <div className="p-4 bg-teal-50 rounded">
  <Pill className="h-8 w-8 mx-auto mb-2 text-teal-600" />
  <p className="text-2xl font-bold text-teal-600">{medicamentCount}</p>
@@ -5000,6 +5002,14 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <p className="text-2xl font-bold text-blue-600">{imagingCount}</p>
  <p className="text-sm text-gray-600">Imaging</p>
  </div>
+ <button
+   onClick={() => setActiveTab("sickleave")}
+   className="p-4 bg-orange-50 rounded hover:bg-orange-100 transition-colors cursor-pointer"
+ >
+ <Calendar className="h-8 w-8 mx-auto mb-2 text-orange-600" />
+ <p className="text-2xl font-bold text-orange-600">{sickLeaveDays}</p>
+ <p className="text-sm text-gray-600">Sick Leave Days</p>
+ </button>
  </div>
  </CardContent>
  </Card>
