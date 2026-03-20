@@ -2828,7 +2828,8 @@ export default function ChronicProfessionalReport({
             address: patientAddress
           },
           clinicalData: clinicalData || {},
-          diagnosisData: diagnosisData || {}
+          diagnosisData: diagnosisData || {},
+          isEmergency: isEmergencyCase
         })
       })
 
@@ -2913,12 +2914,33 @@ export default function ChronicProfessionalReport({
       // Prepare documents payload for chronic disease
       console.log('📦 Preparing documents payload...')
 
+      // 🚨 Detect emergency status to include in payload for patient side
+      const detectEmergencyForPayload = () => {
+        const textToCheck = [
+          report?.medicalReport?.narrative || '',
+          report?.medicalReport?.patient?.chiefComplaint || '',
+          JSON.stringify(report?.medicalReport?.diagnosis || '')
+        ].join(' ').toUpperCase()
+        const emergencyKeywords = [
+          'IMMEDIATE HOSPITAL REFERRAL', 'EMERGENCY REFERRAL', 'EMERGENCY',
+          'URGENT REFERRAL', 'SAMU 114', 'CALL AMBULANCE', 'LIFE-THREATENING',
+          'ACUTE CORONARY SYNDROME', 'ACS', 'STEMI', 'NSTEMI', 'STROKE',
+          'PULMONARY EMBOLISM', 'AORTIC DISSECTION', 'SEPSIS',
+          'DIABETIC KETOACIDOSIS', 'HYPOGLYCEMIC COMA', 'ANAPHYLAXIS',
+          'STATUS EPILEPTICUS', 'HYPERTENSIVE EMERGENCY', 'ACUTE ABDOMEN',
+          'URGENCES', 'URGENCE MÉDICALE', 'ORIENTATION URGENCES'
+        ]
+        return emergencyKeywords.some(keyword => textToCheck.includes(keyword))
+      }
+      const isEmergencyCase = detectEmergencyForPayload()
+
       const documentsPayload = {
         consultationId: finalConsultationId,
         patientId,
         doctorId,
         doctorName: finalDoctorInfo.nom,
         generatedAt: new Date().toISOString(),
+        isEmergency: isEmergencyCase,
         consultationType: 'chronic_disease',
         // Patient data for Tibok chronic-disease-documents endpoint
         patientData: {

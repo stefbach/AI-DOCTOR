@@ -225,13 +225,70 @@ export default function ViewReportPage() {
 }
 
 /**
+ * Detect emergency status from report content
+ */
+function detectEmergencyFromReport(report: any): boolean {
+  const textToCheck = [
+    report?.rapport?.motifConsultation || '',
+    report?.rapport?.syntheseDiagnostique || '',
+    report?.rapport?.conclusionDiagnostique || '',
+    report?.rapport?.priseEnCharge || '',
+    report?.rapport?.surveillance || '',
+    report?.medicalReport?.narrative || '',
+    report?.medicalReport?.patient?.chiefComplaint || '',
+    JSON.stringify(report?.medicalReport?.diagnosis || ''),
+    typeof report === 'string' ? report : ''
+  ].join(' ').toUpperCase()
+
+  const emergencyKeywords = [
+    'IMMEDIATE HOSPITAL REFERRAL', 'EMERGENCY REFERRAL', 'EMERGENCY',
+    'URGENT REFERRAL', 'SAMU 114', 'CALL AMBULANCE', 'LIFE-THREATENING',
+    'ACUTE CORONARY SYNDROME', 'ACS', 'STEMI', 'NSTEMI', 'STROKE',
+    'PULMONARY EMBOLISM', 'AORTIC DISSECTION', 'SEPSIS',
+    'DIABETIC KETOACIDOSIS', 'HYPOGLYCEMIC COMA', 'ANAPHYLAXIS',
+    'STATUS EPILEPTICUS', 'HYPERTENSIVE EMERGENCY', 'ACUTE ABDOMEN',
+    'URGENCES', 'URGENCE MÉDICALE', 'ORIENTATION URGENCES'
+  ]
+  return emergencyKeywords.some(keyword => textToCheck.includes(keyword))
+}
+
+/**
+ * Emergency banner component
+ */
+function EmergencyBanner() {
+  return (
+    <div className="mb-6 p-6 bg-red-600 text-white rounded-lg border-4 border-red-700 shadow-2xl print:bg-red-100 print:text-red-900 print:border-red-900">
+      <div className="flex items-center gap-4">
+        <div className="text-5xl">🚨</div>
+        <div className="flex-1">
+          <h2 className="text-2xl font-black mb-1 tracking-wide">⚠️ EMERGENCY CASE ⚠️</h2>
+          <p className="text-lg font-bold">IMMEDIATE MEDICAL ATTENTION REQUIRED</p>
+          <p className="text-base mt-1">This consultation requires urgent hospital referral - Do not delay</p>
+        </div>
+        <div className="text-5xl">🚨</div>
+      </div>
+    </div>
+  )
+}
+
+/**
  * Render report based on its structure
  */
 function renderReport(report: any) {
+  const isEmergency = detectEmergencyFromReport(report)
+
+  // Helper to wrap content with emergency banner if needed
+  const wrapWithEmergency = (content: React.ReactNode) => (
+    <>
+      {isEmergency && <EmergencyBanner />}
+      {content}
+    </>
+  )
+
   // Case 1: String report
   if (typeof report === 'string') {
-    return (
-      <div 
+    return wrapWithEmergency(
+      <div
         className="prose prose-sm max-w-none"
         style={{
           fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -247,8 +304,8 @@ function renderReport(report: any) {
 
   // Case 2: English format with narrative
   if (report.medicalReport?.narrative) {
-    return (
-      <div 
+    return wrapWithEmergency(
+      <div
         className="prose prose-sm max-w-none"
         style={{
           fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -265,16 +322,16 @@ function renderReport(report: any) {
 
   // Case 3: Mauritian format
   if (report.compteRendu) {
-    return renderMauritianReport(report.compteRendu)
+    return wrapWithEmergency(renderMauritianReport(report.compteRendu))
   }
 
   // Case 4: Structured data - render as sections
   if (report.medicalReport) {
-    return renderStructuredReport(report.medicalReport)
+    return wrapWithEmergency(renderStructuredReport(report.medicalReport))
   }
 
   // Fallback: JSON display
-  return (
+  return wrapWithEmergency(
     <div className="bg-gray-50 p-4 rounded-lg border">
       <pre className="text-xs text-gray-700 whitespace-pre-wrap font-mono overflow-x-auto">
         {JSON.stringify(report, null, 2)}

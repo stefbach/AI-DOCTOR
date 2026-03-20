@@ -3730,7 +3730,8 @@ const handleSendDocuments = async () => {
  address: patientAddress
  },
  clinicalData: clinicalData || {},
- diagnosisData: diagnosisData || {}
+ diagnosisData: diagnosisData || {},
+ isEmergency: isEmergencyCase
  })
  })
 
@@ -3813,7 +3814,30 @@ const handleSendDocuments = async () => {
 
  // Prepare documents payload
  console.log('📦 Preparing documents payload...')
- 
+
+ // 🚨 Detect emergency status to include in payload for patient side
+ const detectEmergencyForPayload = () => {
+   const rapportData = getReportRapport()
+   const textToCheck = [
+     rapportData?.motifConsultation || '',
+     rapportData?.syntheseDiagnostique || '',
+     rapportData?.conclusionDiagnostique || '',
+     rapportData?.priseEnCharge || '',
+     rapportData?.surveillance || ''
+   ].join(' ').toUpperCase()
+   const emergencyKeywords = [
+     'IMMEDIATE HOSPITAL REFERRAL', 'EMERGENCY REFERRAL', 'EMERGENCY',
+     'URGENT REFERRAL', 'SAMU 114', 'CALL AMBULANCE', 'LIFE-THREATENING',
+     'ACUTE CORONARY SYNDROME', 'ACS', 'STEMI', 'NSTEMI', 'STROKE',
+     'PULMONARY EMBOLISM', 'AORTIC DISSECTION', 'SEPSIS',
+     'DIABETIC KETOACIDOSIS', 'HYPOGLYCEMIC COMA', 'ANAPHYLAXIS',
+     'STATUS EPILEPTICUS', 'HYPERTENSIVE EMERGENCY', 'ACUTE ABDOMEN',
+     'URGENCES', 'URGENCE MÉDICALE', 'ORIENTATION URGENCES'
+   ]
+   return emergencyKeywords.some(keyword => textToCheck.includes(keyword))
+ }
+ const isEmergencyCase = detectEmergencyForPayload()
+
  const documentsPayload = {
  consultationId,
  patientId,
@@ -3823,6 +3847,7 @@ const handleSendDocuments = async () => {
  patientEmail: patientEmail,
  patientPhone: patientPhone,
  generatedAt: new Date().toISOString(),
+ isEmergency: isEmergencyCase,
  documents: {
  consultationReport: report?.compteRendu ? {
  type: 'consultation_report',

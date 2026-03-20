@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
           },
           invoice: reportData.report?.invoice
         },
+        isEmergency: reportData.isEmergency || false,
         signatures: reportData.signatures
       })
     })

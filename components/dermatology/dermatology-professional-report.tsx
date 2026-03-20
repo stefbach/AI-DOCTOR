@@ -3574,7 +3574,8 @@ const handleSendDocuments = async () => {
      ? diagnosisData.diagnosis.fullText.substring(0, 10000)
      : undefined
  } : undefined
- } : {}
+ } : {},
+isEmergency: isEmergencyCase
  })
  })
 
@@ -3748,6 +3749,30 @@ console.log('    - weight:', patient?.poids || patientData?.weight || 'MISSING')
  console.log('  Checked: ocrAnalysisData.analysis, diagnosisData.diagnosis, imageData.analysis')
  }
 
+// 🚨 Detect emergency status to include in payload for patient side
+const detectEmergencyForPayload = () => {
+  const rapportData = getReportRapport()
+  const textToCheck = [
+    rapportData?.motifConsultation || '',
+    rapportData?.syntheseDiagnostique || '',
+    rapportData?.conclusionDiagnostique || '',
+    rapportData?.priseEnCharge || '',
+    rapportData?.surveillance || ''
+  ].join(' ').toUpperCase()
+  const emergencyKeywords = [
+    'IMMEDIATE HOSPITAL REFERRAL', 'EMERGENCY REFERRAL', 'EMERGENCY',
+    'URGENT REFERRAL', 'SAMU 114', 'CALL AMBULANCE', 'LIFE-THREATENING',
+    'ACUTE CORONARY SYNDROME', 'ACS', 'STEMI', 'NSTEMI', 'STROKE',
+    'PULMONARY EMBOLISM', 'AORTIC DISSECTION', 'SEPSIS',
+    'DIABETIC KETOACIDOSIS', 'HYPOGLYCEMIC COMA', 'ANAPHYLAXIS',
+    'STATUS EPILEPTICUS', 'HYPERTENSIVE EMERGENCY', 'ACUTE ABDOMEN',
+    'URGENCES', 'URGENCE MÉDICALE', 'ORIENTATION URGENCES',
+    'NECROTIZING FASCIITIS', 'STEVENS-JOHNSON SYNDROME', 'TOXIC EPIDERMAL NECROLYSIS'
+  ]
+  return emergencyKeywords.some(keyword => textToCheck.includes(keyword))
+}
+const isEmergencyCase = detectEmergencyForPayload()
+
  const documentsPayload = {
  consultationId,
  patientId,
@@ -3757,6 +3782,7 @@ console.log('    - weight:', patient?.poids || patientData?.weight || 'MISSING')
  patientEmail: patientEmail,
  patientPhone: patientPhone,
  generatedAt: new Date().toISOString(),
+isEmergency: isEmergencyCase,
  consultationType: 'dermatology',
  // Complete patient data for Tibok
  patientData: {
