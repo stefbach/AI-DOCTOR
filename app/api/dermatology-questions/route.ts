@@ -3,6 +3,9 @@
 // - Auto-correction on final attempt
 // - 8000 max tokens for comprehensive questions
 // - Advanced OpenAI parameters
+export const runtime = 'nodejs'
+export const maxDuration = 120 // 120 seconds for dermatology questions generation
+
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
@@ -83,7 +86,7 @@ ${systemMessage}
       }
       
       const completion = await openai.chat.completions.create({
-        model: "gpt-5.2",
+        model: "gpt-5.4",
         messages: [
           { role: "system", content: enhancedSystemMessage },
           { role: "user", content: prompt }
@@ -394,7 +397,7 @@ YOU MUST return a JSON object with "questions" array, NOT a single question!`
         lastName: originalIdentity.lastName
       },
       metadata: {
-        model: 'gpt-5.2',
+        model: 'gpt-5.4',
         version: '2.0-Professional-Grade-4Retry',
         qualityMetrics: result.qualityMetrics
       },

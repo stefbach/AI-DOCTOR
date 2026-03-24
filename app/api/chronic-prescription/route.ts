@@ -346,7 +346,7 @@ Generate the comprehensive chronic disease prescription now.`
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-5.2",
+        model: "gpt-5.4",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: patientContext }

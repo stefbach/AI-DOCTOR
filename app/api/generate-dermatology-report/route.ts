@@ -1584,7 +1584,7 @@ export async function POST(request: NextRequest) {
       const userPrompt = createEnhancedUserPrompt(enrichedGPTData)
       
       const result = await generateText({
-        model: openai("gpt-5.2"),
+        model: openai("gpt-5.4"),
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }

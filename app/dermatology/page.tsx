@@ -361,6 +361,10 @@ export default function DermatologyWorkflow() {
                   imageData={imageData}
                   ocrAnalysisData={ocrAnalysisData}
                   questionsData={questionsData}
+                  onImageUpdate={(images) => {
+                    console.log('📸 Images updated from diagnosis step:', images.length)
+                    setImageData(images)
+                  }}
                   onNext={(data) => {
                     console.log('✅ Diagnosis generated:', data)
                     console.log('🔍 CRITICAL: diagnosisData keys:', Object.keys(data || {}))

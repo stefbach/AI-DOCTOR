@@ -53,7 +53,7 @@ Répondez UNIQUEMENT avec du JSON valide.
     `
 
     const result = await generateText({
-      model: openai("gpt-5.2", { reasoningEffort: "none" }),
+      model: openai("gpt-5.4", { reasoningEffort: "none" }),
       prompt: prompt,
       temperature: 0.1,
       maxTokens: 2000,
@@ -84,7 +84,7 @@ Répondez UNIQUEMENT avec du JSON valide.
       data: medicationData,
       metadata: {
         source: "OpenAI Medical Knowledge",
-        model: "gpt-5.2",
+        model: "gpt-5.4",
         lastUpdated: new Date().toISOString(),
         confidence: medicationData.rxcui !== "unknown" ? "high" : "medium"
       }

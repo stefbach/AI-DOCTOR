@@ -8,6 +8,9 @@
 // - Auto-correction on final attempt
 // - 8000 max tokens for comprehensive responses
 // - Enhanced context awareness
+export const runtime = 'nodejs'
+export const maxDuration = 300 // 300 seconds max for GPT-5.4 dermatology diagnosis generation
+
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
@@ -370,7 +373,7 @@ CLINICAL SUMMARY MUST INCLUDE:
       }
       
       const completion = await openai.chat.completions.create({
-        model: "gpt-5.2",
+        model: "gpt-5.4",
         messages: [
           {
             role: "system",
@@ -381,8 +384,8 @@ CLINICAL SUMMARY MUST INCLUDE:
             content: diagnosticPrompt
           }
         ],
-        max_completion_tokens: 16000,
-        reasoning_effort: 'high',
+        max_completion_tokens: 8000,
+        reasoning_effort: 'medium',
         response_format: { type: "json_object" },
       })
       
@@ -885,7 +888,7 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
 GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity and pharmaceutical precision.`
 
     // Call OpenAI with retry mechanism and quality validation
-    const result = await callOpenAIWithRetry(openai, diagnosticPrompt, 2)
+    const result = await callOpenAIWithRetry(openai, diagnosticPrompt, 1)
     const diagnosisData = result.diagnosis
     
     // Generate formatted text for backward compatibility

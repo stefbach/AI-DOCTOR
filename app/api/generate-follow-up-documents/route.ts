@@ -42,9 +42,9 @@ export async function POST(req: NextRequest) {
       consultationType
     )
 
-    // Generate documents using GPT-5.2
+    // Generate documents using GPT-5.4
     const result = await generateText({
-      model: openai('gpt-5.2'),
+      model: openai('gpt-5.4'),
       messages: [
         {
           role: 'system',

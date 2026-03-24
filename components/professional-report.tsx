@@ -6497,6 +6497,8 @@ const [localSickLeave, setLocalSickLeave] = useState({
  const bioCount = Object.values(report?.ordonnances?.biologie?.prescription?.analyses || {})
  .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0)
  const imagingCount = report?.ordonnances?.imagerie?.prescription?.examens?.length || 0
+ const sickLeaveData = report?.ordonnances?.arretMaladie?.certificat
+ const sickLeaveDays = sickLeaveData?.nombreJours || 0
 
  return (
  <Card className="print:hidden">
@@ -6505,7 +6507,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <p className="text-sm text-gray-500">Click on a card to go to the corresponding tab</p>
  </CardHeader>
  <CardContent>
- <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-center">
+ <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center">
  <button
  onClick={() => setActiveTab("medicaments")}
  className="p-4 bg-teal-50 rounded hover:bg-teal-100 transition-colors cursor-pointer w-full border-2 border-transparent hover:border-teal-300"
@@ -6529,6 +6531,14 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <Scan className="h-8 w-8 mx-auto mb-2 text-blue-600" />
  <p className="text-2xl font-bold text-blue-600">{imagingCount}</p>
  <p className="text-sm text-gray-600">Imaging</p>
+ </button>
+ <button
+ onClick={() => setActiveTab("sickleave")}
+ className="p-4 bg-orange-50 rounded hover:bg-orange-100 transition-colors cursor-pointer w-full border-2 border-transparent hover:border-orange-300"
+ >
+ <Calendar className="h-8 w-8 mx-auto mb-2 text-orange-600" />
+ <p className="text-2xl font-bold text-orange-600">{sickLeaveDays}</p>
+ <p className="text-sm text-gray-600">Sick Leave Days</p>
  </button>
  </div>
  </CardContent>

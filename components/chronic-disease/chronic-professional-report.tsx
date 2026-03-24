@@ -1746,10 +1746,10 @@ export default function ChronicProfessionalReport({
       }
     }
     
-    if (patientData && diagnosisData && doctorInfo.nom !== "Dr. [Name Required]") {
+    if (patientData && diagnosisData) {
       generateReport()
     }
-  }, [patientData, clinicalData, questionsData, diagnosisData, doctorInfo])
+  }, [patientData, clinicalData, questionsData, diagnosisData])
 
   // ==================== COMPUTED VALUES ====================
 
@@ -6827,6 +6827,7 @@ export default function ChronicProfessionalReport({
       Object.values(report.laboratoryTests.prescription.tests || {})
         .reduce((acc: number, tests: any) => acc + (Array.isArray(tests) ? tests.length : 0), 0) : 0
     const paraclinicalCount = report.paraclinicalExams?.prescription.exams?.length || 0
+    const sickLeaveDaysCount = sickLeaveData.numberOfDays || 0
 
     return (
       <Card className="print:hidden">
@@ -6835,7 +6836,7 @@ export default function ChronicProfessionalReport({
           <p className="text-sm text-gray-500">Click on a card to go to the corresponding tab</p>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <button
               onClick={() => setActiveTab("medications")}
               className="p-4 bg-teal-50 rounded hover:bg-teal-100 transition-colors cursor-pointer w-full border-2 border-transparent hover:border-teal-300"
@@ -6860,12 +6861,20 @@ export default function ChronicProfessionalReport({
               <p className="text-2xl font-bold text-indigo-600">{paraclinicalCount}</p>
               <p className="text-sm text-gray-600">Paraclinical</p>
             </button>
+            <button
+              onClick={() => setActiveTab("sick-leave")}
+              className="p-4 bg-orange-50 rounded hover:bg-orange-100 transition-colors cursor-pointer w-full border-2 border-transparent hover:border-orange-300"
+            >
+              <Calendar className="h-8 w-8 mx-auto mb-2 text-orange-600" />
+              <p className="text-2xl font-bold text-orange-600">{sickLeaveDaysCount}</p>
+              <p className="text-sm text-gray-600">Sick Leave Days</p>
+            </button>
           </div>
         </CardContent>
       </Card>
     )
   }
-  
+
   // ==================== MAIN RENDER ====================
   
   return (

@@ -12,7 +12,7 @@ import { openai } from '@ai-sdk/openai'
  * - New concerns or improvements
  * - Adjusted treatment plans
  * 
- * Uses GPT-5.2 for superior narrative quality and clinical reasoning.
+ * Uses GPT-5.4 for superior narrative quality and clinical reasoning.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -39,9 +39,9 @@ export async function POST(req: NextRequest) {
       consultationHistory
     )
 
-    // Generate report using GPT-5.2
+    // Generate report using GPT-5.4
     const result = await generateText({
-      model: openai('gpt-5.2', { reasoningEffort: 'none' }),
+      model: openai('gpt-5.4', { reasoningEffort: 'none' }),
       messages: [
         {
           role: 'system',
