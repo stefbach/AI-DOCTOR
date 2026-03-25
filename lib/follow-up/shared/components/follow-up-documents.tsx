@@ -508,6 +508,7 @@ export function FollowUpDocuments({
                             <SelectItem value="Pommade">Pommade</SelectItem>
                             <SelectItem value="Solution">Solution</SelectItem>
                             <SelectItem value="Injection">Injection</SelectItem>
+                            <SelectItem value="Ampoule">Ampoule</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
