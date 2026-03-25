@@ -489,6 +489,7 @@ const MedicationEditForm = memo(({
  <SelectItem value="injection">Injection</SelectItem>
  <SelectItem value="cream">Cream</SelectItem>
  <SelectItem value="ointment">Ointment</SelectItem>
+ <SelectItem value="ampoule">Ampoule</SelectItem>
  </SelectContent>
  </Select>
  </div>

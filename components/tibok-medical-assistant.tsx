@@ -662,7 +662,7 @@ I will suggest precise improvements that you can review and apply!`,
 
   // ==================== MAIN RENDER ====================
   return (
-    <Card className="w-full h-[700px] flex flex-col shadow-2xl border-2 border-teal-200 overflow-hidden">
+    <Card className="w-full h-[700px] max-h-[90vh] flex flex-col shadow-2xl border-2 border-teal-200 overflow-hidden">
       {/* Header */}
       <CardHeader className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white pb-4 flex-shrink-0">
         <div className="flex items-center justify-between">
@@ -671,7 +671,7 @@ I will suggest precise improvements that you can review and apply!`,
               <Brain className="h-6 w-6" />
             </div>
             <div>
-              <CardTitle className="text-xl flex items-center gap-2">
+              <CardTitle className="text-lg sm:text-xl flex items-center gap-2 flex-wrap">
                 Assistant Médical TIBOK
                 <Badge className="bg-white/20 text-white border-0 text-xs">
                   GPT-4 Encyclopédique
@@ -785,14 +785,15 @@ I will suggest precise improvements that you can review and apply!`,
                     </div>
 
                     {/* Message Content */}
-                    <div className={`flex-1 max-w-[85%] ${message.role === 'user' ? 'items-end' : ''}`}>
+                    <div className={`flex-1 max-w-[85%] min-w-0 overflow-hidden ${message.role === 'user' ? 'items-end' : ''}`}>
                       <div className={`rounded-2xl p-4 ${
                         message.role === 'user'
                           ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white ml-auto'
                           : 'bg-gray-100 border border-gray-200'
                       }`}>
-                        <div className="text-sm whitespace-pre-wrap leading-relaxed prose prose-sm max-w-none"
-                          dangerouslySetInnerHTML={{ 
+                        <div className="text-sm whitespace-pre-wrap leading-relaxed prose prose-sm max-w-none break-words"
+                          style={{ overflowWrap: 'anywhere' }}
+                          dangerouslySetInnerHTML={{
                             __html: message.content
                               .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                               .replace(/\n/g, '<br/>')
@@ -810,10 +811,10 @@ I will suggest precise improvements that you can review and apply!`,
                           {message.actions.map((action, actionIndex) => (
                             <div 
                               key={actionIndex}
-                              className="flex items-start gap-2 p-3 bg-white border-2 border-teal-200 rounded-xl hover:border-teal-400 hover:shadow-md transition-all"
+                              className="flex items-start gap-2 p-3 bg-white border-2 border-teal-200 rounded-xl hover:border-teal-400 hover:shadow-md transition-all flex-wrap sm:flex-nowrap"
                             >
                               <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-1 sm:gap-2 mb-2 flex-wrap">
                                   <Badge className="bg-teal-500 text-white px-2 py-1">
                                     {getActionIcon(action.type)}
                                     <span className="ml-1 capitalize">{action.action || 'Modifier'}</span>
