@@ -1,0 +1,76 @@
+{
+  "name": "[AI-DOCTOR][AGENT-04] CDC MMWR Daily",
+  "_template_note": "Identical pipeline to 02-who-guidelines.json. Override values listed below.",
+  "_overrides": {
+    "Schedule": "0 5 * * *",
+    "source_code": "CDC",
+    "language": "en",
+    "rss_url": "https://tools.cdc.gov/api/v2/resources/media/rss/132608.rss",
+    "filter_keywords": ["guideline", "recommendation", "mmwr", "vaccination schedule", "clinical"],
+    "filter_exclusions": ["quick stats", "notes from the field"]
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 5 * * *" }]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "Schedule (daily 5AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            { "name": "source_code", "value": "CDC" },
+            { "name": "language", "value": "en" },
+            { "name": "rss_url", "value": "https://tools.cdc.gov/api/v2/resources/media/rss/132608.rss" }
+          ]
+        }
+      },
+      "id": "set-config",
+      "name": "Set Source Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.rss_url }}",
+        "options": { "timeout": 30000 }
+      },
+      "id": "fetch-rss",
+      "name": "Fetch RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const keywords = ['guideline', 'recommendation', 'mmwr', 'vaccination schedule', 'clinical'];\nconst exclusions = ['quick stats', 'notes from the field'];\n\nreturn $input.all()\n  .filter(item => {\n    const title = (item.json.title || '').toLowerCase();\n    if (exclusions.some(e => title.includes(e))) return false;\n    return keywords.some(k => title.includes(k));\n  })\n  .slice(0, 15);"
+      },
+      "id": "filter-items",
+      "name": "Filter CDC Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Schedule (daily 5AM)": {
+      "main": [[{ "node": "Set Source Config", "type": "main", "index": 0 }]]
+    },
+    "Set Source Config": {
+      "main": [[{ "node": "Fetch RSS", "type": "main", "index": 0 }]]
+    },
+    "Fetch RSS": {
+      "main": [[{ "node": "Filter CDC Items", "type": "main", "index": 0 }]]
+    }
+  },
+  "_continuation": "Continue with the same downstream pipeline as 02-who-guidelines.json: Loop Over Items → Fetch Full Page → Extract & Chunk → AI Metadata Extraction → Generate Embeddings → Build Webhook Payload → POST Vercel Webhook",
+  "tags": [{ "name": "AI-DOCTOR" }, { "name": "CDC" }, { "name": "guidelines" }]
+}

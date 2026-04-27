@@ -1,0 +1,119 @@
+{
+  "name": "[AI-DOCTOR][AGENT-05] NICE Guidelines Daily",
+  "_template_note": "Identical pipeline to 02-who-guidelines.json. Override values listed below.",
+  "_warning": "NICE may block automated access from non-UK IPs. Test the RSS URL first via n8n manual execution. If 403/blocked, fall back to scripts/bulk-seed/sources/nice-manual.ts for PDF ingestion.",
+  "_overrides": {
+    "Schedule": "0 3 * * *",
+    "source_code": "NICE",
+    "language": "en",
+    "rss_url": "https://www.nice.org.uk/guidance/published?type=ng,cg,qs,ta&feed=rss"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 3 * * *" }]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "Schedule (daily 3AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            { "name": "source_code", "value": "NICE" },
+            { "name": "language", "value": "en" },
+            { "name": "rss_url", "value": "https://www.nice.org.uk/guidance/published?type=ng,cg,qs,ta&feed=rss" }
+          ]
+        }
+      },
+      "id": "set-config",
+      "name": "Set Source Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.rss_url }}",
+        "options": {
+          "timeout": 30000,
+          "headers": {
+            "User-Agent": "Mozilla/5.0 AI-DOCTOR-RAG/1.0"
+          }
+        }
+      },
+      "id": "fetch-rss",
+      "name": "Fetch NICE RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// NICE returns mostly NG/CG/QS/TA codes — no extra filter needed\n// but we cap at 20 to control cost\nreturn $input.all().slice(0, 20);"
+      },
+      "id": "filter-items",
+      "name": "Cap items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.error }}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      },
+      "id": "if-feed-ok",
+      "name": "If Feed OK",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.RESEND_FROM }}",
+        "toEmail": "={{ $env.ADMIN_EMAIL }}",
+        "subject": "[AI-DOCTOR] ⚠️ NICE feed unreachable",
+        "html": "<p>The NICE RSS feed could not be reached today. Please verify access manually.</p><p>Fallback: ingest priority NICE guidelines manually via <code>npx tsx scripts/bulk-seed/sources/nice-manual.ts</code></p>"
+      },
+      "id": "notify-failure",
+      "name": "Notify NICE Failure",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1340, 480]
+    }
+  ],
+  "connections": {
+    "Schedule (daily 3AM)": {
+      "main": [[{ "node": "Set Source Config", "type": "main", "index": 0 }]]
+    },
+    "Set Source Config": {
+      "main": [[{ "node": "Fetch NICE RSS", "type": "main", "index": 0 }]]
+    },
+    "Fetch NICE RSS": {
+      "main": [[{ "node": "Cap items", "type": "main", "index": 0 }]]
+    },
+    "Cap items": {
+      "main": [[{ "node": "If Feed OK", "type": "main", "index": 0 }]]
+    },
+    "If Feed OK": {
+      "main": [
+        [{ "node": "Loop Over Items (continue)", "type": "main", "index": 0 }],
+        [{ "node": "Notify NICE Failure", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "_continuation": "On the TRUE branch of If Feed OK, connect to the same downstream pipeline as 02-who-guidelines.json: Loop Over Items → Fetch Full Page → Extract & Chunk → AI Metadata Extraction → Generate Embeddings → Build Webhook Payload → POST Vercel Webhook",
+  "tags": [{ "name": "AI-DOCTOR" }, { "name": "NICE" }, { "name": "guidelines" }, { "name": "uk" }]
+}

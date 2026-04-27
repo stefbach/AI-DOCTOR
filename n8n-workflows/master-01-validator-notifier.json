@@ -1,0 +1,101 @@
+{
+  "name": "[AI-DOCTOR][MASTER-01] Validator Notifier (hourly)",
+  "_description": "Sends an hourly digest email to medical-admin if there are pending guidelines awaiting validation. Suppresses notifications if pending count <= threshold.",
+  "_threshold": "Email sent only if pending_review count > 5",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 * * * *" }]
+        }
+      },
+      "id": "trigger",
+      "name": "Schedule (hourly)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/medical_guidelines",
+        "queryParameters": {
+          "parameters": [
+            { "name": "select", "value": "source,guideline_code,title,created_at" },
+            { "name": "status", "value": "eq.pending_review" },
+            { "name": "order", "value": "created_at.desc" },
+            { "name": "limit", "value": "100" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}" }
+          ]
+        }
+      },
+      "id": "fetch-pending",
+      "name": "Fetch Pending Guidelines",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.length }}",
+              "operation": "larger",
+              "value2": 5
+            }
+          ]
+        }
+      },
+      "id": "if-many-pending",
+      "name": "If > 5 Pending",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build digest email HTML\nconst items = $input.first().json;\nconst byCode = {};\nitems.forEach(i => {\n  const key = `${i.source}:${i.guideline_code}`;\n  if (!byCode[key]) byCode[key] = { source: i.source, code: i.guideline_code, title: i.title, count: 0, oldest: i.created_at };\n  byCode[key].count++;\n  if (i.created_at < byCode[key].oldest) byCode[key].oldest = i.created_at;\n});\nconst groups = Object.values(byCode).sort((a, b) => a.oldest.localeCompare(b.oldest));\n\nconst rows = groups.map(g => `<tr><td><strong>${g.source}</strong></td><td><code>${g.code}</code></td><td>${g.title}</td><td>${g.count} chunks</td><td>${new Date(g.oldest).toLocaleDateString()}</td></tr>`).join('\\n');\n\nconst html = `<h2>📋 ${groups.length} guidelines en attente de validation</h2>\n<p>${items.length} chunks au total. Veuillez les valider sur <a href=\"${$env.VERCEL_BASE_URL}/admin/guidelines\">l'interface admin</a>.</p>\n<table border=\"1\" cellpadding=\"6\" style=\"border-collapse:collapse\">\n<thead><tr><th>Source</th><th>Code</th><th>Titre</th><th>Chunks</th><th>Plus ancien</th></tr></thead>\n<tbody>${rows}</tbody></table>\n<p style=\"font-size:12px;color:#888\">Email automatique envoyé chaque heure si > 5 guidelines en attente.</p>`;\n\nreturn [{ json: { html, count: groups.length, total_chunks: items.length } }];"
+      },
+      "id": "build-email",
+      "name": "Build Digest HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.RESEND_FROM }}",
+        "toEmail": "={{ $env.ADMIN_EMAIL }}",
+        "subject": "=[AI-DOCTOR] {{ $json.count }} guidelines en attente de validation",
+        "html": "={{ $json.html }}"
+      },
+      "id": "send-email",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    }
+  ],
+  "connections": {
+    "Schedule (hourly)": {
+      "main": [[{ "node": "Fetch Pending Guidelines", "type": "main", "index": 0 }]]
+    },
+    "Fetch Pending Guidelines": {
+      "main": [[{ "node": "If > 5 Pending", "type": "main", "index": 0 }]]
+    },
+    "If > 5 Pending": {
+      "main": [[{ "node": "Build Digest HTML", "type": "main", "index": 0 }]]
+    },
+    "Build Digest HTML": {
+      "main": [[{ "node": "Send Email", "type": "main", "index": 0 }]]
+    }
+  },
+  "tags": [{ "name": "AI-DOCTOR" }, { "name": "master" }, { "name": "notifier" }]
+}

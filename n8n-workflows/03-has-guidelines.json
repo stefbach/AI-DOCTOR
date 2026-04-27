@@ -1,0 +1,77 @@
+{
+  "name": "[AI-DOCTOR][AGENT-03] HAS Guidelines Daily (FR)",
+  "_template_note": "Identical pipeline to 02-who-guidelines.json. Only differences: schedule, RSS URL, language=fr, filters",
+  "_instructions": "Import 02-who-guidelines.json first, then duplicate it in n8n UI and apply these overrides:",
+  "_overrides": {
+    "Schedule (cron expression)": "0 3 * * *",
+    "Set Source Config / source_code": "HAS",
+    "Set Source Config / language": "fr",
+    "Set Source Config / rss_url": "https://www.has-sante.fr/jcms/fc_2875171/fr/toutes-nos-publications/feed",
+    "Filter Items / keywords": ["recommandation", "guide", "fiche pertinence", "avis"],
+    "Filter Items / exclusions": ["communiqué", "actualité"]
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 3 * * *" }]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "Schedule (daily 3AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            { "name": "source_code", "value": "HAS" },
+            { "name": "language", "value": "fr" },
+            { "name": "rss_url", "value": "https://www.has-sante.fr/jcms/fc_2875171/fr/toutes-nos-publications/feed" }
+          ]
+        }
+      },
+      "id": "set-config",
+      "name": "Set Source Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.rss_url }}",
+        "options": { "timeout": 30000 }
+      },
+      "id": "fetch-rss",
+      "name": "Fetch RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// HAS-specific filter (French keywords)\nconst keywords = ['recommandation', 'guide', 'fiche pertinence', 'avis'];\nconst exclusions = ['communiqué', 'actualité'];\n\nreturn $input.all()\n  .filter(item => {\n    const title = (item.json.title || '').toLowerCase();\n    if (exclusions.some(e => title.includes(e))) return false;\n    return keywords.some(k => title.includes(k));\n  })\n  .slice(0, 15);"
+      },
+      "id": "filter-items",
+      "name": "Filter Items (FR)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Schedule (daily 3AM)": {
+      "main": [[{ "node": "Set Source Config", "type": "main", "index": 0 }]]
+    },
+    "Set Source Config": {
+      "main": [[{ "node": "Fetch RSS", "type": "main", "index": 0 }]]
+    },
+    "Fetch RSS": {
+      "main": [[{ "node": "Filter Items (FR)", "type": "main", "index": 0 }]]
+    }
+  },
+  "_continuation": "After Filter Items (FR), connect to the same nodes as in 02-who-guidelines.json: Loop Over Items → Fetch Full Page → Extract & Chunk → AI Metadata Extraction → Generate Embeddings → Build Webhook Payload → POST Vercel Webhook",
+  "tags": [{ "name": "AI-DOCTOR" }, { "name": "HAS" }, { "name": "guidelines" }, { "name": "fr" }]
+}

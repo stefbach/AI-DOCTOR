@@ -1,0 +1,108 @@
+{
+  "name": "[AI-DOCTOR][MASTER-03] Daily Health Check (06:00 UTC)",
+  "_description": "Verifies that each source has run as expected. Daily sources should have run in last 24h, weekly in last 7d, monthly in last 35d. Sends alert email if anomalies detected.",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 6 * * *" }]
+        }
+      },
+      "id": "trigger",
+      "name": "Schedule (daily 6AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/guideline_sources",
+        "queryParameters": {
+          "parameters": [
+            { "name": "select", "value": "source_code,source_name,frequency_label,active,last_successful_run,last_failed_run,consecutive_failures,access_status" },
+            { "name": "active", "value": "eq.true" },
+            { "name": "order", "value": "source_code.asc" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}" }
+          ]
+        }
+      },
+      "id": "fetch-sources",
+      "name": "Fetch Active Sources",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Compute health status for each source\nconst sources = $input.first().json;\nconst now = Date.now();\nconst H = 3600 * 1000;\n\nconst slaByFrequency = {\n  hourly:  2 * H,           // hourly source must have run in last 2h\n  daily:   30 * H,          // daily must have run in last 30h\n  weekly:  8 * 24 * H,      // weekly must have run in last 8 days\n  monthly: 35 * 24 * H,     // monthly within 35 days\n  annual:  370 * 24 * H     // annual within 370 days\n};\n\nconst anomalies = [];\nfor (const s of sources) {\n  const sla = slaByFrequency[s.frequency_label] || (30 * H);\n  const lastRunMs = s.last_successful_run ? Date.parse(s.last_successful_run) : 0;\n  const elapsed = now - lastRunMs;\n  const overSla = elapsed > sla;\n  const reasons = [];\n  if (overSla) reasons.push(`Last run ${Math.round(elapsed / H)}h ago (SLA: ${Math.round(sla / H)}h)`);\n  if (s.consecutive_failures >= 3) reasons.push(`${s.consecutive_failures} consecutive failures`);\n  if (s.access_status === 'blocked') reasons.push('Access blocked');\n  if (reasons.length > 0) {\n    anomalies.push({ ...s, reasons, hours_since_last_run: lastRunMs ? Math.round(elapsed / H) : 'never' });\n  }\n}\n\nconst total = sources.length;\nconst healthy = total - anomalies.length;\n\nreturn [{ json: {\n  total,\n  healthy,\n  anomalies,\n  anomaly_count: anomalies.length,\n  needs_alert: anomalies.length > 0\n} }];"
+      },
+      "id": "analyze-health",
+      "name": "Analyze Health",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            { "value1": "={{ $json.needs_alert }}", "value2": true }
+          ]
+        }
+      },
+      "id": "if-alert",
+      "name": "If Anomalies Detected",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst rows = data.anomalies.map(a =>\n  `<tr><td><strong>${a.source_code}</strong></td><td>${a.source_name}</td><td>${a.frequency_label}</td><td>${a.hours_since_last_run}h</td><td style=\"color:red\">${a.reasons.join('<br>')}</td></tr>`\n).join('\\n');\n\nconst html = `<h2>🚨 AI-DOCTOR — Anomalies de santé des sources</h2>\n<p><strong>${data.healthy}/${data.total}</strong> sources fonctionnent correctement.</p>\n<p><strong>${data.anomaly_count}</strong> source(s) en anomalie :</p>\n<table border=\"1\" cellpadding=\"6\" style=\"border-collapse:collapse\">\n<thead><tr><th>Code</th><th>Nom</th><th>Fréquence</th><th>Depuis</th><th>Raison</th></tr></thead>\n<tbody>${rows}</tbody></table>\n<p>Vérifier les workflows correspondants dans n8n et les logs <code>guideline_ingestion_runs</code> pour diagnostic.</p>`;\n\nreturn [{ json: { html, count: data.anomaly_count } }];"
+      },
+      "id": "build-alert",
+      "name": "Build Alert HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.RESEND_FROM }}",
+        "toEmail": "={{ $env.ADMIN_EMAIL }}",
+        "subject": "=[AI-DOCTOR] 🚨 {{ $json.count }} anomalie(s) détectée(s) sur les sources",
+        "html": "={{ $json.html }}"
+      },
+      "id": "send-alert",
+      "name": "Send Alert Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1340, 200]
+    }
+  ],
+  "connections": {
+    "Schedule (daily 6AM)": {
+      "main": [[{ "node": "Fetch Active Sources", "type": "main", "index": 0 }]]
+    },
+    "Fetch Active Sources": {
+      "main": [[{ "node": "Analyze Health", "type": "main", "index": 0 }]]
+    },
+    "Analyze Health": {
+      "main": [[{ "node": "If Anomalies Detected", "type": "main", "index": 0 }]]
+    },
+    "If Anomalies Detected": {
+      "main": [[{ "node": "Build Alert HTML", "type": "main", "index": 0 }]]
+    },
+    "Build Alert HTML": {
+      "main": [[{ "node": "Send Alert Email", "type": "main", "index": 0 }]]
+    }
+  },
+  "tags": [{ "name": "AI-DOCTOR" }, { "name": "master" }, { "name": "health" }]
+}

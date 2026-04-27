@@ -1,0 +1,215 @@
+{
+  "name": "[AI-DOCTOR][AGENT-02] WHO Guidelines Weekly",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 3 * * 1" }]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "Schedule (weekly Mon 3AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            { "name": "source_code", "value": "WHO" },
+            { "name": "language", "value": "en" },
+            { "name": "rss_url", "value": "https://www.who.int/feeds/entity/publications/en/rss.xml" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-config",
+      "name": "Set Source Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.rss_url }}",
+        "options": { "timeout": 30000 }
+      },
+      "id": "fetch-rss",
+      "name": "Fetch RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter: keep only items with 'guideline', 'recommendation', 'clinical' in title\nconst keywords = ['guideline', 'recommendation', 'clinical', 'technical guidance'];\nconst exclusions = ['news', 'press release', 'event'];\n\nreturn $input.all()\n  .filter(item => {\n    const title = (item.json.title || '').toLowerCase();\n    if (exclusions.some(e => title.includes(e))) return false;\n    return keywords.some(k => title.includes(k));\n  })\n  .slice(0, 10);  // safety cap"
+      },
+      "id": "filter-items",
+      "name": "Filter Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "loop-batches",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
+        "options": {
+          "timeout": 30000,
+          "redirect": { "redirect": { "followRedirects": true } }
+        }
+      },
+      "id": "fetch-page",
+      "name": "Fetch Full Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cheerio = require('cheerio');\nconst crypto = require('crypto');\n\nconst html = $input.first().json.data || $input.first().json.body || '';\nconst rssItem = $('Loop Over Items').item.json;\nconst config = $('Set Source Config').first().json;\n\nconst $$ = cheerio.load(html);\n$$('nav, footer, aside, script, style, noscript').remove();\n$$('.sidebar, .cookie-banner, .advertisement').remove();\nconst text = ($$('main').text() || $$('article').text() || $$('body').text())\n  .replace(/\\s+/g, ' ').trim();\n\nif (text.length < 500) {\n  return [];  // skip too short\n}\n\nconst hash = crypto.createHash('sha256').update(html).digest('hex');\n\n// Chunking ~800 words, overlap 100\nconst words = text.split(' ');\nconst chunks = [];\nconst chunkSize = 800;\nconst overlap = 100;\nfor (let i = 0; i < words.length; i += chunkSize - overlap) {\n  const slice = words.slice(i, i + chunkSize).join(' ');\n  if (slice.length < 100) break;\n  chunks.push({ chunk_index: chunks.length, section: null, content: slice });\n}\n\n// Derive guideline_code from URL last segment\nlet code;\ntry {\n  const u = new URL(rssItem.link);\n  const last = u.pathname.split('/').filter(Boolean).pop() || '';\n  code = last.replace(/\\.(html|php|aspx?)$/i, '').slice(0, 100);\n  if (code.length < 3) {\n    code = (rssItem.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 100);\n  }\n} catch {\n  code = (rssItem.title || 'unknown').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 100);\n}\n\nreturn [{\n  json: {\n    source: config.source_code,\n    guideline_code: code,\n    title: rssItem.title,\n    url: rssItem.link,\n    language: config.language,\n    pub_date: rssItem.pubDate || new Date().toISOString(),\n    text_preview: text.slice(0, 3000),\n    full_text: text,\n    source_hash: hash,\n    chunks: chunks\n  }\n}];"
+      },
+      "id": "extract-clean",
+      "name": "Extract & Chunk",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-5.4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a medical librarian. Extract structured metadata from clinical guidelines. Always return valid JSON."
+            },
+            {
+              "role": "user",
+              "content": "=Source: {{ $json.source }}\nTitle: {{ $json.title }}\nText: {{ $json.text_preview }}\n\nReturn ONLY valid JSON:\n{\n  \"specialty\": [\"cardiology\"],\n  \"conditions_covered\": [\"acute coronary syndrome\"],\n  \"drugs_mentioned\": [\"aspirin\"],\n  \"icd10_codes\": [\"I20.0\"],\n  \"patient_population\": {\"age_range\": \"adult\", \"pregnancy\": false, \"pediatric\": false, \"special_populations\": []},\n  \"significance\": \"moderate\"\n}\n\nRules: lowercase English, empty array if unknown, NO invention."
+            }
+          ]
+        },
+        "options": {
+          "responseFormat": "json_object",
+          "temperature": 0.1,
+          "maxTokens": 800
+        }
+      },
+      "id": "ai-metadata",
+      "name": "AI Metadata Extraction",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [1780, 300],
+      "credentials": {
+        "openAiApi": { "id": "openai-prod", "name": "OpenAI API Production" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate embeddings for each chunk via OpenAI batch endpoint\nconst doc = $('Extract & Chunk').first().json;\nconst chunks = doc.chunks;\n\nif (!chunks || chunks.length === 0) return [];\n\n// Call OpenAI embeddings endpoint directly\nconst openaiKey = $credentials.openAi.apiKey;\n\nconst response = await this.helpers.httpRequest({\n  method: 'POST',\n  url: 'https://api.openai.com/v1/embeddings',\n  headers: {\n    'Authorization': `Bearer ${openaiKey}`,\n    'Content-Type': 'application/json'\n  },\n  body: {\n    model: 'text-embedding-3-small',\n    input: chunks.map(c => c.content.slice(0, 8000))\n  },\n  json: true\n});\n\nconst withEmbeddings = chunks.map((c, i) => ({\n  ...c,\n  embedding: response.data[i].embedding\n}));\n\nreturn [{ json: { ...doc, chunks: withEmbeddings, _tokens: response.usage.total_tokens } }];"
+      },
+      "id": "embeddings",
+      "name": "Generate Embeddings",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 300],
+      "credentials": {
+        "openAiApi": { "id": "openai-prod", "name": "OpenAI API Production" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const doc = $('Extract & Chunk').first().json;\nconst withEmbeddings = $input.first().json;\nconst meta = JSON.parse($('AI Metadata Extraction').first().json.message.content);\nconst config = $('Set Source Config').first().json;\n\nreturn [{\n  json: {\n    source: doc.source,\n    guideline_code: doc.guideline_code,\n    title: doc.title,\n    url: doc.url,\n    version: '1.0',\n    effective_date: doc.pub_date.split('T')[0],\n    source_hash: doc.source_hash,\n    language: config.language,\n    specialty: meta.specialty || [],\n    conditions_covered: meta.conditions_covered || [],\n    drugs_mentioned: meta.drugs_mentioned || [],\n    patient_population: meta.patient_population || {},\n    metadata: {\n      icd10_codes: meta.icd10_codes,\n      significance: meta.significance,\n      rss_pub_date: doc.pub_date\n    },\n    chunks: withEmbeddings.chunks,\n    ingested_by: `n8n:${doc.source.toLowerCase()}`\n  }\n}];"
+      },
+      "id": "build-final",
+      "name": "Build Webhook Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2220, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.VERCEL_BASE_URL }}/api/webhook/n8n/rag-ingest",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 30000,
+          "retry": { "maxTries": 3, "waitBetweenTries": 5000 }
+        }
+      },
+      "id": "post-webhook",
+      "name": "POST Vercel Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2440, 300],
+      "credentials": {
+        "httpHeaderAuth": { "id": "ai-doctor-webhook", "name": "AI-DOCTOR Webhook" }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule (weekly Mon 3AM)": {
+      "main": [[{ "node": "Set Source Config", "type": "main", "index": 0 }]]
+    },
+    "Set Source Config": {
+      "main": [[{ "node": "Fetch RSS", "type": "main", "index": 0 }]]
+    },
+    "Fetch RSS": {
+      "main": [[{ "node": "Filter Items", "type": "main", "index": 0 }]]
+    },
+    "Filter Items": {
+      "main": [[{ "node": "Loop Over Items", "type": "main", "index": 0 }]]
+    },
+    "Loop Over Items": {
+      "main": [[{ "node": "Fetch Full Page", "type": "main", "index": 0 }]]
+    },
+    "Fetch Full Page": {
+      "main": [[{ "node": "Extract & Chunk", "type": "main", "index": 0 }]]
+    },
+    "Extract & Chunk": {
+      "main": [[{ "node": "AI Metadata Extraction", "type": "main", "index": 0 }]]
+    },
+    "AI Metadata Extraction": {
+      "main": [[{ "node": "Generate Embeddings", "type": "main", "index": 0 }]]
+    },
+    "Generate Embeddings": {
+      "main": [[{ "node": "Build Webhook Payload", "type": "main", "index": 0 }]]
+    },
+    "Build Webhook Payload": {
+      "main": [[{ "node": "POST Vercel Webhook", "type": "main", "index": 0 }]]
+    },
+    "POST Vercel Webhook": {
+      "main": [[{ "node": "Loop Over Items", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "executionTimeout": 1800
+  },
+  "tags": [{ "name": "AI-DOCTOR" }, { "name": "WHO" }, { "name": "guidelines" }],
+  "meta": {
+    "description": "Weekly ingestion of WHO guidelines. RSS → filter → fetch → chunk → embed → Vercel webhook. Inserts as status='pending_review' for human validation."
+  }
+}

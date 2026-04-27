@@ -2,6 +2,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import OpenAI from 'openai'
+import {
+  retrieveRelevantGuidelines,
+  formatGuidelinesForPrompt,
+  logRAGTrace,
+  type GuidelineMatch
+} from '@/lib/rag/medical-rag'
+import {
+  checkAllPatientDrugs,
+  formatSafetyAlertsForPrompt,
+  type DrugWithAlerts
+} from '@/lib/rag/safety-alerts'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300 // 300 seconds max for GPT-5.4 diagnosis generation (large prompt)
@@ -2058,6 +2069,44 @@ async function callOpenAIWithMauritiusQuality(
   let qualityLevel = 0
   const functionStartTime = Date.now()
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // RAG ENRICHMENT — retrieved once before retry loop (same context for all attempts)
+  // ═══════════════════════════════════════════════════════════════════════
+  let ragGuidelines: GuidelineMatch[] = []
+  let ragDrugAlerts: DrugWithAlerts[] = []
+  let ragPromptSection = ''
+  let ragQueryText = ''
+
+  try {
+    ragQueryText = [
+      patientContext.chief_complaint,
+      ...(patientContext.symptoms || []),
+      `Patient: ${patientContext.age}y ${patientContext.sex}`,
+      `History: ${(patientContext.medical_history || []).join(', ')}`,
+      `Current medications: ${(patientContext.current_medications || []).join(', ')}`,
+      patientContext.vital_signs?.blood_pressure ? `BP: ${patientContext.vital_signs.blood_pressure}` : ''
+    ].filter(Boolean).join(' | ')
+
+    const [guidelines, drugAlerts] = await Promise.all([
+      retrieveRelevantGuidelines(ragQueryText, {
+        topK: parseInt(process.env.RAG_TOP_K || '5'),
+        threshold: parseFloat(process.env.RAG_MIN_SIMILARITY || '0.65'),
+        language: 'en'
+      }),
+      checkAllPatientDrugs(patientContext.current_medications || [])
+    ])
+
+    ragGuidelines = guidelines
+    ragDrugAlerts = drugAlerts
+    ragPromptSection = formatSafetyAlertsForPrompt(drugAlerts) + formatGuidelinesForPrompt(guidelines)
+
+    console.log(`📚 [RAG] ${guidelines.length} guidelines + ${drugAlerts.length} drug alerts retrieved`)
+  } catch (ragError) {
+    console.error('[RAG] Enrichment failed (non-blocking):', ragError)
+    // Continue without RAG enrichment — never block the consultation
+  }
+  // ═══════════════════════════════════════════════════════════════════════
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       // Check elapsed time - don't retry if we've used more than 70 seconds
@@ -2068,9 +2117,9 @@ async function callOpenAIWithMauritiusQuality(
       }
 
       console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1} (Mauritius quality level: ${qualityLevel})`)
-      
+
       let finalPrompt = basePrompt
-      
+
       if (attempt === 1) {
         finalPrompt = `🚨 PREVIOUS RESPONSE HAD GENERIC CONTENT - MAURITIUS MEDICAL SPECIFICITY + DCI REQUIRED
 
@@ -2174,7 +2223,10 @@ EXAMPLE COMPLETE MEDICATION WITH DCI + DETAILED INDICATION:
 GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters each)`
         qualityLevel = 3
       }
-      
+
+      // ─── Prepend RAG section (guidelines + safety alerts) to every attempt ──
+      finalPrompt = ragPromptSection + finalPrompt
+
       const openaiClient = new OpenAI({ apiKey })
 
       const completion = await openaiClient.chat.completions.create({
@@ -2261,7 +2313,28 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
       console.log('✅ Mauritius quality validation successful')
       console.log(`🏝️ Quality level used: ${qualityLevel}`)
       console.log(`📊 Medical specificity issues corrected: ${qualityCheck.issues.length}`)
-      
+
+      // ─── Log RAG trace (audit médico-légal — rétention 10 ans) ────────────
+      // Non-blocking: errors are caught and logged but never break the consultation
+      if (process.env.FEATURE_RAG_TRACE === 'true') {
+        const consultationId = patientContext.anonymousId || crypto.randomUUID()
+        logRAGTrace({
+          consultationId,
+          patientAnonymousId: patientContext.anonymousId,
+          queryText: ragQueryText,
+          guidelines: ragGuidelines,
+          alerts: ragDrugAlerts.map(d => ({
+            drug: d.drug,
+            alerts: d.alerts.map(a => ({ source: a.source, type: a.alert_type, url: a.url }))
+          })),
+          gptModel: 'gpt-5.4',
+          reasoningEffort: 'medium',
+          inputTokens: completion.usage?.prompt_tokens,
+          outputTokens: completion.usage?.completion_tokens,
+          consultationType: patientContext.consultation_context?.setting
+        }).catch(e => console.error('[RAG] log trace failed (non-blocking):', e))
+      }
+
       return { data: rawContent, analysis, mauritius_quality_level: qualityLevel }
       
     } catch (error) {

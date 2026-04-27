@@ -1,0 +1,144 @@
+{
+  "name": "[AI-DOCTOR][AGENT-01] FDA Safety Alerts Hourly",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "Schedule (hourly)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://www.fda.gov/safety/recalls-market-withdrawals-safety-alerts/rss.xml",
+        "options": {
+          "timeout": 30000,
+          "redirect": { "redirect": { "followRedirects": true } }
+        }
+      },
+      "id": "fetch-fda-rss",
+      "name": "FDA RSS Feed",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-batches",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-5.4",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a medical regulatory expert. Extract structured drug safety information from FDA alerts. Always return valid JSON, no markdown."
+            },
+            {
+              "role": "user",
+              "content": "=Extract drug safety info from this FDA alert.\n\nTitle: {{ $json.title }}\nContent: {{ $json.contentSnippet || $json.content }}\n\nReturn ONLY valid JSON:\n{\n  \"drug_name\": \"Main drug name (DCI), or null\",\n  \"drug_name_normalized\": \"lowercase alphanumeric only\",\n  \"drug_name_aliases\": [\"Brand names\"],\n  \"alert_type\": \"recall|black_box|contraindication|shortage|safety_communication|dose_adjustment|interaction_warning\",\n  \"severity\": \"class_I|class_II|class_III|critical|moderate|low|null\",\n  \"summary\": \"1-2 sentence summary\",\n  \"affected_lots\": [],\n  \"affected_countries\": [\"US\"],\n  \"recommended_action\": \"What physicians should do\",\n  \"extraction_confidence\": 0.95\n}\n\nIf no specific drug is identified (e.g. 'Quarterly Recall Summary'): drug_name = null."
+            }
+          ]
+        },
+        "options": {
+          "responseFormat": "json_object",
+          "temperature": 0.1,
+          "maxTokens": 600
+        }
+      },
+      "id": "ai-extract",
+      "name": "AI Extract Drug Info",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [900, 300],
+      "credentials": {
+        "openAiApi": { "id": "openai-prod", "name": "OpenAI API Production" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = JSON.parse($input.first().json.message.content);\nconst rss = $('Loop Over Items').item.json;\n\nif (!response.drug_name) {\n  return [];  // Skip non-drug-specific alerts\n}\n\nreturn [{\n  json: {\n    source: 'FDA',\n    alert_type: response.alert_type || 'safety_communication',\n    severity: response.severity || null,\n    drug_name: response.drug_name,\n    drug_name_normalized: response.drug_name_normalized || response.drug_name.toLowerCase().replace(/[^a-z0-9]/g, ''),\n    drug_name_aliases: response.drug_name_aliases || [],\n    summary: response.summary || rss.title,\n    full_text: rss.content || rss.contentSnippet,\n    affected_lots: response.affected_lots || [],\n    affected_countries: response.affected_countries || [],\n    recommended_action: response.recommended_action || null,\n    url: rss.link,\n    published_date: rss.pubDate ? new Date(rss.pubDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],\n    extraction_confidence: response.extraction_confidence || 0.7\n  }\n}];"
+      },
+      "id": "build-payload",
+      "name": "Build Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1140, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.VERCEL_BASE_URL }}/api/webhook/n8n/safety-alert",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 15000,
+          "retry": { "maxTries": 3, "waitBetweenTries": 2000 }
+        }
+      },
+      "id": "post-webhook",
+      "name": "POST Vercel Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1380, 300],
+      "credentials": {
+        "httpHeaderAuth": { "id": "ai-doctor-webhook", "name": "AI-DOCTOR Webhook" }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule (hourly)": {
+      "main": [[{ "node": "FDA RSS Feed", "type": "main", "index": 0 }]]
+    },
+    "FDA RSS Feed": {
+      "main": [[{ "node": "Loop Over Items", "type": "main", "index": 0 }]]
+    },
+    "Loop Over Items": {
+      "main": [[{ "node": "AI Extract Drug Info", "type": "main", "index": 0 }]]
+    },
+    "AI Extract Drug Info": {
+      "main": [[{ "node": "Build Payload", "type": "main", "index": 0 }]]
+    },
+    "Build Payload": {
+      "main": [[{ "node": "POST Vercel Webhook", "type": "main", "index": 0 }]]
+    },
+    "POST Vercel Webhook": {
+      "main": [[{ "node": "Loop Over Items", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "errorWorkflow": ""
+  },
+  "tags": [{ "name": "AI-DOCTOR" }, { "name": "FDA" }, { "name": "safety-alerts" }],
+  "meta": {
+    "description": "Hourly ingestion of FDA drug safety alerts. AI-extracts drug name, severity, recommended action. Posts to Vercel webhook for storage in drug_safety_alerts table."
+  }
+}
