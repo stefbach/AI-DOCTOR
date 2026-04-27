@@ -7,11 +7,23 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "test": "node --test"
+    "test": "node --test",
+    "rag:migrate": "tsx scripts/apply-rag-migration.ts",
+    "rag:seed": "tsx scripts/bulk-seed/index.ts",
+    "rag:seed:dry": "tsx scripts/bulk-seed/index.ts --dry-run",
+    "rag:seed:fda": "tsx scripts/bulk-seed/index.ts --only=FDA",
+    "rag:seed:who": "tsx scripts/bulk-seed/index.ts --only=WHO",
+    "rag:seed:has": "tsx scripts/bulk-seed/index.ts --only=HAS",
+    "rag:seed:cdc": "tsx scripts/bulk-seed/index.ts --only=CDC",
+    "rag:seed:nice": "tsx scripts/bulk-seed/index.ts --only=NICE"
   },
   "dependencies": {
     "@ai-sdk/openai": "latest",
     "@radix-ui/react-checkbox": "latest",
+    "cheerio": "^1.0.0",
+    "pdf-parse": "^1.1.1",
+    "resend": "^4.0.0",
+    "rss-parser": "^3.13.0",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "latest",
     "@radix-ui/react-progress": "latest",
@@ -43,9 +55,11 @@
   },
   "devDependencies": {
     "@types/node": "^22",
+    "@types/pdf-parse": "^1.1.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "knip": "^5.62.0",
+    "tsx": "^4.19.0",
     "postcss": "^8.5",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
