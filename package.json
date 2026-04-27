@@ -9,6 +9,7 @@
     "start": "next start",
     "test": "node --test",
     "rag:migrate": "tsx scripts/apply-rag-migration.ts",
+    "rag:test": "tsx scripts/bulk-seed/test-connectivity.ts",
     "rag:seed": "tsx scripts/bulk-seed/index.ts",
     "rag:seed:dry": "tsx scripts/bulk-seed/index.ts --dry-run",
     "rag:seed:fda": "tsx scripts/bulk-seed/index.ts --only=FDA",
