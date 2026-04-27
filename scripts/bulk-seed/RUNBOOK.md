@@ -1,216 +1,204 @@
-# 📘 RUNBOOK — Bulk Seed AI-DOCTOR RAG
+# 📘 RUNBOOK — Constitution complète de la base de guidelines
 
 **Branche** : `claude/medical-assistant-transparency-dv5S9`
-**Phase** : 1 — 5 sources prioritaires
-**Estimé** : 2-4 h pour exécution complète, ~10-30 $ d'embeddings OpenAI
+**Couverture** : **16 sources** (5 RSS + 1 RSS+RSS + 10 sociétés HTML)
+**Estimation totale** : 30-90 minutes, ~$2-10 d'embeddings OpenAI
 
 ---
 
-## 🎯 Objectif
+## 🎯 Philosophie
 
-Constituer la base initiale de guidelines médicaux dans Supabase à partir des
-5 sources prioritaires :
+L'objectif est de constituer une **base de connaissances médicale complète et vivante**
+en SQL, source par source, à partir des organisations médicales officielles
+mondiales. Cette base alimente le RAG runtime qui enrichit GPT-5.4 à chaque
+consultation.
 
-1. **FDA Drug Safety Alerts** → table `drug_safety_alerts`
-2. **WHO** (international) → table `medical_guidelines`
-3. **HAS** (France) → table `medical_guidelines`
-4. **CDC** (USA) → table `medical_guidelines`
-5. **NICE** (UK) → table `medical_guidelines` (avec fallback PDF si bloqué)
+---
+
+## 📊 Cartographie des 16 sources
+
+### Phase 1 — RSS / API publiques (6 sources)
+
+| # | Code | Méthode | Fréquence | Volume attendu |
+|---|------|---------|-----------|----------------|
+| 1 | **FDA** | RSS | horaire | drug_safety_alerts |
+| 2 | **WHO** | RSS | hebdo | medical_guidelines (en) |
+| 3 | **HAS** | RSS | quotidien | medical_guidelines (fr) |
+| 4 | **CDC** | RSS | quotidien | medical_guidelines (en) |
+| 5 | **NICE** | RSS + fallback | quotidien | medical_guidelines (en) |
+| 6 | **ECDC** | RSS | hebdo | medical_guidelines (en) |
+
+### Phase 2 — Sociétés savantes / scraping HTML (10 sources)
+
+| # | Code | Spécialité | Fréquence | Volume attendu |
+|---|------|-----------|-----------|----------------|
+| 7 | **ESC** | Cardiologie | mensuel | ~25 guidelines |
+| 8 | **AHA** | Cardiologie | mensuel | ~20 statements |
+| 9 | **ADA** | Diabétologie | annuel | ~15 articles |
+| 10 | **IDSA** | Infectiologie | mensuel | ~30 protocoles |
+| 11 | **KDIGO** | Néphrologie | mensuel | ~15 guidelines |
+| 12 | **GOLD** | BPCO | annuel | 1 rapport principal |
+| 13 | **GINA** | Asthme | annuel | 1 rapport principal |
+| 14 | **EASL** | Hépatologie | mensuel | ~20 guidelines |
+| 15 | **ERS** | Pneumologie | mensuel | ~20 guidelines |
+| 16 | **USPSTF** | Prévention | mensuel | ~30 recommandations |
+
+**Total estimé** : 200-300 guidelines, 5000-15000 chunks vectorisés.
 
 ---
 
 ## ✅ Pré-requis
 
-### Variables d'environnement
-
-Toutes ces variables doivent être définies avant l'exécution :
+### 1. Variables d'environnement
 
 ```bash
-# Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
-
-# OpenAI
 OPENAI_API_KEY=sk-proj-<your-key>
-
-# RAG runtime feature flags
 RAG_ENABLED=true
-RAG_MIN_SIMILARITY=0.65
-RAG_TOP_K=5
-RAG_REASONING_EFFORT=medium
-FEATURE_SAFETY_ALERTS=true
-FEATURE_RAG_TRACE=true
-
-# Webhook secret (pour future intégration n8n)
-N8N_WEBHOOK_SECRET=<openssl rand -hex 32>
-
-# Site URL (pour webhook callback)
-NEXT_PUBLIC_SITE_URL=https://your-app.vercel.app
+SEED_MAX_ITEMS=30                    # cap items per source
 ```
 
-### Dépendances npm
+### 2. Dépendances npm
 
 ```bash
-npm install rss-parser pdf-parse cheerio resend zod
-npm install -D @types/pdf-parse tsx
+npm install
+# rss-parser, pdf-parse, cheerio, resend, tsx, zod (déjà ajoutés au package.json)
+```
+
+### 3. Migration Supabase appliquée
+
+```bash
+npm run rag:migrate
 ```
 
 ---
 
-## 🔢 Ordre d'exécution
+## 🚀 Mode opératoire (4 étapes)
 
-### Étape 1 — Appliquer la migration Supabase
+### Étape 1 — Test connectivité (gratuit, 30 secondes)
 
-```bash
-# Auto-apply (recommandé)
-npx tsx scripts/apply-rag-migration.ts
-
-# Si exec_sql RPC non disponible, fallback Supabase CLI
-supabase db push
-# OU coller manuellement le SQL dans Dashboard → SQL Editor
-```
-
-**Vérification** :
-```sql
-SELECT tablename FROM pg_tables
-WHERE schemaname = 'public'
-  AND tablename IN (
-    'medical_guidelines','drug_safety_alerts','guideline_update_log',
-    'consultation_rag_trace','guideline_sources','guideline_ingestion_runs',
-    'guideline_failed_documents'
-  );
--- Doit retourner 7 lignes
-
-SELECT extname FROM pg_extension WHERE extname = 'vector';
--- Doit retourner 1 ligne
-
-SELECT count(*) FROM guideline_sources;
--- Doit retourner 16 (FDA + 15 guideline sources)
-```
-
-### Étape 2 — Test de connectivité (dry-run)
-
-Avant d'engager le coût OpenAI, on vérifie que les flux RSS répondent :
+Avant tout coût OpenAI, savoir quelles sources sont joignables depuis votre réseau :
 
 ```bash
-npx tsx scripts/bulk-seed/index.ts --dry-run
+npm run rag:test
 ```
 
-**Résultat attendu** : tableau récapitulatif indiquant `dry_run` pour chaque source,
-sans consommation OpenAI. Les sources injoignables apparaissent avec `failed`.
+**Sortie** : tableau des 16 sources avec ✅/⚠️/❌. Vous saurez immédiatement quelles
+sources nécessiteront un fallback PDF manuel.
 
-### Étape 3 — Exécution progressive (recommandé)
+### Étape 2 — Phase 1 (RSS, ~5 min)
 
-#### 3.1 — Source par source pour valider
+Lancement progressif (recommandé) :
 
 ```bash
-# FDA d'abord (le plus critique, le plus rapide)
-npx tsx scripts/bulk-seed/index.ts --only=FDA --max=20
-
-# Vérifier le résultat
-psql ... -c "SELECT count(*) FROM drug_safety_alerts WHERE active=true;"
+npm run rag:seed:fda      # 1-2 min, alertes médicaments
+npm run rag:seed:who      # 2-3 min, guidelines WHO
+npm run rag:seed:has      # 2-3 min, guidelines HAS (FR)
+npm run rag:seed:cdc      # 2-3 min, MMWR + recommandations CDC
+npm run rag:seed:nice     # 3-5 min, NICE (avec fallback automatique)
+npm run rag:seed:ecdc     # 1-2 min
 ```
+
+Ou tout en un coup :
 
 ```bash
-# WHO
-npx tsx scripts/bulk-seed/index.ts --only=WHO --max=10
-
-# HAS
-npx tsx scripts/bulk-seed/index.ts --only=HAS --max=10
-
-# CDC
-npx tsx scripts/bulk-seed/index.ts --only=CDC --max=10
-
-# NICE (peut échouer → fallback automatique avec liste à ingérer manuellement)
-npx tsx scripts/bulk-seed/index.ts --only=NICE
+npm run rag:seed:phase1
 ```
 
-#### 3.2 — Tout en un coup (si confiant après tests)
+### Étape 3 — Phase 2 (sociétés savantes, ~30-60 min)
+
+Les 10 sociétés savantes nécessitent du scraping HTML qui peut être plus
+fragile. Recommandation : tester source par source.
 
 ```bash
-npx tsx scripts/bulk-seed/index.ts --max=30
+npm run rag:seed:esc      # Cardiologie EU
+npm run rag:seed:aha      # Cardiologie US
+npm run rag:seed:ada      # Diabétologie US
+npm run rag:seed:idsa     # Infectiologie US
+npm run rag:seed:kdigo    # Néphrologie INT
+npm run rag:seed:gold     # BPCO INT
+npm run rag:seed:gina     # Asthme INT
+npm run rag:seed:easl     # Hépatologie EU
+npm run rag:seed:ers      # Pneumologie EU
+npm run rag:seed:uspstf   # Prévention US
 ```
 
-**Durée estimée** : 30-90 minutes selon nombre d'items et latence OpenAI.
-
-### Étape 4 — Si NICE bloqué : ingestion manuelle des PDFs prioritaires
-
-Le script `nice-fallback.ts` affichera la liste des 13 guidelines NICE prioritaires
-si l'accès automatique échoue.
-
-Procédure manuelle :
+Ou tout en un coup :
 
 ```bash
-# 1. Télécharger les PDFs depuis nice.org.uk dans ./guidelines/nice/
-mkdir -p guidelines/nice
-# (téléchargement manuel via navigateur, ou wget si non bloqué)
-
-# 2. Ingérer chaque PDF
-npx tsx scripts/bulk-seed/sources/nice-manual.ts \
-  ./guidelines/nice/ng185.pdf NG185 "Acute coronary syndromes"
-
-npx tsx scripts/bulk-seed/sources/nice-manual.ts \
-  ./guidelines/nice/ng128.pdf NG128 "Stroke and TIA in over 16s"
-
-# ... répéter pour les 13 guidelines listés
+npm run rag:seed:phase2
 ```
 
-### Étape 5 — Validation médicale
+### Étape 4 — Tout en une commande (Phase 1 + Phase 2)
 
-Tous les chunks ingérés sont en `status = 'pending_review'`. Un médecin doit
-les valider avant qu'ils soient utilisés en consultation.
+```bash
+npm run rag:seed
+# Lance les 16 sources séquentiellement, ~30-90 min total
+```
 
-**Tableau de bord** :
+---
+
+## 🔧 En cas de blocage d'une source
+
+### Symptômes typiques
+
+- HTTP 403 / 401 : géo-restriction ou paywall (ESC complet, ADA full text)
+- HTTP 404 : URL changée → mettre à jour `html-source-configs.ts`
+- 0 items extraits : sélecteur CSS obsolète → idem
+- Timeout : feed lent → re-essayer plus tard
+- Anti-bot : Cloudflare etc. → fallback PDF manuel
+
+### Fallback : upload manuel de PDFs
+
+Pour toute source bloquée, télécharger le PDF officiel depuis votre navigateur
+et utiliser la commande générique :
+
+```bash
+npm run rag:upload-pdf -- <source> <pdf-path> <code> "<title>" [url]
+```
+
+**Exemples** :
+
+```bash
+# NICE NG185
+npm run rag:upload-pdf -- NICE ./guidelines/ng185.pdf NG185 \
+  "Acute coronary syndromes" https://www.nice.org.uk/guidance/ng185
+
+# ESC 2024 STEMI
+npm run rag:upload-pdf -- ESC ./guidelines/esc-stemi-2024.pdf ESC-STEMI-2024 \
+  "ESC 2024 Guidelines for STEMI" https://www.escardio.org/...
+
+# ADA Standards of Care 2026
+npm run rag:upload-pdf -- ADA ./guidelines/ada-soc-2026.pdf ADA-2026-SOC \
+  "Standards of Medical Care in Diabetes 2026"
+```
+
+---
+
+## 📊 Vérification après seed
+
+### Tableau de bord SQL
+
 ```sql
 -- Vue d'ensemble
-SELECT source, status, count(DISTINCT guideline_code) AS guidelines, count(*) AS chunks
+SELECT
+  source,
+  status,
+  count(DISTINCT guideline_code) AS unique_guidelines,
+  count(*) AS total_chunks
 FROM medical_guidelines
 GROUP BY source, status
 ORDER BY source, status;
-
--- Lister les guidelines en attente
-SELECT id, source, guideline_code, title, created_at
-FROM medical_guidelines
-WHERE status = 'pending_review'
-ORDER BY source, guideline_code, chunk_index
-LIMIT 50;
 ```
 
-**Validation par lot** (après revue manuelle des contenus) :
-```sql
--- Approuver un guideline complet
-UPDATE medical_guidelines
-SET status = 'active', validated_by = 'dr.example@x.com', validated_at = NOW()
-WHERE source = 'NICE' AND guideline_code = 'NG185' AND status = 'pending_review';
-
--- Approuver tous les guidelines d'une source en une fois (à utiliser avec prudence)
-UPDATE medical_guidelines
-SET status = 'active', validated_by = 'bulk-validation@x.com', validated_at = NOW()
-WHERE source = 'WHO' AND status = 'pending_review';
-```
-
----
-
-## 📊 Monitoring de l'exécution
-
-### Pendant l'exécution
+### Statistiques par run
 
 ```sql
--- Runs en cours
-SELECT source_code, started_at, items_fetched, items_new, items_failed, status
-FROM guideline_ingestion_runs
-WHERE started_at > NOW() - INTERVAL '1 hour'
-ORDER BY started_at DESC;
-```
-
-### Après l'exécution
-
-```sql
--- Statistiques par source
 SELECT
   source_code,
   status,
-  duration_ms / 1000.0 AS duration_s,
+  duration_ms / 1000 AS duration_s,
   items_fetched,
   items_new,
   items_failed,
@@ -219,101 +207,127 @@ SELECT
 FROM guideline_ingestion_runs
 WHERE started_at > NOW() - INTERVAL '1 day'
 ORDER BY started_at DESC;
+```
 
--- Documents échoués (à reprendre)
-SELECT source_code, document_url, error_type, error_message, retry_count
-FROM guideline_failed_documents
-WHERE resolved = FALSE
-ORDER BY first_failed_at DESC;
+### Alertes de sécurité actives
+
+```sql
+SELECT count(*), source FROM drug_safety_alerts
+WHERE active = true
+GROUP BY source;
 ```
 
 ---
 
-## 🔄 Retry des documents échoués
+## ✅ Validation médicale (étape obligatoire)
 
-Pour réessayer manuellement les documents qui ont échoué :
+Tous les chunks ingérés ont `status = 'pending_review'`. Un médecin doit les
+valider avant qu'ils soient utilisés en consultation.
+
+**Interface** : `https://your-app.vercel.app/admin/guidelines`
+
+**Validation par lot** :
+
+```sql
+-- Approuver tous les guidelines d'une source d'un coup
+UPDATE medical_guidelines
+SET status = 'active',
+    validated_by = 'dr.referent@x.com',
+    validated_at = NOW()
+WHERE source = 'NICE' AND status = 'pending_review';
+```
+
+---
+
+## 💰 Coût total attendu
+
+| Phase | Sources | Chunks estimés | Coût embeddings | Coût AI metadata | Total |
+|-------|---------|---------------|-----------------|------------------|-------|
+| Phase 1 | 6 RSS | ~3000 | $0.06 | $0.50 | **~$0.60** |
+| Phase 2 | 10 HTML | ~5000 | $0.10 | $1.00 | **~$1.10** |
+| **TOTAL** | **16** | **~8000** | **$0.16** | **$1.50** | **~$1.70** |
+
+Coût récurrent (n8n continu) : ~$5-15/mois pour mises à jour automatiques.
+
+---
+
+## 🆘 Troubleshooting
+
+| Symptôme | Cause probable | Fix |
+|----------|---------------|-----|
+| `Missing required env vars` | Variables non chargées | `source .env.local` |
+| `Feed unreachable: HTTP 403` | Anti-bot / géo | Fallback PDF manuel |
+| `OpenAI rate limit` | Trop de requêtes | Lancer source par source |
+| `Insert failed: duplicate key` | Déjà ingéré | Normal — détection OK |
+| `pgvector extension not found` | Migration non appliquée | `npm run rag:migrate` |
+| `0 items extracted` | Sélecteur CSS obsolète | Inspecter site, MAJ html-source-configs.ts |
+| HTML scraper crash | Site redesign | Idem |
+
+---
+
+## 🔄 Maintenance continue (après seed initial)
+
+Une fois la base initiale constituée, n8n prend le relais pour les mises à jour :
+
+1. Importer les workflows depuis `n8n-workflows/` (voir SETUP.md)
+2. Activer les 8 workflows dans l'ordre indiqué
+3. Le master agent `master-03-health-check.json` surveille la fraîcheur de chaque source
+
+---
+
+## 📊 Commandes npm récapitulatif
 
 ```bash
-# (à implémenter en Phase 2 - script de retry)
-npx tsx scripts/bulk-seed/retry-failed.ts
+# Connectivité
+npm run rag:test                    # test sans coût
+
+# Migration
+npm run rag:migrate                 # applique le schéma
+
+# Seed Phase 1 (RSS)
+npm run rag:seed:phase1             # 6 sources d'un coup
+npm run rag:seed:fda
+npm run rag:seed:who
+npm run rag:seed:has
+npm run rag:seed:cdc
+npm run rag:seed:nice
+npm run rag:seed:ecdc
+
+# Seed Phase 2 (sociétés HTML)
+npm run rag:seed:phase2             # 10 sources d'un coup
+npm run rag:seed:esc
+npm run rag:seed:aha
+npm run rag:seed:ada
+npm run rag:seed:idsa
+npm run rag:seed:kdigo
+npm run rag:seed:gold
+npm run rag:seed:gina
+npm run rag:seed:easl
+npm run rag:seed:ers
+npm run rag:seed:uspstf
+
+# Seed complet
+npm run rag:seed                    # tout en un coup
+npm run rag:seed:dry                # connectivité uniquement, no cost
+
+# Fallback manuel PDF
+npm run rag:upload-pdf -- <source> <pdf> <code> "<title>" [url]
 ```
 
-En attendant, retry manuel :
-```sql
-SELECT * FROM guideline_failed_documents
-WHERE resolved = FALSE AND retry_count < 5;
+---
+
+## 🎯 Status final attendu
+
+Après exécution complète et validation médicale :
+
+```
+✅ 16 sources actives
+✅ 200-300 guidelines indexés
+✅ 5000-15000 chunks vectorisés
+✅ Recherche sémantique opérationnelle
+✅ RAG runtime branché dans openai-diagnosis
+✅ n8n workflows actifs pour mises à jour continues
+✅ Audit trail médico-légal (10 ans)
 ```
 
-Puis re-tenter l'ingestion via le script NICE manuel ou en relançant la source
-correspondante.
-
----
-
-## 💰 Coût estimé
-
-Hypothèses pour Phase 1 complète (~150 guidelines × 30 chunks moyens = 4500 chunks) :
-
-| Poste | Calcul | Coût |
-|---|---|---|
-| Embeddings (text-embedding-3-small) | 4500 chunks × 800 tokens × $0.02/1M | ~$0.07 |
-| AI extraction métadonnées (gpt-5.4) | 150 docs × 1500 tokens × $5/1M | ~$1.13 |
-| **Total Phase 1** | | **~$1.50-5** |
-
-**Bien moindre que prévu** — les modèles d'embeddings sont très bon marché.
-
----
-
-## ⚠️ Points d'attention
-
-### NICE potentiellement bloqué
-
-Le script `nice-fallback.ts` essaie 3 stratégies :
-1. RSS officiel (préférée)
-2. Sitemap public (TODO)
-3. Liste manuelle (13 guidelines prioritaires)
-
-Si vos tests confirment l'accès, retirer le fallback et utiliser le pipeline standard.
-
-### Limitation `text-embedding-3-small`
-
-Les chunks sont tronqués à 8000 caractères avant embedding. C'est la limite
-standard du modèle (8191 tokens). Pour des chunks plus longs, downgrade au
-chunking ~500 mots dans `helpers.ts`.
-
-### Validation humaine obligatoire
-
-**Aucun guideline ne doit être marqué `status = 'active'` automatiquement.**
-La validation par un médecin référent est obligatoire pour la conformité
-médico-légale.
-
-### Anonymisation patient
-
-Le runtime RAG (`/lib/rag/medical-rag.ts`) reçoit le contexte clinique du
-patient. Vérifier que la route `/app/api/openai-diagnosis/route.ts` anonymise
-bien les données avant de les passer au RAG.
-
----
-
-## 🚀 Phase 2 (à venir)
-
-Une fois Phase 1 validée et opérationnelle :
-1. Créer les 15 workflows n8n pour mises à jour continues
-2. Brancher les webhooks `/api/webhook/n8n/rag-ingest` et `/api/webhook/n8n/safety-alert`
-3. Configurer les alertes Slack/Email
-4. Étendre aux 10 sources Phase 2 (ESC, AHA, ADA, IDSA, KDIGO, GOLD, GINA, EASL, ERS, USPSTF, ECDC)
-
----
-
-## 🆘 En cas de problème
-
-| Symptôme | Diagnostic | Action |
-|---|---|---|
-| `Missing required env vars` | Variables non chargées | `source .env.local` ou exporter manuellement |
-| `Feed unreachable: HTTP 403` | IP bloquée par la source | NICE notamment — utiliser nice-manual.ts |
-| `OpenAI rate limit` | Trop de requêtes | Réduire `--max` ou attendre 1 min |
-| `Insert failed: duplicate key` | Guideline déjà ingéré | Normal — détection de duplicat fonctionne |
-| `pgvector extension not found` | Migration non appliquée | Étape 1 |
-| `Embedding length 1536 mismatch` | Mauvais modèle | Vérifier `text-embedding-3-small` |
-
-**Logs détaillés** : tous les runs sont loggés dans `guideline_ingestion_runs`.
-**Documents échoués** : voir `guideline_failed_documents`.
+**Système RAG médical pleinement opérationnel.**
