@@ -1590,7 +1590,6 @@ export async function POST(request: NextRequest) {
           { role: 'user', content: userPrompt }
         ],
         maxTokens: 4000,
-        temperature: 0.2,
       })
 
       // IMPROVED JSON PARSING WITH BETTER ERROR HANDLING

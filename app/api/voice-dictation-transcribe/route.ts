@@ -128,7 +128,6 @@ RULES:
           content: text
         }
       ],
-      temperature: 0.2,
       max_completion_tokens: 2000,
     });
 
@@ -260,7 +259,6 @@ Respond ONLY with JSON, no additional text.`;
           content: extractionPrompt,
         },
       ],
-      temperature: 0.3,
       response_format: { type: 'json_object' },
     });
 

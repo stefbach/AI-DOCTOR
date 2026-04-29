@@ -528,7 +528,6 @@ CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON medical nomenclature in EN
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.3,
       max_completion_tokens: 3000
     })
 
@@ -582,7 +581,6 @@ CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON nomenclature. NO EMOJIS.`
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.3,
       max_completion_tokens: 3000
     })
 
@@ -633,7 +631,6 @@ CRITICAL: Return ONLY the JSON array. Professional terminology. NO EMOJIS.`
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.3,
       max_completion_tokens: 2500
     })
 
@@ -711,7 +708,6 @@ export async function POST(req: NextRequest) {
             { role: "user", content: userPrompt }
           ],
           max_completion_tokens: 6000,
-          temperature: 0.3,
           response_format: { type: "json_object" }
         }),
       })

@@ -318,7 +318,6 @@ IMPORTANT: Adapte TOUTES les valeurs au cas clinique spécifique. Ce diagnostic 
     const result = await generateText({
       model: openai("gpt-5.5", { reasoningEffort: "none" }),
       prompt: diagnosticPrompt,
-      temperature: 0.1,
       maxTokens: 3000,
     })
 
@@ -409,7 +408,6 @@ Format JSON pour document modifiable:
     const result = await generateText({
       model: openai("gpt-5.5", { reasoningEffort: "none" }),
       prompt: summaryPrompt,
-      temperature: 0.2,
       maxTokens: 2000,
     })
 

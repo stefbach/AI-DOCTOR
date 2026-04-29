@@ -142,7 +142,6 @@ Réponds UNIQUEMENT avec ce JSON exact (sans markdown, sans texte supplémentair
       model: openai("gpt-5.5", { reasoningEffort: "none" }),
       prompt: diagnosticPrompt,
       maxTokens: 6000,
-      temperature: 0.1,
     })
 
     console.log("✅ Réponse OpenAI reçue")

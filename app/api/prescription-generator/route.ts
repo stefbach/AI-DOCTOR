@@ -210,7 +210,6 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
       model: openai("gpt-5.5", { reasoningEffort: "none" }),
       prompt: expertPrescriptionPrompt,
       maxTokens: 12000,
-      temperature: 0.05, // Très faible pour maximiser la sécurité
     })
 
     console.log("✅ Ordonnance experte générée")

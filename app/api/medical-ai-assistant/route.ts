@@ -269,7 +269,6 @@ export async function POST(request: NextRequest) {
             content: finalPrompt
           }
         ],
-        temperature: 0.3,
         max_completion_tokens: 4000,
         response_format: { type: "json_object" },
         top_p: 0.9,

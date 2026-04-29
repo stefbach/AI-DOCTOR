@@ -56,7 +56,6 @@ export async function POST(req: NextRequest) {
         }
       ],
       maxTokens: 3000,
-      temperature: 0.3
     })
 
     // Parse structured response

@@ -77,7 +77,6 @@ EXAMPLE OUTPUT FORMAT:
           content: extractionPrompt
         }
       ],
-      temperature: 0.3,
       max_completion_tokens: 2000,
     })
 

@@ -91,7 +91,6 @@ ${systemMessage}
           { role: "system", content: enhancedSystemMessage },
           { role: "user", content: prompt }
         ],
-        temperature: attempt === 0 ? 0.4 : attempt === 1 ? 0.2 : 0.1,
         max_completion_tokens: 8000,
         response_format: { type: "json_object" },
         top_p: 0.9,

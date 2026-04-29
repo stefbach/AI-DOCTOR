@@ -55,7 +55,6 @@ Répondez UNIQUEMENT avec du JSON valide, sans texte supplémentaire.
     const result = await generateText({
       model: openai("gpt-5.5", { reasoningEffort: "none" }),
       prompt: prompt,
-      temperature: 0.3,
       maxTokens: 3000,
     })
 

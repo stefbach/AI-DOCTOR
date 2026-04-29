@@ -19,7 +19,6 @@ export async function POST(req: NextRequest) {
         { role: 'user', content: patientContext }
       ],
       maxTokens: 5000,
-      temperature: 0.3
     })
 
     const report = parseStructuredReport(result.text)

@@ -500,7 +500,6 @@ export async function POST(request: NextRequest) {
       schema: tibokResponseSchema,
       messages,
       maxTokens: 1500,
-      temperature: 0.1
     })
 
     const parsed = result.object as any

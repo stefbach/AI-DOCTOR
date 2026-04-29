@@ -356,7 +356,6 @@ RULES:
           content: frenchText
         }
       ],
-      temperature: 0.2,
       max_completion_tokens: 2000,
     });
 
@@ -387,7 +386,6 @@ async function extractClinicalData(
         content: `Transcription de la dictée médicale:\n\n${transcriptionText}\n\nExtrayez toutes les données cliniques en JSON.`
       }
     ],
-    temperature: 0.1,
     max_completion_tokens: 3000,
     response_format: { type: "json_object" }
   });

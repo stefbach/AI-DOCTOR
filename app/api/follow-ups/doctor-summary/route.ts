@@ -113,7 +113,6 @@ export async function GET(req: NextRequest) {
           { role: 'user', content: aiPrompt },
         ],
         maxTokens: 2000,
-        temperature: 0.3,
       })
 
       const content = result.text

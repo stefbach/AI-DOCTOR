@@ -233,7 +233,6 @@ Generate complete 7-day meal plan with EXACTLY ${Math.round(targetCalories)} kca
           { role: "user", content: patientContext }
         ],
         max_completion_tokens: 10000,
-        temperature: 0.3,
         response_format: { type: "json_object" }
       }),
     })

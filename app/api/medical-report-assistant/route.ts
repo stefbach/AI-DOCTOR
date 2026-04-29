@@ -73,7 +73,6 @@ export async function POST(request: NextRequest) {
       model: openai("gpt-5.5", { reasoningEffort: "none" }),
       messages,
       maxTokens: 2000,
-      temperature: 0.3,
       tools: {
         // Tool 1: Modify existing item (medication, test, etc.)
         modifyItem: {

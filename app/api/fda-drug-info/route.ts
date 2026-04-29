@@ -58,7 +58,6 @@ Ne jamais inclure de texte en dehors du JSON.
     const result = await generateText({
       model: openai("gpt-5.5", { reasoningEffort: "none" }),
       prompt: prompt,
-      temperature: 0.1,
       maxTokens: 4000,
     })
 

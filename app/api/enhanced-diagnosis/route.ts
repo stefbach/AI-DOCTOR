@@ -45,7 +45,6 @@ export async function POST(request: NextRequest) {
     const diagnosticResult = await generateText({
       model: openai("gpt-5.5", { reasoningEffort: "none" }),
       prompt: diagnosticPrompt,
-      temperature: 0.2,
       maxTokens: 2000,
     })
 
@@ -117,7 +116,6 @@ export async function POST(request: NextRequest) {
     const examensResult = await generateText({
       model: openai("gpt-5.5", { reasoningEffort: "none" }),
       prompt: examensPrompt,
-      temperature: 0.1,
       maxTokens: 1500,
     })
 
@@ -167,7 +165,6 @@ export async function POST(request: NextRequest) {
     const prescriptionResult = await generateText({
       model: openai("gpt-5.5", { reasoningEffort: "none" }),
       prompt: prescriptionPrompt,
-      temperature: 0.1,
       maxTokens: 1500,
     })
 
@@ -263,7 +260,6 @@ export async function POST(request: NextRequest) {
     const rapportResult = await generateText({
       model: openai("gpt-5.5", { reasoningEffort: "none" }),
       prompt: rapportPrompt,
-      temperature: 0.1,
       maxTokens: 2000,
     })
 
