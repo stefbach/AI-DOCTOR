@@ -1765,7 +1765,7 @@ export async function GET(request: NextRequest) {
       '🔧 Enhanced JSON parsing with better error handling',
       '🔍 Improved empty data detection and validation',
       '🛠️ Enhanced fallback function with clinical data support',
-      '📝 Better GPT-4 response processing',
+      '📝 Better GPT-5.5 response processing',
       '⚠️ Comprehensive error recovery mechanisms'
     ],
     features: [

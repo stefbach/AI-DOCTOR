@@ -5871,7 +5871,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           '🔄 INTELLIGENT QUALITY RETRY - Application progressive spécificité UK',
           '🌍 Validation médicale universelle (TOUTES pathologies)',
           '🧠 Standards basés sur preuves internationales',
-          '🎯 Évaluation intelligente confiance GPT-4', 
+          '🎯 Évaluation intelligente confiance GPT-5.5',
           '🏥 Toutes spécialités médicales supportées automatiquement',
           '📊 Métriques de qualité et scoring en temps réel',
           '🔒 Protection complète des données (GDPR/HIPAA)',
@@ -6278,7 +6278,7 @@ export async function GET(request: NextRequest) {
       'Individual dose specification',
       'Administration timing precision',
       'Complete medication object generation',
-      'Enhanced GPT-4 prompting for precision',
+      'Enhanced GPT-5.5 prompting for precision',
       'Multi-retry system for accuracy',
       'Intelligent validation and correction'
     ]
