@@ -13,7 +13,7 @@ import { openai } from '@ai-sdk/openai'
  * - Before/after image analysis
  * - Dermatological diagnostic reasoning
  * 
- * Uses GPT-5.4 for superior clinical reasoning and image analysis descriptions.
+ * Uses GPT-5.5 for superior clinical reasoning and image analysis descriptions.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -42,9 +42,9 @@ export async function POST(req: NextRequest) {
       consultationHistory
     )
 
-    // Generate report using GPT-5.4
+    // Generate report using GPT-5.5
     const result = await generateText({
-      model: openai('gpt-5.4'),
+      model: openai('gpt-5.5'),
       messages: [
         {
           role: 'system',

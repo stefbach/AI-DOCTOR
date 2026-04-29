@@ -68,7 +68,7 @@ EXAMPLE OUTPUT FORMAT:
 ]`
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-5.4",
+      model: "gpt-5.5",
       messages: [
         {
           role: "system",
