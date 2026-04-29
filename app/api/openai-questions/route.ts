@@ -324,7 +324,6 @@ async function callOpenAIWithRetry(
   model: string,
   prompt: string,
   systemMessage: string,
-  baseTemperature: number,
   isPregnant: boolean,
   maxRetries: number = 3
 ): Promise<any> {
@@ -1971,10 +1970,10 @@ export async function POST(request: NextRequest) {
     const prompt = generateModeSpecificPrompt(adjustedMode, context)
     
     const aiConfig = {
-      fast: { model: 'gpt-5.5', temperature: 0.2, maxTokens: 8000 },
-      balanced: { model: 'gpt-5.5', temperature: 0.3, maxTokens: 8000 },
-      intelligent: { model: 'gpt-5.5', temperature: 0.3, maxTokens: 8000 }
-    }[adjustedMode] || { model: 'gpt-5.5', temperature: 0.3, maxTokens: 8000 }
+      fast: { model: 'gpt-5.5', maxTokens: 8000 },
+      balanced: { model: 'gpt-5.5', maxTokens: 8000 },
+      intelligent: { model: 'gpt-5.5', maxTokens: 8000 }
+    }[adjustedMode] || { model: 'gpt-5.5', maxTokens: 8000 }
     
     console.log(`Calling ${aiConfig.model} with ${adjustedMode} mode (history-enhanced) with retry mechanism`)
     
@@ -1985,7 +1984,6 @@ export async function POST(request: NextRequest) {
       aiConfig.model,
       prompt,
       systemMessage,
-      aiConfig.temperature,
       processedPatient.isPregnant || false,
       3
     )
