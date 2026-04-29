@@ -779,7 +779,7 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
     
     // Detailed prescription data
     detailedMedications: medications.map((med: any) => ({
-      name: getString(med.medication_dci || med.drug || 'Medication'),
+      name: getString(med.nom || med.medication_dci || med.drug || med.medication_name || med.name || 'Medication'),
       indication: getString(med.precise_indication || med.indication || ''),
       mechanism: getString(med.mechanism || ''),
       dosing: getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed'),
@@ -967,8 +967,8 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     }
     
     medications.push({
-      name: getString(med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
-      genericName: getString(med.dci || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
+      name: getString(med.nom || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
+      genericName: getString(med.denominationCommune || med.dci || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
       dosage: completeDosage,
       form: getString(med.dosage_form || med.form || 'tablet'),
       frequency: detailedFrequency,
@@ -984,7 +984,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       pregnancyCategory: getString(med.pregnancy_category || ''),
       pregnancySafety: getString(med.pregnancy_safety || ''),
       breastfeedingSafety: getString(med.breastfeeding_safety || ''),
-      completeLine: `${getString(med.medication_dci || med.dci || med.drug || med.medication_name || med.name)} ${completeDosage}\n${detailedFrequency}`
+      completeLine: `${getString(med.nom || med.medication_dci || med.dci || med.drug || med.medication_name || med.name)} ${completeDosage}\n${detailedFrequency}`
     })
     })
   }

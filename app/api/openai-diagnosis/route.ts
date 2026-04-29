@@ -5212,7 +5212,33 @@ export async function POST(request: NextRequest) {
     )
     
     console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
-    
+
+    // ========== FIX-3 BUG-A: Filter placeholder medication entries ==========
+    const PLACEHOLDER_MED_PATTERNS = [
+      /no\s+(regular\s+)?(current\s+)?medication/i,
+      /aucun\s+médicament/i,
+      /not\s+applicable/i,
+    ]
+    const isPlaceholderMed = (med: any): boolean => {
+      if (!med || typeof med !== 'object') return true
+      const name = String(med.medication_name || med.drug || med.name || '').trim()
+      if (!name) return true
+      return PLACEHOLDER_MED_PATTERNS.some(p => p.test(name))
+    }
+    if (Array.isArray(medicalAnalysis.treatment_plan?.medications)) {
+      const before = medicalAnalysis.treatment_plan.medications.length
+      medicalAnalysis.treatment_plan.medications = medicalAnalysis.treatment_plan.medications.filter((m: any) => !isPlaceholderMed(m))
+      const after = medicalAnalysis.treatment_plan.medications.length
+      if (before !== after) console.log(`🧹 Filtered ${before - after} placeholder med(s) from treatment_plan.medications`)
+    }
+    if (Array.isArray(medicalAnalysis.current_medications_validated)) {
+      const before = medicalAnalysis.current_medications_validated.length
+      medicalAnalysis.current_medications_validated = medicalAnalysis.current_medications_validated.filter((m: any) => !isPlaceholderMed(m))
+      const after = medicalAnalysis.current_medications_validated.length
+      if (before !== after) console.log(`🧹 Filtered ${before - after} placeholder med(s) from current_medications_validated`)
+    }
+    // ========== END FIX-3 BUG-A ==========
+
     // ========== DEBUG CURRENT MEDICATIONS VALIDATED ==========
     if (medicalAnalysis.current_medications_validated && medicalAnalysis.current_medications_validated.length > 0) {
       console.log('💊 CURRENT MEDICATIONS VALIDATED BY AI:', medicalAnalysis.current_medications_validated.length)
