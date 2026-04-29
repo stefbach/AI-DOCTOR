@@ -100,8 +100,8 @@ ${systemMessage}
       
       let questionsText = completion.choices[0].message.content || '[]'
       
-      // ========== CRITICAL DEBUG: Log raw GPT-4 response ==========
-      console.log('🔍 ========== RAW GPT-4 RESPONSE ==========')
+      // ========== CRITICAL DEBUG: Log raw GPT-5.5 response ==========
+      console.log('🔍 ========== RAW GPT-5.5 RESPONSE ==========')
       console.log('   Raw response length:', questionsText.length)
       console.log('   Raw response preview:', questionsText.substring(0, 500))
       console.log('   Raw response end:', questionsText.substring(Math.max(0, questionsText.length - 200)))
@@ -125,7 +125,7 @@ ${systemMessage}
       console.log('🔍 Has questions field?:', !!parsed.questions)
       
       // ========== CRITICAL FIX: Handle single question object ==========
-      // GPT-4 sometimes returns a single question object instead of array
+      // The LLM sometimes returns a single question object instead of array
       let questions: any[] = []
       
       if (Array.isArray(parsed)) {
@@ -136,7 +136,7 @@ ${systemMessage}
         questions = parsed.questions
       } else if (parsed.id && parsed.question) {
         // Case 3: Single question object - wrap in array
-        console.log('⚠️ GPT-4 returned single question object, wrapping in array')
+        console.log('⚠️ LLM returned single question object, wrapping in array')
         questions = [parsed]
       } else {
         // Case 4: Unknown format

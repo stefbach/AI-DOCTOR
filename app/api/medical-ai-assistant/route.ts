@@ -221,7 +221,7 @@ export async function POST(request: NextRequest) {
     // Déterminer si on utilise les capacités étendues
     const useEnhancedCapabilities = body.enhancedCapabilities && body.requestType === 'enhanced_medical_improvement'
     
-    // Préparer le contexte médical pour GPT-4
+    // Préparer le contexte médical pour GPT-5.5
     const medicalContextString = JSON.stringify({
       patient: body.medicalContext.patientInfo,
       current_report_sections: body.medicalContext.currentReport?.compteRendu?.rapport || {},
@@ -244,11 +244,11 @@ export async function POST(request: NextRequest) {
       .replace('{{MEDICAL_CONTEXT}}', medicalContextString)
       .replace('{{CAPABILITIES}}', JSON.stringify(body.medicalContext.capabilities || {}, null, 2))
 
-    console.log('📤 Sending enhanced request to GPT-4 with Mauritius medical standards...')
+    console.log('📤 Sending enhanced request to GPT-5.5 with Mauritius medical standards...')
     console.log('🔧 Enhanced capabilities enabled:', useEnhancedCapabilities)
     console.log('🎯 Available capabilities:', body.medicalContext.capabilities)
 
-    // Appel à GPT-4 avec paramètres optimisés pour les capacités étendues
+    // Appel à GPT-5.5 avec paramètres optimisés pour les capacités étendues
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -286,7 +286,7 @@ export async function POST(request: NextRequest) {
     const data = await response.json()
     const rawContent = data.choices[0]?.message?.content || ''
 
-    console.log('📥 Enhanced GPT-4 response received')
+    console.log('📥 Enhanced GPT-5.5 response received')
 
     // Parser la réponse JSON
     let parsedResponse: any

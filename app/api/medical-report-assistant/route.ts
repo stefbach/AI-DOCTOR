@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       { role: 'user', content: message }
     ]
 
-    console.log('📡 Calling GPT-4 for intelligent assistance...')
+    console.log('📡 Calling GPT-5.5 for intelligent assistance...')
 
     // Call GPT-5.5 with function calling for structured actions
     const result = await generateText({

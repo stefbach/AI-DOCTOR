@@ -226,7 +226,7 @@ function extractChronicDiseaseData(diagnosisData: any, patientData: any, clinica
   }
 }
 
-// ==================== GPT-4 DATA PREPARATION ====================
+// ==================== GPT-5.5 DATA PREPARATION ====================
 function prepareChronicDiseaseGPTData(extractedData: any, patientData: any) {
   return {
     // Patient info
@@ -283,7 +283,7 @@ function prepareChronicDiseaseGPTData(extractedData: any, patientData: any) {
   }
 }
 
-// ==================== GPT-4 PROMPTS (ADAPTED FOR CHRONIC DISEASES) ====================
+// ==================== GPT-5.5 PROMPTS (ADAPTED FOR CHRONIC DISEASES) ====================
 function createChronicDiseaseSystemPrompt(): string {
   return `You are a senior endocrinologist writing professional medical reports in ENGLISH for chronic disease follow-up consultations in Mauritius.
 
@@ -686,7 +686,7 @@ export async function POST(req: NextRequest) {
     console.log("STEP 2: Preparing enriched GPT data...")
     const enrichedData = prepareChronicDiseaseGPTData(extractedData, patientData)
     
-    // ===== STEP 3: GENERATE NARRATIVE REPORT WITH GPT-4 (like consultation-report) =====
+    // ===== STEP 3: GENERATE NARRATIVE REPORT WITH GPT-5.5 (like consultation-report) =====
     console.log("STEP 3: Generating narrative report with gpt-5.5...")
     
     const systemPrompt = createChronicDiseaseSystemPrompt()

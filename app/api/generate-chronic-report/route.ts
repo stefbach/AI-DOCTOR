@@ -699,7 +699,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   return { medications, labTests, imagingStudies }
 }
 
-// ==================== GPT-4 DATA PREPARATION ====================
+// ==================== GPT-5.5 DATA PREPARATION ====================
 function prepareEnrichedGPTData(realData: any, patientData: any) {
   return {
     // Patient info
@@ -757,7 +757,7 @@ function prepareEnrichedGPTData(realData: any, patientData: any) {
   }
 }
 
-// ==================== GPT-4 PROMPTS ====================
+// ==================== GPT-5.5 PROMPTS ====================
 function createEnhancedSystemPrompt(pregnancyStatus: string): string {
   const status = getString(pregnancyStatus)
   const pregnancyNote = (status === 'pregnant' || status === 'possibly_pregnant') ?
@@ -1247,8 +1247,8 @@ export async function POST(request: NextRequest) {
       examinationDate: examDate
     }
 
-    // ===== CALL GPT-4 WITH TRANSLATED DATA AND IMPROVED JSON PARSING =====
-    console.log("🤖 Calling GPT-4 with translated data for narrative structuring...")
+    // ===== CALL GPT-5.5 WITH TRANSLATED DATA AND IMPROVED JSON PARSING =====
+    console.log("🤖 Calling GPT-5.5 with translated data for narrative structuring...")
 
     let narrativeContent: any = {}
 
@@ -1266,8 +1266,8 @@ export async function POST(request: NextRequest) {
       })
 
       // IMPROVED JSON PARSING WITH BETTER ERROR HANDLING
-      console.log("🔍 GPT-4 raw response length:", result.text.length)
-      console.log("🔍 GPT-4 response preview:", result.text.substring(0, 500))
+      console.log("🔍 GPT-5.5 raw response length:", result.text.length)
+      console.log("🔍 GPT-5.5 response preview:", result.text.substring(0, 500))
       
       let cleanedText = result.text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
       
@@ -1283,9 +1283,9 @@ export async function POST(request: NextRequest) {
         try {
           // Try to parse the extracted JSON
           narrativeContent = JSON.parse(jsonString)
-          // Apply translation to GPT-4 response
+          // Apply translation to GPT-5.5 response
           narrativeContent = translateObjectRecursively(narrativeContent)
-          console.log("✅ GPT-4 narrative content parsed and translated successfully")
+          console.log("✅ GPT-5.5 narrative content parsed and translated successfully")
           console.log("✅ Narrative sections:", Object.keys(narrativeContent))
           
         } catch (parseError) {
@@ -1319,7 +1319,7 @@ export async function POST(request: NextRequest) {
       }
       
     } catch (error) {
-      console.error("❌ GPT-4 Error:", error)
+      console.error("❌ GPT-5.5 Error:", error)
       console.log("🔄 Using fallback content")
       narrativeContent = useRealDataFallback(realData, pregnancyInfo, clinicalData, patientData)
       narrativeContent = translateObjectRecursively(narrativeContent)

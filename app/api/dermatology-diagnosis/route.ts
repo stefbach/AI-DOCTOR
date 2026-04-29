@@ -612,7 +612,7 @@ ${summary}
       console.log(`💊 Patient has current medications: ${anonymizedPatient.currentMedications}`)
     }
 
-    // Format current medications properly for GPT-4
+    // Format current medications properly for GPT-5.5
     const currentMedicationsFormatted = hasCurrentMedications
       ? (Array.isArray(anonymizedPatient.currentMedications)
           ? anonymizedPatient.currentMedications.map((med: string, idx: number) => `${idx + 1}. ${med}`).join('\n  ')

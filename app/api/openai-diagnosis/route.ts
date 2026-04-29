@@ -1453,7 +1453,7 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
     }
   })
   
-  // VALIDATION ASSOUPLIE pour médicaments - accepter formats naturels GPT-4
+  // VALIDATION ASSOUPLIE pour médicaments - accepter formats naturels GPT-5.5
   const medications = (analysis?.treatment_plan?.medications || []).filter(
     (med: any) => med && (med.drug || med.medication || med.nom || med.dci || med.indication || med.dosing)
   )
@@ -1490,7 +1490,7 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
       console.log(`ℹ️ Medication ${idx + 1}: DCI will be auto-extracted`)
     }
     
-    // Plus de validation stricte du format dosing - GPT-4 peut utiliser le format qui lui convient
+    // Plus de validation stricte du format dosing - GPT-5.5 peut utiliser le format qui lui convient
   })
   
   const hasGenericContent = issues.length > 0
@@ -1503,7 +1503,7 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
 function extractDCIFromDrugName(drugName: string): string {
   if (!drugName) return 'Active ingredient'
   
-  // ✅ SIMPLIFIED: Let GPT-4 handle drug name normalization
+  // ✅ SIMPLIFIED: Let GPT-5.5 handle drug name normalization
   // No fixed dictionary - AI normalizes ANY medication intelligently
   // Just extract and capitalize the first word (drug name)
   const match = drugName.match(/^([a-zA-ZÀ-ÿ]+)/)
@@ -1717,9 +1717,9 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
           fixedMed.drug === null ||
           fixedMed.drug.length < 5) {
         
-        // 🚫 DO NOT AUTO-FIX - Trust GPT-4 or remove invalid medication
+        // 🚫 DO NOT AUTO-FIX - Trust GPT-5.5 or remove invalid medication
         console.log(`⚠️ Invalid medication detected: ${fixedMed.drug || 'undefined'}`)
-        console.log('✅ Removing invalid medication - Trusting GPT-4 decision')
+        console.log('✅ Removing invalid medication - Trusting GPT-5.5 decision')
         
         // Return null to filter out later
         return null
@@ -2922,7 +2922,7 @@ function universalMedicalValidation(
   
   console.log(`📊 Universal Validation Results:`)
   console.log(`   - Overall Quality: ${overallQuality}`)
-  console.log(`   - Trust GPT-4: ${trustGPT4}`)
+  console.log(`   - Trust GPT-5.5: ${trustGPT4}`)
   console.log(`   - Critical Issues: ${criticalIssues}`)
   console.log(`   - Important Issues: ${importantIssues}`)
   console.log(`   - Treatment Completeness: ${metrics.treatment_completeness}%`)
@@ -3198,10 +3198,10 @@ export function validateTherapeuticCompleteness(analysis: any, patientContext: P
       })
       completenessScore -= 50
       
-      // 🚨 NO AUTO-GENERATION - Trust GPT-4 decision
-      // If GPT-4 didn't prescribe medications, it may be CORRECT (e.g., ACS → immediate hospital referral)
-      console.log('⚠️ No medications prescribed by GPT-4 - This may be intentional (emergency referral)')
-      console.log('✅ Trusting GPT-4 decision - NOT auto-generating medications')
+      // 🚨 NO AUTO-GENERATION - Trust GPT-5.5 decision
+      // If GPT-5.5 didn't prescribe medications, it may be CORRECT (e.g., ACS → immediate hospital referral)
+      console.log('⚠️ No medications prescribed by GPT-5.5 - This may be intentional (emergency referral)')
+      console.log('✅ Trusting GPT-5.5 decision - NOT auto-generating medications')
     }
   }
   
@@ -3438,10 +3438,10 @@ function universalIntelligentValidation(analysis: any, patientContext: PatientCo
   const validation = universalMedicalValidation(analysis, patientContext)
   
   if (validation.trustGPT4) {
-    console.log('✅ GPT-4 prescription quality is sufficient - Minimal corrections')
+    console.log('✅ GPT-5.5 prescription quality is sufficient - Minimal corrections')
     analysis = applyMinimalCorrections(analysis, validation.issues, patientContext)
   } else {
-    console.log('⚠️ GPT-4 prescription needs improvement - Targeted corrections') 
+    console.log('⚠️ GPT-5.5 prescription needs improvement - Targeted corrections') 
     analysis = applyTargetedUniversalCorrections(analysis, validation.issues, patientContext)
   }
   
@@ -4825,7 +4825,7 @@ function validateUniversalMedicalAnalysis(
   console.log(`   - ${labTests.length} test(s) de laboratoire`)
   console.log(`   - ${imaging.length} étude(s) d'imagerie`)
   console.log(`   - Validation universelle : ${analysis.universal_validation?.overall_quality || 'non évaluée'}`)
-  console.log(`   - GPT-4 fiable : ${analysis.universal_validation?.gpt4_trusted || false}`)
+  console.log(`   - GPT-5.5 fiable : ${analysis.universal_validation?.gpt4_trusted || false}`)
   console.log(`   - Problèmes critiques : ${analysis.universal_validation?.critical_issues || 0}`)
   
   if (!analysis?.clinical_analysis?.primary_diagnosis?.condition) {
@@ -5222,7 +5222,7 @@ export async function POST(request: NextRequest) {
         console.log(`      Corrections: ${med.validated_corrections}`)
       })
     } else if (patientContext.current_medications.length > 0) {
-      // 🚨 FALLBACK: GPT-4 didn't return current_medications_validated, generate from patient input
+      // 🚨 FALLBACK: GPT-5.5 didn't return current_medications_validated, generate from patient input
       console.log('⚠️ AI did not return current_medications_validated - GENERATING FALLBACK from patient input!')
       console.log(`   📋 Patient has ${patientContext.current_medications.length} current medications to process`)
       
