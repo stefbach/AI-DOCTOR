@@ -2,6 +2,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import OpenAI from 'openai'
+import {
+  queryMedicalGuidelines,
+  formatGuidelinesForPrompt,
+  inferSpecialty,
+  buildClinicalQuery,
+  type RAGContext,
+  type RAGReference,
+} from '@/lib/rag/medical-rag'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300 // 300 seconds max for GPT-5.5 diagnosis generation (large prompt)
@@ -471,7 +479,13 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
     "understanding_condition": "MANDATORY - Specific condition explanation",
     "treatment_importance": "MANDATORY - Precise treatment importance",
     "warning_signs": "MANDATORY - Specific warning signs"
-  }
+  },
+  "evidence_references": [
+    {
+      "ref_id": "MANDATORY - The [ref-N] tag from RAG context (omit field if no RAG was provided)",
+      "used_for": "MANDATORY - Specific recommendation supported by this reference (e.g. 'NSAID contraindication until dengue excluded', 'Treatment threshold ≥140/90')"
+    }
+  ]
 }
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -5202,9 +5216,45 @@ export async function POST(request: NextRequest) {
       console.log('   - Clinical reasoning present:', !!doctorNotes.clinicalReasoning)
     }
     
-    // ============ APPEL OPENAI AVEC QUALITÉ MAURITIUS + DCI ============
-    const mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis, doctorNotes)
-    
+    // ============ RAG ENRICHMENT (TIBOK guidelines) — best-effort, non-blocking ============
+    let ragContext: RAGContext = {
+      chunks: [],
+      references: [],
+      totalChunks: 0,
+      avgSimilarity: 0,
+      ragUsed: false,
+    }
+    try {
+      const ragQuery = buildClinicalQuery({
+        chiefComplaint: patientContext.chief_complaint,
+        symptoms: patientContext.symptoms,
+        ageYears: patientContext.age,
+        sex: patientContext.sex,
+        medicalHistory: patientContext.medical_history,
+        travelHistory: patientContext.disease_history,
+        vitalSigns: patientContext.vital_signs as Record<string, unknown>,
+        duration: patientContext.symptom_duration,
+      })
+      const inferredSpecialty = inferSpecialty(ragQuery)
+      console.log(`📚 [RAG] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
+      console.log(`📚 [RAG] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
+      ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty })
+      console.log(
+        `📚 [RAG] Retrieved ${ragContext.totalChunks} chunks ` +
+          `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
+      )
+    } catch (ragErr: any) {
+      console.error('📚 [RAG] Enrichment failed (non-blocking):', ragErr?.message || ragErr)
+    }
+    const ragPromptBlock = formatGuidelinesForPrompt(ragContext)
+
+    // ============ APPEL OPENAI AVEC QUALITÉ MAURITIUS + DCI + RAG ============
+    let mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis, doctorNotes)
+    if (ragPromptBlock) {
+      // Prepend RAG context so the LLM sees authoritative guidelines before the rest of the prompt.
+      mauritiusPrompt = `${ragPromptBlock}\n\n${mauritiusPrompt}`
+    }
+
     const { data: openaiData, analysis: medicalAnalysis, mauritius_quality_level } = await callOpenAIWithMauritiusQuality(
       apiKey,
       mauritiusPrompt,
@@ -5495,7 +5545,44 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     }
     
     const validation = validateUniversalMedicalAnalysis(finalAnalysis, patientContext)
-    
+
+    // ============ RAG: enrich evidence_references with full metadata ============
+    // The LLM emits {ref_id, used_for}; we merge in title/source/url/date from ragContext.
+    let evidenceReferences: Array<RAGReference & { used_for: string }> = []
+    let unknownCitedRefs: string[] = []
+    if (ragContext.ragUsed) {
+      const llmRefs: Array<{ ref_id?: string; used_for?: string }> = Array.isArray(
+        finalAnalysis?.evidence_references
+      )
+        ? finalAnalysis.evidence_references
+        : []
+      const refLookup = new Map(ragContext.references.map((r) => [r.ref_id, r]))
+      const seen = new Set<string>()
+      for (const cited of llmRefs) {
+        const id = (cited?.ref_id || '').trim()
+        if (!id) continue
+        const meta = refLookup.get(id)
+        if (!meta) {
+          unknownCitedRefs.push(id)
+          continue
+        }
+        if (seen.has(id)) continue
+        seen.add(id)
+        evidenceReferences.push({
+          ...meta,
+          used_for: (cited?.used_for || '').trim() || 'Unspecified',
+        })
+      }
+      if (unknownCitedRefs.length > 0) {
+        console.error(
+          `📚 [RAG] LLM cited unknown ref(s): ${unknownCitedRefs.join(', ')} — known: ${ragContext.references.map((r) => r.ref_id).join(', ')}`
+        )
+      }
+      console.log(
+        `📚 [RAG] Cited ${evidenceReferences.length}/${ragContext.references.length} provided references`
+      )
+    }
+
     const patientContextWithIdentity = {
       ...patientContext,
       ...originalIdentity
@@ -5514,7 +5601,18 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     const finalResponse = {
       success: true,
       processingTime: `${processingTime}ms`,
-      
+
+      // ========== RAG (TIBOK guidelines) ==========
+      rag_used: ragContext.ragUsed,
+      rag_metadata: {
+        chunks_retrieved: ragContext.totalChunks,
+        avg_similarity: Number(ragContext.avgSimilarity.toFixed(3)),
+        provided_references: ragContext.references.length,
+        cited_references: evidenceReferences.length,
+        unknown_citations: unknownCitedRefs,
+      },
+      evidence_references: evidenceReferences,
+
       // ========== VALIDATION QUALITÉ MAURITIUS + DCI PRÉCIS ==========
       mauritiusQualityValidation: {
         enabled: true,
