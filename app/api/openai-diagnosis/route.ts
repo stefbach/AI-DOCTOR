@@ -5214,16 +5214,29 @@ export async function POST(request: NextRequest) {
     console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
 
     // ========== FIX-3 BUG-A: Filter placeholder medication entries ==========
+    // Primary guard: if patient submitted 0 current medications, GPT cannot
+    // legitimately validate any — drop any placeholder it may have invented.
+    if (!patientContext.current_medications || patientContext.current_medications.length === 0) {
+      if (Array.isArray(medicalAnalysis.current_medications_validated) && medicalAnalysis.current_medications_validated.length > 0) {
+        console.log(`🧹 Patient has 0 current meds — discarding ${medicalAnalysis.current_medications_validated.length} AI-generated placeholder entry(ies)`)
+        medicalAnalysis.current_medications_validated = []
+      }
+    }
+    // Secondary defense: pattern-based filter on remaining entries.
+    // Regex accepts 'no medication', 'no current medication', 'no regular medication',
+    // and any combination order ('no current regular medication', 'no regular current medication').
     const PLACEHOLDER_MED_PATTERNS = [
-      /no\s+(regular\s+)?(current\s+)?medication/i,
+      /no\s+(?:(?:regular|current)\s+)*medication/i,
       /aucun\s+médicament/i,
       /not\s+applicable/i,
+      /no\s+medicine\s+name/i,
     ]
     const isPlaceholderMed = (med: any): boolean => {
       if (!med || typeof med !== 'object') return true
-      const name = String(med.medication_name || med.drug || med.name || '').trim()
-      if (!name) return true
-      return PLACEHOLDER_MED_PATTERNS.some(p => p.test(name))
+      const text = [med.medication_name, med.drug, med.name, med.dci, med.medication_dci]
+        .filter(Boolean).map(String).join(' ').trim()
+      if (!text) return true
+      return PLACEHOLDER_MED_PATTERNS.some(p => p.test(text))
     }
     if (Array.isArray(medicalAnalysis.treatment_plan?.medications)) {
       const before = medicalAnalysis.treatment_plan.medications.length
