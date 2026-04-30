@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress"
 import { toast } from "@/components/ui/use-toast"
 import TibokMedicalAssistant from '../tibok-medical-assistant'
+import EvidenceReferencesSection from '../rag/evidence-references-section'
 import {
   FileText, Download, Printer, CheckCircle, Loader2, Pill, TestTube,
   Scan, AlertTriangle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
@@ -4276,6 +4277,9 @@ export default function ChronicProfessionalReport({
               <div><strong>🕐 Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
             </div>
           </div>
+
+          {/* RAG: medical guidelines used for this consultation */}
+          <EvidenceReferencesSection references={diagnosisData?.evidence_references} />
 
           {/* Signature Section for Main Report */}
           <div className="mt-4 sm:mt-8 pt-4 sm:pt-6 border-t-2 border-gray-800">

@@ -24,6 +24,7 @@ import {
  UserPlus, Activity, Heart, Scale, Droplets
 } from "lucide-react"
 import TibokMedicalAssistant from './tibok-medical-assistant'
+import EvidenceReferencesSection from './rag/evidence-references-section'
 
 // ==================== HELPER FUNCTIONS ====================
 // Helper function to safely handle DCI fields
@@ -5465,7 +5466,9 @@ const ConsultationReport = () => {
  )}
  </div>
 
- 
+ {/* RAG: medical guidelines used for this consultation */}
+ <EvidenceReferencesSection references={diagnosisData?.evidence_references} />
+
  <div className="mt-12 pt-8 border-t border-gray-300 signature">
  <div className="text-right">
  <p className="font-semibold">{praticien.nom}</p>

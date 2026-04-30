@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import TibokMedicalAssistant from '../tibok-medical-assistant'
+import EvidenceReferencesSection from '../rag/evidence-references-section'
 import {
  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube,
  Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
@@ -5425,7 +5426,9 @@ const ConsultationReport = () => {
  )}
  </div>
 
- 
+ {/* RAG: medical guidelines used for this consultation */}
+ <EvidenceReferencesSection references={diagnosisData?.evidence_references} />
+
  <div className="mt-12 pt-8 border-t border-gray-300 signature">
  <div className="text-right">
  <p className="font-semibold">{praticien.nom}</p>
@@ -5434,9 +5437,9 @@ const ConsultationReport = () => {
 
  {validationStatus === 'validated' && documentSignatures.consultation ? (
  <div className="mt-4">
- <img 
- src={documentSignatures.consultation} 
- alt="Doctor's Signature" 
+ <img
+ src={documentSignatures.consultation}
+ alt="Doctor's Signature"
  className="ml-auto h-20 w-auto"
  style={{ maxWidth: '300px' }}
  />
