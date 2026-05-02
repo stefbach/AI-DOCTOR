@@ -1,0 +1,122 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+AAOS-001,AAOS,Hip Osteoarthritis Treatment,2023,https://www.aaos.org/quality/quality-programs/lower-extremity-programs/hip-osteoarthritis/,,AAOS ©,restricted,orthopedics,high
+AAOS-002,AAOS,Knee Osteoarthritis Treatment Non-Surgical,2021,https://www.aaos.org/quality/quality-programs/lower-extremity-programs/osteoarthritis-of-the-knee/,,AAOS ©,restricted,orthopedics,high
+AAOS-003,AAOS,Anterior Cruciate Ligament Injuries,2022,https://www.aaos.org/quality/quality-programs/lower-extremity-programs/acl-injuries/,,AAOS ©,restricted,orthopedics,medium
+AAOS-004,AAOS,Hip Fractures in Older Adults,2021,https://www.aaos.org/quality/quality-programs/lower-extremity-programs/hip-fractures-in-the-elderly/,,AAOS ©,restricted,orthopedics,high
+AAOS-005,AAOS,Distal Radius Fractures,2020,https://www.aaos.org/quality/quality-programs/upper-extremity-programs/distal-radius-fractures/,,AAOS ©,restricted,orthopedics,medium
+AAOS-006,AAOS,Carpal Tunnel Syndrome,2024,https://www.aaos.org/quality/quality-programs/upper-extremity-programs/carpal-tunnel-syndrome/,,AAOS ©,restricted,orthopedics,medium
+AAOS-007,AAOS,Rotator Cuff Injuries Treatment,2019,https://www.aaos.org/quality/quality-programs/upper-extremity-programs/rotator-cuff-injuries/,,AAOS ©,restricted,orthopedics,medium
+AAOS-008,AAOS,Pediatric Supracondylar Humerus Fractures,2024,https://www.aaos.org/quality/quality-programs/pediatric-programs/pediatric-supracondylar-humerus-fractures/,,AAOS ©,restricted,orthopedics,medium
+AUA-001,AUA,Localized Prostate Cancer Management,2022,https://www.auanet.org/guidelines-and-quality/guidelines/clinically-localized-prostate-cancer,,AUA ©,restricted,urology,high
+AUA-002,AUA,Benign Prostatic Hyperplasia,2023,https://www.auanet.org/guidelines-and-quality/guidelines/benign-prostatic-hyperplasia-(bph)-guideline,,AUA ©,restricted,urology,high
+AUA-003,AUA,Bladder Cancer Management,2024,https://www.auanet.org/guidelines-and-quality/guidelines/bladder-cancer-non-muscle-invasive-guideline,,AUA ©,restricted,urology,high
+AUA-004,AUA,Kidney Stones Management,2024,https://www.auanet.org/guidelines-and-quality/guidelines/surgical-management-of-stones-(2024)-guideline,,AUA ©,restricted,urology,high
+AUA-005,AUA,Erectile Dysfunction Treatment,2018,https://www.auanet.org/guidelines-and-quality/guidelines/erectile-dysfunction-(ed)-guideline,,AUA ©,restricted,urology,medium
+AUA-006,AUA,Urinary Incontinence Adult Female,2023,https://www.auanet.org/guidelines-and-quality/guidelines/incontinence-after-prostate-treatment,,AUA ©,restricted,urology,high
+AUA-007,AUA,Recurrent Urinary Tract Infections,2022,https://www.auanet.org/guidelines-and-quality/guidelines/recurrent-uti,,AUA ©,restricted,urology,high
+AUA-008,AUA,Microscopic Hematuria,2020,https://www.auanet.org/guidelines-and-quality/guidelines/microhematuria,,AUA ©,restricted,urology,medium
+EAU-001,EAU,Prostate Cancer Treatment,2024,https://uroweb.org/guidelines/prostate-cancer,,EAU ©,restricted,urology,high
+EAU-002,EAU,Renal Cell Carcinoma,2024,https://uroweb.org/guidelines/renal-cell-carcinoma,,EAU ©,restricted,urology,high
+EAU-003,EAU,Bladder Cancer Non-Muscle Invasive,2024,https://uroweb.org/guidelines/non-muscle-invasive-bladder-cancer,,EAU ©,restricted,urology,high
+EAU-004,EAU,Urological Trauma,2023,https://uroweb.org/guidelines/urological-trauma,,EAU ©,restricted,urology,medium
+EAU-005,EAU,Male Lower Urinary Tract Symptoms,2024,https://uroweb.org/guidelines/management-of-non-neurogenic-male-luts,,EAU ©,restricted,urology,high
+EAU-006,EAU,Urolithiasis Management,2024,https://uroweb.org/guidelines/urolithiasis,,EAU ©,restricted,urology,high
+EAU-007,EAU,Urological Infections,2024,https://uroweb.org/guidelines/urological-infections,,EAU ©,restricted,urology,high
+EAU-008,EAU,Sexual and Reproductive Health,2024,https://uroweb.org/guidelines/sexual-and-reproductive-health,,EAU ©,restricted,urology,medium
+AAO-001,AAO,Diabetic Retinopathy PPP,2024,https://www.aao.org/preferred-practice-pattern/diabetic-retinopathy-ppp,,AAO ©,restricted,ophthalmology,high
+AAO-002,AAO,Glaucoma Primary Open-Angle PPP,2020,https://www.aao.org/preferred-practice-pattern/primary-open-angle-glaucoma-ppp,,AAO ©,restricted,ophthalmology,high
+AAO-003,AAO,Age-Related Macular Degeneration PPP,2024,https://www.aao.org/preferred-practice-pattern/age-related-macular-degeneration-ppp,,AAO ©,restricted,ophthalmology,high
+AAO-004,AAO,Cataract in Adult Eye PPP,2021,https://www.aao.org/preferred-practice-pattern/cataract-in-adult-eye-ppp,,AAO ©,restricted,ophthalmology,medium
+AAO-005,AAO,Dry Eye Syndrome PPP,2018,https://www.aao.org/preferred-practice-pattern/dry-eye-syndrome-ppp-2018,,AAO ©,restricted,ophthalmology,medium
+AAO-006,AAO,Pediatric Eye Evaluations PPP,2017,https://www.aao.org/preferred-practice-pattern/pediatric-eye-evaluations-ppp-2017,,AAO ©,restricted,ophthalmology,medium
+AAO-007,AAO,Retinal Vein Occlusions PPP,2019,https://www.aao.org/preferred-practice-pattern/retinal-vein-occlusions-ppp-2019,,AAO ©,restricted,ophthalmology,medium
+APA-001,APA,Major Depressive Disorder Treatment,2010,https://psychiatryonline.org/pb/assets/raw/sitewide/practice_guidelines/guidelines/mdd.pdf,https://psychiatryonline.org/pb/assets/raw/sitewide/practice_guidelines/guidelines/mdd.pdf,APA ©,restricted,psychiatry,high
+APA-002,APA,Bipolar Disorder Treatment,2002,https://psychiatryonline.org/pb/assets/raw/sitewide/practice_guidelines/guidelines/bipolar.pdf,https://psychiatryonline.org/pb/assets/raw/sitewide/practice_guidelines/guidelines/bipolar.pdf,APA ©,restricted,psychiatry,high
+APA-003,APA,Schizophrenia Treatment,2020,https://psychiatryonline.org/doi/book/10.1176/appi.books.9780890424841,,APA ©,restricted,psychiatry,high
+APA-004,APA,Eating Disorders Treatment,2023,https://psychiatryonline.org/doi/10.1176/appi.ajp.20232304,,APA ©,restricted,psychiatry,high
+APA-005,APA,PTSD Treatment,2017,https://psychiatryonline.org/doi/10.1176/appi.books.9780890424841,,APA ©,restricted,psychiatry,high
+ATS-001,ATS,Asthma Diagnosis Adults,2020,https://www.atsjournals.org/doi/10.1164/rccm.202009-3577ST,,ATS ©,restricted,respiratory,high
+ATS-002,ATS,Pulmonary Function Testing Standards,2022,https://www.atsjournals.org/doi/10.1164/rccm.202204-0656ST,,ATS ©,restricted,respiratory,high
+ATS-003,ATS,Treatment of Tuberculosis,2016,https://www.atsjournals.org/doi/10.1164/rccm.201605-1051ST,,ATS ©,restricted,respiratory,high
+ATS-004,ATS,Idiopathic Pulmonary Fibrosis,2022,https://www.atsjournals.org/doi/10.1164/rccm.202202-0399ST,,ATS ©,restricted,respiratory,high
+ATS-005,ATS,Pneumonia Community-Acquired Adults,2019,https://www.atsjournals.org/doi/10.1164/rccm.201908-1581ST,,ATS ©,restricted,respiratory,high
+ATS-006,ATS,Hospital-Acquired Pneumonia,2016,https://www.atsjournals.org/doi/10.1164/rccm.201602-0247ST,,ATS ©,restricted,respiratory,high
+ATS-007,ATS,Sleep Apnea Adult Diagnosis,2017,https://www.atsjournals.org/doi/10.1164/rccm.201609-1854ST,,ATS ©,restricted,respiratory,medium
+ATS-008,ATS,COPD Exacerbation Pharmacological,2021,https://www.atsjournals.org/doi/10.1164/rccm.202103-0580ST,,ATS ©,restricted,respiratory,high
+WGO-001,WGO,Inflammatory Bowel Disease Global Guidelines,2015,https://www.worldgastroenterology.org/guidelines/inflammatory-bowel-disease/inflammatory-bowel-disease-english,,WGO ©,restricted,gastroenterology,high
+WGO-002,WGO,Helicobacter pylori Global Guidelines,2021,https://www.worldgastroenterology.org/guidelines/helicobacter-pylori/helicobacter-pylori-english,,WGO ©,restricted,gastroenterology,high
+WGO-003,WGO,Constipation Global Guidelines,2010,https://www.worldgastroenterology.org/guidelines/constipation/constipation-english,,WGO ©,restricted,gastroenterology,medium
+WGO-004,WGO,GERD Global Guidelines,2017,https://www.worldgastroenterology.org/guidelines/gerd/gerd-english,,WGO ©,restricted,gastroenterology,high
+WGO-005,WGO,Acute Diarrhea Global Guidelines,2012,https://www.worldgastroenterology.org/guidelines/acute-diarrhea/acute-diarrhea-english,,WGO ©,restricted,gastroenterology,medium
+ESPEN-001,ESPEN,Clinical Nutrition in Hospital,2022,https://www.espen.org/files/ESPEN-Guidelines/ESPEN-guideline-on-Nutritional-support-for-polymorbid-medical-inpatients.pdf,https://www.espen.org/files/ESPEN-Guidelines/ESPEN-guideline-on-Nutritional-support-for-polymorbid-medical-inpatients.pdf,ESPEN ©,restricted,nutrition,high
+ESPEN-002,ESPEN,Clinical Nutrition Cancer,2021,https://www.espen.org/files/ESPEN-Guidelines/ESPEN-practical-guideline-Clinical-Nutrition-in-cancer.pdf,https://www.espen.org/files/ESPEN-Guidelines/ESPEN-practical-guideline-Clinical-Nutrition-in-cancer.pdf,ESPEN ©,restricted,nutrition,high
+ESPEN-003,ESPEN,Clinical Nutrition Geriatrics,2022,https://www.espen.org/files/ESPEN-Guidelines/ESPEN-practical-guideline-clinical-nutrition-and-hydration-in-geriatrics.pdf,https://www.espen.org/files/ESPEN-Guidelines/ESPEN-practical-guideline-clinical-nutrition-and-hydration-in-geriatrics.pdf,ESPEN ©,restricted,nutrition,high
+ESPEN-004,ESPEN,Clinical Nutrition Liver Disease,2022,https://www.espen.org/files/ESPEN-Guidelines/ESPEN-practical-guideline_Clinical_Nutrition-in-liver_disease.pdf,https://www.espen.org/files/ESPEN-Guidelines/ESPEN-practical-guideline_Clinical_Nutrition-in-liver_disease.pdf,ESPEN ©,restricted,nutrition,medium
+ESPEN-005,ESPEN,Clinical Nutrition ICU,2023,https://www.espen.org/files/ESPEN-Guidelines/ESPEN-practical-guideline-Clinical-nutrition-in-the-intensive-care-unit.pdf,https://www.espen.org/files/ESPEN-Guidelines/ESPEN-practical-guideline-Clinical-nutrition-in-the-intensive-care-unit.pdf,ESPEN ©,restricted,nutrition,high
+ESPEN-006,ESPEN,Home Parenteral Nutrition,2020,https://www.espen.org/files/ESPEN-Guidelines/ESPEN-practical-guideline-on-home-parenteral-nutrition.pdf,https://www.espen.org/files/ESPEN-Guidelines/ESPEN-practical-guideline-on-home-parenteral-nutrition.pdf,ESPEN ©,restricted,nutrition,medium
+ESPGHAN-001,ESPGHAN,Pediatric Coeliac Disease,2020,https://journals.lww.com/jpgn/Fulltext/2020/01000/European_Society_Paediatric_Gastroenterology,,ESPGHAN ©,restricted,pediatrics,high
+ESPGHAN-002,ESPGHAN,Pediatric IBD,2021,https://journals.lww.com/jpgn/Fulltext/2021/02000/Inflammatory_Bowel_Disease_in_Children_and,,ESPGHAN ©,restricted,pediatrics,high
+ESPGHAN-003,ESPGHAN,Pediatric Functional Constipation,2014,https://journals.lww.com/jpgn/Fulltext/2014/02000/Evaluation_and_Treatment_of_Functional,,ESPGHAN ©,restricted,pediatrics,high
+ESPGHAN-004,ESPGHAN,Pediatric GERD,2018,https://journals.lww.com/jpgn/Fulltext/2018/03000/Pediatric_Gastroesophageal_Reflux_Clinical,,ESPGHAN ©,restricted,pediatrics,high
+ESPGHAN-005,ESPGHAN,Pediatric Acute Gastroenteritis,2014,https://journals.lww.com/jpgn/Fulltext/2014/07000/European_Society_for_Pediatric_Gastroenterology,,ESPGHAN ©,restricted,pediatrics,high
+SFAR-001,SFAR,Anesthesia Management Postoperative Nausea Vomiting,2022,https://sfar.org/wp-content/uploads/2022/03/Anti-emetic_DR_2022.pdf,,SFAR ©,restricted,anesthesia,medium
+SFAR-002,SFAR,Perioperative Anaphylaxis,2018,https://sfar.org/wp-content/uploads/2018/06/2-Anesth-Reanim-2018-Anaphylaxis.pdf,,SFAR ©,restricted,anesthesia,high
+SFAR-003,SFAR,Antibiotic Prophylaxis Surgery,2018,https://sfar.org/wp-content/uploads/2018/04/RFE-AntibioP-Vsoumise.pdf,,SFAR ©,restricted,anesthesia,high
+SFC-001,SFC,Cardiopathie Ischemique Stable,2018,https://www.sfcardio.fr/sites/default/files/PDF/sfc_recommandations_cardiopathies_ischemiques.pdf,,SFC ©,restricted,cardiology,medium
+SPLF-001,SPLF,Sevrage Tabagique en Pneumologie,2018,https://splf.fr/wp-content/uploads/2018/02/Sevrage-tabagique-recommandations-2018.pdf,,SPLF ©,restricted,respiratory,medium
+SFD-001,SFD,Diabete Type 2 Adulte Prise Charge Recommandations,2021,https://www.sfdiabete.org/sites/www.sfdiabete.org/files/files/recommandations_t2dm_sfd_2021.pdf,,SFD ©,restricted,endocrinology,high
+ACEP-001,ACEP,Adult Sepsis Emergency Department,2022,https://www.acep.org/patient-care/policy-statements/sepsis,,ACEP ©,restricted,emergency,high
+ACEP-002,ACEP,Acute Coronary Syndrome ED,2018,https://www.acep.org/patient-care/policy-statements/critical-issues-in-the-evaluation-and-management-of-emergency-department-patients-with-suspected-non-st-elevation-acute-coronary-syndromes/,,ACEP ©,restricted,emergency,high
+ACEP-003,ACEP,Pulmonary Embolism Diagnosis ED,2018,https://www.acep.org/patient-care/policy-statements/critical-issues-in-the-evaluation-and-management-of-adult-patients-presenting-to-the-emergency-department-with-suspected-acute-venous-thromboembolic-disease/,,ACEP ©,restricted,emergency,high
+ACEP-004,ACEP,Stroke Acute ED,2017,https://www.acep.org/patient-care/policy-statements/clinical-policy-use-of-intravenous-tpa-for-the-management-of-acute-ischemic-stroke-in-the-emergency-department/,,ACEP ©,restricted,emergency,high
+ACEP-005,ACEP,Headache ED Evaluation,2019,https://www.acep.org/patient-care/policy-statements/clinical-policy-critical-issues-in-the-evaluation-and-management-of-adult-patients-with-headache-in-the-emergency-department/,,ACEP ©,restricted,emergency,medium
+NICE-EXT-001,NICE,Anxiety Disorders in Adults,2019,https://www.nice.org.uk/guidance/cg113,,NICE ©,restricted,psychiatry,high
+NICE-EXT-002,NICE,Pancreatic Cancer Adults,2018,https://www.nice.org.uk/guidance/ng85,,NICE ©,restricted,oncology,high
+NICE-EXT-003,NICE,Lung Cancer Diagnosis Treatment,2019,https://www.nice.org.uk/guidance/ng122,,NICE ©,restricted,oncology,high
+NICE-EXT-004,NICE,Colorectal Cancer Adults,2020,https://www.nice.org.uk/guidance/ng151,,NICE ©,restricted,oncology,high
+NICE-EXT-005,NICE,Breast Cancer Early Locally Advanced,2018,https://www.nice.org.uk/guidance/ng101,,NICE ©,restricted,oncology,high
+NICE-EXT-006,NICE,Heart Valve Disease,2021,https://www.nice.org.uk/guidance/ng208,,NICE ©,restricted,cardiology,medium
+NICE-EXT-007,NICE,Coronary Heart Disease Stable Angina,2016,https://www.nice.org.uk/guidance/cg126,,NICE ©,restricted,cardiology,high
+NICE-EXT-008,NICE,Postnatal Depression and Mental Health,2020,https://www.nice.org.uk/guidance/cg192,,NICE ©,restricted,psychiatry,high
+NICE-EXT-009,NICE,Generalised Anxiety Disorder Treatment,2020,https://www.nice.org.uk/guidance/cg113,,NICE ©,restricted,psychiatry,high
+NICE-EXT-010,NICE,Eating Disorders Recognition Treatment,2020,https://www.nice.org.uk/guidance/ng69,,NICE ©,restricted,psychiatry,high
+NICE-EXT-011,NICE,Inflammatory Bowel Disease Crohn's,2019,https://www.nice.org.uk/guidance/ng129,,NICE ©,restricted,gastroenterology,high
+NICE-EXT-012,NICE,Ulcerative Colitis,2019,https://www.nice.org.uk/guidance/ng130,,NICE ©,restricted,gastroenterology,high
+NICE-EXT-013,NICE,Irritable Bowel Syndrome,2017,https://www.nice.org.uk/guidance/cg61,,NICE ©,restricted,gastroenterology,high
+NICE-EXT-014,NICE,Coeliac Disease,2015,https://www.nice.org.uk/guidance/ng20,,NICE ©,restricted,gastroenterology,medium
+NICE-EXT-015,NICE,Anaphylaxis Assessment Children Adults,2020,https://www.nice.org.uk/guidance/cg134,,NICE ©,restricted,emergency,high
+NICE-EXT-016,NICE,Headaches in Over 12s,2021,https://www.nice.org.uk/guidance/cg150,,NICE ©,restricted,neurology,high
+NICE-EXT-017,NICE,Multiple Sclerosis Management,2022,https://www.nice.org.uk/guidance/ng220,,NICE ©,restricted,neurology,high
+NICE-EXT-018,NICE,Parkinson Disease Adults,2017,https://www.nice.org.uk/guidance/ng71,,NICE ©,restricted,neurology,high
+NICE-EXT-019,NICE,Epilepsy Diagnosis Management,2022,https://www.nice.org.uk/guidance/ng217,,NICE ©,restricted,neurology,high
+NICE-EXT-020,NICE,Glaucoma Diagnosis Management,2022,https://www.nice.org.uk/guidance/ng81,,NICE ©,restricted,ophthalmology,high
+NICE-EXT-021,NICE,Eczema Atopic Children,2007,https://www.nice.org.uk/guidance/cg57,,NICE ©,restricted,dermatology,medium
+NICE-EXT-022,NICE,Acne Vulgaris Management,2021,https://www.nice.org.uk/guidance/ng198,,NICE ©,restricted,dermatology,medium
+NICE-EXT-023,NICE,Psoriasis Management,2017,https://www.nice.org.uk/guidance/cg153,,NICE ©,restricted,dermatology,high
+NICE-EXT-024,NICE,Tuberculosis,2019,https://www.nice.org.uk/guidance/ng33,,NICE ©,restricted,infectious,high
+NICE-EXT-025,NICE,HIV Testing,2016,https://www.nice.org.uk/guidance/ng60,,NICE ©,restricted,infectious,high
+NICE-EXT-026,NICE,Endometriosis Diagnosis Management,2017,https://www.nice.org.uk/guidance/ng73,,NICE ©,restricted,gynecology,high
+NICE-EXT-027,NICE,Heavy Menstrual Bleeding,2021,https://www.nice.org.uk/guidance/ng88,,NICE ©,restricted,gynecology,high
+NICE-EXT-028,NICE,Menopause Diagnosis Management,2024,https://www.nice.org.uk/guidance/ng23,,NICE ©,restricted,gynecology,high
+NICE-EXT-029,NICE,Pelvic Inflammatory Disease,2019,https://www.nice.org.uk/guidance/cs5,,NICE ©,restricted,gynecology,medium
+NICE-EXT-030,NICE,Falls Prevention Older People,2013,https://www.nice.org.uk/guidance/cg161,,NICE ©,restricted,geriatrics,high
+NICE-EXT-031,NICE,Delirium Prevention Diagnosis,2010,https://www.nice.org.uk/guidance/cg103,,NICE ©,restricted,geriatrics,high
+NICE-EXT-032,NICE,Pressure Ulcers Prevention,2014,https://www.nice.org.uk/guidance/cg179,,NICE ©,restricted,geriatrics,medium
+NICE-EXT-033,NICE,Venous Thromboembolic Diseases Diagnosis Management,2020,https://www.nice.org.uk/guidance/ng158,,NICE ©,restricted,hematology,high
+NICE-EXT-034,NICE,Anaemia Iron Deficiency,2024,https://www.nice.org.uk/guidance/ng191,,NICE ©,restricted,hematology,medium
+NICE-EXT-035,NICE,Sickle Cell Disease Acute Painful Episodes,2012,https://www.nice.org.uk/guidance/cg143,,NICE ©,restricted,hematology,high
+ISTH-001,ISTH,Diagnosis Treatment Heparin-Induced Thrombocytopenia,2018,https://onlinelibrary.wiley.com/doi/10.1111/jth.14254,,ISTH ©,restricted,hematology,medium
+ISTH-002,ISTH,DIC Disseminated Intravascular Coagulation,2018,https://onlinelibrary.wiley.com/doi/10.1111/jth.14149,,ISTH ©,restricted,hematology,medium
+ASH-EXT-001,ASH,Cancer-Associated Venous Thromboembolism,2021,https://ashpublications.org/bloodadvances/article/5/4/927,,ASH ©,restricted,hematology,high
+ASH-EXT-002,ASH,Heparin-Induced Thrombocytopenia,2018,https://ashpublications.org/bloodadvances/article/2/22/3360,,ASH ©,restricted,hematology,high
+ASH-EXT-003,ASH,Pediatric Venous Thromboembolism,2018,https://ashpublications.org/bloodadvances/article/2/22/3292,,ASH ©,restricted,hematology,medium
+ESC-EXT-001,ESC,Lipid Management 2025,2025,https://academic.oup.com/eurheartj/article-lookup/doi/10.1093/eurheartj/ehae177,,ESC/OUP ©,restricted,cardiology,high
+ESC-EXT-002,ESC,Stable Coronary Artery Disease,2024,https://academic.oup.com/eurheartj/article/45/36/3415/7743115,,ESC/OUP ©,restricted,cardiology,high
+EULAR-EXT-001,EULAR,Behçet Disease Management,2018,https://ard.bmj.com/content/77/6/808,,EULAR/BMJ ©,restricted,rheumatology,medium
+EULAR-EXT-002,EULAR,Idiopathic Inflammatory Myopathies,2017,https://ard.bmj.com/content/76/12/1955,,EULAR/BMJ ©,restricted,rheumatology,medium
+NCCN-001,NCCN,Breast Cancer Screening,2024,https://www.nccn.org/guidelines/guidelines-detail?category=2&id=1421,,NCCN ©,restricted,oncology,high
+NCCN-002,NCCN,Pancreatic Adenocarcinoma,2024,https://www.nccn.org/guidelines/guidelines-detail?category=1&id=1455,,NCCN ©,restricted,oncology,high
+NCCN-003,NCCN,Distress Management Cancer,2023,https://www.nccn.org/guidelines/guidelines-detail?category=3&id=1431,,NCCN ©,restricted,oncology,medium
+WHO-EXT-007,WHO,Stroke Treatment Recovery,2024,https://www.who.int/publications/i/item/9789240081826,,CC BY-NC-SA 3.0 IGO,restricted,neurology,high
+WHO-EXT-008,WHO,Cardiovascular Disease Risk Reduction Total,2007,https://www.who.int/publications/i/item/9241547171,,CC BY-NC-SA 3.0 IGO,restricted,cardiology,high
+WHO-EXT-009,WHO,Pharmacological Treatment Mental Health Conditions,2024,https://www.who.int/publications/i/item/9789240089242,,CC BY-NC-SA 3.0 IGO,restricted,psychiatry,high

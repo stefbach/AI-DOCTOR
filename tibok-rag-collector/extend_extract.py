@@ -12,6 +12,7 @@ import csv
 import hashlib
 import json
 import re
+import sys
 import time
 from pathlib import Path
 from urllib.parse import quote_plus
@@ -20,7 +21,7 @@ import requests
 from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).parent.parent
-CSV_PATH = ROOT / "tibok-rag-collector" / "guidelines_extended.csv"
+CSV_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].endswith(".csv") else (ROOT / "tibok-rag-collector" / "guidelines_extended.csv")
 EXTRACT_DIR = ROOT / "tibok-rag-collector" / "extracted"
 
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/124.0"
