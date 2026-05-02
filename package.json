@@ -30,7 +30,10 @@
     "rag:seed:ers": "tsx scripts/bulk-seed/index.ts --only=ERS",
     "rag:seed:uspstf": "tsx scripts/bulk-seed/index.ts --only=USPSTF",
     "rag:seed:ecdc": "tsx scripts/bulk-seed/index.ts --only=ECDC",
-    "rag:upload-pdf": "tsx scripts/bulk-seed/sources/manual-pdf-upload.ts"
+    "rag:upload-pdf": "tsx scripts/bulk-seed/sources/manual-pdf-upload.ts",
+    "rag:download-all": "cd tibok-rag-collector && python3 download_guidelines.py --csv guidelines_master.csv --out ./pdfs",
+    "rag:download-source": "cd tibok-rag-collector && python3 download_guidelines.py --csv guidelines_master.csv --out ./pdfs --source",
+    "rag:ingest-manifest": "tsx scripts/bulk-seed/sources/ingest-from-manifest.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "latest",

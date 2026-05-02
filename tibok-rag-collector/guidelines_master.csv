@@ -1,0 +1,288 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+NICE-001,NICE,Hypertension in adults: diagnosis and management,2026,https://www.nice.org.uk/guidance/ng136,,NICE © (NHS free; commercial=license),restricted,cardiology,high
+NICE-002,NICE,Type 2 diabetes in adults: management,2022,https://www.nice.org.uk/guidance/ng28,,NICE ©,restricted,endocrinology,high
+NICE-003,NICE,Type 1 diabetes in adults: diagnosis and management,2022,https://www.nice.org.uk/guidance/ng17,,NICE ©,restricted,endocrinology,high
+NICE-004,NICE,Diabetes in pregnancy,2020,https://www.nice.org.uk/guidance/ng3,,NICE ©,restricted,obstetrics,high
+NICE-005,NICE,Chronic kidney disease: assessment and management,2025,https://www.nice.org.uk/guidance/ng203,,NICE ©,restricted,nephrology,high
+NICE-006,NICE,Chronic heart failure in adults,2018,https://www.nice.org.uk/guidance/ng106,,NICE ©,restricted,cardiology,high
+NICE-007,NICE,Acute coronary syndromes,2020,https://www.nice.org.uk/guidance/ng185,,NICE ©,restricted,cardiology,high
+NICE-008,NICE,Atrial fibrillation: diagnosis and management,2021,https://www.nice.org.uk/guidance/ng196,,NICE ©,restricted,cardiology,high
+NICE-009,NICE,Stroke and TIA in over 16s,2022,https://www.nice.org.uk/guidance/ng128,,NICE ©,restricted,neurology,high
+NICE-010,NICE,Stroke rehabilitation in adults,2023,https://www.nice.org.uk/guidance/ng236,,NICE ©,restricted,neurology,medium
+NICE-011,NICE,COPD in over 16s: diagnosis and management,2019,https://www.nice.org.uk/guidance/ng115,,NICE ©,restricted,respiratory,high
+NICE-012,NICE,Asthma: diagnosis monitoring and chronic management,2024,https://www.nice.org.uk/guidance/ng245,,NICE ©,restricted,respiratory,high
+NICE-013,NICE,Pneumonia (community-acquired): antimicrobial prescribing,2019,https://www.nice.org.uk/guidance/ng138,,NICE ©,restricted,infectious,high
+NICE-014,NICE,COVID-19 rapid guideline,2024,https://www.nice.org.uk/guidance/ng191,,NICE ©,restricted,infectious,medium
+NICE-015,NICE,Depression in adults: treatment and management,2022,https://www.nice.org.uk/guidance/ng222,,NICE ©,restricted,psychiatry,high
+NICE-016,NICE,Self-harm: assessment management and preventing recurrence,2022,https://www.nice.org.uk/guidance/ng225,,NICE ©,restricted,psychiatry,high
+NICE-017,NICE,ADHD: diagnosis and management,2019,https://www.nice.org.uk/guidance/ng87,,NICE ©,restricted,psychiatry,medium
+NICE-018,NICE,Dementia: assessment management and support,2018,https://www.nice.org.uk/guidance/ng97,,NICE ©,restricted,neurology,high
+NICE-019,NICE,Chronic pain in over 16s,2021,https://www.nice.org.uk/guidance/ng193,,NICE ©,restricted,pain,medium
+NICE-020,NICE,Low back pain and sciatica in over 16s,2020,https://www.nice.org.uk/guidance/ng59,,NICE ©,restricted,musculoskeletal,high
+NICE-021,NICE,Osteoarthritis in over 16s,2022,https://www.nice.org.uk/guidance/ng226,,NICE ©,restricted,musculoskeletal,high
+NICE-022,NICE,Rheumatoid arthritis in adults,2020,https://www.nice.org.uk/guidance/ng100,,NICE ©,restricted,rheumatology,medium
+NICE-023,NICE,Suspected cancer: recognition and referral,2023,https://www.nice.org.uk/guidance/ng12,,NICE ©,restricted,oncology,high
+NICE-024,NICE,Hypertension in pregnancy,2023,https://www.nice.org.uk/guidance/ng133,,NICE ©,restricted,obstetrics,high
+NICE-025,NICE,Antenatal care,2024,https://www.nice.org.uk/guidance/ng201,,NICE ©,restricted,obstetrics,high
+NICE-026,NICE,Postnatal care,2021,https://www.nice.org.uk/guidance/ng194,,NICE ©,restricted,obstetrics,high
+NICE-027,NICE,Transition between hospital and community settings,2015,https://www.nice.org.uk/guidance/ng27,,NICE ©,restricted,care-org,low
+NICE-028,NICE,Sepsis: recognition diagnosis and early management,2024,https://www.nice.org.uk/guidance/ng51,,NICE ©,restricted,emergency,high
+NICE-029,NICE,Lyme disease,2018,https://www.nice.org.uk/guidance/ng95,,NICE ©,restricted,infectious,medium
+NICE-030,NICE,Preventing excess weight gain,2015,https://www.nice.org.uk/guidance/ng7,,NICE ©,restricted,prevention,medium
+USPSTF-001,USPSTF,Hypertension in Adults: Screening,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hypertension-in-adults-screening,,US Public Domain,allowed,prevention,high
+USPSTF-002,USPSTF,Prediabetes & Type 2 Diabetes Screening,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes,,US Public Domain,allowed,prevention,high
+USPSTF-003,USPSTF,Statin Use for Primary Prevention of CVD,2022,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/statin-use-in-adults-preventive-medication,,US Public Domain,allowed,prevention,high
+USPSTF-004,USPSTF,Aspirin Use for Primary Prevention of CVD,2022,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/aspirin-use-to-prevent-cardiovascular-disease-preventive-medication,,US Public Domain,allowed,prevention,medium
+USPSTF-005,USPSTF,Healthy Diet/Physical Activity Counseling for CVD Prevention,2020,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/healthy-diet-and-physical-activity-counseling-adults-with-high-risk-of-cvd,,US Public Domain,allowed,prevention,medium
+USPSTF-006,USPSTF,Tobacco Smoking Cessation in Adults,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/tobacco-use-in-adults-and-pregnant-women-counseling-and-interventions,,US Public Domain,allowed,prevention,high
+USPSTF-007,USPSTF,Unhealthy Alcohol Use Screening,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/unhealthy-alcohol-use-in-adolescents-and-adults-screening-and-behavioral-counseling-interventions,,US Public Domain,allowed,prevention,high
+USPSTF-008,USPSTF,Unhealthy Drug Use Screening,2020,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/drug-use-illicit-screening,,US Public Domain,allowed,prevention,medium
+USPSTF-009,USPSTF,Obesity in Adults: Behavioral Interventions,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/obesity-in-adults-interventions,,US Public Domain,allowed,prevention,high
+USPSTF-010,USPSTF,Obesity in Children & Adolescents: Screening,2024,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/obesity-in-children-and-adolescents-screening,,US Public Domain,allowed,pediatrics,high
+USPSTF-011,USPSTF,Depression & Suicide Risk in Adults,2023,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-depression-suicide-risk-adults,,US Public Domain,allowed,psychiatry,high
+USPSTF-012,USPSTF,Depression & Suicide Risk in Children/Adolescents,2022,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-depression-suicide-risk-children-adolescents,,US Public Domain,allowed,psychiatry,high
+USPSTF-013,USPSTF,Anxiety in Adults: Screening,2023,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-anxiety-adults,,US Public Domain,allowed,psychiatry,high
+USPSTF-014,USPSTF,Intimate Partner Violence: Screening,2024,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/intimate-partner-violence-elder-abuse-and-abuse-of-vulnerable-adults-screening,,US Public Domain,allowed,prevention,medium
+USPSTF-015,USPSTF,Breast Cancer Screening (Mammography),2024,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening,,US Public Domain,allowed,oncology,high
+USPSTF-016,USPSTF,Cervical Cancer Screening,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening,,US Public Domain,allowed,oncology,high
+USPSTF-017,USPSTF,Colorectal Cancer Screening,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening,,US Public Domain,allowed,oncology,high
+USPSTF-018,USPSTF,Lung Cancer Screening (LDCT),2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening,,US Public Domain,allowed,oncology,high
+USPSTF-019,USPSTF,Prostate Cancer Screening,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening,,US Public Domain,allowed,oncology,medium
+USPSTF-020,USPSTF,Skin Cancer Counseling,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/skin-cancer-counseling,,US Public Domain,allowed,oncology,medium
+USPSTF-021,USPSTF,Osteoporosis Screening,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening,,US Public Domain,allowed,musculoskeletal,medium
+USPSTF-022,USPSTF,Falls Prevention in Older Adults,2024,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/falls-prevention-in-older-adults-interventions,,US Public Domain,allowed,geriatrics,high
+USPSTF-023,USPSTF,HIV Screening,2019,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening,,US Public Domain,allowed,infectious,high
+USPSTF-024,USPSTF,HIV Pre-Exposure Prophylaxis (PrEP),2023,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prevention-of-human-immunodeficiency-virus-hiv-infection-pre-exposure-prophylaxis,,US Public Domain,allowed,infectious,high
+USPSTF-025,USPSTF,Hepatitis B Virus Screening,2020,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-screening,,US Public Domain,allowed,infectious,medium
+USPSTF-026,USPSTF,Hepatitis C Virus Screening,2020,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening,,US Public Domain,allowed,infectious,high
+USPSTF-027,USPSTF,Latent Tuberculosis Screening,2023,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/latent-tuberculosis-infection-screening,,US Public Domain,allowed,infectious,medium
+USPSTF-028,USPSTF,Gestational Diabetes Screening,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/gestational-diabetes-screening,,US Public Domain,allowed,obstetrics,high
+USPSTF-029,USPSTF,Folic Acid Supplementation in Pregnancy,2023,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/folic-acid-for-the-prevention-of-neural-tube-defects-preventive-medication,,US Public Domain,allowed,obstetrics,high
+USPSTF-030,USPSTF,Aspirin for Preeclampsia Prevention,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/aspirin-use-to-prevent-preeclampsia-and-related-morbidity-and-mortality-preventive-medication,,US Public Domain,allowed,obstetrics,high
+CDC-001,CDC,STI Treatment Guidelines,2021,https://www.cdc.gov/mmwr/volumes/70/rr/rr7004a1.htm,,US Public Domain,allowed,infectious,high
+CDC-002,CDC,Clinical Practice Guideline for Prescribing Opioids for Pain,2022,https://www.cdc.gov/mmwr/volumes/71/rr/rr7103a1.htm,,US Public Domain,allowed,pain,high
+CDC-003,CDC,Doxycycline PEP for Bacterial STI Prevention,2024,https://www.cdc.gov/mmwr/volumes/73/rr/rr7302a1.htm,,US Public Domain,allowed,infectious,medium
+CDC-004,CDC,US Medical Eligibility Criteria for Contraceptive Use,2024,https://www.cdc.gov/mmwr/volumes/73/rr/rr7304a1.htm,,US Public Domain,allowed,obstetrics,high
+CDC-005,CDC,US Selected Practice Recommendations for Contraceptive Use,2024,https://www.cdc.gov/mmwr/volumes/73/rr/rr7303a1.htm,,US Public Domain,allowed,obstetrics,high
+CDC-006,CDC,Prevention & Control of Seasonal Influenza with Vaccines (ACIP),2024,https://www.cdc.gov/mmwr/volumes/73/rr/rr7305a1.htm,,US Public Domain,allowed,infectious,high
+CDC-007,CDC,Adult Immunization Schedule (ACIP),2025,https://www.cdc.gov/vaccines/hcp/imz-schedules/adult-age.html,,US Public Domain,allowed,infectious,high
+CDC-008,CDC,Child & Adolescent Immunization Schedule (ACIP),2025,https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-age.html,,US Public Domain,allowed,pediatrics,high
+CDC-009,CDC,HIV PrEP Clinical Practice Guideline,2021,https://www.cdc.gov/hiv/pdf/risk/prep/cdc-hiv-prep-guidelines-2021.pdf,https://www.cdc.gov/hiv/pdf/risk/prep/cdc-hiv-prep-guidelines-2021.pdf,US Public Domain,allowed,infectious,high
+CDC-010,CDC,TB Treatment Guidelines (Drug-susceptible),2016,https://www.cdc.gov/mmwr/volumes/65/rr/rr6511a1.htm,,US Public Domain,allowed,infectious,medium
+CDC-011,CDC,Latent TB Infection Treatment,2020,https://www.cdc.gov/mmwr/volumes/69/rr/rr6901a1.htm,,US Public Domain,allowed,infectious,medium
+CDC-012,CDC,Lyme Disease Diagnosis & Management,2024,https://www.cdc.gov/lyme/hcp/diagnosis-testing/index.html,,US Public Domain,allowed,infectious,medium
+CDC-013,CDC,Antibiotic Resistance Threats Report,2024,https://www.cdc.gov/antimicrobial-resistance/data-research/threats/index.html,,US Public Domain,allowed,infectious,medium
+CDC-014,CDC,Healthcare Infection Control Practices (HICPAC),2022,https://www.cdc.gov/infection-control/hcp/isolation-precautions/index.html,,US Public Domain,allowed,infectious,medium
+CDC-015,CDC,Vaccine Information Statements (VIS) Composite,2024,https://www.cdc.gov/vaccines/hcp/vis/index.html,,US Public Domain,allowed,infectious,low
+ECDC-001,ECDC,Prevention and control of infectious diseases among PWID,2023,https://www.ecdc.europa.eu/sites/default/files/documents/people-inject-drugs-prevention-infectious-diseases-guidance.pdf,https://www.ecdc.europa.eu/sites/default/files/documents/people-inject-drugs-prevention-infectious-diseases-guidance.pdf,Decision 2011/833/EU,allowed,infectious,medium
+ECDC-002,ECDC,Public health guidance on screening and vaccination for migrants,2018,https://www.ecdc.europa.eu/en/publications-data/public-health-guidance-screening-and-vaccination-infectious-diseases-newly,,Decision 2011/833/EU,allowed,infectious,medium
+ECDC-003,ECDC,Tuberculosis: management of contacts and outbreaks,2017,https://www.ecdc.europa.eu/en/publications-data/guidance-management-contacts-mdr-tb-and-xdr-tb-patients,,Decision 2011/833/EU,allowed,infectious,medium
+ECDC-004,ECDC,HIV testing: increasing uptake and effectiveness in the EU,2018,https://www.ecdc.europa.eu/en/publications-data/public-health-guidance-hiv-hepatitis-b-and-c-testing-eueea,,Decision 2011/833/EU,allowed,infectious,medium
+ECDC-005,ECDC,Influenza vaccination strategies for risk groups,2018,https://www.ecdc.europa.eu/en/publications-data/seasonal-influenza-vaccination-strategies-targeting-risk-groups,,Decision 2011/833/EU,allowed,infectious,medium
+ECDC-006,ECDC,Antimicrobial resistance prevention in healthcare settings,2017,https://www.ecdc.europa.eu/en/publications-data/proposals-ebp-prevention-control-cre-cri-cra-healthcare-settings,,Decision 2011/833/EU,allowed,infectious,medium
+ECDC-007,ECDC,COVID-19 surveillance guidance & strategy,2024,https://www.ecdc.europa.eu/en/publications-data/operational-considerations-respiratory-virus-surveillance-europe,,Decision 2011/833/EU,allowed,infectious,medium
+ECDC-008,ECDC,Mpox clinical management and public health response,2024,https://www.ecdc.europa.eu/en/publications-data/public-health-considerations-mpox-eueea,,Decision 2011/833/EU,allowed,infectious,medium
+ECDC-009,ECDC,Dengue & Aedes-borne arboviruses surveillance,2024,https://www.ecdc.europa.eu/en/publications-data/aedes-borne-disease-surveillance-public-health-response-strategies-eueea,,Decision 2011/833/EU,allowed,infectious,medium
+ECDC-010,ECDC,Lyme borreliosis surveillance and management,2022,https://www.ecdc.europa.eu/en/publications-data/factsheet-health-professionals-lyme-borreliosis,,Decision 2011/833/EU,allowed,infectious,medium
+WHO-001,WHO,Guidelines for management of hypertension in adults,2021,https://www.who.int/publications/i/item/9789240033986,,CC BY-NC-SA 3.0 IGO,restricted,cardiology,high
+WHO-002,WHO,HEARTS technical package CVD primary care,2023,https://www.who.int/publications/i/item/9789240081062,,CC BY-NC-SA 3.0 IGO,restricted,cardiology,high
+WHO-003,WHO,Consolidated guidelines on HIV prevention testing treatment,2024,https://www.who.int/publications/i/item/9789240094703,,CC BY-NC-SA 3.0 IGO,restricted,infectious,high
+WHO-004,WHO,TB Module 4: Treatment (drug-susceptible),2022,https://www.who.int/publications/i/item/9789240048126,,CC BY-NC-SA 3.0 IGO,restricted,infectious,high
+WHO-005,WHO,TB Module 4: Treatment (drug-resistant),2022,https://www.who.int/publications/i/item/9789240063129,,CC BY-NC-SA 3.0 IGO,restricted,infectious,medium
+WHO-006,WHO,Guidelines for treatment of malaria,2024,https://www.who.int/publications/i/item/guidelines-for-the-treatment-of-malaria,,CC BY-NC-SA 3.0 IGO,restricted,infectious,high
+WHO-007,WHO,Guidelines on hepatitis B and C virus testing,2017,https://www.who.int/publications/i/item/9789241549981,,CC BY-NC-SA 3.0 IGO,restricted,infectious,medium
+WHO-008,WHO,Chronic hepatitis B prevention care and treatment,2024,https://www.who.int/publications/i/item/9789240090903,,CC BY-NC-SA 3.0 IGO,restricted,infectious,high
+WHO-009,WHO,Chronic hepatitis C care and treatment,2022,https://www.who.int/publications/i/item/9789240052734,,CC BY-NC-SA 3.0 IGO,restricted,infectious,high
+WHO-010,WHO,Antenatal care for a positive pregnancy experience,2016,https://www.who.int/publications/i/item/9789241549912,,CC BY-NC-SA 3.0 IGO,restricted,obstetrics,high
+WHO-011,WHO,Intrapartum care for a positive childbirth experience,2018,https://www.who.int/publications/i/item/9789241550215,,CC BY-NC-SA 3.0 IGO,restricted,obstetrics,high
+WHO-012,WHO,Postnatal care of mother and newborn,2022,https://www.who.int/publications/i/item/9789240045989,,CC BY-NC-SA 3.0 IGO,restricted,obstetrics,high
+WHO-013,WHO,Pocket book of hospital care for children,2013,https://www.who.int/publications/i/item/978-92-4-154837-3,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-014,WHO,IMCI chart booklet,2014,https://www.who.int/publications/i/item/9789241506823,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-015,WHO,mhGAP Intervention Guide v2.0,2016,https://www.who.int/publications/i/item/9789241549790,,CC BY-NC-SA 3.0 IGO,restricted,psychiatry,high
+WHO-016,WHO,Physical health in adults with severe mental disorders,2018,https://www.who.int/publications/i/item/9789241550383,,CC BY-NC-SA 3.0 IGO,restricted,psychiatry,medium
+WHO-017,WHO,Sodium intake for adults and children,2012,https://www.who.int/publications/i/item/9789241504836,,CC BY-NC-SA 3.0 IGO,restricted,prevention,medium
+WHO-018,WHO,Self-care interventions for health and well-being,2022,https://www.who.int/publications/i/item/9789240052192,,CC BY-NC-SA 3.0 IGO,restricted,prevention,medium
+WHO-019,WHO,Model List of Essential Medicines (23rd),2023,https://www.who.int/publications/i/item/WHO-MHP-HPS-EML-2023.02,,CC BY-NC-SA 3.0 IGO,restricted,pharmacology,high
+WHO-020,WHO,Therapeutics and COVID-19 living guideline,2024,https://www.who.int/publications/i/item/WHO-2019-nCoV-therapeutics-2024.1,,CC BY-NC-SA 3.0 IGO,restricted,infectious,medium
+HAS-001,HAS,Hypertension artérielle de l'adulte,2024,https://www.has-sante.fr/jcms/p_3489524/fr/hta-essentielle-de-l-adulte-prise-en-charge,,Etalab 2.0,allowed,cardiology,high
+HAS-002,HAS,Diabète de type 2 stratégie médicamenteuse,2024,https://www.has-sante.fr/jcms/p_3375357/fr/diabete-de-type-2-de-l-adulte,,Etalab 2.0,allowed,endocrinology,high
+HAS-003,HAS,Guide parcours de soins Diabète de type 2,2014,https://www.has-sante.fr/jcms/c_1735060/fr/guide-parcours-de-soins-diabete-de-type-2-de-l-adulte,,Etalab 2.0,allowed,endocrinology,high
+HAS-004,HAS,Maladie rénale chronique de l'adulte parcours de soins,2021,https://www.has-sante.fr/jcms/p_3279700/fr/guide-du-parcours-de-soins-maladie-renale-chronique-de-l-adulte-mrc,,Etalab 2.0,allowed,nephrology,high
+HAS-005,HAS,Insuffisance cardiaque parcours de soins,2024,https://www.has-sante.fr/jcms/p_3253126/fr/guide-parcours-de-soins-insuffisance-cardiaque,,Etalab 2.0,allowed,cardiology,high
+HAS-006,HAS,BPCO parcours de soins,2019,https://www.has-sante.fr/jcms/c_1242507/fr/guide-parcours-de-soins-bronchopneumopathie-chronique-obstructive-bpco,,Etalab 2.0,allowed,respiratory,high
+HAS-007,HAS,Asthme de l'adulte,2023,https://www.has-sante.fr/jcms/p_3253149/fr/asthme-de-l-adulte,,Etalab 2.0,allowed,respiratory,high
+HAS-008,HAS,Fibrillation atriale prise en charge,2024,https://www.has-sante.fr/jcms/p_3327431/fr/fibrillation-atriale-prise-en-charge,,Etalab 2.0,allowed,cardiology,high
+HAS-009,HAS,AVC prise en charge précoce,2018,https://www.has-sante.fr/jcms/c_2768501/fr/accident-vasculaire-cerebral-prise-en-charge-precoce,,Etalab 2.0,allowed,neurology,high
+HAS-010,HAS,Dyslipidémies évaluation et prise en charge,2017,https://www.has-sante.fr/jcms/c_2876507/fr/principales-dyslipidemies-strategies-de-prise-en-charge,,Etalab 2.0,allowed,cardiology,high
+HAS-011,HAS,Surpoids et obésité de l'adulte,2022,https://www.has-sante.fr/jcms/p_3346001/fr/obesite-de-l-adulte-prise-en-charge-de-2eme-et-3eme-niveaux,,Etalab 2.0,allowed,endocrinology,high
+HAS-012,HAS,Obésité enfant et adolescent,2024,https://www.has-sante.fr/jcms/p_3346001/fr/obesite-de-l-enfant-et-de-l-adolescent,,Etalab 2.0,allowed,pediatrics,high
+HAS-013,HAS,Épisode dépressif caractérisé de l'adulte,2017,https://www.has-sante.fr/jcms/c_1739917/fr/episode-depressif-caracterise-de-l-adulte-prise-en-charge-en-soins-de-premier-recours,,Etalab 2.0,allowed,psychiatry,high
+HAS-014,HAS,Troubles bipolaires repérage et diagnostic,2015,https://www.has-sante.fr/jcms/c_1747465/fr/troubles-bipolaires-reperage-et-diagnostic-en-premier-recours,,Etalab 2.0,allowed,psychiatry,medium
+HAS-015,HAS,Trouble anxieux généralisé,2024,https://www.has-sante.fr/jcms/c_272346/fr/affections-psychiatriques-de-longue-duree-troubles-anxieux-graves,,Etalab 2.0,allowed,psychiatry,medium
+HAS-016,HAS,Conduite à tenir devant un patient suicidaire,2017,https://www.has-sante.fr/jcms/p_3268985/fr/comment-prevenir-le-suicide,,Etalab 2.0,allowed,psychiatry,high
+HAS-017,HAS,Maladie d'Alzheimer diagnostic et prise en charge,2018,https://www.has-sante.fr/jcms/c_2906096/fr/patients-presentant-un-trouble-neurocognitif-associe-a-la-maladie-d-alzheimer-ou-a-une-maladie-apparentee,,Etalab 2.0,allowed,neurology,high
+HAS-018,HAS,Prise en charge médicamenteuse douleur chronique,2022,https://www.has-sante.fr/jcms/p_3375415/fr/prise-en-charge-medicamenteuse-de-la-douleur-de-l-adulte,,Etalab 2.0,allowed,pain,high
+HAS-019,HAS,Lombalgie commune prise en charge,2019,https://www.has-sante.fr/jcms/c_2961499/fr/prise-en-charge-du-patient-presentant-une-lombalgie-commune,,Etalab 2.0,allowed,musculoskeletal,high
+HAS-020,HAS,Antibiothérapie infections respiratoires basses adulte,2021,https://www.has-sante.fr/jcms/p_3293657/fr/antibiotherapie-des-infections-a-entiterobacteries,,Etalab 2.0,allowed,infectious,high
+HAS-021,HAS,Infections urinaires de l'adulte,2018,https://www.has-sante.fr/jcms/c_1761395/fr/diagnostic-et-antibiotherapie-des-infections-urinaires-bacteriennes-communautaires-chez-l-adulte,,Etalab 2.0,allowed,infectious,high
+HAS-022,HAS,Bronchiolite aiguë du nourrisson,2019,https://www.has-sante.fr/jcms/p_3118113/fr/prise-en-charge-du-premier-episode-de-bronchiolite-aigue-chez-le-nourrisson-de-moins-de-12-mois,,Etalab 2.0,allowed,pediatrics,high
+HAS-023,HAS,Dépistage néonatal,2024,https://www.has-sante.fr/jcms/p_3309735/fr/extension-du-depistage-neonatal-a-7-erreurs-innees-du-metabolisme,,Etalab 2.0,allowed,pediatrics,high
+HAS-024,HAS,Suivi de grossesse à bas risque,2016,https://www.has-sante.fr/jcms/c_1700927/fr/comment-mieux-informer-les-femmes-enceintes,,Etalab 2.0,allowed,obstetrics,high
+HAS-025,HAS,Hémorragie du post-partum immédiat,2014,https://www.has-sante.fr/jcms/c_1737466/fr/hemorragies-du-post-partum-immediat,,Etalab 2.0,allowed,obstetrics,high
+HAS-026,HAS,Allaitement maternel,2002,https://www.has-sante.fr/jcms/c_272220/fr/allaitement-maternel-mise-en-oeuvre-et-poursuite,,Etalab 2.0,allowed,obstetrics,medium
+HAS-027,HAS,Contraception méthodes,2019,https://www.has-sante.fr/jcms/c_1369192/fr/contraception,,Etalab 2.0,allowed,obstetrics,high
+HAS-028,HAS,Ménopause traitement hormonal,2014,https://www.has-sante.fr/jcms/c_1754596/fr/les-traitements-hormonaux-de-la-menopause,,Etalab 2.0,allowed,gynecology,medium
+HAS-029,HAS,Ostéoporose post-ménopausique traitement,2019,https://www.has-sante.fr/jcms/p_3279091/fr/osteoporose-traitement-medicamenteux,,Etalab 2.0,allowed,musculoskeletal,medium
+HAS-030,HAS,Cancer du sein dépistage organisé,2024,https://www.has-sante.fr/jcms/c_2024559/fr/depistage-du-cancer-du-sein-en-france-identification-des-femmes-a-haut-risque-et-modalites-de-depistage,,Etalab 2.0,allowed,oncology,high
+HAS-031,HAS,Cancer colorectal dépistage,2017,https://www.has-sante.fr/jcms/c_1623732/fr/depistage-et-prevention-du-cancer-colorectal,,Etalab 2.0,allowed,oncology,high
+HAS-032,HAS,Cancer du col utérin dépistage,2019,https://www.has-sante.fr/jcms/p_3024649/fr/depistage-du-cancer-du-col-de-l-uterus-en-france,,Etalab 2.0,allowed,oncology,high
+HAS-033,HAS,Sevrage tabagique aide à l'arrêt,2014,https://www.has-sante.fr/jcms/c_1718021/fr/arret-de-la-consommation-de-tabac,,Etalab 2.0,allowed,prevention,high
+HAS-034,HAS,Mésusage de l'alcool RPIB,2014,https://www.has-sante.fr/jcms/c_1795221/fr/outil-d-aide-au-reperage-precoce-et-intervention-breve-alcool-cannabis-tabac,,Etalab 2.0,allowed,prevention,medium
+HAS-035,HAS,Calendrier vaccinal,2025,https://www.has-sante.fr/jcms/p_3502611/fr/calendrier-vaccinal,,Etalab 2.0,allowed,infectious,high
+HAS-036,HAS,Borréliose de Lyme,2018,https://www.has-sante.fr/jcms/c_2820854/fr/borreliose-de-lyme-et-autres-maladies-vectorielles-a-tiques,,Etalab 2.0,allowed,infectious,medium
+HAS-037,HAS,COVID-19 réponses rapides,2023,https://www.has-sante.fr/jcms/p_3306726/fr/reponses-rapides-dans-le-cadre-du-covid-19,,Etalab 2.0,allowed,infectious,medium
+HAS-038,HAS,Trouble du spectre de l'autisme diagnostic,2018,https://www.has-sante.fr/jcms/c_468812/fr/troubles-du-spectre-de-l-autisme-tsa,,Etalab 2.0,allowed,psychiatry,medium
+HAS-039,HAS,TDAH enfant et adolescent,2014,https://www.has-sante.fr/jcms/c_1362969/fr/conduite-a-tenir-en-medecine-de-premier-recours-devant-un-enfant-ou-un-adolescent-susceptible-d-avoir-un-trouble-deficit-de-l-attention-avec-ou-sans-hyperactivite,,Etalab 2.0,allowed,pediatrics,medium
+HAS-040,HAS,Mon Bilan Prévention,2024,https://www.has-sante.fr/jcms/p_3496288/fr/mon-bilan-prevention,,Etalab 2.0,allowed,prevention,high
+KDIGO-001,KDIGO,CKD Evaluation & Management,2024,https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf,https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf,KDIGO ©,restricted,nephrology,high
+KDIGO-002,KDIGO,ADPKD,2025,https://kdigo.org/wp-content/uploads/2025/01/KDIGO-2025-ADPKD-Guideline.pdf,https://kdigo.org/wp-content/uploads/2025/01/KDIGO-2025-ADPKD-Guideline.pdf,KDIGO ©,restricted,nephrology,medium
+KDIGO-003,KDIGO,Diabetes Management in CKD,2022,https://kdigo.org/wp-content/uploads/2022/10/KDIGO-2022-Diabetes-Management-GL.pdf,https://kdigo.org/wp-content/uploads/2022/10/KDIGO-2022-Diabetes-Management-GL.pdf,KDIGO ©,restricted,nephrology,high
+KDIGO-004,KDIGO,Blood Pressure Management in CKD,2021,https://kdigo.org/wp-content/uploads/2017/02/KDIGO-Blood-Pressure-Guideline-2021.pdf,https://kdigo.org/wp-content/uploads/2017/02/KDIGO-Blood-Pressure-Guideline-2021.pdf,KDIGO ©,restricted,nephrology,high
+KDIGO-005,KDIGO,Glomerular Diseases,2021,https://kdigo.org/wp-content/uploads/2017/02/KDIGO-Glomerular-Diseases-Guideline-2021.pdf,https://kdigo.org/wp-content/uploads/2017/02/KDIGO-Glomerular-Diseases-Guideline-2021.pdf,KDIGO ©,restricted,nephrology,medium
+KDIGO-006,KDIGO,Diabetes Management in CKD (2020),2020,https://kdigo.org/wp-content/uploads/2020/10/KDIGO-2020-Diabetes-in-CKD-GL.pdf,https://kdigo.org/wp-content/uploads/2020/10/KDIGO-2020-Diabetes-in-CKD-GL.pdf,KDIGO ©,restricted,nephrology,low
+KDIGO-007,KDIGO,Hepatitis C in CKD,2018,https://kdigo.org/wp-content/uploads/2017/02/KDIGO-2018-Hep-C-GL.pdf,https://kdigo.org/wp-content/uploads/2017/02/KDIGO-2018-Hep-C-GL.pdf,KDIGO ©,restricted,nephrology,low
+KDIGO-008,KDIGO,CKD-MBD Update,2017,https://kdigo.org/wp-content/uploads/2017/02/2017-KDIGO-CKD-MBD-GL-Update.pdf,https://kdigo.org/wp-content/uploads/2017/02/2017-KDIGO-CKD-MBD-GL-Update.pdf,KDIGO ©,restricted,nephrology,medium
+KDIGO-009,KDIGO,Acute Kidney Injury (AKI),2012,https://kdigo.org/wp-content/uploads/2016/10/KDIGO-2012-AKI-Guideline-English.pdf,https://kdigo.org/wp-content/uploads/2016/10/KDIGO-2012-AKI-Guideline-English.pdf,KDIGO ©,restricted,nephrology,high
+KDIGO-010,KDIGO,Anemia in CKD,2012,https://kdigo.org/wp-content/uploads/2016/10/KDIGO-2012-Anemia-Guideline-English.pdf,https://kdigo.org/wp-content/uploads/2016/10/KDIGO-2012-Anemia-Guideline-English.pdf,KDIGO ©,restricted,nephrology,medium
+KDIGO-011,KDIGO,Lipid Management in CKD,2013,https://kdigo.org/wp-content/uploads/2016/10/KDIGO-2013-Lipids-Guideline-English.pdf,https://kdigo.org/wp-content/uploads/2016/10/KDIGO-2013-Lipids-Guideline-English.pdf,KDIGO ©,restricted,nephrology,low
+KDIGO-012,KDIGO,Kidney Transplant Candidate Evaluation,2020,https://kdigo.org/wp-content/uploads/2018/08/KDIGO-Txp-Candidate-GL-FINAL.pdf,https://kdigo.org/wp-content/uploads/2018/08/KDIGO-Txp-Candidate-GL-FINAL.pdf,KDIGO ©,restricted,nephrology,low
+KDIGO-013,KDIGO,Care of Kidney Transplant Recipient,2009,https://kdigo.org/wp-content/uploads/2016/10/KDIGO-Txp-Recipient-GL-2009.pdf,https://kdigo.org/wp-content/uploads/2016/10/KDIGO-Txp-Recipient-GL-2009.pdf,KDIGO ©,restricted,nephrology,low
+KDIGO-014,KDIGO,Living Kidney Donor Evaluation,2024,https://kdigo.org/wp-content/uploads/2017/07/KDIGO-Living-Kidney-Donor-GL.pdf,https://kdigo.org/wp-content/uploads/2017/07/KDIGO-Living-Kidney-Donor-GL.pdf,KDIGO ©,restricted,nephrology,low
+KDIGO-015,KDIGO,Hepatitis B in CKD,2018,https://kdigo.org/wp-content/uploads/2018/01/KDIGO_Hepatitis-B_Final.pdf,https://kdigo.org/wp-content/uploads/2018/01/KDIGO_Hepatitis-B_Final.pdf,KDIGO ©,restricted,nephrology,low
+GOLD-001,GOLD,GOLD 2025 Report COPD Strategy,2025,https://goldcopd.org/wp-content/uploads/2024/11/GOLD-2025-Report-v1.0-15Nov2024_WMV.pdf,https://goldcopd.org/wp-content/uploads/2024/11/GOLD-2025-Report-v1.0-15Nov2024_WMV.pdf,GOLD ©,restricted,respiratory,high
+GINA-001,GINA,GINA 2025 Asthma Strategy,2025,https://ginasthma.org/wp-content/uploads/2025/05/GINA-2025_tracked-for-archive-WMSA.pdf,https://ginasthma.org/wp-content/uploads/2025/05/GINA-2025_tracked-for-archive-WMSA.pdf,GINA ©,restricted,respiratory,high
+ESC-001,ESC,Atrial fibrillation (with EACTS),2024,https://academic.oup.com/eurheartj/article/45/36/3314/7738779,,ESC/OUP ©,restricted,cardiology,high
+ESC-002,ESC,Chronic coronary syndromes,2024,https://academic.oup.com/eurheartj/article/45/36/3415/7743115,,ESC/OUP ©,restricted,cardiology,high
+ESC-003,ESC,Elevated BP and hypertension,2024,https://academic.oup.com/eurheartj/article/45/38/3912/7741010,,ESC/OUP ©,restricted,cardiology,high
+ESC-004,ESC,Peripheral arterial and aortic diseases,2024,https://academic.oup.com/eurheartj/article/45/36/3538/7747876,,ESC/OUP ©,restricted,cardiology,medium
+ESC-005,ESC,Valvular heart disease (with EACTS),2025,https://academic.oup.com/eurheartj/article/46/40/4096/8195232,,ESC/OUP ©,restricted,cardiology,high
+ESC-006,ESC,Dyslipidaemias Focused Update,2025,https://academic.oup.com/eurheartj/article-lookup/doi/10.1093/eurheartj/ehaf190,,ESC/OUP ©,restricted,cardiology,high
+ESC-007,ESC,Acute coronary syndromes,2023,https://academic.oup.com/eurheartj/article/44/38/3720/7243210,,ESC/OUP ©,restricted,cardiology,high
+ESC-008,ESC,Cardiomyopathies,2023,https://academic.oup.com/eurheartj/article/44/37/3503/7246608,,ESC/OUP ©,restricted,cardiology,medium
+ESC-009,ESC,Endocarditis,2023,https://academic.oup.com/eurheartj/article/44/39/3948/7243107,,ESC/OUP ©,restricted,cardiology,high
+ESC-010,ESC,CVD in patients with diabetes,2023,https://academic.oup.com/eurheartj/article/44/39/4043/7238227,,ESC/OUP ©,restricted,cardiology,high
+ESC-011,ESC,Heart failure Focused Update,2023,https://academic.oup.com/eurheartj/article/44/37/3627/7246292,,ESC/OUP ©,restricted,cardiology,high
+ESC-012,ESC,Ventricular arrhythmias and SCD prevention,2022,https://academic.oup.com/eurheartj/article/43/40/3997/6675633,,ESC/OUP ©,restricted,cardiology,medium
+ESC-013,ESC,Cardio-oncology,2022,https://academic.oup.com/eurheartj/article/43/41/4229/6673929,,ESC/OUP ©,restricted,cardiology,low
+ESC-014,ESC,CV management for non-cardiac surgery,2022,https://academic.oup.com/eurheartj/article/43/39/3826/6675076,,ESC/OUP ©,restricted,cardiology,high
+ESC-015,ESC,Pulmonary hypertension (with ERS),2022,https://academic.oup.com/eurheartj/article/43/38/3618/6673929,,ESC/OUP ©,restricted,cardiology,medium
+ESC-016,ESC,Acute and chronic heart failure,2021,https://academic.oup.com/eurheartj/article/42/36/3599/6358045,,ESC/OUP ©,restricted,cardiology,high
+ESC-017,ESC,Cardiac pacing and CRT,2021,https://academic.oup.com/eurheartj/article/42/35/3427/6358547,,ESC/OUP ©,restricted,cardiology,medium
+ESC-018,ESC,CVD prevention,2021,https://academic.oup.com/eurheartj/article/42/34/3227/6358713,,ESC/OUP ©,restricted,cardiology,high
+ESC-019,ESC,Adult congenital heart disease,2020,https://academic.oup.com/eurheartj/article/42/6/563/5898606,,ESC/OUP ©,restricted,cardiology,low
+ESC-020,ESC,Sports cardiology and exercise in CVD,2020,https://academic.oup.com/eurheartj/article/42/1/17/5898937,,ESC/OUP ©,restricted,cardiology,low
+ESC-021,ESC,NSTE-ACS,2020,https://academic.oup.com/eurheartj/article/42/14/1289/5898842,,ESC/OUP ©,restricted,cardiology,high
+ESC-022,ESC,Acute pulmonary embolism,2019,https://academic.oup.com/eurheartj/article/41/4/543/5556136,,ESC/OUP ©,restricted,cardiology,high
+ESC-023,ESC,Dyslipidaemias (with EAS),2019,https://academic.oup.com/eurheartj/article/41/1/111/5556353,,ESC/OUP ©,restricted,cardiology,high
+ESC-024,ESC,Diabetes prediabetes and CVD (with EASD),2019,https://academic.oup.com/eurheartj/article/41/2/255/5556890,,ESC/OUP ©,restricted,cardiology,high
+ESC-025,ESC,CV disease during pregnancy,2018,https://academic.oup.com/eurheartj/article/39/34/3165/5078465,,ESC/OUP ©,restricted,cardiology,high
+AHA-001,AHA,High Blood Pressure in Adults,2025,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001356,,AHA/ACC ©,restricted,cardiology,high
+AHA-002,AHA,Acute Coronary Syndromes,2025,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001309,,AHA/ACC ©,restricted,cardiology,high
+AHA-003,AHA,Management of Dyslipidemia,2026,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001423,,AHA/ACC ©,restricted,cardiology,high
+AHA-004,AHA,Lower Extremity PAD,2024,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001251,,AHA/ACC ©,restricted,cardiology,medium
+AHA-005,AHA,Perioperative CV Management Noncardiac Surgery,2024,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001285,,AHA/ACC ©,restricted,cardiology,high
+AHA-006,AHA,Atrial Fibrillation (ACCP/HRS),2023,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001193,,AHA/ACC ©,restricted,cardiology,high
+AHA-007,AHA,Chronic Coronary Disease,2023,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001168,,AHA/ACC ©,restricted,cardiology,high
+AHA-008,AHA,Aortic Disease,2022,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001106,,AHA/ACC ©,restricted,cardiology,medium
+AHA-009,AHA,Heart Failure (HFSA),2022,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001063,,AHA/ACC ©,restricted,cardiology,high
+AHA-010,AHA,Coronary Artery Revascularization,2021,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001038,,AHA/ACC ©,restricted,cardiology,medium
+AHA-011,AHA,Valvular Heart Disease,2020,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000923,,AHA/ACC ©,restricted,cardiology,high
+AHA-012,AHA,Hypertrophic Cardiomyopathy,2020,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000937,,AHA/ACC ©,restricted,cardiology,low
+AHA-013,AHA,Primary Prevention of CVD,2019,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000678,,AHA/ACC ©,restricted,cardiology,high
+AHA-014,AHA,AF Focused Update,2019,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000665,,AHA/ACC ©,restricted,cardiology,medium
+AHA-015,AHA,Bradycardia,2018,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000628,,AHA/ACC ©,restricted,cardiology,low
+AHA-016,AHA,Spontaneous Intracerebral Hemorrhage,2022,https://www.ahajournals.org/doi/10.1161/STR.0000000000000407,,AHA ©,restricted,neurology,medium
+AHA-017,AHA,Early Management Acute Ischemic Stroke,2019,https://www.ahajournals.org/doi/10.1161/STR.0000000000000211,,AHA ©,restricted,neurology,high
+AHA-018,AHA,Stroke/TIA Secondary Prevention,2021,https://www.ahajournals.org/doi/10.1161/STR.0000000000000375,,AHA ©,restricted,neurology,high
+AHA-019,AHA,CPR and Emergency CV Care,2020,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000916,,AHA ©,restricted,emergency,high
+AHA-020,AHA,Blood Cholesterol Management,2018,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000625,,AHA/ACC ©,restricted,cardiology,high
+ADA-001,ADA,Standards of Care in Diabetes 2025 (full),2025,https://diabetesjournals.org/care/issue/48/Supplement_1,,ADA ©,restricted,endocrinology,high
+ADA-002,ADA,SoC 2025 Sec.2 Diagnosis and Classification,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S27/157566,,ADA ©,restricted,endocrinology,high
+ADA-003,ADA,SoC 2025 Sec.6 Glycemic Goals and Hypoglycemia,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S128/157554,,ADA ©,restricted,endocrinology,high
+ADA-004,ADA,SoC 2025 Sec.9 Pharmacologic Approaches,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S181/157559,,ADA ©,restricted,endocrinology,high
+ADA-005,ADA,SoC 2025 Sec.10 CVD and Risk Management,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S207/157551,,ADA ©,restricted,endocrinology,high
+ADA-006,ADA,SoC 2025 Sec.11 CKD,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S239/157564,,ADA ©,restricted,endocrinology,high
+ADA-007,ADA,SoC 2025 Sec.12 Retinopathy Neuropathy Foot,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S252/157569,,ADA ©,restricted,endocrinology,high
+ADA-008,ADA,SoC 2025 Sec.14 Children and Adolescents,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S283/157561,,ADA ©,restricted,endocrinology,medium
+ADA-009,ADA,SoC 2025 Sec.15 Diabetes in Pregnancy,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S306/157568,,ADA ©,restricted,endocrinology,high
+ADA-010,ADA,ADA/EASD Consensus Hyperglycemia in T2D,2022,https://diabetesjournals.org/care/article/45/11/2753/147671,,ADA ©,restricted,endocrinology,high
+IDSA-001,IDSA,Treatment of AMR Gram-Negative Infections,2024,https://www.idsociety.org/practice-guideline/amr-guidance/,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-002,IDSA,Complicated Intra-abdominal Infections,2024,https://academic.oup.com/cid/article/79/Supplement_3/S81/7706348,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-003,IDSA,COVID-19 Treatment Living Guideline,2024,https://www.idsociety.org/practice-guideline/covid-19-guideline-treatment-and-management/,,IDSA © (CDS clause),restricted-cds,infectious,medium
+IDSA-004,IDSA,Primary Care for Persons With HIV,2024,https://academic.oup.com/cid/article/78/Supplement_1/S1/7626014,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-005,IDSA,Complicated UTI,2024,https://www.idsociety.org/practice-guideline/cuti/,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-006,IDSA,Uncomplicated Cystitis & Pyelonephritis,2011,https://www.idsociety.org/practice-guideline/uncomplicated-cystitis-and-pyelonephritis-uti/,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-007,IDSA,Diabetes-related Foot Infections (IWGDF),2023,https://academic.oup.com/cid/article/79/2/286/7287196,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-008,IDSA,Skin and Soft Tissue Infections,2014,https://academic.oup.com/cid/article/59/2/e10/2895845,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-009,IDSA,Community-Acquired Pneumonia in Adults,2019,https://www.thoracic.org/statements/resources/tb-opi/cap-guideline.pdf,https://www.thoracic.org/statements/resources/tb-opi/cap-guideline.pdf,IDSA/ATS ©,restricted,infectious,high
+IDSA-010,IDSA,Hospital-Acquired & VAP,2016,https://academic.oup.com/cid/article/63/5/e61/2237650,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-011,IDSA,Drug-Susceptible TB Treatment,2016,https://academic.oup.com/cid/article/63/7/e147/2196792,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-012,IDSA,Latent TB Infection,2020,https://academic.oup.com/cid/article/71/1/e1/5651492,,IDSA © (CDS clause),restricted-cds,infectious,medium
+IDSA-013,IDSA,Microbiology Lab Utilization Guide,2024,https://academic.oup.com/cid/article/79/Supplement_3/S122/7741275,,IDSA © (CDS clause),restricted-cds,infectious,medium
+IDSA-014,IDSA,Seasonal Influenza,2018,https://academic.oup.com/cid/article/68/6/e1/5251935,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-015,IDSA,Infectious Diarrhea,2017,https://academic.oup.com/cid/article/65/12/e45/4557073,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-016,IDSA,Clostridioides difficile Update,2021,https://academic.oup.com/cid/article/73/5/e1029/6298219,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-017,IDSA,Vertebral Osteomyelitis,2015,https://academic.oup.com/cid/article/61/6/e26/451513,,IDSA © (CDS clause),restricted-cds,infectious,medium
+IDSA-018,IDSA,Native Vertebral Osteomyelitis (companion),2015,https://academic.oup.com/cid/article/61/6/e26/451513,,IDSA © (CDS clause),restricted-cds,infectious,low
+IDSA-019,IDSA,Antimicrobial Prophylaxis for Surgery,2013,https://academic.oup.com/cid/article/56/12/e163/293185,,IDSA © (CDS clause),restricted-cds,infectious,medium
+IDSA-020,IDSA,Sinusitis Diagnosis and Management,2012,https://academic.oup.com/cid/article/54/8/e72/325995,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-021,IDSA,Acute Bacterial Rhinosinusitis,2012,https://academic.oup.com/cid/article/54/8/e72/325995,,IDSA © (CDS clause),restricted-cds,infectious,high
+IDSA-022,IDSA,Lyme Disease,2020,https://academic.oup.com/cid/article/72/1/1/6010056,,IDSA © (CDS clause),restricted-cds,infectious,medium
+IDSA-023,IDSA,Healthcare-Associated Ventriculitis & Meningitis,2017,https://academic.oup.com/cid/article/64/6/e34/2961758,,IDSA © (CDS clause),restricted-cds,infectious,low
+IDSA-024,IDSA,Aspergillosis Diagnosis & Management,2016,https://academic.oup.com/cid/article/63/4/e1/2237650,,IDSA © (CDS clause),restricted-cds,infectious,low
+IDSA-025,IDSA,Candidiasis Diagnosis & Management,2016,https://academic.oup.com/cid/article/62/4/e1/2462830,,IDSA © (CDS clause),restricted-cds,infectious,medium
+IDSA-026,IDSA,Cryptococcal Disease,2010,https://academic.oup.com/cid/article/50/3/291/305790,,IDSA © (CDS clause),restricted-cds,infectious,low
+IDSA-027,IDSA,Asymptomatic Bacteriuria,2019,https://academic.oup.com/cid/article/68/10/e83/5407612,,IDSA © (CDS clause),restricted-cds,infectious,medium
+IDSA-028,IDSA,Antibiotic Stewardship Programs,2016,https://academic.oup.com/cid/article/62/10/e51/2462846,,IDSA © (CDS clause),restricted-cds,infectious,medium
+IDSA-029,IDSA,STI Treatment (CDC co-published),2021,https://www.cdc.gov/mmwr/volumes/70/rr/rr7004a1.htm,,US Public Domain,allowed,infectious,high
+IDSA-030,IDSA,Duke-ISCVID Criteria for Infective Endocarditis,2023,https://academic.oup.com/cid/article/77/4/518/7128194,,IDSA © (CDS clause),restricted-cds,infectious,high
+EASL-001,EASL,Hepatocellular carcinoma (HCC),2024,https://www.journal-of-hepatology.eu/article/S0168-8278(24)02508-X/fulltext,,EASL/Elsevier ©,restricted,hepatology,high
+EASL-002,EASL,MASLD (with EASD/EASO),2024,https://www.journal-of-hepatology.eu/article/S0168-8278(24)00329-5/fulltext,,CC BY-NC,restricted,hepatology,high
+EASL-003,EASL,Hepatitis B virus infection,2025,https://www.journal-of-hepatology.eu/article/S0168-8278(25)00174-6/fulltext,,EASL/Elsevier ©,restricted,hepatology,high
+EASL-004,EASL,Autoimmune hepatitis,2025,https://www.journal-of-hepatology.eu/article/S0168-8278(25)00173-4/fulltext,,EASL/Elsevier ©,restricted,hepatology,medium
+EASL-005,EASL,Extrahepatic cholangiocarcinoma,2025,https://www.journal-of-hepatology.eu/article/S0168-8278(25)00162-X/fulltext,,EASL/Elsevier ©,restricted,hepatology,medium
+EASL-006,EASL,Intrahepatic cholangiocarcinoma,2023,https://www.journal-of-hepatology.eu/article/S0168-8278(23)00194-0/fulltext,,EASL/Elsevier ©,restricted,hepatology,medium
+EASL-007,EASL,Hepatitis C virus infection,2020,https://www.journal-of-hepatology.eu/article/S0168-8278(20)30548-1/fulltext,,EASL/Elsevier ©,restricted,hepatology,high
+EASL-008,EASL,Hepatitis D virus,2023,https://www.journal-of-hepatology.eu/article/S0168-8278(23)00461-0/fulltext,,EASL/Elsevier ©,restricted,hepatology,medium
+EASL-009,EASL,Alcohol-related liver disease,2018,https://www.journal-of-hepatology.eu/article/S0168-8278(18)31984-8/fulltext,,EASL/Elsevier ©,restricted,hepatology,high
+EASL-010,EASL,Decompensated cirrhosis,2018,https://www.journal-of-hepatology.eu/article/S0168-8278(18)31966-6/fulltext,,EASL/Elsevier ©,restricted,hepatology,high
+EASL-011,EASL,Acute-on-chronic liver failure (ACLF),2023,https://www.journal-of-hepatology.eu/article/S0168-8278(23)00194-0/fulltext,,EASL/Elsevier ©,restricted,hepatology,medium
+EASL-012,EASL,Hepatic encephalopathy,2022,https://www.journal-of-hepatology.eu/article/S0168-8278(22)00603-4/fulltext,,EASL/Elsevier ©,restricted,hepatology,medium
+EASL-013,EASL,Liver transplantation,2024,https://www.journal-of-hepatology.eu/article/S0168-8278(23)05274-X/fulltext,,EASL/Elsevier ©,restricted,hepatology,medium
+EASL-014,EASL,Vascular diseases of the liver,2024,https://www.journal-of-hepatology.eu/article/S0168-8278(23)05274-X/fulltext,,EASL/Elsevier ©,restricted,hepatology,low
+EASL-015,EASL,Wilson's disease,2024,https://www.journal-of-hepatology.eu/article/S0168-8278(24)00496-3/fulltext,,EASL/Elsevier ©,restricted,hepatology,low
+EASL-016,EASL,Haemochromatosis,2022,https://www.journal-of-hepatology.eu/article/S0168-8278(22)00351-X/fulltext,,EASL/Elsevier ©,restricted,hepatology,low
+EASL-017,EASL,Primary biliary cholangitis (PBC),2017,https://www.journal-of-hepatology.eu/article/S0168-8278(17)30186-1/fulltext,,EASL/Elsevier ©,restricted,hepatology,medium
+EASL-018,EASL,Primary sclerosing cholangitis (PSC),2022,https://www.journal-of-hepatology.eu/article/S0168-8278(22)02916-7/fulltext,,EASL/Elsevier ©,restricted,hepatology,medium
+EASL-019,EASL,Cystic and infectious liver lesions,2022,https://www.journal-of-hepatology.eu/article/S0168-8278(22)00321-1/fulltext,,EASL/Elsevier ©,restricted,hepatology,low
+EASL-020,EASL,Drug-induced liver injury (DILI),2019,https://www.journal-of-hepatology.eu/article/S0168-8278(19)30163-X/fulltext,,EASL/Elsevier ©,restricted,hepatology,medium
+ERS-001,ERS,Adult bronchiectasis,2025,https://publications.ersnet.org/content/erj/66/6/2501126.full.pdf,https://publications.ersnet.org/content/erj/66/6/2501126.full.pdf,ERS ©,restricted,respiratory,high
+ERS-002,ERS,Symptom management serious respiratory illness,2024,https://publications.ersnet.org/content/erj/early/2024/04/25/13993003.00335-2024.full.pdf,https://publications.ersnet.org/content/erj/early/2024/04/25/13993003.00335-2024.full.pdf,ERS ©,restricted,respiratory,medium
+ERS-003,ERS,Telemedicine in home mechanical ventilation,2025,https://publications.ersnet.org/content/erj/early/2025/06/19/1399300300094-2025,,ERS ©,restricted,respiratory,low
+ERS-004,ERS,Asthma in adults (with ATS),2024,https://publications.ersnet.org/content/erj/64/3/2400125,,ERS ©,restricted,respiratory,high
+ERS-005,ERS,Severe asthma management,2020,https://publications.ersnet.org/content/erj/55/1/1900588,,ERS ©,restricted,respiratory,high
+ERS-006,ERS,Spirometry lung volumes DLCO standards (with ATS),2019,https://publications.ersnet.org/content/erj/53/1/1801499,,ERS ©,restricted,respiratory,high
+ERS-007,ERS,Pulmonary function tests interpretation (with ATS),2022,https://publications.ersnet.org/content/erj/60/1/2101499,,ERS ©,restricted,respiratory,high
+ERS-008,ERS,Idiopathic pulmonary fibrosis IPF (with ATS),2022,https://publications.ersnet.org/content/erj/60/1/2102566,,ERS ©,restricted,respiratory,medium
+ERS-009,ERS,Progressive pulmonary fibrosis (with ATS),2022,https://publications.ersnet.org/content/erj/60/3/2102560,,ERS ©,restricted,respiratory,medium
+ERS-010,ERS,Hypersensitivity pneumonitis (with ATS),2020,https://publications.ersnet.org/content/erj/56/4/2002032,,ERS ©,restricted,respiratory,low
+ERS-011,ERS,Community-acquired pneumonia,2024,https://publications.ersnet.org/content/erj/63/3/2300618,,ERS ©,restricted,respiratory,high
+ERS-012,ERS,NTM pulmonary disease (with ATS/IDSA),2020,https://publications.ersnet.org/content/erj/56/1/2000535,,ERS ©,restricted,respiratory,medium
+ERS-013,ERS,Multidrug-resistant TB,2019,https://publications.ersnet.org/content/erj/54/4/1901048,,ERS ©,restricted,respiratory,medium
+ERS-014,ERS,Acute exacerbations COPD,2017,https://publications.ersnet.org/content/erj/49/3/1600791,,ERS ©,restricted,respiratory,high
+ERS-015,ERS,Long-term oxygen therapy (with ATS),2024,https://publications.ersnet.org/content/erj/63/4/2300920,,ERS ©,restricted,respiratory,high
+ERS-016,ERS,Noninvasive ventilation acute respiratory failure,2017,https://publications.ersnet.org/content/erj/50/2/1602426,,ERS ©,restricted,respiratory,high
+ERS-017,ERS,Obstructive sleep apnoea OSA,2024,https://publications.ersnet.org/content/erj/63/2/2301889,,ERS ©,restricted,respiratory,high
+ERS-018,ERS,Obesity hypoventilation syndrome (with ATS),2024,https://publications.ersnet.org/content/erj/63/4/2400298,,ERS ©,restricted,respiratory,medium
+ERS-019,ERS,Pulmonary rehabilitation in COPD,2023,https://publications.ersnet.org/content/erj/61/3/2201605,,ERS ©,restricted,respiratory,medium
+ERS-020,ERS,Pleural infection management,2023,https://publications.ersnet.org/content/erj/61/2/2201062,,ERS ©,restricted,respiratory,medium
