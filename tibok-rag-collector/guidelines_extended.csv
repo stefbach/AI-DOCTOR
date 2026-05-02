@@ -1,0 +1,105 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+ASCO-001,ASCO,Adjuvant Therapy for Stage II Colon Cancer,2022,https://ascopubs.org/doi/10.1200/JCO.21.02538,,ASCO ©,restricted,oncology,high
+ASCO-002,ASCO,Management of Anxiety and Depression in Adult Cancer Survivors,2023,https://ascopubs.org/doi/10.1200/JCO.23.00293,,ASCO ©,restricted,oncology,high
+ASCO-003,ASCO,Selection of Optimal Adjuvant Chemotherapy Regimens for HER2-negative breast cancer,2022,https://ascopubs.org/doi/10.1200/JCO.21.02510,,ASCO ©,restricted,oncology,high
+ASCO-004,ASCO,Hereditary Breast Cancer Genetic Testing,2024,https://ascopubs.org/doi/10.1200/JCO.23.02225,,ASCO ©,restricted,oncology,high
+ASCO-005,ASCO,Therapy for Stage IV NSCLC With Driver Alterations,2022,https://ascopubs.org/doi/10.1200/JCO.21.01034,,ASCO ©,restricted,oncology,high
+ASCO-006,ASCO,Antiemetics for Cancer Patients,2024,https://ascopubs.org/doi/10.1200/JCO.24.00040,,ASCO ©,restricted,oncology,high
+ASCO-007,ASCO,Cancer Pain Management in Adults,2023,https://ascopubs.org/doi/10.1200/JCO.23.01272,,ASCO ©,restricted,oncology,high
+ASCO-008,ASCO,Management of Stage III NSCLC,2022,https://ascopubs.org/doi/10.1200/JCO.21.02528,,ASCO ©,restricted,oncology,high
+ASCO-009,ASCO,Treatment of Pancreatic Adenocarcinoma,2020,https://ascopubs.org/doi/10.1200/JCO.20.01364,,ASCO ©,restricted,oncology,high
+ASCO-010,ASCO,Adjuvant Endocrine Therapy for Breast Cancer,2022,https://ascopubs.org/doi/10.1200/JCO.21.02675,,ASCO ©,restricted,oncology,high
+ASCO-011,ASCO,Cancer-related fatigue management,2023,https://ascopubs.org/doi/10.1200/JCO.23.01236,,ASCO ©,restricted,oncology,medium
+ASCO-012,ASCO,Survivorship Care After Curative Treatment,2022,https://ascopubs.org/doi/10.1200/JCO.21.02661,,ASCO ©,restricted,oncology,medium
+ESMO-001,ESMO,Early Breast Cancer Diagnosis Treatment Follow-up,2024,https://www.esmo.org/guidelines/breast-cancer/early-breast-cancer,,ESMO ©,restricted,oncology,high
+ESMO-002,ESMO,Metastatic Breast Cancer,2024,https://www.esmo.org/guidelines/breast-cancer/metastatic-breast-cancer,,ESMO ©,restricted,oncology,high
+ESMO-003,ESMO,Colorectal Cancer Treatment,2023,https://www.esmo.org/guidelines/gastrointestinal-cancers/colorectal-cancer,,ESMO ©,restricted,oncology,high
+ESMO-004,ESMO,NSCLC Stage IV Treatment,2023,https://www.esmo.org/guidelines/lung-and-chest-tumours/non-small-cell-lung-cancer,,ESMO ©,restricted,oncology,high
+ESMO-005,ESMO,Hepatocellular Carcinoma,2024,https://www.esmo.org/guidelines/gastrointestinal-cancers/hepatocellular-carcinoma,,ESMO ©,restricted,oncology,high
+ESMO-006,ESMO,Pancreatic Cancer Treatment,2023,https://www.esmo.org/guidelines/gastrointestinal-cancers/pancreatic-cancer,,ESMO ©,restricted,oncology,high
+ESMO-007,ESMO,Prostate Cancer Treatment,2024,https://www.esmo.org/guidelines/genitourinary-cancers/prostate-cancer,,ESMO ©,restricted,oncology,high
+ESMO-008,ESMO,Cervical Cancer Treatment,2024,https://www.esmo.org/guidelines/gynaecological-cancers/cervical-cancer,,ESMO ©,restricted,oncology,high
+ESMO-009,ESMO,Ovarian Cancer Treatment,2024,https://www.esmo.org/guidelines/gynaecological-cancers/ovarian-cancer,,ESMO ©,restricted,oncology,high
+ESMO-010,ESMO,Cancer Pain Management,2023,https://www.esmo.org/guidelines/supportive-and-palliative-care/cancer-pain,,ESMO ©,restricted,oncology,high
+EULAR-001,EULAR,Rheumatoid Arthritis Management,2023,https://ard.bmj.com/content/82/1/3,,EULAR/BMJ ©,restricted,rheumatology,high
+EULAR-002,EULAR,Systemic Lupus Erythematosus Treatment,2024,https://ard.bmj.com/content/83/1/15,,EULAR/BMJ ©,restricted,rheumatology,high
+EULAR-003,EULAR,Psoriatic Arthritis Treatment,2024,https://ard.bmj.com/content/83/6/706,,EULAR/BMJ ©,restricted,rheumatology,high
+EULAR-004,EULAR,Spondyloarthritis Management,2023,https://ard.bmj.com/content/82/1/19,,EULAR/BMJ ©,restricted,rheumatology,high
+EULAR-005,EULAR,ANCA-Associated Vasculitis Management,2024,https://ard.bmj.com/content/83/1/30,,EULAR/BMJ ©,restricted,rheumatology,high
+EULAR-006,EULAR,Sjögren Syndrome Management,2020,https://ard.bmj.com/content/79/1/3,,EULAR/BMJ ©,restricted,rheumatology,medium
+EULAR-007,EULAR,Gout Management,2024,https://ard.bmj.com/content/83/1/45,,EULAR/BMJ ©,restricted,rheumatology,high
+EULAR-008,EULAR,Systemic Sclerosis Treatment,2023,https://ard.bmj.com/content/82/1/55,,EULAR/BMJ ©,restricted,rheumatology,medium
+EULAR-009,EULAR,Polymyalgia Rheumatica Management,2023,https://ard.bmj.com/content/82/1/74,,EULAR/BMJ ©,restricted,rheumatology,medium
+EULAR-010,EULAR,Giant Cell Arteritis Diagnosis Treatment,2024,https://ard.bmj.com/content/83/1/85,,EULAR/BMJ ©,restricted,rheumatology,high
+ACR-001,ACR,Treatment of Rheumatoid Arthritis,2021,https://acrjournals.onlinelibrary.wiley.com/doi/10.1002/art.41752,,ACR ©,restricted,rheumatology,high
+ACR-002,ACR,Treatment of Psoriatic Arthritis,2018,https://acrjournals.onlinelibrary.wiley.com/doi/10.1002/art.40726,,ACR ©,restricted,rheumatology,high
+ACR-003,ACR,Treatment of Lupus Nephritis,2024,https://acrjournals.onlinelibrary.wiley.com/doi/10.1002/art.42788,,ACR ©,restricted,rheumatology,high
+ACR-004,ACR,Treatment of ANCA-Associated Vasculitis,2021,https://acrjournals.onlinelibrary.wiley.com/doi/10.1002/art.41773,,ACR ©,restricted,rheumatology,high
+ACR-005,ACR,Treatment of Gout,2020,https://acrjournals.onlinelibrary.wiley.com/doi/10.1002/art.41247,,ACR ©,restricted,rheumatology,high
+ACR-006,ACR,Treatment of Glucocorticoid-Induced Osteoporosis,2017,https://acrjournals.onlinelibrary.wiley.com/doi/10.1002/art.40137,,ACR ©,restricted,rheumatology,medium
+ACR-007,ACR,Treatment of Juvenile Idiopathic Arthritis,2022,https://acrjournals.onlinelibrary.wiley.com/doi/10.1002/art.42037,,ACR ©,restricted,rheumatology,high
+ACR-008,ACR,Treatment of Polymyalgia Rheumatica,2023,https://acrjournals.onlinelibrary.wiley.com/doi/10.1002/art.42330,,ACR ©,restricted,rheumatology,medium
+SCCM-001,SCCM,Surviving Sepsis Campaign Adults,2021,https://www.sccm.org/Clinical-Resources/Guidelines/Guidelines/Surviving-Sepsis-Guidelines-2021,,SCCM ©,restricted,critical_care,high
+SCCM-002,SCCM,Surviving Sepsis Campaign Children,2020,https://www.sccm.org/Clinical-Resources/Guidelines/Guidelines/Surviving-Sepsis-Campaign-International-Guidelines,,SCCM ©,restricted,critical_care,high
+SCCM-003,SCCM,Pain Agitation Delirium ICU,2018,https://journals.lww.com/ccmjournal/Fulltext/2018/09000/Clinical_Practice_Guidelines_for_the_Prevention.29.aspx,,SCCM ©,restricted,critical_care,high
+SCCM-004,SCCM,Acute Respiratory Distress Syndrome,2023,https://journals.lww.com/ccmjournal/Fulltext/2023/01000/Executive_Summary__Society_of_Critical_Care.21.aspx,,SCCM ©,restricted,critical_care,high
+SCCM-005,SCCM,Hemodynamic Monitoring Critically Ill,2020,https://journals.lww.com/ccmjournal/Fulltext/2020/09000/Hemodynamic_Monitoring.30.aspx,,SCCM ©,restricted,critical_care,medium
+SCCM-006,SCCM,Mechanical Ventilation in ICU,2021,https://journals.lww.com/ccmjournal/Fulltext/2021/09000/Liberation_From_Mechanical_Ventilation.29.aspx,,SCCM ©,restricted,critical_care,high
+SCCM-007,SCCM,Targeted Temperature Management Cardiac Arrest,2021,https://journals.lww.com/ccmjournal/Fulltext/2021/02000/Targeted_Temperature_Management.40.aspx,,SCCM ©,restricted,critical_care,high
+SCCM-008,SCCM,Nutrition in ICU Patients,2022,https://journals.lww.com/ccmjournal/Fulltext/2022/12000/ASPEN_Critical_Care_Nutrition_Guidelines.40.aspx,,SCCM ©,restricted,critical_care,medium
+ESICM-001,ESICM,Hemodynamic Resuscitation Septic Shock,2023,https://link.springer.com/article/10.1007/s00134-023-07116-6,,ESICM ©,restricted,critical_care,high
+ESICM-002,ESICM,ICU Acquired Weakness,2024,https://link.springer.com/article/10.1007/s00134-024-07450-0,,ESICM ©,restricted,critical_care,high
+ESICM-003,ESICM,Acute Kidney Injury Critical Care,2023,https://link.springer.com/article/10.1007/s00134-023-07215-4,,ESICM ©,restricted,critical_care,high
+ESICM-004,ESICM,Renal Replacement Therapy Critical Illness,2022,https://link.springer.com/article/10.1007/s00134-022-06776-0,,ESICM ©,restricted,critical_care,medium
+ESICM-005,ESICM,Sedation Agitation ICU,2024,https://link.springer.com/article/10.1007/s00134-024-07472-x,,ESICM ©,restricted,critical_care,medium
+AAP-001,AAP,Pediatric Hypertension Guideline,2017,https://publications.aap.org/pediatrics/article/140/3/e20171904,,AAP ©,restricted,pediatrics,high
+AAP-002,AAP,Pediatric Obesity Treatment,2023,https://publications.aap.org/pediatrics/article/151/2/e2022060640,,AAP ©,restricted,pediatrics,high
+AAP-003,AAP,Pediatric Asthma Management,2021,https://publications.aap.org/pediatrics/article/147/4/e2021050298,,AAP ©,restricted,pediatrics,high
+AAP-004,AAP,Pediatric Acute Otitis Media,2013,https://publications.aap.org/pediatrics/article/131/3/e964,,AAP ©,restricted,pediatrics,high
+AAP-005,AAP,Pediatric ADHD Diagnosis Treatment,2019,https://publications.aap.org/pediatrics/article/144/4/e20192528,,AAP ©,restricted,pediatrics,high
+AAP-006,AAP,Pediatric Bronchiolitis Management,2014,https://publications.aap.org/pediatrics/article/134/5/e1474,,AAP ©,restricted,pediatrics,high
+AAP-007,AAP,Pediatric Urinary Tract Infection,2011,https://publications.aap.org/pediatrics/article/128/3/595,,AAP ©,restricted,pediatrics,high
+AAP-008,AAP,Pediatric Concussion Management,2018,https://publications.aap.org/pediatrics/article/142/6/e20183074,,AAP ©,restricted,pediatrics,medium
+AAP-009,AAP,Pediatric Sleep Apnea Diagnosis,2012,https://publications.aap.org/pediatrics/article/130/3/576,,AAP ©,restricted,pediatrics,medium
+AAP-010,AAP,Newborn Screening Hyperbilirubinemia,2022,https://publications.aap.org/pediatrics/article/150/3/e2022058859,,AAP ©,restricted,pediatrics,high
+ACOG-001,ACOG,Management of Hypertension in Pregnancy,2022,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2022/06/gestational-hypertension-and-preeclampsia,,ACOG ©,restricted,obstetrics,high
+ACOG-002,ACOG,Gestational Diabetes Mellitus,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2018/02/gestational-diabetes-mellitus,,ACOG ©,restricted,obstetrics,high
+ACOG-003,ACOG,Cervical Cancer Screening,2021,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2021/04/cervical-cancer-screening,,ACOG ©,restricted,gynecology,high
+ACOG-004,ACOG,Postpartum Hemorrhage,2017,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2017/10/postpartum-hemorrhage,,ACOG ©,restricted,obstetrics,high
+ACOG-005,ACOG,Long-Acting Reversible Contraception,2017,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2017/11/long-acting-reversible-contraception-implants-and-intrauterine-devices,,ACOG ©,restricted,gynecology,high
+ACOG-006,ACOG,Endometriosis Management,2010,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2010/07/endometriosis,,ACOG ©,restricted,gynecology,medium
+ACOG-007,ACOG,Polycystic Ovary Syndrome,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2018/06/polycystic-ovary-syndrome,,ACOG ©,restricted,gynecology,high
+AAN-001,AAN,Acute Stroke Treatment,2019,https://www.neurology.org/doi/10.1212/WNL.0000000000007487,,AAN ©,restricted,neurology,high
+AAN-002,AAN,Multiple Sclerosis Disease-Modifying Therapy,2023,https://www.neurology.org/doi/10.1212/WNL.0000000000207523,,AAN ©,restricted,neurology,high
+AAN-003,AAN,Migraine Prevention,2024,https://www.neurology.org/doi/10.1212/WNL.0000000000209056,,AAN ©,restricted,neurology,high
+AAN-004,AAN,Epilepsy Antiseizure Treatment,2018,https://www.neurology.org/doi/10.1212/WNL.0000000000005755,,AAN ©,restricted,neurology,high
+AAN-005,AAN,Parkinson Disease Treatment,2021,https://www.neurology.org/doi/10.1212/WNL.0000000000012398,,AAN ©,restricted,neurology,high
+AAN-006,AAN,Mild Cognitive Impairment,2018,https://www.neurology.org/doi/10.1212/WNL.0000000000004826,,AAN ©,restricted,neurology,high
+AAN-007,AAN,Carotid Endarterectomy Indications,2021,https://www.neurology.org/doi/10.1212/WNL.0000000000012677,,AAN ©,restricted,neurology,medium
+AAN-008,AAN,Tics Tourette Syndrome Treatment,2019,https://www.neurology.org/doi/10.1212/WNL.0000000000007466,,AAN ©,restricted,neurology,medium
+AASLD-001,AASLD,Hepatocellular Carcinoma Management,2023,https://aasldpubs.onlinelibrary.wiley.com/doi/10.1097/HEP.0000000000000466,,AASLD ©,restricted,hepatology,high
+AASLD-002,AASLD,Hepatic Encephalopathy,2014,https://aasldpubs.onlinelibrary.wiley.com/doi/10.1002/hep.27210,,AASLD ©,restricted,hepatology,high
+AASLD-003,AASLD,Acute Liver Failure,2023,https://aasldpubs.onlinelibrary.wiley.com/doi/10.1097/HEP.0000000000000465,,AASLD ©,restricted,hepatology,high
+AASLD-004,AASLD,Alcohol-Associated Liver Disease,2024,https://aasldpubs.onlinelibrary.wiley.com/doi/10.1097/HEP.0000000000000730,,AASLD ©,restricted,hepatology,high
+AASLD-005,AASLD,Liver Transplantation Adult Candidates,2022,https://aasldpubs.onlinelibrary.wiley.com/doi/10.1002/hep.32487,,AASLD ©,restricted,hepatology,medium
+AASLD-006,AASLD,Wilson Disease Diagnosis Treatment,2023,https://aasldpubs.onlinelibrary.wiley.com/doi/10.1097/HEP.0000000000000383,,AASLD ©,restricted,hepatology,low
+AAD-001,AAD,Acne Vulgaris Management,2024,https://www.jaad.org/article/S0190-9622(23)03389-9/fulltext,,AAD ©,restricted,dermatology,high
+AAD-002,AAD,Atopic Dermatitis Management,2024,https://www.jaad.org/article/S0190-9622(23)03234-5/fulltext,,AAD ©,restricted,dermatology,high
+AAD-003,AAD,Psoriasis Management Biologics,2019,https://www.jaad.org/article/S0190-9622(18)33001-2/fulltext,,AAD ©,restricted,dermatology,high
+AAD-004,AAD,Melanoma Management,2019,https://www.jaad.org/article/S0190-9622(18)32354-1/fulltext,,AAD ©,restricted,dermatology,high
+AAD-005,AAD,Skin Cancer Screening,2024,https://www.jaad.org/article/S0190-9622(23)03234-5/fulltext,,AAD ©,restricted,dermatology,medium
+NIH-COVID-001,NIH,COVID-19 Treatment Guidelines (Living Document),2024,https://www.covid19treatmentguidelines.nih.gov/,,US Public Domain,allowed,infectious,high
+SIGN-001,SIGN,Risk Estimation Prevention CVD,2017,https://www.sign.ac.uk/our-guidelines/risk-estimation-and-the-prevention-of-cardiovascular-disease/,,SIGN ©,restricted,cardiology,high
+SIGN-002,SIGN,Diabetes Management Adults,2024,https://www.sign.ac.uk/our-guidelines/management-of-diabetes/,,SIGN ©,restricted,endocrinology,high
+SIGN-003,SIGN,Stroke Management,2023,https://www.sign.ac.uk/our-guidelines/management-of-stroke/,,SIGN ©,restricted,neurology,high
+ASH-001,ASH,Venous Thromboembolism Treatment,2020,https://ashpublications.org/bloodadvances/article/4/19/4693,,ASH ©,restricted,hematology,high
+ASH-002,ASH,Sickle Cell Disease Management,2020,https://ashpublications.org/bloodadvances/article/4/8/1554,,ASH ©,restricted,hematology,high
+ASH-003,ASH,Immune Thrombocytopenia Adults,2019,https://ashpublications.org/bloodadvances/article/3/23/3829,,ASH ©,restricted,hematology,high
+ASH-004,ASH,Acute Myeloid Leukemia,2024,https://ashpublications.org/blood/article/144/8/849,,ASH ©,restricted,hematology,high
+ASH-005,ASH,Multiple Myeloma Management,2023,https://ashpublications.org/blood/article/142/16/1382,,ASH ©,restricted,hematology,high
+WHO-EXT-001,WHO,Mental Health Atlas Substance Use Disorders,2023,https://www.who.int/publications/i/item/9789240076394,,CC BY-NC-SA 3.0 IGO,restricted,psychiatry,medium
+WHO-EXT-002,WHO,Suicide Prevention Guidelines,2021,https://www.who.int/publications/i/item/9789240026643,,CC BY-NC-SA 3.0 IGO,restricted,psychiatry,high
+WHO-EXT-003,WHO,Antimicrobial Resistance Action Plan,2024,https://www.who.int/publications/i/item/9789240095830,,CC BY-NC-SA 3.0 IGO,restricted,infectious,high
+WHO-EXT-004,WHO,Tuberculosis Programmatic Management Drug-Resistant,2024,https://www.who.int/publications/i/item/9789240067578,,CC BY-NC-SA 3.0 IGO,restricted,infectious,high
+WHO-EXT-005,WHO,Ending Childhood Obesity,2017,https://www.who.int/publications/i/item/9789241510066,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-EXT-006,WHO,Newborn Care Essential Practices,2018,https://www.who.int/publications/i/item/essential-newborn-care-and-feeding,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
