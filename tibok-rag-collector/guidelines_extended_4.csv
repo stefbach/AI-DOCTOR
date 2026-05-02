@@ -1,0 +1,155 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+WHO-TROP-001,WHO,Malaria Case Management Operational Manual,2024,https://www.who.int/publications/i/item/9789240097872,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-002,WHO,Severe Malaria Treatment,2014,https://www.who.int/publications/i/item/severe-malaria-tropical-medicine-international-health,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-003,WHO,Visceral Leishmaniasis Treatment,2010,https://www.who.int/publications/i/item/WHO-TRS-949,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-004,WHO,Leishmaniasis Diagnosis Treatment Prevention,2024,https://www.who.int/publications/i/item/9789240095427,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-005,WHO,Schistosomiasis Treatment Control Programs,2022,https://www.who.int/publications/i/item/9789240041608,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-006,WHO,Soil-Transmitted Helminthiases,2017,https://www.who.int/publications/i/item/9789241550116,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-007,WHO,Lymphatic Filariasis Diagnosis,2018,https://www.who.int/publications/i/item/9789241550161,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-008,WHO,Onchocerciasis Elimination,2016,https://www.who.int/publications/i/item/9789241549950,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-009,WHO,Dracunculiasis Eradication,2018,https://www.who.int/publications/i/item/9789241513586,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,medium
+WHO-TROP-010,WHO,Chagas Disease Treatment,2018,https://www.who.int/publications/i/item/9789241513876,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-011,WHO,Human African Trypanosomiasis,2019,https://www.who.int/publications/i/item/9789241550567,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,medium
+WHO-TROP-012,WHO,Buruli Ulcer Diagnosis Treatment,2022,https://www.who.int/publications/i/item/9789240048232,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-013,WHO,Yaws Eradication,2022,https://www.who.int/publications/i/item/9789240048324,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-014,WHO,Leprosy Diagnosis Treatment Prevention,2018,https://www.who.int/publications/i/item/9789290226383,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-015,WHO,Rabies Vaccine Position Paper,2018,https://www.who.int/publications/i/item/who-wer9316,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-016,WHO,Snakebite Management Africa,2010,https://www.who.int/publications/i/item/9789290223771,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-017,WHO,Echinococcosis Diagnosis Treatment,2010,https://www.who.int/publications/i/item/echinococcosis-handbook,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-018,WHO,Trachoma Elimination,2020,https://www.who.int/publications/i/item/9789240015371,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-019,WHO,Dengue Diagnosis Treatment Prevention,2009,https://www.who.int/publications/i/item/9789241547871,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-020,WHO,Chikungunya Outbreak Management,2009,https://www.who.int/publications/i/item/9789290224167,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-021,WHO,Zika Virus Country Office,2016,https://www.who.int/publications/i/item/9789241510158,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-022,WHO,Yellow Fever Vaccination,2019,https://www.who.int/publications/i/item/9789241516198,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-023,WHO,Cholera Vaccine Position Paper,2017,https://www.who.int/publications/i/item/who-wer9234-477-498,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-024,WHO,Cholera Treatment Manual,2018,https://www.who.int/publications/i/item/cholera-treatment-strategies-2018,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-025,WHO,Typhoid Fever Vaccines Position,2019,https://www.who.int/publications/i/item/who-wer-no-13-2019,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-026,WHO,Ebola Virus Disease Clinical Management,2024,https://www.who.int/publications/i/item/9789240072107,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-027,WHO,Marburg Virus Disease Management,2024,https://www.who.int/publications/i/item/9789240094413,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-028,WHO,Lassa Fever Management,2024,https://www.who.int/publications/i/item/9789240091856,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,medium
+WHO-TROP-029,WHO,Mycetoma Eumycetoma Actinomycetoma,2019,https://www.who.int/publications/i/item/9789241516136,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,medium
+WHO-TROP-030,WHO,Foodborne Trematodiases,2018,https://www.who.int/publications/i/item/9789241549936,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,medium
+WHO-TROP-031,WHO,Taeniasis Cysticercosis Programmatic Update,2019,https://www.who.int/publications/i/item/9789241516327,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,medium
+WHO-TROP-032,WHO,Roadmap for Neglected Tropical Diseases 2021-2030,2021,https://www.who.int/publications/i/item/9789240010352,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-033,WHO,Visceral Leishmaniasis Eastern Africa,2024,https://www.who.int/publications/i/item/9789240092877,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,medium
+WHO-TROP-034,WHO,Antibiotics Antimicrobials Resistance Tropical,2023,https://www.who.int/publications/i/item/9789240076556,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-035,WHO,Diarrhoeal Diseases Children,2017,https://www.who.int/publications/i/item/9789241549950,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+CDC-TROP-001,CDC,Travelers Health Yellow Book,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/table-of-contents,,US Public Domain,allowed,tropical_diseases,high
+CDC-TROP-002,CDC,Malaria Treatment United States,2023,https://www.cdc.gov/malaria/hcp/clinical-guidance/index.html,,US Public Domain,allowed,tropical_diseases,high
+CDC-TROP-003,CDC,Dengue Clinical Care Adults Children,2023,https://www.cdc.gov/dengue/hcp/clinical-care/index.html,,US Public Domain,allowed,tropical_diseases,high
+CDC-TROP-004,CDC,Schistosomiasis Diagnosis Treatment,2024,https://www.cdc.gov/schistosomiasis/hcp/clinical-overview/index.html,,US Public Domain,allowed,tropical_diseases,high
+CDC-TROP-005,CDC,Leishmaniasis Diagnosis Treatment,2024,https://www.cdc.gov/leishmaniasis/hcp/clinical-overview/index.html,,US Public Domain,allowed,tropical_diseases,high
+CDC-TROP-006,CDC,Chagas Disease Diagnosis Treatment,2024,https://www.cdc.gov/chagas/hcp/clinical-overview/index.html,,US Public Domain,allowed,tropical_diseases,high
+CDC-TROP-007,CDC,Cholera Treatment Adults Children,2024,https://www.cdc.gov/cholera/hcp/clinical-overview/index.html,,US Public Domain,allowed,tropical_diseases,high
+CDC-TROP-008,CDC,Yellow Fever Vaccination Pre-Travel,2024,https://www.cdc.gov/yellow-fever/hcp/clinical-guidance/index.html,,US Public Domain,allowed,tropical_diseases,high
+CDC-TROP-009,CDC,Pre-Travel Consultation Approach,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/pre-travel-consultation,,US Public Domain,allowed,tropical_diseases,high
+CDC-TROP-010,CDC,Travel Medicine HIV-Positive,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/special-considerations/immunocompromised-travelers,,US Public Domain,allowed,tropical_diseases,medium
+ASTMH-001,ASTMH,Treatment Imported Malaria Adults,2023,https://www.ajtmh.org/view/journals/tpmd/108/2/article-p233.xml,,ASTMH ©,restricted,tropical_diseases,high
+ASTMH-002,ASTMH,Cutaneous Leishmaniasis Treatment Returning Travelers,2024,https://www.ajtmh.org/view/journals/tpmd/110/4/article-p615.xml,,ASTMH ©,restricted,tropical_diseases,high
+ASTMH-003,ASTMH,Schistosomiasis Travelers Migrants,2018,https://www.ajtmh.org/view/journals/tpmd/99/3/article-p638.xml,,ASTMH ©,restricted,tropical_diseases,high
+ASTMH-004,ASTMH,Soil-Transmitted Helminths Travelers,2020,https://www.ajtmh.org/view/journals/tpmd/103/4/article-p1462.xml,,ASTMH ©,restricted,tropical_diseases,medium
+ASTMH-005,ASTMH,Strongyloidiasis Diagnosis Treatment,2017,https://www.ajtmh.org/view/journals/tpmd/97/3/article-p645.xml,,ASTMH ©,restricted,tropical_diseases,high
+ISTM-001,ISTM,Travel Medicine Practice Body Knowledge,2017,https://academic.oup.com/jtm/article/24/suppl_1/S2/3084977,,ISTM ©,restricted,tropical_diseases,medium
+ISTM-002,ISTM,Travelers Diarrhea Prevention Treatment,2017,https://academic.oup.com/jtm/article/24/suppl_1/S57/3084903,,ISTM ©,restricted,tropical_diseases,high
+RSTMH-001,RSTMH,Tropical Medicine Hygiene Snakebite,2019,https://academic.oup.com/trstmh/article/113/9/477/5550023,,RSTMH/OUP ©,restricted,tropical_diseases,high
+PAHO-001,PAHO,Dengue Clinical Management Guidelines,2022,https://www.paho.org/en/documents/dengue-guidelines-clinical-management,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+PAHO-002,PAHO,Zika Virus Disease Clinical Management,2017,https://www.paho.org/en/documents/zika-virus-disease-clinical-management-and-rehabilitation,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+PAHO-003,PAHO,Chikungunya Treatment Care Pathway,2017,https://www.paho.org/en/documents/chikungunya-clinical-management,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+DNDi-001,DNDi,Visceral Leishmaniasis Treatment Update,2023,https://dndi.org/diseases/visceral-leishmaniasis/,,DNDi ©,restricted,tropical_diseases,medium
+ASTRO-001,ASTRO,Radiation Therapy Breast Cancer,2024,https://www.redjournal.org/article/S0360-3016(24)00198-7/fulltext,,ASTRO ©,restricted,oncology,high
+ASTRO-002,ASTRO,Radiation Therapy Prostate Cancer,2024,https://www.redjournal.org/article/S0360-3016(23)07765-5/fulltext,,ASTRO ©,restricted,oncology,high
+ASTRO-003,ASTRO,Palliative Radiation Bone Metastases,2017,https://www.redjournal.org/article/S0360-3016(16)33561-0/fulltext,,ASTRO ©,restricted,oncology,high
+ESPS-001,ASPS,Breast Reconstruction Cancer,2019,https://journals.lww.com/plasreconsurg/Fulltext/2019/04001/Breast_Reconstruction.31.aspx,,ASPS ©,restricted,plastic_surgery,medium
+ESPS-002,ASPS,Pressure Injury Reconstruction,2024,https://journals.lww.com/plasreconsurg/Fulltext/2024/01000/Practice_Recommendations_for_Pressure_Injury.40.aspx,,ASPS ©,restricted,plastic_surgery,medium
+NCCIH-001,NCCIH,Acupuncture Pain Evidence,2022,https://www.nccih.nih.gov/health/acupuncture-effectiveness-and-safety,,US Public Domain,allowed,integrative,medium
+NCCIH-002,NCCIH,Yoga Health Benefits Evidence,2024,https://www.nccih.nih.gov/health/yoga-what-you-need-to-know,,US Public Domain,allowed,integrative,medium
+NCCIH-003,NCCIH,Mindfulness Meditation Mental Health,2023,https://www.nccih.nih.gov/health/meditation-and-mindfulness-effectiveness-and-safety,,US Public Domain,allowed,integrative,medium
+CPIC-001,CPIC,Pharmacogenomic Therapeutic Recommendations Clopidogrel,2022,https://cpicpgx.org/guidelines/guideline-for-clopidogrel-and-cyp2c19/,,CPIC ©,restricted,pharmacogenomics,high
+CPIC-002,CPIC,Warfarin Pharmacogenomic Dosing,2017,https://cpicpgx.org/guidelines/guideline-for-warfarin-and-cyp2c9-and-vkorc1/,,CPIC ©,restricted,pharmacogenomics,high
+CPIC-003,CPIC,Codeine CYP2D6 Therapeutic Recommendations,2021,https://cpicpgx.org/guidelines/guideline-for-codeine-and-cyp2d6/,,CPIC ©,restricted,pharmacogenomics,high
+CPIC-004,CPIC,SSRI Antidepressants CYP2C19 CYP2D6,2023,https://cpicpgx.org/guidelines/guideline-for-selective-serotonin-reuptake-inhibitors-and-cyp2d6-and-cyp2c19/,,CPIC ©,restricted,pharmacogenomics,high
+CPIC-005,CPIC,Tamoxifen CYP2D6 Therapeutic Use,2021,https://cpicpgx.org/guidelines/cpic-guideline-for-tamoxifen-based-on-cyp2d6-genotype/,,CPIC ©,restricted,pharmacogenomics,medium
+ACSM-001,ACSM,Exercise Testing Prescription Adults,2018,https://journals.lww.com/acsm-msse/Fulltext/2018/06000/Updated_Statement_on_Pre_Exercise_Health.9.aspx,,ACSM ©,restricted,sports_medicine,high
+ACSM-002,ACSM,Resistance Training Health Benefits,2019,https://journals.lww.com/acsm-msse/Fulltext/2019/01000/American_College_of_Sports_Medicine_Position.27.aspx,,ACSM ©,restricted,sports_medicine,medium
+ACSM-003,ACSM,Sports Medicine Concussion Athletes,2017,https://journals.lww.com/cjsportsmed/Fulltext/2017/03000/Sport_Concussion.10.aspx,,ACSM ©,restricted,sports_medicine,high
+EWMA-001,EWMA,Wound Bed Preparation Diabetic Foot,2020,https://onlinelibrary.wiley.com/doi/10.1111/wrr.12824,,EWMA ©,restricted,wound_care,high
+EWMA-002,EWMA,Pressure Ulcer Prevention,2019,https://onlinelibrary.wiley.com/doi/10.1111/iwj.13022,,EWMA ©,restricted,wound_care,medium
+EAPC-001,EAPC,Palliative Care Cancer Symptom Management,2018,https://journals.sagepub.com/doi/10.1177/0269216318756257,,EAPC ©,restricted,palliative,high
+EAPC-002,EAPC,End-of-Life Care Cancer Patients,2020,https://journals.sagepub.com/doi/10.1177/0269216320920455,,EAPC ©,restricted,palliative,high
+NHPCO-001,NHPCO,Hospice End-of-Life Care Standards,2018,https://www.nhpco.org/regulatory-and-quality/standards/,,NHPCO ©,restricted,palliative,medium
+PVRI-001,PVRI,Pulmonary Hypertension Diagnosis Treatment,2023,https://onlinelibrary.wiley.com/doi/10.1002/pul2.12283,,PVRI ©,restricted,respiratory,high
+ATS-EXT-003,ATS,Lung Volume Reduction Therapy,2019,https://www.atsjournals.org/doi/10.1164/rccm.201907-1276ST,,ATS ©,restricted,respiratory,medium
+ATS-EXT-004,ATS,Long-Term Mechanical Ventilation Children,2024,https://www.atsjournals.org/doi/10.1164/rccm.202402-0317ST,,ATS ©,restricted,pediatrics,high
+JCS-001,JCS,Cardiovascular Disease Prevention Japan,2023,https://www.j-circ.or.jp/cms/wp-content/uploads/2023/03/JCS2023_Tsutsui.pdf,https://www.j-circ.or.jp/cms/wp-content/uploads/2023/03/JCS2023_Tsutsui.pdf,JCS ©,restricted,cardiology,medium
+CSC-001,CSC,Coronary Artery Disease Diagnosis Management,2022,https://onlinelibrary.wiley.com/doi/10.1111/jch.14570,,CSC ©,restricted,cardiology,medium
+ICMR-001,ICMR,Antimicrobial Resistance Stewardship India,2022,https://www.icmr.gov.in/cdcfiles/Treatment%20Guidelines%202022%20final.pdf,https://www.icmr.gov.in/cdcfiles/Treatment%20Guidelines%202022%20final.pdf,ICMR ©,restricted,infectious,medium
+MOH-SG-001,MOH-Singapore,Hypertension Clinical Practice Guideline,2017,https://www.moh.gov.sg/hpp/all-healthcare-professionals/cpg/details/hypertension,,Singapore Govt,restricted,cardiology,medium
+NICE-EXT-059,NICE,Liver Cancer Adults Hepatocellular,2017,https://www.nice.org.uk/guidance/ng12,,NICE ©,restricted,oncology,medium
+NICE-EXT-060,NICE,Bladder Cancer Diagnosis Management,2015,https://www.nice.org.uk/guidance/ng2,,NICE ©,restricted,oncology,high
+NICE-EXT-061,NICE,Renal Cancer Adults,2014,https://www.nice.org.uk/guidance/cg175,,NICE ©,restricted,oncology,medium
+NICE-EXT-062,NICE,Atopic Eczema Children,2007,https://www.nice.org.uk/guidance/cg57,,NICE ©,restricted,dermatology,high
+NICE-EXT-063,NICE,Acute Lower Limb Ischaemia,2019,https://www.nice.org.uk/guidance/ng147,,NICE ©,restricted,vascular_surgery,high
+NICE-EXT-064,NICE,Suspected Acute Myocardial Infarction,2020,https://www.nice.org.uk/guidance/ng185,,NICE ©,restricted,cardiology,high
+NICE-EXT-065,NICE,Bipolar Disorder Adults,2014,https://www.nice.org.uk/guidance/cg185,,NICE ©,restricted,psychiatry,high
+NICE-EXT-066,NICE,Schizophrenia Adults Treatment,2014,https://www.nice.org.uk/guidance/cg178,,NICE ©,restricted,psychiatry,high
+NICE-EXT-067,NICE,Personality Disorders Borderline,2009,https://www.nice.org.uk/guidance/cg78,,NICE ©,restricted,psychiatry,medium
+NICE-EXT-068,NICE,Substance Misuse Drug Service,2017,https://www.nice.org.uk/guidance/ng12,,NICE ©,restricted,psychiatry,medium
+WHO-EXT-016,WHO,Global Action Plan Vaccines,2020,https://www.who.int/publications/i/item/9789240026766,,CC BY-NC-SA 3.0 IGO,restricted,infectious,high
+WHO-EXT-017,WHO,Global Action Plan AMR,2022,https://www.who.int/publications/i/item/9789240046443,,CC BY-NC-SA 3.0 IGO,restricted,infectious,high
+WHO-EXT-018,WHO,Universal Health Coverage Primary Care,2023,https://www.who.int/publications/i/item/9789240083097,,CC BY-NC-SA 3.0 IGO,restricted,public_health,high
+WHO-EXT-019,WHO,Climate Change Health Impacts,2023,https://www.who.int/publications/i/item/9789240081413,,CC BY-NC-SA 3.0 IGO,restricted,public_health,medium
+WHO-EXT-020,WHO,Tobacco Cessation Treatment Settings,2023,https://www.who.int/publications/i/item/9789240070684,,CC BY-NC-SA 3.0 IGO,restricted,prevention,high
+ESC-EXT-006,ESC,Pulmonary Hypertension 2022,2022,https://academic.oup.com/eurheartj/article/43/38/3618/6673929,,ESC/OUP ©,restricted,cardiology,high
+ESC-EXT-007,ESC,Cardiovascular Diabetes 2023,2023,https://academic.oup.com/eurheartj/article/44/39/4043/7238227,,ESC/OUP ©,restricted,cardiology,high
+ATA-001,ATA,Hypothyroidism Adults,2014,https://www.liebertpub.com/doi/10.1089/thy.2014.0028,,ATA ©,restricted,endocrinology,high
+ATA-002,ATA,Hyperthyroidism Adults,2016,https://www.liebertpub.com/doi/10.1089/thy.2016.0229,,ATA ©,restricted,endocrinology,high
+ATA-003,ATA,Thyroid Cancer Differentiated,2015,https://www.liebertpub.com/doi/10.1089/thy.2015.0020,,ATA ©,restricted,endocrinology,high
+ATA-004,ATA,Thyroid Pregnancy Postpartum,2017,https://www.liebertpub.com/doi/10.1089/thy.2016.0457,,ATA ©,restricted,endocrinology,high
+ENDOCRINE-SOC-001,EndocrineSociety,Adrenal Insufficiency Diagnosis Treatment,2016,https://academic.oup.com/jcem/article/101/2/364/2810113,,Endocrine Society ©,restricted,endocrinology,high
+ENDOCRINE-SOC-002,EndocrineSociety,Cushing Syndrome Diagnosis,2008,https://academic.oup.com/jcem/article/93/5/1526/2598119,,Endocrine Society ©,restricted,endocrinology,high
+ENDOCRINE-SOC-003,EndocrineSociety,Hypoglycemia Adults,2009,https://academic.oup.com/jcem/article/94/3/709/2596275,,Endocrine Society ©,restricted,endocrinology,medium
+ENDOCRINE-SOC-004,EndocrineSociety,Hirsutism Premenopausal Women,2018,https://academic.oup.com/jcem/article/103/4/1233/4924418,,Endocrine Society ©,restricted,endocrinology,medium
+ABA-001,ABA,Burn Care Initial Management,2024,https://academic.oup.com/jbcr/article/45/3/505/7634561,,ABA ©,restricted,emergency,high
+ABA-002,ABA,Inhalation Injury Diagnosis,2019,https://academic.oup.com/jbcr/article/40/2/137/5145108,,ABA ©,restricted,emergency,high
+ESP-001,ESP,European Society Pathology Lung Cancer,2017,https://link.springer.com/article/10.1007/s00428-017-2118-y,,ESP ©,restricted,pathology,medium
+SCAI-001,SCAI,Catheterization Adults Coronary Diagnosis,2020,https://onlinelibrary.wiley.com/doi/10.1002/ccd.28854,,SCAI ©,restricted,cardiology,medium
+HRS-001,HRS,Cardiac Implantable Electronic Device Infection Management,2017,https://www.heartrhythmjournal.com/article/S1547-5271(17)30332-3/fulltext,,HRS ©,restricted,cardiology,medium
+HRS-002,HRS,Atrial Fibrillation Catheter Ablation,2017,https://www.heartrhythmjournal.com/article/S1547-5271(17)31145-5/fulltext,,HRS ©,restricted,cardiology,high
+HRS-003,HRS,Bradyarrhythmia Pacing Devices,2019,https://www.heartrhythmjournal.com/article/S1547-5271(19)30050-6/fulltext,,HRS ©,restricted,cardiology,medium
+NIH-MEDLINE-001,NIH,MedlinePlus Drug Information Database,2024,https://medlineplus.gov/druginformation.html,,US Public Domain,allowed,pharmacology,low
+WHO-TROP-036,WHO,Pediatric Tuberculosis Module,2022,https://www.who.int/publications/i/item/9789240046788,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-037,WHO,HIV-TB Co-Infection Management,2024,https://www.who.int/publications/i/item/9789240089105,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-038,WHO,Postpartum Hemorrhage Tropical Settings,2024,https://www.who.int/publications/i/item/9789240091559,,CC BY-NC-SA 3.0 IGO,restricted,obstetrics,high
+WHO-TROP-039,WHO,Snakebite Treatment Asia,2017,https://www.who.int/publications/i/item/snakebite-treatment-asia-2017,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+WHO-TROP-040,WHO,Multi-Drug Resistant Tuberculosis Treatment,2022,https://www.who.int/publications/i/item/9789240063129,,CC BY-NC-SA 3.0 IGO,restricted,tropical_diseases,high
+ECDC-EXT-001,ECDC,Vector-Borne Diseases Europe,2024,https://www.ecdc.europa.eu/en/publications-data/factsheet-tick-borne-encephalitis,,Decision 2011/833/EU,allowed,tropical_diseases,medium
+ECDC-EXT-002,ECDC,West Nile Virus Surveillance,2023,https://www.ecdc.europa.eu/en/west-nile-fever,,Decision 2011/833/EU,allowed,tropical_diseases,medium
+ECDC-EXT-003,ECDC,Crimean-Congo Hemorrhagic Fever,2024,https://www.ecdc.europa.eu/en/publications-data/factsheet-crimean-congo-haemorrhagic-fever,,Decision 2011/833/EU,allowed,tropical_diseases,medium
+HAS-EXT-003,HAS,Anaphylaxie Diagnostic et Prise en charge,2018,https://www.has-sante.fr/jcms/c_2812233/fr/anaphylaxie,,Etalab 2.0,allowed,allergy,high
+HAS-EXT-004,HAS,Plaies Chroniques Pansements,2007,https://www.has-sante.fr/jcms/c_576427/fr/strategies-de-prise-en-charge-en-cas-de-denutrition-proteino-energetique,,Etalab 2.0,allowed,wound_care,medium
+HAS-EXT-005,HAS,Insuffisance Veineuse Chronique,2010,https://www.has-sante.fr/jcms/c_926284/fr/recommandations-pour-la-pratique-clinique-de-l-insuffisance-veineuse-chronique-et-tachycardie,,Etalab 2.0,allowed,vascular_surgery,medium
+EAU-EXT-001,EAU,Testicular Cancer,2024,https://uroweb.org/guidelines/testicular-cancer,,EAU ©,restricted,urology,medium
+EAU-EXT-002,EAU,Penile Cancer,2024,https://uroweb.org/guidelines/penile-cancer,,EAU ©,restricted,urology,medium
+EAU-EXT-003,EAU,Female and Functional Urology,2024,https://uroweb.org/guidelines/female-non-neurogenic-luts,,EAU ©,restricted,urology,medium
+WHO-EXT-021,WHO,Hand Hygiene Healthcare,2009,https://www.who.int/publications/i/item/9789241597906,,CC BY-NC-SA 3.0 IGO,restricted,infectious,high
+WHO-EXT-022,WHO,Surgical Site Infection Prevention,2018,https://www.who.int/publications/i/item/9789241549882,,CC BY-NC-SA 3.0 IGO,restricted,surgery,high
+WHO-EXT-023,WHO,Bloodborne Pathogens Healthcare Settings,2010,https://www.who.int/publications/i/item/9789241599931,,CC BY-NC-SA 3.0 IGO,restricted,infectious,medium
+ASCO-EXT-001,ASCO,Genetic Counseling Hereditary Cancer,2020,https://ascopubs.org/doi/10.1200/JCO.20.00641,,ASCO ©,restricted,oncology,high
+ASCO-EXT-002,ASCO,Adjuvant Therapy Stage III Colon,2024,https://ascopubs.org/doi/10.1200/JCO.23.02128,,ASCO ©,restricted,oncology,high
+ASCO-EXT-003,ASCO,Cancer Patient Sexuality Management,2018,https://ascopubs.org/doi/10.1200/JCO.2017.75.8995,,ASCO ©,restricted,oncology,medium
+SAEM-001,SAEM,Pediatric Emergency Medicine Sepsis,2020,https://onlinelibrary.wiley.com/doi/10.1111/acem.14107,,SAEM ©,restricted,pediatrics,high
+SAEM-002,SAEM,Status Epilepticus Adults,2016,https://onlinelibrary.wiley.com/doi/10.1111/acem.12978,,SAEM ©,restricted,emergency,high
+ESM-001,ESM,Sport Concussion Recognition Management,2017,https://bjsm.bmj.com/content/51/11/838,,BMJ-BJSM ©,restricted,sports_medicine,high
+ISC-001,ISC,Stroke Recognition Pre-Hospital,2018,https://journals.sagepub.com/doi/10.1177/2396987318763459,,ESO ©,restricted,neurology,high
+ESO-001,ESO,Acute Ischaemic Stroke Treatment European,2021,https://journals.sagepub.com/doi/10.1177/23969873211003433,,ESO ©,restricted,neurology,high
+ESO-002,ESO,Intracerebral Hemorrhage Management,2023,https://journals.sagepub.com/doi/10.1177/23969873221141648,,ESO ©,restricted,neurology,high
+NICE-EXT-069,NICE,Tropical Diseases Travel Health Adults,2024,https://www.nice.org.uk/guidance/cs5,,NICE ©,restricted,tropical_diseases,medium
+NICE-EXT-070,NICE,Lyme Disease Diagnosis Management,2018,https://www.nice.org.uk/guidance/ng95,,NICE ©,restricted,infectious,high
+ASRM-EXT-001,ASRM,Female Subfertility Investigation Management,2023,https://www.fertstert.org/article/S0015-0282(23)00185-3/fulltext,,ASRM ©,restricted,reproductive,medium
+ASRM-EXT-002,ASRM,IVF Embryo Transfer,2017,https://www.fertstert.org/article/S0015-0282(17)30225-7/fulltext,,ASRM ©,restricted,reproductive,medium
+WPSI-001,WPSI,Women Preventive Services Initiative Recommendations,2023,https://www.womenspreventivehealth.org/recommendations/,,WPSI ©,restricted,gynecology,medium
+ECCMID-001,ESCMID,Multidrug-Resistant Gram-Negative Infections,2022,https://www.clinicalmicrobiologyandinfection.com/article/S1198-743X(22)00097-2/fulltext,,ESCMID ©,restricted,infectious,high
+ECCMID-002,ESCMID,Candidemia Diagnosis Treatment,2019,https://www.clinicalmicrobiologyandinfection.com/article/S1198-743X(19)30022-X/fulltext,,ESCMID ©,restricted,infectious,high
+WHO-EXT-024,WHO,Hospital Indoor Air Quality,2010,https://www.who.int/publications/i/item/9789289002134,,CC BY-NC-SA 3.0 IGO,restricted,public_health,medium
+WHO-EXT-025,WHO,Mental Health and Substance Use,2022,https://www.who.int/publications/i/item/9789240049338,,CC BY-NC-SA 3.0 IGO,restricted,psychiatry,high
+WHO-EXT-026,WHO,Healthy Aging,2017,https://www.who.int/publications/i/item/who-clinical-consortium-on-healthy-ageing,,CC BY-NC-SA 3.0 IGO,restricted,geriatrics,medium
