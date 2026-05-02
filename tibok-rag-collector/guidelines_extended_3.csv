@@ -1,0 +1,147 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+AAAAI-001,AAAAI,Anaphylaxis Diagnosis Treatment,2020,https://www.aaaai.org/practice-resources/practice-parameters,,AAAAI ©,restricted,allergy,high
+AAAAI-002,AAAAI,Drug Allergy Practice Parameter,2024,https://www.aaaai.org/practice-resources/practice-parameters,,AAAAI ©,restricted,allergy,high
+AAAAI-003,AAAAI,Atopic Dermatitis Practice Parameter,2024,https://www.aaaai.org/practice-resources/practice-parameters,,AAAAI ©,restricted,allergy,high
+AAAAI-004,AAAAI,Allergic Rhinitis Practice Parameter,2017,https://www.aaaai.org/practice-resources/practice-parameters,,AAAAI ©,restricted,allergy,high
+AAAAI-005,AAAAI,Food Allergy Diagnosis Management,2023,https://www.aaaai.org/practice-resources/practice-parameters,,AAAAI ©,restricted,allergy,high
+EAACI-001,EAACI,Anaphylaxis Guideline,2021,https://onlinelibrary.wiley.com/doi/10.1111/all.14997,,EAACI ©,restricted,allergy,high
+EAACI-002,EAACI,Asthma Allergy Phenotype,2023,https://onlinelibrary.wiley.com/doi/10.1111/all.15838,,EAACI ©,restricted,allergy,high
+EAACI-003,EAACI,Chronic Urticaria Management,2022,https://onlinelibrary.wiley.com/doi/10.1111/all.15090,,EAACI ©,restricted,allergy,high
+AASM-001,AASM,Adult Obstructive Sleep Apnea Diagnosis,2017,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,AASM ©,restricted,sleep,high
+AASM-002,AASM,Insomnia Adults Pharmacological Treatment,2017,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,AASM ©,restricted,sleep,high
+AASM-003,AASM,Restless Legs Syndrome,2024,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,AASM ©,restricted,sleep,medium
+AASM-004,AASM,Pediatric OSA Diagnosis,2022,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,AASM ©,restricted,sleep,high
+AASM-005,AASM,Narcolepsy Diagnosis Treatment,2021,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,AASM ©,restricted,sleep,medium
+IASP-001,IASP,Chronic Pain Definitions Classification,2020,https://www.iasp-pain.org/publications/iasp-news/icd-11/,,IASP ©,restricted,pain,high
+IASP-002,IASP,Cancer Pain Management WHO Ladder,2021,https://www.iasp-pain.org/publications/clinical-updates/cancer-pain/,,IASP ©,restricted,pain,high
+IASP-003,IASP,Neuropathic Pain Pharmacology,2022,https://www.iasp-pain.org/publications/clinical-updates/neuropathic-pain/,,IASP ©,restricted,pain,high
+IDF-001,IDF,Diabetes Atlas 11th Edition,2024,https://diabetesatlas.org/,,IDF ©,restricted,endocrinology,high
+IDF-002,IDF,Type 2 Diabetes Global Guideline,2014,https://www.idf.org/our-network/regions-members/atlas-publications/global-clinical-practice-guideline.html,,IDF ©,restricted,endocrinology,high
+IHS-001,IHS,International Classification of Headache Disorders ICHD-3,2018,https://ichd-3.org/,,IHS ©,restricted,neurology,high
+IHS-002,IHS,Migraine Treatment Acute,2024,https://onlinelibrary.wiley.com/doi/10.1111/head.14595,,IHS ©,restricted,neurology,high
+IHS-003,IHS,Migraine Prevention Adults,2023,https://onlinelibrary.wiley.com/doi/10.1111/head.14439,,IHS ©,restricted,neurology,high
+IHS-004,IHS,Cluster Headache Treatment,2024,https://onlinelibrary.wiley.com/doi/10.1111/head.14794,,IHS ©,restricted,neurology,medium
+MDS-001,MDS,Parkinson Disease Diagnostic Criteria,2015,https://movementdisorders.onlinelibrary.wiley.com/doi/10.1002/mds.26424,,MDS ©,restricted,neurology,high
+MDS-002,MDS,Parkinson Pharmacological Therapies Motor Symptoms,2018,https://movementdisorders.onlinelibrary.wiley.com/doi/10.1002/mds.27372,,MDS ©,restricted,neurology,high
+MDS-003,MDS,Parkinson Non-Motor Symptoms,2019,https://movementdisorders.onlinelibrary.wiley.com/doi/10.1002/mds.27475,,MDS ©,restricted,neurology,high
+MDS-004,MDS,Tardive Syndrome Treatment,2018,https://movementdisorders.onlinelibrary.wiley.com/doi/10.1002/mds.27270,,MDS ©,restricted,neurology,medium
+PIDS-001,PIDS,Pediatric Community-Acquired Pneumonia,2011,https://academic.oup.com/cid/article/53/7/e25/424286,,PIDS ©,restricted,pediatrics,high
+PIDS-002,PIDS,Pediatric Sepsis Septic Shock,2020,https://journals.lww.com/pccmjournal/Fulltext/2020/02000/Surviving_Sepsis_Campaign_International,,PIDS ©,restricted,pediatrics,high
+PIDS-003,PIDS,Pediatric UTI Diagnosis Management,2017,https://academic.oup.com/jpids/article/6/2/132/3071876,,PIDS ©,restricted,pediatrics,high
+CPS-001,CPS,Pediatric Otitis Media Diagnosis,2024,https://cps.ca/en/documents/position/diagnosis-management-acute-otitis-media,,CPS ©,restricted,pediatrics,high
+CPS-002,CPS,Bronchiolitis Diagnosis Management,2014,https://cps.ca/en/documents/position/bronchiolitis,,CPS ©,restricted,pediatrics,high
+CPS-003,CPS,Newborn Routine Care,2018,https://cps.ca/en/documents/position/care-of-the-newborn,,CPS ©,restricted,pediatrics,medium
+AGS-001,AGS,Beers Criteria Potentially Inappropriate Medications,2023,https://agsjournals.onlinelibrary.wiley.com/doi/10.1111/jgs.18372,,AGS ©,restricted,geriatrics,high
+AGS-002,AGS,Postoperative Delirium Older Adults,2015,https://agsjournals.onlinelibrary.wiley.com/doi/10.1111/jgs.13281,,AGS ©,restricted,geriatrics,high
+AGS-003,AGS,Falls Prevention Older Adults,2022,https://agsjournals.onlinelibrary.wiley.com/doi/10.1111/jgs.17873,,AGS ©,restricted,geriatrics,high
+AGS-004,AGS,Persistent Pain in Older Adults,2009,https://agsjournals.onlinelibrary.wiley.com/doi/10.1111/j.1532-5415.2009.02376.x,,AGS ©,restricted,geriatrics,medium
+ASGE-001,ASGE,Colonoscopy Quality Indicators,2023,https://www.giejournal.org/article/S0016-5107(23)00021-3/fulltext,,ASGE ©,restricted,gastroenterology,high
+ASGE-002,ASGE,Colorectal Cancer Screening Endoscopy,2022,https://www.giejournal.org/article/S0016-5107(22)00026-2/fulltext,,ASGE ©,restricted,gastroenterology,high
+ASGE-003,ASGE,Bariatric Endoscopy,2021,https://www.giejournal.org/article/S0016-5107(20)35074-5/fulltext,,ASGE ©,restricted,gastroenterology,medium
+ESGE-001,ESGE,Colonoscopy Quality Performance,2017,https://www.thieme-connect.de/products/ejournals/abstract/10.1055/s-0043-103411,,ESGE ©,restricted,gastroenterology,high
+ESGE-002,ESGE,Endoscopic Mucosal Resection Lesions,2021,https://www.thieme-connect.de/products/ejournals/abstract/10.1055/a-1689-5130,,ESGE ©,restricted,gastroenterology,medium
+STS-001,STS,Coronary Artery Bypass Grafting Adult,2024,https://www.annalsthoracicsurgery.org/article/S0003-4975(23)01133-5/fulltext,,STS ©,restricted,cardiothoracic_surgery,high
+STS-002,STS,Aortic Valve Replacement Adult,2024,https://www.annalsthoracicsurgery.org/article/S0003-4975(24)00086-4/fulltext,,STS ©,restricted,cardiothoracic_surgery,high
+STS-003,STS,Lung Cancer Surgical Treatment,2023,https://www.annalsthoracicsurgery.org/article/S0003-4975(22)01521-9/fulltext,,STS ©,restricted,cardiothoracic_surgery,high
+EACTS-001,EACTS,Coronary Revascularization Adult,2024,https://academic.oup.com/ejcts/article/65/1/ezad365,,EACTS ©,restricted,cardiothoracic_surgery,high
+EACTS-002,EACTS,Aortic Disease Surgery,2024,https://academic.oup.com/ejcts/article/65/1/ezad426,,EACTS ©,restricted,cardiothoracic_surgery,high
+EACTS-003,EACTS,Mitral Valve Disease Surgery,2023,https://academic.oup.com/ejcts/article/63/1/ezac643,,EACTS ©,restricted,cardiothoracic_surgery,medium
+ASCRS-001,ASCRS,Colorectal Cancer Surgery,2022,https://journals.lww.com/dcrjournal/Fulltext/2022/07000/Clinical_Practice_Guidelines_for_the_Treatment_of.5.aspx,,ASCRS ©,restricted,colorectal_surgery,high
+ASCRS-002,ASCRS,Hemorrhoids Treatment,2018,https://journals.lww.com/dcrjournal/Fulltext/2018/03000/The_American_Society_of_Colon_and_Rectal_Surgeons.5.aspx,,ASCRS ©,restricted,colorectal_surgery,high
+ASCRS-003,ASCRS,Anal Fistulas Treatment,2022,https://journals.lww.com/dcrjournal/Fulltext/2022/05000/The_American_Society_of_Colon_and_Rectal_Surgeons.4.aspx,,ASCRS ©,restricted,colorectal_surgery,medium
+AAO-HNS-001,AAO-HNS,Acute Otitis Externa,2014,https://journals.sagepub.com/doi/10.1177/0194599813517083,,AAO-HNS ©,restricted,ent,high
+AAO-HNS-002,AAO-HNS,Hoarseness Diagnosis Treatment,2018,https://journals.sagepub.com/doi/10.1177/0194599817751030,,AAO-HNS ©,restricted,ent,medium
+AAO-HNS-003,AAO-HNS,Tinnitus Adult Management,2014,https://journals.sagepub.com/doi/10.1177/0194599814545325,,AAO-HNS ©,restricted,ent,high
+AAO-HNS-004,AAO-HNS,Sinusitis Acute Adult,2015,https://journals.sagepub.com/doi/10.1177/0194599815572097,,AAO-HNS ©,restricted,ent,high
+AAO-HNS-005,AAO-HNS,Hearing Loss Sudden,2019,https://journals.sagepub.com/doi/10.1177/0194599819859885,,AAO-HNS ©,restricted,ent,medium
+ASRM-001,ASRM,Diagnostic Evaluation Infertile Female,2021,https://www.fertstert.org/article/S0015-0282(21)00139-7/fulltext,,ASRM ©,restricted,reproductive,high
+ASRM-002,ASRM,Polycystic Ovary Syndrome Infertility Treatment,2017,https://www.fertstert.org/article/S0015-0282(17)30429-3/fulltext,,ASRM ©,restricted,reproductive,medium
+ASRM-003,ASRM,Recurrent Pregnancy Loss Evaluation,2020,https://www.fertstert.org/article/S0015-0282(20)32025-8/fulltext,,ASRM ©,restricted,reproductive,medium
+ESHRE-001,ESHRE,Endometriosis Management,2022,https://academic.oup.com/hropen/article/2022/2/hoac009,,ESHRE ©,restricted,reproductive,high
+ESHRE-002,ESHRE,Recurrent Pregnancy Loss,2023,https://academic.oup.com/hropen/article/2023/1/hoad002,,ESHRE ©,restricted,reproductive,high
+ESHRE-003,ESHRE,Polycystic Ovary Syndrome,2024,https://academic.oup.com/humrep/article/39/4/650/7556290,,ESHRE ©,restricted,reproductive,high
+ASMBS-001,ASMBS,Bariatric Surgery Indications,2022,https://www.soard.org/article/S1550-7289(22)00641-4/fulltext,,ASMBS ©,restricted,bariatric,high
+ASMBS-002,ASMBS,Postoperative Care Bariatric Surgery,2019,https://www.soard.org/article/S1550-7289(19)31037-8/fulltext,,ASMBS ©,restricted,bariatric,high
+ACMG-001,ACMG,Genetic Testing Hereditary Cancer Syndromes,2021,https://www.gimjournal.org/article/S1098-3600(21)00099-8/fulltext,,ACMG ©,restricted,genetics,high
+ACMG-002,ACMG,Carrier Screening Pregnancy,2021,https://www.gimjournal.org/article/S1098-3600(21)00040-8/fulltext,,ACMG ©,restricted,genetics,high
+ACMG-003,ACMG,Newborn Screening Conditions,2024,https://www.gimjournal.org/article/S1098-3600(24)00050-0/fulltext,,ACMG ©,restricted,genetics,high
+ACMG-004,ACMG,Genetic Counseling Standards,2023,https://www.gimjournal.org/article/S1098-3600(23)00800-5/fulltext,,ACMG ©,restricted,genetics,medium
+SVS-001,SVS,Abdominal Aortic Aneurysm Management,2018,https://www.jvascsurg.org/article/S0741-5214(17)32369-8/fulltext,,SVS ©,restricted,vascular_surgery,high
+SVS-002,SVS,Carotid Artery Disease Management,2022,https://www.jvascsurg.org/article/S0741-5214(21)02568-2/fulltext,,SVS ©,restricted,vascular_surgery,high
+SVS-003,SVS,Lower Extremity Peripheral Arterial Disease,2024,https://www.jvascsurg.org/article/S0741-5214(24)00011-8/fulltext,,SVS ©,restricted,vascular_surgery,high
+ESVS-001,ESVS,Abdominal Aortic Aneurysms Management,2024,https://www.ejves.com/article/S1078-5884(23)00729-1/fulltext,,ESVS ©,restricted,vascular_surgery,high
+ESVS-002,ESVS,Carotid Surgery Atherosclerotic,2023,https://www.ejves.com/article/S1078-5884(22)00679-8/fulltext,,ESVS ©,restricted,vascular_surgery,medium
+ASA-001,ASA,Difficult Airway Management,2022,https://pubs.asahq.org/anesthesiology/article/136/1/31,,ASA ©,restricted,anesthesia,high
+ASA-002,ASA,Postoperative Nausea Vomiting,2020,https://pubs.asahq.org/anesthesiology/article/132/4/906,,ASA ©,restricted,anesthesia,high
+ASA-003,ASA,Pediatric Anesthesia Sedation,2019,https://pubs.asahq.org/anesthesiology/article/130/6/1232,,ASA ©,restricted,anesthesia,high
+ASA-004,ASA,Acute Pain Management Postoperative,2016,https://pubs.asahq.org/anesthesiology/article/124/2/535,,ASA ©,restricted,anesthesia,high
+NIH-COVID-002,NIH,COVID-19 Therapeutics Antivirals,2024,https://www.covid19treatmentguidelines.nih.gov/therapies/antivirals-including-antibody-products/,,US Public Domain,allowed,infectious,high
+NIH-COVID-003,NIH,COVID-19 ICU Critically Ill Patients,2024,https://www.covid19treatmentguidelines.nih.gov/management/critical-care-for-adults/,,US Public Domain,allowed,critical_care,high
+NHLBI-001,NHLBI,Hypertension Detection Treatment Update,2018,https://www.nhlbi.nih.gov/health-topics/managing-blood-pressure,,US Public Domain,allowed,cardiology,high
+NHLBI-002,NHLBI,Sickle Cell Disease Management Adults,2014,https://www.nhlbi.nih.gov/health-topics/sickle-cell-disease,,US Public Domain,allowed,hematology,high
+NHLBI-003,NHLBI,Asthma Care Quick Reference,2020,https://www.nhlbi.nih.gov/health-topics/asthma-care,,US Public Domain,allowed,respiratory,high
+ACR-RAD-001,ACR-RAD,Acute Chest Pain Suspected Pulmonary Embolism Imaging,2022,https://acsearch.acr.org/docs/3083076/Narrative/,,ACR ©,restricted,radiology,high
+ACR-RAD-002,ACR-RAD,Suspected Lower Back Pain Imaging,2024,https://acsearch.acr.org/docs/69483/Narrative/,,ACR ©,restricted,radiology,high
+ACR-RAD-003,ACR-RAD,Headache Imaging Adults,2024,https://acsearch.acr.org/docs/3270612/Narrative/,,ACR ©,restricted,radiology,high
+ACR-RAD-004,ACR-RAD,Acute Abdomen Imaging,2024,https://acsearch.acr.org/docs/3270613/Narrative/,,ACR ©,restricted,radiology,high
+NICE-EXT-036,NICE,Suspected Sepsis Recognition Diagnosis Children,2024,https://www.nice.org.uk/guidance/ng51,,NICE ©,restricted,pediatrics,high
+NICE-EXT-037,NICE,Atrial Fibrillation Anticoagulation,2021,https://www.nice.org.uk/guidance/ng196,,NICE ©,restricted,cardiology,high
+NICE-EXT-038,NICE,Heart Failure Acute,2014,https://www.nice.org.uk/guidance/cg187,,NICE ©,restricted,cardiology,high
+NICE-EXT-039,NICE,Cancer of Unknown Primary,2010,https://www.nice.org.uk/guidance/cg104,,NICE ©,restricted,oncology,medium
+NICE-EXT-040,NICE,Pancreatitis,2018,https://www.nice.org.uk/guidance/ng104,,NICE ©,restricted,gastroenterology,high
+NICE-EXT-041,NICE,Cirrhosis Adults Diagnosis Management,2016,https://www.nice.org.uk/guidance/ng50,,NICE ©,restricted,hepatology,high
+NICE-EXT-042,NICE,Tonsillitis,2014,https://www.nice.org.uk/guidance/cg155,,NICE ©,restricted,ent,medium
+NICE-EXT-043,NICE,Otitis Media Acute Antimicrobial,2018,https://www.nice.org.uk/guidance/ng91,,NICE ©,restricted,ent,high
+NICE-EXT-044,NICE,Hearing Loss Adults Assessment,2018,https://www.nice.org.uk/guidance/ng98,,NICE ©,restricted,ent,medium
+NICE-EXT-045,NICE,Vitamin D Deficiency Adults,2017,https://www.nice.org.uk/guidance/cg56,,NICE ©,restricted,endocrinology,medium
+NICE-EXT-046,NICE,Hyperthyroidism Diagnosis,2019,https://www.nice.org.uk/guidance/ng145,,NICE ©,restricted,endocrinology,high
+NICE-EXT-047,NICE,Adrenal Insufficiency,2024,https://www.nice.org.uk/guidance/ng243,,NICE ©,restricted,endocrinology,medium
+NICE-EXT-048,NICE,Pneumonia Children Antimicrobial,2017,https://www.nice.org.uk/guidance/ng84,,NICE ©,restricted,pediatrics,high
+NICE-EXT-049,NICE,Cerebral Palsy Children Young Adults,2019,https://www.nice.org.uk/guidance/ng62,,NICE ©,restricted,pediatrics,medium
+NICE-EXT-050,NICE,Down Syndrome Adults Care,2024,https://www.nice.org.uk/guidance/ng196,,NICE ©,restricted,pediatrics,low
+WHO-EXT-010,WHO,Breast Cancer Screening Position,2024,https://www.who.int/publications/i/item/9789240097995,,CC BY-NC-SA 3.0 IGO,restricted,oncology,high
+WHO-EXT-011,WHO,Cervical Cancer Screening Self-Sampling,2022,https://www.who.int/publications/i/item/9789240040434,,CC BY-NC-SA 3.0 IGO,restricted,oncology,high
+WHO-EXT-012,WHO,Childhood Cancer Diagnosis Treatment,2024,https://www.who.int/publications/i/item/9789240088160,,CC BY-NC-SA 3.0 IGO,restricted,oncology,high
+WHO-EXT-013,WHO,Palliative Care Essential Medicines,2018,https://www.who.int/publications/i/item/9789241514477,,CC BY-NC-SA 3.0 IGO,restricted,palliative,high
+WHO-EXT-014,WHO,Stroke Acute Care Management Recommendations,2023,https://www.who.int/publications/i/item/9789240067462,,CC BY-NC-SA 3.0 IGO,restricted,neurology,high
+WHO-EXT-015,WHO,Snake Bite Management,2010,https://www.who.int/publications/i/item/9789290223771,,CC BY-NC-SA 3.0 IGO,restricted,emergency,medium
+ESC-EXT-003,ESC,Antithrombotic Therapy Coronary Revascularization,2017,https://academic.oup.com/eurheartj/article/39/3/213/4095043,,ESC/OUP ©,restricted,cardiology,high
+ESC-EXT-004,ESC,Diabetes Cardiovascular Disease 2023,2023,https://academic.oup.com/eurheartj/article/44/39/4043/7238227,,ESC/OUP ©,restricted,cardiology,high
+ESC-EXT-005,ESC,Pericardial Disease,2015,https://academic.oup.com/eurheartj/article/36/42/2921/2293375,,ESC/OUP ©,restricted,cardiology,high
+AHA-EXT-001,AHA,Cardiac Arrest Survivors Care,2020,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000937,,AHA ©,restricted,cardiology,high
+AHA-EXT-002,AHA,Pediatric Resuscitation BLS,2020,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000901,,AHA ©,restricted,pediatrics,high
+AHA-EXT-003,AHA,Endocarditis Prevention Treatment,2024,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001229,,AHA ©,restricted,cardiology,high
+ACOG-EXT-001,ACOG,Vaginal Birth After Cesarean,2017,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2017/02/vaginal-birth-after-cesarean-delivery,,ACOG ©,restricted,obstetrics,high
+ACOG-EXT-002,ACOG,Breech Presentation Delivery,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2018/05/external-cephalic-version,,ACOG ©,restricted,obstetrics,medium
+ACOG-EXT-003,ACOG,Premature Rupture of Membranes,2020,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/03/prelabor-rupture-of-membranes,,ACOG ©,restricted,obstetrics,high
+EULAR-EXT-003,EULAR,Glucocorticoid Tapering Rheumatic Diseases,2024,https://ard.bmj.com/content/83/12/1547,,EULAR/BMJ ©,restricted,rheumatology,medium
+EULAR-EXT-004,EULAR,Pregnancy Reproductive Health Rheumatic Diseases,2017,https://ard.bmj.com/content/76/3/476,,EULAR/BMJ ©,restricted,rheumatology,medium
+ESMO-EXT-001,ESMO,Bone Health Cancer Patients,2020,https://www.esmo.org/guidelines/supportive-and-palliative-care/bone-health,,ESMO ©,restricted,oncology,medium
+ESMO-EXT-002,ESMO,Cancer Survivorship Long-Term,2022,https://www.esmo.org/guidelines/cancer-care-during-the-covid-19-pandemic,,ESMO ©,restricted,oncology,medium
+ESMO-EXT-003,ESMO,Endocrine Therapy Premenopausal Breast Cancer,2024,https://www.esmo.org/guidelines/breast-cancer/early-breast-cancer,,ESMO ©,restricted,oncology,high
+WGO-EXT-001,WGO,Liver Disease Pregnancy,2017,https://www.worldgastroenterology.org/guidelines/liver-disease-during-pregnancy/liver-disease-during-pregnancy-english,,WGO ©,restricted,hepatology,medium
+WGO-EXT-002,WGO,Common Anorectal Disorders,2010,https://www.worldgastroenterology.org/guidelines/common-anorectal-disorders/common-anorectal-disorders-english,,WGO ©,restricted,gastroenterology,medium
+ATS-EXT-001,ATS,Acute Respiratory Failure Mechanical Ventilation,2020,https://www.atsjournals.org/doi/10.1164/rccm.202004-1163ST,,ATS ©,restricted,respiratory,high
+ATS-EXT-002,ATS,Bronchiectasis Adult Management,2017,https://www.atsjournals.org/doi/10.1164/rccm.201701-0207ST,,ATS ©,restricted,respiratory,high
+USPSTF-EXT-001,USPSTF,Atrial Fibrillation Screening,2022,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/atrial-fibrillation-screening-with-electrocardiography,,US Public Domain,allowed,cardiology,medium
+USPSTF-EXT-002,USPSTF,Hearing Loss Older Adults Screening,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hearing-loss-in-older-adults-screening,,US Public Domain,allowed,ent,medium
+USPSTF-EXT-003,USPSTF,Vision Screening Children,2017,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/vision-in-children-ages-6-months-to-5-years-screening,,US Public Domain,allowed,pediatrics,medium
+USPSTF-EXT-004,USPSTF,Cardiovascular Risk ECG Screening,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cardiovascular-disease-risk-screening-with-electrocardiography,,US Public Domain,allowed,cardiology,medium
+HAS-EXT-001,HAS,Pertinence Bilan Lipidique,2024,https://www.has-sante.fr/jcms/p_3437464/fr/pertinence-du-bilan-lipidique,,Etalab 2.0,allowed,cardiology,medium
+HAS-EXT-002,HAS,Reperage Maltraitance Enfants,2014,https://www.has-sante.fr/jcms/c_1760393/fr/reperage-et-signalement-de-l-inceste-par-les-medecins-reconnaitre-les-maltraitances-sexuelles-intra-familiales-chez-le-mineur,,Etalab 2.0,allowed,pediatrics,medium
+GINA-EXT-001,GINA,Asthma in Children Aged 5 Years and Younger,2024,https://ginasthma.org/wp-content/uploads/2024/05/GINA-Children-2024-WMS.pdf,https://ginasthma.org/wp-content/uploads/2024/05/GINA-Children-2024-WMS.pdf,GINA ©,restricted,pediatrics,high
+COG-001,COG,Childhood Cancer Survivor Long-Term Follow-Up,2018,https://www.survivorshipguidelines.org/,,COG ©,restricted,pediatric_oncology,high
+SIOP-001,SIOP,Wilms Tumor Pediatric Oncology,2014,https://onlinelibrary.wiley.com/doi/10.1002/pbc.25000,,SIOP ©,restricted,pediatric_oncology,medium
+ICRP-001,ICRP,Radiation Protection Medicine,2017,https://journals.sagepub.com/doi/10.1177/ANIB_46_3-4,,ICRP ©,restricted,radiology,medium
+WSPID-001,WSPID,Pediatric Antimicrobial Stewardship,2017,https://academic.oup.com/jpids/article/6/4/313/4555049,,WSPID ©,restricted,pediatrics,high
+NIAMS-001,NIAMS,Osteoporosis Diagnosis Treatment,2023,https://www.niams.nih.gov/health-topics/osteoporosis,,US Public Domain,allowed,musculoskeletal,high
+ACOEM-001,ACOEM,Occupational Low Back Pain,2020,https://journals.lww.com/joem/Fulltext/2020/03000/Acoem_Practice_Guidelines__Low_Back_Disorders.30.aspx,,ACOEM ©,restricted,occupational,medium
+SCDM-001,SCDM,Diabetes Foot Care,2022,https://onlinelibrary.wiley.com/doi/10.1002/dmrr.3266,,SCDM ©,restricted,endocrinology,high
+NICE-EXT-051,NICE,Acute Kidney Injury Prevention,2019,https://www.nice.org.uk/guidance/ng148,,NICE ©,restricted,nephrology,high
+NICE-EXT-052,NICE,Stroke Rehabilitation,2023,https://www.nice.org.uk/guidance/ng236,,NICE ©,restricted,neurology,high
+NICE-EXT-053,NICE,Older People Hospital Discharge,2017,https://www.nice.org.uk/guidance/ng74,,NICE ©,restricted,geriatrics,medium
+NICE-EXT-054,NICE,Type 1 Diabetes in Children Young People,2015,https://www.nice.org.uk/guidance/ng18,,NICE ©,restricted,pediatrics,high
+NICE-EXT-055,NICE,Cardiovascular Disease Lipid Modification,2023,https://www.nice.org.uk/guidance/cg181,,NICE ©,restricted,cardiology,high
+NICE-EXT-056,NICE,Smoking Cessation Adults,2021,https://www.nice.org.uk/guidance/ng209,,NICE ©,restricted,prevention,high
+NICE-EXT-057,NICE,Alcohol Misuse Diagnosis,2010,https://www.nice.org.uk/guidance/cg100,,NICE ©,restricted,prevention,high
+NICE-EXT-058,NICE,Drug Misuse Treatment,2007,https://www.nice.org.uk/guidance/cg52,,NICE ©,restricted,prevention,medium
