@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-05-02T14:24:48Z",
+  "generated_at": "2026-05-02T14:31:17Z",
   "sources": [
     {
-      "source": "ERS",
-      "total_in_csv": 20,
-      "extracted": 16,
-      "new": 16,
+      "source": "HAS",
+      "total_in_csv": 40,
+      "extracted": 9,
+      "new": 9,
       "skipped": 0,
-      "failed": 4
+      "failed": 31
     }
   ],
-  "total_extracted": 16,
-  "total_failed": 4
+  "total_extracted": 9,
+  "total_failed": 31
 }

@@ -33,7 +33,8 @@
     "rag:upload-pdf": "tsx scripts/bulk-seed/sources/manual-pdf-upload.ts",
     "rag:download-all": "cd tibok-rag-collector && python3 download_guidelines.py --csv guidelines_master.csv --out ./pdfs",
     "rag:download-source": "cd tibok-rag-collector && python3 download_guidelines.py --csv guidelines_master.csv --out ./pdfs --source",
-    "rag:ingest-manifest": "tsx scripts/bulk-seed/sources/ingest-from-manifest.ts"
+    "rag:ingest-manifest": "tsx scripts/bulk-seed/sources/ingest-from-manifest.ts",
+    "rag:ingest-extracted": "tsx scripts/bulk-seed/sources/ingest-from-extracted.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "latest",
