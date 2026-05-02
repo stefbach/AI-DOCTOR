@@ -160,6 +160,35 @@ def extract_text(pdf_path):
         return ""
 
 
+def fetch_pmc_xml_text(pmcid):
+    """Fetch JATS XML from NCBI efetch and extract plain text.
+    Bypasses PMC anti-bot by using the official E-utilities API.
+    """
+    pmc_num = pmcid.replace("PMC", "")
+    url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id={pmc_num}&rettype=xml"
+    throttle("https://eutils.ncbi.nlm.nih.gov")
+    try:
+        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+        if r.status_code != 200 or len(r.content) < 1000:
+            return ""
+        # Strip JATS XML tags to get plain text
+        soup = BeautifulSoup(r.content, "lxml-xml") if False else BeautifulSoup(r.content, "html.parser")
+        # Remove non-content tags
+        for tag in soup(["xref", "fig", "table-wrap", "graphic", "tex-math", "ref-list",
+                          "back", "front-stub", "license-p", "copyright-statement"]):
+            tag.decompose()
+        # Get the body text
+        body = soup.find("body")
+        if body:
+            text = body.get_text(separator=" ", strip=True)
+        else:
+            text = soup.get_text(separator=" ", strip=True)
+        return re.sub(r"\s+", " ", text).strip()
+    except Exception as e:
+        print(f"   efetch error: {e}")
+        return ""
+
+
 def chunk_text(text, chunk_size=800, overlap=100):
     text = re.sub(r"\s+", " ", text).strip()
     words = text.split()
@@ -230,35 +259,43 @@ def main():
             pdf_url = resolve_pdf_url(row)
             pdf_source = "direct"
             pmcid = None
+            text = ""
+            size = 0
+            sha = ""
             ok = False
             if pdf_url:
                 ok = download_pdf(pdf_url, target)
                 if ok:
                     print(f"     ✓ direct: {pdf_url[:80]}")
 
-            # Fallback PMC (NCBI) if direct failed
+            # Fallback PMC (NCBI E-utilities efetch XML — no anti-bot)
             if not ok and PMC_OK:
-                print(f"     ↻ trying PMC fallback...")
+                print(f"     ↻ trying PMC fallback (NCBI efetch XML)...")
                 sess = requests.Session()
                 sess.headers.update(HEADERS)
                 pmc = find_pmc_mirror(sess, row["title"], row["year"], row["source"])
-                if pmc and pmc.get("pdf_url"):
-                    pdf_url = pmc["pdf_url"]
+                if pmc and pmc.get("pmcid"):
                     pmcid = pmc["pmcid"]
-                    pdf_source = "pmc"
-                    ok = download_pdf(pdf_url, target)
-                    if ok:
-                        print(f"     ✓ PMC ({pmcid}): {pdf_url[:80]}")
+                    pdf_source = "pmc-xml"
+                    pdf_url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id={pmcid.replace('PMC','')}"
+                    text = fetch_pmc_xml_text(pmcid)
+                    if text and len(text) > 500:
+                        size = len(text.encode())
+                        sha = hashlib.sha256(text.encode()).hexdigest()
+                        ok = True
+                        print(f"     ✓ PMC efetch ({pmcid}): {len(text)} chars")
 
             if not ok:
-                print(f"     ✗ no PDF (direct + PMC both failed)")
+                print(f"     ✗ no content (direct + PMC both failed)")
                 fail_count += 1
                 continue
 
-            size = target.stat().st_size
-            print(f"     ✓ downloaded {size // 1024}KB from {pdf_url[:80]}")
-
-            text = extract_text(target)
+            # If got direct PDF, extract text now; if got PMC XML, text already set
+            if pdf_source == "direct":
+                size = target.stat().st_size
+                print(f"     ✓ downloaded {size // 1024}KB from {pdf_url[:80]}")
+                text = extract_text(target)
+                sha = sha256_of(target)
             if len(text) < 500:
                 print(f"     ✗ extracted text too short ({len(text)} chars)")
                 fail_count += 1
@@ -280,7 +317,7 @@ def main():
                 "commercial_use": row["commercial_use"],
                 "clinical_domain": row["clinical_domain"],
                 "priority": row["priority"],
-                "sha256": sha256_of(target),
+                "sha256": sha,
                 "size_bytes": size,
                 "pdf_source": pdf_source,
                 "pmcid": pmcid,
