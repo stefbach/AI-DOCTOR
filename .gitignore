@@ -26,4 +26,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 tibok-rag-collector/pdfs/
-tibok-rag-collector/pdfs/
+tibok-rag-collector/__pycache__/
+tibok-rag-collector/.venv/
+**/__pycache__/
