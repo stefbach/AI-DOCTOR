@@ -25,3 +25,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+tibok-rag-collector/pdfs/
+tibok-rag-collector/pdfs/

@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-05-02T14:14:46Z",
+  "sources": [
+    {
+      "source": "WHO",
+      "total_in_csv": 20,
+      "extracted": 0,
+      "new": 0,
+      "skipped": 0,
+      "failed": 20
+    }
+  ],
+  "total_extracted": 0,
+  "total_failed": 20
+}
