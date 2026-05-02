@@ -1,0 +1,185 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+COCHRANE-001,Cochrane,Antibiotics for Acute Bronchitis,2017,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD000245.pub4/full,,Cochrane ©,restricted,respiratory,high
+COCHRANE-002,Cochrane,Antibiotics for Acute Otitis Media in Children,2023,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD000219.pub5/full,,Cochrane ©,restricted,pediatrics,high
+COCHRANE-003,Cochrane,Stroke Unit Care for Acute Stroke,2020,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD000197.pub4/full,,Cochrane ©,restricted,neurology,high
+COCHRANE-004,Cochrane,Inhaled Bronchodilators in COPD,2024,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD012620.pub3/full,,Cochrane ©,restricted,respiratory,high
+COCHRANE-005,Cochrane,Mammography Breast Cancer Screening,2013,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD001877.pub5/full,,Cochrane ©,restricted,oncology,high
+COCHRANE-006,Cochrane,PSA Screening Prostate Cancer,2013,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004720.pub3/full,,Cochrane ©,restricted,oncology,medium
+COCHRANE-007,Cochrane,Statins Primary Prevention CVD,2013,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004816.pub5/full,,Cochrane ©,restricted,cardiology,high
+COCHRANE-008,Cochrane,Aspirin Primary Prevention CVD,2018,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004720.pub3/full,,Cochrane ©,restricted,cardiology,high
+COCHRANE-009,Cochrane,Anticoagulation Atrial Fibrillation,2014,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD006186.pub4/full,,Cochrane ©,restricted,cardiology,high
+COCHRANE-010,Cochrane,Vaccines Influenza Healthy Adults,2018,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD001269.pub6/full,,Cochrane ©,restricted,infectious,high
+COCHRANE-011,Cochrane,Probiotics for Diarrhea Children,2020,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD003048.pub3/full,,Cochrane ©,restricted,pediatrics,medium
+COCHRANE-012,Cochrane,Vitamin D Supplementation Adults,2014,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD007470.pub3/full,,Cochrane ©,restricted,endocrinology,medium
+COCHRANE-013,Cochrane,Insulin vs Oral Diabetes Type 2,2016,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD006992.pub2/full,,Cochrane ©,restricted,endocrinology,high
+COCHRANE-014,Cochrane,SSRI Depression Adults,2009,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD006117.pub3/full,,Cochrane ©,restricted,psychiatry,high
+COCHRANE-015,Cochrane,CBT Anxiety Disorders,2024,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD003388.pub5/full,,Cochrane ©,restricted,psychiatry,high
+COCHRANE-016,Cochrane,Smoking Cessation Pharmacotherapy,2024,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD013229.pub3/full,,Cochrane ©,restricted,prevention,high
+COCHRANE-017,Cochrane,Antibiotics for Acute Pharyngitis,2021,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD000023.pub5/full,,Cochrane ©,restricted,infectious,high
+COCHRANE-018,Cochrane,Corticosteroids COPD Exacerbations,2018,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD001288.pub4/full,,Cochrane ©,restricted,respiratory,high
+COCHRANE-019,Cochrane,Decompression Cervical Radiculopathy,2017,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD012609/full,,Cochrane ©,restricted,musculoskeletal,medium
+COCHRANE-020,Cochrane,Alpha-Blockers BPH,2014,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD006015.pub2/full,,Cochrane ©,restricted,urology,medium
+COCHRANE-021,Cochrane,Bisphosphonates Postmenopausal Osteoporosis,2019,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD001155.pub5/full,,Cochrane ©,restricted,musculoskeletal,high
+COCHRANE-022,Cochrane,Exercise for Chronic Low Back Pain,2021,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD009790.pub2/full,,Cochrane ©,restricted,musculoskeletal,high
+COCHRANE-023,Cochrane,Methylphenidate ADHD Adults,2024,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD009996.pub3/full,,Cochrane ©,restricted,psychiatry,medium
+COCHRANE-024,Cochrane,Antibiotics for Lyme Disease,2017,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD007359.pub2/full,,Cochrane ©,restricted,infectious,medium
+COCHRANE-025,Cochrane,Pneumococcal Vaccines Adults,2017,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD000422.pub4/full,,Cochrane ©,restricted,infectious,high
+COCHRANE-026,Cochrane,Iron Supplementation Pregnancy,2015,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004736.pub5/full,,Cochrane ©,restricted,obstetrics,high
+COCHRANE-027,Cochrane,Magnesium Sulfate Preeclampsia,2010,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD000025.pub2/full,,Cochrane ©,restricted,obstetrics,high
+COCHRANE-028,Cochrane,Oxytocin Augmentation Labour,2013,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD009701.pub2/full,,Cochrane ©,restricted,obstetrics,high
+COCHRANE-029,Cochrane,Antiretroviral HIV Adults,2017,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD006496.pub3/full,,Cochrane ©,restricted,infectious,high
+COCHRANE-030,Cochrane,Tuberculosis Treatment Latent,2014,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD001363.pub4/full,,Cochrane ©,restricted,infectious,high
+COCHRANE-031,Cochrane,Antimalarial for Malaria Treatment,2014,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD006652.pub3/full,,Cochrane ©,restricted,tropical_diseases,high
+COCHRANE-032,Cochrane,Praziquantel Schistosomiasis,2014,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD000528.pub3/full,,Cochrane ©,restricted,tropical_diseases,high
+COCHRANE-033,Cochrane,Insecticide-Treated Bed Nets Malaria Prevention,2018,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD000363.pub3/full,,Cochrane ©,restricted,tropical_diseases,high
+COCHRANE-034,Cochrane,Glycemic Control Diabetes,2019,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD012704.pub2/full,,Cochrane ©,restricted,endocrinology,high
+COCHRANE-035,Cochrane,Beta-Blockers Heart Failure,2017,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD002752.pub3/full,,Cochrane ©,restricted,cardiology,high
+COCHRANE-036,Cochrane,ACE Inhibitors Heart Failure,2017,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD001431.pub4/full,,Cochrane ©,restricted,cardiology,high
+COCHRANE-037,Cochrane,Antiplatelets Secondary Stroke Prevention,2014,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD000029.pub3/full,,Cochrane ©,restricted,neurology,high
+COCHRANE-038,Cochrane,Anti-VEGF Diabetic Retinopathy,2023,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD007419.pub5/full,,Cochrane ©,restricted,ophthalmology,high
+COCHRANE-039,Cochrane,Vitamin K Newborns,2014,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD002776.pub3/full,,Cochrane ©,restricted,pediatrics,high
+COCHRANE-040,Cochrane,Folic Acid Pregnancy Neural Tube Defects,2013,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD007950.pub2/full,,Cochrane ©,restricted,obstetrics,high
+COCHRANE-041,Cochrane,Hand Washing Diarrhea Prevention,2021,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004265.pub5/full,,Cochrane ©,restricted,public_health,high
+COCHRANE-042,Cochrane,Statins LDL Reduction,2019,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD007838.pub3/full,,Cochrane ©,restricted,cardiology,high
+COCHRANE-043,Cochrane,Antibiotics Sinusitis Adults,2018,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD000243.pub3/full,,Cochrane ©,restricted,infectious,high
+COCHRANE-044,Cochrane,Inhaled Steroids Asthma Adults,2020,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD012064.pub2/full,,Cochrane ©,restricted,respiratory,high
+COCHRANE-045,Cochrane,Antifungals Candidemia,2013,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD006559.pub2/full,,Cochrane ©,restricted,infectious,medium
+COCHRANE-046,Cochrane,Tamsulosin Stones Expulsion,2015,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD008509.pub2/full,,Cochrane ©,restricted,urology,medium
+COCHRANE-047,Cochrane,IV Fluids Resuscitation Septic Shock,2018,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD000567.pub7/full,,Cochrane ©,restricted,critical_care,high
+COCHRANE-048,Cochrane,Hypothermia After Cardiac Arrest,2016,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004128.pub4/full,,Cochrane ©,restricted,critical_care,high
+COCHRANE-049,Cochrane,Probiotics Antibiotic-Associated Diarrhea,2017,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD006095.pub4/full,,Cochrane ©,restricted,gastroenterology,medium
+COCHRANE-050,Cochrane,Ondansetron Postoperative Nausea,2017,https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD012859/full,,Cochrane ©,restricted,anesthesia,medium
+AAFP-001,AAFP,Adult Hypertension Treatment Family Medicine,2024,https://www.aafp.org/pubs/afp/issues/2024/0500/hypertension-adults.html,,AAFP ©,restricted,primary_care,high
+AAFP-002,AAFP,Type 2 Diabetes Management Primary Care,2024,https://www.aafp.org/pubs/afp/issues/2024/0700/diabetes-type-2.html,,AAFP ©,restricted,primary_care,high
+AAFP-003,AAFP,Acute Bronchitis Diagnosis Treatment,2023,https://www.aafp.org/pubs/afp/issues/2023/0900/acute-bronchitis.html,,AAFP ©,restricted,primary_care,high
+AAFP-004,AAFP,Common Cold Symptomatic Treatment,2023,https://www.aafp.org/pubs/afp/issues/2023/0500/common-cold.html,,AAFP ©,restricted,primary_care,medium
+AAFP-005,AAFP,Cough in Adults Evaluation,2024,https://www.aafp.org/pubs/afp/issues/2024/0900/chronic-cough.html,,AAFP ©,restricted,primary_care,medium
+AAFP-006,AAFP,Headache Adult Evaluation Primary Care,2024,https://www.aafp.org/pubs/afp/issues/2024/0700/headache.html,,AAFP ©,restricted,primary_care,high
+AAFP-007,AAFP,Low Back Pain Adult Evaluation,2024,https://www.aafp.org/pubs/afp/issues/2024/0900/low-back-pain.html,,AAFP ©,restricted,primary_care,high
+AAFP-008,AAFP,Anxiety Disorders Adult Treatment,2024,https://www.aafp.org/pubs/afp/issues/2024/0900/anxiety-disorders-adults.html,,AAFP ©,restricted,primary_care,high
+AAFP-009,AAFP,Depression Diagnosis Adults,2024,https://www.aafp.org/pubs/afp/issues/2024/0500/depression-screening.html,,AAFP ©,restricted,primary_care,high
+AAFP-010,AAFP,Insomnia Treatment Primary Care,2024,https://www.aafp.org/pubs/afp/issues/2024/0500/chronic-insomnia.html,,AAFP ©,restricted,primary_care,high
+AAFP-011,AAFP,Sinusitis Diagnosis Adult Children,2023,https://www.aafp.org/pubs/afp/issues/2023/0700/acute-sinusitis.html,,AAFP ©,restricted,primary_care,high
+AAFP-012,AAFP,Pharyngitis Adult Children,2023,https://www.aafp.org/pubs/afp/issues/2023/0500/pharyngitis.html,,AAFP ©,restricted,primary_care,high
+AAFP-013,AAFP,Acute Otitis Media,2023,https://www.aafp.org/pubs/afp/issues/2023/0900/acute-otitis-media.html,,AAFP ©,restricted,primary_care,high
+AAFP-014,AAFP,Urinary Tract Infection Women,2023,https://www.aafp.org/pubs/afp/issues/2023/0700/urinary-tract-infection-women.html,,AAFP ©,restricted,primary_care,high
+AAFP-015,AAFP,Vaginitis Vulvovaginitis,2023,https://www.aafp.org/pubs/afp/issues/2023/0500/vaginitis.html,,AAFP ©,restricted,primary_care,high
+AAFP-016,AAFP,Migraine Acute Treatment Family,2024,https://www.aafp.org/pubs/afp/issues/2024/0900/migraine-acute.html,,AAFP ©,restricted,primary_care,high
+AAFP-017,AAFP,Diarrhea Acute Adults,2024,https://www.aafp.org/pubs/afp/issues/2024/0500/acute-diarrhea-adults.html,,AAFP ©,restricted,primary_care,high
+AAFP-018,AAFP,Skin Rash Diagnostic Approach,2024,https://www.aafp.org/pubs/afp/issues/2024/0700/skin-rash.html,,AAFP ©,restricted,primary_care,medium
+AAFP-019,AAFP,Childhood Vaccinations Schedule,2024,https://www.aafp.org/pubs/afp/issues/2024/0500/childhood-vaccinations.html,,AAFP ©,restricted,primary_care,high
+AAFP-020,AAFP,Travel Vaccinations Adults,2023,https://www.aafp.org/pubs/afp/issues/2023/0700/travel-vaccinations.html,,AAFP ©,restricted,primary_care,medium
+RACGP-001,RACGP,Red Book Preventive Activities,2024,https://www.racgp.org.au/clinical-resources/clinical-guidelines/key-racgp-guidelines/view-all-racgp-guidelines/red-book,,RACGP ©,restricted,primary_care,high
+RACGP-002,RACGP,Smoking Cessation Australia,2024,https://www.racgp.org.au/clinical-resources/clinical-guidelines/key-racgp-guidelines/view-all-racgp-guidelines/supporting-smoking-cessation,,RACGP ©,restricted,primary_care,high
+RACGP-003,RACGP,Diabetes Type 2 Management,2024,https://www.racgp.org.au/clinical-resources/clinical-guidelines/key-racgp-guidelines/view-all-racgp-guidelines/management-of-type-2-diabetes,,RACGP ©,restricted,primary_care,high
+RACGP-004,RACGP,Aboriginal Torres Strait Islander Health Check,2024,https://www.racgp.org.au/clinical-resources/clinical-guidelines/key-racgp-guidelines/view-all-racgp-guidelines/national-guide,,RACGP ©,restricted,primary_care,high
+RACGP-005,RACGP,Chronic Disease Care Plan,2024,https://www.racgp.org.au/clinical-resources/clinical-guidelines/key-racgp-guidelines/view-all-racgp-guidelines/chronic-disease,,RACGP ©,restricted,primary_care,medium
+CFPC-001,CFPC,Periodic Health Examination,2017,https://www.cfp.ca/content/63/3/198,,CFPC ©,restricted,primary_care,high
+CFPC-002,CFPC,Smoking Cessation Treatment Canada,2018,https://www.cfp.ca/content/64/4/279,,CFPC ©,restricted,primary_care,high
+CFPC-003,CFPC,Hypertension Management Canada,2024,https://www.cfp.ca/content/70/2/87,,CFPC ©,restricted,primary_care,high
+CFPC-004,CFPC,Diabetes Type 2 Adults Canada,2024,https://www.cfp.ca/content/70/3/151,,CFPC ©,restricted,primary_care,high
+ACP-001,ACP,Cardiovascular Disease Prevention Statins,2017,https://www.acpjournals.org/doi/10.7326/M14-1901,,ACP ©,restricted,primary_care,high
+ACP-002,ACP,Hypertension Pharmacological Treatment,2017,https://www.acpjournals.org/doi/10.7326/M16-1785,,ACP ©,restricted,primary_care,high
+ACP-003,ACP,Diabetes Type 2 Glycemic Control,2018,https://www.acpjournals.org/doi/10.7326/M17-0939,,ACP ©,restricted,primary_care,high
+ACP-004,ACP,Acute Pain Management Non-Pharmacological,2017,https://www.acpjournals.org/doi/10.7326/M16-2367,,ACP ©,restricted,primary_care,high
+ACP-005,ACP,Low Back Pain Treatment ACP,2017,https://www.acpjournals.org/doi/10.7326/M16-2367,,ACP ©,restricted,primary_care,high
+ACP-006,ACP,Common Cold Antibiotics,2016,https://www.acpjournals.org/doi/10.7326/M15-1840,,ACP ©,restricted,primary_care,medium
+RCGP-001,RCGP,Polypharmacy Older People,2024,https://www.rcgp.org.uk/getmedia/40c12b21-3f3e-4ad7-b3b9-aa90919faad2/Polypharmacy-Toolkit-RCGP-2024.pdf,https://www.rcgp.org.uk/getmedia/40c12b21-3f3e-4ad7-b3b9-aa90919faad2/Polypharmacy-Toolkit-RCGP-2024.pdf,RCGP ©,restricted,primary_care,medium
+WONCA-001,WONCA,Mental Health Primary Care Global,2018,https://www.globalfamilydoctor.com/groups/WorkingParties/MentalHealth.aspx,,WONCA ©,restricted,primary_care,medium
+ORPHANET-001,Orphanet,Cystic Fibrosis,2024,https://www.orpha.net/consor/cgi-bin/OC_Exp.php?Lng=EN&Expert=586,,Orphanet ©,restricted,rare_diseases,high
+ORPHANET-002,Orphanet,Sickle Cell Disease,2024,https://www.orpha.net/consor/cgi-bin/OC_Exp.php?Lng=EN&Expert=232,,Orphanet ©,restricted,rare_diseases,high
+ORPHANET-003,Orphanet,Huntington Disease,2024,https://www.orpha.net/consor/cgi-bin/OC_Exp.php?Lng=EN&Expert=399,,Orphanet ©,restricted,rare_diseases,high
+ORPHANET-004,Orphanet,Marfan Syndrome,2024,https://www.orpha.net/consor/cgi-bin/OC_Exp.php?Lng=EN&Expert=558,,Orphanet ©,restricted,rare_diseases,high
+ORPHANET-005,Orphanet,Duchenne Muscular Dystrophy,2024,https://www.orpha.net/consor/cgi-bin/OC_Exp.php?Lng=EN&Expert=98896,,Orphanet ©,restricted,rare_diseases,high
+NORD-001,NORD,Amyotrophic Lateral Sclerosis ALS,2024,https://rarediseases.org/rare-diseases/amyotrophic-lateral-sclerosis/,,NORD ©,restricted,rare_diseases,high
+NORD-002,NORD,Pulmonary Arterial Hypertension Idiopathic,2024,https://rarediseases.org/rare-diseases/pulmonary-arterial-hypertension/,,NORD ©,restricted,rare_diseases,high
+NORD-003,NORD,Wilson Disease,2024,https://rarediseases.org/rare-diseases/wilson-disease/,,NORD ©,restricted,rare_diseases,medium
+NORD-004,NORD,Hereditary Hemochromatosis,2024,https://rarediseases.org/rare-diseases/classical-hereditary-hemochromatosis/,,NORD ©,restricted,rare_diseases,medium
+NORD-005,NORD,Gaucher Disease,2024,https://rarediseases.org/rare-diseases/gauchers-disease/,,NORD ©,restricted,rare_diseases,medium
+NORD-006,NORD,Phenylketonuria,2024,https://rarediseases.org/rare-diseases/phenylketonuria/,,NORD ©,restricted,rare_diseases,medium
+NORD-007,NORD,Ehlers-Danlos Syndromes,2024,https://rarediseases.org/rare-diseases/ehlers-danlos-syndromes/,,NORD ©,restricted,rare_diseases,medium
+NORD-008,NORD,Tuberous Sclerosis,2024,https://rarediseases.org/rare-diseases/tuberous-sclerosis/,,NORD ©,restricted,rare_diseases,medium
+NORD-009,NORD,Neurofibromatosis Type 1,2024,https://rarediseases.org/rare-diseases/neurofibromatosis-1/,,NORD ©,restricted,rare_diseases,medium
+NORD-010,NORD,Acromegaly,2024,https://rarediseases.org/rare-diseases/acromegaly/,,NORD ©,restricted,rare_diseases,medium
+NORD-011,NORD,Pheochromocytoma,2024,https://rarediseases.org/rare-diseases/pheochromocytoma/,,NORD ©,restricted,rare_diseases,medium
+NORD-012,NORD,Klinefelter Syndrome,2024,https://rarediseases.org/rare-diseases/klinefelter-syndrome/,,NORD ©,restricted,rare_diseases,medium
+NORD-013,NORD,Turner Syndrome,2024,https://rarediseases.org/rare-diseases/turner-syndrome/,,NORD ©,restricted,rare_diseases,medium
+NORD-014,NORD,Long QT Syndrome,2024,https://rarediseases.org/rare-diseases/long-qt-syndrome/,,NORD ©,restricted,rare_diseases,medium
+NORD-015,NORD,Hereditary Angioedema,2024,https://rarediseases.org/rare-diseases/hereditary-angioedema/,,NORD ©,restricted,rare_diseases,medium
+NORD-016,NORD,Sjögren Syndrome,2024,https://rarediseases.org/rare-diseases/sjogrens-syndrome/,,NORD ©,restricted,rare_diseases,medium
+NORD-017,NORD,Behçet Disease,2024,https://rarediseases.org/rare-diseases/behcets-syndrome/,,NORD ©,restricted,rare_diseases,medium
+NORD-018,NORD,Mastocytosis,2024,https://rarediseases.org/rare-diseases/mastocytosis/,,NORD ©,restricted,rare_diseases,medium
+NORD-019,NORD,Idiopathic Pulmonary Fibrosis,2024,https://rarediseases.org/rare-diseases/idiopathic-pulmonary-fibrosis/,,NORD ©,restricted,rare_diseases,high
+NORD-020,NORD,Myasthenia Gravis,2024,https://rarediseases.org/rare-diseases/myasthenia-gravis/,,NORD ©,restricted,rare_diseases,high
+NICE-EXT-071,NICE,Caesarean Birth,2021,https://www.nice.org.uk/guidance/ng192,,NICE ©,restricted,obstetrics,high
+NICE-EXT-072,NICE,Inducing Labour,2021,https://www.nice.org.uk/guidance/ng207,,NICE ©,restricted,obstetrics,high
+NICE-EXT-073,NICE,Twin Triplet Pregnancy,2019,https://www.nice.org.uk/guidance/ng137,,NICE ©,restricted,obstetrics,medium
+NICE-EXT-074,NICE,Pelvic Floor Dysfunction,2021,https://www.nice.org.uk/guidance/ng210,,NICE ©,restricted,gynecology,medium
+NICE-EXT-075,NICE,Adult Care Older People Long-term,2017,https://www.nice.org.uk/guidance/ng56,,NICE ©,restricted,geriatrics,medium
+NICE-EXT-076,NICE,Brain Tumours Diagnosis Management,2021,https://www.nice.org.uk/guidance/ng99,,NICE ©,restricted,oncology,medium
+NICE-EXT-077,NICE,Skin Cancer Melanoma,2022,https://www.nice.org.uk/guidance/ng14,,NICE ©,restricted,oncology,high
+NICE-EXT-078,NICE,Skin Cancer Non-Melanoma,2010,https://www.nice.org.uk/guidance/csgstim,,NICE ©,restricted,oncology,medium
+NICE-EXT-079,NICE,Lymphoma Diffuse Large B-Cell,2018,https://www.nice.org.uk/guidance/ng52,,NICE ©,restricted,oncology,medium
+NICE-EXT-080,NICE,Spondyloarthritis Adult Diagnosis,2017,https://www.nice.org.uk/guidance/ng65,,NICE ©,restricted,rheumatology,medium
+NICE-EXT-081,NICE,Lupus Adults Children,2021,https://www.nice.org.uk/guidance/ng56,,NICE ©,restricted,rheumatology,medium
+NICE-EXT-082,NICE,Vasculitis Cranial Adults,2024,https://www.nice.org.uk/guidance/ng186,,NICE ©,restricted,rheumatology,low
+NICE-EXT-083,NICE,Children Maltreatment Suspected,2017,https://www.nice.org.uk/guidance/cg89,,NICE ©,restricted,pediatrics,medium
+NICE-EXT-084,NICE,Domestic Violence Abuse,2014,https://www.nice.org.uk/guidance/ph50,,NICE ©,restricted,public_health,medium
+NICE-EXT-085,NICE,Faecal Incontinence Adults,2007,https://www.nice.org.uk/guidance/cg49,,NICE ©,restricted,gastroenterology,medium
+NICE-EXT-086,NICE,Hyperphenylalaninaemia,2020,https://www.nice.org.uk/guidance/cg77,,NICE ©,restricted,rare_diseases,low
+NICE-EXT-087,NICE,Cystic Fibrosis Adults Children,2017,https://www.nice.org.uk/guidance/ng78,,NICE ©,restricted,respiratory,high
+NICE-EXT-088,NICE,Hyperhidrosis,2014,https://www.nice.org.uk/guidance/ipg478,,NICE ©,restricted,dermatology,low
+NICE-EXT-089,NICE,Substance Use Pregnancy,2021,https://www.nice.org.uk/guidance/ng196,,NICE ©,restricted,obstetrics,medium
+NICE-EXT-090,NICE,Cellulitis Erysipelas Antibiotics,2019,https://www.nice.org.uk/guidance/ng141,,NICE ©,restricted,infectious,high
+NICE-EXT-091,NICE,Tonsillectomy Adults Children,2024,https://www.nice.org.uk/guidance/ng263,,NICE ©,restricted,ent,medium
+NICE-EXT-092,NICE,Glue Ear Children Treatment,2008,https://www.nice.org.uk/guidance/cg60,,NICE ©,restricted,ent,medium
+NICE-EXT-093,NICE,Cancer Care End of Life,2017,https://www.nice.org.uk/guidance/ng61,,NICE ©,restricted,palliative,high
+NICE-EXT-094,NICE,Joint Replacement Surgery Knee Hip,2023,https://www.nice.org.uk/guidance/ng157,,NICE ©,restricted,orthopedics,medium
+NICE-EXT-095,NICE,Spinal Injury Acute Severe,2016,https://www.nice.org.uk/guidance/ng41,,NICE ©,restricted,emergency,medium
+NICE-EXT-096,NICE,Major Trauma Adults Children,2016,https://www.nice.org.uk/guidance/ng39,,NICE ©,restricted,emergency,high
+NICE-EXT-097,NICE,Head Injury Adults Children Assessment,2023,https://www.nice.org.uk/guidance/ng232,,NICE ©,restricted,emergency,high
+NICE-EXT-098,NICE,Asymptomatic Carotid Artery Disease,2015,https://www.nice.org.uk/guidance/ipg495,,NICE ©,restricted,neurology,medium
+NICE-EXT-099,NICE,Diabetic Foot Problems Inpatient,2019,https://www.nice.org.uk/guidance/ng19,,NICE ©,restricted,endocrinology,high
+NICE-EXT-100,NICE,Recurrent Pregnancy Loss,2024,https://www.nice.org.uk/guidance/ng193,,NICE ©,restricted,obstetrics,high
+WHO-AFRO-001,WHO,Africa Health Strategy,2014,https://www.afro.who.int/publications/africa-health-strategy-2016-2030,,CC BY-NC-SA 3.0 IGO,restricted,public_health,high
+WHO-AFRO-002,WHO,Antibiotic Resistance Africa,2022,https://www.afro.who.int/publications/strategic-priorities-tackle-antibiotic-resistance-african-region,,CC BY-NC-SA 3.0 IGO,restricted,infectious,high
+WHO-AFRO-003,WHO,Maternal Health Africa Strategy,2017,https://www.afro.who.int/publications/regional-strategy-reduce-maternal-newborn-deaths,,CC BY-NC-SA 3.0 IGO,restricted,obstetrics,high
+WHO-AFRO-004,WHO,Childhood Pneumonia Africa,2022,https://www.afro.who.int/publications/integrated-management-childhood-illness-imci,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-AFRO-005,WHO,Mental Health Africa Action Plan,2020,https://www.afro.who.int/publications/regional-mental-health-strategy-2022-2031,,CC BY-NC-SA 3.0 IGO,restricted,psychiatry,medium
+NDOH-SA-001,NDOH-SA,South African Standard Treatment Guidelines Primary Care,2020,https://www.health.gov.za/wp-content/uploads/2020/11/PHC-STGs-2020-Edition-Booklet.pdf,https://www.health.gov.za/wp-content/uploads/2020/11/PHC-STGs-2020-Edition-Booklet.pdf,Govt SA,allowed,primary_care,high
+NDOH-SA-002,NDOH-SA,South African Hospital Standard Treatment Guidelines,2020,https://www.health.gov.za/wp-content/uploads/2021/06/Adult-STG-Hospital-2020.pdf,https://www.health.gov.za/wp-content/uploads/2021/06/Adult-STG-Hospital-2020.pdf,Govt SA,allowed,primary_care,high
+NDOH-SA-003,NDOH-SA,South African Antiretroviral Treatment Guidelines,2023,https://www.health.gov.za/wp-content/uploads/2023/03/ART-Clinical-Guidelines-2023.pdf,https://www.health.gov.za/wp-content/uploads/2023/03/ART-Clinical-Guidelines-2023.pdf,Govt SA,allowed,infectious,high
+NDOH-SA-004,NDOH-SA,South African TB Treatment Guidelines,2024,https://www.health.gov.za/wp-content/uploads/2024/06/National-TB-Management-Guidelines-2024.pdf,https://www.health.gov.za/wp-content/uploads/2024/06/National-TB-Management-Guidelines-2024.pdf,Govt SA,allowed,infectious,high
+NDOH-SA-005,NDOH-SA,South African Maternal Care Guidelines,2024,https://www.health.gov.za/wp-content/uploads/2024/03/MaternityCareGuidelines2024.pdf,https://www.health.gov.za/wp-content/uploads/2024/03/MaternityCareGuidelines2024.pdf,Govt SA,allowed,obstetrics,high
+KENYA-MOH-001,KEN-MOH,Kenya National Family Planning Guidelines,2018,https://www.health.go.ke/wp-content/uploads/2018/02/Kenya-National-Family-Planning-Guidelines-for-Service-Providers.pdf,,Govt Kenya,allowed,primary_care,medium
+KENYA-MOH-002,KEN-MOH,Kenya National HIV Treatment Guidelines,2022,https://www.nascop.or.ke/wp-content/uploads/2022/04/National-HIV-Guidelines-2022-Final.pdf,,Govt Kenya,allowed,infectious,high
+GHANA-MOH-001,GHA-MOH,Ghana Standard Treatment Guidelines,2020,https://www.moh.gov.gh/wp-content/uploads/2020/07/GHS-STG-2020.pdf,,Govt Ghana,allowed,primary_care,high
+NIGERIA-FMOH-001,NIG-FMOH,Nigeria Standard Treatment Guidelines,2016,https://www.health.gov.ng/doc/STG.pdf,,Govt Nigeria,allowed,primary_care,medium
+MAURITIUS-MOH-001,MUS-MOH,Mauritius National HIV Strategic Framework,2022,https://health.govmu.org/Pages/Documents/HIV/Mauritius-HIV-Strategic-Framework-2018-2022.pdf,,Govt Mauritius,allowed,infectious,high
+MAURITIUS-MOH-002,MUS-MOH,Mauritius National Diabetes Strategy,2021,https://health.govmu.org/Pages/Documents/Plans/National-NCD-Strategic-Plan.pdf,,Govt Mauritius,allowed,endocrinology,high
+MAURITIUS-MOH-003,MUS-MOH,Mauritius Maternal Child Health Indicators,2022,https://health.govmu.org/,,Govt Mauritius,allowed,obstetrics,medium
+SOMI-001,SOMI,Société Médecine Océan Indien Tropical Diseases,2022,https://www.somi-asso.com/,,SOMI ©,restricted,tropical_diseases,medium
+NICE-EXT-101,NICE,Suspected Acute Pancreatitis,2018,https://www.nice.org.uk/guidance/ng104,,NICE ©,restricted,gastroenterology,high
+NICE-EXT-102,NICE,Sore Throat Acute Antimicrobial,2018,https://www.nice.org.uk/guidance/ng84,,NICE ©,restricted,infectious,high
+NICE-EXT-103,NICE,Acute Sinusitis Antimicrobial Prescribing,2017,https://www.nice.org.uk/guidance/ng79,,NICE ©,restricted,infectious,high
+NICE-EXT-104,NICE,Bronchiectasis Adults Diagnosis,2017,https://www.nice.org.uk/guidance/ng52,,NICE ©,restricted,respiratory,medium
+NICE-EXT-105,NICE,Eating Disorders Recognition Treatment,2017,https://www.nice.org.uk/guidance/ng69,,NICE ©,restricted,psychiatry,high
+NICE-EXT-106,NICE,Tinnitus Diagnosis Treatment,2020,https://www.nice.org.uk/guidance/ng155,,NICE ©,restricted,ent,medium
+NICE-EXT-107,NICE,Renal Replacement Therapy Adults,2018,https://www.nice.org.uk/guidance/ng107,,NICE ©,restricted,nephrology,high
+NICE-EXT-108,NICE,Liver Disease Cirrhosis Adults,2016,https://www.nice.org.uk/guidance/ng50,,NICE ©,restricted,hepatology,high
+NICE-EXT-109,NICE,Vascular Dementia,2024,https://www.nice.org.uk/guidance/ng97,,NICE ©,restricted,neurology,medium
+NICE-EXT-110,NICE,Inflammatory Arthritis Adults,2024,https://www.nice.org.uk/guidance/ng100,,NICE ©,restricted,rheumatology,high
+WHO-EXT-027,WHO,Maternal Newborn Care Pediatric Tropical Settings,2024,https://www.who.int/publications/i/item/9789240080720,,CC BY-NC-SA 3.0 IGO,restricted,obstetrics,high
+WHO-EXT-028,WHO,Hypertension Africa Region,2024,https://www.afro.who.int/publications/strategy-prevention-control-hypertension,,CC BY-NC-SA 3.0 IGO,restricted,cardiology,high
+WHO-EXT-029,WHO,Air Pollution Health Effects,2021,https://www.who.int/publications/i/item/9789240034228,,CC BY-NC-SA 3.0 IGO,restricted,public_health,high
+WHO-EXT-030,WHO,Healthy Diet Nutrition,2018,https://www.who.int/publications/i/item/9789241549516,,CC BY-NC-SA 3.0 IGO,restricted,nutrition,high
+PRIMARY-001,PrimaryCare,Telemedicine Best Practices Primary Care,2024,https://www.aafp.org/pubs/afp/issues/2024/0700/telemedicine-primary-care.html,,AAFP ©,restricted,primary_care,high
+PRIMARY-002,PrimaryCare,Tele-triage Family Medicine,2023,https://www.aafp.org/pubs/afp/issues/2023/0500/telephone-triage-family-medicine.html,,AAFP ©,restricted,primary_care,high
+PRIMARY-003,PrimaryCare,Common Symptom Differential Diagnosis Primary Care,2024,https://www.aafp.org/pubs/afp/issues/2024/0500/common-symptoms.html,,AAFP ©,restricted,primary_care,high
+PRIMARY-004,PrimaryCare,Routine Adult Preventive Health Examination,2024,https://www.aafp.org/pubs/afp/issues/2024/0900/preventive-health.html,,AAFP ©,restricted,primary_care,high
+PRIMARY-005,PrimaryCare,Pediatric Routine Visit,2023,https://www.aafp.org/pubs/afp/issues/2023/0500/pediatric-well-child.html,,AAFP ©,restricted,primary_care,high
+PRIMARY-006,PrimaryCare,Common Skin Conditions Primary Care,2023,https://www.aafp.org/pubs/afp/issues/2023/0900/common-skin-conditions.html,,AAFP ©,restricted,primary_care,high
+PRIMARY-007,PrimaryCare,Common Eye Conditions Primary Care,2023,https://www.aafp.org/pubs/afp/issues/2023/0700/common-eye-conditions.html,,AAFP ©,restricted,primary_care,medium
+PRIMARY-008,PrimaryCare,Common ENT Conditions Primary Care,2024,https://www.aafp.org/pubs/afp/issues/2024/0900/common-ent-conditions.html,,AAFP ©,restricted,primary_care,medium
+PRIMARY-009,PrimaryCare,Vaccination Adult Catch-Up,2024,https://www.aafp.org/pubs/afp/issues/2024/0700/adult-vaccinations-catch-up.html,,AAFP ©,restricted,primary_care,high
+PRIMARY-010,PrimaryCare,Geriatric Assessment Primary Care,2024,https://www.aafp.org/pubs/afp/issues/2024/0500/geriatric-assessment.html,,AAFP ©,restricted,primary_care,medium
