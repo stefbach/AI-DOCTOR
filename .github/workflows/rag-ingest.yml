@@ -36,6 +36,11 @@ on:
         type: string
         required: false
         default: ''
+      branch:
+        description: 'Git branch to use on VPS (default: this branch)'
+        type: string
+        required: false
+        default: 'claude/medical-assistant-transparency-dv5S9'
       resume:
         description: 'Resume mode (skip already-ingested docs by SHA-256)'
         type: boolean
@@ -79,13 +84,14 @@ jobs:
         env:
           MODE: ${{ inputs.mode }}
           SOURCE: ${{ inputs.source }}
+          BRANCH: ${{ inputs.branch }}
           RESUME: ${{ inputs.resume }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
-          envs: MODE,SOURCE,RESUME
+          envs: MODE,SOURCE,BRANCH,RESUME
           command_timeout: 25m
           script: |
             set -e
@@ -94,6 +100,7 @@ jobs:
             echo "═══════════════════════════════════════════════════════════"
             echo "  Mode    : $MODE"
             echo "  Source  : ${SOURCE:-(n/a)}"
+            echo "  Branch  : $BRANCH"
             echo "  Resume  : $RESUME"
             echo ""
 
@@ -106,11 +113,38 @@ jobs:
             echo "Working dir : $(pwd)"
             echo ""
 
-            # Pull latest code from current branch
-            echo "📥 Pulling latest code..."
-            git fetch origin
-            git checkout claude/medical-assistant-transparency-dv5S9 || git checkout main
-            git pull
+            # ─── Robust branch checkout ────────────────────────────────────
+            echo "📥 Fetching all remote branches..."
+            git fetch origin --prune
+            echo ""
+
+            echo "🔀 Switching to branch: $BRANCH"
+            # Stash any local changes to .env.local etc. (preserve them)
+            git stash push --include-untracked --message "rag-ingest-tmp" || true
+            # Checkout target branch — handles both new local and existing local
+            if git show-ref --verify --quiet refs/heads/$BRANCH; then
+              echo "  Local branch exists, switching"
+              git checkout "$BRANCH"
+              git reset --hard "origin/$BRANCH"
+            else
+              echo "  Creating local tracking branch from origin/$BRANCH"
+              git checkout -b "$BRANCH" "origin/$BRANCH"
+            fi
+            # Restore stashed .env.local etc.
+            git stash pop 2>/dev/null || true
+            echo "  Now on: $(git branch --show-current) at $(git rev-parse --short HEAD)"
+            echo ""
+
+            # ─── Verify the RAG code is present on this branch ─────────────
+            if [ ! -d tibok-rag-collector/extracted ]; then
+              echo "::error::RAG code not on branch '$BRANCH'!"
+              echo "Expected directory: tibok-rag-collector/extracted/"
+              echo "Available files:"
+              ls -la
+              exit 1
+            fi
+            n_files=$(ls tibok-rag-collector/extracted/*.json 2>/dev/null | grep -v _summary | wc -l)
+            echo "✅ Found $n_files extracted source files on branch $BRANCH"
             echo ""
 
             # Verify .env.local exists with required vars
@@ -134,12 +168,6 @@ jobs:
               echo "📦 Installing dependencies..."
               npm install
             fi
-
-            # Inventory check
-            echo "📊 Inventory:"
-            n_files=$(ls tibok-rag-collector/extracted/*.json 2>/dev/null | grep -v _summary | wc -l)
-            echo "   Source files: $n_files"
-            echo ""
 
             # Source env vars from .env.local for the npm scripts
             set -a
