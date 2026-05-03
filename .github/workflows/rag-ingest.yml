@@ -1,21 +1,15 @@
-name: 🧠 RAG — Ingest Guidelines into Supabase (via VPS SSH)
+name: 🧠 RAG — Ingest Guidelines into Supabase
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Manual trigger only — never runs automatically.
-# Use the "Run workflow" button in GitHub UI: Actions tab.
+# Manual trigger only — runs directly on GitHub's Ubuntu runner
+# (no SSH to a VPS, since the app is hosted on Vercel).
 #
-# This workflow REUSES the existing VPS deployment (same SSH secrets as
-# deploy.prod.yml) — the VPS already has .env.local with:
-#   - NEXT_PUBLIC_SUPABASE_URL
-#   - SUPABASE_SERVICE_ROLE_KEY
-#   - OPENAI_API_KEY
+# Required GitHub Secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL              → https://<your-project>.supabase.co
+#   SUPABASE_SERVICE_ROLE_KEY → service_role secret (RLS bypass)
+#   OPENAI_API_KEY            → sk-proj-...  (for embeddings, ~$0.22 cost)
 #
-# So no need to duplicate credentials in GitHub! It uses your existing
-# SSH secrets:
-#   - SSH_HOST (already set, used by deploy.prod.yml)
-#   - SSH_USER (already set)
-#   - SSH_PRIVATE_KEY (already set)
-#   - SSH_PORT (optional, defaults to 22)
+# Copy these from Vercel Dashboard → Project → Settings → Environment Variables
 # ═══════════════════════════════════════════════════════════════════════════
 
 on:
@@ -27,9 +21,9 @@ on:
         required: true
         default: 'dry-run'
         options:
-          - dry-run             # Just verify VPS env + count files
-          - migrate-only        # Apply Supabase migrations
-          - single-source       # Ingest ONE source (specify below)
+          - dry-run             # Verify everything is ready, no DB changes
+          - migrate-only        # Apply Supabase migrations (~30 sec)
+          - single-source       # Ingest ONE source (specify below) for testing
           - full-ingest         # Full pipeline: migrate + ingest 984 docs
       source:
         description: 'Source code (only for single-source mode, e.g. NICE, GOLD, WHO)'
@@ -37,7 +31,7 @@ on:
         required: false
         default: ''
       branch:
-        description: 'Git branch to use on VPS (default: this branch)'
+        description: 'Git branch to checkout (where the RAG code lives)'
         type: string
         required: false
         default: 'claude/medical-assistant-transparency-dv5S9'
@@ -55,190 +49,195 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  ingest-via-vps:
-    name: 'Ingest via VPS SSH (mode=${{ inputs.mode }})'
+  ingest:
+    name: 'Ingest (mode=${{ inputs.mode }})'
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
-      - name: Verify SSH secrets
+      # ─── Checkout the RAG branch (where extracted/ exists) ─────────────────
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci || npm install
+          else
+            npm install
+          fi
+
+      # ─── Pre-flight checks ─────────────────────────────────────────────────
+      - name: Verify required secrets
         env:
-          HAS_SSH_HOST: ${{ secrets.SSH_HOST != '' }}
-          HAS_SSH_USER: ${{ secrets.SSH_USER != '' }}
-          HAS_SSH_KEY:  ${{ secrets.SSH_PRIVATE_KEY != '' }}
+          HAS_SB_URL: ${{ secrets.SUPABASE_URL != '' }}
+          HAS_SB_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
+          HAS_OAI:    ${{ secrets.OPENAI_API_KEY != '' }}
         run: |
           missing=0
-          [ "$HAS_SSH_HOST" = "true" ] || { echo "::error::SSH_HOST missing"; missing=1; }
-          [ "$HAS_SSH_USER" = "true" ] || { echo "::error::SSH_USER missing"; missing=1; }
-          [ "$HAS_SSH_KEY"  = "true" ] || { echo "::error::SSH_PRIVATE_KEY missing"; missing=1; }
+          if [ "$HAS_SB_URL" != "true" ]; then echo "::error::Secret SUPABASE_URL is missing"; missing=1; fi
+          if [ "$HAS_SB_KEY" != "true" ]; then echo "::error::Secret SUPABASE_SERVICE_ROLE_KEY is missing"; missing=1; fi
+          if [ "$HAS_OAI" != "true" ] && [ "${{ inputs.mode }}" != "migrate-only" ] && [ "${{ inputs.mode }}" != "dry-run" ]; then
+            echo "::error::Secret OPENAI_API_KEY is missing (required for ingestion)"; missing=1
+          fi
           if [ $missing -eq 1 ]; then
             echo ""
-            echo "These secrets should already be configured (used by deploy.prod.yml)."
-            echo "Configure at: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            echo "📋 Configure secrets at: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            echo "📋 Get values from your Vercel project: Settings → Environment Variables"
             exit 1
           fi
-          echo "✅ SSH secrets present (reusing deploy.prod.yml setup)"
+          echo "✅ All required secrets present"
 
-      - name: Run RAG operation on VPS via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Verify RAG code on this branch
+        run: |
+          if [ ! -d tibok-rag-collector/extracted ]; then
+            echo "::error::tibok-rag-collector/extracted/ not found on branch '${{ inputs.branch }}'"
+            echo "Did you specify the correct branch in the input?"
+            exit 1
+          fi
+          n_files=$(ls tibok-rag-collector/extracted/*.json 2>/dev/null | grep -v _summary | wc -l)
+          echo "✅ Found $n_files extracted source files on branch '${{ inputs.branch }}'"
+
+      - name: Pre-flight inventory
+        id: inventory
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "📊 PRE-FLIGHT INVENTORY"
+          echo "═══════════════════════════════════════════════════════════"
+          n_files=$(ls tibok-rag-collector/extracted/*.json 2>/dev/null | grep -v _summary | wc -l)
+          echo "Source files: $n_files"
+
+          stats=$(node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const dir = 'tibok-rag-collector/extracted';
+            let total = 0, chars = 0;
+            for (const f of fs.readdirSync(dir)) {
+              if (!f.endsWith('.json') || f === '_summary.json') continue;
+              const d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf-8'));
+              total += (d.documents || []).length;
+              chars += (d.documents || []).reduce((s, x) => s + (x.char_count || 0), 0);
+            }
+            console.log(JSON.stringify({total, chars}));
+          ")
+          n_docs=$(echo "$stats" | node -e "console.log(JSON.parse(require('fs').readFileSync(0)).total)")
+          n_chars=$(echo "$stats" | node -e "console.log(JSON.parse(require('fs').readFileSync(0)).chars)")
+          cost=$(echo "$n_chars" | node -e "const c = parseInt(require('fs').readFileSync(0)); console.log(((c / 4 / 1000000) * 0.02).toFixed(3))")
+          duration=$(echo "$n_docs" | node -e "const d = parseInt(require('fs').readFileSync(0)); console.log(Math.ceil((d + 60) / 60))")
+          echo "Documents: $n_docs"
+          echo "Total text: $((n_chars / 1000000)) MB"
+          echo "Estimated OpenAI cost: ~\$$cost"
+          echo "Estimated duration: ~$duration minutes"
+          echo "n_files=$n_files" >> $GITHUB_OUTPUT
+          echo "n_docs=$n_docs" >> $GITHUB_OUTPUT
+
+      # ─── Mode: dry-run ─────────────────────────────────────────────────────
+      - name: Dry-run summary
+        if: inputs.mode == 'dry-run'
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "🟦 DRY RUN — no changes made to Supabase"
+          echo "═══════════════════════════════════════════════════════════"
+          echo "✅ Branch checkout OK"
+          echo "✅ Dependencies installed"
+          echo "✅ Required secrets present"
+          echo "✅ Would apply 2 Supabase migrations"
+          echo "✅ Would ingest ${{ steps.inventory.outputs.n_docs }} documents"
+          echo ""
+          echo "Next: re-run with mode='migrate-only' or 'full-ingest'"
+
+      # ─── Mode: migrate-only or full-ingest ─────────────────────────────────
+      - name: Apply Supabase migrations
+        if: inputs.mode == 'migrate-only' || inputs.mode == 'full-ingest'
         env:
-          MODE: ${{ inputs.mode }}
-          SOURCE: ${{ inputs.source }}
-          BRANCH: ${{ inputs.branch }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "🗄️  APPLYING SUPABASE MIGRATIONS"
+          echo "═══════════════════════════════════════════════════════════"
+          npm run rag:migrate
+
+      # ─── Mode: single-source ───────────────────────────────────────────────
+      - name: Validate single-source input
+        if: inputs.mode == 'single-source'
+        run: |
+          if [ -z "${{ inputs.source }}" ]; then
+            echo "::error::Mode 'single-source' requires the 'source' input field"
+            exit 1
+          fi
+          if [ ! -f "tibok-rag-collector/extracted/${{ inputs.source }}.json" ]; then
+            echo "::error::No JSON file for source '${{ inputs.source }}' in tibok-rag-collector/extracted/"
+            echo "Available sources:"
+            ls tibok-rag-collector/extracted/*.json | grep -v _summary | sed 's|.*/||;s|\.json||'
+            exit 1
+          fi
+
+      - name: Ingest single source
+        if: inputs.mode == 'single-source'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           RESUME: ${{ inputs.resume }}
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
-          envs: MODE,SOURCE,BRANCH,RESUME
-          command_timeout: 25m
-          script: |
-            set -e
-            echo "═══════════════════════════════════════════════════════════"
-            echo "🧠 AI-DOCTOR RAG Operation"
-            echo "═══════════════════════════════════════════════════════════"
-            echo "  Mode    : $MODE"
-            echo "  Source  : ${SOURCE:-(n/a)}"
-            echo "  Branch  : $BRANCH"
-            echo "  Resume  : $RESUME"
-            echo ""
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "🔬 INGESTING SOURCE: ${{ inputs.source }}"
+          echo "═══════════════════════════════════════════════════════════"
+          npx tsx scripts/bulk-seed/sources/ingest-from-extracted.ts ${{ inputs.source }}
 
-            # Activate Node env (same as deploy.prod.yml)
-            source /home/tibok/nodevenv/medical-ai-expert/22/bin/activate
-            cd /home/tibok/medical-ai-expert
+      # ─── Mode: full-ingest ─────────────────────────────────────────────────
+      - name: Ingest all guidelines
+        if: inputs.mode == 'full-ingest'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          RESUME: ${{ inputs.resume }}
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "🚀 FULL INGESTION (${{ steps.inventory.outputs.n_docs }} docs)"
+          echo "═══════════════════════════════════════════════════════════"
+          npx tsx scripts/bulk-seed/sources/ingest-from-extracted.ts ALL
 
-            echo "Node version: $(node --version)"
-            echo "NPM version : $(npm --version)"
-            echo "Working dir : $(pwd)"
-            echo ""
-
-            # ─── Robust branch checkout ────────────────────────────────────
-            echo "📥 Fetching all remote branches..."
-            git fetch origin --prune
-            echo ""
-
-            echo "🔀 Switching to branch: $BRANCH"
-            # Stash any local changes to .env.local etc. (preserve them)
-            git stash push --include-untracked --message "rag-ingest-tmp" || true
-            # Checkout target branch — handles both new local and existing local
-            if git show-ref --verify --quiet refs/heads/$BRANCH; then
-              echo "  Local branch exists, switching"
-              git checkout "$BRANCH"
-              git reset --hard "origin/$BRANCH"
-            else
-              echo "  Creating local tracking branch from origin/$BRANCH"
-              git checkout -b "$BRANCH" "origin/$BRANCH"
-            fi
-            # Restore stashed .env.local etc.
-            git stash pop 2>/dev/null || true
-            echo "  Now on: $(git branch --show-current) at $(git rev-parse --short HEAD)"
-            echo ""
-
-            # ─── Verify the RAG code is present on this branch ─────────────
-            if [ ! -d tibok-rag-collector/extracted ]; then
-              echo "::error::RAG code not on branch '$BRANCH'!"
-              echo "Expected directory: tibok-rag-collector/extracted/"
-              echo "Available files:"
-              ls -la
-              exit 1
-            fi
-            n_files=$(ls tibok-rag-collector/extracted/*.json 2>/dev/null | grep -v _summary | wc -l)
-            echo "✅ Found $n_files extracted source files on branch $BRANCH"
-            echo ""
-
-            # Verify .env.local exists with required vars
-            if [ ! -f .env.local ]; then
-              echo "::error::.env.local not found on VPS!"
-              echo "Expected at: $(pwd)/.env.local"
-              exit 1
-            fi
-
-            for var in NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY OPENAI_API_KEY; do
-              if ! grep -q "^$var=" .env.local; then
-                echo "::error::$var missing from .env.local"
-                exit 1
-              fi
-            done
-            echo "✅ .env.local has Supabase + OpenAI credentials"
-            echo ""
-
-            # Install dependencies if needed (tsx, @supabase/supabase-js, openai, etc.)
-            if [ ! -d node_modules ] || [ ! -d node_modules/tsx ]; then
-              echo "📦 Installing dependencies..."
-              npm install
-            fi
-
-            # Source env vars from .env.local for the npm scripts
-            set -a
-            source .env.local
-            set +a
-
-            case "$MODE" in
-              dry-run)
-                echo "🟦 DRY RUN — listing what would be done"
-                echo ""
-                echo "Would apply migrations:"
-                ls supabase/migrations/*.sql | sed 's|^|  - |'
-                echo ""
-                echo "Would ingest:"
-                ls tibok-rag-collector/extracted/*.json | grep -v _summary | head -20
-                echo "  ... ($n_files total)"
-                ;;
-
-              migrate-only)
-                echo "🗄️  Applying Supabase migrations..."
-                npm run rag:migrate
-                ;;
-
-              single-source)
-                if [ -z "$SOURCE" ]; then
-                  echo "::error::Mode 'single-source' requires the 'source' input"
-                  exit 1
-                fi
-                if [ ! -f "tibok-rag-collector/extracted/$SOURCE.json" ]; then
-                  echo "::error::No JSON file for source '$SOURCE'"
-                  echo "Available sources:"
-                  ls tibok-rag-collector/extracted/*.json | grep -v _summary | sed 's|.*/||;s|\.json||'
-                  exit 1
-                fi
-                echo "🔬 Ingesting source: $SOURCE"
-                RESUME=$RESUME npm run rag:ingest-extracted -- "$SOURCE"
-                ;;
-
-              full-ingest)
-                echo "🚀 FULL INGESTION (~10-15 min, ~\$0.22 OpenAI cost)"
-                echo "Step 1/2: applying migrations..."
-                npm run rag:migrate
-                echo ""
-                echo "Step 2/2: ingesting all 984 guidelines..."
-                RESUME=$RESUME npm run rag:ingest-extracted -- ALL
-                ;;
-
-              *)
-                echo "::error::Unknown mode: $MODE"
-                exit 1
-                ;;
-            esac
-
-            echo ""
-            echo "═══════════════════════════════════════════════════════════"
-            echo "✅ Operation complete: $MODE"
-            echo "═══════════════════════════════════════════════════════════"
+      # ─── Verification ──────────────────────────────────────────────────────
+      - name: Post-ingestion verification
+        if: always() && (inputs.mode == 'full-ingest' || inputs.mode == 'single-source' || inputs.mode == 'migrate-only')
+        env:
+          SB_URL: ${{ secrets.SUPABASE_URL }}
+          SB_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "📊 POST-INGESTION VERIFICATION"
+          echo "═══════════════════════════════════════════════════════════"
+          curl -sS \
+            -H "apikey: $SB_KEY" \
+            -H "Authorization: Bearer $SB_KEY" \
+            -H "Prefer: count=exact" \
+            "$SB_URL/rest/v1/medical_guidelines?select=id&limit=1" \
+            -I 2>&1 | grep -i "content-range" || echo "(could not query Supabase REST)"
 
       - name: Job summary
         if: always()
         run: |
           {
-            echo "## 🧠 RAG Operation Result"
+            echo "## 🧠 RAG Ingestion Result"
             echo ""
             echo "| Field | Value |"
             echo "|---|---|"
             echo "| Mode | \`${{ inputs.mode }}\` |"
-            echo "| Source | \`${{ inputs.source || '(n/a)' }}\` |"
-            echo "| Resume | ${{ inputs.resume }} |"
+            echo "| Branch | \`${{ inputs.branch }}\` |"
+            echo "| Source files | ${{ steps.inventory.outputs.n_files }} |"
+            echo "| Documents | ${{ steps.inventory.outputs.n_docs }} |"
             echo "| Status | ${{ job.status }} |"
-            echo "| VPS | \`${{ secrets.SSH_HOST }}\` |"
             echo ""
             echo "**Verification SQL** (run in Supabase SQL editor):"
             echo '```sql'
