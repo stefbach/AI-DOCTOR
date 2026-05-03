@@ -1,0 +1,54 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+MSF-001,MSF,Clinical Guidelines Diagnosis Treatment Field,2024,https://medicalguidelines.msf.org/en/clinical,,MSF Open Access,allowed,humanitarian,high
+MSF-002,MSF,Essential Drugs Pocket Edition,2024,https://medicalguidelines.msf.org/en/essential-drugs,,MSF Open Access,allowed,humanitarian,high
+MSF-003,MSF,Tuberculosis Treatment Practical Guide,2023,https://medicalguidelines.msf.org/en/tuberculosis,,MSF Open Access,allowed,tropical_diseases,high
+MSF-004,MSF,Cholera Outbreak Management Field Guide,2023,https://medicalguidelines.msf.org/en/cholera,,MSF Open Access,allowed,tropical_diseases,high
+MSF-005,MSF,Refugee Health Emergency Care,2024,https://medicalguidelines.msf.org/en/refugee-health,,MSF Open Access,allowed,humanitarian,high
+MSF-006,MSF,Obstetrics Emergency Tropical Setting,2023,https://medicalguidelines.msf.org/en/obstetrics-tropical,,MSF Open Access,allowed,humanitarian,high
+MSF-007,MSF,Mental Health Disaster Conflict Setting,2024,https://medicalguidelines.msf.org/en/mental-health-emergencies,,MSF Open Access,allowed,humanitarian,high
+MSF-008,MSF,Pediatric Emergency Care Resource-Limited,2024,https://medicalguidelines.msf.org/en/pediatrics,,MSF Open Access,allowed,pediatrics,high
+ICRC-001,ICRC,War Surgery Working Surgeon Conflict,2009,https://www.icrc.org/en/publication/0973-war-surgery-working-surgeon-armed-conflict,,ICRC ©,restricted,humanitarian,high
+ICRC-002,ICRC,Emergency Care Disaster Setting,2018,https://www.icrc.org/en/publication/4458-emergency-disasters-and-conflicts,,ICRC ©,restricted,humanitarian,high
+ICRC-003,ICRC,Healthcare in Danger,2020,https://www.icrc.org/en/publication/4319-health-care-danger-violence-against-health-care,,ICRC ©,restricted,humanitarian,high
+SPHERE-001,Sphere,Humanitarian Charter Minimum Standards,2018,https://spherestandards.org/handbook-2018/,,Sphere CC BY-NC-ND,restricted,humanitarian,high
+SPHERE-002,Sphere,WASH Water Sanitation Hygiene Standards,2018,https://spherestandards.org/handbook-2018/,,Sphere CC BY-NC-ND,restricted,humanitarian,high
+SPHERE-003,Sphere,Food Security Nutrition Standards,2018,https://spherestandards.org/handbook-2018/,,Sphere CC BY-NC-ND,restricted,humanitarian,high
+SPHERE-004,Sphere,Health Systems Standards,2018,https://spherestandards.org/handbook-2018/,,Sphere CC BY-NC-ND,restricted,humanitarian,high
+WHO-IMCI-001,WHO-IMCI,IMCI Chart Booklet Children 2 Months 5 Years,2014,https://www.who.int/publications/i/item/9789241506823,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-IMCI-002,WHO-IMCI,IMCI Distance Learning Course Module 1,2014,https://www.who.int/publications/i/item/imci-distance-learning-course,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-IMCI-003,WHO-IMCI,Hospital Care Children Pocket Book,2013,https://www.who.int/publications/i/item/978-92-4-154837-3,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-IMCI-004,WHO-IMCI,IMCI for Sick Newborns and Young Infants,2019,https://www.who.int/publications/i/item/imci-young-infants,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-IMCI-005,WHO-IMCI,Newborn Care Up to Six Days Birth,2018,https://www.who.int/publications/i/item/9789241546225,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-001,WHO,Severe Acute Malnutrition Children Management,2013,https://www.who.int/publications/i/item/9789241506328,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-002,WHO,Moderate Acute Malnutrition Children,2012,https://www.who.int/publications/i/item/moderate-acute-malnutrition-children,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-003,WHO,Pediatric Malaria Treatment Severe Cases,2023,https://www.who.int/publications/i/item/9789240046900,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-004,WHO,Pediatric Tuberculosis Childhood Adolescents,2022,https://www.who.int/publications/i/item/9789240046788,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-005,WHO,Pediatric HIV Treatment Children Adolescents,2023,https://www.who.int/publications/i/item/9789240073302,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-006,WHO,Pediatric Pneumonia Acute Respiratory Infection,2014,https://www.who.int/publications/i/item/9789241548571,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-007,WHO,Pediatric Diarrhoea Treatment Plan A B C,2017,https://www.who.int/publications/i/item/9789241549950,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-008,WHO,Pediatric Sepsis Recognition Limited Resources,2024,https://www.who.int/publications/i/item/9789240092945,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-009,WHO,Pediatric Anemia Iron Deficiency,2017,https://www.who.int/publications/i/item/9789241564960,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-010,WHO,Pediatric Vitamin A Supplementation,2011,https://www.who.int/publications/i/item/9789241501767,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-011,WHO,Pediatric Dengue Diagnosis Management,2012,https://www.who.int/publications/i/item/9789241504713,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-012,WHO,Pediatric Schistosomiasis Soil-Transmitted Helminths,2017,https://www.who.int/publications/i/item/9789241550116,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-013,WHO,Pediatric Meningococcal Meningitis,2019,https://www.who.int/publications/i/item/9789241516327,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-014,WHO,Newborn Resuscitation Resource-Limited,2019,https://www.who.int/publications/i/item/9789241516488,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-PED-TROP-015,WHO,Kangaroo Mother Care Preterm Newborns,2020,https://www.who.int/publications/i/item/9789240028111,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+DISASTER-001,WHO,Health Emergency Disaster Risk Management Framework,2019,https://www.who.int/publications/i/item/9789241516181,,CC BY-NC-SA 3.0 IGO,restricted,humanitarian,high
+DISASTER-002,WHO,Mass Casualty Management Hospital Emergency,2007,https://www.who.int/publications/i/item/9789241596053,,CC BY-NC-SA 3.0 IGO,restricted,emergency,high
+DISASTER-003,WHO,Cyclone Tropical Storm Health Response,2020,https://www.who.int/publications/i/item/cyclone-health-response,,CC BY-NC-SA 3.0 IGO,restricted,humanitarian,high
+DISASTER-004,WHO,Flood Health Risks Response,2020,https://www.who.int/publications/i/item/flood-health-risks,,CC BY-NC-SA 3.0 IGO,restricted,humanitarian,medium
+DISASTER-005,WHO,Earthquake Emergency Health Response,2017,https://www.who.int/publications/i/item/earthquake-emergency-response,,CC BY-NC-SA 3.0 IGO,restricted,humanitarian,medium
+WHO-CHILD-VAC-001,WHO,Childhood Vaccination Schedule WHO,2023,https://www.who.int/publications/i/item/9789240069701,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-CHILD-VAC-002,WHO,Measles Mumps Rubella Vaccination,2024,https://www.who.int/publications/i/item/who-wer-no-37-2024,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-CHILD-VAC-003,WHO,Polio Vaccination End-Stage Eradication,2023,https://www.who.int/publications/i/item/9789240081109,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-CHILD-VAC-004,WHO,BCG Vaccine TB Prevention,2018,https://www.who.int/publications/i/item/who-wer9305,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-CHILD-VAC-005,WHO,RSV Maternal Newborn Vaccine,2024,https://www.who.int/publications/i/item/who-wer-no-30-2024,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-CHILD-VAC-006,WHO,Rotavirus Vaccination Pediatric,2021,https://www.who.int/publications/i/item/who-wer9628,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-CHILD-VAC-007,WHO,Pneumococcal Conjugate Vaccine Children,2019,https://www.who.int/publications/i/item/who-wer9408,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+WHO-CHILD-VAC-008,WHO,HPV Vaccine Adolescents,2022,https://www.who.int/publications/i/item/who-wer9750,,CC BY-NC-SA 3.0 IGO,restricted,pediatrics,high
+ISN-001,ISN,Pediatric AKI Recognition Treatment Tropical,2017,https://www.kidney-international.org/article/S0085-2538(17)30106-7/fulltext,,ISN ©,restricted,pediatrics,high
+ISN-002,ISN,Snake Bite Pediatric Acute Kidney Injury,2020,https://www.kidney-international.org/article/S0085-2538(20)30005-4/fulltext,,ISN ©,restricted,tropical_diseases,medium
+HUMAN-NUTR-001,UNICEF,Severe Acute Malnutrition Community Management,2019,https://www.unicef.org/documents/community-based-management-acute-malnutrition,,UNICEF CC BY,allowed,humanitarian,high
+HUMAN-NUTR-002,UNICEF,Maternal Newborn Health Crisis Settings,2024,https://www.unicef.org/documents/maternal-newborn-health-emergencies,,UNICEF CC BY,allowed,humanitarian,high
+PIH-001,PIH,Diabetes Type 2 Resource-Poor Settings,2020,https://www.pih.org/practitioner-resource/management-diabetes-type-2-resource-poor,,PIH ©,restricted,humanitarian,medium
