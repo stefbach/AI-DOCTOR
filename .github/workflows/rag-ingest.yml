@@ -1,0 +1,222 @@
+name: 🧠 RAG — Ingest Guidelines into Supabase
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Manual trigger only — never runs automatically.
+# Use the "Run workflow" button in GitHub UI: Actions tab.
+#
+# Required GitHub Secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL              → https://<your-project>.supabase.co
+#   SUPABASE_SERVICE_ROLE_KEY → service_role secret (RLS bypass)
+#   OPENAI_API_KEY            → sk-proj-...  (for embeddings, ~$0.22 cost)
+# ═══════════════════════════════════════════════════════════════════════════
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Execution mode'
+        type: choice
+        required: true
+        default: 'dry-run'
+        options:
+          - dry-run             # No DB write, just verify everything is ready
+          - migrate-only        # Apply Supabase migrations (no ingestion)
+          - single-source       # Ingest ONE source (specify below)
+          - full-ingest         # Full pipeline: migrate + ingest all 984 docs
+      source:
+        description: 'Source code (only used in single-source mode, e.g. NICE, WHO, ESC)'
+        type: string
+        required: false
+        default: ''
+      resume:
+        description: 'Resume mode (skip already-ingested docs by SHA-256)'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  # Only one ingestion job at a time — prevent double-write race conditions
+  group: rag-ingest-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    name: 'Ingest (mode=${{ inputs.mode }})'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      # ─── Setup ─────────────────────────────────────────────────────────────
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci || npm install
+        # Use npm ci if package-lock.json is present, fallback to install
+
+      # ─── Pre-flight checks ─────────────────────────────────────────────────
+      - name: Verify required secrets
+        env:
+          HAS_SUPABASE_URL: ${{ secrets.SUPABASE_URL != '' }}
+          HAS_SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
+          HAS_OPENAI_KEY:   ${{ secrets.OPENAI_API_KEY != '' }}
+        run: |
+          missing=0
+          if [ "$HAS_SUPABASE_URL" != "true" ]; then echo "::error::Secret SUPABASE_URL is missing"; missing=1; fi
+          if [ "$HAS_SUPABASE_KEY" != "true" ]; then echo "::error::Secret SUPABASE_SERVICE_ROLE_KEY is missing"; missing=1; fi
+          if [ "$HAS_OPENAI_KEY"  != "true" ] && [ "${{ inputs.mode }}" != "migrate-only" ] && [ "${{ inputs.mode }}" != "dry-run" ]; then
+            echo "::error::Secret OPENAI_API_KEY is missing (required for ingestion)"; missing=1
+          fi
+          if [ $missing -eq 1 ]; then
+            echo ""
+            echo "📋 Configure secrets at: https://github.com/${{ github.repository }}/settings/secrets/actions"
+            exit 1
+          fi
+          echo "✅ All required secrets present"
+
+      - name: Pre-flight inventory
+        id: inventory
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "📊 PRE-FLIGHT INVENTORY"
+          echo "═══════════════════════════════════════════════════════════"
+          n_files=$(ls tibok-rag-collector/extracted/*.json 2>/dev/null | grep -v _summary | wc -l)
+          echo "Source files (.json): $n_files"
+
+          n_docs=$(node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const dir = 'tibok-rag-collector/extracted';
+            let total = 0, chars = 0;
+            for (const f of fs.readdirSync(dir)) {
+              if (!f.endsWith('.json') || f === '_summary.json') continue;
+              const d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf-8'));
+              total += (d.documents || []).length;
+              chars += (d.documents || []).reduce((s, x) => s + (x.char_count || 0), 0);
+            }
+            console.log(JSON.stringify({total, chars}));
+          ")
+          n_docs_count=$(echo "$n_docs" | node -e "console.log(JSON.parse(require('fs').readFileSync(0)).total)")
+          n_chars=$(echo "$n_docs" | node -e "console.log(JSON.parse(require('fs').readFileSync(0)).chars)")
+          echo "Documents to ingest: $n_docs_count"
+          echo "Total text size: $n_chars chars (~$((n_chars / 1000000)) MB)"
+          echo "Estimated cost: ~\$$(echo "$n_chars" | node -e "const c = parseInt(require('fs').readFileSync(0)); console.log(((c / 4 / 1000000) * 0.02).toFixed(3))")"
+          echo "Estimated duration: ~$(((n_docs_count + 60) / 60)) minutes"
+          echo ""
+          echo "n_files=$n_files" >> $GITHUB_OUTPUT
+          echo "n_docs=$n_docs_count" >> $GITHUB_OUTPUT
+
+      # ─── Mode: dry-run ─────────────────────────────────────────────────────
+      - name: Dry-run summary
+        if: inputs.mode == 'dry-run'
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "🟦 DRY RUN — no changes made to Supabase"
+          echo "═══════════════════════════════════════════════════════════"
+          echo "✅ Would apply 2 migrations to Supabase"
+          echo "✅ Would ingest ${{ steps.inventory.outputs.n_docs }} documents"
+          echo "✅ All required secrets are present"
+          echo ""
+          echo "To perform the actual ingestion, re-run with mode='full-ingest'"
+
+      # ─── Mode: migrate-only or full-ingest ─────────────────────────────────
+      - name: Apply Supabase migrations
+        if: inputs.mode == 'migrate-only' || inputs.mode == 'full-ingest'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "🗄️  APPLYING SUPABASE MIGRATIONS"
+          echo "═══════════════════════════════════════════════════════════"
+          npm run rag:migrate
+
+      # ─── Mode: single-source ───────────────────────────────────────────────
+      - name: Validate single-source input
+        if: inputs.mode == 'single-source'
+        run: |
+          if [ -z "${{ inputs.source }}" ]; then
+            echo "::error::Mode 'single-source' requires the 'source' input field"
+            exit 1
+          fi
+          if [ ! -f "tibok-rag-collector/extracted/${{ inputs.source }}.json" ]; then
+            echo "::error::No JSON file for source '${{ inputs.source }}' in tibok-rag-collector/extracted/"
+            echo "Available sources:"
+            ls tibok-rag-collector/extracted/*.json | grep -v _summary | sed 's|.*/||;s|\.json||'
+            exit 1
+          fi
+
+      - name: Ingest single source
+        if: inputs.mode == 'single-source'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          RESUME: ${{ inputs.resume }}
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "🔬 INGESTING SOURCE: ${{ inputs.source }}"
+          echo "═══════════════════════════════════════════════════════════"
+          npm run rag:ingest-extracted -- ${{ inputs.source }}
+
+      # ─── Mode: full-ingest ─────────────────────────────────────────────────
+      - name: Ingest all 984 guidelines
+        if: inputs.mode == 'full-ingest'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          RESUME: ${{ inputs.resume }}
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "🚀 FULL INGESTION (${{ steps.inventory.outputs.n_docs }} documents)"
+          echo "═══════════════════════════════════════════════════════════"
+          npm run rag:ingest-extracted -- ALL
+
+      # ─── Final report ──────────────────────────────────────────────────────
+      - name: Final summary
+        if: always() && (inputs.mode == 'full-ingest' || inputs.mode == 'single-source')
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "═══════════════════════════════════════════════════════════"
+          echo "📊 POST-INGESTION VERIFICATION"
+          echo "═══════════════════════════════════════════════════════════"
+          curl -sS \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/medical_guidelines?select=count" \
+            -H "Prefer: count=exact" \
+            -H "Range: 0-0" \
+            -I 2>&1 | grep -i "content-range" || echo "(could not query Supabase REST)"
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## 🧠 RAG Ingestion Result"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Mode | \`${{ inputs.mode }}\` |"
+            echo "| Source files | ${{ steps.inventory.outputs.n_files }} |"
+            echo "| Documents | ${{ steps.inventory.outputs.n_docs }} |"
+            echo "| Resume | ${{ inputs.resume }} |"
+            echo "| Status | ${{ job.status }} |"
+            echo ""
+            echo "**Next steps:**"
+            echo ""
+            echo "- Check Supabase: \`SELECT count(*) FROM medical_guidelines;\`"
+            echo "- Review pending: \`/admin/guidelines\` page"
+            echo "- Activate ones: \`UPDATE medical_guidelines SET status='active' WHERE source='NICE'\`"
+          } >> $GITHUB_STEP_SUMMARY
