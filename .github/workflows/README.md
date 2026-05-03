@@ -1,173 +1,143 @@
-# 🤖 GitHub Actions Workflows — AI-DOCTOR RAG
+# 🤖 GitHub Actions Workflows — AI-DOCTOR
 
-Ce dossier contient les workflows GitHub Actions pour automatiser
-l'ingestion et la maintenance du système RAG médical.
-
-## 📋 Workflows disponibles
-
-| Workflow | Trigger | Coût | Durée | Description |
-|---|---|---|---|---|
-| `rag-connectivity-test.yml` | Manuel | $0 | 30 sec | Vérifie que Supabase + OpenAI + sources RSS sont joignables |
-| `rag-ingest.yml` | Manuel | ~$0.22 | 10-15 min | Ingère les 984 guidelines dans Supabase pgvector |
-| `deploy.prod.yml` | Push `main` | — | — | Déploiement prod existant (intact) |
-
----
-
-## 🔐 Étape 1 — Configurer les 3 secrets GitHub (1 fois, 2 minutes)
-
-**Aller sur** : `https://github.com/stefbach/AI-DOCTOR/settings/secrets/actions`
-
-Cliquer **"New repository secret"** trois fois pour ajouter :
-
-| Nom du secret | Valeur | Où la trouver |
+| Workflow | Trigger | Description |
 |---|---|---|
-| `SUPABASE_URL` | `https://xxxxx.supabase.co` | Supabase Dashboard → Settings → API → Project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | `eyJhbGciOi...` | Supabase Dashboard → Settings → API → `service_role` (secret) |
-| `OPENAI_API_KEY` | `sk-proj-...` | OpenAI Platform → API Keys |
-
-⚠️ **Important** :
-- `SUPABASE_SERVICE_ROLE_KEY` est la clé **secrète** (pas l'anon key)
-- Une fois enregistrés, **personne ne peut les relire** (même les admins du repo)
-- Les secrets sont chiffrés et **uniquement** accessibles aux workflows pendant l'exécution
+| `deploy.prod.yml` | Push `main` | Déploiement production (existant, intact) |
+| `rag-ingest.yml` | Manuel | Ingestion RAG via SSH sur le VPS |
 
 ---
 
-## 🚀 Étape 2 — Test de connectivité (gratuit)
+## 🧠 RAG Ingestion via VPS SSH
 
-Avant la première ingestion, vérifier que tout est branché :
+### 💡 Pourquoi SSH plutôt que credentials dans GitHub ?
 
-1. Aller sur **Actions** : `https://github.com/stefbach/AI-DOCTOR/actions`
-2. Cliquer sur **"🔌 RAG — Connectivity Test"** dans la sidebar gauche
-3. Cliquer le bouton **"Run workflow"** (à droite)
-4. Sélectionner la branche `claude/medical-assistant-transparency-dv5S9`
-5. Cliquer le bouton vert **"Run workflow"**
+Le VPS a **déjà** tous les credentials nécessaires dans son `.env.local` :
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `OPENAI_API_KEY`
 
-⏱ Durée : ~30 secondes.
+Le workflow **réutilise les secrets SSH existants** (déjà utilisés par `deploy.prod.yml`) :
+- `SSH_HOST`
+- `SSH_USER`
+- `SSH_PRIVATE_KEY`
+- `SSH_PORT`
 
-**Résultat attendu** :
+→ **Aucun secret à recopier dans GitHub.** Tout fonctionne avec ce qui est déjà là.
+
+---
+
+## 🚀 Procédure d'utilisation
+
+### Étape 1 — Vérifier les pré-requis sur le VPS (1 fois)
+
+Vérifier que le VPS a bien la branche RAG cloné et `.env.local` complet.
+
+SSH sur le VPS :
+```bash
+cd /home/tibok/medical-ai-expert
+ls -la .env.local
+grep -E "^(NEXT_PUBLIC_SUPABASE_URL|SUPABASE_SERVICE_ROLE_KEY|OPENAI_API_KEY)=" .env.local
 ```
-✅ Source RSS feeds (16 sources)
-✅ Supabase reachable
-✅ OpenAI API reachable
-✅ text-embedding-3-small model accessible
-ℹ️  medical_guidelines table not yet created (normal, on va la créer)
-📚 126 source files / 984 documents ready to ingest
-```
 
-Si tout est ✅, passer à l'étape 3.
+Si tout est OK, c'est bon. Sinon ajouter les variables manquantes dans `.env.local`.
 
----
+### Étape 2 — Lancer l'ingestion
 
-## 🚀 Étape 3 — Migrations Supabase
+`https://github.com/stefbach/AI-DOCTOR/actions`
+→ "🧠 RAG — Ingest Guidelines into Supabase (via VPS SSH)"
+→ **Run workflow**
 
-1. Aller sur **Actions** → **"🧠 RAG — Ingest Guidelines into Supabase"**
-2. Cliquer **"Run workflow"**
-3. Choisir :
-   - Mode : **`migrate-only`**
-   - Source : (laisser vide)
-   - Resume : (peu importe)
-4. Cliquer **"Run workflow"**
+#### Mode `dry-run` (recommandé en premier, gratuit, ~30 sec)
+- Mode : `dry-run`
+- Run
 
-⏱ Durée : ~30 secondes.
+→ Liste les fichiers/migrations qui seraient appliqués, **sans rien modifier**.
 
-Cela va créer dans Supabase :
-- 7 tables (medical_guidelines, drug_safety_alerts, ...)
-- 2 fonctions RPC (match_guidelines, check_drug_alerts)
-- HNSW index pgvector
-- RLS policies
-- Seed des 16 sources principales
+#### Mode `migrate-only` (~30 sec)
+- Mode : `migrate-only`
+- Run
 
----
+→ Applique les 2 migrations Supabase (création des 7 tables RAG + pgvector).
 
-## 🚀 Étape 4 — Test sur 1 seule source (recommandé avant le full-ingest)
+#### Mode `single-source` (~1 min, ~$0.001)
+- Mode : `single-source`
+- Source : `GOLD` (1 doc, idéal pour test)
+- Resume : `true`
+- Run
 
-Pour vérifier que l'ingestion fonctionne sans dépenser tout le budget :
+→ Ingère 1 seule source dans Supabase. Permet de valider que tout fonctionne.
 
-1. Actions → **"🧠 RAG — Ingest Guidelines into Supabase"** → Run workflow
-2. Mode : **`single-source`**
-3. Source : **`GOLD`** (1 seul document, ~1 MB → idéal pour test rapide)
-4. Resume : `true`
-5. Run
+#### Mode `full-ingest` (10-15 min, ~$0.22)
+- Mode : `full-ingest`
+- Resume : `true`
+- Run
 
-⏱ Durée : ~1 minute.
-💰 Coût : ~$0.0008.
+→ Migrations + ingestion complète des 984 guidelines.
 
-**Vérifier ensuite** dans Supabase SQL editor :
+### Étape 3 — Vérification
+
+Dans Supabase SQL Editor :
 ```sql
-SELECT count(*) FROM medical_guidelines WHERE source = 'GOLD';
--- doit retourner ~167 (chunks du GOLD 2025 Report)
-```
-
----
-
-## 🚀 Étape 5 — Full ingestion (les 984 guidelines)
-
-1. Actions → **"🧠 RAG — Ingest Guidelines into Supabase"** → Run workflow
-2. Mode : **`full-ingest`**
-3. Resume : **`true`** (skip les docs déjà ingérés via test étape 4)
-4. Run
-
-⏱ Durée : 10-15 minutes.
-💰 Coût : ~$0.22 sur votre compte OpenAI.
-
-**Vous pouvez fermer l'onglet** — GitHub continue le run en background.
-Vous recevrez un email à la fin (si activé dans vos préférences).
-
-**Vérifier ensuite** :
-```sql
--- Volume total
-SELECT count(DISTINCT guideline_code), count(*)
+SELECT
+  count(DISTINCT guideline_code) AS guidelines,
+  count(*) AS chunks,
+  pg_size_pretty(pg_total_relation_size('medical_guidelines')) AS size
 FROM medical_guidelines;
--- doit retourner ~984 / ~12000
-
--- Top 10 sources
-SELECT source, count(DISTINCT guideline_code) AS guidelines, count(*) AS chunks
-FROM medical_guidelines
-GROUP BY source ORDER BY chunks DESC LIMIT 10;
+-- Attendu : 984 guidelines / ~12 000 chunks
 ```
 
 ---
 
-## 🆘 Que faire si le workflow échoue ?
+## 🔄 Ce qui se passe pendant l'exécution
 
-### Si "Verify required secrets" fail
-→ Ajouter les 3 secrets manquants (étape 1).
-
-### Si "Apply Supabase migrations" fail avec `extension vector not found`
-→ Upgrader Supabase Pro (HNSW index requis pour les embeddings 1536-d).
-→ OU appliquer la migration manuellement dans le SQL Editor du Dashboard Supabase.
-
-### Si "Ingest" échoue à mi-chemin
-→ Relancer en mode `full-ingest` avec `resume=true` — il reprend où il s'était arrêté.
-→ Les docs déjà ingérés sont identifiés par leur SHA-256.
-
-### Si OpenAI rate-limit (429)
-→ Réduire la concurrence dans `lib/bulk-seed/helpers.ts` (batch de 100 → 50).
-→ OU lancer source par source en mode `single-source`.
-
-### Si le workflow ne démarre pas
-→ Vérifier que `Actions` est activé dans Settings → Actions → General.
-→ Vérifier que la branche existe et contient bien `.github/workflows/`.
+1. GitHub Actions démarre un runner Ubuntu
+2. Vérifie que les secrets SSH sont configurés
+3. Se connecte en SSH au VPS
+4. Sur le VPS :
+   - `cd /home/tibok/medical-ai-expert`
+   - `git pull` la branche RAG
+   - Vérifie `.env.local`
+   - `npm install` (si nécessaire)
+   - Source les variables d'env depuis `.env.local`
+   - Lance `npm run rag:migrate` puis `npm run rag:ingest-extracted ALL`
+5. Affiche les logs dans GitHub Actions UI
+6. Génère un résumé avec le SQL de vérification
 
 ---
 
-## 📊 Audit / replay
+## 🆘 Troubleshooting
 
-Tous les runs sont visibles dans l'onglet **Actions** :
-- ✅ Logs complets
-- ✅ Durée par étape
-- ✅ "Re-run failed jobs" en 1 clic
-- ✅ Téléchargement des logs
+| Symptôme | Fix |
+|---|---|
+| `SSH_HOST missing` | Vérifier les secrets dans Settings → Secrets |
+| `.env.local not found on VPS` | SSH sur le VPS et créer/vérifier le fichier |
+| `NEXT_PUBLIC_SUPABASE_URL missing` | Ajouter les vars manquantes dans `.env.local` du VPS |
+| `pgvector extension not found` | Upgrader Supabase Pro (HNSW indexes nécessitent Pro) |
+| OpenAI rate limit | Lancer source par source en mode `single-source` |
+| Branche pas trouvée | Le VPS doit avoir la branche `claude/medical-assistant-transparency-dv5S9` ou main avec le code RAG |
+
+---
+
+## ✅ Avantages de l'approche SSH
+
+| Aspect | Sans SSH (GitHub direct) | **Avec SSH (cette approche)** |
+|---|---|---|
+| Secrets à gérer | 3 nouveaux dans GitHub | **0 nouveau** (réutilise SSH existant) |
+| Duplication credentials | OUI | **NON** |
+| Environnement d'exécution | Runner GitHub Ubuntu | **Votre VPS** (où tourne déjà l'app) |
+| Sécurité OpenAI | Quota partagé GitHub | **Quota directement sur votre clé** |
+| Audit | Logs GitHub Actions | **Logs GitHub Actions + logs VPS** |
+| Maintenance | Garder secrets sync | **Une seule source de vérité (.env.local du VPS)** |
 
 ---
 
 ## 🔄 Maintenance continue
 
-Une fois l'ingestion initiale faite, n8n prend le relais pour les mises à jour
-quotidiennes/horaires (FDA alerts, NICE updates, etc.). Voir
+Après l'ingestion initiale (one-shot), n8n prend le relais pour les mises à
+jour automatiques (FDA alerts horaire, NICE quotidien, etc.). Voir
 `n8n-workflows/SETUP.md`.
 
 Le workflow `rag-ingest.yml` reste utile pour :
-- Re-ingestion complète après ajout de nouveaux docs au catalogue
-- Single-source si une source est mise à jour
+- Re-ingestion complète après ajout de nouveaux guidelines au catalogue
+- Single-source si une source spécifique est mise à jour
 - Migrations futures du schéma Supabase
