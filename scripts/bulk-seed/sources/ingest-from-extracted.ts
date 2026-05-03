@@ -223,19 +223,27 @@ async function main() {
   const target = process.argv[2]
   if (!target) {
     console.error('Usage: ingest-from-extracted.ts <SOURCE|ALL>')
+    console.error('       Pass "ALL" to ingest every <SOURCE>.json in extracted/')
+    console.error('       Or pass a single source code (e.g. NICE, WHO, ESC)')
     process.exit(1)
   }
   const resume = process.env.RESUME === 'true'
   const dryRun = process.env.DRY_RUN === 'true'
 
-  const allSources = ['NICE', 'WHO', 'CDC', 'ECDC', 'USPSTF', 'HAS', 'KDIGO', 'GOLD', 'GINA',
-                      'ESC', 'AHA', 'ADA', 'IDSA', 'EASL', 'ERS']
-  const targets = target.toUpperCase() === 'ALL' ? allSources : [target.toUpperCase()]
+  // Dynamically discover all extracted source files (preserves all 126+ sources
+  // added across the 6 extraction passes — no hardcoded list to update).
+  const allFiles = await fs.readdir(EXTRACTED_DIR)
+  const allSources = allFiles
+    .filter((f) => f.endsWith('.json') && f !== '_summary.json')
+    .map((f) => f.replace(/\.json$/, ''))
+    .sort()
+
+  const targets = target.toUpperCase() === 'ALL' ? allSources : [target]
 
   console.log('╔═══════════════════════════════════════════════════════════════════╗')
   console.log('║   AI-DOCTOR — Ingest extracted JSONs into Supabase               ║')
   console.log('╚═══════════════════════════════════════════════════════════════════╝')
-  console.log(`  Sources : ${targets.join(', ')}`)
+  console.log(`  Sources : ${targets.length} (${targets.slice(0, 6).join(', ')}${targets.length > 6 ? ', ...' : ''})`)
   console.log(`  Resume  : ${resume}`)
   console.log(`  Dry run : ${dryRun}`)
 
