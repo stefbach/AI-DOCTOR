@@ -734,66 +734,52 @@ export function buildSecondaryQueries(input: {
 }
 
 // ============================================================================
-// Citation expansion: [ref-N] → "(Source, Year)"
+// Citation expansion: [ref-N] → "[K]" (Vancouver-style sequential numbering)
 // ============================================================================
 
-export interface RefCitationMeta {
-  source: string
-  year: string
-}
+/**
+ * Map associating each internal ref_id (e.g. "ref-1") with its 1-indexed
+ * display number — derived from the position of that entry in the final
+ * filtered evidence_references array. The bibliography section at the
+ * bottom of the report numbers entries by the same array position, so
+ * in-text [K] tokens line up with bibliography [K] entries.
+ */
+export type RefDisplayNumberMap = Map<string, number>
 
 /**
- * Build a quick lookup from ref_id → { source, year } for citation expansion.
- *
- * Accepts both bare ("ref-1") and bracketed ("[ref-1]") ids defensively;
- * normalises to the bare form for storage. Year is extracted as the first
- * 4-digit run found in publication_date (handles "2025", "2025-03-12", etc.).
+ * Build a ref_id → display-number lookup from the final evidence_references
+ * array. Accepts both bare ("ref-1") and bracketed ("[ref-1]") ids
+ * defensively; normalises to the bare form for storage.
  */
-export function buildRefCitationMap(
-  references: ReadonlyArray<{
-    ref_id?: string
-    source?: string
-    publication_date?: string
-    year?: string | number
-  }>
-): Map<string, RefCitationMeta> {
-  const map = new Map<string, RefCitationMeta>()
-  if (!references) return map
-  for (const ref of references) {
-    if (!ref?.ref_id) continue
+export function buildRefDisplayMap(
+  evidenceRefs: ReadonlyArray<{ ref_id?: string }> | null | undefined
+): RefDisplayNumberMap {
+  const map: RefDisplayNumberMap = new Map<string, number>()
+  if (!Array.isArray(evidenceRefs)) return map
+  evidenceRefs.forEach((ref, idx) => {
+    if (!ref?.ref_id) return
     const id = String(ref.ref_id).replace(/^\[(.+)\]$/, '$1').trim()
-    if (!id) continue
-    const yearFromExplicit = ref.year != null && String(ref.year).trim() ? String(ref.year).trim() : ''
-    const yearFromDate = (() => {
-      if (!ref.publication_date) return ''
-      const m = String(ref.publication_date).match(/(\d{4})/)
-      return m ? m[1] : ''
-    })()
-    map.set(id, {
-      source: String(ref.source || '').trim() || 'Guideline',
-      year: yearFromExplicit || yearFromDate,
-    })
-  }
+    if (!id || map.has(id)) return
+    map.set(id, idx + 1)
+  })
   return map
 }
 
 /**
- * Replace [ref-N] tokens in a string with a short human-readable citation
- * "(Source, Year)" — or "(Source)" when the year is unknown.
- *
- * Tokens whose ref-N is unknown to the map are dropped (they are usually
- * already filtered upstream by the scrub pass; defence-in-depth).
+ * Replace [ref-N] tokens in a string with the Vancouver-style "[K]" form,
+ * where K is the display number of ref-N in the final bibliography
+ * (1-indexed). Tokens whose ref-N is unknown are dropped — they are
+ * normally already filtered upstream by the scrub pass; defence-in-depth.
  */
 export function expandRefCitations(
   text: string,
-  refMap: Map<string, RefCitationMeta>
+  displayMap: RefDisplayNumberMap
 ): string {
-  if (!text || refMap.size === 0) return text
+  if (!text || displayMap.size === 0) return text
   return text
     .replace(/\[ref-(\d+)\]/g, (_match, num) => {
-      const meta = refMap.get(`ref-${num}`)
-      if (!meta) return ''
-      return meta.year ? `(${meta.source}, ${meta.year})` : `(${meta.source})`
+      const k = displayMap.get(`ref-${num}`)
+      return k ? `[${k}]` : ''
     })
     // Tidy whitespace/punctuation introduced by drops above.
     .replace(/\s+([,.;:!?)])/g, '$1')
@@ -807,17 +793,18 @@ export function expandRefCitations(
  * `expandRefCitations`. Mutates in place AND returns the same reference.
  *
  * `excludeKeys` lets callers protect structured ref metadata (e.g. the
- * `evidence_references` array which keeps its [ref-N] form for the
- * bibliography section at the bottom of the report).
+ * `evidence_references` array which keeps its internal ref-N form for the
+ * bibliography section at the bottom of the report — the frontend numbers
+ * those entries by their array position, matching the [K] placed in-text).
  */
 export function expandRefsInTree(
   node: any,
-  refMap: Map<string, RefCitationMeta>,
+  displayMap: RefDisplayNumberMap,
   excludeKeys: ReadonlySet<string> = new Set(['evidence_references', 'rag_metadata'])
 ): any {
-  if (refMap.size === 0) return node
+  if (displayMap.size === 0) return node
   const visit = (n: any): any => {
-    if (typeof n === 'string') return expandRefCitations(n, refMap)
+    if (typeof n === 'string') return expandRefCitations(n, displayMap)
     if (Array.isArray(n)) {
       for (let i = 0; i < n.length; i++) n[i] = visit(n[i])
       return n

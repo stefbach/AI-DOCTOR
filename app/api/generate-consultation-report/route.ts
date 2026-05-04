@@ -2,7 +2,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
-import { buildRefCitationMap, expandRefsInTree } from "@/lib/rag/medical-rag"
+import { buildRefDisplayMap, expandRefsInTree } from "@/lib/rag/medical-rag"
 
 export const runtime = 'nodejs'
 export const maxDuration = 120 // 120 seconds for GPT-5.5 report generation (increased from 60s to prevent 504 timeouts)
@@ -2417,25 +2417,31 @@ export async function POST(request: NextRequest) {
     
     reportStructure.medicalReport.metadata.wordCount = wordCount
 
-    // ====== Fix B: expand [ref-N] → "(Source, Year)" in narrative strings ======
-    // Doctors and patients can't read "[ref-7]" — give them readable inline
-    // citations. The full bibliography (with title + URL) stays in
-    // diagnosisData.evidence_references for the section at the bottom of the
-    // report; we exclude that key + rag_metadata from the walk so it survives
-    // intact for rendering.
+    // ====== Expand [ref-N] → [K] (Vancouver-style sequential numbering) ======
+    // Doctors and patients want a classic scientific in-text citation: a
+    // bracketed number that matches the position of the reference in the
+    // bibliography section at the bottom of the report. The frontend numbers
+    // bibliography entries by their array position in evidence_references, so
+    // mapping ref_id → (1-indexed array position) keeps in-text and bibliography
+    // numbers in lockstep. evidence_references + rag_metadata are skipped via
+    // excludeKeys so the bibliography keeps its internal ref-N form intact for
+    // rendering.
     //
     // We expand BOTH reportStructure (narrative + prescriptions emitted by
     // LLM #2) AND diagnosisData (clinical rationale + investigation/treatment
     // plans emitted by LLM #1, rendered directly by professional-report.tsx).
     try {
       const refsForExpansion = (diagnosisData as any)?.evidence_references ?? []
-      const refMap = buildRefCitationMap(refsForExpansion as any)
-      if (refMap.size > 0) {
-        expandRefsInTree(reportStructure, refMap)
-        expandRefsInTree(diagnosisData, refMap)
+      const displayMap = buildRefDisplayMap(refsForExpansion as any)
+      if (displayMap.size > 0) {
+        expandRefsInTree(reportStructure, displayMap)
+        expandRefsInTree(diagnosisData, displayMap)
+        const mappingPreview = Array.from(displayMap.entries())
+          .map(([id, k]) => `${id}→[${k}]`)
+          .join(', ')
         console.log(
-          `📚 [RAG] Expanded [ref-N] → (Source, Year) across reportStructure + diagnosisData ` +
-            `(${refMap.size} refs available: ${Array.from(refMap.keys()).join(', ')})`
+          `📚 [RAG] Expanded [ref-N] → [K] (Vancouver sequential numbering) across reportStructure + diagnosisData ` +
+            `(${displayMap.size} refs: ${mappingPreview})`
         )
       } else {
         console.log('📚 [RAG] No references available for citation expansion (skipped)')
