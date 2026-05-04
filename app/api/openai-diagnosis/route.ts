@@ -4,6 +4,8 @@ import crypto from 'crypto'
 import OpenAI from 'openai'
 import {
   queryMedicalGuidelines,
+  queryMedicalGuidelinesMulti,
+  buildSecondaryQueries,
   formatGuidelinesForPrompt,
   inferSpecialty,
   buildClinicalQuery,
@@ -5239,10 +5241,34 @@ export async function POST(request: NextRequest) {
       const inferredSpecialty = inferSpecialty(ragQuery)
       console.log(`📚 [RAG] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
       console.log(`📚 [RAG] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
-      ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+
+      // Bug B (multi-query RAG): when the patient context fits a known scenario
+      // whose vocabulary differs from the chief complaint (e.g. malaria when
+      // travelling from an endemic country, bacterial workup on prolonged fever),
+      // run targeted secondary queries in parallel and merge with the primary.
+      const secondaryQueries = buildSecondaryQueries({
+        chiefComplaint: patientContext.chief_complaint,
+        symptoms: patientContext.symptoms,
+        travelHistory: patientContext.disease_history,
+        symptomDuration: patientContext.symptom_duration,
+        ageYears: patientContext.age,
+      })
+      if (secondaryQueries.length > 0) {
+        console.log(
+          `📚 [RAG] Secondary queries triggered: ${secondaryQueries.map(q => q.label).join(', ')}`
+        )
+        ragContext = await queryMedicalGuidelinesMulti(
+          ragQuery,
+          secondaryQueries,
+          { specialty: inferredSpecialty, limit: 10 }
+        )
+      } else {
+        console.log('📚 [RAG] No secondary queries triggered — running single-query retrieval')
+        ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+      }
       console.log(
         `📚 [RAG] Retrieved ${ragContext.totalChunks} chunks ` +
-          `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length}, limit=15)`
+          `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
       )
       if (ragContext.references.length > 0) {
         console.log(

@@ -106,6 +106,20 @@ export interface QueryOptions {
   limit?: number
 }
 
+/** A context-specific secondary query bundled with its retrieval options. */
+export interface SecondaryQuery {
+  /** Short label for logging (e.g. "malaria", "bacterial_workup"). */
+  label: string
+  /** Free-text clinical query optimised for the targeted topic. */
+  text: string
+  /** Specialty filter; null = broad search. */
+  specialty?: SpecialtyCode | null
+  /** Cosine similarity threshold; defaults to 0.30. */
+  threshold?: number
+  /** Max chunks to retrieve for this subquery; default 3. */
+  limit?: number
+}
+
 const EMPTY_CONTEXT: RAGContext = {
   chunks: [],
   references: [],
@@ -135,50 +149,153 @@ export async function queryMedicalGuidelines(
   const threshold = opts.threshold ?? 0.30
   const limit = opts.limit ?? 8
 
-  // 1. Embed the query
+  const rows = await fetchGuidelineRows(trimmedQuery, { specialty, threshold, limit })
+  if (rows === null) return { ...EMPTY_CONTEXT, ragUsed: false }
+  if (rows.length === 0) return { ...EMPTY_CONTEXT, ragUsed: true }
+  return buildContextFromRows(rows)
+}
+
+/**
+ * Multi-query retrieval — runs the primary clinical query plus any context-
+ * specific secondary queries (e.g. malaria when travel_history mentions an
+ * endemic country). Results are merged, deduped by chunk content, and
+ * re-numbered with stable global ref-N ids.
+ *
+ * Why this exists: a single embedding-driven query is dominated by the
+ * vocabulary of the chief complaint and misses chunks that share the same
+ * clinical scenario but use different terminology (Plasmodium vs arbovirus,
+ * blood cultures vs viral PCR…). Secondary queries surface those without
+ * lowering the threshold or further widening match_count.
+ */
+export async function queryMedicalGuidelinesMulti(
+  primaryQuery: string,
+  secondaryQueries: SecondaryQuery[],
+  primaryOpts: QueryOptions = {}
+): Promise<RAGContext> {
+  if (!secondaryQueries || secondaryQueries.length === 0) {
+    return queryMedicalGuidelines(primaryQuery, primaryOpts)
+  }
+
+  const allSpecs = [
+    {
+      label: 'main_clinical',
+      query: (primaryQuery || '').trim(),
+      opts: {
+        specialty: primaryOpts.specialty ?? null,
+        threshold: primaryOpts.threshold ?? 0.30,
+        limit: primaryOpts.limit ?? 10,
+      },
+    },
+    ...secondaryQueries.map(q => ({
+      label: q.label,
+      query: (q.text || '').trim(),
+      opts: {
+        specialty: q.specialty ?? null,
+        threshold: q.threshold ?? 0.30,
+        limit: q.limit ?? 3,
+      },
+    })),
+  ]
+
+  const t0 = Date.now()
+  const rowsPerQuery = await Promise.all(
+    allSpecs.map(spec => spec.query ? fetchGuidelineRows(spec.query, spec.opts) : Promise.resolve([] as MatchGuidelinesRow[]))
+  )
+
+  // Per-query log so we can see which subquery contributed what
+  allSpecs.forEach((spec, i) => {
+    const rows = rowsPerQuery[i]
+    if (rows === null) {
+      console.log(`[RAG] Multi-query "${spec.label}": failed (non-blocking)`)
+    } else {
+      const avgSim = rows.length > 0
+        ? rows.reduce((s, r) => s + (r.similarity || 0), 0) / rows.length
+        : 0
+      console.log(
+        `[RAG] Multi-query "${spec.label}": ${rows.length} chunks (avg sim ${avgSim.toFixed(2)}, ` +
+          `specialty=${spec.opts.specialty ?? 'any'}, limit=${spec.opts.limit})`
+      )
+    }
+  })
+
+  const ragUsed = rowsPerQuery.some(r => r !== null)
+  // Flatten + drop null results (RPC failures already logged)
+  const allRows = rowsPerQuery.flatMap(r => r ?? [])
+
+  if (allRows.length === 0) {
+    console.log(`[RAG] Multi-query: 0 chunks across ${allSpecs.length} queries in ${Date.now() - t0}ms`)
+    return { ...EMPTY_CONTEXT, ragUsed }
+  }
+
+  // Sort by similarity DESC so the dedup below keeps the highest-similarity
+  // occurrence of each chunk.
+  allRows.sort((a, b) => (b.similarity || 0) - (a.similarity || 0))
+
+  const seenKeys = new Set<string>()
+  const dedupedRows: MatchGuidelinesRow[] = []
+  for (const row of allRows) {
+    const key = `${row.guideline_external_id}::${row.chunk_metadata?.section_title || ''}::${(row.chunk_content || '').slice(0, 120)}`
+    if (seenKeys.has(key)) continue
+    seenKeys.add(key)
+    dedupedRows.push(row)
+  }
+
+  console.log(
+    `[RAG] Multi-query merged: ${allRows.length} → ${dedupedRows.length} unique chunks ` +
+      `in ${Date.now() - t0}ms (deduped ${allRows.length - dedupedRows.length})`
+  )
+
+  const ctx = buildContextFromRows(dedupedRows)
+  return { ...ctx, ragUsed: ragUsed && ctx.ragUsed }
+}
+
+/** Embed a query and call the match_guidelines RPC. Returns null on failure. */
+async function fetchGuidelineRows(
+  query: string,
+  opts: Required<Pick<QueryOptions, 'specialty' | 'threshold' | 'limit'>>
+): Promise<MatchGuidelinesRow[] | null> {
   let embedding: number[]
   try {
     const t0 = Date.now()
     const res = await getOpenAI().embeddings.create({
       model: 'text-embedding-3-small',
-      input: trimmedQuery,
+      input: query,
     })
     embedding = res.data[0].embedding
     console.log(`[RAG] embedding generated in ${Date.now() - t0}ms (${embedding.length} dims)`)
   } catch (err: any) {
     console.error('[RAG] embedding failed (non-blocking):', err?.message || err)
-    return { ...EMPTY_CONTEXT, ragUsed: false }
+    return null
   }
 
-  // 2. Call match_guidelines RPC
-  let rows: MatchGuidelinesRow[] = []
   try {
     const t0 = Date.now()
     const { data, error } = await getSupabase().rpc('match_guidelines', {
       query_embedding: embedding,
-      match_specialty_code: specialty,
-      match_threshold: threshold,
-      match_count: limit,
+      match_specialty_code: opts.specialty,
+      match_threshold: opts.threshold,
+      match_count: opts.limit,
     })
     if (error) {
       console.error('[RAG] match_guidelines RPC error:', error.message)
-      return { ...EMPTY_CONTEXT, ragUsed: true }
+      return null
     }
-    rows = (data || []) as MatchGuidelinesRow[]
+    const rows = (data || []) as MatchGuidelinesRow[]
     console.log(
       `[RAG] match_guidelines returned ${rows.length} chunks in ${Date.now() - t0}ms ` +
-        `(specialty=${specialty ?? 'any'}, threshold=${threshold}, limit=${limit})`
+        `(specialty=${opts.specialty ?? 'any'}, threshold=${opts.threshold}, limit=${opts.limit})`
     )
+    return rows
   } catch (err: any) {
     console.error('[RAG] RPC call failed (non-blocking):', err?.message || err)
-    return { ...EMPTY_CONTEXT, ragUsed: true }
+    return null
   }
+}
 
-  if (rows.length === 0) {
-    return { ...EMPTY_CONTEXT, ragUsed: true }
-  }
+/** Group rows into chunks + dedup references by external_id. */
+function buildContextFromRows(rows: MatchGuidelinesRow[]): RAGContext {
+  if (rows.length === 0) return { ...EMPTY_CONTEXT, ragUsed: true }
 
-  // 3. Build chunks + dedup references by external_id
   const refByExternalId = new Map<string, RAGReference>()
   const chunks: RAGChunk[] = []
 
@@ -515,4 +632,103 @@ export function buildClinicalQuery(input: {
   // Numeric vitals dilute the embedding signal and rarely add retrieval value.
 
   return segments.join(' ').replace(/\s+/g, ' ').trim()
+}
+
+// ============================================================================
+// Secondary query inference (Bug B / multi-query RAG)
+// ============================================================================
+
+/**
+ * Countries with active or recurrent malaria transmission. Lower-cased,
+ * substring matching. List intentionally generous — false positives only
+ * cost a small extra query.
+ */
+const MALARIA_ENDEMIC_COUNTRIES: readonly string[] = [
+  // South / Southeast Asia
+  'india', 'pakistan', 'bangladesh', 'sri lanka', 'nepal', 'bhutan',
+  'myanmar', 'burma', 'cambodia', 'laos', 'vietnam', 'thailand',
+  'indonesia', 'philippines', 'malaysia', 'east timor', 'timor-leste', 'timor',
+  'papua new guinea',
+  // Africa (sub-Saharan + horn)
+  'nigeria', 'congo', 'drc', 'democratic republic of the congo',
+  'kenya', 'tanzania', 'uganda', 'ethiopia', 'eritrea', 'somalia',
+  'sudan', 'south sudan', 'ghana', 'cameroon', 'senegal', 'mali',
+  'burkina faso', 'angola', 'mozambique', 'madagascar', 'malawi',
+  'zambia', 'zimbabwe', "cote d'ivoire", "côte d'ivoire", 'ivory coast',
+  'sierra leone', 'liberia', 'guinea', 'gambia', 'guinea-bissau',
+  'benin', 'togo', 'central african republic', 'chad', 'niger',
+  'rwanda', 'burundi', 'mauritania', 'comoros',
+  // Americas (tropical)
+  'brazil', 'colombia', 'peru', 'venezuela', 'guyana', 'suriname',
+  'french guiana', 'haiti', 'dominican republic', 'panama', 'nicaragua',
+  'honduras', 'guatemala', 'belize', 'ecuador', 'bolivia',
+  // Pacific
+  'solomon islands', 'vanuatu',
+]
+
+/**
+ * Build a list of secondary RAG queries based on the patient context.
+ *
+ * Each query targets a clinical scenario whose vocabulary differs enough
+ * from the chief complaint that a single embedding query would miss it
+ * (malaria with arboviral CC, bacterial workup with viral CC, etc.).
+ *
+ * Returns [] when no extra signal is detected — the caller falls back to
+ * the single-query path with no overhead change.
+ */
+export function buildSecondaryQueries(input: {
+  chiefComplaint?: string
+  symptoms?: string[]
+  travelHistory?: string
+  symptomDuration?: string
+  ageYears?: number | string
+}): SecondaryQuery[] {
+  const queries: SecondaryQuery[] = []
+  const cc = (input.chiefComplaint || '').toLowerCase()
+  const symptoms = (input.symptoms || []).map(s => String(s || '').toLowerCase())
+  const symptomBlob = [cc, ...symptoms].join(' ')
+  const travel = (input.travelHistory || '').toLowerCase()
+
+  const hasFever = /\bfever\b|\bfièvre\b|febrile|pyrexia|hyperthermia/.test(symptomBlob)
+
+  // ---------- Malaria — fever + travel to endemic country ----------
+  if (hasFever && MALARIA_ENDEMIC_COUNTRIES.some(c => travel.includes(c))) {
+    queries.push({
+      label: 'malaria',
+      text:
+        'malaria diagnosis Plasmodium falciparum vivax thick thin blood films ' +
+        'rapid diagnostic test RDT artemisinin combination therapy treatment ' +
+        'returning travelers fever endemic regions',
+      specialty: 'infectious_diseases',
+      limit: 3,
+    })
+  }
+
+  // ---------- Bacterial workup — fever ≥ 3 days or any prolonged febrile illness ----------
+  // The duration field is often a coded range like "3_7_days" or a free-form
+  // string; pull out any leading integer to gate.
+  const durationDays = (() => {
+    const raw = String(input.symptomDuration || '').toLowerCase()
+    const m = raw.match(/(\d+)/)
+    if (!m) return 0
+    const n = parseInt(m[1], 10)
+    if (raw.includes('week')) return n * 7
+    if (raw.includes('month')) return n * 30
+    if (raw.includes('hour')) return Math.max(0, Math.round(n / 24))
+    return n
+  })()
+
+  if (hasFever && durationDays >= 3) {
+    queries.push({
+      label: 'bacterial_workup',
+      text:
+        'blood cultures bacteraemia sepsis acute febrile illness CRP procalcitonin ' +
+        'inflammatory markers urinalysis empirical antibiotic prolonged fever ' +
+        'undifferentiated febrile illness',
+      specialty: 'infectious_diseases',
+      limit: 2,
+    })
+  }
+
+  return queries
 }
