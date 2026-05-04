@@ -5239,11 +5239,16 @@ export async function POST(request: NextRequest) {
       const inferredSpecialty = inferSpecialty(ragQuery)
       console.log(`📚 [RAG] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
       console.log(`📚 [RAG] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
-      ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty })
+      ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
       console.log(
         `📚 [RAG] Retrieved ${ragContext.totalChunks} chunks ` +
-          `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
+          `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length}, limit=15)`
       )
+      if (ragContext.references.length > 0) {
+        console.log(
+          `📚 [RAG] Available citation IDs: ${ragContext.references.map(r => r.ref_id).join(', ')}`
+        )
+      }
     } catch (ragErr: any) {
       console.error('📚 [RAG] Enrichment failed (non-blocking):', ragErr?.message || ragErr)
     }
@@ -5547,6 +5552,76 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     
     const validation = validateUniversalMedicalAnalysis(finalAnalysis, patientContext)
 
+    // ============ RAG: scrub hallucinated [ref-N] from narrative strings ============
+    // The LLM sometimes cites refs outside the provided range (e.g. [ref-4] when only 3
+    // refs were given). These break frontend lookup and erode trust. Strip them in-place
+    // across every string field of finalAnalysis. Valid [ref-N] are preserved as-is.
+    let hallucinatedRefsScrubbed = 0
+    let hallucinatedRefsBreakdown: Record<string, number> = {}
+    if (ragContext.ragUsed) {
+      const validRefIds = new Set(ragContext.references.map(r => r.ref_id))
+      const REF_TOKEN = /\[ref-(\d+)\]/g
+      const strippedTokens: string[] = []
+      let stringsScanned = 0
+      let stringsModified = 0
+
+      const scrubString = (s: string): string => {
+        stringsScanned++
+        let modified = false
+        const cleaned = s.replace(REF_TOKEN, (match, num) => {
+          const id = `ref-${num}`
+          if (validRefIds.has(id)) return match
+          modified = true
+          strippedTokens.push(id)
+          return ''
+        })
+        if (!modified) return s
+        stringsModified++
+        // Tidy trailing/double whitespace and stray punctuation around the removal
+        return cleaned
+          .replace(/\s+([,.;:!?)])/g, '$1')
+          .replace(/\(\s*\)/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .trim()
+      }
+
+      const scrubNode = (node: any): any => {
+        if (typeof node === 'string') return scrubString(node)
+        if (Array.isArray(node)) return node.map(scrubNode)
+        if (node && typeof node === 'object') {
+          // Don't rewrite the evidence_references entries themselves — Pass 1 below
+          // handles those and tags unknown ref_id values into unknownCitedRefs.
+          if (node === finalAnalysis?.evidence_references) return node
+          for (const k of Object.keys(node)) {
+            if (k === 'evidence_references') continue
+            node[k] = scrubNode(node[k])
+          }
+        }
+        return node
+      }
+
+      scrubNode(finalAnalysis)
+
+      if (strippedTokens.length > 0) {
+        hallucinatedRefsScrubbed = strippedTokens.length
+        hallucinatedRefsBreakdown = strippedTokens.reduce<Record<string, number>>((acc, t) => {
+          acc[t] = (acc[t] || 0) + 1
+          return acc
+        }, {})
+        console.warn(
+          `📚 [RAG] Scrubbed ${strippedTokens.length} hallucinated ref token(s) ` +
+            `from ${stringsModified}/${stringsScanned} narrative string(s). ` +
+            `Counts: ${JSON.stringify(hallucinatedRefsBreakdown)}. ` +
+            `Valid range was [ref-1..ref-${ragContext.references.length}].`
+        )
+      } else {
+        console.log(
+          `📚 [RAG] Scrub clean: scanned ${stringsScanned} string(s), no out-of-range [ref-N] found ` +
+            `(valid range [ref-1..ref-${ragContext.references.length}]).`
+        )
+      }
+    }
+
     // ============ RAG: enrich evidence_references with full metadata ============
     // The LLM emits {ref_id, used_for}; we merge in title/source/url/date from ragContext.
     // Hybrid strategy:
@@ -5635,6 +5710,8 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         cited_references: evidenceReferences.length,
         unknown_citations: unknownCitedRefs,
         citations_reconstructed: citationsReconstructed,
+        hallucinated_refs_scrubbed: hallucinatedRefsScrubbed,
+        hallucinated_refs_breakdown: hallucinatedRefsBreakdown,
       },
       evidence_references: evidenceReferences,
 

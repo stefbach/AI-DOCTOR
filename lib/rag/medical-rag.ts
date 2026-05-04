@@ -230,6 +230,10 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
     return ''
   }
 
+  const N = ctx.references.length
+  const validRange = N === 1 ? '[ref-1] ONLY' : `[ref-1] to [ref-${N}]`
+  const validIds = ctx.references.map(r => `[${r.ref_id}]`).join(', ')
+
   const lines: string[] = []
   lines.push('=== CONTEXTE GUIDELINES MÉDICALES (RAG) ===')
   lines.push('')
@@ -268,16 +272,25 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
 
   lines.push('=== RÈGLES OBLIGATOIRES POUR LES RÉFÉRENCES ===')
   lines.push(
-    '1. Chaque recommandation diagnostique ou thérapeutique DOIT être attribuée à une référence [ref-N] si elle est supportée par les guidelines ci-dessus.'
+    `1. Plage de citations VALIDES: ${validRange}. EXACTEMENT ${N} référence(s) disponible(s): ${validIds}.`
   )
   lines.push(
-    "2. Si aucune guideline du contexte ne supporte une recommandation, note explicitement: 'Recommandation basée sur la pratique clinique standard, hors guideline RAG'."
+    `2. INTERDIT de citer [ref-${N + 1}], [ref-${N + 2}], ou tout [ref-X] avec X > ${N}. Toute référence hors de la plage ${validRange} sera supprimée du rapport (citation invalidée).`
   )
   lines.push(
-    '3. Liste TOUTES les références utilisées dans le champ evidence_references du JSON output.'
+    '3. Chaque recommandation diagnostique ou thérapeutique DOIT être attribuée à une référence [ref-N] si elle est supportée par les guidelines ci-dessus.'
   )
   lines.push(
-    "4. NE PAS inventer de références: ne cite que les [ref-N] présents ci-dessus."
+    "4. Si aucune guideline du contexte ne supporte une recommandation, note explicitement: 'Recommandation basée sur la pratique clinique standard, hors guideline RAG'."
+  )
+  lines.push(
+    '5. POUR CHAQUE MÉDICAMENT prescrit, cite la référence guideline pertinente [ref-N] dans le champ "indication" si disponible dans le contexte ci-dessus (ex: "Symptomatic relief of fever and pain [ref-2]").'
+  )
+  lines.push(
+    '6. Liste TOUTES les références utilisées dans le champ evidence_references du JSON output.'
+  )
+  lines.push(
+    "7. NE PAS inventer de références: ne cite que les [ref-N] présents ci-dessus."
   )
   lines.push('')
 
