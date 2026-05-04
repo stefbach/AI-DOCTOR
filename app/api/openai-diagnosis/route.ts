@@ -5556,8 +5556,12 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     // The LLM sometimes cites refs outside the provided range (e.g. [ref-4] when only 3
     // refs were given). These break frontend lookup and erode trust. Strip them in-place
     // across every string field of finalAnalysis. Valid [ref-N] are preserved as-is.
+    // We also collect the set of VALID refs that actually appear in the narrative so we
+    // can drop unused entries from finalAnalysis.evidence_references afterwards (Bug D).
     let hallucinatedRefsScrubbed = 0
     let hallucinatedRefsBreakdown: Record<string, number> = {}
+    let unusedRefsFiltered = 0
+    const usedValidRefs = new Set<string>()
     if (ragContext.ragUsed) {
       const validRefIds = new Set(ragContext.references.map(r => r.ref_id))
       const REF_TOKEN = /\[ref-(\d+)\]/g
@@ -5570,7 +5574,10 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         let modified = false
         const cleaned = s.replace(REF_TOKEN, (match, num) => {
           const id = `ref-${num}`
-          if (validRefIds.has(id)) return match
+          if (validRefIds.has(id)) {
+            usedValidRefs.add(id)
+            return match
+          }
           modified = true
           strippedTokens.push(id)
           return ''
@@ -5620,6 +5627,26 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
             `(valid range [ref-1..ref-${ragContext.references.length}]).`
         )
       }
+
+      // ============ Bug D: drop refs the LLM never actually used in the text ============
+      // The model often dumps every provided ref into evidence_references "by reflex"
+      // even when only 1–2 are cited in the narrative. Filter to the refs that show
+      // up in the cleaned report — anything the doctor cannot trace back to a passage
+      // is noise and erodes trust ("[ref-7] Intracerebral Hemorrhage" on a dengue case).
+      if (Array.isArray(finalAnalysis?.evidence_references) && finalAnalysis.evidence_references.length > 0) {
+        const before = finalAnalysis.evidence_references.length
+        finalAnalysis.evidence_references = finalAnalysis.evidence_references.filter((entry: any) => {
+          const id = (entry?.ref_id || '').trim()
+          return id && usedValidRefs.has(id)
+        })
+        unusedRefsFiltered = before - finalAnalysis.evidence_references.length
+        if (unusedRefsFiltered > 0) {
+          console.log(
+            `📚 [RAG] Dropped ${unusedRefsFiltered} ref(s) from evidence_references that never appeared in the report text. ` +
+              `Kept: ${Array.from(usedValidRefs).join(', ') || '(none)'}`
+          )
+        }
+      }
     }
 
     // ============ RAG: enrich evidence_references with full metadata ============
@@ -5657,13 +5684,20 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         })
       }
 
-      // Pass 2 — deterministic fallback if LLM emitted nothing despite chunks
+      // Pass 2 — deterministic fallback if LLM emitted nothing despite chunks.
+      // Prefer refs the model actually cited in the narrative (usedValidRefs);
+      // only fall back to the full provided set if the narrative cites nothing
+      // either (otherwise we'd reintroduce the off-topic noise Bug D removed).
       if (evidenceReferences.length === 0 && ragContext.references.length > 0) {
         citationsReconstructed = true
+        const fallbackRefs = usedValidRefs.size > 0
+          ? ragContext.references.filter(r => usedValidRefs.has(r.ref_id))
+          : ragContext.references
         console.log(
-          `📚 [RAG] Reconstructing ${ragContext.references.length} citation(s) — LLM emitted empty evidence_references despite ${ragContext.totalChunks} chunks provided`
+          `📚 [RAG] Reconstructing ${fallbackRefs.length} citation(s) — LLM emitted empty evidence_references despite ${ragContext.totalChunks} chunks provided ` +
+            `(narrative-cited: ${usedValidRefs.size}, full-fallback: ${usedValidRefs.size === 0})`
         )
-        for (const ref of ragContext.references) {
+        for (const ref of fallbackRefs) {
           evidenceReferences.push({
             ...ref,
             used_for: 'Référence fournie au modèle (mapping détaillé non précisé par le LLM)',
@@ -5712,6 +5746,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         citations_reconstructed: citationsReconstructed,
         hallucinated_refs_scrubbed: hallucinatedRefsScrubbed,
         hallucinated_refs_breakdown: hallucinatedRefsBreakdown,
+        unused_refs_filtered: unusedRefsFiltered,
       },
       evidence_references: evidenceReferences,
 
