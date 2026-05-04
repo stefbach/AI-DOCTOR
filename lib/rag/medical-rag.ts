@@ -100,7 +100,7 @@ export interface RAGContext {
 export interface QueryOptions {
   /** Specialty filter; null = broad search across all specialties. */
   specialty?: SpecialtyCode | null
-  /** Cosine similarity threshold; default 0.55 (better recall for natural-language queries on text-embedding-3-small medical content). */
+  /** Cosine similarity threshold; default 0.30 (validated against real DB: text-embedding-3-small produces sims ~0.30-0.40 for clinically relevant medical content). */
   threshold?: number
   /** Max chunks to retrieve; default 8 (RPC default). */
   limit?: number
@@ -132,7 +132,7 @@ export async function queryMedicalGuidelines(
   if (!trimmedQuery) return EMPTY_CONTEXT
 
   const specialty = opts.specialty ?? null
-  const threshold = opts.threshold ?? 0.55
+  const threshold = opts.threshold ?? 0.30
   const limit = opts.limit ?? 8
 
   // 1. Embed the query
