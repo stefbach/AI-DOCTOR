@@ -732,3 +732,103 @@ export function buildSecondaryQueries(input: {
 
   return queries
 }
+
+// ============================================================================
+// Citation expansion: [ref-N] → "(Source, Year)"
+// ============================================================================
+
+export interface RefCitationMeta {
+  source: string
+  year: string
+}
+
+/**
+ * Build a quick lookup from ref_id → { source, year } for citation expansion.
+ *
+ * Accepts both bare ("ref-1") and bracketed ("[ref-1]") ids defensively;
+ * normalises to the bare form for storage. Year is extracted as the first
+ * 4-digit run found in publication_date (handles "2025", "2025-03-12", etc.).
+ */
+export function buildRefCitationMap(
+  references: ReadonlyArray<{
+    ref_id?: string
+    source?: string
+    publication_date?: string
+    year?: string | number
+  }>
+): Map<string, RefCitationMeta> {
+  const map = new Map<string, RefCitationMeta>()
+  if (!references) return map
+  for (const ref of references) {
+    if (!ref?.ref_id) continue
+    const id = String(ref.ref_id).replace(/^\[(.+)\]$/, '$1').trim()
+    if (!id) continue
+    const yearFromExplicit = ref.year != null && String(ref.year).trim() ? String(ref.year).trim() : ''
+    const yearFromDate = (() => {
+      if (!ref.publication_date) return ''
+      const m = String(ref.publication_date).match(/(\d{4})/)
+      return m ? m[1] : ''
+    })()
+    map.set(id, {
+      source: String(ref.source || '').trim() || 'Guideline',
+      year: yearFromExplicit || yearFromDate,
+    })
+  }
+  return map
+}
+
+/**
+ * Replace [ref-N] tokens in a string with a short human-readable citation
+ * "(Source, Year)" — or "(Source)" when the year is unknown.
+ *
+ * Tokens whose ref-N is unknown to the map are dropped (they are usually
+ * already filtered upstream by the scrub pass; defence-in-depth).
+ */
+export function expandRefCitations(
+  text: string,
+  refMap: Map<string, RefCitationMeta>
+): string {
+  if (!text || refMap.size === 0) return text
+  return text
+    .replace(/\[ref-(\d+)\]/g, (_match, num) => {
+      const meta = refMap.get(`ref-${num}`)
+      if (!meta) return ''
+      return meta.year ? `(${meta.source}, ${meta.year})` : `(${meta.source})`
+    })
+    // Tidy whitespace/punctuation introduced by drops above.
+    .replace(/\s+([,.;:!?)])/g, '$1')
+    .replace(/\(\s*\)/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+/**
+ * Walk an arbitrary object/array tree and rewrite every string field through
+ * `expandRefCitations`. Mutates in place AND returns the same reference.
+ *
+ * `excludeKeys` lets callers protect structured ref metadata (e.g. the
+ * `evidence_references` array which keeps its [ref-N] form for the
+ * bibliography section at the bottom of the report).
+ */
+export function expandRefsInTree(
+  node: any,
+  refMap: Map<string, RefCitationMeta>,
+  excludeKeys: ReadonlySet<string> = new Set(['evidence_references', 'rag_metadata'])
+): any {
+  if (refMap.size === 0) return node
+  const visit = (n: any): any => {
+    if (typeof n === 'string') return expandRefCitations(n, refMap)
+    if (Array.isArray(n)) {
+      for (let i = 0; i < n.length; i++) n[i] = visit(n[i])
+      return n
+    }
+    if (n && typeof n === 'object') {
+      for (const k of Object.keys(n)) {
+        if (excludeKeys.has(k)) continue
+        n[k] = visit(n[k])
+      }
+    }
+    return n
+  }
+  return visit(node)
+}
