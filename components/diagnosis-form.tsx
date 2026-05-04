@@ -495,6 +495,9 @@ export default function DiagnosisForm({
  const [currentMedicationsValidated, setCurrentMedicationsValidated] = useState<any[]>([])
  const [medications, setMedications] = useState<any[]>([])
  const [combinedPrescription, setCombinedPrescription] = useState<any[]>([])
+ const [evidenceReferences, setEvidenceReferences] = useState<any[]>([])
+ const [ragUsed, setRagUsed] = useState<boolean>(false)
+ const [ragMetadata, setRagMetadata] = useState<any>(null)
  
  // 🏥 CONSULTATION CONTEXT STATE
  const [consultationContext, setConsultationContext] = useState<{
@@ -600,6 +603,15 @@ export default function DiagnosisForm({
  setCombinedPrescription(savedData.diagnosisData.combinedPrescription)
  console.log('✅ Restored', savedData.diagnosisData.combinedPrescription.length, 'combined prescriptions from localStorage')
  }
+ if (Array.isArray(savedData.diagnosisData.evidence_references)) {
+ setEvidenceReferences(savedData.diagnosisData.evidence_references)
+ }
+ if (typeof savedData.diagnosisData.rag_used === 'boolean') {
+ setRagUsed(savedData.diagnosisData.rag_used)
+ }
+ if (savedData.diagnosisData.rag_metadata) {
+ setRagMetadata(savedData.diagnosisData.rag_metadata)
+ }
  }
  }
  } catch (error) {
@@ -625,6 +637,10 @@ export default function DiagnosisForm({
  currentMedicationsValidated,
  medications,
  combinedPrescription,
+ // RAG (TIBOK guidelines)
+ evidence_references: evidenceReferences,
+ rag_used: ragUsed,
+ rag_metadata: ragMetadata,
  timestamp: new Date().toISOString()
  }
  
@@ -637,7 +653,7 @@ export default function DiagnosisForm({
  
  onDataChange(completeData)
  }
- }, [diagnosis, diagnosticReasoning, expertAnalysis, mauritianDocuments, documentsGenerated, currentMedicationsValidated, medications, combinedPrescription])
+ }, [diagnosis, diagnosticReasoning, expertAnalysis, mauritianDocuments, documentsGenerated, currentMedicationsValidated, medications, combinedPrescription, evidenceReferences, ragUsed, ragMetadata])
 
  // Effect for realistic progression
  useEffect(() => {
@@ -711,6 +727,10 @@ export default function DiagnosisForm({
  currentMedicationsValidated,
  medications,
  combinedPrescription,
+ // RAG (TIBOK guidelines) — persisted so EvidenceReferencesSection survives reloads
+ evidence_references: evidenceReferences,
+ rag_used: ragUsed,
+ rag_metadata: ragMetadata,
  timestamp: new Date().toISOString()
  }
  await consultationDataService.saveStepData(3, dataToSave)
@@ -721,7 +741,7 @@ export default function DiagnosisForm({
  }
  
  saveData()
- }, [diagnosis, diagnosticReasoning, expertAnalysis, mauritianDocuments, documentsGenerated, currentMedicationsValidated, medications, combinedPrescription])
+ }, [diagnosis, diagnosticReasoning, expertAnalysis, mauritianDocuments, documentsGenerated, currentMedicationsValidated, medications, combinedPrescription, evidenceReferences, ragUsed, ragMetadata])
 
  // Test API function
  const testAPI = async () => {
@@ -816,6 +836,15 @@ export default function DiagnosisForm({
  setCurrentMedicationsValidated(data.currentMedicationsValidated || [])
  setMedications(data.medications || [])
  setCombinedPrescription(data.combinedPrescription || [])
+ // RAG (TIBOK guidelines)
+ setEvidenceReferences(Array.isArray(data.evidence_references) ? data.evidence_references : [])
+ setRagUsed(!!data.rag_used)
+ setRagMetadata(data.rag_metadata || null)
+ console.log('📚 [RAG] Frontend received:', {
+   rag_used: data.rag_used,
+   evidence_references_count: Array.isArray(data.evidence_references) ? data.evidence_references.length : 0,
+   rag_metadata: data.rag_metadata,
+ })
  
  console.log('🔧 ========== UPDATING PRESCRIPTION STATE VARIABLES ==========')
  console.log('   💊 Setting currentMedicationsValidated:', data.currentMedicationsValidated?.length || 0, 'items')
@@ -842,7 +871,11 @@ export default function DiagnosisForm({
  // CRITICAL - Pass through current medications validated
  currentMedicationsValidated: data.currentMedicationsValidated,
  medications: data.medications,
- combinedPrescription: data.combinedPrescription
+ combinedPrescription: data.combinedPrescription,
+ // RAG (TIBOK guidelines) — feeds EvidenceReferencesSection in the report
+ evidence_references: data.evidence_references,
+ rag_used: data.rag_used,
+ rag_metadata: data.rag_metadata,
  }
 
  // CLIENT DEBUG - Check what we're saving
