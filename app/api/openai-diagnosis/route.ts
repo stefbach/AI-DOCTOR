@@ -5548,8 +5548,13 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
 
     // ============ RAG: enrich evidence_references with full metadata ============
     // The LLM emits {ref_id, used_for}; we merge in title/source/url/date from ragContext.
+    // Hybrid strategy:
+    //  1. Honor LLM citations when present (precision: per-recommendation mapping)
+    //  2. Deterministic fallback when LLM emits [] despite RAG context provided
+    //     (honest UX: refs labeled "mapping non précisé par le LLM")
     let evidenceReferences: Array<RAGReference & { used_for: string }> = []
     let unknownCitedRefs: string[] = []
+    let citationsReconstructed = false
     if (ragContext.ragUsed) {
       const llmRefs: Array<{ ref_id?: string; used_for?: string }> = Array.isArray(
         finalAnalysis?.evidence_references
@@ -5558,6 +5563,8 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         : []
       const refLookup = new Map(ragContext.references.map((r) => [r.ref_id, r]))
       const seen = new Set<string>()
+
+      // Pass 1 — preserve LLM citations
       for (const cited of llmRefs) {
         const id = (cited?.ref_id || '').trim()
         if (!id) continue
@@ -5573,13 +5580,29 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           used_for: (cited?.used_for || '').trim() || 'Unspecified',
         })
       }
+
+      // Pass 2 — deterministic fallback if LLM emitted nothing despite chunks
+      if (evidenceReferences.length === 0 && ragContext.references.length > 0) {
+        citationsReconstructed = true
+        console.log(
+          `📚 [RAG] Reconstructing ${ragContext.references.length} citation(s) — LLM emitted empty evidence_references despite ${ragContext.totalChunks} chunks provided`
+        )
+        for (const ref of ragContext.references) {
+          evidenceReferences.push({
+            ...ref,
+            used_for: 'Référence fournie au modèle (mapping détaillé non précisé par le LLM)',
+          })
+        }
+      }
+
       if (unknownCitedRefs.length > 0) {
         console.error(
           `📚 [RAG] LLM cited unknown ref(s): ${unknownCitedRefs.join(', ')} — known: ${ragContext.references.map((r) => r.ref_id).join(', ')}`
         )
       }
       console.log(
-        `📚 [RAG] Cited ${evidenceReferences.length}/${ragContext.references.length} provided references`
+        `📚 [RAG] Final evidence_references count: ${evidenceReferences.length}/${ragContext.references.length} ` +
+          `(reconstructed: ${citationsReconstructed})`
       )
     }
 
@@ -5610,6 +5633,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         provided_references: ragContext.references.length,
         cited_references: evidenceReferences.length,
         unknown_citations: unknownCitedRefs,
+        citations_reconstructed: citationsReconstructed,
       },
       evidence_references: evidenceReferences,
 

@@ -281,6 +281,15 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
   )
   lines.push('')
 
+  lines.push('=== CONFIRMATION FINALE OBLIGATOIRE ===')
+  lines.push(
+    'Avant de retourner ton JSON, vérifie EXPLICITEMENT que le tableau "evidence_references" contient au moins une entrée par [ref-N] que tu as effectivement utilisé.'
+  )
+  lines.push(
+    'Si tu as utilisé ref-1 et ref-2 dans ton raisonnement, "evidence_references" doit contenir au minimum 2 objets. Champ vide = échec de la consigne RAG.'
+  )
+  lines.push('')
+
   return lines.join('\n')
 }
 
