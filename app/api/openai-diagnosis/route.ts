@@ -5279,9 +5279,12 @@ export async function POST(request: NextRequest) {
       }
     }
     // Secondary defense: pattern-based filter on remaining entries.
-    // Regex accepts 'no medication', 'no current medication', 'no regular medication',
-    // and any combination order ('no current regular medication', 'no regular current medication').
+    // Catches both "no medication" sentences and standalone placeholders ("None",
+    // "Nil", "N/A", "Aucun") that the model sometimes emits as the actual drug
+    // name when the patient has no current medication. Each id field is tested
+    // independently to avoid masking via concatenation.
     const PLACEHOLDER_MED_PATTERNS = [
+      /^\s*(?:none|nil|n\.?\s*\/?\s*a\.?|aucun|aucune|tbd|to\s+be\s+determined|inconnu|unknown|na)\s*$/i,
       /no\s+(?:(?:regular|current)\s+)*medication/i,
       /aucun\s+médicament/i,
       /not\s+applicable/i,
@@ -5289,10 +5292,16 @@ export async function POST(request: NextRequest) {
     ]
     const isPlaceholderMed = (med: any): boolean => {
       if (!med || typeof med !== 'object') return true
-      const text = [med.medication_name, med.drug, med.name, med.dci, med.medication_dci]
-        .filter(Boolean).map(String).join(' ').trim()
-      if (!text) return true
-      return PLACEHOLDER_MED_PATTERNS.some(p => p.test(text))
+      const fields = [
+        med.medication_name, med.drug, med.name, med.dci, med.medication_dci,
+        med.inn, med.genericName, med.generic_name, med.nom,
+      ]
+        .map(v => String(v ?? '').trim())
+        .filter(Boolean)
+      // No identifier at all → placeholder
+      if (fields.length === 0) return true
+      // Any single identifier matching a placeholder pattern → placeholder
+      return fields.some(f => PLACEHOLDER_MED_PATTERNS.some(p => p.test(f)))
     }
     if (Array.isArray(medicalAnalysis.treatment_plan?.medications)) {
       const before = medicalAnalysis.treatment_plan.medications.length
@@ -5562,6 +5571,9 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     let hallucinatedRefsBreakdown: Record<string, number> = {}
     let unusedRefsFiltered = 0
     const usedValidRefs = new Set<string>()
+    // Diagnostic: record where each valid [ref-N] appears so Megane can see whether
+    // the model cited it in legitimately narrative content vs in a tangential field.
+    const refUsageByPath = new Map<string, Array<{ path: string; excerpt: string }>>()
     if (ragContext.ragUsed) {
       const validRefIds = new Set(ragContext.references.map(r => r.ref_id))
       const REF_TOKEN = /\[ref-(\d+)\]/g
@@ -5569,13 +5581,23 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       let stringsScanned = 0
       let stringsModified = 0
 
-      const scrubString = (s: string): string => {
+      const recordUsage = (id: string, path: string, source: string) => {
+        const arr = refUsageByPath.get(id) ?? []
+        const idx = source.indexOf(`[${id}]`)
+        const start = Math.max(0, idx - 60)
+        const end = Math.min(source.length, idx + 80)
+        arr.push({ path, excerpt: source.slice(start, end).replace(/\s+/g, ' ').trim() })
+        refUsageByPath.set(id, arr)
+      }
+
+      const scrubString = (s: string, path: string): string => {
         stringsScanned++
         let modified = false
         const cleaned = s.replace(REF_TOKEN, (match, num) => {
           const id = `ref-${num}`
           if (validRefIds.has(id)) {
             usedValidRefs.add(id)
+            recordUsage(id, path, s)
             return match
           }
           modified = true
@@ -5592,22 +5614,34 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           .trim()
       }
 
-      const scrubNode = (node: any): any => {
-        if (typeof node === 'string') return scrubString(node)
-        if (Array.isArray(node)) return node.map(scrubNode)
+      const scrubNode = (node: any, path: string): any => {
+        if (typeof node === 'string') return scrubString(node, path)
+        if (Array.isArray(node)) return node.map((item, i) => scrubNode(item, `${path}[${i}]`))
         if (node && typeof node === 'object') {
           // Don't rewrite the evidence_references entries themselves — Pass 1 below
           // handles those and tags unknown ref_id values into unknownCitedRefs.
           if (node === finalAnalysis?.evidence_references) return node
           for (const k of Object.keys(node)) {
             if (k === 'evidence_references') continue
-            node[k] = scrubNode(node[k])
+            node[k] = scrubNode(node[k], path ? `${path}.${k}` : k)
           }
         }
         return node
       }
 
-      scrubNode(finalAnalysis)
+      // Snapshot the LLM's raw evidence_references BEFORE filtering — useful for
+      // diagnosing which refs the model claimed to use vs which actually appear.
+      const llmEvidenceRaw: Array<{ ref_id?: string; used_for?: string }> = Array.isArray(
+        finalAnalysis?.evidence_references
+      )
+        ? JSON.parse(JSON.stringify(finalAnalysis.evidence_references))
+        : []
+      console.log(
+        `📚 [RAG] LLM raw evidence_references (${llmEvidenceRaw.length}): ` +
+          JSON.stringify(llmEvidenceRaw.map(e => ({ ref_id: e?.ref_id, used_for: (e?.used_for || '').slice(0, 80) })))
+      )
+
+      scrubNode(finalAnalysis, '')
 
       if (strippedTokens.length > 0) {
         hallucinatedRefsScrubbed = strippedTokens.length
@@ -5628,6 +5662,19 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         )
       }
 
+      // Diagnostic: where did each kept [ref-N] show up?
+      if (refUsageByPath.size > 0) {
+        console.log('📚 [RAG] Citation paths in narrative (so Megane can spot tangential placements):')
+        for (const [id, hits] of refUsageByPath) {
+          for (const h of hits.slice(0, 3)) {
+            console.log(`   [${id}] @ ${h.path} :: …${h.excerpt}…`)
+          }
+          if (hits.length > 3) {
+            console.log(`   [${id}] … +${hits.length - 3} more occurrence(s)`)
+          }
+        }
+      }
+
       // ============ Bug D: drop refs the LLM never actually used in the text ============
       // The model often dumps every provided ref into evidence_references "by reflex"
       // even when only 1–2 are cited in the narrative. Filter to the refs that show
@@ -5635,15 +5682,18 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       // is noise and erodes trust ("[ref-7] Intracerebral Hemorrhage" on a dengue case).
       if (Array.isArray(finalAnalysis?.evidence_references) && finalAnalysis.evidence_references.length > 0) {
         const before = finalAnalysis.evidence_references.length
+        const droppedIds: string[] = []
         finalAnalysis.evidence_references = finalAnalysis.evidence_references.filter((entry: any) => {
           const id = (entry?.ref_id || '').trim()
-          return id && usedValidRefs.has(id)
+          const keep = !!id && usedValidRefs.has(id)
+          if (!keep && id) droppedIds.push(id)
+          return keep
         })
         unusedRefsFiltered = before - finalAnalysis.evidence_references.length
         if (unusedRefsFiltered > 0) {
           console.log(
-            `📚 [RAG] Dropped ${unusedRefsFiltered} ref(s) from evidence_references that never appeared in the report text. ` +
-              `Kept: ${Array.from(usedValidRefs).join(', ') || '(none)'}`
+            `📚 [RAG] Dropped ${unusedRefsFiltered} ref(s) from evidence_references not present in report text. ` +
+              `Dropped: ${droppedIds.join(', ')}. Kept: ${Array.from(usedValidRefs).join(', ') || '(none)'}.`
           )
         }
       }

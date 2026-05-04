@@ -284,13 +284,16 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
     "4. Si aucune guideline du contexte ne supporte une recommandation, note explicitement: 'Recommandation basée sur la pratique clinique standard, hors guideline RAG'."
   )
   lines.push(
-    '5. POUR CHAQUE MÉDICAMENT prescrit, cite la référence guideline pertinente [ref-N] dans le champ "indication" si disponible dans le contexte ci-dessus (ex: "Symptomatic relief of fever and pain [ref-2]").'
+    '5. POUR CHAQUE MÉDICAMENT prescrit, ET CHAQUE examen complémentaire (lab, imagerie), cite la référence guideline pertinente [ref-N] dans le champ "indication" / "clinical_indication" si disponible dans le contexte ci-dessus (ex: "Symptomatic relief of fever and pain [ref-2]"). En cas de doute entre citer ou marquer "hors guideline RAG", PRÉFÈRE citer si une ref aborde même partiellement le sujet.'
   )
   lines.push(
-    '6. Liste TOUTES les références utilisées dans le champ evidence_references du JSON output.'
+    "6. PERTINENCE STRICTE: ne cite [ref-N] QUE si la guideline correspondante traite DIRECTEMENT du sujet de la recommandation. NE PAS citer une ref simplement parce qu'elle a été fournie. Une ref tangentielle (ex: 'endocardite' citée sur une fièvre arbovirale sans souffle/valve concernée) sera retirée et nuit à la crédibilité du rapport."
   )
   lines.push(
-    "7. NE PAS inventer de références: ne cite que les [ref-N] présents ci-dessus."
+    "7. Liste dans evidence_references UNIQUEMENT les [ref-N] que tu as réellement utilisés dans le texte (champs narratifs, indications). Toute ref listée ici sans apparaître dans le texte sera retirée. Cohérence stricte texte ↔ evidence_references."
+  )
+  lines.push(
+    "8. NE PAS inventer de références: ne cite que les [ref-N] présents ci-dessus."
   )
   lines.push('')
 
