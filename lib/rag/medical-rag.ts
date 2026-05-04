@@ -100,7 +100,7 @@ export interface RAGContext {
 export interface QueryOptions {
   /** Specialty filter; null = broad search across all specialties. */
   specialty?: SpecialtyCode | null
-  /** Cosine similarity threshold; default matches Megane's RPC default (0.7). */
+  /** Cosine similarity threshold; default 0.55 (better recall for natural-language queries on text-embedding-3-small medical content). */
   threshold?: number
   /** Max chunks to retrieve; default 8 (RPC default). */
   limit?: number
@@ -132,7 +132,7 @@ export async function queryMedicalGuidelines(
   if (!trimmedQuery) return EMPTY_CONTEXT
 
   const specialty = opts.specialty ?? null
-  const threshold = opts.threshold ?? 0.7
+  const threshold = opts.threshold ?? 0.55
   const limit = opts.limit ?? 8
 
   // 1. Embed the query
@@ -393,7 +393,14 @@ export function inferSpecialty(query: string): SpecialtyCode | null {
 
 /**
  * Build a clinical query string from raw consultation data.
- * The result is what we embed and search for.
+ *
+ * Output is plain natural language (no labels, no UI codes, no nulls)
+ * focused on the clinical signal — what the embedding model needs to
+ * match guideline chunks. Demographics are added ONLY when clinically
+ * relevant (pregnancy, paediatrics, geriatrics).
+ *
+ * Why: structured labels and noisy fields dilute the embedding and
+ * push similarity below threshold. See git log for the dengue case.
  */
 export function buildClinicalQuery(input: {
   chiefComplaint?: string
@@ -404,21 +411,92 @@ export function buildClinicalQuery(input: {
   travelHistory?: string
   vitalSigns?: Record<string, unknown>
   duration?: string
+  pregnancyStatus?: string
 }): string {
-  const parts: string[] = []
-  if (input.chiefComplaint) parts.push(`Chief complaint: ${input.chiefComplaint}`)
-  if (input.symptoms?.length) parts.push(`Symptoms: ${input.symptoms.join(', ')}`)
-  if (input.duration) parts.push(`Duration: ${input.duration}`)
-  if (input.ageYears != null && input.ageYears !== '') parts.push(`Age: ${input.ageYears}`)
-  if (input.sex) parts.push(`Sex: ${input.sex}`)
-  if (input.medicalHistory?.length) parts.push(`History: ${input.medicalHistory.join(', ')}`)
-  if (input.travelHistory) parts.push(`Travel: ${input.travelHistory}`)
-  if (input.vitalSigns) {
-    const vs = Object.entries(input.vitalSigns)
-      .filter(([, v]) => v !== undefined && v !== null && v !== '')
-      .map(([k, v]) => `${k}=${v}`)
-      .join(', ')
-    if (vs) parts.push(`Vitals: ${vs}`)
+  // ---------- helpers ----------
+  const norm = (s: unknown): string =>
+    String(s ?? '').replace(/\s+/g, ' ').trim()
+
+  const isMeaningful = (v: unknown): boolean => {
+    if (v === undefined || v === null) return false
+    const s = String(v).trim().toLowerCase()
+    if (!s) return false
+    // Common no-data sentinels emitted by the form
+    if (['0', 'na', 'n/a', 'none', 'null', 'undefined', 'unknown', 'inconnu', 'not specified', 'not measured'].includes(s)) return false
+    if (s.startsWith('anon-')) return false
+    return true
   }
-  return parts.join('. ')
+
+  /** Decode UI codes like "3_7_days" → "3 to 7 days", "1_6_hours" → "1 to 6 hours". */
+  const decodeDuration = (raw: string): string => {
+    const s = norm(raw)
+    if (!s) return ''
+    const range = s.match(/^(\d+)_(\d+)_([a-z]+)$/i)
+    if (range) return `${range[1]} to ${range[2]} ${range[3]}`
+    const single = s.match(/^(\d+)_([a-z]+)$/i)
+    if (single) return `${single[1]} ${single[2]}`
+    return s.replace(/_/g, ' ')
+  }
+
+  const sentence = (s: string) =>
+    s.replace(/[.!?]+\s*$/, '').trim()
+
+  // ---------- chief complaint (anchor) ----------
+  const cc = isMeaningful(input.chiefComplaint) ? sentence(norm(input.chiefComplaint)) : ''
+  const ccLower = cc.toLowerCase()
+
+  // ---------- symptoms NOT already in chief complaint ----------
+  const extraSymptoms = (input.symptoms || [])
+    .filter(isMeaningful)
+    .map(s => sentence(norm(s)))
+    .filter(s => s && !ccLower.includes(s.toLowerCase()))
+
+  // ---------- duration (decoded, only if not in CC) ----------
+  const dur = isMeaningful(input.duration) ? decodeDuration(input.duration!) : ''
+  const durationStr =
+    dur && !ccLower.includes(dur.toLowerCase()) && !/\b\d+\s*(day|week|hour|month)/i.test(cc)
+      ? `for ${dur}`
+      : ''
+
+  // ---------- travel context (only if non-redundant with CC) ----------
+  let travelStr = ''
+  if (isMeaningful(input.travelHistory)) {
+    const travel = sentence(norm(input.travelHistory))
+    // Avoid duplication: travelHistory often == chiefComplaint in current form
+    if (travel.toLowerCase() !== ccLower && !ccLower.includes(travel.toLowerCase())) {
+      travelStr = travel
+    }
+  }
+
+  // ---------- demographics: only if clinically relevant ----------
+  const demoBits: string[] = []
+  const ageNum =
+    typeof input.ageYears === 'number'
+      ? input.ageYears
+      : parseInt(String(input.ageYears ?? ''), 10)
+  if (Number.isFinite(ageNum)) {
+    if (ageNum < 16) demoBits.push(`paediatric patient (${ageNum} years old)`)
+    else if (ageNum >= 75) demoBits.push(`elderly patient (${ageNum} years old)`)
+  }
+  const preg = isMeaningful(input.pregnancyStatus) ? norm(input.pregnancyStatus).toLowerCase() : ''
+  if (preg && (preg === 'pregnant' || preg === 'possibly_pregnant' || preg === 'breastfeeding')) {
+    demoBits.push(preg.replace(/_/g, ' '))
+  }
+
+  // ---------- medical history (only meaningful entries) ----------
+  const histBits = (input.medicalHistory || []).filter(isMeaningful).map(h => sentence(norm(h)))
+
+  // ---------- assemble ----------
+  const segments: string[] = []
+  if (cc) segments.push(cc)
+  if (extraSymptoms.length) segments.push(`with ${extraSymptoms.join(', ')}`)
+  if (durationStr) segments.push(durationStr)
+  if (travelStr) segments.push(travelStr)
+  if (histBits.length) segments.push(`history of ${histBits.join(', ')}`)
+  if (demoBits.length) segments.push(`patient profile: ${demoBits.join(', ')}`)
+
+  // Vitals are intentionally OMITTED unless we can detect a meaningful abnormality.
+  // Numeric vitals dilute the embedding signal and rarely add retrieval value.
+
+  return segments.join(' ').replace(/\s+/g, ' ').trim()
 }

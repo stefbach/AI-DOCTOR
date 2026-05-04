@@ -5234,6 +5234,7 @@ export async function POST(request: NextRequest) {
         travelHistory: patientContext.disease_history,
         vitalSigns: patientContext.vital_signs as Record<string, unknown>,
         duration: patientContext.symptom_duration,
+        pregnancyStatus: patientContext.pregnancy_status,
       })
       const inferredSpecialty = inferSpecialty(ragQuery)
       console.log(`📚 [RAG] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
