@@ -6339,7 +6339,44 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     console.log('   📦 medications length:', finalResponse.medications?.length || 0)
     console.log('   📦 combinedPrescription length:', finalResponse.combinedPrescription?.length || 0)
     console.log('=========================================================')
-    
+
+    // ====== LOG #1: labs + imaging refs LEAVING openai-diagnosis ======
+    // Pure instrumentation — zero behavioural change. Helps locate where in
+    // the LLM#1 → LLM#2 pipeline the [ref-N] tokens are being lost.
+    try {
+      const labsForDebug = (finalAnalysis as any)?.investigation_plan?.laboratory
+        ?? (finalAnalysis as any)?.expert_investigations?.laboratory_tests
+        ?? (finalAnalysis as any)?.expert_investigations?.immediate_priority?.filter((t: any) => {
+              const c = String(t?.category || '').toLowerCase()
+              return c && !c.includes('imag') && !c.includes('radio')
+            })
+        ?? (finalAnalysis as any)?.lab_tests
+        ?? []
+      console.log('🔬 [DEBUG-LABS-OUT] === LABS LEAVING openai-diagnosis ===')
+      ;(labsForDebug as any[]).forEach((lab: any, i: number) => {
+        const indication = String(lab?.clinical_indication ?? lab?.indication ?? lab?.rationale ?? '')
+        const name = String(lab?.test_name ?? lab?.examination ?? lab?.name ?? lab?.title ?? '')
+        console.log(`[DEBUG-LABS-OUT] #${i + 1} "${name}" | hasRef=${/\[ref-\d+\]/.test(indication)} | indication="${indication.slice(0, 250)}"`)
+      })
+
+      const imgForDebug = (finalAnalysis as any)?.investigation_plan?.imaging
+        ?? (finalAnalysis as any)?.expert_investigations?.imaging_studies
+        ?? (finalAnalysis as any)?.expert_investigations?.immediate_priority?.filter((t: any) => {
+              const c = String(t?.category || '').toLowerCase()
+              return c.includes('imag') || c.includes('radio')
+            })
+        ?? (finalAnalysis as any)?.imaging_studies
+        ?? []
+      console.log('🩻 [DEBUG-IMG-OUT] === IMAGING LEAVING openai-diagnosis ===')
+      ;(imgForDebug as any[]).forEach((img: any, i: number) => {
+        const indication = String(img?.clinical_indication ?? img?.indication ?? '')
+        const name = String(img?.study ?? img?.examination ?? img?.title ?? img?.name ?? '')
+        console.log(`[DEBUG-IMG-OUT] #${i + 1} "${name}" | hasRef=${/\[ref-\d+\]/.test(indication)} | clinical_indication="${indication.slice(0, 250)}"`)
+      })
+    } catch (dbgErr: any) {
+      console.error('[DEBUG-LABS-OUT] instrumentation error (non-blocking):', dbgErr?.message || dbgErr)
+    }
+
     return NextResponse.json(finalResponse)
     
   } catch (error) {

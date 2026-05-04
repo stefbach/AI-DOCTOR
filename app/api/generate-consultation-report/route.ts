@@ -716,6 +716,26 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
   console.log(`   - Lab tests found: ${labTests.length}`)
   console.log(`   - Imaging studies found: ${imagingStudies.length}`)
 
+  // ====== LOG #2: labs + imaging refs ENTERING LLM #2 (post-extraction) ======
+  // Pure instrumentation — verifies whether [ref-N] tokens survive the
+  // openai-diagnosis → generate-consultation-report extraction step.
+  try {
+    console.log('🔬 [DEBUG-LABS-IN-LLM2] === LABS ENTERING LLM #2 ===')
+    ;(labTests as any[]).forEach((lab: any, i: number) => {
+      const indication = String(lab?.indication ?? lab?.clinical_indication ?? lab?.justification_clinique ?? lab?.rationale ?? '')
+      const name = String(lab?.name ?? lab?.test_name ?? lab?.examination ?? '')
+      console.log(`[DEBUG-LABS-IN-LLM2] #${i + 1} "${name}" | hasRef=${/\[ref-\d+\]/.test(indication)} | indication="${indication.slice(0, 250)}"`)
+    })
+    console.log('🩻 [DEBUG-IMG-IN-LLM2] === IMAGING ENTERING LLM #2 ===')
+    ;(imagingStudies as any[]).forEach((img: any, i: number) => {
+      const indication = String(img?.indication ?? img?.clinical_indication ?? img?.justification_clinique ?? '')
+      const name = String(img?.name ?? img?.study ?? img?.examination ?? '')
+      console.log(`[DEBUG-IMG-IN-LLM2] #${i + 1} "${name}" | hasRef=${/\[ref-\d+\]/.test(indication)} | indication="${indication.slice(0, 250)}"`)
+    })
+  } catch (dbgErr: any) {
+    console.error('[DEBUG-LABS-IN-LLM2] instrumentation error (non-blocking):', dbgErr?.message || dbgErr)
+  }
+
   // =========== 11. FOLLOW-UP PLAN ===========
   const followUp = getString(
     diagnosisData?.followUpPlan?.immediate ||
@@ -2346,6 +2366,26 @@ export async function POST(request: NextRequest) {
     console.log(`   - Pregnancy status: ${pregnancyInfo.display}`)
     console.log(`   - Processing time: ${processingTime}ms`)
     console.log(`   - All text content now in English`)
+
+    // ====== LOG #3: labs + imaging refs LEAVING LLM #2 (final) ======
+    // Pure instrumentation — verifies whether the LLM #2 narrative pass
+    // preserves [ref-N] tokens it received in lab/imaging indications.
+    try {
+      console.log('🔬 [DEBUG-LABS-OUT-LLM2] === LABS LEAVING LLM #2 (final) ===')
+      ;(cleanLabTests as any[]).forEach((lab: any, i: number) => {
+        const indication = String(lab?.indication ?? lab?.clinical_indication ?? lab?.justification_clinique ?? '')
+        const name = String(lab?.name ?? lab?.test_name ?? lab?.examination ?? '')
+        console.log(`[DEBUG-LABS-OUT-LLM2] #${i + 1} "${name}" | hasRef=${/\[ref-\d+\]/.test(indication)} | indication="${indication.slice(0, 250)}"`)
+      })
+      console.log('🩻 [DEBUG-IMG-OUT-LLM2] === IMAGING LEAVING LLM #2 (final) ===')
+      ;(cleanImagingStudies as any[]).forEach((img: any, i: number) => {
+        const indication = String(img?.indication ?? img?.clinical_indication ?? img?.justification_clinique ?? '')
+        const name = String(img?.name ?? img?.study ?? img?.examination ?? '')
+        console.log(`[DEBUG-IMG-OUT-LLM2] #${i + 1} "${name}" | hasRef=${/\[ref-\d+\]/.test(indication)} | indication="${indication.slice(0, 250)}"`)
+      })
+    } catch (dbgErr: any) {
+      console.error('[DEBUG-LABS-OUT-LLM2] instrumentation error (non-blocking):', dbgErr?.message || dbgErr)
+    }
 
     return NextResponse.json({
       success: true,
