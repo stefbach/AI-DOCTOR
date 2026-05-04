@@ -398,10 +398,10 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
     '3. Chaque recommandation diagnostique ou thérapeutique DOIT être attribuée à une référence [ref-N] si elle est supportée par les guidelines ci-dessus.'
   )
   lines.push(
-    "4. Si aucune guideline du contexte ne supporte une recommandation, note explicitement: 'Recommandation basée sur la pratique clinique standard, hors guideline RAG'."
+    "4. Si aucune guideline du contexte ne supporte une recommandation, termine simplement l'indication par: 'Based on standard clinical practice.' (NE PAS écrire 'hors guideline RAG' — c'est du jargon interne qui ne doit jamais apparaître dans le rapport rendu)."
   )
   lines.push(
-    '5. POUR CHAQUE MÉDICAMENT prescrit, ET CHAQUE examen complémentaire (lab, imagerie), cite la référence guideline pertinente [ref-N] dans le champ "indication" / "clinical_indication" si disponible dans le contexte ci-dessus (ex: "Symptomatic relief of fever and pain [ref-2]"). En cas de doute entre citer ou marquer "hors guideline RAG", PRÉFÈRE citer si une ref aborde même partiellement le sujet.'
+    '5. POUR CHAQUE MÉDICAMENT prescrit, ET CHAQUE examen complémentaire (lab, imagerie), cite la référence guideline pertinente [ref-N] dans le champ "indication" / "clinical_indication" si disponible dans le contexte ci-dessus (ex: "Symptomatic relief of fever and pain [ref-2]"). En cas de doute entre citer une ref et écrire \'Based on standard clinical practice.\', PRÉFÈRE citer si une ref aborde même partiellement le sujet.'
   )
   lines.push(
     "6. PERTINENCE STRICTE: ne cite [ref-N] QUE si la guideline correspondante traite DIRECTEMENT du sujet de la recommandation. NE PAS citer une ref simplement parce qu'elle a été fournie. Une ref tangentielle (ex: 'endocardite' citée sur une fièvre arbovirale sans souffle/valve concernée) sera retirée et nuit à la crédibilité du rapport."

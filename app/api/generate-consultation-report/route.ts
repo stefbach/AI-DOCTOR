@@ -7,6 +7,69 @@ import { buildRefCitationMap, expandRefsInTree } from "@/lib/rag/medical-rag"
 export const runtime = 'nodejs'
 export const maxDuration = 120 // 120 seconds for GPT-5.5 report generation (increased from 60s to prevent 504 timeouts)
 
+// ==================== "HORS GUIDELINE RAG" JARGON SANITISER ====================
+// Internal pipeline vocabulary (the prompt previously asked the LLM to write
+// "Recommendation based on standard clinical practice, hors guideline RAG"
+// when no provided ref applied). Doctors/patients should never see this —
+// strip it post-hoc as a safety net even though the prompt no longer requests it.
+function stripHorsGuidelineJargon(text: string): string {
+  if (!text || typeof text !== 'string') return text
+  const original = text
+  const cleaned = text
+    // Full legacy sentence with optional French/English variants of "based on practice"
+    .replace(
+      /Recommendation\s+based\s+on\s+(?:standard\s+clinical\s+practice|practice\s+clinique\s+standard|standard\s+practice|clinical\s+practice)\s*,?\s*hors\s+guideline\s+RAG\.?/gi,
+      'Based on standard clinical practice.'
+    )
+    // Same idea but in French
+    .replace(
+      /Recommandation\s+bas[ée]e?\s+sur\s+la\s+pratique\s+clinique\s+standard\s*,?\s*hors\s+guideline\s+RAG\.?/gi,
+      'Based on standard clinical practice.'
+    )
+    // Standalone trailing ", hors guideline RAG"
+    .replace(/[,;]?\s*hors\s+guideline\s+RAG\.?/gi, '')
+    // Tidy up artefacts: ". .", ", .", double spaces, leading/trailing punctuation
+    .replace(/\s*\.\s*\./g, '.')
+    .replace(/,\s*\./g, '.')
+    .replace(/\s+([,.;:!?)])/g, '$1')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+  return cleaned !== original ? cleaned : original
+}
+
+/**
+ * Recursive walk that scrubs the jargon from every string field of an
+ * arbitrary tree, in place. Returns the number of strings that were modified.
+ * Skips the bibliography metadata (evidence_references) and rag_metadata
+ * for parity with the citation-expansion pass.
+ */
+function stripHorsGuidelineJargonInTree(
+  node: any,
+  excludeKeys: ReadonlySet<string> = new Set(['evidence_references', 'rag_metadata'])
+): number {
+  let modified = 0
+  const visit = (n: any): any => {
+    if (typeof n === 'string') {
+      const cleaned = stripHorsGuidelineJargon(n)
+      if (cleaned !== n) modified++
+      return cleaned
+    }
+    if (Array.isArray(n)) {
+      for (let i = 0; i < n.length; i++) n[i] = visit(n[i])
+      return n
+    }
+    if (n && typeof n === 'object') {
+      for (const k of Object.keys(n)) {
+        if (excludeKeys.has(k)) continue
+        n[k] = visit(n[k])
+      }
+    }
+    return n
+  }
+  visit(node)
+  return modified
+}
+
 // ==================== FONCTION DE TRADUCTION PRAGMATIQUE ====================
 function translateFrenchMedicalTerms(text: string): string {
   if (!text || typeof text !== 'string') return text
@@ -2376,6 +2439,15 @@ export async function POST(request: NextRequest) {
         )
       } else {
         console.log('📚 [RAG] No references available for citation expansion (skipped)')
+      }
+
+      // Safety net: scrub the "hors guideline RAG" jargon if the LLM ignored
+      // the prompt update and emitted the legacy phrasing anyway. Doctors and
+      // patients shouldn't see internal pipeline vocabulary.
+      const cleanedCount = stripHorsGuidelineJargonInTree(reportStructure)
+        + stripHorsGuidelineJargonInTree(diagnosisData)
+      if (cleanedCount > 0) {
+        console.log(`🧹 [RAG] Cleaned "hors guideline RAG" jargon from ${cleanedCount} string(s)`)
       }
     } catch (expErr: any) {
       console.error('📚 [RAG] Citation expansion failed (non-blocking):', expErr?.message || expErr)
