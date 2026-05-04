@@ -11,7 +11,7 @@ name: RAG Ingest TIBOK Guidelines
 #   SUPABASE_URL                 — https://yyxmqositmmyyeyuryln.supabase.co
 #   SUPABASE_SERVICE_ROLE_KEY    — Vercel env of v0-medical-ai-expert
 
-on:
+"on":
   workflow_dispatch:
     inputs:
       tier:
@@ -73,25 +73,33 @@ jobs:
       - name: Install dependencies
         run: pip install --quiet -r scripts/rag-ingest/requirements.txt
 
+      - name: Build CLI flags
+        env:
+          INPUT_TIER: ${{ github.event.inputs.tier }}
+          INPUT_MAX_DOCS: ${{ github.event.inputs.max_docs }}
+          INPUT_DRY_RUN: ${{ github.event.inputs.dry_run }}
+          INPUT_SOURCE: ${{ github.event.inputs.source }}
+          INPUT_EXTERNAL_ID: ${{ github.event.inputs.external_id }}
+        run: |
+          FLAGS="--tier=${INPUT_TIER}"
+          if [ "${INPUT_DRY_RUN}" = "true" ]; then
+            FLAGS="${FLAGS} --dry-run"
+          fi
+          if [ -n "${INPUT_MAX_DOCS}" ] && [ "${INPUT_MAX_DOCS}" != "0" ]; then
+            FLAGS="${FLAGS} --max-docs=${INPUT_MAX_DOCS}"
+          fi
+          if [ -n "${INPUT_SOURCE}" ]; then
+            FLAGS="${FLAGS} --source=${INPUT_SOURCE}"
+          fi
+          if [ -n "${INPUT_EXTERNAL_ID}" ]; then
+            FLAGS="${FLAGS} --external-id=${INPUT_EXTERNAL_ID}"
+          fi
+          echo "FLAGS=${FLAGS}" >> "$GITHUB_ENV"
+          echo "Resolved FLAGS: ${FLAGS}"
+
       - name: Run ingestion
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           RAG_SOURCE_DIR: ${{ github.workspace }}/rag-source/tibok-rag-collector/extracted
-        run: |
-          ARGS=""
-          ARGS="$ARGS --tier=${{ inputs.tier }}"
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            ARGS="$ARGS --dry-run"
-          fi
-          if [ "${{ inputs.max_docs }}" != "0" ] && [ -n "${{ inputs.max_docs }}" ]; then
-            ARGS="$ARGS --max-docs=${{ inputs.max_docs }}"
-          fi
-          if [ -n "${{ inputs.source }}" ]; then
-            ARGS="$ARGS --source=${{ inputs.source }}"
-          fi
-          if [ -n "${{ inputs.external_id }}" ]; then
-            ARGS="$ARGS --external-id=${{ inputs.external_id }}"
-          fi
-          echo "Running: python scripts/rag-ingest/ingest.py $ARGS"
-          python scripts/rag-ingest/ingest.py $ARGS
+        run: python scripts/rag-ingest/ingest.py $FLAGS
