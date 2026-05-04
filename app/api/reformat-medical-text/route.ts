@@ -2,12 +2,21 @@
 import { type NextRequest, NextResponse } from "next/server"
 import OpenAI from "openai"
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+let openaiClient: OpenAI | null = null
+
+function getOpenAIClient(): OpenAI {
+  if (!openaiClient) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY environment variable is not set')
+    }
+    openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  }
+  return openaiClient
+}
 
 export async function POST(req: NextRequest) {
   try {
+    const openai = getOpenAIClient()
     const { text, sectionType, currentContent } = await req.json()
 
     if (!text) {
@@ -48,13 +57,12 @@ ${currentContent ? `EXISTING CONTENT IN THIS SECTION:\n${currentContent}\n\nAppe
 Return ONLY the formatted medical text as a paragraph IN ENGLISH, nothing else. No titles, no bullet points.`
 
     const response = await openai.chat.completions.create({
-      model: "gpt-5.4",
+      model: "gpt-5.5",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: `Please format this voice-transcribed text for the ${sectionType} section:\n\n${text}` }
       ],
       max_completion_tokens: 1000,
-      temperature: 0.3,
     })
 
     const formattedText = response.choices[0]?.message?.content?.trim() || text

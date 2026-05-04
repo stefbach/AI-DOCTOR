@@ -8,7 +8,7 @@ import { openai } from "@ai-sdk/openai"
 import { z } from "zod"
 
 export const runtime = 'nodejs'
-export const maxDuration = 90 // 90 seconds for GPT-4 medical assistance (increased for complex analysis)
+export const maxDuration = 90 // 90 seconds for GPT-5.5 medical assistance (increased for complex analysis)
 
 // ==================== ZOD SCHEMA FOR STRUCTURED OUTPUT ====================
 const tibokResponseSchema = z.object({
@@ -484,7 +484,7 @@ export async function POST(request: NextRequest) {
     // Build context summary from all documents (avec données anonymisées)
     const contextSummary = buildDocumentContextSummary(documentContext || {})
 
-    // Prepare messages for GPT-4 (avec données anonymisées)
+    // Prepare messages for GPT-5.5 (avec données anonymisées)
     const messages: Message[] = [
       { role: 'system', content: TIBOK_MEDICAL_ASSISTANT_SYSTEM_PROMPT },
       { role: 'system', content: contextSummary },  // ✅ CONTEXTE ANONYMISÉ
@@ -492,15 +492,14 @@ export async function POST(request: NextRequest) {
       { role: 'user', content: message }
     ]
 
-    console.log('📡 Calling GPT-4 with ANONYMIZED patient data (GDPR/HIPAA compliant)...')
+    console.log('📡 Calling GPT-5.5 with ANONYMIZED patient data (GDPR/HIPAA compliant)...')
 
-    // Call GPT-4 with structured output (guarantees valid JSON)
+    // Call GPT-5.5 with structured output (guarantees valid JSON)
     const result = await generateObject({
-      model: openai("gpt-5.4", { reasoningEffort: "none" }),
+      model: openai("gpt-5.5", { reasoningEffort: "none" }),
       schema: tibokResponseSchema,
       messages,
       maxTokens: 1500,
-      temperature: 0.1
     })
 
     const parsed = result.object as any

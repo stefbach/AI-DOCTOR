@@ -535,7 +535,7 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
     
     // Detailed prescription data
     detailedMedications: medications.map((med: any) => ({
-      name: getString(med.medication_dci || med.drug || 'Medication'),
+      name: getString(med.nom || med.medication_dci || med.drug || med.medication_name || med.name || 'Medication'),
       indication: getString(med.precise_indication || med.indication || ''),
       mechanism: getString(med.mechanism || ''),
       dosing: getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed'),
@@ -612,8 +612,8 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   
   primaryTreatments.forEach((med: any, idx: number) => {
     medications.push({
-      name: getString(med.medication_dci || med.drug || `Medication ${idx + 1}`),
-      genericName: getString(med.medication_dci || med.drug || `Medication ${idx + 1}`),
+      name: getString(med.nom || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
+      genericName: getString(med.denominationCommune || med.dci || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
       dosage: getString(med.dosage_strength || med.dosage || med.strength || ''),
       form: getString(med.dosage_form || med.form || 'tablet'),
       frequency: getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed'),
@@ -629,7 +629,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       pregnancyCategory: getString(med.pregnancy_category || ''),
       pregnancySafety: getString(med.pregnancy_safety || ''),
       breastfeedingSafety: getString(med.breastfeeding_safety || ''),
-      completeLine: `${getString(med.medication_dci || med.drug)} ${getString(med.dosage_strength || med.dosage || '')}\n${getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed')}`
+      completeLine: `${getString(med.nom || med.medication_dci || med.drug || med.medication_name || med.name)} ${getString(med.dosage_strength || med.dosage || '')}\n${getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed')}`
     })
   })
   
@@ -699,7 +699,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   return { medications, labTests, imagingStudies }
 }
 
-// ==================== GPT-4 DATA PREPARATION ====================
+// ==================== GPT-5.5 DATA PREPARATION ====================
 function prepareEnrichedGPTData(realData: any, patientData: any) {
   return {
     // Patient info
@@ -757,7 +757,7 @@ function prepareEnrichedGPTData(realData: any, patientData: any) {
   }
 }
 
-// ==================== GPT-4 PROMPTS ====================
+// ==================== GPT-5.5 PROMPTS ====================
 function createEnhancedSystemPrompt(pregnancyStatus: string): string {
   const status = getString(pregnancyStatus)
   const pregnancyNote = (status === 'pregnant' || status === 'possibly_pregnant') ?
@@ -1247,8 +1247,8 @@ export async function POST(request: NextRequest) {
       examinationDate: examDate
     }
 
-    // ===== CALL GPT-4 WITH TRANSLATED DATA AND IMPROVED JSON PARSING =====
-    console.log("🤖 Calling GPT-4 with translated data for narrative structuring...")
+    // ===== CALL GPT-5.5 WITH TRANSLATED DATA AND IMPROVED JSON PARSING =====
+    console.log("🤖 Calling GPT-5.5 with translated data for narrative structuring...")
 
     let narrativeContent: any = {}
 
@@ -1257,18 +1257,17 @@ export async function POST(request: NextRequest) {
       const userPrompt = createEnhancedUserPrompt(enrichedGPTData)
       
       const result = await generateText({
-        model: openai("gpt-5.4"),
+        model: openai("gpt-5.5"),
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
         maxTokens: 4000,
-        temperature: 0.2,
       })
 
       // IMPROVED JSON PARSING WITH BETTER ERROR HANDLING
-      console.log("🔍 GPT-4 raw response length:", result.text.length)
-      console.log("🔍 GPT-4 response preview:", result.text.substring(0, 500))
+      console.log("🔍 GPT-5.5 raw response length:", result.text.length)
+      console.log("🔍 GPT-5.5 response preview:", result.text.substring(0, 500))
       
       let cleanedText = result.text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
       
@@ -1284,9 +1283,9 @@ export async function POST(request: NextRequest) {
         try {
           // Try to parse the extracted JSON
           narrativeContent = JSON.parse(jsonString)
-          // Apply translation to GPT-4 response
+          // Apply translation to GPT-5.5 response
           narrativeContent = translateObjectRecursively(narrativeContent)
-          console.log("✅ GPT-4 narrative content parsed and translated successfully")
+          console.log("✅ GPT-5.5 narrative content parsed and translated successfully")
           console.log("✅ Narrative sections:", Object.keys(narrativeContent))
           
         } catch (parseError) {
@@ -1320,7 +1319,7 @@ export async function POST(request: NextRequest) {
       }
       
     } catch (error) {
-      console.error("❌ GPT-4 Error:", error)
+      console.error("❌ GPT-5.5 Error:", error)
       console.log("🔄 Using fallback content")
       narrativeContent = useRealDataFallback(realData, pregnancyInfo, clinicalData, patientData)
       narrativeContent = translateObjectRecursively(narrativeContent)
@@ -1766,7 +1765,7 @@ export async function GET(request: NextRequest) {
       '🔧 Enhanced JSON parsing with better error handling',
       '🔍 Improved empty data detection and validation',
       '🛠️ Enhanced fallback function with clinical data support',
-      '📝 Better GPT-4 response processing',
+      '📝 Better GPT-5.5 response processing',
       '⚠️ Comprehensive error recovery mechanisms'
     ],
     features: [

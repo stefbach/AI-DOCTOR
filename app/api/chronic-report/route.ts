@@ -226,7 +226,7 @@ function extractChronicDiseaseData(diagnosisData: any, patientData: any, clinica
   }
 }
 
-// ==================== GPT-4 DATA PREPARATION ====================
+// ==================== GPT-5.5 DATA PREPARATION ====================
 function prepareChronicDiseaseGPTData(extractedData: any, patientData: any) {
   return {
     // Patient info
@@ -283,7 +283,7 @@ function prepareChronicDiseaseGPTData(extractedData: any, patientData: any) {
   }
 }
 
-// ==================== GPT-4 PROMPTS (ADAPTED FOR CHRONIC DISEASES) ====================
+// ==================== GPT-5.5 PROMPTS (ADAPTED FOR CHRONIC DISEASES) ====================
 function createChronicDiseaseSystemPrompt(): string {
   return `You are a senior endocrinologist writing professional medical reports in ENGLISH for chronic disease follow-up consultations in Mauritius.
 
@@ -520,7 +520,7 @@ Return format (professional prescription - NO EMOJIS):
 CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON medical nomenclature in ENGLISH. NO EMOJIS.`
 
     const completion = await openaiClient.chat.completions.create({
-      model: "gpt-5.4",
+      model: "gpt-5.5",
       messages: [
         { 
           role: "system", 
@@ -528,7 +528,6 @@ CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON medical nomenclature in EN
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.3,
       max_completion_tokens: 3000
     })
 
@@ -574,7 +573,7 @@ Categories: hematology, clinicalChemistry, immunology, microbiology, endocrinolo
 CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON nomenclature. NO EMOJIS.`
 
     const completion = await openaiClient.chat.completions.create({
-      model: "gpt-5.4",
+      model: "gpt-5.5",
       messages: [
         { 
           role: "system", 
@@ -582,7 +581,6 @@ CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON nomenclature. NO EMOJIS.`
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.3,
       max_completion_tokens: 3000
     })
 
@@ -625,7 +623,7 @@ Return format (professional imaging request - NO EMOJIS):
 CRITICAL: Return ONLY the JSON array. Professional terminology. NO EMOJIS.`
 
     const completion = await openaiClient.chat.completions.create({
-      model: "gpt-5.4",
+      model: "gpt-5.5",
       messages: [
         { 
           role: "system", 
@@ -633,7 +631,6 @@ CRITICAL: Return ONLY the JSON array. Professional terminology. NO EMOJIS.`
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.3,
       max_completion_tokens: 2500
     })
 
@@ -689,8 +686,8 @@ export async function POST(req: NextRequest) {
     console.log("STEP 2: Preparing enriched GPT data...")
     const enrichedData = prepareChronicDiseaseGPTData(extractedData, patientData)
     
-    // ===== STEP 3: GENERATE NARRATIVE REPORT WITH GPT-4 (like consultation-report) =====
-    console.log("STEP 3: Generating narrative report with gpt-5.4...")
+    // ===== STEP 3: GENERATE NARRATIVE REPORT WITH GPT-5.5 (like consultation-report) =====
+    console.log("STEP 3: Generating narrative report with gpt-5.5...")
     
     const systemPrompt = createChronicDiseaseSystemPrompt()
     const userPrompt = createChronicDiseaseUserPrompt(enrichedData, patientData, doctorData, followUpContext)
@@ -705,13 +702,12 @@ export async function POST(req: NextRequest) {
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-5.4",
+          model: "gpt-5.5",
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt }
           ],
           max_completion_tokens: 6000,
-          temperature: 0.3,
           response_format: { type: "json_object" }
         }),
       })

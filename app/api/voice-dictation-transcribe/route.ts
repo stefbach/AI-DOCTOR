@@ -4,16 +4,23 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { 
+import {
   normalizeTranscriptionToEnglish,
   normalizeMedicationList,
-  type NormalizationResult 
+  type NormalizationResult
 } from '@/lib/medical-terminology-normalizer';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openaiClient: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openaiClient) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY environment variable is not set');
+    }
+    openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return openaiClient;
+}
 
 export const runtime = 'nodejs';
 export const maxDuration = 180; // 3 minutes max
@@ -43,6 +50,7 @@ Medical history: diabète, diabetes, hypertension, asthme, asthma, BPCO, COPD, i
 Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
 
   try {
+    const openai = getOpenAIClient();
     // For short phrases, specifying language helps Whisper accuracy
     const whisperOptions: any = {
       file: audioFile,
@@ -107,8 +115,9 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
 // ============================================
 async function translateToEnglish(text: string): Promise<string> {
   try {
+    const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
-      model: 'gpt-5.4',
+      model: 'gpt-5.5',
       messages: [
         {
           role: 'system',
@@ -128,7 +137,6 @@ RULES:
           content: text
         }
       ],
-      temperature: 0.2,
       max_completion_tokens: 2000,
     });
 
@@ -177,7 +185,7 @@ async function extractClinicalData(normalizedText: string): Promise<{
   referralInfo?: any;
   consultationType: 'standard' | 'specialist_referral';
 }> {
-  console.log('📊 Step 3: Extracting clinical data with GPT-5.4...');
+  console.log('📊 Step 3: Extracting clinical data with GPT-5.5...');
 
   const extractionPrompt = `You are an expert medical assistant. Analyze this medical consultation transcription and extract the following information in strict JSON format:
 
@@ -248,8 +256,9 @@ ${normalizedText}
 Respond ONLY with JSON, no additional text.`;
 
   try {
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
-      model: 'gpt-5.4',
+      model: 'gpt-5.5',
       messages: [
         {
           role: 'system',
@@ -260,7 +269,6 @@ Respond ONLY with JSON, no additional text.`;
           content: extractionPrompt,
         },
       ],
-      temperature: 0.3,
       response_format: { type: 'json_object' },
     });
 
@@ -474,7 +482,7 @@ export async function GET() {
     description: 'Voice dictation transcription and extraction (Steps 1-2 only)',
     steps: [
       '1. Audio transcription (Whisper API)',
-      '2. Clinical data extraction (GPT-5.4)',
+      '2. Clinical data extraction (GPT-5.5)',
     ],
     note: 'Frontend will then display DiagnosisForm and ProfessionalReport',
   });

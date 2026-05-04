@@ -2,17 +2,34 @@
 // WORKFLOW DICTÉE VOCALE → DIAGNOSTIC → RAPPORT CONSULTATION
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+// === Lazy singletons ===
+let openaiClient: OpenAI | null = null;
+let supabaseClient: SupabaseClient | null = null;
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getOpenAIClient(): OpenAI {
+  if (!openaiClient) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY environment variable is not set');
+    }
+    openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return openaiClient;
+}
+
+function getSupabaseClient(): SupabaseClient {
+  if (!supabaseClient) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) {
+      throw new Error('Supabase environment variables are not set');
+    }
+    supabaseClient = createClient(url, key);
+  }
+  return supabaseClient;
+}
+// === End lazy singletons ===
 
 export const runtime = 'nodejs';
 export const maxDuration = 180; // 3 minutes pour le workflow complet
@@ -299,6 +316,7 @@ async function transcribeAudio(audioFile: File): Promise<{
 }> {
   console.log('🎤 Step 1: Transcribing audio with Whisper...');
 
+  const openai = getOpenAIClient();
   const transcription = await openai.audio.transcriptions.create({
     file: audioFile,
     model: 'whisper-1',
@@ -337,8 +355,9 @@ async function transcribeAudio(audioFile: File): Promise<{
 // ============================================
 async function translateToEnglish(frenchText: string): Promise<string> {
   try {
+    const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
-      model: 'gpt-5.4',
+      model: 'gpt-5.5',
       messages: [
         {
           role: 'system',
@@ -356,7 +375,6 @@ RULES:
           content: frenchText
         }
       ],
-      temperature: 0.2,
       max_completion_tokens: 2000,
     });
 
@@ -373,10 +391,11 @@ RULES:
 async function extractClinicalData(
   transcriptionText: string
 ): Promise<ExtractedClinicalData> {
-  console.log('🧠 Step 2: Extracting clinical data with GPT-5.4...');
+  console.log('🧠 Step 2: Extracting clinical data with GPT-5.5...');
 
+  const openai = getOpenAIClient();
   const extraction = await openai.chat.completions.create({
-    model: 'gpt-5.4',
+    model: 'gpt-5.5',
     messages: [
       {
         role: 'system',
@@ -387,7 +406,6 @@ async function extractClinicalData(
         content: `Transcription de la dictée médicale:\n\n${transcriptionText}\n\nExtrayez toutes les données cliniques en JSON.`
       }
     ],
-    temperature: 0.1,
     max_completion_tokens: 3000,
     response_format: { type: "json_object" }
   });
@@ -638,7 +656,8 @@ async function saveReportToSupabase(
     console.log('📝 Attempting to insert into consultation_records table...');
     console.log('   Record keys:', Object.keys(consultationRecord));
     console.log('   Consultation ID:', consultationId);
-    
+
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('consultation_records')
       .insert([consultationRecord])
@@ -859,7 +878,7 @@ export async function POST(request: NextRequest) {
         totalProcessingTime: `${processingTime}ms`,
         stepsCompleted: [
           '1. Audio transcription (Whisper)',
-          '2. Clinical data extraction (GPT-5.4)',
+          '2. Clinical data extraction (GPT-5.5)',
           '3. Medical diagnosis (openai-diagnosis API)',
           '4. Report generation (generate-consultation-report API)'
         ],
@@ -901,7 +920,7 @@ export async function GET() {
     description: 'Complete voice dictation to consultation report workflow',
     workflow: [
       'Step 1: Whisper audio transcription',
-      'Step 2: GPT-5.4 clinical data extraction',
+      'Step 2: GPT-5.5 clinical data extraction',
       'Step 3: openai-diagnosis API call',
       'Step 4: generate-consultation-report API call'
     ],

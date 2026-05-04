@@ -68,7 +68,7 @@ EXAMPLE OUTPUT FORMAT:
 ]`
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-5.4",
+      model: "gpt-5.5",
       messages: [
         {
           role: "system",
@@ -79,7 +79,6 @@ EXAMPLE OUTPUT FORMAT:
           content: extractionPrompt
         }
       ],
-      temperature: 0.3,
       max_completion_tokens: 1500,
     })
 

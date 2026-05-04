@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import TibokMedicalAssistant from '../tibok-medical-assistant'
+import EvidenceReferencesSection from '../rag/evidence-references-section'
 import {
  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube,
  Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
@@ -2399,8 +2400,15 @@ if (isRenewal) {
  prescription: {
  datePrescription: apiReport.prescriptions.medications.prescription?.prescriptionDate || new Date().toISOString().split('T')[0],
  // APPLY SANITIZATION HERE - NOW INCLUDING medication_type
+ // FIX-3 BUG-A: Filter out placeholder entries (e.g. "No regular current medication reported")
  medicaments: sanitizeMedications(
- apiReport.prescriptions.medications.prescription?.medications?.map((med: any) => ({
+ (apiReport.prescriptions.medications.prescription?.medications || [])
+ .filter((med: any) => {
+ const name = String(med?.name || med?.medication_name || med?.drug || '').trim()
+ if (!name) return false
+ return !/no\s+(regular\s+)?(current\s+)?medication|aucun\s+médicament|not\s+applicable/i.test(name)
+ })
+ .map((med: any) => ({
  nom: med.name || '',
  denominationCommune: med.genericName || med.name || '',
  dosage: med.dosage || '',
@@ -2417,7 +2425,7 @@ if (isRenewal) {
  validated_by_ai: med.validated_by_ai || false,
  original_input: med.original_input || '',
  ligneComplete: med.fullDescription || ''
- })) || []
+ }))
  ),
  validite: apiReport.prescriptions.medications.prescription?.validity || "3 months unless otherwise specified",
  dispensationNote: apiReport.prescriptions.medications.prescription?.dispensationNote
@@ -5418,7 +5426,9 @@ const ConsultationReport = () => {
  )}
  </div>
 
- 
+ {/* RAG: medical guidelines used for this consultation */}
+ <EvidenceReferencesSection references={diagnosisData?.evidence_references} />
+
  <div className="mt-12 pt-8 border-t border-gray-300 signature">
  <div className="text-right">
  <p className="font-semibold">{praticien.nom}</p>
@@ -5427,9 +5437,9 @@ const ConsultationReport = () => {
 
  {validationStatus === 'validated' && documentSignatures.consultation ? (
  <div className="mt-4">
- <img 
- src={documentSignatures.consultation} 
- alt="Doctor's Signature" 
+ <img
+ src={documentSignatures.consultation}
+ alt="Doctor's Signature"
  className="ml-auto h-20 w-auto"
  style={{ maxWidth: '300px' }}
  />

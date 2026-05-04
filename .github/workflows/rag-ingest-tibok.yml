@@ -1,0 +1,105 @@
+name: RAG Ingest TIBOK Guidelines
+
+# Manual workflow to ingest Stéphane's 984 medical guidelines into the
+# TIBOK Supabase RAG (project yyxmqositmmyyeyuryln).
+#
+# Source data is checked out from the data branch
+# `claude/medical-assistant-transparency-dv5S9` at
+# tibok-rag-collector/extracted/*.json.
+#
+# Required GitHub Actions secrets:
+#   SUPABASE_URL                 — https://yyxmqositmmyyeyuryln.supabase.co
+#   SUPABASE_SERVICE_ROLE_KEY    — Vercel env of v0-medical-ai-expert
+
+"on":
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: 'Quality tier (extraction_method based)'
+        type: choice
+        options: [high, medium, low, all]
+        default: high
+      max_docs:
+        description: 'Limit number of docs (0 = no limit). Use small values for testing.'
+        type: string
+        default: '0'
+      dry_run:
+        description: 'Simulate without writing to the DB'
+        type: boolean
+        default: true
+      source:
+        description: 'Optional: filter by source code (e.g. CDC, USPSTF)'
+        type: string
+        default: ''
+      external_id:
+        description: 'Optional: target a single doc by external_id (e.g. CDC-003)'
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout AI-DOCTOR (this branch — script + workflow)
+        uses: actions/checkout@v4
+
+      - name: Checkout data branch (984 JSON files)
+        uses: actions/checkout@v4
+        with:
+          ref: claude/medical-assistant-transparency-dv5S9
+          path: rag-source
+          # Only fetch what we need
+          sparse-checkout: |
+            tibok-rag-collector/extracted
+          sparse-checkout-cone-mode: false
+
+      - name: Verify source files
+        run: |
+          ls "${GITHUB_WORKSPACE}/rag-source/tibok-rag-collector/extracted/" | wc -l
+          echo "(expected ~127 — 126 source JSONs + _summary.json)"
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'scripts/rag-ingest/requirements.txt'
+
+      - name: Install dependencies
+        run: pip install --quiet -r scripts/rag-ingest/requirements.txt
+
+      - name: Build CLI flags
+        env:
+          INPUT_TIER: ${{ github.event.inputs.tier }}
+          INPUT_MAX_DOCS: ${{ github.event.inputs.max_docs }}
+          INPUT_DRY_RUN: ${{ github.event.inputs.dry_run }}
+          INPUT_SOURCE: ${{ github.event.inputs.source }}
+          INPUT_EXTERNAL_ID: ${{ github.event.inputs.external_id }}
+        run: |
+          FLAGS="--tier=${INPUT_TIER}"
+          if [ "${INPUT_DRY_RUN}" = "true" ]; then
+            FLAGS="${FLAGS} --dry-run"
+          fi
+          if [ -n "${INPUT_MAX_DOCS}" ] && [ "${INPUT_MAX_DOCS}" != "0" ]; then
+            FLAGS="${FLAGS} --max-docs=${INPUT_MAX_DOCS}"
+          fi
+          if [ -n "${INPUT_SOURCE}" ]; then
+            FLAGS="${FLAGS} --source=${INPUT_SOURCE}"
+          fi
+          if [ -n "${INPUT_EXTERNAL_ID}" ]; then
+            FLAGS="${FLAGS} --external-id=${INPUT_EXTERNAL_ID}"
+          fi
+          echo "FLAGS=${FLAGS}" >> "$GITHUB_ENV"
+          echo "Resolved FLAGS: ${FLAGS}"
+
+      - name: Run ingestion
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RAG_SOURCE_DIR: ${{ github.workspace }}/rag-source/tibok-rag-collector/extracted
+        run: python scripts/rag-ingest/ingest.py $FLAGS

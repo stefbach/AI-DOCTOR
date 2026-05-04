@@ -2,9 +2,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import OpenAI from 'openai'
+import {
+  queryMedicalGuidelines,
+  queryMedicalGuidelinesMulti,
+  buildSecondaryQueries,
+  formatGuidelinesForPrompt,
+  inferSpecialty,
+  buildClinicalQuery,
+  type RAGContext,
+  type RAGReference,
+} from '@/lib/rag/medical-rag'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300 // 300 seconds max for GPT-5.4 diagnosis generation (large prompt)
+export const maxDuration = 300 // 300 seconds max for GPT-5.5 diagnosis generation (large prompt)
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
@@ -471,7 +481,13 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
     "understanding_condition": "MANDATORY - Specific condition explanation",
     "treatment_importance": "MANDATORY - Precise treatment importance",
     "warning_signs": "MANDATORY - Specific warning signs"
-  }
+  },
+  "evidence_references": [
+    {
+      "ref_id": "MANDATORY - The [ref-N] tag from RAG context (omit field if no RAG was provided)",
+      "used_for": "MANDATORY - Specific recommendation supported by this reference (e.g. 'NSAID contraindication until dengue excluded', 'Treatment threshold ≥140/90')"
+    }
+  ]
 }
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -1453,7 +1469,7 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
     }
   })
   
-  // VALIDATION ASSOUPLIE pour médicaments - accepter formats naturels GPT-4
+  // VALIDATION ASSOUPLIE pour médicaments - accepter formats naturels GPT-5.5
   const medications = (analysis?.treatment_plan?.medications || []).filter(
     (med: any) => med && (med.drug || med.medication || med.nom || med.dci || med.indication || med.dosing)
   )
@@ -1490,7 +1506,7 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
       console.log(`ℹ️ Medication ${idx + 1}: DCI will be auto-extracted`)
     }
     
-    // Plus de validation stricte du format dosing - GPT-4 peut utiliser le format qui lui convient
+    // Plus de validation stricte du format dosing - GPT-5.5 peut utiliser le format qui lui convient
   })
   
   const hasGenericContent = issues.length > 0
@@ -1503,7 +1519,7 @@ export function validateMauritiusMedicalSpecificity(analysis: any): {
 function extractDCIFromDrugName(drugName: string): string {
   if (!drugName) return 'Active ingredient'
   
-  // ✅ SIMPLIFIED: Let GPT-4 handle drug name normalization
+  // ✅ SIMPLIFIED: Let GPT-5.5 handle drug name normalization
   // No fixed dictionary - AI normalizes ANY medication intelligently
   // Just extract and capitalize the first word (drug name)
   const match = drugName.match(/^([a-zA-ZÀ-ÿ]+)/)
@@ -1717,9 +1733,9 @@ function enhanceMauritiusMedicalSpecificity(analysis: any, patientContext: Patie
           fixedMed.drug === null ||
           fixedMed.drug.length < 5) {
         
-        // 🚫 DO NOT AUTO-FIX - Trust GPT-4 or remove invalid medication
+        // 🚫 DO NOT AUTO-FIX - Trust GPT-5.5 or remove invalid medication
         console.log(`⚠️ Invalid medication detected: ${fixedMed.drug || 'undefined'}`)
-        console.log('✅ Removing invalid medication - Trusting GPT-4 decision')
+        console.log('✅ Removing invalid medication - Trusting GPT-5.5 decision')
         
         // Return null to filter out later
         return null
@@ -1977,7 +1993,7 @@ function validateAndParseJSON(rawContent: string): { success: boolean, data?: an
     // Remove markdown code blocks
     cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
 
-    // GPT-5.4 may include reasoning/thinking text before JSON - extract JSON object
+    // GPT-5.5 may include reasoning/thinking text before JSON - extract JSON object
     if (!cleanContent.startsWith('{')) {
       const firstBrace = cleanContent.indexOf('{')
       if (firstBrace !== -1) {
@@ -2178,7 +2194,7 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
       const openaiClient = new OpenAI({ apiKey })
 
       const completion = await openaiClient.chat.completions.create({
-        model: 'gpt-5.4',
+        model: 'gpt-5.5',
         messages: [
           {
             role: 'system',
@@ -2226,7 +2242,7 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
       const rawContent = completion.choices[0]?.message?.content || ''
       const finishReason = completion.choices[0]?.finish_reason || 'unknown'
 
-      console.log('🤖 GPT-5.4 response received, length:', rawContent.length, 'finish_reason:', finishReason)
+      console.log('🤖 GPT-5.5 response received, length:', rawContent.length, 'finish_reason:', finishReason)
       console.log('🔍 Response starts with:', rawContent.substring(0, 100))
       console.log('🔍 Response ends with:', rawContent.substring(Math.max(0, rawContent.length - 100)))
 
@@ -2922,7 +2938,7 @@ function universalMedicalValidation(
   
   console.log(`📊 Universal Validation Results:`)
   console.log(`   - Overall Quality: ${overallQuality}`)
-  console.log(`   - Trust GPT-4: ${trustGPT4}`)
+  console.log(`   - Trust GPT-5.5: ${trustGPT4}`)
   console.log(`   - Critical Issues: ${criticalIssues}`)
   console.log(`   - Important Issues: ${importantIssues}`)
   console.log(`   - Treatment Completeness: ${metrics.treatment_completeness}%`)
@@ -3198,10 +3214,10 @@ export function validateTherapeuticCompleteness(analysis: any, patientContext: P
       })
       completenessScore -= 50
       
-      // 🚨 NO AUTO-GENERATION - Trust GPT-4 decision
-      // If GPT-4 didn't prescribe medications, it may be CORRECT (e.g., ACS → immediate hospital referral)
-      console.log('⚠️ No medications prescribed by GPT-4 - This may be intentional (emergency referral)')
-      console.log('✅ Trusting GPT-4 decision - NOT auto-generating medications')
+      // 🚨 NO AUTO-GENERATION - Trust GPT-5.5 decision
+      // If GPT-5.5 didn't prescribe medications, it may be CORRECT (e.g., ACS → immediate hospital referral)
+      console.log('⚠️ No medications prescribed by GPT-5.5 - This may be intentional (emergency referral)')
+      console.log('✅ Trusting GPT-5.5 decision - NOT auto-generating medications')
     }
   }
   
@@ -3438,10 +3454,10 @@ function universalIntelligentValidation(analysis: any, patientContext: PatientCo
   const validation = universalMedicalValidation(analysis, patientContext)
   
   if (validation.trustGPT4) {
-    console.log('✅ GPT-4 prescription quality is sufficient - Minimal corrections')
+    console.log('✅ GPT-5.5 prescription quality is sufficient - Minimal corrections')
     analysis = applyMinimalCorrections(analysis, validation.issues, patientContext)
   } else {
-    console.log('⚠️ GPT-4 prescription needs improvement - Targeted corrections') 
+    console.log('⚠️ GPT-5.5 prescription needs improvement - Targeted corrections') 
     analysis = applyTargetedUniversalCorrections(analysis, validation.issues, patientContext)
   }
   
@@ -4825,7 +4841,7 @@ function validateUniversalMedicalAnalysis(
   console.log(`   - ${labTests.length} test(s) de laboratoire`)
   console.log(`   - ${imaging.length} étude(s) d'imagerie`)
   console.log(`   - Validation universelle : ${analysis.universal_validation?.overall_quality || 'non évaluée'}`)
-  console.log(`   - GPT-4 fiable : ${analysis.universal_validation?.gpt4_trusted || false}`)
+  console.log(`   - GPT-5.5 fiable : ${analysis.universal_validation?.gpt4_trusted || false}`)
   console.log(`   - Problèmes critiques : ${analysis.universal_validation?.critical_issues || 0}`)
   
   if (!analysis?.clinical_analysis?.primary_diagnosis?.condition) {
@@ -5202,9 +5218,75 @@ export async function POST(request: NextRequest) {
       console.log('   - Clinical reasoning present:', !!doctorNotes.clinicalReasoning)
     }
     
-    // ============ APPEL OPENAI AVEC QUALITÉ MAURITIUS + DCI ============
-    const mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis, doctorNotes)
-    
+    // ============ RAG ENRICHMENT (TIBOK guidelines) — best-effort, non-blocking ============
+    let ragContext: RAGContext = {
+      chunks: [],
+      references: [],
+      totalChunks: 0,
+      avgSimilarity: 0,
+      ragUsed: false,
+    }
+    try {
+      const ragQuery = buildClinicalQuery({
+        chiefComplaint: patientContext.chief_complaint,
+        symptoms: patientContext.symptoms,
+        ageYears: patientContext.age,
+        sex: patientContext.sex,
+        medicalHistory: patientContext.medical_history,
+        travelHistory: patientContext.disease_history,
+        vitalSigns: patientContext.vital_signs as Record<string, unknown>,
+        duration: patientContext.symptom_duration,
+        pregnancyStatus: patientContext.pregnancy_status,
+      })
+      const inferredSpecialty = inferSpecialty(ragQuery)
+      console.log(`📚 [RAG] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
+      console.log(`📚 [RAG] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
+
+      // Bug B (multi-query RAG): when the patient context fits a known scenario
+      // whose vocabulary differs from the chief complaint (e.g. malaria when
+      // travelling from an endemic country, bacterial workup on prolonged fever),
+      // run targeted secondary queries in parallel and merge with the primary.
+      const secondaryQueries = buildSecondaryQueries({
+        chiefComplaint: patientContext.chief_complaint,
+        symptoms: patientContext.symptoms,
+        travelHistory: patientContext.disease_history,
+        symptomDuration: patientContext.symptom_duration,
+        ageYears: patientContext.age,
+      })
+      if (secondaryQueries.length > 0) {
+        console.log(
+          `📚 [RAG] Secondary queries triggered: ${secondaryQueries.map(q => q.label).join(', ')}`
+        )
+        ragContext = await queryMedicalGuidelinesMulti(
+          ragQuery,
+          secondaryQueries,
+          { specialty: inferredSpecialty, limit: 10 }
+        )
+      } else {
+        console.log('📚 [RAG] No secondary queries triggered — running single-query retrieval')
+        ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+      }
+      console.log(
+        `📚 [RAG] Retrieved ${ragContext.totalChunks} chunks ` +
+          `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
+      )
+      if (ragContext.references.length > 0) {
+        console.log(
+          `📚 [RAG] Available citation IDs: ${ragContext.references.map(r => r.ref_id).join(', ')}`
+        )
+      }
+    } catch (ragErr: any) {
+      console.error('📚 [RAG] Enrichment failed (non-blocking):', ragErr?.message || ragErr)
+    }
+    const ragPromptBlock = formatGuidelinesForPrompt(ragContext)
+
+    // ============ APPEL OPENAI AVEC QUALITÉ MAURITIUS + DCI + RAG ============
+    let mauritiusPrompt = prepareMauritiusQualityPrompt(patientContext, consultationAnalysis, doctorNotes)
+    if (ragPromptBlock) {
+      // Prepend RAG context so the LLM sees authoritative guidelines before the rest of the prompt.
+      mauritiusPrompt = `${ragPromptBlock}\n\n${mauritiusPrompt}`
+    }
+
     const { data: openaiData, analysis: medicalAnalysis, mauritius_quality_level } = await callOpenAIWithMauritiusQuality(
       apiKey,
       mauritiusPrompt,
@@ -5212,7 +5294,55 @@ export async function POST(request: NextRequest) {
     )
     
     console.log('✅ Analyse médicale avec qualité anglo-saxonne + DCI précis terminée')
-    
+
+    // ========== FIX-3 BUG-A: Filter placeholder medication entries ==========
+    // Primary guard: if patient submitted 0 current medications, GPT cannot
+    // legitimately validate any — drop any placeholder it may have invented.
+    if (!patientContext.current_medications || patientContext.current_medications.length === 0) {
+      if (Array.isArray(medicalAnalysis.current_medications_validated) && medicalAnalysis.current_medications_validated.length > 0) {
+        console.log(`🧹 Patient has 0 current meds — discarding ${medicalAnalysis.current_medications_validated.length} AI-generated placeholder entry(ies)`)
+        medicalAnalysis.current_medications_validated = []
+      }
+    }
+    // Secondary defense: pattern-based filter on remaining entries.
+    // Catches both "no medication" sentences and standalone placeholders ("None",
+    // "Nil", "N/A", "Aucun") that the model sometimes emits as the actual drug
+    // name when the patient has no current medication. Each id field is tested
+    // independently to avoid masking via concatenation.
+    const PLACEHOLDER_MED_PATTERNS = [
+      /^\s*(?:none|nil|n\.?\s*\/?\s*a\.?|aucun|aucune|tbd|to\s+be\s+determined|inconnu|unknown|na)\s*$/i,
+      /no\s+(?:(?:regular|current)\s+)*medication/i,
+      /aucun\s+médicament/i,
+      /not\s+applicable/i,
+      /no\s+medicine\s+name/i,
+    ]
+    const isPlaceholderMed = (med: any): boolean => {
+      if (!med || typeof med !== 'object') return true
+      const fields = [
+        med.medication_name, med.drug, med.name, med.dci, med.medication_dci,
+        med.inn, med.genericName, med.generic_name, med.nom,
+      ]
+        .map(v => String(v ?? '').trim())
+        .filter(Boolean)
+      // No identifier at all → placeholder
+      if (fields.length === 0) return true
+      // Any single identifier matching a placeholder pattern → placeholder
+      return fields.some(f => PLACEHOLDER_MED_PATTERNS.some(p => p.test(f)))
+    }
+    if (Array.isArray(medicalAnalysis.treatment_plan?.medications)) {
+      const before = medicalAnalysis.treatment_plan.medications.length
+      medicalAnalysis.treatment_plan.medications = medicalAnalysis.treatment_plan.medications.filter((m: any) => !isPlaceholderMed(m))
+      const after = medicalAnalysis.treatment_plan.medications.length
+      if (before !== after) console.log(`🧹 Filtered ${before - after} placeholder med(s) from treatment_plan.medications`)
+    }
+    if (Array.isArray(medicalAnalysis.current_medications_validated)) {
+      const before = medicalAnalysis.current_medications_validated.length
+      medicalAnalysis.current_medications_validated = medicalAnalysis.current_medications_validated.filter((m: any) => !isPlaceholderMed(m))
+      const after = medicalAnalysis.current_medications_validated.length
+      if (before !== after) console.log(`🧹 Filtered ${before - after} placeholder med(s) from current_medications_validated`)
+    }
+    // ========== END FIX-3 BUG-A ==========
+
     // ========== DEBUG CURRENT MEDICATIONS VALIDATED ==========
     if (medicalAnalysis.current_medications_validated && medicalAnalysis.current_medications_validated.length > 0) {
       console.log('💊 CURRENT MEDICATIONS VALIDATED BY AI:', medicalAnalysis.current_medications_validated.length)
@@ -5222,11 +5352,27 @@ export async function POST(request: NextRequest) {
         console.log(`      Corrections: ${med.validated_corrections}`)
       })
     } else if (patientContext.current_medications.length > 0) {
-      // 🚨 FALLBACK: GPT-4 didn't return current_medications_validated, generate from patient input
+      // 🚨 FALLBACK: GPT-5.5 didn't return current_medications_validated, generate from patient input
+      // Bug E: filter placeholder strings ("None", "Nil", "N/A", "Aucun"…) BEFORE the
+      // fallback runs — otherwise the patient typing "NONE" gets turned into a fake
+      // 1-unit prescription. Same patterns used by isPlaceholderMed above.
+      const placeholderInputRe = /^\s*(?:none|nil|n\.?\s*\/?\s*a\.?|aucun|aucune|aucun médicament|tbd|to\s+be\s+determined|inconnu|unknown|na|null|rien|no\s+medication)\s*$/i
+      const validInputs = patientContext.current_medications.filter((m: string) => {
+        if (typeof m !== 'string') return false
+        return !placeholderInputRe.test(m.trim())
+      })
+      const droppedCount = patientContext.current_medications.length - validInputs.length
+      if (droppedCount > 0) {
+        console.log(`🧹 Patient input fallback: dropped ${droppedCount} placeholder entry/ies (e.g. "None") from current_medications input`)
+      }
+      if (validInputs.length === 0) {
+        console.log('🧹 All current_medications inputs are placeholders → no current meds, skipping fallback generation')
+        medicalAnalysis.current_medications_validated = []
+      } else {
       console.log('⚠️ AI did not return current_medications_validated - GENERATING FALLBACK from patient input!')
-      console.log(`   📋 Patient has ${patientContext.current_medications.length} current medications to process`)
-      
-      medicalAnalysis.current_medications_validated = patientContext.current_medications.map((medString: string, idx: number) => {
+      console.log(`   📋 Patient has ${validInputs.length} current medications to process`)
+
+      medicalAnalysis.current_medications_validated = validInputs.map((medString: string, idx: number) => {
         // Parse the medication string to extract name, dosage, frequency
         const medLower = medString.toLowerCase()
         const originalInput = medString
@@ -5367,11 +5513,12 @@ export async function POST(request: NextRequest) {
         }
         
         console.log(`   ✅ Fallback validation ${idx + 1}: "${originalInput}" → ${validatedMed.medication_name} (${validatedMed.how_to_take})`)
-        
+
         return validatedMed
       })
-      
+
       console.log(`✅ FALLBACK: Generated ${medicalAnalysis.current_medications_validated.length} validated current medications`)
+      }
     } else {
       console.log('ℹ️ Patient has no current medications - current_medications_validated is empty')
       medicalAnalysis.current_medications_validated = []
@@ -5456,7 +5603,233 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     }
     
     const validation = validateUniversalMedicalAnalysis(finalAnalysis, patientContext)
-    
+
+    // ============ RAG: scrub hallucinated [ref-N] from narrative strings ============
+    // The LLM sometimes cites refs outside the provided range (e.g. [ref-4] when only 3
+    // refs were given). These break frontend lookup and erode trust. Strip them in-place
+    // across every string field of finalAnalysis. Valid [ref-N] are preserved as-is.
+    // We also collect the set of VALID refs that actually appear in the narrative so we
+    // can drop unused entries from finalAnalysis.evidence_references afterwards (Bug D).
+    let hallucinatedRefsScrubbed = 0
+    let hallucinatedRefsBreakdown: Record<string, number> = {}
+    let unusedRefsFiltered = 0
+    const usedValidRefs = new Set<string>()
+    // Diagnostic: record where each valid [ref-N] appears so Megane can see whether
+    // the model cited it in legitimately narrative content vs in a tangential field.
+    const refUsageByPath = new Map<string, Array<{ path: string; excerpt: string }>>()
+    if (ragContext.ragUsed) {
+      const validRefIds = new Set(ragContext.references.map(r => r.ref_id))
+      const REF_TOKEN = /\[ref-(\d+)\]/g
+      const strippedTokens: string[] = []
+      let stringsScanned = 0
+      let stringsModified = 0
+
+      const recordUsage = (id: string, path: string, source: string) => {
+        const arr = refUsageByPath.get(id) ?? []
+        const idx = source.indexOf(`[${id}]`)
+        const start = Math.max(0, idx - 60)
+        const end = Math.min(source.length, idx + 80)
+        arr.push({ path, excerpt: source.slice(start, end).replace(/\s+/g, ' ').trim() })
+        refUsageByPath.set(id, arr)
+      }
+
+      const scrubString = (s: string, path: string): string => {
+        stringsScanned++
+        let modified = false
+        const cleaned = s.replace(REF_TOKEN, (match, num) => {
+          const id = `ref-${num}`
+          if (validRefIds.has(id)) {
+            usedValidRefs.add(id)
+            recordUsage(id, path, s)
+            return match
+          }
+          modified = true
+          strippedTokens.push(id)
+          return ''
+        })
+        if (!modified) return s
+        stringsModified++
+        // Tidy trailing/double whitespace and stray punctuation around the removal
+        return cleaned
+          .replace(/\s+([,.;:!?)])/g, '$1')
+          .replace(/\(\s*\)/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .trim()
+      }
+
+      const scrubNode = (node: any, path: string): any => {
+        if (typeof node === 'string') return scrubString(node, path)
+        if (Array.isArray(node)) return node.map((item, i) => scrubNode(item, `${path}[${i}]`))
+        if (node && typeof node === 'object') {
+          // Don't rewrite the evidence_references entries themselves — Pass 1 below
+          // handles those and tags unknown ref_id values into unknownCitedRefs.
+          if (node === finalAnalysis?.evidence_references) return node
+          for (const k of Object.keys(node)) {
+            if (k === 'evidence_references') continue
+            node[k] = scrubNode(node[k], path ? `${path}.${k}` : k)
+          }
+        }
+        return node
+      }
+
+      // Snapshot the LLM's raw evidence_references BEFORE filtering — useful for
+      // diagnosing which refs the model claimed to use vs which actually appear.
+      const llmEvidenceRaw: Array<{ ref_id?: string; used_for?: string }> = Array.isArray(
+        finalAnalysis?.evidence_references
+      )
+        ? JSON.parse(JSON.stringify(finalAnalysis.evidence_references))
+        : []
+      console.log(
+        `📚 [RAG] LLM raw evidence_references (${llmEvidenceRaw.length}): ` +
+          JSON.stringify(llmEvidenceRaw.map(e => ({ ref_id: e?.ref_id, used_for: (e?.used_for || '').slice(0, 80) })))
+      )
+
+      scrubNode(finalAnalysis, '')
+
+      if (strippedTokens.length > 0) {
+        hallucinatedRefsScrubbed = strippedTokens.length
+        hallucinatedRefsBreakdown = strippedTokens.reduce<Record<string, number>>((acc, t) => {
+          acc[t] = (acc[t] || 0) + 1
+          return acc
+        }, {})
+        console.warn(
+          `📚 [RAG] Scrubbed ${strippedTokens.length} hallucinated ref token(s) ` +
+            `from ${stringsModified}/${stringsScanned} narrative string(s). ` +
+            `Counts: ${JSON.stringify(hallucinatedRefsBreakdown)}. ` +
+            `Valid range was [ref-1..ref-${ragContext.references.length}].`
+        )
+      } else {
+        console.log(
+          `📚 [RAG] Scrub clean: scanned ${stringsScanned} string(s), no out-of-range [ref-N] found ` +
+            `(valid range [ref-1..ref-${ragContext.references.length}]).`
+        )
+      }
+
+      // Diagnostic: where did each kept [ref-N] show up?
+      if (refUsageByPath.size > 0) {
+        console.log('📚 [RAG] Citation paths in narrative (so Megane can spot tangential placements):')
+        for (const [id, hits] of refUsageByPath) {
+          for (const h of hits.slice(0, 3)) {
+            console.log(`   [${id}] @ ${h.path} :: …${h.excerpt}…`)
+          }
+          if (hits.length > 3) {
+            console.log(`   [${id}] … +${hits.length - 3} more occurrence(s)`)
+          }
+        }
+      }
+
+      // ============ Bug D: drop refs the LLM never actually used in the text ============
+      // The model often dumps every provided ref into evidence_references "by reflex"
+      // even when only 1–2 are cited in the narrative. Filter to the refs that show
+      // up in the cleaned report — anything the doctor cannot trace back to a passage
+      // is noise and erodes trust ("[ref-7] Intracerebral Hemorrhage" on a dengue case).
+      //
+      // Bug F: GPT-5.5 sometimes emits ref_id WITH brackets ("[ref-1]") instead of the
+      // bare form ("ref-1") that ragContext.references uses. Normalise before comparing
+      // and store the normalised form so Pass 1 lookups + the frontend both match.
+      if (Array.isArray(finalAnalysis?.evidence_references) && finalAnalysis.evidence_references.length > 0) {
+        const before = finalAnalysis.evidence_references.length
+        const droppedIds: string[] = []
+        const normalisedFromBracketed: string[] = []
+        finalAnalysis.evidence_references = finalAnalysis.evidence_references
+          .map((entry: any) => {
+            const raw = String(entry?.ref_id ?? '').trim()
+            const stripped = raw.replace(/^\[(.+)\]$/, '$1').trim()
+            if (raw !== stripped) normalisedFromBracketed.push(`${raw}→${stripped}`)
+            return { ...entry, ref_id: stripped }
+          })
+          .filter((entry: any) => {
+            const id = entry.ref_id
+            const keep = !!id && usedValidRefs.has(id)
+            if (!keep && id) droppedIds.push(id)
+            return keep
+          })
+        if (normalisedFromBracketed.length > 0) {
+          console.log(
+            `📚 [RAG] Normalised ${normalisedFromBracketed.length} bracketed ref_id(s) emitted by the LLM: ` +
+              normalisedFromBracketed.slice(0, 10).join(', ')
+          )
+        }
+        unusedRefsFiltered = before - finalAnalysis.evidence_references.length
+        if (unusedRefsFiltered > 0) {
+          console.log(
+            `📚 [RAG] Dropped ${unusedRefsFiltered} ref(s) from evidence_references not present in report text. ` +
+              `Dropped: ${droppedIds.join(', ')}. Kept: ${Array.from(usedValidRefs).join(', ') || '(none)'}.`
+          )
+        }
+      }
+    }
+
+    // ============ RAG: enrich evidence_references with full metadata ============
+    // The LLM emits {ref_id, used_for}; we merge in title/source/url/date from ragContext.
+    // Hybrid strategy:
+    //  1. Honor LLM citations when present (precision: per-recommendation mapping)
+    //  2. Deterministic fallback when LLM emits [] despite RAG context provided
+    //     (honest UX: refs labeled "mapping non précisé par le LLM")
+    let evidenceReferences: Array<RAGReference & { used_for: string }> = []
+    let unknownCitedRefs: string[] = []
+    let citationsReconstructed = false
+    if (ragContext.ragUsed) {
+      const llmRefs: Array<{ ref_id?: string; used_for?: string }> = Array.isArray(
+        finalAnalysis?.evidence_references
+      )
+        ? finalAnalysis.evidence_references
+        : []
+      const refLookup = new Map(ragContext.references.map((r) => [r.ref_id, r]))
+      const seen = new Set<string>()
+
+      // Pass 1 — preserve LLM citations.
+      // Bug F: normalise any bracketed ref_id ("[ref-1]") that slipped past the
+      // earlier scrub (e.g. when ragContext.ragUsed was false at scrub time).
+      for (const cited of llmRefs) {
+        const raw = String(cited?.ref_id ?? '').trim()
+        const id = raw.replace(/^\[(.+)\]$/, '$1').trim()
+        if (!id) continue
+        const meta = refLookup.get(id)
+        if (!meta) {
+          unknownCitedRefs.push(id)
+          continue
+        }
+        if (seen.has(id)) continue
+        seen.add(id)
+        evidenceReferences.push({
+          ...meta,
+          used_for: (cited?.used_for || '').trim() || 'Unspecified',
+        })
+      }
+
+      // Pass 2 — deterministic fallback if LLM emitted nothing despite chunks.
+      // Prefer refs the model actually cited in the narrative (usedValidRefs);
+      // only fall back to the full provided set if the narrative cites nothing
+      // either (otherwise we'd reintroduce the off-topic noise Bug D removed).
+      if (evidenceReferences.length === 0 && ragContext.references.length > 0) {
+        citationsReconstructed = true
+        const fallbackRefs = usedValidRefs.size > 0
+          ? ragContext.references.filter(r => usedValidRefs.has(r.ref_id))
+          : ragContext.references
+        console.log(
+          `📚 [RAG] Reconstructing ${fallbackRefs.length} citation(s) — LLM emitted empty evidence_references despite ${ragContext.totalChunks} chunks provided ` +
+            `(narrative-cited: ${usedValidRefs.size}, full-fallback: ${usedValidRefs.size === 0})`
+        )
+        for (const ref of fallbackRefs) {
+          evidenceReferences.push({
+            ...ref,
+            used_for: 'Référence fournie au modèle (mapping détaillé non précisé par le LLM)',
+          })
+        }
+      }
+
+      if (unknownCitedRefs.length > 0) {
+        console.error(
+          `📚 [RAG] LLM cited unknown ref(s): ${unknownCitedRefs.join(', ')} — known: ${ragContext.references.map((r) => r.ref_id).join(', ')}`
+        )
+      }
+      console.log(
+        `📚 [RAG] Final evidence_references count: ${evidenceReferences.length}/${ragContext.references.length} ` +
+          `(reconstructed: ${citationsReconstructed})`
+      )
+    }
+
     const patientContextWithIdentity = {
       ...patientContext,
       ...originalIdentity
@@ -5475,7 +5848,22 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     const finalResponse = {
       success: true,
       processingTime: `${processingTime}ms`,
-      
+
+      // ========== RAG (TIBOK guidelines) ==========
+      rag_used: ragContext.ragUsed,
+      rag_metadata: {
+        chunks_retrieved: ragContext.totalChunks,
+        avg_similarity: Number(ragContext.avgSimilarity.toFixed(3)),
+        provided_references: ragContext.references.length,
+        cited_references: evidenceReferences.length,
+        unknown_citations: unknownCitedRefs,
+        citations_reconstructed: citationsReconstructed,
+        hallucinated_refs_scrubbed: hallucinatedRefsScrubbed,
+        hallucinated_refs_breakdown: hallucinatedRefsBreakdown,
+        unused_refs_filtered: unusedRefsFiltered,
+      },
+      evidence_references: evidenceReferences,
+
       // ========== VALIDATION QUALITÉ MAURITIUS + DCI PRÉCIS ==========
       mauritiusQualityValidation: {
         enabled: true,
@@ -5858,7 +6246,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       
       // Métadonnées
       metadata: {
-        ai_model: 'GPT-5.4',
+        ai_model: 'GPT-5.5',
         system_version: '4.3-Mauritius-Complete-Logic-DCI-Precise-System',
         features: [
           '🏝️ MAURITIUS ANGLO-SAXON NOMENCLATURE - Terminologie médicale UK',
@@ -5871,7 +6259,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
           '🔄 INTELLIGENT QUALITY RETRY - Application progressive spécificité UK',
           '🌍 Validation médicale universelle (TOUTES pathologies)',
           '🧠 Standards basés sur preuves internationales',
-          '🎯 Évaluation intelligente confiance GPT-4', 
+          '🎯 Évaluation intelligente confiance GPT-5.5',
           '🏥 Toutes spécialités médicales supportées automatiquement',
           '📊 Métriques de qualité et scoring en temps réel',
           '🔒 Protection complète des données (GDPR/HIPAA)',
@@ -5951,7 +6339,44 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     console.log('   📦 medications length:', finalResponse.medications?.length || 0)
     console.log('   📦 combinedPrescription length:', finalResponse.combinedPrescription?.length || 0)
     console.log('=========================================================')
-    
+
+    // ====== LOG #1: labs + imaging refs LEAVING openai-diagnosis ======
+    // Pure instrumentation — zero behavioural change. Helps locate where in
+    // the LLM#1 → LLM#2 pipeline the [ref-N] tokens are being lost.
+    try {
+      const labsForDebug = (finalAnalysis as any)?.investigation_plan?.laboratory
+        ?? (finalAnalysis as any)?.expert_investigations?.laboratory_tests
+        ?? (finalAnalysis as any)?.expert_investigations?.immediate_priority?.filter((t: any) => {
+              const c = String(t?.category || '').toLowerCase()
+              return c && !c.includes('imag') && !c.includes('radio')
+            })
+        ?? (finalAnalysis as any)?.lab_tests
+        ?? []
+      console.log('🔬 [DEBUG-LABS-OUT] === LABS LEAVING openai-diagnosis ===')
+      ;(labsForDebug as any[]).forEach((lab: any, i: number) => {
+        const indication = String(lab?.clinical_indication ?? lab?.indication ?? lab?.rationale ?? '')
+        const name = String(lab?.test_name ?? lab?.examination ?? lab?.name ?? lab?.title ?? '')
+        console.log(`[DEBUG-LABS-OUT] #${i + 1} "${name}" | hasRef=${/\[ref-\d+\]/.test(indication)} | indication="${indication.slice(0, 250)}"`)
+      })
+
+      const imgForDebug = (finalAnalysis as any)?.investigation_plan?.imaging
+        ?? (finalAnalysis as any)?.expert_investigations?.imaging_studies
+        ?? (finalAnalysis as any)?.expert_investigations?.immediate_priority?.filter((t: any) => {
+              const c = String(t?.category || '').toLowerCase()
+              return c.includes('imag') || c.includes('radio')
+            })
+        ?? (finalAnalysis as any)?.imaging_studies
+        ?? []
+      console.log('🩻 [DEBUG-IMG-OUT] === IMAGING LEAVING openai-diagnosis ===')
+      ;(imgForDebug as any[]).forEach((img: any, i: number) => {
+        const indication = String(img?.clinical_indication ?? img?.indication ?? '')
+        const name = String(img?.study ?? img?.examination ?? img?.title ?? img?.name ?? '')
+        console.log(`[DEBUG-IMG-OUT] #${i + 1} "${name}" | hasRef=${/\[ref-\d+\]/.test(indication)} | clinical_indication="${indication.slice(0, 250)}"`)
+      })
+    } catch (dbgErr: any) {
+      console.error('[DEBUG-LABS-OUT] instrumentation error (non-blocking):', dbgErr?.message || dbgErr)
+    }
+
     return NextResponse.json(finalResponse)
     
   } catch (error) {
@@ -6278,7 +6703,7 @@ export async function GET(request: NextRequest) {
       'Individual dose specification',
       'Administration timing precision',
       'Complete medication object generation',
-      'Enhanced GPT-4 prompting for precision',
+      'Enhanced GPT-5.5 prompting for precision',
       'Multi-retry system for accuracy',
       'Intelligent validation and correction'
     ]

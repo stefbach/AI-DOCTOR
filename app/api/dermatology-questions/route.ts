@@ -86,12 +86,11 @@ ${systemMessage}
       }
       
       const completion = await openai.chat.completions.create({
-        model: "gpt-5.4",
+        model: "gpt-5.5",
         messages: [
           { role: "system", content: enhancedSystemMessage },
           { role: "user", content: prompt }
         ],
-        temperature: attempt === 0 ? 0.4 : attempt === 1 ? 0.2 : 0.1,
         max_completion_tokens: 8000,
         response_format: { type: "json_object" },
         top_p: 0.9,
@@ -101,8 +100,8 @@ ${systemMessage}
       
       let questionsText = completion.choices[0].message.content || '[]'
       
-      // ========== CRITICAL DEBUG: Log raw GPT-4 response ==========
-      console.log('🔍 ========== RAW GPT-4 RESPONSE ==========')
+      // ========== CRITICAL DEBUG: Log raw GPT-5.5 response ==========
+      console.log('🔍 ========== RAW GPT-5.5 RESPONSE ==========')
       console.log('   Raw response length:', questionsText.length)
       console.log('   Raw response preview:', questionsText.substring(0, 500))
       console.log('   Raw response end:', questionsText.substring(Math.max(0, questionsText.length - 200)))
@@ -126,7 +125,7 @@ ${systemMessage}
       console.log('🔍 Has questions field?:', !!parsed.questions)
       
       // ========== CRITICAL FIX: Handle single question object ==========
-      // GPT-4 sometimes returns a single question object instead of array
+      // The LLM sometimes returns a single question object instead of array
       let questions: any[] = []
       
       if (Array.isArray(parsed)) {
@@ -137,7 +136,7 @@ ${systemMessage}
         questions = parsed.questions
       } else if (parsed.id && parsed.question) {
         // Case 3: Single question object - wrap in array
-        console.log('⚠️ GPT-4 returned single question object, wrapping in array')
+        console.log('⚠️ LLM returned single question object, wrapping in array')
         questions = [parsed]
       } else {
         // Case 4: Unknown format
@@ -397,7 +396,7 @@ YOU MUST return a JSON object with "questions" array, NOT a single question!`
         lastName: originalIdentity.lastName
       },
       metadata: {
-        model: 'gpt-5.4',
+        model: 'gpt-5.5',
         version: '2.0-Professional-Grade-4Retry',
         qualityMetrics: result.qualityMetrics
       },

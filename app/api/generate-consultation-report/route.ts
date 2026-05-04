@@ -2,9 +2,73 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { buildRefCitationMap, expandRefsInTree } from "@/lib/rag/medical-rag"
 
 export const runtime = 'nodejs'
-export const maxDuration = 120 // 120 seconds for GPT-4 report generation (increased from 60s to prevent 504 timeouts)
+export const maxDuration = 120 // 120 seconds for GPT-5.5 report generation (increased from 60s to prevent 504 timeouts)
+
+// ==================== "HORS GUIDELINE RAG" JARGON SANITISER ====================
+// Internal pipeline vocabulary (the prompt previously asked the LLM to write
+// "Recommendation based on standard clinical practice, hors guideline RAG"
+// when no provided ref applied). Doctors/patients should never see this —
+// strip it post-hoc as a safety net even though the prompt no longer requests it.
+function stripHorsGuidelineJargon(text: string): string {
+  if (!text || typeof text !== 'string') return text
+  const original = text
+  const cleaned = text
+    // Full legacy sentence with optional French/English variants of "based on practice"
+    .replace(
+      /Recommendation\s+based\s+on\s+(?:standard\s+clinical\s+practice|practice\s+clinique\s+standard|standard\s+practice|clinical\s+practice)\s*,?\s*hors\s+guideline\s+RAG\.?/gi,
+      'Based on standard clinical practice.'
+    )
+    // Same idea but in French
+    .replace(
+      /Recommandation\s+bas[ée]e?\s+sur\s+la\s+pratique\s+clinique\s+standard\s*,?\s*hors\s+guideline\s+RAG\.?/gi,
+      'Based on standard clinical practice.'
+    )
+    // Standalone trailing ", hors guideline RAG"
+    .replace(/[,;]?\s*hors\s+guideline\s+RAG\.?/gi, '')
+    // Tidy up artefacts: ". .", ", .", double spaces, leading/trailing punctuation
+    .replace(/\s*\.\s*\./g, '.')
+    .replace(/,\s*\./g, '.')
+    .replace(/\s+([,.;:!?)])/g, '$1')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+  return cleaned !== original ? cleaned : original
+}
+
+/**
+ * Recursive walk that scrubs the jargon from every string field of an
+ * arbitrary tree, in place. Returns the number of strings that were modified.
+ * Skips the bibliography metadata (evidence_references) and rag_metadata
+ * for parity with the citation-expansion pass.
+ */
+function stripHorsGuidelineJargonInTree(
+  node: any,
+  excludeKeys: ReadonlySet<string> = new Set(['evidence_references', 'rag_metadata'])
+): number {
+  let modified = 0
+  const visit = (n: any): any => {
+    if (typeof n === 'string') {
+      const cleaned = stripHorsGuidelineJargon(n)
+      if (cleaned !== n) modified++
+      return cleaned
+    }
+    if (Array.isArray(n)) {
+      for (let i = 0; i < n.length; i++) n[i] = visit(n[i])
+      return n
+    }
+    if (n && typeof n === 'object') {
+      for (const k of Object.keys(n)) {
+        if (excludeKeys.has(k)) continue
+        n[k] = visit(n[k])
+      }
+    }
+    return n
+  }
+  visit(node)
+  return modified
+}
 
 // ==================== FONCTION DE TRADUCTION PRAGMATIQUE ====================
 function translateFrenchMedicalTerms(text: string): string {
@@ -716,6 +780,26 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
   console.log(`   - Lab tests found: ${labTests.length}`)
   console.log(`   - Imaging studies found: ${imagingStudies.length}`)
 
+  // ====== LOG #2: labs + imaging refs ENTERING LLM #2 (post-extraction) ======
+  // Pure instrumentation — verifies whether [ref-N] tokens survive the
+  // openai-diagnosis → generate-consultation-report extraction step.
+  try {
+    console.log('🔬 [DEBUG-LABS-IN-LLM2] === LABS ENTERING LLM #2 ===')
+    ;(labTests as any[]).forEach((lab: any, i: number) => {
+      const indication = String(lab?.indication ?? lab?.clinical_indication ?? lab?.justification_clinique ?? lab?.rationale ?? '')
+      const name = String(lab?.name ?? lab?.test_name ?? lab?.examination ?? '')
+      console.log(`[DEBUG-LABS-IN-LLM2] #${i + 1} "${name}" | hasRef=${/\[ref-\d+\]/.test(indication)} | indication="${indication.slice(0, 250)}"`)
+    })
+    console.log('🩻 [DEBUG-IMG-IN-LLM2] === IMAGING ENTERING LLM #2 ===')
+    ;(imagingStudies as any[]).forEach((img: any, i: number) => {
+      const indication = String(img?.indication ?? img?.clinical_indication ?? img?.justification_clinique ?? '')
+      const name = String(img?.name ?? img?.study ?? img?.examination ?? '')
+      console.log(`[DEBUG-IMG-IN-LLM2] #${i + 1} "${name}" | hasRef=${/\[ref-\d+\]/.test(indication)} | indication="${indication.slice(0, 250)}"`)
+    })
+  } catch (dbgErr: any) {
+    console.error('[DEBUG-LABS-IN-LLM2] instrumentation error (non-blocking):', dbgErr?.message || dbgErr)
+  }
+
   // =========== 11. FOLLOW-UP PLAN ===========
   const followUp = getString(
     diagnosisData?.followUpPlan?.immediate ||
@@ -779,7 +863,7 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
     
     // Detailed prescription data
     detailedMedications: medications.map((med: any) => ({
-      name: getString(med.medication_dci || med.drug || 'Medication'),
+      name: getString(med.nom || med.medication_dci || med.drug || med.medication_name || med.name || 'Medication'),
       indication: getString(med.precise_indication || med.indication || ''),
       mechanism: getString(med.mechanism || ''),
       dosing: getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed'),
@@ -967,8 +1051,8 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     }
     
     medications.push({
-      name: getString(med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
-      genericName: getString(med.dci || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
+      name: getString(med.nom || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
+      genericName: getString(med.denominationCommune || med.dci || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
       dosage: completeDosage,
       form: getString(med.dosage_form || med.form || 'tablet'),
       frequency: detailedFrequency,
@@ -984,7 +1068,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       pregnancyCategory: getString(med.pregnancy_category || ''),
       pregnancySafety: getString(med.pregnancy_safety || ''),
       breastfeedingSafety: getString(med.breastfeeding_safety || ''),
-      completeLine: `${getString(med.medication_dci || med.dci || med.drug || med.medication_name || med.name)} ${completeDosage}\n${detailedFrequency}`
+      completeLine: `${getString(med.nom || med.medication_dci || med.dci || med.drug || med.medication_name || med.name)} ${completeDosage}\n${detailedFrequency}`
     })
     })
   }
@@ -1072,7 +1156,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   return { medications, labTests, imagingStudies }
 }
 
-// ==================== GPT-4 DATA PREPARATION ====================
+// ==================== GPT-5.5 DATA PREPARATION ====================
 function prepareEnrichedGPTData(realData: any, patientData: any, clinicalData?: any) {
   // Extract workplace incident information
   const workplaceIncident = clinicalData?.workplaceIncident || {}
@@ -1144,7 +1228,7 @@ function prepareEnrichedGPTData(realData: any, patientData: any, clinicalData?: 
   }
 }
 
-// ==================== GPT-4 PROMPTS ====================
+// ==================== GPT-5.5 PROMPTS ====================
 // ==================== DERMATOLOGY-SPECIFIC PROMPTS ====================
 function createDermatologySystemPrompt(pregnancyStatus: string): string {
   const status = getString(pregnancyStatus)
@@ -1859,8 +1943,8 @@ export async function POST(request: NextRequest) {
       examinationDate: examDate
     }
 
-    // ===== CALL GPT-4 WITH TRANSLATED DATA AND IMPROVED JSON PARSING =====
-    console.log("🤖 Calling GPT-4 with translated data for narrative structuring...")
+    // ===== CALL GPT-5.5 WITH TRANSLATED DATA AND IMPROVED JSON PARSING =====
+    console.log("🤖 Calling GPT-5.5 with translated data for narrative structuring...")
 
     let narrativeContent: any = {}
 
@@ -1884,18 +1968,17 @@ export async function POST(request: NextRequest) {
       }
       
       const result = await generateText({
-        model: openai("gpt-5.4", { reasoningEffort: "none" }),
+        model: openai("gpt-5.5", { reasoningEffort: "none" }),
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
         maxTokens: 4000,
-        temperature: 0.2,
       })
 
       // IMPROVED JSON PARSING WITH BETTER ERROR HANDLING
-      console.log("🔍 GPT-4 raw response length:", result.text.length)
-      console.log("🔍 GPT-4 response preview:", result.text.substring(0, 500))
+      console.log("🔍 GPT-5.5 raw response length:", result.text.length)
+      console.log("🔍 GPT-5.5 response preview:", result.text.substring(0, 500))
       
       let cleanedText = result.text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
       
@@ -1911,9 +1994,9 @@ export async function POST(request: NextRequest) {
         try {
           // Try to parse the extracted JSON
           narrativeContent = JSON.parse(jsonString)
-          // Apply translation to GPT-4 response
+          // Apply translation to GPT-5.5 response
           narrativeContent = translateObjectRecursively(narrativeContent)
-          console.log("✅ GPT-4 narrative content parsed and translated successfully")
+          console.log("✅ GPT-5.5 narrative content parsed and translated successfully")
           console.log("✅ Narrative sections:", Object.keys(narrativeContent))
           
         } catch (parseError) {
@@ -1947,7 +2030,7 @@ export async function POST(request: NextRequest) {
       }
       
     } catch (error) {
-      console.error("❌ GPT-4 Error:", error)
+      console.error("❌ GPT-5.5 Error:", error)
       console.log("🔄 Using fallback content")
       narrativeContent = useRealDataFallback(realData, pregnancyInfo, clinicalData, patientData)
       narrativeContent = translateObjectRecursively(narrativeContent)
@@ -2334,6 +2417,42 @@ export async function POST(request: NextRequest) {
     
     reportStructure.medicalReport.metadata.wordCount = wordCount
 
+    // ====== Fix B: expand [ref-N] → "(Source, Year)" in narrative strings ======
+    // Doctors and patients can't read "[ref-7]" — give them readable inline
+    // citations. The full bibliography (with title + URL) stays in
+    // diagnosisData.evidence_references for the section at the bottom of the
+    // report; we exclude that key + rag_metadata from the walk so it survives
+    // intact for rendering.
+    //
+    // We expand BOTH reportStructure (narrative + prescriptions emitted by
+    // LLM #2) AND diagnosisData (clinical rationale + investigation/treatment
+    // plans emitted by LLM #1, rendered directly by professional-report.tsx).
+    try {
+      const refsForExpansion = (diagnosisData as any)?.evidence_references ?? []
+      const refMap = buildRefCitationMap(refsForExpansion as any)
+      if (refMap.size > 0) {
+        expandRefsInTree(reportStructure, refMap)
+        expandRefsInTree(diagnosisData, refMap)
+        console.log(
+          `📚 [RAG] Expanded [ref-N] → (Source, Year) across reportStructure + diagnosisData ` +
+            `(${refMap.size} refs available: ${Array.from(refMap.keys()).join(', ')})`
+        )
+      } else {
+        console.log('📚 [RAG] No references available for citation expansion (skipped)')
+      }
+
+      // Safety net: scrub the "hors guideline RAG" jargon if the LLM ignored
+      // the prompt update and emitted the legacy phrasing anyway. Doctors and
+      // patients shouldn't see internal pipeline vocabulary.
+      const cleanedCount = stripHorsGuidelineJargonInTree(reportStructure)
+        + stripHorsGuidelineJargonInTree(diagnosisData)
+      if (cleanedCount > 0) {
+        console.log(`🧹 [RAG] Cleaned "hors guideline RAG" jargon from ${cleanedCount} string(s)`)
+      }
+    } catch (expErr: any) {
+      console.error('📚 [RAG] Citation expansion failed (non-blocking):', expErr?.message || expErr)
+    }
+
     const endTime = Date.now()
     const processingTime = endTime - startTime
 
@@ -2347,6 +2466,28 @@ export async function POST(request: NextRequest) {
     console.log(`   - Pregnancy status: ${pregnancyInfo.display}`)
     console.log(`   - Processing time: ${processingTime}ms`)
     console.log(`   - All text content now in English`)
+
+    // ====== LOG #3: labs + imaging refs LEAVING LLM #2 (final) ======
+    // Pure instrumentation — verifies whether the LLM #2 narrative pass
+    // preserves [ref-N] tokens it received in lab/imaging indications.
+    // NB: cleanLabTests / cleanImagingStudies store the indication under
+    // camelCase `clinicalIndication`; we also try snake_case as fallback.
+    try {
+      console.log('🔬 [DEBUG-LABS-OUT-LLM2] === LABS LEAVING LLM #2 (final) ===')
+      ;(cleanLabTests as any[]).forEach((lab: any, i: number) => {
+        const indication = String(lab?.clinicalIndication ?? lab?.indication ?? lab?.clinical_indication ?? '')
+        const name = String(lab?.name ?? lab?.test_name ?? lab?.examination ?? '')
+        console.log(`[DEBUG-LABS-OUT-LLM2] #${i + 1} "${name}" | hasRef=${/\[ref-\d+\]/.test(indication)} | indication="${indication.slice(0, 250)}"`)
+      })
+      console.log('🩻 [DEBUG-IMG-OUT-LLM2] === IMAGING LEAVING LLM #2 (final) ===')
+      ;(cleanImagingStudies as any[]).forEach((img: any, i: number) => {
+        const indication = String(img?.clinicalIndication ?? img?.indication ?? img?.clinical_indication ?? '')
+        const name = String(img?.name ?? img?.study ?? img?.examination ?? '')
+        console.log(`[DEBUG-IMG-OUT-LLM2] #${i + 1} "${name}" | hasRef=${/\[ref-\d+\]/.test(indication)} | indication="${indication.slice(0, 250)}"`)
+      })
+    } catch (dbgErr: any) {
+      console.error('[DEBUG-LABS-OUT-LLM2] instrumentation error (non-blocking):', dbgErr?.message || dbgErr)
+    }
 
     return NextResponse.json({
       success: true,
@@ -2397,7 +2538,7 @@ export async function GET(request: NextRequest) {
       '🔧 Enhanced JSON parsing with better error handling',
       '🔍 Improved empty data detection and validation',
       '🛠️ Enhanced fallback function with clinical data support',
-      '📝 Better GPT-4 response processing',
+      '📝 Better GPT-5.5 response processing',
       '⚠️ Comprehensive error recovery mechanisms'
     ],
     features: [

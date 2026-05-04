@@ -9,7 +9,7 @@
 // - 8000 max tokens for comprehensive responses
 // - Enhanced context awareness
 export const runtime = 'nodejs'
-export const maxDuration = 300 // 300 seconds max for GPT-5.4 dermatology diagnosis generation
+export const maxDuration = 300 // 300 seconds max for GPT-5.5 dermatology diagnosis generation
 
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
@@ -373,7 +373,7 @@ CLINICAL SUMMARY MUST INCLUDE:
       }
       
       const completion = await openai.chat.completions.create({
-        model: "gpt-5.4",
+        model: "gpt-5.5",
         messages: [
           {
             role: "system",
@@ -612,7 +612,7 @@ ${summary}
       console.log(`💊 Patient has current medications: ${anonymizedPatient.currentMedications}`)
     }
 
-    // Format current medications properly for GPT-4
+    // Format current medications properly for GPT-5.5
     const currentMedicationsFormatted = hasCurrentMedications
       ? (Array.isArray(anonymizedPatient.currentMedications)
           ? anonymizedPatient.currentMedications.map((med: string, idx: number) => `${idx + 1}. ${med}`).join('\n  ')
