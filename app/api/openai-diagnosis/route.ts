@@ -5327,10 +5327,26 @@ export async function POST(request: NextRequest) {
       })
     } else if (patientContext.current_medications.length > 0) {
       // 🚨 FALLBACK: GPT-5.5 didn't return current_medications_validated, generate from patient input
+      // Bug E: filter placeholder strings ("None", "Nil", "N/A", "Aucun"…) BEFORE the
+      // fallback runs — otherwise the patient typing "NONE" gets turned into a fake
+      // 1-unit prescription. Same patterns used by isPlaceholderMed above.
+      const placeholderInputRe = /^\s*(?:none|nil|n\.?\s*\/?\s*a\.?|aucun|aucune|aucun médicament|tbd|to\s+be\s+determined|inconnu|unknown|na|null|rien|no\s+medication)\s*$/i
+      const validInputs = patientContext.current_medications.filter((m: string) => {
+        if (typeof m !== 'string') return false
+        return !placeholderInputRe.test(m.trim())
+      })
+      const droppedCount = patientContext.current_medications.length - validInputs.length
+      if (droppedCount > 0) {
+        console.log(`🧹 Patient input fallback: dropped ${droppedCount} placeholder entry/ies (e.g. "None") from current_medications input`)
+      }
+      if (validInputs.length === 0) {
+        console.log('🧹 All current_medications inputs are placeholders → no current meds, skipping fallback generation')
+        medicalAnalysis.current_medications_validated = []
+      } else {
       console.log('⚠️ AI did not return current_medications_validated - GENERATING FALLBACK from patient input!')
-      console.log(`   📋 Patient has ${patientContext.current_medications.length} current medications to process`)
-      
-      medicalAnalysis.current_medications_validated = patientContext.current_medications.map((medString: string, idx: number) => {
+      console.log(`   📋 Patient has ${validInputs.length} current medications to process`)
+
+      medicalAnalysis.current_medications_validated = validInputs.map((medString: string, idx: number) => {
         // Parse the medication string to extract name, dosage, frequency
         const medLower = medString.toLowerCase()
         const originalInput = medString
@@ -5471,11 +5487,12 @@ export async function POST(request: NextRequest) {
         }
         
         console.log(`   ✅ Fallback validation ${idx + 1}: "${originalInput}" → ${validatedMed.medication_name} (${validatedMed.how_to_take})`)
-        
+
         return validatedMed
       })
-      
+
       console.log(`✅ FALLBACK: Generated ${medicalAnalysis.current_medications_validated.length} validated current medications`)
+      }
     } else {
       console.log('ℹ️ Patient has no current medications - current_medications_validated is empty')
       medicalAnalysis.current_medications_validated = []
@@ -5680,15 +5697,33 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       // even when only 1–2 are cited in the narrative. Filter to the refs that show
       // up in the cleaned report — anything the doctor cannot trace back to a passage
       // is noise and erodes trust ("[ref-7] Intracerebral Hemorrhage" on a dengue case).
+      //
+      // Bug F: GPT-5.5 sometimes emits ref_id WITH brackets ("[ref-1]") instead of the
+      // bare form ("ref-1") that ragContext.references uses. Normalise before comparing
+      // and store the normalised form so Pass 1 lookups + the frontend both match.
       if (Array.isArray(finalAnalysis?.evidence_references) && finalAnalysis.evidence_references.length > 0) {
         const before = finalAnalysis.evidence_references.length
         const droppedIds: string[] = []
-        finalAnalysis.evidence_references = finalAnalysis.evidence_references.filter((entry: any) => {
-          const id = (entry?.ref_id || '').trim()
-          const keep = !!id && usedValidRefs.has(id)
-          if (!keep && id) droppedIds.push(id)
-          return keep
-        })
+        const normalisedFromBracketed: string[] = []
+        finalAnalysis.evidence_references = finalAnalysis.evidence_references
+          .map((entry: any) => {
+            const raw = String(entry?.ref_id ?? '').trim()
+            const stripped = raw.replace(/^\[(.+)\]$/, '$1').trim()
+            if (raw !== stripped) normalisedFromBracketed.push(`${raw}→${stripped}`)
+            return { ...entry, ref_id: stripped }
+          })
+          .filter((entry: any) => {
+            const id = entry.ref_id
+            const keep = !!id && usedValidRefs.has(id)
+            if (!keep && id) droppedIds.push(id)
+            return keep
+          })
+        if (normalisedFromBracketed.length > 0) {
+          console.log(
+            `📚 [RAG] Normalised ${normalisedFromBracketed.length} bracketed ref_id(s) emitted by the LLM: ` +
+              normalisedFromBracketed.slice(0, 10).join(', ')
+          )
+        }
         unusedRefsFiltered = before - finalAnalysis.evidence_references.length
         if (unusedRefsFiltered > 0) {
           console.log(
@@ -5717,9 +5752,12 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       const refLookup = new Map(ragContext.references.map((r) => [r.ref_id, r]))
       const seen = new Set<string>()
 
-      // Pass 1 — preserve LLM citations
+      // Pass 1 — preserve LLM citations.
+      // Bug F: normalise any bracketed ref_id ("[ref-1]") that slipped past the
+      // earlier scrub (e.g. when ragContext.ragUsed was false at scrub time).
       for (const cited of llmRefs) {
-        const id = (cited?.ref_id || '').trim()
+        const raw = String(cited?.ref_id ?? '').trim()
+        const id = raw.replace(/^\[(.+)\]$/, '$1').trim()
         if (!id) continue
         const meta = refLookup.get(id)
         if (!meta) {
