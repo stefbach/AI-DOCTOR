@@ -819,3 +819,104 @@ export function expandRefsInTree(
   }
   return visit(node)
 }
+
+// ============================================================================
+// Citation expansion (alternate format): [ref-N] → "(Source, Year)"
+// ============================================================================
+//
+// Used in parallel with the Vancouver [K] expansion so the rendered report
+// can use the two formats side-by-side: [K] in the narrative (compact, doctor-
+// friendly inline citation), "(Source, Year)" in prescriptions / lab / imaging
+// indications (more readable for the patient when looking at a single med
+// or test out of bibliography context).
+
+export interface RefSourceYear {
+  source: string
+  year: string
+}
+
+export type RefSourceYearMap = Map<string, RefSourceYear>
+
+/**
+ * Build a ref_id → { source, year } lookup from the final
+ * evidence_references array. Tolerates both bare ("ref-1") and bracketed
+ * ("[ref-1]") ids; pulls the year from `year` when set, else the first 4-digit
+ * run inside `publication_date` (handles "2025", "2025-03-12", etc.).
+ */
+export function buildRefSourceYearMap(
+  evidenceRefs: ReadonlyArray<{
+    ref_id?: string
+    source?: string
+    publication_date?: string
+    year?: string | number
+  }> | null | undefined
+): RefSourceYearMap {
+  const map: RefSourceYearMap = new Map<string, RefSourceYear>()
+  if (!Array.isArray(evidenceRefs)) return map
+  for (const ref of evidenceRefs) {
+    if (!ref?.ref_id) continue
+    const id = String(ref.ref_id).replace(/^\[(.+)\]$/, '$1').trim()
+    if (!id || map.has(id)) continue
+    const yearFromExplicit = ref.year != null && String(ref.year).trim() ? String(ref.year).trim() : ''
+    const yearFromDate = ref.publication_date
+      ? (String(ref.publication_date).match(/(\d{4})/)?.[1] ?? '')
+      : ''
+    map.set(id, {
+      source: String(ref.source || '').trim() || 'Guideline',
+      year: yearFromExplicit || yearFromDate,
+    })
+  }
+  return map
+}
+
+/**
+ * Replace [ref-N] tokens in a string with "(Source, Year)" — or "(Source)"
+ * when the year is unknown. Tokens whose ref-N is unknown to the map are
+ * dropped (the upstream scrub normally already removes them).
+ */
+export function expandRefCitationsAsSourceYear(
+  text: string,
+  sourceYearMap: RefSourceYearMap
+): string {
+  if (!text || sourceYearMap.size === 0) return text
+  return text
+    .replace(/\[ref-(\d+)\]/g, (_match, num) => {
+      const meta = sourceYearMap.get(`ref-${num}`)
+      if (!meta) return ''
+      return meta.year ? `(${meta.source}, ${meta.year})` : `(${meta.source})`
+    })
+    // Tidy whitespace/punctuation introduced by drops or insertions above.
+    .replace(/\s+([,.;:!?)])/g, '$1')
+    .replace(/\(\s*\)/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+/**
+ * Walk an arbitrary object/array tree and rewrite every string field through
+ * `expandRefCitationsAsSourceYear`. Mutates in place AND returns the same
+ * reference. Uses the same default excludeKeys as the Vancouver walker
+ * (evidence_references + rag_metadata).
+ */
+export function expandRefsAsSourceYearInTree(
+  node: any,
+  sourceYearMap: RefSourceYearMap,
+  excludeKeys: ReadonlySet<string> = new Set(['evidence_references', 'rag_metadata'])
+): any {
+  if (sourceYearMap.size === 0) return node
+  const visit = (n: any): any => {
+    if (typeof n === 'string') return expandRefCitationsAsSourceYear(n, sourceYearMap)
+    if (Array.isArray(n)) {
+      for (let i = 0; i < n.length; i++) n[i] = visit(n[i])
+      return n
+    }
+    if (n && typeof n === 'object') {
+      for (const k of Object.keys(n)) {
+        if (excludeKeys.has(k)) continue
+        n[k] = visit(n[k])
+      }
+    }
+    return n
+  }
+  return visit(node)
+}

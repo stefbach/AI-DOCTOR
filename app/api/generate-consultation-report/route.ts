@@ -2,7 +2,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
-import { buildRefDisplayMap, expandRefsInTree } from "@/lib/rag/medical-rag"
+import { buildRefDisplayMap, buildRefSourceYearMap, expandRefsInTree, expandRefsAsSourceYearInTree } from "@/lib/rag/medical-rag"
 
 export const runtime = 'nodejs'
 export const maxDuration = 120 // 120 seconds for GPT-5.5 report generation (increased from 60s to prevent 504 timeouts)
@@ -2445,49 +2445,72 @@ export async function POST(request: NextRequest) {
     
     reportStructure.medicalReport.metadata.wordCount = wordCount
 
-    // ====== Expand [ref-N] → [K] (Vancouver-style sequential numbering) ======
-    // Doctors and patients want a classic scientific in-text citation: a
-    // bracketed number that matches the position of the reference in the
-    // bibliography section at the bottom of the report. The frontend numbers
-    // bibliography entries by their array position in evidence_references, so
-    // mapping ref_id → (1-indexed array position) keeps in-text and bibliography
-    // numbers in lockstep. evidence_references + rag_metadata are skipped via
-    // excludeKeys so the bibliography keeps its internal ref-N form intact for
-    // rendering.
+    // ====== Dual-format citation expansion ======
+    // Vancouver-style "[K]" for the narrative (chiefComplaint, history,
+    // diagnostic synthesis, …) — a compact bracketed number that matches the
+    // bibliography position at the bottom of the report.
+    // Author-date "(Source, Year)" for prescriptions (medications, labs,
+    // imaging) — readable when the doctor or patient looks at a single med
+    // or test out of bibliography context.
     //
-    // We expand BOTH reportStructure (narrative + prescriptions emitted by
-    // LLM #2) AND diagnosisData (clinical rationale + investigation/treatment
-    // plans emitted by LLM #1, rendered directly by professional-report.tsx).
+    // Order matters: we apply (Source, Year) FIRST on prescription sub-paths
+    // and the source clean* arrays so they get the readable inline form, then
+    // run the Vancouver walk on the rest of the tree with `prescriptions`
+    // added to excludeKeys so it doesn't double-rewrite the already-expanded
+    // strings. evidence_references + rag_metadata stay intact for the
+    // bibliography section regardless.
     try {
       const refsForExpansion = (diagnosisData as any)?.evidence_references ?? []
       const displayMap = buildRefDisplayMap(refsForExpansion as any)
+      const sourceYearMap = buildRefSourceYearMap(refsForExpansion as any)
       if (displayMap.size > 0) {
-        // Diagnostic: log where we're walking and a sample lab so Megane can
-        // see whether the prescription clean arrays actually carry [ref-N].
+        // Diagnostic: where we're walking + sample inputs.
         console.log('🔍 [RAG-EXPAND] reportStructure top-level keys:', Object.keys(reportStructure))
         console.log('🔍 [RAG-EXPAND] diagnosisData top-level keys:', Object.keys(diagnosisData ?? {}))
         if (cleanLabTests?.[0]) {
           console.log('🔍 [RAG-EXPAND] cleanLabTests[0] indication:', String((cleanLabTests[0] as any).clinicalIndication ?? '').slice(0, 200))
         }
 
-        expandRefsInTree(reportStructure, displayMap)
+        // 1) (Source, Year) on prescription sub-paths in the structure +
+        //    the source clean* arrays. Done FIRST so the Vancouver walk
+        //    can skip these subtrees and keep its [K] for the narrative.
+        const rs = reportStructure as any
+        if (rs?.prescriptions?.medications) expandRefsAsSourceYearInTree(rs.prescriptions.medications, sourceYearMap)
+        if (rs?.prescriptions?.laboratoryTests) expandRefsAsSourceYearInTree(rs.prescriptions.laboratoryTests, sourceYearMap)
+        if (rs?.prescriptions?.imagingStudies) expandRefsAsSourceYearInTree(rs.prescriptions.imagingStudies, sourceYearMap)
+        expandRefsAsSourceYearInTree(cleanMedications as any, sourceYearMap)
+        expandRefsAsSourceYearInTree(cleanLabTests as any, sourceYearMap)
+        expandRefsAsSourceYearInTree(cleanImagingStudies as any, sourceYearMap)
+
+        // 2) Vancouver [K] on the rest of the narrative. `prescriptions` is
+        //    added to excludeKeys so we don't traverse the subtrees we just
+        //    expanded as (Source, Year).
+        const NARRATIVE_EXCLUDE: ReadonlySet<string> = new Set([
+          'evidence_references',
+          'rag_metadata',
+          'prescriptions',
+        ])
+        expandRefsInTree(reportStructure, displayMap, NARRATIVE_EXCLUDE)
         expandRefsInTree(diagnosisData, displayMap)
-        // The prescription arrays are the SOURCE of strings copied into
-        // reportStructure.prescriptions.* via .filter().map() at structure-
-        // build time. The mapped objects are independent — mutating
-        // reportStructure does not back-propagate to cleanLabTests. Walk the
-        // arrays directly so anything reading the clean* arrays (LOG #3,
-        // future code paths) sees the same [K] citations.
-        expandRefsInTree(cleanMedications as any, displayMap)
-        expandRefsInTree(cleanLabTests as any, displayMap)
-        expandRefsInTree(cleanImagingStudies as any, displayMap)
+
         const mappingPreview = Array.from(displayMap.entries())
           .map(([id, k]) => `${id}→[${k}]`)
           .join(', ')
         console.log(
-          `📚 [RAG] Expanded [ref-N] → [K] (Vancouver sequential numbering) across reportStructure + diagnosisData + clean{Medications,LabTests,ImagingStudies} ` +
+          `📚 [RAG] Dual-format citation expansion DONE — Vancouver [K] for narrative ` +
+            `(reportStructure excl. prescriptions, diagnosisData) + (Source, Year) for ` +
+            `prescriptions + clean{Medications,LabTests,ImagingStudies} ` +
             `(${displayMap.size} refs: ${mappingPreview})`
         )
+
+        // Diagnostic: confirm both formats coexist after expansion.
+        if (cleanLabTests?.[0]) {
+          console.log('🔍 [RAG-FORMAT] cleanLabTests[0] indication (post-expand):', String((cleanLabTests[0] as any).clinicalIndication ?? '').slice(0, 200))
+        }
+        const sampleNarrative = (rs?.medicalReport?.report?.diagnosticConclusion ?? rs?.medicalReport?.report?.chiefComplaint ?? '') as string
+        if (sampleNarrative) {
+          console.log('🔍 [RAG-FORMAT] reportStructure narrative sample (post-expand):', String(sampleNarrative).slice(0, 200))
+        }
       } else {
         console.log('📚 [RAG] No references available for citation expansion (skipped)')
       }
