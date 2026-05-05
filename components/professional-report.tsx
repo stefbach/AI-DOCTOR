@@ -3940,6 +3940,28 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  console.log('📨 Sending to Tibok at:', tibokUrl)
  console.log('📦 Payload size:', JSON.stringify(documentsPayload).length, 'bytes')
 
+ // Diagnostic: confirm evidenceReferences + medication.indication actually
+ // reach the payload sent to TIBOK. If a field is missing here, it cannot
+ // be the TIBOK route handler's fault.
+ try {
+   const cr = (documentsPayload as any).documents?.consultationReport
+   const rx = (documentsPayload as any).documents?.prescriptions
+   console.log('🔍 [DEBUG-AIDOC-PAYLOAD] consultationReport keys:',
+               cr ? Object.keys(cr) : '(consultationReport is null)')
+   console.log('🔍 [DEBUG-AIDOC-PAYLOAD] evidenceReferences length:',
+               cr?.evidenceReferences?.length)
+   console.log('🔍 [DEBUG-AIDOC-PAYLOAD] first ref:',
+               cr?.evidenceReferences?.[0])
+   console.log('🔍 [DEBUG-AIDOC-PAYLOAD] diagnosisData.evidence_references length:',
+               (diagnosisData as any)?.evidence_references?.length)
+   console.log('🔍 [DEBUG-AIDOC-PAYLOAD] prescriptions.medications[0] keys:',
+               rx?.medications?.[0] ? Object.keys(rx.medications[0]) : '(no medications)')
+   console.log('🔍 [DEBUG-AIDOC-PAYLOAD] prescriptions.medications[0].indication:',
+               rx?.medications?.[0]?.indication?.slice?.(0, 200))
+ } catch (dbgErr: any) {
+   console.error('🔍 [DEBUG-AIDOC-PAYLOAD] instrumentation error (non-blocking):', dbgErr?.message || dbgErr)
+ }
+
  // Call Tibok endpoint for ALL consultation types
  const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
  method: 'POST',
