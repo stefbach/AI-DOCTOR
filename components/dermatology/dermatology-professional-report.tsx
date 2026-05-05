@@ -3817,6 +3817,11 @@ isEmergency: isEmergencyCase,
  type: 'consultation_report',
  title: 'Medical Consultation Report',
  content: report.compteRendu,
+ // Bug 1 (parity with general flow): ship medical guideline references
+ // so the patient PDF can render the bibliography section.
+ evidenceReferences: Array.isArray(diagnosisData?.evidence_references)
+   ? diagnosisData.evidence_references
+   : [],
  validated: true,
  validatedAt: report.compteRendu.metadata?.validatedAt || new Date().toISOString(),
  signature: documentSignatures?.consultation || null
@@ -3824,7 +3829,12 @@ isEmergency: isEmergencyCase,
  prescriptions: report?.ordonnances?.medicaments ? {
  type: 'prescription',
  title: 'Medical Prescription',
- medications: report.ordonnances.medicaments.prescription?.medicaments || [],
+ // Bug 2 (parity with general flow): mirror `justification` as
+ // `indication` so the prescription PDF template can render it.
+ medications: (report.ordonnances.medicaments.prescription?.medicaments || []).map((m: any) => ({
+   ...m,
+   indication: m?.indication || m?.justification || '',
+ })),
  validity: report.ordonnances.medicaments.prescription?.validite || '3 months',
  signature: documentSignatures?.prescription || null,
  content: report.ordonnances.medicaments

@@ -2956,6 +2956,11 @@ export default function ChronicProfessionalReport({
             type: 'chronic_disease_report',
             title: 'Chronic Disease Follow-up Consultation Report',
             content: report.medicalReport,
+            // Bug 1 (parity with general flow): ship medical guideline
+            // references so the patient PDF can render the bibliography.
+            evidenceReferences: Array.isArray((diagnosisData as any)?.evidence_references)
+              ? (diagnosisData as any).evidence_references
+              : [],
             validated: true,
             validatedAt: new Date().toISOString(),
             signature: documentSignatures?.consultation || null
@@ -2963,7 +2968,12 @@ export default function ChronicProfessionalReport({
           prescriptions: report?.medicationPrescription ? {
             type: 'prescription',
             title: 'Medication Prescription',
-            medications: report.medicationPrescription.prescription?.medications || [],
+            // Bug 2 (parity with general flow): mirror `justification` as
+            // `indication` so the prescription PDF template can render it.
+            medications: (report.medicationPrescription.prescription?.medications || []).map((m: any) => ({
+              ...m,
+              indication: m?.indication || m?.justification || '',
+            })),
             validity: report.medicationPrescription.prescription?.validity || '3 months',
             signature: documentSignatures?.prescription || null,
             content: report.medicationPrescription
