@@ -1246,6 +1246,15 @@ IMPORTANT: This is a DERMATOLOGY consultation with:
 
 ${pregnancyNote}
 
+CRITICAL CITATION PRESERVATION RULE:
+The input data contains in-text citation tokens of the form [ref-1], [ref-2], [ref-3], etc.
+These are MEDICAL GUIDELINE REFERENCES that MUST be preserved verbatim in your output narrative,
+at the same locations where they appear in the input. They are NOT jargon to clean up.
+- DO NOT remove [ref-N] tokens.
+- DO NOT paraphrase, translate, or replace them.
+- DO NOT move them to a different sentence — keep them adjacent to the claim they support.
+- A later pipeline stage will transform them into Vancouver-style numbers ([1], [2]…) and produce a bibliography.
+
 DERMATOLOGY REPORT REQUIREMENTS:
 - Include VISUAL FINDINGS from image analysis in physical examination
 - Describe lesion morphology, distribution, color as observed in images
@@ -1345,6 +1354,15 @@ IMPORTANT: This is a CHRONIC DISEASE MANAGEMENT consultation with:
 
 ${pregnancyNote}
 
+CRITICAL CITATION PRESERVATION RULE:
+The input data contains in-text citation tokens of the form [ref-1], [ref-2], [ref-3], etc.
+These are MEDICAL GUIDELINE REFERENCES that MUST be preserved verbatim in your output narrative,
+at the same locations where they appear in the input. They are NOT jargon to clean up.
+- DO NOT remove [ref-N] tokens.
+- DO NOT paraphrase, translate, or replace them.
+- DO NOT move them to a different sentence — keep them adjacent to the claim they support.
+- A later pipeline stage will transform them into Vancouver-style numbers ([1], [2]…) and produce a bibliography.
+
 CHRONIC DISEASE REPORT REQUIREMENTS:
 - Emphasize disease control and medication adherence
 - Include lifestyle modifications (diet, exercise)
@@ -1410,12 +1428,12 @@ function createEnhancedSystemPrompt(pregnancyStatus: string): string {
   const breastfeedingNote = (status === 'breastfeeding') ?
     'NOTE: Patient is BREASTFEEDING - Consider medication compatibility.' : ''
 
-  return `You are a medical report writer for Mauritius. 
+  return `You are a medical report writer for Mauritius.
 Write professional medical reports in ENGLISH using the provided COMPLETE ANALYSIS from openai-diagnosis.
 
 IMPORTANT: You are receiving PRE-ANALYZED medical data including:
 - Complete diagnostic reasoning with pathophysiology (200+ words)
-- Full clinical reasoning (150+ words) 
+- Full clinical reasoning (150+ words)
 - Validated treatment plan with medications
 - Investigation strategy with specific indications
 - Differential diagnoses with probabilities
@@ -1424,6 +1442,16 @@ Your task is to STRUCTURE this existing analysis into narrative form, NOT to re-
 
 ${pregnancyNote}
 ${breastfeedingNote}
+
+CRITICAL CITATION PRESERVATION RULE:
+The input data contains in-text citation tokens of the form [ref-1], [ref-2], [ref-3], etc.
+These tokens are MEDICAL GUIDELINE REFERENCES that MUST be preserved verbatim in your output narrative,
+at the same locations where they appear in the input. They are NOT jargon to clean up.
+- DO NOT remove [ref-N] tokens.
+- DO NOT paraphrase them, translate them, or replace them.
+- DO NOT move them to a different sentence — keep them adjacent to the claim they support.
+- A later pipeline stage will transform them into Vancouver-style numbers ([1], [2]…) and produce a bibliography.
+- If a [ref-N] token appears mid-sentence or end-of-sentence in the input, copy it to the same position in the output.
 
 FORMATTING REQUIREMENTS:
 - Each section must contain minimum 150-200 words
@@ -2434,13 +2462,30 @@ export async function POST(request: NextRequest) {
       const refsForExpansion = (diagnosisData as any)?.evidence_references ?? []
       const displayMap = buildRefDisplayMap(refsForExpansion as any)
       if (displayMap.size > 0) {
+        // Diagnostic: log where we're walking and a sample lab so Megane can
+        // see whether the prescription clean arrays actually carry [ref-N].
+        console.log('🔍 [RAG-EXPAND] reportStructure top-level keys:', Object.keys(reportStructure))
+        console.log('🔍 [RAG-EXPAND] diagnosisData top-level keys:', Object.keys(diagnosisData ?? {}))
+        if (cleanLabTests?.[0]) {
+          console.log('🔍 [RAG-EXPAND] cleanLabTests[0] indication:', String((cleanLabTests[0] as any).clinicalIndication ?? '').slice(0, 200))
+        }
+
         expandRefsInTree(reportStructure, displayMap)
         expandRefsInTree(diagnosisData, displayMap)
+        // The prescription arrays are the SOURCE of strings copied into
+        // reportStructure.prescriptions.* via .filter().map() at structure-
+        // build time. The mapped objects are independent — mutating
+        // reportStructure does not back-propagate to cleanLabTests. Walk the
+        // arrays directly so anything reading the clean* arrays (LOG #3,
+        // future code paths) sees the same [K] citations.
+        expandRefsInTree(cleanMedications as any, displayMap)
+        expandRefsInTree(cleanLabTests as any, displayMap)
+        expandRefsInTree(cleanImagingStudies as any, displayMap)
         const mappingPreview = Array.from(displayMap.entries())
           .map(([id, k]) => `${id}→[${k}]`)
           .join(', ')
         console.log(
-          `📚 [RAG] Expanded [ref-N] → [K] (Vancouver sequential numbering) across reportStructure + diagnosisData ` +
+          `📚 [RAG] Expanded [ref-N] → [K] (Vancouver sequential numbering) across reportStructure + diagnosisData + clean{Medications,LabTests,ImagingStudies} ` +
             `(${displayMap.size} refs: ${mappingPreview})`
         )
       } else {
