@@ -3859,6 +3859,14 @@ const handleSendDocuments = async () => {
  type: 'consultation_report',
  title: 'Medical Consultation Report',
  content: report.compteRendu,
+ // Bug 1: ship the medical guideline references with the consultation
+ // report so the patient PDF can render the "Références médicales
+ // utilisées" section at the bottom (between the narrative and the QR
+ // verification block). Prescriptions/labs/imaging keep the inline
+ // "(Source, Year)" form only — the full bibliography lives here.
+ evidenceReferences: Array.isArray(diagnosisData?.evidence_references)
+   ? diagnosisData.evidence_references
+   : [],
  validated: true,
  validatedAt: report.compteRendu.metadata?.validatedAt || new Date().toISOString(),
  signature: documentSignatures?.consultation || null
@@ -3866,7 +3874,15 @@ const handleSendDocuments = async () => {
  prescriptions: report?.ordonnances?.medicaments ? {
  type: 'prescription',
  title: 'Medical Prescription',
- medications: report.ordonnances.medicaments.prescription?.medicaments || [],
+ // Bug 2: each medication needs an `indication` field for the TIBOK
+ // prescription PDF template. Locally we render `med.justification`
+ // (set from `med.indication` upstream at the report-mapping step), so
+ // mirror it back as `indication` for the patient-facing payload while
+ // keeping `justification` for backwards compatibility.
+ medications: (report.ordonnances.medicaments.prescription?.medicaments || []).map((m: any) => ({
+   ...m,
+   indication: m?.indication || m?.justification || '',
+ })),
  validity: report.ordonnances.medicaments.prescription?.validite || '3 months',
  signature: documentSignatures?.prescription || null,
  content: report.ordonnances.medicaments
