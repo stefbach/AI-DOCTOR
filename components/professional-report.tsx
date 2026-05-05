@@ -3962,11 +3962,32 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
    console.error('🔍 [DEBUG-AIDOC-PAYLOAD] instrumentation error (non-blocking):', dbgErr?.message || dbgErr)
  }
 
+ // VERIFY-OUTGOING-1: serialise the body ONCE here, log flags computed
+ // from the exact bytes that go on the wire, then reuse that same string
+ // in the fetch body. This proves whether the field is in the HTTP body
+ // — distinct from the JS object `documentsPayload` which the earlier
+ // [DEBUG-AIDOC-PAYLOAD] log inspected. PHI is never logged; only flags.
+ const bodyStr = JSON.stringify(documentsPayload)
+ try {
+   console.log('[VERIFY-OUTGOING-1]', {
+     containsEvRef: bodyStr.includes('"evidenceReferences"'),
+     evRefMatches: (bodyStr.match(/"evidenceReferences"/g) || []).length,
+     containsDengueText: bodyStr.includes('Dengue Clinical Care'),
+     containsECDCText: bodyStr.includes('ECDC'),
+     bodyByteSize: bodyStr.length,
+     consultationReportKeys: (documentsPayload as any)?.documents?.consultationReport
+       ? Object.keys((documentsPayload as any).documents.consultationReport)
+       : 'consultationReport is undefined',
+   })
+ } catch (verifyErr: any) {
+   console.error('[VERIFY-OUTGOING-1] instrumentation error (non-blocking):', verifyErr?.message || verifyErr)
+ }
+
  // Call Tibok endpoint for ALL consultation types
  const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify(documentsPayload)
+ body: bodyStr
  })
 
  console.log('📨 Tibok response status:', response.status)
