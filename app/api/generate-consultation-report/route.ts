@@ -2,7 +2,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
-import { buildRefCitationMap, expandRefsInTree } from "@/lib/rag/medical-rag"
+import { buildRefDisplayMap, buildRefSourceYearMap, expandRefsInTree, expandRefsAsSourceYearInTree } from "@/lib/rag/medical-rag"
 
 export const runtime = 'nodejs'
 export const maxDuration = 120 // 120 seconds for GPT-5.5 report generation (increased from 60s to prevent 504 timeouts)
@@ -1246,6 +1246,15 @@ IMPORTANT: This is a DERMATOLOGY consultation with:
 
 ${pregnancyNote}
 
+CRITICAL CITATION PRESERVATION RULE:
+The input data contains in-text citation tokens of the form [ref-1], [ref-2], [ref-3], etc.
+These are MEDICAL GUIDELINE REFERENCES that MUST be preserved verbatim in your output narrative,
+at the same locations where they appear in the input. They are NOT jargon to clean up.
+- DO NOT remove [ref-N] tokens.
+- DO NOT paraphrase, translate, or replace them.
+- DO NOT move them to a different sentence — keep them adjacent to the claim they support.
+- A later pipeline stage will transform them into Vancouver-style numbers ([1], [2]…) and produce a bibliography.
+
 DERMATOLOGY REPORT REQUIREMENTS:
 - Include VISUAL FINDINGS from image analysis in physical examination
 - Describe lesion morphology, distribution, color as observed in images
@@ -1345,6 +1354,15 @@ IMPORTANT: This is a CHRONIC DISEASE MANAGEMENT consultation with:
 
 ${pregnancyNote}
 
+CRITICAL CITATION PRESERVATION RULE:
+The input data contains in-text citation tokens of the form [ref-1], [ref-2], [ref-3], etc.
+These are MEDICAL GUIDELINE REFERENCES that MUST be preserved verbatim in your output narrative,
+at the same locations where they appear in the input. They are NOT jargon to clean up.
+- DO NOT remove [ref-N] tokens.
+- DO NOT paraphrase, translate, or replace them.
+- DO NOT move them to a different sentence — keep them adjacent to the claim they support.
+- A later pipeline stage will transform them into Vancouver-style numbers ([1], [2]…) and produce a bibliography.
+
 CHRONIC DISEASE REPORT REQUIREMENTS:
 - Emphasize disease control and medication adherence
 - Include lifestyle modifications (diet, exercise)
@@ -1410,12 +1428,12 @@ function createEnhancedSystemPrompt(pregnancyStatus: string): string {
   const breastfeedingNote = (status === 'breastfeeding') ?
     'NOTE: Patient is BREASTFEEDING - Consider medication compatibility.' : ''
 
-  return `You are a medical report writer for Mauritius. 
+  return `You are a medical report writer for Mauritius.
 Write professional medical reports in ENGLISH using the provided COMPLETE ANALYSIS from openai-diagnosis.
 
 IMPORTANT: You are receiving PRE-ANALYZED medical data including:
 - Complete diagnostic reasoning with pathophysiology (200+ words)
-- Full clinical reasoning (150+ words) 
+- Full clinical reasoning (150+ words)
 - Validated treatment plan with medications
 - Investigation strategy with specific indications
 - Differential diagnoses with probabilities
@@ -1424,6 +1442,16 @@ Your task is to STRUCTURE this existing analysis into narrative form, NOT to re-
 
 ${pregnancyNote}
 ${breastfeedingNote}
+
+CRITICAL CITATION PRESERVATION RULE:
+The input data contains in-text citation tokens of the form [ref-1], [ref-2], [ref-3], etc.
+These tokens are MEDICAL GUIDELINE REFERENCES that MUST be preserved verbatim in your output narrative,
+at the same locations where they appear in the input. They are NOT jargon to clean up.
+- DO NOT remove [ref-N] tokens.
+- DO NOT paraphrase them, translate them, or replace them.
+- DO NOT move them to a different sentence — keep them adjacent to the claim they support.
+- A later pipeline stage will transform them into Vancouver-style numbers ([1], [2]…) and produce a bibliography.
+- If a [ref-N] token appears mid-sentence or end-of-sentence in the input, copy it to the same position in the output.
 
 FORMATTING REQUIREMENTS:
 - Each section must contain minimum 150-200 words
@@ -2417,26 +2445,72 @@ export async function POST(request: NextRequest) {
     
     reportStructure.medicalReport.metadata.wordCount = wordCount
 
-    // ====== Fix B: expand [ref-N] → "(Source, Year)" in narrative strings ======
-    // Doctors and patients can't read "[ref-7]" — give them readable inline
-    // citations. The full bibliography (with title + URL) stays in
-    // diagnosisData.evidence_references for the section at the bottom of the
-    // report; we exclude that key + rag_metadata from the walk so it survives
-    // intact for rendering.
+    // ====== Dual-format citation expansion ======
+    // Vancouver-style "[K]" for the narrative (chiefComplaint, history,
+    // diagnostic synthesis, …) — a compact bracketed number that matches the
+    // bibliography position at the bottom of the report.
+    // Author-date "(Source, Year)" for prescriptions (medications, labs,
+    // imaging) — readable when the doctor or patient looks at a single med
+    // or test out of bibliography context.
     //
-    // We expand BOTH reportStructure (narrative + prescriptions emitted by
-    // LLM #2) AND diagnosisData (clinical rationale + investigation/treatment
-    // plans emitted by LLM #1, rendered directly by professional-report.tsx).
+    // Order matters: we apply (Source, Year) FIRST on prescription sub-paths
+    // and the source clean* arrays so they get the readable inline form, then
+    // run the Vancouver walk on the rest of the tree with `prescriptions`
+    // added to excludeKeys so it doesn't double-rewrite the already-expanded
+    // strings. evidence_references + rag_metadata stay intact for the
+    // bibliography section regardless.
     try {
       const refsForExpansion = (diagnosisData as any)?.evidence_references ?? []
-      const refMap = buildRefCitationMap(refsForExpansion as any)
-      if (refMap.size > 0) {
-        expandRefsInTree(reportStructure, refMap)
-        expandRefsInTree(diagnosisData, refMap)
+      const displayMap = buildRefDisplayMap(refsForExpansion as any)
+      const sourceYearMap = buildRefSourceYearMap(refsForExpansion as any)
+      if (displayMap.size > 0) {
+        // Diagnostic: where we're walking + sample inputs.
+        console.log('🔍 [RAG-EXPAND] reportStructure top-level keys:', Object.keys(reportStructure))
+        console.log('🔍 [RAG-EXPAND] diagnosisData top-level keys:', Object.keys(diagnosisData ?? {}))
+        if (cleanLabTests?.[0]) {
+          console.log('🔍 [RAG-EXPAND] cleanLabTests[0] indication:', String((cleanLabTests[0] as any).clinicalIndication ?? '').slice(0, 200))
+        }
+
+        // 1) (Source, Year) on prescription sub-paths in the structure +
+        //    the source clean* arrays. Done FIRST so the Vancouver walk
+        //    can skip these subtrees and keep its [K] for the narrative.
+        const rs = reportStructure as any
+        if (rs?.prescriptions?.medications) expandRefsAsSourceYearInTree(rs.prescriptions.medications, sourceYearMap)
+        if (rs?.prescriptions?.laboratoryTests) expandRefsAsSourceYearInTree(rs.prescriptions.laboratoryTests, sourceYearMap)
+        if (rs?.prescriptions?.imagingStudies) expandRefsAsSourceYearInTree(rs.prescriptions.imagingStudies, sourceYearMap)
+        expandRefsAsSourceYearInTree(cleanMedications as any, sourceYearMap)
+        expandRefsAsSourceYearInTree(cleanLabTests as any, sourceYearMap)
+        expandRefsAsSourceYearInTree(cleanImagingStudies as any, sourceYearMap)
+
+        // 2) Vancouver [K] on the rest of the narrative. `prescriptions` is
+        //    added to excludeKeys so we don't traverse the subtrees we just
+        //    expanded as (Source, Year).
+        const NARRATIVE_EXCLUDE: ReadonlySet<string> = new Set([
+          'evidence_references',
+          'rag_metadata',
+          'prescriptions',
+        ])
+        expandRefsInTree(reportStructure, displayMap, NARRATIVE_EXCLUDE)
+        expandRefsInTree(diagnosisData, displayMap)
+
+        const mappingPreview = Array.from(displayMap.entries())
+          .map(([id, k]) => `${id}→[${k}]`)
+          .join(', ')
         console.log(
-          `📚 [RAG] Expanded [ref-N] → (Source, Year) across reportStructure + diagnosisData ` +
-            `(${refMap.size} refs available: ${Array.from(refMap.keys()).join(', ')})`
+          `📚 [RAG] Dual-format citation expansion DONE — Vancouver [K] for narrative ` +
+            `(reportStructure excl. prescriptions, diagnosisData) + (Source, Year) for ` +
+            `prescriptions + clean{Medications,LabTests,ImagingStudies} ` +
+            `(${displayMap.size} refs: ${mappingPreview})`
         )
+
+        // Diagnostic: confirm both formats coexist after expansion.
+        if (cleanLabTests?.[0]) {
+          console.log('🔍 [RAG-FORMAT] cleanLabTests[0] indication (post-expand):', String((cleanLabTests[0] as any).clinicalIndication ?? '').slice(0, 200))
+        }
+        const sampleNarrative = (rs?.medicalReport?.report?.diagnosticConclusion ?? rs?.medicalReport?.report?.chiefComplaint ?? '') as string
+        if (sampleNarrative) {
+          console.log('🔍 [RAG-FORMAT] reportStructure narrative sample (post-expand):', String(sampleNarrative).slice(0, 200))
+        }
       } else {
         console.log('📚 [RAG] No references available for citation expansion (skipped)')
       }
