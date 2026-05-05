@@ -3,6 +3,14 @@
 // - Call 1: Disease Assessment + Medication Management (reasoning: medium, 16K budget)
 // - Call 2: Meal Plan + Objectives & Follow-up (no reasoning, ~6K budget)
 import { type NextRequest, NextResponse } from "next/server"
+import {
+  buildClinicalQuery,
+  inferSpecialty,
+  queryMedicalGuidelines,
+  formatGuidelinesForPrompt,
+  scrubAndEnrichEvidenceRefs,
+  type RAGContext,
+} from '@/lib/rag/medical-rag'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300
@@ -213,11 +221,46 @@ QUESTIONNAIRE: ${JSON.stringify(questionsData, null, 2)}`
         }
 
         try {
+          // ========== RAG ENRICHMENT (TIBOK guidelines) — best-effort, non-blocking ==========
+          let ragContext: RAGContext = {
+            chunks: [],
+            references: [],
+            totalChunks: 0,
+            avgSimilarity: 0,
+            ragUsed: false,
+          }
+          let ragPromptBlock = ''
+          try {
+            sendSSE('progress', { message: 'Consultation des guidelines médicales...', progress: 5 })
+            const ragQuery = buildClinicalQuery({
+              chiefComplaint: clinicalData.chiefComplaint || 'Suivi maladie chronique',
+              symptoms: clinicalData.symptoms || [],
+              ageYears: anonymizedPatient.age,
+              sex: anonymizedPatient.gender,
+              medicalHistory: chronicDiseases,
+              vitalSigns: clinicalData.vitalSigns,
+              duration: clinicalData.symptomDuration,
+            })
+            // For chronic, let inferSpecialty decide (often endocrinology for diabetes,
+            // cardiology for HTA). Fall back to broad search when scorer is unsure.
+            const inferredSpecialty = inferSpecialty(ragQuery)
+            console.log(`📚 [RAG-CHRONIC] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
+            console.log(`📚 [RAG-CHRONIC] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
+            ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+            console.log(
+              `📚 [RAG-CHRONIC] Retrieved ${ragContext.totalChunks} chunks ` +
+                `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
+            )
+            ragPromptBlock = formatGuidelinesForPrompt(ragContext)
+          } catch (ragErr: any) {
+            console.error('📚 [RAG-CHRONIC] Enrichment failed (non-blocking):', ragErr?.message || ragErr)
+          }
+
           // ========== CALL 1: Clinical Reasoning — Disease Assessment + Medication Management (50%) ==========
           sendSSE('progress', { message: 'Analyse clinique approfondie des maladies chroniques...', progress: 10 })
           console.log('🧠 Call 1: Clinical Reasoning — Disease Assessment + Medication Management')
 
-          const clinicalAnalysis = await callOpenAI(apiKey, `Tu es un endocrinologue senior spécialisé en pharmacologie.
+          const call1SystemPrompt = `${ragPromptBlock ? ragPromptBlock + '\n\n' : ''}Tu es un endocrinologue senior spécialisé en pharmacologie.
 Analyse les maladies chroniques du patient ET propose la gestion médicamenteuse.
 UTILISE les noms DCI (Metformine, Périndopril, Amlodipine, etc.)
 Format posologie UK: OD (1x/jour), BD (2x/jour), TDS (3x/jour)
@@ -269,9 +312,14 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
     "globalControl": "Good/Fair/Poor",
     "mainConcerns": ["préoccupation 1", "préoccupation 2"],
     "priorityActions": ["action 1", "action 2"]
-  }
+  },
+  "evidence_references": [
+    { "ref_id": "ref-1", "used_for": "Description précise de l'usage de cette guideline dans tes recommandations" }
+  ]
 }
-Si pas de médicaments à modifier, retourne des tableaux vides pour continue/add/adjust/stop.`, patientContext, 8000, true)
+Si pas de médicaments à modifier, retourne des tableaux vides pour continue/add/adjust/stop.
+Si le RAG n'a fourni aucune guideline (pas de bloc CONTEXTE GUIDELINES MÉDICALES ci-dessus), retourne evidence_references: [].`
+          const clinicalAnalysis = await callOpenAI(apiKey, call1SystemPrompt, patientContext, 8000, true)
 
           sendSSE('progress', { message: 'Évaluation clinique complète, création du plan de suivi...', progress: 50 })
 
@@ -295,7 +343,7 @@ Si pas de médicaments à modifier, retourne des tableaux vides pour continue/ad
           sendSSE('progress', { message: 'Création du plan nutritionnel et objectifs thérapeutiques...', progress: 55 })
           console.log('📋 Call 2: Structured Plans — Meal Plan + Objectives & Follow-up')
 
-          const structuredPlans = await callOpenAI(apiKey, `Tu es un diététicien clinique ET endocrinologue senior.
+          const call2SystemPrompt = `${ragPromptBlock ? ragPromptBlock + '\n\n' : ''}Tu es un diététicien clinique ET endocrinologue senior.
 Crée un plan alimentaire DÉTAILLÉ et PERSONNALISÉ + les objectifs thérapeutiques et le plan de suivi.
 
 CONTEXTE CLINIQUE (résultat de l'évaluation):
@@ -368,14 +416,17 @@ Retourne UNIQUEMENT un JSON valide:
       "weight": { "frequency": "1x/semaine", "timing": "matin à jeun", "target": "perte progressive" }
     }
   }
-}`, patientContext, 6000)
+}
+
+Si une recommandation s'appuie sur une guideline du bloc CONTEXTE GUIDELINES MÉDICALES ci-dessus, cite [ref-N] dans le texte de la recommandation (ex: "viser HbA1c < 7% [ref-1]").`
+          const structuredPlans = await callOpenAI(apiKey, call2SystemPrompt, patientContext, 6000)
 
           sendSSE('progress', { message: 'Finalisation de l\'évaluation...', progress: 90 })
 
           // ========== COMBINE RESULTS ==========
           console.log('✅ Both calls completed, combining results...')
 
-          const combinedAssessment = {
+          const combinedAssessment: any = {
             diseaseAssessment: {
               diabetes: clinicalAnalysis.diseaseAssessment?.diabetes || { present: false },
               hypertension: clinicalAnalysis.diseaseAssessment?.hypertension || { present: false },
@@ -391,7 +442,34 @@ Retourne UNIQUEMENT un JSON valide:
               globalControl: "Fair",
               mainConcerns: ["Suivi requis"],
               priorityActions: ["Continuer le traitement"]
-            }
+            },
+            // LLM-emitted citations from Call 1's evidence_references field;
+            // walked + filtered + enriched by scrubAndEnrichEvidenceRefs below.
+            evidence_references: Array.isArray(clinicalAnalysis.evidence_references)
+              ? clinicalAnalysis.evidence_references
+              : []
+          }
+
+          // RAG: scrub hallucinated [ref-N] from narrative, drop unused refs,
+          // normalise bracketed ref_id, enrich with full metadata. Same helper
+          // as openai-diagnosis and dermatology-diagnosis.
+          const ragResult = scrubAndEnrichEvidenceRefs(
+            combinedAssessment,
+            ragContext,
+            { logPrefix: '📚 [RAG-CHRONIC]' }
+          )
+          combinedAssessment.evidence_references = ragResult.evidenceReferences
+          combinedAssessment.rag_used = ragContext.ragUsed
+          combinedAssessment.rag_metadata = {
+            chunks_retrieved: ragContext.totalChunks,
+            avg_similarity: Number(ragContext.avgSimilarity.toFixed(3)),
+            provided_references: ragContext.references.length,
+            cited_references: ragResult.evidenceReferences.length,
+            unknown_citations: ragResult.unknownCitedRefs,
+            citations_reconstructed: ragResult.citationsReconstructed,
+            hallucinated_refs_scrubbed: ragResult.hallucinatedRefsScrubbed,
+            hallucinated_refs_breakdown: ragResult.hallucinatedRefsBreakdown,
+            unused_refs_filtered: ragResult.unusedRefsFiltered,
           }
 
           sendSSE('progress', { message: 'Évaluation terminée!', progress: 100 })

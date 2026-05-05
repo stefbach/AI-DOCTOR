@@ -9,6 +9,7 @@ import {
   formatGuidelinesForPrompt,
   inferSpecialty,
   buildClinicalQuery,
+  scrubAndEnrichEvidenceRefs,
   type RAGContext,
   type RAGReference,
 } from '@/lib/rag/medical-rag'
@@ -5604,231 +5605,17 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     
     const validation = validateUniversalMedicalAnalysis(finalAnalysis, patientContext)
 
-    // ============ RAG: scrub hallucinated [ref-N] from narrative strings ============
-    // The LLM sometimes cites refs outside the provided range (e.g. [ref-4] when only 3
-    // refs were given). These break frontend lookup and erode trust. Strip them in-place
-    // across every string field of finalAnalysis. Valid [ref-N] are preserved as-is.
-    // We also collect the set of VALID refs that actually appear in the narrative so we
-    // can drop unused entries from finalAnalysis.evidence_references afterwards (Bug D).
-    let hallucinatedRefsScrubbed = 0
-    let hallucinatedRefsBreakdown: Record<string, number> = {}
-    let unusedRefsFiltered = 0
-    const usedValidRefs = new Set<string>()
-    // Diagnostic: record where each valid [ref-N] appears so Megane can see whether
-    // the model cited it in legitimately narrative content vs in a tangential field.
-    const refUsageByPath = new Map<string, Array<{ path: string; excerpt: string }>>()
-    if (ragContext.ragUsed) {
-      const validRefIds = new Set(ragContext.references.map(r => r.ref_id))
-      const REF_TOKEN = /\[ref-(\d+)\]/g
-      const strippedTokens: string[] = []
-      let stringsScanned = 0
-      let stringsModified = 0
+    // ============ RAG: scrub + Bug-D + Bug-F + Pass-1/2 enrichment ============
+    // Shared with chronic-diagnosis and dermatology-diagnosis via the helper in
+    // lib/rag/medical-rag.ts so all three flows behave identically.
+    const ragResult = scrubAndEnrichEvidenceRefs(finalAnalysis, ragContext)
+    const evidenceReferences = ragResult.evidenceReferences
+    const unknownCitedRefs = ragResult.unknownCitedRefs
+    const citationsReconstructed = ragResult.citationsReconstructed
+    const hallucinatedRefsScrubbed = ragResult.hallucinatedRefsScrubbed
+    const hallucinatedRefsBreakdown = ragResult.hallucinatedRefsBreakdown
+    const unusedRefsFiltered = ragResult.unusedRefsFiltered
 
-      const recordUsage = (id: string, path: string, source: string) => {
-        const arr = refUsageByPath.get(id) ?? []
-        const idx = source.indexOf(`[${id}]`)
-        const start = Math.max(0, idx - 60)
-        const end = Math.min(source.length, idx + 80)
-        arr.push({ path, excerpt: source.slice(start, end).replace(/\s+/g, ' ').trim() })
-        refUsageByPath.set(id, arr)
-      }
-
-      const scrubString = (s: string, path: string): string => {
-        stringsScanned++
-        let modified = false
-        const cleaned = s.replace(REF_TOKEN, (match, num) => {
-          const id = `ref-${num}`
-          if (validRefIds.has(id)) {
-            usedValidRefs.add(id)
-            recordUsage(id, path, s)
-            return match
-          }
-          modified = true
-          strippedTokens.push(id)
-          return ''
-        })
-        if (!modified) return s
-        stringsModified++
-        // Tidy trailing/double whitespace and stray punctuation around the removal
-        return cleaned
-          .replace(/\s+([,.;:!?)])/g, '$1')
-          .replace(/\(\s*\)/g, '')
-          .replace(/\s{2,}/g, ' ')
-          .trim()
-      }
-
-      const scrubNode = (node: any, path: string): any => {
-        if (typeof node === 'string') return scrubString(node, path)
-        if (Array.isArray(node)) return node.map((item, i) => scrubNode(item, `${path}[${i}]`))
-        if (node && typeof node === 'object') {
-          // Don't rewrite the evidence_references entries themselves — Pass 1 below
-          // handles those and tags unknown ref_id values into unknownCitedRefs.
-          if (node === finalAnalysis?.evidence_references) return node
-          for (const k of Object.keys(node)) {
-            if (k === 'evidence_references') continue
-            node[k] = scrubNode(node[k], path ? `${path}.${k}` : k)
-          }
-        }
-        return node
-      }
-
-      // Snapshot the LLM's raw evidence_references BEFORE filtering — useful for
-      // diagnosing which refs the model claimed to use vs which actually appear.
-      const llmEvidenceRaw: Array<{ ref_id?: string; used_for?: string }> = Array.isArray(
-        finalAnalysis?.evidence_references
-      )
-        ? JSON.parse(JSON.stringify(finalAnalysis.evidence_references))
-        : []
-      console.log(
-        `📚 [RAG] LLM raw evidence_references (${llmEvidenceRaw.length}): ` +
-          JSON.stringify(llmEvidenceRaw.map(e => ({ ref_id: e?.ref_id, used_for: (e?.used_for || '').slice(0, 80) })))
-      )
-
-      scrubNode(finalAnalysis, '')
-
-      if (strippedTokens.length > 0) {
-        hallucinatedRefsScrubbed = strippedTokens.length
-        hallucinatedRefsBreakdown = strippedTokens.reduce<Record<string, number>>((acc, t) => {
-          acc[t] = (acc[t] || 0) + 1
-          return acc
-        }, {})
-        console.warn(
-          `📚 [RAG] Scrubbed ${strippedTokens.length} hallucinated ref token(s) ` +
-            `from ${stringsModified}/${stringsScanned} narrative string(s). ` +
-            `Counts: ${JSON.stringify(hallucinatedRefsBreakdown)}. ` +
-            `Valid range was [ref-1..ref-${ragContext.references.length}].`
-        )
-      } else {
-        console.log(
-          `📚 [RAG] Scrub clean: scanned ${stringsScanned} string(s), no out-of-range [ref-N] found ` +
-            `(valid range [ref-1..ref-${ragContext.references.length}]).`
-        )
-      }
-
-      // Diagnostic: where did each kept [ref-N] show up?
-      if (refUsageByPath.size > 0) {
-        console.log('📚 [RAG] Citation paths in narrative (so Megane can spot tangential placements):')
-        for (const [id, hits] of refUsageByPath) {
-          for (const h of hits.slice(0, 3)) {
-            console.log(`   [${id}] @ ${h.path} :: …${h.excerpt}…`)
-          }
-          if (hits.length > 3) {
-            console.log(`   [${id}] … +${hits.length - 3} more occurrence(s)`)
-          }
-        }
-      }
-
-      // ============ Bug D: drop refs the LLM never actually used in the text ============
-      // The model often dumps every provided ref into evidence_references "by reflex"
-      // even when only 1–2 are cited in the narrative. Filter to the refs that show
-      // up in the cleaned report — anything the doctor cannot trace back to a passage
-      // is noise and erodes trust ("[ref-7] Intracerebral Hemorrhage" on a dengue case).
-      //
-      // Bug F: GPT-5.5 sometimes emits ref_id WITH brackets ("[ref-1]") instead of the
-      // bare form ("ref-1") that ragContext.references uses. Normalise before comparing
-      // and store the normalised form so Pass 1 lookups + the frontend both match.
-      if (Array.isArray(finalAnalysis?.evidence_references) && finalAnalysis.evidence_references.length > 0) {
-        const before = finalAnalysis.evidence_references.length
-        const droppedIds: string[] = []
-        const normalisedFromBracketed: string[] = []
-        finalAnalysis.evidence_references = finalAnalysis.evidence_references
-          .map((entry: any) => {
-            const raw = String(entry?.ref_id ?? '').trim()
-            const stripped = raw.replace(/^\[(.+)\]$/, '$1').trim()
-            if (raw !== stripped) normalisedFromBracketed.push(`${raw}→${stripped}`)
-            return { ...entry, ref_id: stripped }
-          })
-          .filter((entry: any) => {
-            const id = entry.ref_id
-            const keep = !!id && usedValidRefs.has(id)
-            if (!keep && id) droppedIds.push(id)
-            return keep
-          })
-        if (normalisedFromBracketed.length > 0) {
-          console.log(
-            `📚 [RAG] Normalised ${normalisedFromBracketed.length} bracketed ref_id(s) emitted by the LLM: ` +
-              normalisedFromBracketed.slice(0, 10).join(', ')
-          )
-        }
-        unusedRefsFiltered = before - finalAnalysis.evidence_references.length
-        if (unusedRefsFiltered > 0) {
-          console.log(
-            `📚 [RAG] Dropped ${unusedRefsFiltered} ref(s) from evidence_references not present in report text. ` +
-              `Dropped: ${droppedIds.join(', ')}. Kept: ${Array.from(usedValidRefs).join(', ') || '(none)'}.`
-          )
-        }
-      }
-    }
-
-    // ============ RAG: enrich evidence_references with full metadata ============
-    // The LLM emits {ref_id, used_for}; we merge in title/source/url/date from ragContext.
-    // Hybrid strategy:
-    //  1. Honor LLM citations when present (precision: per-recommendation mapping)
-    //  2. Deterministic fallback when LLM emits [] despite RAG context provided
-    //     (honest UX: refs labeled "mapping non précisé par le LLM")
-    let evidenceReferences: Array<RAGReference & { used_for: string }> = []
-    let unknownCitedRefs: string[] = []
-    let citationsReconstructed = false
-    if (ragContext.ragUsed) {
-      const llmRefs: Array<{ ref_id?: string; used_for?: string }> = Array.isArray(
-        finalAnalysis?.evidence_references
-      )
-        ? finalAnalysis.evidence_references
-        : []
-      const refLookup = new Map(ragContext.references.map((r) => [r.ref_id, r]))
-      const seen = new Set<string>()
-
-      // Pass 1 — preserve LLM citations.
-      // Bug F: normalise any bracketed ref_id ("[ref-1]") that slipped past the
-      // earlier scrub (e.g. when ragContext.ragUsed was false at scrub time).
-      for (const cited of llmRefs) {
-        const raw = String(cited?.ref_id ?? '').trim()
-        const id = raw.replace(/^\[(.+)\]$/, '$1').trim()
-        if (!id) continue
-        const meta = refLookup.get(id)
-        if (!meta) {
-          unknownCitedRefs.push(id)
-          continue
-        }
-        if (seen.has(id)) continue
-        seen.add(id)
-        evidenceReferences.push({
-          ...meta,
-          used_for: (cited?.used_for || '').trim() || 'Unspecified',
-        })
-      }
-
-      // Pass 2 — deterministic fallback if LLM emitted nothing despite chunks.
-      // Prefer refs the model actually cited in the narrative (usedValidRefs);
-      // only fall back to the full provided set if the narrative cites nothing
-      // either (otherwise we'd reintroduce the off-topic noise Bug D removed).
-      if (evidenceReferences.length === 0 && ragContext.references.length > 0) {
-        citationsReconstructed = true
-        const fallbackRefs = usedValidRefs.size > 0
-          ? ragContext.references.filter(r => usedValidRefs.has(r.ref_id))
-          : ragContext.references
-        console.log(
-          `📚 [RAG] Reconstructing ${fallbackRefs.length} citation(s) — LLM emitted empty evidence_references despite ${ragContext.totalChunks} chunks provided ` +
-            `(narrative-cited: ${usedValidRefs.size}, full-fallback: ${usedValidRefs.size === 0})`
-        )
-        for (const ref of fallbackRefs) {
-          evidenceReferences.push({
-            ...ref,
-            used_for: 'Référence fournie au modèle (mapping détaillé non précisé par le LLM)',
-          })
-        }
-      }
-
-      if (unknownCitedRefs.length > 0) {
-        console.error(
-          `📚 [RAG] LLM cited unknown ref(s): ${unknownCitedRefs.join(', ')} — known: ${ragContext.references.map((r) => r.ref_id).join(', ')}`
-        )
-      }
-      console.log(
-        `📚 [RAG] Final evidence_references count: ${evidenceReferences.length}/${ragContext.references.length} ` +
-          `(reconstructed: ${citationsReconstructed})`
-      )
-    }
 
     const patientContextWithIdentity = {
       ...patientContext,
