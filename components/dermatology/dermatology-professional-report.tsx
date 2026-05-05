@@ -3905,6 +3905,27 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
    console.log('📦 Reduced payload size:', Math.round(JSON.stringify(documentsPayload).length / 1024), 'KB')
  }
 
+ // Diagnostic: confirm evidenceReferences + medication.indication actually
+ // reach the payload sent to TIBOK.
+ try {
+   const cr = (documentsPayload as any).documents?.consultationReport
+   const rx = (documentsPayload as any).documents?.prescriptions
+   console.log('🔍 [DEBUG-AIDOC-PAYLOAD] consultationReport keys:',
+               cr ? Object.keys(cr) : '(consultationReport is null)')
+   console.log('🔍 [DEBUG-AIDOC-PAYLOAD] evidenceReferences length:',
+               cr?.evidenceReferences?.length)
+   console.log('🔍 [DEBUG-AIDOC-PAYLOAD] first ref:',
+               cr?.evidenceReferences?.[0])
+   console.log('🔍 [DEBUG-AIDOC-PAYLOAD] diagnosisData.evidence_references length:',
+               (diagnosisData as any)?.evidence_references?.length)
+   console.log('🔍 [DEBUG-AIDOC-PAYLOAD] prescriptions.medications[0] keys:',
+               rx?.medications?.[0] ? Object.keys(rx.medications[0]) : '(no medications)')
+   console.log('🔍 [DEBUG-AIDOC-PAYLOAD] prescriptions.medications[0].indication:',
+               rx?.medications?.[0]?.indication?.slice?.(0, 200))
+ } catch (dbgErr: any) {
+   console.error('🔍 [DEBUG-AIDOC-PAYLOAD] instrumentation error (non-blocking):', dbgErr?.message || dbgErr)
+ }
+
  // Send to dedicated dermatology documents endpoint
  const response = await fetch(`${tibokUrl}/api/dermatology-documents`, {
  method: 'POST',
