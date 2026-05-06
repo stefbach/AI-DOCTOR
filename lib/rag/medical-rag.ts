@@ -49,13 +49,59 @@ function getOpenAI(): OpenAI {
 // Types
 // ============================================================================
 
-/** Specialty codes recognised by the TIBOK RAG (validated by Megane). */
+/**
+ * Specialty codes ingested into the TIBOK RAG corpus. Source of truth:
+ * `scripts/rag-ingest/ingest.py` CLINICAL_DOMAIN_TO_SPECIALTY (deduped values).
+ * Kept in sync manually — extend both places when adding a new domain.
+ */
 export type SpecialtyCode =
+  | 'allergy'
+  | 'anesthesia'
+  | 'bariatric_surgery'
   | 'cardiology'
+  | 'cardiothoracic_surgery'
+  | 'colorectal_surgery'
+  | 'dermatology'
+  | 'emergency_medicine'
   | 'endocrinology'
-  | 'preventive_medicine'
+  | 'ent'
+  | 'general_medicine'
+  | 'general_surgery'
+  | 'genetics'
+  | 'geriatrics'
+  | 'hematology'
+  | 'hepatology_gastro'
+  | 'humanitarian'
   | 'infectious_diseases'
+  | 'integrative_medicine'
+  | 'musculoskeletal'
+  | 'nephrology'
+  | 'neurology'
+  | 'nutrition'
+  | 'occupational_medicine'
+  | 'oncology'
+  | 'ophthalmology'
+  | 'orthopedics'
+  | 'pain_management'
+  | 'palliative_care'
+  | 'pathology'
+  | 'pediatrics'
+  | 'pharmacogenomics'
+  | 'pharmacology'
+  | 'plastic_surgery'
+  | 'preventive_medicine'
+  | 'psychiatry'
   | 'pulmonology'
+  | 'radiology'
+  | 'rare_diseases'
+  | 'rheumatology'
+  | 'sleep_medicine'
+  | 'sports_medicine'
+  | 'tropical_diseases'
+  | 'urology'
+  | 'vascular_surgery'
+  | 'women_health'
+  | 'wound_care'
 
 /** Raw row shape returned by public.match_guidelines RPC. */
 interface MatchGuidelinesRow {
@@ -434,92 +480,107 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
  */
 export function inferSpecialty(query: string): SpecialtyCode | null {
   const q = (query || '').toLowerCase()
+  const has = (kw: string) => q.includes(kw)
+  const score = (keywords: readonly string[]) => keywords.reduce((n, k) => has(k) ? n + 1 : n, 0)
 
-  const cardioHits = [
-    'chest pain',
-    'angina',
-    'acs',
-    'stemi',
-    'nstemi',
-    'heart failure',
-    'douleur thoracique',
-    'tachycard',
-    'bradycard',
-    'hypertension',
-    'hta',
-    'blood pressure',
-    'tension artérielle',
-  ].filter(k => q.includes(k))
+  // Keyword tables — FR + EN. Order in `scores` array below decides tie-breaks
+  // (more specific specialties first), since Array.sort is stable in JS engines.
+  // Tropical-specific terms moved out of infectious_diseases so dengue/malaria
+  // route to the targeted corpus.
+  const tropical = [
+    'dengue', 'malaria', 'paludisme', 'chikungunya', 'zika', 'arbovir',
+    'leptospiros', 'fièvre tropicale', 'tropical fever', 'returning travel',
+  ] as const
+  const oncology = [
+    'cancer', 'tumeur', 'tumor', 'malignant', 'metastas', 'métastas',
+    'chemotherapy', 'chimio', 'oncolog', 'leukemia', 'leucémie',
+    'lymphoma', 'lymphome', 'carcinoma',
+  ] as const
+  const womenHealth = [
+    'pregnan', 'grossesse', 'prenatal', 'prénatal', 'postpartum', 'post-partum',
+    'menstrual', 'menstrue', 'gynéco', 'gynaeco', 'ovaire', 'ovary',
+    'uterus', 'utér', 'breastfeed', 'allaitement',
+  ] as const
+  const pediatrics = [
+    'pediatric', 'pédiat', 'enfant', 'nourrisson', 'bébé', 'infant',
+    'child', 'neonatal', 'néonat', 'adolescent',
+  ] as const
+  const dermatology = [
+    'rash', 'éruption', 'peau', 'dermat', 'eczema', 'eczéma',
+    'psoriasis', 'acne', 'acné', 'prurit', 'lésion cutané', 'skin lesion',
+    'mole', 'naevus', 'urticaire', 'urticaria',
+  ] as const
+  const psychiatry = [
+    'depression', 'dépression', 'anxiety', 'anxiété', 'psychiatric',
+    'psychiatrique', 'mental health', 'santé mentale', 'suicid',
+    'panic', 'panique', 'bipolar', 'bipolaire',
+  ] as const
+  const rheumatology = [
+    'arthrit', 'rhumatolog', 'polyarthrite', 'lupus', 'fibromyalgie',
+    'fibromyalgia', 'gout', 'goutte', 'joint pain', 'douleur articul',
+    'rheumatoid', 'rhumatoïde',
+  ] as const
+  const neurology = [
+    'seizure', 'convulsion', 'paralys', 'stroke', 'avc',
+    'neurolog', 'migraine', 'epilep', 'epilepsie',
+    'parkinson', 'multiple sclerosis', 'sclérose',
+  ] as const
+  const nephrology = [
+    'rénal', 'renal', 'kidney', 'dialys', 'créatinine', 'creatinine',
+    'nephrit', 'néphrit', 'glomerular', 'glomérulair', 'urolith',
+  ] as const
+  const hepatologyGastro = [
+    'abdominal', 'abdomen', 'gastro', 'intestin', 'colon',
+    'hépatique', 'hepatic', 'liver', 'foie', 'ibd', 'crohn',
+    'ulcerative colitis', 'pancrea', 'cholecyst', 'cholécyst',
+  ] as const
+  const cardiology = [
+    'chest pain', 'angina', 'angor', 'acs', 'stemi', 'nstemi',
+    'heart failure', 'insuffisance cardiaque',
+    'douleur thoracique', 'tachycard', 'bradycard',
+    'hypertension', 'hta', 'blood pressure', 'tension artérielle',
+  ] as const
+  const endocrinology = [
+    'diabet', 'glycém', 'glycemia', 'hba1c', 'hyperglyc', 'hypoglyc',
+    'thyroid', 'thyroïde', 'insulin', 'insuline',
+  ] as const
+  const infectious = [
+    'fever', 'fièvre', 'febrile', 'travel', 'voyage',
+    'sepsis', 'meningitis', 'méningite', 'pneumonia', 'pneumonie',
+    'covid', 'antibiotic', 'bacterial', 'viral',
+  ] as const
+  const pulmonology = [
+    'cough', 'toux', 'dyspn', 'breath', 'wheez', 'asthma', 'asthme', 'copd', 'bpco',
+  ] as const
+  const preventive = [
+    'screening', 'dépistage', 'prevent', 'prévention', 'check-up', 'bilan',
+    'statin', 'aspirin',
+  ] as const
 
-  const infectHits = [
-    'fever',
-    'fièvre',
-    'tropical',
-    'travel',
-    'voyage',
-    'malaria',
-    'paludisme',
-    'dengue',
-    'chikungunya',
-    'zika',
-    'arbovir',
-    'rash',
-    'éruption',
-    'sepsis',
-    'meningitis',
-    'méningite',
-    'pneumonia',
-    'covid',
-  ].filter(k => q.includes(k))
-
-  const endoHits = [
-    'diabet',
-    'glycém',
-    'glycemia',
-    'hba1c',
-    'hyperglyc',
-    'hypoglyc',
-    'thyroid',
-    'thyroïde',
-    'insulin',
-  ].filter(k => q.includes(k))
-
-  const pulmHits = [
-    'cough',
-    'toux',
-    'dyspn',
-    'breath',
-    'wheez',
-    'asthma',
-    'asthme',
-    'copd',
-    'bpco',
-  ].filter(k => q.includes(k))
-
-  const preventiveHits = [
-    'screening',
-    'dépistage',
-    'prevent',
-    'prévention',
-    'check-up',
-    'bilan',
-    'statin',
-    'aspirin',
-  ].filter(k => q.includes(k))
-
+  // Order = clinical specificity priority for tie-breaks. Most specific first.
   const scores: Array<[SpecialtyCode, number]> = [
-    ['cardiology', cardioHits.length],
-    ['infectious_diseases', infectHits.length],
-    ['endocrinology', endoHits.length],
-    ['pulmonology', pulmHits.length],
-    ['preventive_medicine', preventiveHits.length],
+    ['tropical_diseases', score(tropical)],
+    ['oncology', score(oncology)],
+    ['women_health', score(womenHealth)],
+    ['pediatrics', score(pediatrics)],
+    ['dermatology', score(dermatology)],
+    ['psychiatry', score(psychiatry)],
+    ['rheumatology', score(rheumatology)],
+    ['neurology', score(neurology)],
+    ['nephrology', score(nephrology)],
+    ['hepatology_gastro', score(hepatologyGastro)],
+    ['cardiology', score(cardiology)],
+    ['endocrinology', score(endocrinology)],
+    ['infectious_diseases', score(infectious)],
+    ['pulmonology', score(pulmonology)],
+    ['preventive_medicine', score(preventive)],
   ]
 
   scores.sort((a, b) => b[1] - a[1])
   const [topCode, topScore] = scores[0]
   const [, secondScore] = scores[1]
 
-  // Require top score ≥ 2 and clear lead over second; otherwise broad search.
+  // Require top score ≥ 2 and strict lead over second; otherwise broad search.
   if (topScore >= 2 && topScore > secondScore) return topCode
   return null
 }
@@ -919,4 +980,255 @@ export function expandRefsAsSourceYearInTree(
     return n
   }
   return visit(node)
+}
+
+// ============================================================================
+// Scrub + Bug-D + Bug-F + Pass-1/2 enrichment — shared by all RAG-using routes
+// ============================================================================
+
+/**
+ * Mutates `analysis` in place to:
+ *   - Strip hallucinated [ref-N] tokens whose ref-N is not in `ragContext`.
+ *   - Collect the set of valid [ref-N] tokens that actually appear in the
+ *     narrative (Bug D usedValidRefs).
+ *   - Filter `analysis.evidence_references` to only those refs cited in the
+ *     narrative, after normalising any bracketed ref_id ("[ref-1]" → "ref-1",
+ *     Bug F).
+ *
+ * Then enriches a final array (Pass 1) by joining the LLM's surviving
+ * {ref_id, used_for} entries with full metadata (title/source/url/date/
+ * specialty/external_id) from `ragContext.references`. Pass 2 deterministic
+ * fallback if the LLM emitted nothing despite chunks being provided.
+ *
+ * Returns the enriched array PLUS counters/diagnostics for logging.
+ */
+export function scrubAndEnrichEvidenceRefs(
+  analysis: any,
+  ragContext: RAGContext,
+  options: { logPrefix?: string } = {}
+): {
+  evidenceReferences: Array<RAGReference & { used_for: string }>
+  unknownCitedRefs: string[]
+  citationsReconstructed: boolean
+  hallucinatedRefsScrubbed: number
+  hallucinatedRefsBreakdown: Record<string, number>
+  unusedRefsFiltered: number
+  refUsageByPath: Map<string, Array<{ path: string; excerpt: string }>>
+} {
+  const tag = options.logPrefix || '📚 [RAG]'
+  const evidenceReferences: Array<RAGReference & { used_for: string }> = []
+  const unknownCitedRefs: string[] = []
+  let citationsReconstructed = false
+  let hallucinatedRefsScrubbed = 0
+  let hallucinatedRefsBreakdown: Record<string, number> = {}
+  let unusedRefsFiltered = 0
+  const usedValidRefs = new Set<string>()
+  const refUsageByPath = new Map<string, Array<{ path: string; excerpt: string }>>()
+
+  if (!ragContext.ragUsed) {
+    return {
+      evidenceReferences,
+      unknownCitedRefs,
+      citationsReconstructed,
+      hallucinatedRefsScrubbed,
+      hallucinatedRefsBreakdown,
+      unusedRefsFiltered,
+      refUsageByPath,
+    }
+  }
+
+  const validRefIds = new Set(ragContext.references.map(r => r.ref_id))
+  const REF_TOKEN = /\[ref-(\d+)\]/g
+  const strippedTokens: string[] = []
+  let stringsScanned = 0
+  let stringsModified = 0
+
+  const recordUsage = (id: string, path: string, source: string) => {
+    const arr = refUsageByPath.get(id) ?? []
+    const idx = source.indexOf(`[${id}]`)
+    const start = Math.max(0, idx - 60)
+    const end = Math.min(source.length, idx + 80)
+    arr.push({ path, excerpt: source.slice(start, end).replace(/\s+/g, ' ').trim() })
+    refUsageByPath.set(id, arr)
+  }
+
+  const scrubString = (s: string, path: string): string => {
+    stringsScanned++
+    let modified = false
+    const cleaned = s.replace(REF_TOKEN, (match, num) => {
+      const id = `ref-${num}`
+      if (validRefIds.has(id)) {
+        usedValidRefs.add(id)
+        recordUsage(id, path, s)
+        return match
+      }
+      modified = true
+      strippedTokens.push(id)
+      return ''
+    })
+    if (!modified) return s
+    stringsModified++
+    return cleaned
+      .replace(/\s+([,.;:!?)])/g, '$1')
+      .replace(/\(\s*\)/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
+  }
+
+  const scrubNode = (node: any, path: string): any => {
+    if (typeof node === 'string') return scrubString(node, path)
+    if (Array.isArray(node)) return node.map((item, i) => scrubNode(item, `${path}[${i}]`))
+    if (node && typeof node === 'object') {
+      // Don't rewrite the LLM's evidence_references entries themselves —
+      // Pass 1 below normalises and validates them.
+      if (node === analysis?.evidence_references) return node
+      for (const k of Object.keys(node)) {
+        if (k === 'evidence_references') continue
+        node[k] = scrubNode(node[k], path ? `${path}.${k}` : k)
+      }
+    }
+    return node
+  }
+
+  // Snapshot the LLM's raw evidence_references BEFORE filtering — diagnostics.
+  const llmEvidenceRaw: Array<{ ref_id?: string; used_for?: string }> = Array.isArray(
+    analysis?.evidence_references
+  )
+    ? JSON.parse(JSON.stringify(analysis.evidence_references))
+    : []
+  console.log(
+    `${tag} LLM raw evidence_references (${llmEvidenceRaw.length}): ` +
+      JSON.stringify(llmEvidenceRaw.map(e => ({ ref_id: e?.ref_id, used_for: (e?.used_for || '').slice(0, 80) })))
+  )
+
+  scrubNode(analysis, '')
+
+  if (strippedTokens.length > 0) {
+    hallucinatedRefsScrubbed = strippedTokens.length
+    hallucinatedRefsBreakdown = strippedTokens.reduce<Record<string, number>>((acc, t) => {
+      acc[t] = (acc[t] || 0) + 1
+      return acc
+    }, {})
+    console.warn(
+      `${tag} Scrubbed ${strippedTokens.length} hallucinated ref token(s) ` +
+        `from ${stringsModified}/${stringsScanned} narrative string(s). ` +
+        `Counts: ${JSON.stringify(hallucinatedRefsBreakdown)}. ` +
+        `Valid range was [ref-1..ref-${ragContext.references.length}].`
+    )
+  } else {
+    console.log(
+      `${tag} Scrub clean: scanned ${stringsScanned} string(s), no out-of-range [ref-N] found ` +
+        `(valid range [ref-1..ref-${ragContext.references.length}]).`
+    )
+  }
+
+  if (refUsageByPath.size > 0) {
+    console.log(`${tag} Citation paths in narrative:`)
+    for (const [id, hits] of refUsageByPath) {
+      for (const h of hits.slice(0, 3)) {
+        console.log(`   [${id}] @ ${h.path} :: …${h.excerpt}…`)
+      }
+      if (hits.length > 3) {
+        console.log(`   [${id}] … +${hits.length - 3} more occurrence(s)`)
+      }
+    }
+  }
+
+  // Bug D + Bug F: drop refs the LLM never cited in narrative; normalise
+  // bracketed ref_id values that GPT sometimes emits in evidence_references.
+  if (Array.isArray(analysis?.evidence_references) && analysis.evidence_references.length > 0) {
+    const before = analysis.evidence_references.length
+    const droppedIds: string[] = []
+    const normalisedFromBracketed: string[] = []
+    analysis.evidence_references = analysis.evidence_references
+      .map((entry: any) => {
+        const raw = String(entry?.ref_id ?? '').trim()
+        const stripped = raw.replace(/^\[(.+)\]$/, '$1').trim()
+        if (raw !== stripped) normalisedFromBracketed.push(`${raw}→${stripped}`)
+        return { ...entry, ref_id: stripped }
+      })
+      .filter((entry: any) => {
+        const id = entry.ref_id
+        const keep = !!id && usedValidRefs.has(id)
+        if (!keep && id) droppedIds.push(id)
+        return keep
+      })
+    if (normalisedFromBracketed.length > 0) {
+      console.log(
+        `${tag} Normalised ${normalisedFromBracketed.length} bracketed ref_id(s) emitted by the LLM: ` +
+          normalisedFromBracketed.slice(0, 10).join(', ')
+      )
+    }
+    unusedRefsFiltered = before - analysis.evidence_references.length
+    if (unusedRefsFiltered > 0) {
+      console.log(
+        `${tag} Dropped ${unusedRefsFiltered} ref(s) from evidence_references not present in report text. ` +
+          `Dropped: ${droppedIds.join(', ')}. Kept: ${Array.from(usedValidRefs).join(', ') || '(none)'}.`
+      )
+    }
+  }
+
+  // Pass 1 — preserve LLM citations, enrich with metadata.
+  const llmRefs: Array<{ ref_id?: string; used_for?: string }> = Array.isArray(
+    analysis?.evidence_references
+  )
+    ? analysis.evidence_references
+    : []
+  const refLookup = new Map(ragContext.references.map(r => [r.ref_id, r]))
+  const seen = new Set<string>()
+
+  for (const cited of llmRefs) {
+    const raw = String(cited?.ref_id ?? '').trim()
+    const id = raw.replace(/^\[(.+)\]$/, '$1').trim()
+    if (!id) continue
+    const meta = refLookup.get(id)
+    if (!meta) {
+      unknownCitedRefs.push(id)
+      continue
+    }
+    if (seen.has(id)) continue
+    seen.add(id)
+    evidenceReferences.push({
+      ...meta,
+      used_for: (cited?.used_for || '').trim() || 'Unspecified',
+    })
+  }
+
+  // Pass 2 — fallback if LLM emitted nothing despite chunks being available.
+  if (evidenceReferences.length === 0 && ragContext.references.length > 0) {
+    citationsReconstructed = true
+    const fallbackRefs = usedValidRefs.size > 0
+      ? ragContext.references.filter(r => usedValidRefs.has(r.ref_id))
+      : ragContext.references
+    console.log(
+      `${tag} Reconstructing ${fallbackRefs.length} citation(s) — LLM emitted empty evidence_references despite ${ragContext.totalChunks} chunks provided ` +
+        `(narrative-cited: ${usedValidRefs.size}, full-fallback: ${usedValidRefs.size === 0})`
+    )
+    for (const ref of fallbackRefs) {
+      evidenceReferences.push({
+        ...ref,
+        used_for: 'Référence fournie au modèle (mapping détaillé non précisé par le LLM)',
+      })
+    }
+  }
+
+  if (unknownCitedRefs.length > 0) {
+    console.error(
+      `${tag} LLM cited unknown ref(s): ${unknownCitedRefs.join(', ')} — known: ${ragContext.references.map(r => r.ref_id).join(', ')}`
+    )
+  }
+  console.log(
+    `${tag} Final evidence_references count: ${evidenceReferences.length}/${ragContext.references.length} ` +
+      `(reconstructed: ${citationsReconstructed})`
+  )
+
+  return {
+    evidenceReferences,
+    unknownCitedRefs,
+    citationsReconstructed,
+    hallucinatedRefsScrubbed,
+    hallucinatedRefsBreakdown,
+    unusedRefsFiltered,
+    refUsageByPath,
+  }
 }

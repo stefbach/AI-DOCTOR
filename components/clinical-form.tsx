@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { saveTibokDraft } from '@/lib/tibok-draft-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -806,6 +807,8 @@ const COMMON_SYMPTOMS = useMemo(() => [
  console.log('💾 Clinical form: Saving data before unmounting')
  try {
  await consultationDataService.saveStepData(1, localData)
+ // Phase 2.D.B: nurse draft → TIBOK (no-op for non-nurse).
+ await saveTibokDraft('clinical', localData)
  onDataChange(localData)
  console.log('✅ Clinical data saved successfully before unmounting')
  } catch (error) {
@@ -929,6 +932,8 @@ const COMMON_SYMPTOMS = useMemo(() => [
  if (localData.chiefComplaint || localData.diseaseHistory || localData.symptoms.length > 0) {
  try {
  await consultationDataService.saveStepData(1, localData)
+ // Phase 2.D.B: nurse draft → TIBOK (no-op for non-nurse).
+ await saveTibokDraft('clinical', localData)
  setLastSaved(new Date())
  onDataChange(localData)
  console.log('✅ Data saved for step 1')

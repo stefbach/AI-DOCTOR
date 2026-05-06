@@ -3841,6 +3841,36 @@ const handleSendDocuments = async () => {
 
  const tibokUrl = getTibokUrl()
 
+ // Phase 1 hybrid: forward the consultation mode TIBOK passed at start.
+ // Resolution order: sessionStorage (set by use-tibok-patient-data.ts) → URL
+ // param (defensive for direct loads) → 'telemedicine' (back-compat with
+ // legacy TIBOK URLs that don't pass the param).
+ const consultationMode =
+   sessionStorage.getItem('tibokConsultationMode')
+   || params.get('consultationMode')
+   || 'telemedicine'
+ const presentialActor =
+   sessionStorage.getItem('tibokPresentialActor')
+   || params.get('presentialActor')
+   || null
+
+ // Phase 2.D.A: forward who the nurse is (if nurse-led) and which role
+ // actually clicked Send. Useful for TIBOK audit/analytics; no behavioural
+ // effect today on the receiving end.
+ const nurseId =
+   sessionStorage.getItem('tibokNurseId')
+   || params.get('nurseId')
+   || null
+ const nurseInfoRaw = sessionStorage.getItem('tibokNurseInfo')
+ const nurse: any = (() => {
+   if (!nurseInfoRaw) return null
+   try { return JSON.parse(nurseInfoRaw) } catch { return null }
+ })()
+ const role =
+   sessionStorage.getItem('tibokRole')
+   || params.get('role')
+   || null
+
  // Prepare documents payload
  console.log('📦 Preparing documents payload...')
 
@@ -3854,6 +3884,11 @@ const handleSendDocuments = async () => {
  patientPhone: patientPhone,
  generatedAt: new Date().toISOString(),
  isEmergency: isEmergencyCase,
+ consultationMode,
+ presentialActor,
+ nurseId,
+ nurse,
+ role,
  documents: {
  consultationReport: report?.compteRendu ? {
  type: 'consultation_report',
@@ -3962,11 +3997,32 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
    console.error('🔍 [DEBUG-AIDOC-PAYLOAD] instrumentation error (non-blocking):', dbgErr?.message || dbgErr)
  }
 
+ // VERIFY-OUTGOING-1: serialise the body ONCE here, log flags computed
+ // from the exact bytes that go on the wire, then reuse that same string
+ // in the fetch body. This proves whether the field is in the HTTP body
+ // — distinct from the JS object `documentsPayload` which the earlier
+ // [DEBUG-AIDOC-PAYLOAD] log inspected. PHI is never logged; only flags.
+ const bodyStr = JSON.stringify(documentsPayload)
+ try {
+   console.log('[VERIFY-OUTGOING-1]', {
+     containsEvRef: bodyStr.includes('"evidenceReferences"'),
+     evRefMatches: (bodyStr.match(/"evidenceReferences"/g) || []).length,
+     containsDengueText: bodyStr.includes('Dengue Clinical Care'),
+     containsECDCText: bodyStr.includes('ECDC'),
+     bodyByteSize: bodyStr.length,
+     consultationReportKeys: (documentsPayload as any)?.documents?.consultationReport
+       ? Object.keys((documentsPayload as any).documents.consultationReport)
+       : 'consultationReport is undefined',
+   })
+ } catch (verifyErr: any) {
+   console.error('[VERIFY-OUTGOING-1] instrumentation error (non-blocking):', verifyErr?.message || verifyErr)
+ }
+
  // Call Tibok endpoint for ALL consultation types
  const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify(documentsPayload)
+ body: bodyStr
  })
 
  console.log('📨 Tibok response status:', response.status)
@@ -4092,7 +4148,9 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
          doctor_id: doctorAppointmentData.doctorId,
          status: 'scheduled',
          payment_status: 'pending',
-         consultation_type: 'telemedicine',
+         // Phase 1 hybrid: inherit the mode of the parent consultation; default
+         // to 'telemedicine' for back-compat when the URL didn't carry the param.
+         consultation_type: consultationMode || 'telemedicine',
          scheduled_time: scheduledTimestamp,
          scheduled_date: doctorAppointmentData.appointmentDate,
          patient_first_name: patientData?.firstName || patient?.nom?.split(' ')[0] || '',

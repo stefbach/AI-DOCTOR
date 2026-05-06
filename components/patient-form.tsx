@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { saveTibokDraft } from '@/lib/tibok-draft-service'
 import { toast } from "@/components/ui/use-toast"
 import { supabase } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -930,6 +931,9 @@ useEffect(() => {
  
  // Save the properly formatted data
  await consultationDataService.saveStepData(0, newFormData)
+ // Phase 2.D.B: nurse-led also pushes to TIBOK so the doctor browser can
+ // resume from where the nurse left off. No-op for non-nurse roles.
+ await saveTibokDraft('patient', newFormData)
  
  } else if (!tibokPatient) {
  // If tibokPatient is not ready yet, DON'T process raw data
@@ -979,6 +983,8 @@ useEffect(() => {
  console.log('   🔍 transformedData has these fields:', Object.keys(transformedData).slice(0, 20))
  
  await consultationDataService.saveStepData(0, transformedData)
+ // Phase 2.D.B: nurse draft → TIBOK (no-op for non-nurse).
+ await saveTibokDraft('patient', transformedData)
  setLastSaved(new Date())
  onDataChange(transformedData)
  } catch (error) {

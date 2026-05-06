@@ -13,6 +13,13 @@ export const maxDuration = 300 // 300 seconds max for GPT-5.5 dermatology diagno
 
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import {
+  buildClinicalQuery,
+  queryMedicalGuidelines,
+  formatGuidelinesForPrompt,
+  scrubAndEnrichEvidenceRefs,
+  type RAGContext,
+} from '@/lib/rag/medical-rag'
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -258,14 +265,15 @@ function validateDermatologyQuality(diagnosis: any): { isValid: boolean; issues:
 async function callOpenAIWithRetry(
   openai: OpenAI,
   diagnosticPrompt: string,
-  maxRetries: number = 3
+  maxRetries: number = 3,
+  ragPromptBlock: string = ''
 ): Promise<any> {
   let lastError: Error | null = null
-  
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1}`)
-      
+
       // Enhance system message with quality requirements on retry
       let systemMessage = "You are an expert board-certified dermatologist. Provide comprehensive, evidence-based diagnostic assessments with structured JSON responses."
       
@@ -371,13 +379,19 @@ CLINICAL SUMMARY MUST INCLUDE:
 
 ⚠️ THIS IS THE FINAL ATTEMPT - RESPONSE MUST BE PERFECT!`
       }
-      
+
+      // Prepend the RAG guideline block to systemMessage on every attempt so
+      // the LLM sees the citation rules + chunks regardless of retry tier.
+      const systemMessageWithRAG = ragPromptBlock
+        ? `${ragPromptBlock}\n\n${systemMessage}`
+        : systemMessage
+
       const completion = await openai.chat.completions.create({
         model: "gpt-5.5",
         messages: [
           {
             role: "system",
-            content: systemMessage
+            content: systemMessageWithRAG
           },
           {
             role: "user",
@@ -867,8 +881,13 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
       "validated_corrections": "Any corrections made to spelling or dosing",
       "original_input": "Original patient input for reference"
     }
+  ],
+  "evidence_references": [
+    { "ref_id": "ref-1", "used_for": "Description of where this guideline informed your assessment (e.g., 'topical corticosteroid potency selection for facial eczema')" }
   ]
 }
+
+If the RAG context block (CONTEXTE GUIDELINES MÉDICALES) is absent, return evidence_references: [].
 
 ⚠️ CRITICAL REQUIREMENTS:
 - MANDATORY: Correlate IMAGE ANALYSIS findings with ALL aspects of your assessment (differentials, confidence, investigations, treatment)
@@ -887,9 +906,61 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
 
 GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity and pharmaceutical precision.`
 
+    // ========== RAG ENRICHMENT (TIBOK guidelines) — best-effort, non-blocking ==========
+    // Dermatology consultation: pre-filter the corpus to specialty='dermatology'
+    // (now valid thanks to the SpecialtyCode expansion). Build the clinical
+    // query from chiefComplaint + skin findings + age/sex + history.
+    let ragContext: RAGContext = {
+      chunks: [],
+      references: [],
+      totalChunks: 0,
+      avgSimilarity: 0,
+      ragUsed: false,
+    }
+    let ragPromptBlock = ''
+    try {
+      // Compact "skin findings" sentence pulled from OCR if available — gives
+      // the embedding a description of morphology/distribution to match against.
+      const ocrFindings: string[] = []
+      if (ocrAnalysisData?.analysis) {
+        const v = ocrAnalysisData.analysis.visualObservations
+        const loc = ocrAnalysisData.analysis.locationAnalysis
+        if (v?.primaryMorphology) ocrFindings.push(v.primaryMorphology)
+        if (Array.isArray(v?.secondaryMorphology)) ocrFindings.push(...v.secondaryMorphology.filter(Boolean))
+        if (v?.color) ocrFindings.push(v.color)
+        if (v?.distribution) ocrFindings.push(`distribution: ${v.distribution}`)
+        if (loc?.primarySite) ocrFindings.push(`site: ${loc.primarySite}`)
+      }
+      const ragQuery = buildClinicalQuery({
+        chiefComplaint: questionsData?.chiefComplaint || (questionsData?.answers?.chiefComplaint as string) || 'dermatology consultation',
+        symptoms: ocrFindings,
+        ageYears: anonymizedPatient.age,
+        sex: anonymizedPatient.gender,
+        medicalHistory: Array.isArray(anonymizedPatient.medicalHistory) ? anonymizedPatient.medicalHistory : [],
+      })
+      console.log(`📚 [RAG-DERMA] Querying guidelines (specialty=dermatology)`)
+      console.log(`📚 [RAG-DERMA] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
+      ragContext = await queryMedicalGuidelines(ragQuery, { specialty: 'dermatology', limit: 15 })
+      console.log(
+        `📚 [RAG-DERMA] Retrieved ${ragContext.totalChunks} chunks ` +
+          `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
+      )
+      ragPromptBlock = formatGuidelinesForPrompt(ragContext)
+    } catch (ragErr: any) {
+      console.error('📚 [RAG-DERMA] Enrichment failed (non-blocking):', ragErr?.message || ragErr)
+    }
+
     // Call OpenAI with retry mechanism and quality validation
-    const result = await callOpenAIWithRetry(openai, diagnosticPrompt, 1)
+    const result = await callOpenAIWithRetry(openai, diagnosticPrompt, 1, ragPromptBlock)
     const diagnosisData = result.diagnosis
+
+    // RAG: scrub + Bug-D + Bug-F + Pass-1/2 enrichment (shared helper).
+    const ragResult = scrubAndEnrichEvidenceRefs(
+      diagnosisData,
+      ragContext,
+      { logPrefix: '📚 [RAG-DERMA]' }
+    )
+    const evidenceReferences = ragResult.evidenceReferences
     
     // Generate formatted text for backward compatibility
     const fullTextDiagnosis = generateFormattedDiagnosisText(diagnosisData)
@@ -1093,12 +1164,27 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         }
       },
       
+      // ========== RAG (TIBOK guidelines) ==========
+      rag_used: ragContext.ragUsed,
+      rag_metadata: {
+        chunks_retrieved: ragContext.totalChunks,
+        avg_similarity: Number(ragContext.avgSimilarity.toFixed(3)),
+        provided_references: ragContext.references.length,
+        cited_references: evidenceReferences.length,
+        unknown_citations: ragResult.unknownCitedRefs,
+        citations_reconstructed: ragResult.citationsReconstructed,
+        hallucinated_refs_scrubbed: ragResult.hallucinatedRefsScrubbed,
+        hallucinated_refs_breakdown: ragResult.hallucinatedRefsBreakdown,
+        unused_refs_filtered: ragResult.unusedRefsFiltered,
+      },
+      evidence_references: evidenceReferences,
+
       // ========== ORIGINAL DERMATOLOGY STRUCTURE (FOR BACKWARD COMPATIBILITY) ==========
       diagnosis: {
         fullText: fullTextDiagnosis,
         structured: diagnosisData
       },
-      
+
       qualityMetrics: result.qualityMetrics,
       version: '4.0-Professional-Grade-4Retry-AutoCorrect-Normalized',
       consultationType: consultationType,
