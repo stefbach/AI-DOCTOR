@@ -3789,6 +3789,17 @@ console.log('    - weight:', patient?.poids || patientData?.weight || 'MISSING')
  console.log('  Checked: ocrAnalysisData.analysis, diagnosisData.diagnosis, imageData.analysis')
  }
 
+ // Phase 1 hybrid: forward consultation mode (sessionStorage > URL > default).
+ const payloadUrlParams = new URLSearchParams(window.location.search)
+ const consultationMode =
+   sessionStorage.getItem('tibokConsultationMode')
+   || payloadUrlParams.get('consultationMode')
+   || 'telemedicine'
+ const presentialActor =
+   sessionStorage.getItem('tibokPresentialActor')
+   || payloadUrlParams.get('presentialActor')
+   || null
+
  const documentsPayload = {
  consultationId,
  patientId,
@@ -3799,6 +3810,8 @@ console.log('    - weight:', patient?.poids || patientData?.weight || 'MISSING')
  patientPhone: patientPhone,
  generatedAt: new Date().toISOString(),
 isEmergency: isEmergencyCase,
+ consultationMode,
+ presentialActor,
  consultationType: 'dermatology',
  // Complete patient data for Tibok
  patientData: {
@@ -4064,7 +4077,8 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
          doctor_id: doctorAppointmentData.doctorId,
          status: 'scheduled',
          payment_status: 'pending',
-         consultation_type: 'telemedicine',
+         // Phase 1 hybrid: inherit the parent consultation's mode.
+         consultation_type: consultationMode || 'telemedicine',
          scheduled_time: scheduledTimestamp,
          scheduled_date: doctorAppointmentData.appointmentDate,
          patient_first_name: patientData?.firstName || patient?.nom?.split(' ')[0] || '',

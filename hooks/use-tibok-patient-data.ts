@@ -359,13 +359,31 @@ export function useTibokPatientData() {
       const patientId = urlParams.get('patientId')
       const doctorId = urlParams.get('doctorId')
 
+      // Phase 1 hybrid: read consultation mode + presential actor from URL.
+      // Persist consultationMode in sessionStorage so the report components can
+      // forward it in the final TIBOK payload without re-parsing the URL.
+      // Defaults: 'telemedicine' (back-compat with TIBOK URLs that predate the
+      // hybrid feature) and presentialActor=null when absent.
+      const consultationModeParam = urlParams.get('consultationMode')
+      const presentialActorParam = urlParams.get('presentialActor')
+      if (consultationModeParam) {
+        sessionStorage.setItem('tibokConsultationMode', consultationModeParam)
+        console.log('🏥 TIBOK consultation mode:', consultationModeParam,
+          presentialActorParam ? `(actor=${presentialActorParam})` : '')
+      }
+      if (presentialActorParam) {
+        sessionStorage.setItem('tibokPresentialActor', presentialActorParam)
+      }
+
       console.log('🔍 TIBOK Data Check:', {
         source,
         hasPatientData: !!patientDataParam,
         hasDoctorData: !!doctorDataParam,
         consultationId,
         patientId,
-        doctorId
+        doctorId,
+        consultationMode: consultationModeParam || '(default telemedicine)',
+        presentialActor: presentialActorParam || null,
       })
 
       if (source === 'tibok' && patientDataParam && doctorDataParam) {

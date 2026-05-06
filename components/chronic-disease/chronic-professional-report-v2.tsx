@@ -2860,9 +2860,19 @@ const handleSendDocuments = async () => {
 
  const tibokUrl = getTibokUrl()
 
+ // Phase 1 hybrid: forward consultation mode (sessionStorage > URL > default).
+ const consultationMode =
+   sessionStorage.getItem('tibokConsultationMode')
+   || params.get('consultationMode')
+   || 'telemedicine'
+ const presentialActor =
+   sessionStorage.getItem('tibokPresentialActor')
+   || params.get('presentialActor')
+   || null
+
  // Prepare documents payload
  console.log('📦 Preparing documents payload...')
- 
+
  const documentsPayload = {
  consultationId,
  patientId,
@@ -2872,6 +2882,8 @@ const handleSendDocuments = async () => {
  patientEmail: patientEmail,
  patientPhone: patientPhone,
  generatedAt: new Date().toISOString(),
+ consultationMode,
+ presentialActor,
  documents: {
  consultationReport: report?.compteRendu ? {
  type: 'consultation_report',

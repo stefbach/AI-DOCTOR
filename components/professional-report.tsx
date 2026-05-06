@@ -3841,6 +3841,19 @@ const handleSendDocuments = async () => {
 
  const tibokUrl = getTibokUrl()
 
+ // Phase 1 hybrid: forward the consultation mode TIBOK passed at start.
+ // Resolution order: sessionStorage (set by use-tibok-patient-data.ts) → URL
+ // param (defensive for direct loads) → 'telemedicine' (back-compat with
+ // legacy TIBOK URLs that don't pass the param).
+ const consultationMode =
+   sessionStorage.getItem('tibokConsultationMode')
+   || params.get('consultationMode')
+   || 'telemedicine'
+ const presentialActor =
+   sessionStorage.getItem('tibokPresentialActor')
+   || params.get('presentialActor')
+   || null
+
  // Prepare documents payload
  console.log('📦 Preparing documents payload...')
 
@@ -3854,6 +3867,8 @@ const handleSendDocuments = async () => {
  patientPhone: patientPhone,
  generatedAt: new Date().toISOString(),
  isEmergency: isEmergencyCase,
+ consultationMode,
+ presentialActor,
  documents: {
  consultationReport: report?.compteRendu ? {
  type: 'consultation_report',
@@ -4113,7 +4128,9 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
          doctor_id: doctorAppointmentData.doctorId,
          status: 'scheduled',
          payment_status: 'pending',
-         consultation_type: 'telemedicine',
+         // Phase 1 hybrid: inherit the mode of the parent consultation; default
+         // to 'telemedicine' for back-compat when the URL didn't carry the param.
+         consultation_type: consultationMode || 'telemedicine',
          scheduled_time: scheduledTimestamp,
          scheduled_date: doctorAppointmentData.appointmentDate,
          patient_first_name: patientData?.firstName || patient?.nom?.split(' ')[0] || '',

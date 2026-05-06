@@ -2929,6 +2929,17 @@ export default function ChronicProfessionalReport({
 
       const tibokUrl = getTibokUrl()
 
+      // Phase 1 hybrid: forward consultation mode (sessionStorage > URL > default).
+      const payloadUrlParams = new URLSearchParams(window.location.search)
+      const consultationMode =
+        sessionStorage.getItem('tibokConsultationMode')
+        || payloadUrlParams.get('consultationMode')
+        || 'telemedicine'
+      const presentialActor =
+        sessionStorage.getItem('tibokPresentialActor')
+        || payloadUrlParams.get('presentialActor')
+        || null
+
       // Prepare documents payload for chronic disease
       console.log('📦 Preparing documents payload...')
 
@@ -2940,6 +2951,8 @@ export default function ChronicProfessionalReport({
         generatedAt: new Date().toISOString(),
         isEmergency: isEmergencyCase,
         consultationType: 'chronic_disease',
+        consultationMode,
+        presentialActor,
         // Patient data for Tibok chronic-disease-documents endpoint
         patientData: {
           name: patientName,
@@ -3184,7 +3197,8 @@ export default function ChronicProfessionalReport({
                 doctor_id: doctorAppointmentData.doctorId,
                 status: 'scheduled',
                 payment_status: 'pending',
-                consultation_type: 'telemedicine',
+                // Phase 1 hybrid: inherit the parent consultation's mode.
+                consultation_type: consultationMode || 'telemedicine',
                 scheduled_time: scheduledTimestamp,
                 scheduled_date: doctorAppointmentData.appointmentDate,
                 patient_first_name: patientData?.firstName || patient?.fullName?.split(' ')[0] || '',
