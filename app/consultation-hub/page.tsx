@@ -60,12 +60,92 @@ export default function ConsultationHubPage() {
         sessionStorage.removeItem('fromConsultationHub')
         // Clear previous simulation flag
         sessionStorage.removeItem('isSimulation')
+        // Phase 2.D.B.1: clear hybrid-mode + nurse-led keys too. Without
+        // this, a stale tibokRole='nurse' from an earlier nurse-led consult
+        // would survive into a new doctor consult and trigger gating.
+        sessionStorage.removeItem('tibokConsultationMode')
+        sessionStorage.removeItem('tibokPresentialActor')
+        sessionStorage.removeItem('tibokRole')
+        sessionStorage.removeItem('tibokNurseId')
+        sessionStorage.removeItem('tibokNurseInfo')
+        sessionStorage.removeItem('tibokHandoffState')
       }
 
       // SIMULATION MODE: Store flag and use consultationType from URL directly
       if (isSimulation) {
         console.log('🎮 SIMULATION MODE detected — consultationType:', simConsultationType)
         sessionStorage.setItem('isSimulation', 'true')
+      }
+
+      // Phase 2.D.B.1 — Persist hybrid-mode + nurse-led params NOW.
+      //
+      // Why here instead of (only) hooks/use-tibok-patient-data.ts:
+      // The hub is the actual TIBOK landing page. After the doctor/nurse
+      // clicks "Continuer →", HubWorkflowSelector calls router.push('/')
+      // (or '/chronic-disease', '/dermatology') WITHOUT preserving query
+      // params (components/consultation-hub/hub-workflow-selector.tsx:315).
+      // The downstream pages then see a bare URL — use-tibok-patient-data
+      // running on / finds nothing in URL params and never sets sessionStorage.
+      // Persisting here, before the navigation, is the only way these params
+      // survive the hub → workflow transition.
+      const roleParam = urlParams.get('role')
+      if (roleParam === 'doctor' || roleParam === 'nurse') {
+        sessionStorage.setItem('tibokRole', roleParam)
+        console.log('👤 [Hub] TIBOK role:', roleParam)
+      }
+
+      const nurseIdParam = urlParams.get('nurseId')
+      if (nurseIdParam) {
+        sessionStorage.setItem('tibokNurseId', nurseIdParam)
+        console.log('👩‍⚕️ [Hub] TIBOK nurse ID:', nurseIdParam)
+      }
+
+      const nurseDataParam = urlParams.get('nurseData')
+      if (nurseDataParam) {
+        // Same decode-retry pattern this hub uses for doctorData (L91-118):
+        // decodeURIComponent up to 5×, trim trailing junk after the last '}',
+        // JSON.parse.
+        let decodedNurse = nurseDataParam
+        let nurseInfo: any = null
+        for (let attempt = 1; attempt <= 5; attempt++) {
+          try {
+            decodedNurse = decodeURIComponent(decodedNurse)
+            if (decodedNurse.startsWith('{')) {
+              const lastBrace = decodedNurse.lastIndexOf('}')
+              const jsonString = lastBrace !== -1
+                ? decodedNurse.slice(0, lastBrace + 1)
+                : decodedNurse
+              nurseInfo = JSON.parse(jsonString)
+              break
+            }
+          } catch {
+            // keep decoding
+          }
+        }
+        if (nurseInfo) {
+          sessionStorage.setItem('tibokNurseInfo', JSON.stringify(nurseInfo))
+          console.log('👩‍⚕️ [Hub] TIBOK nurse info:',
+            nurseInfo.fullName || nurseInfo.full_name || nurseInfo.id || '(unnamed)')
+        } else {
+          console.warn('👩‍⚕️ [Hub] nurseData present but failed to decode after 5 attempts')
+        }
+      }
+
+      // Phase 1 hybrid params (consultationMode, presentialActor) — duplicate
+      // the writes here so they survive the hub → workflow navigation too.
+      // hooks/use-tibok-patient-data.ts on the workflow page will be a no-op
+      // when the URL is bare; reading from sessionStorage is the path that
+      // actually carries through.
+      const consultationModeParam = urlParams.get('consultationMode')
+      if (consultationModeParam) {
+        sessionStorage.setItem('tibokConsultationMode', consultationModeParam)
+        console.log('🏥 [Hub] TIBOK consultation mode:', consultationModeParam)
+      }
+
+      const presentialActorParam = urlParams.get('presentialActor')
+      if (presentialActorParam) {
+        sessionStorage.setItem('tibokPresentialActor', presentialActorParam)
+        console.log('👤 [Hub] TIBOK presential actor:', presentialActorParam)
       }
 
       // Extract and save doctor data from URL params
