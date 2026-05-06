@@ -15,6 +15,8 @@
  * consultation_records, so repeat calls on the same step are safe.
  */
 
+import { consultationDataService } from '@/lib/consultation-data-service'
+
 const FETCH_TIMEOUT_MS = 5000
 const RETRY_DELAY_MS = 1000
 
@@ -59,17 +61,45 @@ function resolveTibokUrl(): string {
   return 'https://tibok.mu'
 }
 
+/**
+ * Phase 2.D.B.2 — 4-source cascade. Order matters: more authoritative /
+ * fresher sources first.
+ *
+ *   1. URL ?consultationId=… — only present when AI-DOCTOR is still on a
+ *      page that received it directly from TIBOK (the hub). After
+ *      router.push('/'), the URL is bare so this misses on workflow pages.
+ *   2. sessionStorage.tibokConsultationId — written by app/consultation-hub/
+ *      page.tsx in Phase 2.D.B.2. Survives the hub → / navigation.
+ *   3. consultationDataService.getCurrentConsultationId() — set by
+ *      app/page.tsx:292 from the loaded patient data. Note: this method
+ *      auto-generates a fake `consultation_<ts>_<rand>` if none cached, so
+ *      it should never return null in practice, but if the page hasn't
+ *      mounted yet it can return a generated id that doesn't match the
+ *      TIBOK UUID. (1) and (2) above protect against that.
+ *   4. sessionStorage.consultationPatientData.consultationId — legacy cache
+ *      written by HubWorkflowSelector for the normal-consultation path.
+ *      Kept as a defensive last resort.
+ */
 function getConsultationId(): string | null {
   if (typeof window === 'undefined') return null
-  // Prefer URL (always authoritative for the current consultation), then
-  // sessionStorage caches.
+
   try {
     const fromUrl = new URLSearchParams(window.location.search).get('consultationId')
     if (fromUrl) return fromUrl
   } catch {
-    // ignore
+    // ignore — fall through
   }
-  // Common cache locations seen in the codebase
+
+  const fromTibokSession = sessionStorage.getItem('tibokConsultationId')
+  if (fromTibokSession) return fromTibokSession
+
+  try {
+    const fromService = consultationDataService.getCurrentConsultationId()
+    if (fromService) return fromService
+  } catch {
+    // ignore — fall through
+  }
+
   const stored = sessionStorage.getItem('consultationPatientData')
   if (stored) {
     try {
@@ -79,6 +109,7 @@ function getConsultationId(): string | null {
       // ignore
     }
   }
+
   return null
 }
 
@@ -139,7 +170,10 @@ export async function saveTibokDraft(step: DraftStep, payload: unknown): Promise
 
   const consultationId = getConsultationId()
   if (!consultationId) {
-    console.warn('💾 [TIBOK draft] skipping save — no consultationId available for step:', step)
+    console.warn(
+      `💾 [TIBOK draft] skipping save — no consultationId available for step: ${step}. ` +
+        'Sources checked: URL, tibokConsultationId, consultationDataService, consultationPatientData. All null.'
+    )
     return { success: false, error: 'no_consultation_id' }
   }
 
