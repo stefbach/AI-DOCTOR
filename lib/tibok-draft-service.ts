@@ -213,3 +213,96 @@ export async function saveTibokDraft(step: DraftStep, payload: unknown): Promise
   console.log(`✅ TIBOK draft saved (step=${step})`)
   return { success: true }
 }
+
+// ============================================================================
+// Phase 2.D.C — load drafts on doctor handoff
+// ============================================================================
+
+/**
+ * Drafts the doctor needs at the handoff boundary. All four fields are
+ * optional from the wire; the hub is responsible for deciding whether the
+ * payload is "complete enough" to hydrate (it requires patient + clinical
+ * + questions all present).
+ */
+export interface TibokDraftPayload {
+  patientData: any | null
+  clinicalData: any | null
+  questionsData: any | null
+  workflowStep: number | null
+}
+
+/**
+ * Fetch the nurse drafts that TIBOK persisted at consultation_records for
+ * a given consultation. Returns null on any failure (network, non-OK
+ * status, unknown response shape) — callers must treat this as best-effort
+ * enrichment and fall back to the standard step-0 entry.
+ *
+ * Tolerant of three plausible response shapes (TIBOK's exact contract is
+ * not auditable from this sandbox at the moment):
+ *   - { ok: true, data: { patient_data, clinical_data, questions_data, workflow_step } }
+ *   - { patientData, clinicalData, questionsData, workflowStep }
+ *   - { success: true, draft: { … } }
+ * Anything else maps to null and the doctor starts at step 0 — documented
+ * graceful-degrade behaviour per the Phase 2.D.C garde-fous.
+ */
+export async function loadTibokDraft(
+  consultationId: string
+): Promise<TibokDraftPayload | null> {
+  if (typeof window === 'undefined') return null
+  if (!consultationId) return null
+
+  const baseUrl = resolveTibokUrl()
+  const url = `${baseUrl}/api/consultation/draft/load?consultationId=${encodeURIComponent(consultationId)}`
+  console.log('📥 [TIBOK draft] loading from:', url)
+
+  let json: any
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+    const res = await fetch(url, {
+      method: 'GET',
+      signal: controller.signal,
+      cache: 'no-store',
+    })
+    clearTimeout(timeoutId)
+    if (!res.ok) {
+      console.warn(`⚠️ [TIBOK draft] load returned HTTP ${res.status}`)
+      return null
+    }
+    json = await res.json()
+  } catch (err: any) {
+    console.warn('⚠️ [TIBOK draft] load failed:', err?.name === 'AbortError' ? 'timeout' : (err?.message || err))
+    return null
+  }
+
+  // Find the inner record across the three accepted shapes.
+  const record =
+    (json && typeof json === 'object' && (json.data ?? json.draft ?? json)) || null
+  if (!record || typeof record !== 'object') {
+    console.warn('⚠️ [TIBOK draft] load: response did not match any known shape:', Object.keys(json || {}))
+    return null
+  }
+
+  // Accept either snake_case (from DB columns) or camelCase (from a route
+  // that already mapped them). Falsy → null so downstream completeness
+  // checks are unambiguous.
+  const patientData = record.patientData ?? record.patient_data ?? null
+  const clinicalData = record.clinicalData ?? record.clinical_data ?? null
+  const questionsData = record.questionsData ?? record.questions_data ?? null
+  const workflowStepRaw = record.workflowStep ?? record.workflow_step ?? null
+  const workflowStep =
+    typeof workflowStepRaw === 'number'
+      ? workflowStepRaw
+      : (typeof workflowStepRaw === 'string' && /^\d+$/.test(workflowStepRaw))
+        ? parseInt(workflowStepRaw, 10)
+        : null
+
+  console.log('✅ [TIBOK draft] loaded', {
+    hasPatient: !!patientData,
+    hasClinical: !!clinicalData,
+    hasQuestions: !!questionsData,
+    workflowStep,
+  })
+
+  return { patientData, clinicalData, questionsData, workflowStep }
+}
