@@ -73,6 +73,9 @@ export default function ConsultationHubPage() {
         // one from an earlier consult never wins the lookup cascade in
         // lib/tibok-draft-service.ts.
         sessionStorage.removeItem('tibokConsultationId')
+        // Phase 2.D.B.4: clear the cached tibokUrl so a stale preview origin
+        // from an earlier consult cannot win against a new one.
+        sessionStorage.removeItem('tibokUrl')
       }
 
       // SIMULATION MODE: Store flag and use consultationType from URL directly
@@ -99,6 +102,17 @@ export default function ConsultationHubPage() {
       if (consultationId) {
         sessionStorage.setItem('tibokConsultationId', consultationId)
         console.log('🆔 [Hub] TIBOK consultation ID:', consultationId)
+      }
+
+      // Phase 2.D.B.4 — TIBOK now propagates the origin it was served from
+      // via ?tibokUrl=… so AI-DOCTOR can POST drafts back to the same
+      // origin (prod, preview, or localhost). Persist for the same reason
+      // as tibokConsultationId: the URL is bare on the workflow page after
+      // the hub → / navigation strips query params.
+      const tibokUrlParam = urlParams.get('tibokUrl')
+      if (tibokUrlParam) {
+        sessionStorage.setItem('tibokUrl', tibokUrlParam)
+        console.log('🌐 [Hub] TIBOK URL:', tibokUrlParam)
       }
 
       const roleParam = urlParams.get('role')

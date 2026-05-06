@@ -25,39 +25,52 @@ type DraftStep = 'patient' | 'clinical' | 'questions'
 type SaveResult = { success: true } | { success: false; error: string }
 
 /**
- * Resolve the TIBOK base URL the same way the report components do
- * (professional-report.tsx:3818-3840 etc.):
- *   1. ?tibokUrl=... param (highest priority, set explicitly by caller)
- *   2. document.referrer if its hostname is on the TIBOK whitelist
- *   3. hardcoded https://tibok.mu fallback
+ * Resolve the TIBOK base URL with a 4-source cascade so AI-DOCTOR POSTs
+ * drafts back to the same origin TIBOK was served from (prod, Vercel
+ * preview, or localhost dev).
  *
- * Inlined here to keep this module self-contained — the report components
- * each have their own copy and we don't want to refactor a shared helper
- * out of MVP scope.
+ *   1. URL ?tibokUrl=… — wins on the hub itself, where TIBOK 2.D.B.3
+ *      injects this param when launching the iframe.
+ *   2. sessionStorage.tibokUrl — written by app/consultation-hub/page.tsx
+ *      at 2.D.B.4. Survives the hub → / navigation that strips query params.
+ *   3. document.referrer origin — last-resort heuristic, only trusted
+ *      when the hostname mentions "tibok" (case-insensitive). Defends
+ *      against an arbitrary embedder hijacking the draft target.
+ *   4. https://tibok.mu — production fallback when nothing else applies.
+ *
+ * Returns the resolved origin (no trailing slash) so callers can append
+ * "/api/…" directly.
  */
 function resolveTibokUrl(): string {
   if (typeof window === 'undefined') return 'https://tibok.mu'
 
+  // 1) URL param — explicit wins.
   try {
-    const params = new URLSearchParams(window.location.search)
-    const param = params.get('tibokUrl')
-    if (param) return decodeURIComponent(param)
+    const fromUrl = new URLSearchParams(window.location.search).get('tibokUrl')
+    if (fromUrl) return decodeURIComponent(fromUrl)
   } catch {
-    // ignore — fall through to referrer
+    // ignore — fall through
   }
 
-  if (typeof document !== 'undefined' && document.referrer) {
-    try {
-      const referrer = new URL(document.referrer)
-      const allowed = ['tibok.mu', 'v0-tibokmain2.vercel.app', 'localhost']
-      if (allowed.some(domain => referrer.hostname.includes(domain))) {
-        return referrer.origin
-      }
-    } catch {
-      // ignore — fall through to default
+  // 2) sessionStorage cache (set by the hub).
+  try {
+    const fromSession = sessionStorage.getItem('tibokUrl')
+    if (fromSession) return fromSession
+  } catch {
+    // ignore — fall through
+  }
+
+  // 3) Referrer origin, but only if it looks like TIBOK.
+  try {
+    if (typeof document !== 'undefined' && document.referrer) {
+      const referrerOrigin = new URL(document.referrer).origin
+      if (/tibok/i.test(referrerOrigin)) return referrerOrigin
     }
+  } catch {
+    // ignore — fall through
   }
 
+  // 4) Production fallback.
   return 'https://tibok.mu'
 }
 
@@ -182,6 +195,7 @@ export async function saveTibokDraft(step: DraftStep, payload: unknown): Promise
   const body = JSON.stringify({ consultationId, step, payload })
 
   console.log(`💾 Saving draft step=${step} to TIBOK`)
+  console.log('🌐 [TIBOK draft] base URL resolved:', tibokUrl)
 
   // First attempt
   let result = await postOnce(url, body)
