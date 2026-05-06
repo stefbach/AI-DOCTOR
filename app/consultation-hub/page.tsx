@@ -69,6 +69,10 @@ export default function ConsultationHubPage() {
         sessionStorage.removeItem('tibokNurseId')
         sessionStorage.removeItem('tibokNurseInfo')
         sessionStorage.removeItem('tibokHandoffState')
+        // Phase 2.D.B.2: clear the consultationId we cache here so a stale
+        // one from an earlier consult never wins the lookup cascade in
+        // lib/tibok-draft-service.ts.
+        sessionStorage.removeItem('tibokConsultationId')
       }
 
       // SIMULATION MODE: Store flag and use consultationType from URL directly
@@ -88,6 +92,15 @@ export default function ConsultationHubPage() {
       // running on / finds nothing in URL params and never sets sessionStorage.
       // Persisting here, before the navigation, is the only way these params
       // survive the hub → workflow transition.
+      // Phase 2.D.B.2 — the hub is the only point on AI-DOCTOR where the
+      // consultationId is reliably present in the URL (the workflow page on
+      // / is reached via a query-stripping router.push). Persist here so
+      // saveTibokDraft can find it on every step submit downstream.
+      if (consultationId) {
+        sessionStorage.setItem('tibokConsultationId', consultationId)
+        console.log('🆔 [Hub] TIBOK consultation ID:', consultationId)
+      }
+
       const roleParam = urlParams.get('role')
       if (roleParam === 'doctor' || roleParam === 'nurse') {
         sessionStorage.setItem('tibokRole', roleParam)
