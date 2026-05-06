@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { saveTibokDraft } from '@/lib/tibok-draft-service'
+import { useTibokBridge } from '@/hooks/use-tibok-bridge'
+import { NurseTransferPrompt } from '@/components/nurse-transfer-prompt'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -207,6 +210,12 @@ export default function QuestionsForm({
  language = 'en',
  consultationId
 }: QuestionsFormProps) {
+ // Phase 2.D.B: nurse-led gating. When role='nurse', the questions form
+ // is the last step the nurse touches — replace the "Launch AI Diagnosis"
+ // CTAs with a "transfer to doctor" prompt.
+ const tibokBridge = useTibokBridge()
+ const isNurse = tibokBridge.role === 'nurse'
+
  // States
  const [questions, setQuestions] = useState<Question[]>([])
  const [responses, setResponses] = useState<QuestionResponse[]>([])
@@ -283,6 +292,8 @@ export default function QuestionsForm({
  
  try {
  await consultationDataService.saveStepData(2, { responses })
+ // Phase 2.D.B: nurse draft → TIBOK (no-op for non-nurse).
+ await saveTibokDraft('questions', { responses })
  console.log('💾 Auto-saved questions data')
  } catch (error) {
  console.error('❌ Error saving questions data:', error)
@@ -872,9 +883,9 @@ export default function QuestionsForm({
  Next question
  <ArrowRight className="h-4 w-4 ml-2" />
  </Button>
- ) : (
- <Button 
- onClick={onNext} 
+ ) : isNurse ? null : (
+ <Button
+ onClick={onNext}
  disabled={!isFormValid()}
  className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 font-semibold"
  >
@@ -886,10 +897,14 @@ export default function QuestionsForm({
  </div>
  )}
 
- {/* Fixed AI diagnosis button */}
- {isFormValid() && (
+ {/* Phase 2.D.B: nurse-side end-of-step prompt — replaces the
+     Launch / Sticky-bottom CTAs when role='nurse'. */}
+ {isFormValid() && isNurse && <NurseTransferPrompt />}
+
+ {/* Fixed AI diagnosis button — doctor only. */}
+ {isFormValid() && !isNurse && (
  <div className="sticky bottom-4 flex justify-center">
- <Button 
+ <Button
  onClick={onNext}
  className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white px-8 py-4 shadow-2xl hover:shadow-3xl transition-all duration-300 font-semibold text-lg rounded-full animate-pulse"
  >
@@ -918,14 +933,16 @@ export default function QuestionsForm({
  <ArrowLeft className="h-4 w-4 mr-2" />
  Back to Clinical Info
  </Button>
- <Button 
- onClick={onNext} 
+ {!isNurse && (
+ <Button
+ onClick={onNext}
  disabled={!isFormValid()}
  className="bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
  >
  Continue to Diagnosis
  <ArrowRight className="h-4 w-4 ml-2" />
  </Button>
+ )}
  </div>
  </div>
  )

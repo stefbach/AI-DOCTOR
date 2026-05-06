@@ -23,10 +23,16 @@ import DiagnosisForm from "@/components/diagnosis-form"
 import ProfessionalReport from "@/components/professional-report"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import { supabase } from '@/lib/supabase'
+import { useTibokBridge } from '@/hooks/use-tibok-bridge'
 
 export type Language = 'fr' | 'en'
 
 export default function MedicalAIExpert() {
+  // Phase 2.D.B: nurse-led gating. When TIBOK marks the iframe as nurse-led,
+  // hide steps 3-4 from the chip list and block navigation past step 2.
+  const tibokBridge = useTibokBridge()
+  const isNurse = tibokBridge.role === 'nurse'
+
   const [currentStep, setCurrentStep] = useState(0)
   const [patientData, setPatientData] = useState<any>(null)
   const [clinicalData, setClinicalData] = useState<any>(null)
@@ -378,6 +384,12 @@ useEffect(() => {
   // IDs are now managed as state variables above (lines 44-46)
 
   const handleStepClick = (index: number) => {
+    // Phase 2.D.B: nurse may revisit her completed steps but cannot enter
+    // the doctor-only steps 3-4 even if she clicks the (hidden) chips.
+    if (isNurse && index > 2) {
+      console.log(`🚫 Step ${index} access blocked (role=nurse)`)
+      return
+    }
     if (index <= currentStep) {
       setCurrentStep(index)
     }
@@ -466,7 +478,12 @@ useEffect(() => {
     }
   ]
 
-  const progress = ((currentStep + 1) / steps.length) * 100
+  // Phase 2.D.B: nurse only sees the first three steps (Patient Info,
+  // Clinical Data, AI Questions). Step 3 (Diagnosis) and step 4 (Medical
+  // Record) are doctor-only. The full `steps` array stays intact so
+  // `steps[currentStep]` lookups still work — we just filter the chips.
+  const visibleSteps = isNurse ? steps.slice(0, 3) : steps
+  const progress = ((Math.min(currentStep, visibleSteps.length - 1) + 1) / visibleSteps.length) * 100
 
 const handleNext = async () => {
   const consultationId = consultationDataService.getCurrentConsultationId()
@@ -553,7 +570,15 @@ const handleNext = async () => {
       console.error('Error saving step data:', error)
     }
   }
-  
+
+  // Phase 2.D.B: nurse cannot advance past step 2. Step 2's submit handler
+  // already pushed the questions draft to TIBOK; from here the TIBOK overlay
+  // takes over (handoff to doctor).
+  if (isNurse && currentStep >= 2) {
+    console.log('🚫 Step 3/4 access blocked (role=nurse)')
+    return
+  }
+
   if (currentStep < steps.length - 1) {
     setCurrentStep(currentStep + 1)
   }
@@ -737,7 +762,7 @@ const handlePrevious = () => {
             </div>
             <div className="text-right">
               <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">
-                {currentStep + 1}/{steps.length}
+                {Math.min(currentStep, visibleSteps.length - 1) + 1}/{visibleSteps.length}
               </div>
               <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">
                 Étapes
@@ -748,8 +773,8 @@ const handlePrevious = () => {
           <Progress value={progress} className="mb-4 sm:mb-6 md:mb-8 h-2 sm:h-3 bg-blue-100" />
 
           {/* Mobile: Horizontal scroll, Tablet+: Grid */}
-          <div className="flex overflow-x-auto pb-2 gap-3 sm:grid sm:grid-cols-3 md:grid-cols-5 sm:gap-4 sm:overflow-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0">
-            {steps.map((step, index) => (
+          <div className={`flex overflow-x-auto pb-2 gap-3 sm:grid ${isNurse ? 'sm:grid-cols-3 md:grid-cols-3' : 'sm:grid-cols-3 md:grid-cols-5'} sm:gap-4 sm:overflow-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0`}>
+            {visibleSteps.map((step, index) => (
               <div
                 key={step.id}
                 onClick={() => handleStepClick(index)}
