@@ -169,6 +169,10 @@ export default function MedicalAIExpert() {
               const safeIndex = targetIndex >= 0 ? targetIndex : 3
               setCurrentStep(safeIndex)
               console.log('🩺 [Page] Jumped to step index', safeIndex, '(', payload.targetStep, ')')
+              // Phase 2.D.D — single-shot signal to diagnosis-form.tsx so it
+              // bypasses the chiefComplaint guard on this mount only. The
+              // form clears the flag after triggering the auto-gen.
+              sessionStorage.setItem('tibokHandoffJustHydrated', payload.consultationId)
             }
             // Single-shot: clear regardless so a refresh doesn't re-hydrate.
             sessionStorage.removeItem('tibokHandoffPayload')
