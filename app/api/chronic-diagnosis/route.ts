@@ -5,8 +5,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 import {
   buildClinicalQuery,
+  buildSecondaryQueries,
   inferSpecialty,
   queryMedicalGuidelines,
+  queryMedicalGuidelinesMulti,
   formatGuidelinesForPrompt,
   scrubAndEnrichEvidenceRefs,
   type RAGContext,
@@ -246,7 +248,34 @@ QUESTIONNAIRE: ${JSON.stringify(questionsData, null, 2)}`
             const inferredSpecialty = inferSpecialty(ragQuery)
             console.log(`📚 [RAG-CHRONIC] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
             console.log(`📚 [RAG-CHRONIC] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
-            ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+
+            // Phase 2.E.4.3: multi-query when secondary topics are detected.
+            // For chronic, the relevant secondary is bacterial_workup (e.g.
+            // infectious decompensation in a diabetic with prolonged fever);
+            // malaria can also fire if the chronic patient happens to have
+            // travelled to an endemic area. buildSecondaryQueries handles
+            // both; if it returns [] we transparently fall back to the
+            // single-query path below — same retrieval coverage as before.
+            const secondaryQueries = buildSecondaryQueries({
+              chiefComplaint: clinicalData.chiefComplaint || 'Suivi maladie chronique',
+              symptoms: clinicalData.symptoms || [],
+              travelHistory: clinicalData.diseaseHistory,
+              symptomDuration: clinicalData.symptomDuration,
+              ageYears: anonymizedPatient.age,
+            })
+            if (secondaryQueries.length > 0) {
+              console.log(
+                `📚 [RAG-CHRONIC] Secondary queries triggered: ${secondaryQueries.map(q => q.label).join(', ')}`
+              )
+              ragContext = await queryMedicalGuidelinesMulti(
+                ragQuery,
+                secondaryQueries,
+                { specialty: inferredSpecialty, limit: 10 }
+              )
+            } else {
+              console.log('📚 [RAG-CHRONIC] No secondary queries triggered — running single-query retrieval')
+              ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+            }
             console.log(
               `📚 [RAG-CHRONIC] Retrieved ${ragContext.totalChunks} chunks ` +
                 `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
