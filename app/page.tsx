@@ -137,6 +137,47 @@ export default function MedicalAIExpert() {
         console.log('🧹 Clearing old consultation data for fresh start...')
         await consultationDataService.clearCurrentConsultation()
 
+        // Phase 2.D.C — doctor handoff hydration.
+        // The hub staged a tibokHandoffPayload in sessionStorage when it
+        // detected role=doctor + handoff_state=awaiting_doctor. Sequence
+        // matters: we run AFTER the localStorage clear above so we rebuild
+        // a clean state, and BEFORE setCheckingReturningPatient(false) so
+        // the L325 loadSavedData useEffect picks up our writes on the
+        // next render. Single-shot: the payload is removed after use.
+        try {
+          const handoffRaw = sessionStorage.getItem('tibokHandoffPayload')
+          if (handoffRaw) {
+            const payload = JSON.parse(handoffRaw)
+            if (payload?.consultationId) {
+              console.log('🩺 [Page] Hydrating from nurse handoff:', payload.consultationId)
+              consultationDataService.setCurrentConsultationId(payload.consultationId)
+              if (payload.patientData) {
+                await consultationDataService.saveStepData(0, payload.patientData)
+              }
+              if (payload.clinicalData) {
+                await consultationDataService.saveStepData(1, payload.clinicalData)
+              }
+              if (payload.questionsData) {
+                await consultationDataService.saveStepData(2, payload.questionsData)
+              }
+              // Map semantic targetStep → live steps array index. The 5-step
+              // workflow has Diagnosis at id=3; if the array ever changes
+              // (e.g. workflow split), this lookup keeps the jump correct.
+              const targetIndex = steps.findIndex(s =>
+                s.title?.toLowerCase().includes(String(payload.targetStep || 'diagnosis').toLowerCase())
+              )
+              const safeIndex = targetIndex >= 0 ? targetIndex : 3
+              setCurrentStep(safeIndex)
+              console.log('🩺 [Page] Jumped to step index', safeIndex, '(', payload.targetStep, ')')
+            }
+            // Single-shot: clear regardless so a refresh doesn't re-hydrate.
+            sessionStorage.removeItem('tibokHandoffPayload')
+          }
+        } catch (err) {
+          console.warn('⚠️ [Page] Failed to hydrate handoff payload:', err)
+          sessionStorage.removeItem('tibokHandoffPayload')
+        }
+
         setCheckingReturningPatient(false)
         return
       }

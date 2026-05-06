@@ -11,6 +11,7 @@ import { HubWorkflowSelector } from '@/components/consultation-hub/hub-workflow-
 import { HistoryList, ConsultationDetailModal } from '@/lib/follow-up/shared'
 import type { ConsultationHistoryItem } from '@/lib/follow-up/shared'
 import { fetchTibokConsultationData } from '@/lib/tibok-consultation-service'
+import { loadTibokDraft } from '@/lib/tibok-draft-service'
 
 type WorkflowStep = 'search' | 'summary' | 'workflow'
 
@@ -173,6 +174,59 @@ export default function ConsultationHubPage() {
       if (presentialActorParam) {
         sessionStorage.setItem('tibokPresentialActor', presentialActorParam)
         console.log('👤 [Hub] TIBOK presential actor:', presentialActorParam)
+      }
+
+      // Phase 2.D.C — doctor handoff prefetch.
+      //
+      // When the doctor lands on the hub for a nurse-led consultation that
+      // already has drafts (handoff_state='awaiting_doctor'), pull the 3
+      // datasets the nurse persisted at consultation_records and stage them
+      // in sessionStorage. The user-driven navigation (Continuer →) then
+      // triggers app/page.tsx mount, which reads tibokHandoffPayload,
+      // hydrates consultationDataService, and jumps to the Diagnosis step.
+      //
+      // Strict gates so we never disturb other flows:
+      //   - role === 'doctor' (nurse-side never auto-loads — would race with /save)
+      //   - consultationId present (nothing to fetch otherwise)
+      //   - tibokHandoffHydrated !== consultationId (idempotent on refresh)
+      //
+      // Failure mode: silent. If /load returns null or any of the 3 datasets
+      // is missing, we don't stage anything and the doctor lands on step 0.
+      if (roleParam === 'doctor' && consultationId) {
+        const alreadyHydrated = sessionStorage.getItem('tibokHandoffHydrated')
+        if (alreadyHydrated === consultationId) {
+          console.log('🩺 [Hub] Already hydrated this consultation, skip re-fetch')
+        } else {
+          console.log('🩺 [Hub] Doctor handoff detected — fetching nurse drafts...')
+          try {
+            const drafts = await loadTibokDraft(consultationId)
+            const isComplete = !!(
+              drafts &&
+              drafts.patientData &&
+              drafts.clinicalData &&
+              drafts.questionsData
+            )
+            if (isComplete && drafts) {
+              sessionStorage.setItem(
+                'tibokHandoffPayload',
+                JSON.stringify({
+                  consultationId,
+                  patientData: drafts.patientData,
+                  clinicalData: drafts.clinicalData,
+                  questionsData: drafts.questionsData,
+                  targetStep: 'diagnosis',
+                  workflowStep: drafts.workflowStep,
+                })
+              )
+              sessionStorage.setItem('tibokHandoffHydrated', consultationId)
+              console.log('🩺 [Hub] Drafts staged for hydration, jumping to Diagnosis')
+            } else {
+              console.log('🩺 [Hub] Drafts not ready or incomplete, doctor starts at step 0')
+            }
+          } catch (err) {
+            console.warn('🩺 [Hub] Handoff prefetch failed, doctor starts at step 0:', err)
+          }
+        }
       }
 
       // Extract and save doctor data from URL params
