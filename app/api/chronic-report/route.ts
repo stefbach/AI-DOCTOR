@@ -300,6 +300,15 @@ IMPORTANT: You are receiving PRE-ANALYZED medical data including:
 
 Your task is to STRUCTURE this existing analysis into narrative form, NOT to re-analyze.
 
+CRITICAL CITATION PRESERVATION RULE:
+The input data may contain in-text citation tokens of the form [ref-1], [ref-2], [ref-3], etc.
+These are MEDICAL GUIDELINE REFERENCES that MUST be preserved verbatim in your output narrative,
+at the same locations where they appear in the input. They are NOT jargon to clean up.
+- DO NOT remove [ref-N] tokens.
+- DO NOT paraphrase, translate, or replace them.
+- DO NOT move them to a different sentence — keep them adjacent to the claim they support.
+- A later pipeline stage will transform them into Vancouver-style numbers ([1], [2]…) and produce a bibliography.
+
 CRITICAL FORMATTING REQUIREMENTS:
 - Each section must contain minimum 150-200 words
 - Use the provided detailed analysis - do not invent new information
