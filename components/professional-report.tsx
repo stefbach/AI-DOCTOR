@@ -3854,6 +3854,23 @@ const handleSendDocuments = async () => {
    || params.get('presentialActor')
    || null
 
+ // Phase 2.D.A: forward who the nurse is (if nurse-led) and which role
+ // actually clicked Send. Useful for TIBOK audit/analytics; no behavioural
+ // effect today on the receiving end.
+ const nurseId =
+   sessionStorage.getItem('tibokNurseId')
+   || params.get('nurseId')
+   || null
+ const nurseInfoRaw = sessionStorage.getItem('tibokNurseInfo')
+ const nurse: any = (() => {
+   if (!nurseInfoRaw) return null
+   try { return JSON.parse(nurseInfoRaw) } catch { return null }
+ })()
+ const role =
+   sessionStorage.getItem('tibokRole')
+   || params.get('role')
+   || null
+
  // Prepare documents payload
  console.log('📦 Preparing documents payload...')
 
@@ -3869,6 +3886,9 @@ const handleSendDocuments = async () => {
  isEmergency: isEmergencyCase,
  consultationMode,
  presentialActor,
+ nurseId,
+ nurse,
+ role,
  documents: {
  consultationReport: report?.compteRendu ? {
  type: 'consultation_report',

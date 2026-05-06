@@ -375,6 +375,57 @@ export function useTibokPatientData() {
         sessionStorage.setItem('tibokPresentialActor', presentialActorParam)
       }
 
+      // Phase 2.D.A: nurse identity + current viewer role.
+      // - nurseId: UUID, present only when presentialActor='nurse'.
+      // - nurseData: double-encoded JSON blob (same retry pattern as doctorData).
+      // - role: 'doctor' | 'nurse', who is looking at the iframe right now.
+      //   The role is also delivered via postMessage (see hooks/use-tibok-bridge.ts);
+      //   we read it here too for synchronous availability at mount.
+      const nurseIdParam = urlParams.get('nurseId')
+      const nurseDataParam = urlParams.get('nurseData')
+      const roleParam = urlParams.get('role')
+
+      if (nurseIdParam) {
+        sessionStorage.setItem('tibokNurseId', nurseIdParam)
+        console.log('👩‍⚕️ TIBOK nurse ID:', nurseIdParam)
+      }
+
+      if (nurseDataParam) {
+        // Same decode-retry pattern as the hub uses for doctorData
+        // (app/consultation-hub/page.tsx:91-118): decodeURIComponent up to 5
+        // times until the result starts with '{', trim trailing junk after the
+        // last '}', then JSON.parse.
+        let decodedNurseData = nurseDataParam
+        let nurseInfo: any = null
+        for (let attempt = 1; attempt <= 5; attempt++) {
+          try {
+            decodedNurseData = decodeURIComponent(decodedNurseData)
+            if (decodedNurseData.startsWith('{')) {
+              const lastBrace = decodedNurseData.lastIndexOf('}')
+              const jsonString = lastBrace !== -1
+                ? decodedNurseData.slice(0, lastBrace + 1)
+                : decodedNurseData
+              nurseInfo = JSON.parse(jsonString)
+              break
+            }
+          } catch {
+            // keep decoding
+          }
+        }
+        if (nurseInfo) {
+          sessionStorage.setItem('tibokNurseInfo', JSON.stringify(nurseInfo))
+          console.log('👩‍⚕️ TIBOK nurse info:',
+            nurseInfo.fullName || nurseInfo.full_name || '(unnamed)')
+        } else {
+          console.warn('👩‍⚕️ TIBOK nurseData present but failed to decode after 5 attempts')
+        }
+      }
+
+      if (roleParam === 'doctor' || roleParam === 'nurse') {
+        sessionStorage.setItem('tibokRole', roleParam)
+        console.log('👤 TIBOK role:', roleParam)
+      }
+
       console.log('🔍 TIBOK Data Check:', {
         source,
         hasPatientData: !!patientDataParam,
@@ -384,6 +435,9 @@ export function useTibokPatientData() {
         doctorId,
         consultationMode: consultationModeParam || '(default telemedicine)',
         presentialActor: presentialActorParam || null,
+        role: roleParam || null,
+        hasNurseId: !!nurseIdParam,
+        hasNurseData: !!nurseDataParam,
       })
 
       if (source === 'tibok' && patientDataParam && doctorDataParam) {

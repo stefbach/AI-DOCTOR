@@ -2940,6 +2940,21 @@ export default function ChronicProfessionalReport({
         || payloadUrlParams.get('presentialActor')
         || null
 
+      // Phase 2.D.A: nurse identity + viewer role (audit/analytics on TIBOK).
+      const nurseId =
+        sessionStorage.getItem('tibokNurseId')
+        || payloadUrlParams.get('nurseId')
+        || null
+      const nurseInfoRaw = sessionStorage.getItem('tibokNurseInfo')
+      const nurse: any = (() => {
+        if (!nurseInfoRaw) return null
+        try { return JSON.parse(nurseInfoRaw) } catch { return null }
+      })()
+      const role =
+        sessionStorage.getItem('tibokRole')
+        || payloadUrlParams.get('role')
+        || null
+
       // Prepare documents payload for chronic disease
       console.log('📦 Preparing documents payload...')
 
@@ -2953,6 +2968,9 @@ export default function ChronicProfessionalReport({
         consultationType: 'chronic_disease',
         consultationMode,
         presentialActor,
+        nurseId,
+        nurse,
+        role,
         // Patient data for Tibok chronic-disease-documents endpoint
         patientData: {
           name: patientName,

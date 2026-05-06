@@ -3800,6 +3800,21 @@ console.log('    - weight:', patient?.poids || patientData?.weight || 'MISSING')
    || payloadUrlParams.get('presentialActor')
    || null
 
+ // Phase 2.D.A: nurse identity + viewer role (audit/analytics on TIBOK).
+ const nurseId =
+   sessionStorage.getItem('tibokNurseId')
+   || payloadUrlParams.get('nurseId')
+   || null
+ const nurseInfoRaw = sessionStorage.getItem('tibokNurseInfo')
+ const nurse: any = (() => {
+   if (!nurseInfoRaw) return null
+   try { return JSON.parse(nurseInfoRaw) } catch { return null }
+ })()
+ const role =
+   sessionStorage.getItem('tibokRole')
+   || payloadUrlParams.get('role')
+   || null
+
  const documentsPayload = {
  consultationId,
  patientId,
@@ -3812,6 +3827,9 @@ console.log('    - weight:', patient?.poids || patientData?.weight || 'MISSING')
 isEmergency: isEmergencyCase,
  consultationMode,
  presentialActor,
+ nurseId,
+ nurse,
+ role,
  consultationType: 'dermatology',
  // Complete patient data for Tibok
  patientData: {
