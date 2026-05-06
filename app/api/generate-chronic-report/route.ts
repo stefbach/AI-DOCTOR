@@ -3,6 +3,66 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import {
+  buildRefDisplayMap,
+  buildRefSourceYearMap,
+  expandRefsInTree,
+  expandRefsAsSourceYearInTree,
+} from "@/lib/rag/medical-rag"
+
+// ==================== "HORS GUIDELINE RAG" JARGON SANITISER ====================
+// Phase 2.E.4.1 — duplicated verbatim from generate-consultation-report so this
+// route can offer the same patient-facing cleanup of internal pipeline jargon.
+// stripHorsGuidelineJargonInTree is a private helper there (not exported from
+// lib/rag/medical-rag.ts); per the phase brief we duplicate locally rather than
+// extending the public RAG module.
+function stripHorsGuidelineJargon(text: string): string {
+  if (!text || typeof text !== 'string') return text
+  const original = text
+  const cleaned = text
+    .replace(
+      /Recommendation\s+based\s+on\s+(?:standard\s+clinical\s+practice|practice\s+clinique\s+standard|standard\s+practice|clinical\s+practice)\s*,?\s*hors\s+guideline\s+RAG\.?/gi,
+      'Based on standard clinical practice.'
+    )
+    .replace(
+      /Recommandation\s+bas[ée]e?\s+sur\s+la\s+pratique\s+clinique\s+standard\s*,?\s*hors\s+guideline\s+RAG\.?/gi,
+      'Based on standard clinical practice.'
+    )
+    .replace(/[,;]?\s*hors\s+guideline\s+RAG\.?/gi, '')
+    .replace(/\s*\.\s*\./g, '.')
+    .replace(/,\s*\./g, '.')
+    .replace(/\s+([,.;:!?)])/g, '$1')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+  return cleaned !== original ? cleaned : original
+}
+
+function stripHorsGuidelineJargonInTree(
+  node: any,
+  excludeKeys: ReadonlySet<string> = new Set(['evidence_references', 'rag_metadata'])
+): number {
+  let modified = 0
+  const visit = (n: any): any => {
+    if (typeof n === 'string') {
+      const cleaned = stripHorsGuidelineJargon(n)
+      if (cleaned !== n) modified++
+      return cleaned
+    }
+    if (Array.isArray(n)) {
+      for (let i = 0; i < n.length; i++) n[i] = visit(n[i])
+      return n
+    }
+    if (n && typeof n === 'object') {
+      for (const k of Object.keys(n)) {
+        if (excludeKeys.has(k)) continue
+        n[k] = visit(n[k])
+      }
+    }
+    return n
+  }
+  visit(node)
+  return modified
+}
 
 // ==================== FONCTION DE TRADUCTION PRAGMATIQUE ====================
 function translateFrenchMedicalTerms(text: string): string {
@@ -1716,6 +1776,71 @@ export async function POST(request: NextRequest) {
     console.log(`   - Pregnancy status: ${pregnancyInfo.display}`)
     console.log(`   - Processing time: ${processingTime}ms`)
     console.log(`   - All text content now in English`)
+
+    // ====== Phase 2.E.4.1 — Dual-format citation expansion ======
+    // Same pattern as generate-consultation-report:2462-2528:
+    //   - Vancouver [K] for narrative + diagnosisData (excl. prescriptions)
+    //   - (Source, Year) for prescriptions {medications, laboratoryTests,
+    //     imagingStudies} + the source clean* arrays (so anything reading
+    //     them directly stays in sync, mirroring 2.D logic).
+    //   - "hors guideline RAG" jargon stripper runs unconditionally as a
+    //     safety net even when no refs were retrieved (legacy emissions
+    //     from earlier prompt versions).
+    // evidence_references arrives via body.diagnosisData (the chronic
+    // diagnosis route writes it after scrubAndEnrichEvidenceRefs).
+    try {
+      const refsForExpansion = (diagnosisData as any)?.evidence_references ?? []
+      const displayMap = buildRefDisplayMap(refsForExpansion as any)
+      const sourceYearMap = buildRefSourceYearMap(refsForExpansion as any)
+      if (displayMap.size > 0) {
+        console.log('🔍 [RAG-EXPAND] reportStructure top-level keys:', Object.keys(reportStructure))
+        console.log('🔍 [RAG-EXPAND] diagnosisData top-level keys:', Object.keys(diagnosisData ?? {}))
+
+        // 1) (Source, Year) on prescription sub-paths in the structure +
+        //    the source clean* arrays. Done FIRST so the Vancouver walk
+        //    can skip these subtrees and keep its [K] for the narrative.
+        const rs = reportStructure as any
+        if (rs?.prescriptions?.medications) expandRefsAsSourceYearInTree(rs.prescriptions.medications, sourceYearMap)
+        if (rs?.prescriptions?.laboratoryTests) expandRefsAsSourceYearInTree(rs.prescriptions.laboratoryTests, sourceYearMap)
+        if (rs?.prescriptions?.imagingStudies) expandRefsAsSourceYearInTree(rs.prescriptions.imagingStudies, sourceYearMap)
+        expandRefsAsSourceYearInTree(cleanMedications as any, sourceYearMap)
+        expandRefsAsSourceYearInTree(cleanLabTests as any, sourceYearMap)
+        expandRefsAsSourceYearInTree(cleanImagingStudies as any, sourceYearMap)
+
+        // 2) Vancouver [K] on the rest. Adding 'prescriptions' to
+        //    excludeKeys avoids double-rewriting the strings we just
+        //    expanded as (Source, Year).
+        const NARRATIVE_EXCLUDE: ReadonlySet<string> = new Set([
+          'evidence_references',
+          'rag_metadata',
+          'prescriptions',
+        ])
+        expandRefsInTree(reportStructure, displayMap, NARRATIVE_EXCLUDE)
+        expandRefsInTree(diagnosisData, displayMap)
+
+        const mappingPreview = Array.from(displayMap.entries())
+          .map(([id, k]) => `${id}→[${k}]`)
+          .join(', ')
+        console.log(
+          `📚 [RAG-CHRONIC-REPORT] Dual-format citation expansion DONE — Vancouver [K] for narrative ` +
+            `(reportStructure excl. prescriptions, diagnosisData) + (Source, Year) for ` +
+            `prescriptions + clean{Medications,LabTests,ImagingStudies} ` +
+            `(${displayMap.size} refs: ${mappingPreview})`
+        )
+      } else {
+        console.log('📚 [RAG-CHRONIC-REPORT] No references available for citation expansion (skipped)')
+      }
+
+      // Safety net: scrub the "hors guideline RAG" jargon if any LLM call
+      // emitted the legacy phrasing.
+      const cleanedCount = stripHorsGuidelineJargonInTree(reportStructure)
+        + stripHorsGuidelineJargonInTree(diagnosisData)
+      if (cleanedCount > 0) {
+        console.log(`🧹 [RAG-CHRONIC-REPORT] Cleaned "hors guideline RAG" jargon from ${cleanedCount} string(s)`)
+      }
+    } catch (expErr: any) {
+      console.error('📚 [RAG-CHRONIC-REPORT] Citation expansion failed (non-blocking):', expErr?.message || expErr)
+    }
 
     return NextResponse.json({
       success: true,
