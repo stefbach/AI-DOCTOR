@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, ArrowRight, Loader2, Camera, Upload, X, ImageIcon } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
+import { consultationDataService } from '@/lib/consultation-data-service'
 
 interface Props {
   patientData: any
@@ -158,22 +159,34 @@ export default function DermatologyDiagnosisForm(props: Props) {
     }
   }
 
-  const generateDiagnosis = async () => {
+  const generateDiagnosis = async (overrides?: {
+    patientData?: any
+    imageData?: any
+    ocrAnalysisData?: any
+    questionsData?: any
+  }) => {
     setIsGenerating(true)
     startProgressSimulation()
 
     try {
+      const effectivePatientData = overrides?.patientData ?? props.patientData
+      const effectiveOcrAnalysisData = overrides?.ocrAnalysisData ?? props.ocrAnalysisData
+      const effectiveQuestionsData = overrides?.questionsData ?? props.questionsData
       // Use locally uploaded images if no images were provided from step 1
-      const effectiveImageData = (props.imageData && props.imageData.length > 0)
-        ? props.imageData
-        : uploadedImages
+      const effectiveImageData = (overrides?.imageData && overrides.imageData.length > 0)
+        ? overrides.imageData
+        : (props.imageData && props.imageData.length > 0)
+          ? props.imageData
+          : uploadedImages
 
       const response = await fetch('/api/dermatology-diagnosis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...props,
-          imageData: effectiveImageData
+          patientData: effectivePatientData,
+          ocrAnalysisData: effectiveOcrAnalysisData,
+          questionsData: effectiveQuestionsData,
+          imageData: effectiveImageData,
         })
       })
       const data = await response.json()
@@ -206,6 +219,79 @@ export default function DermatologyDiagnosisForm(props: Props) {
       }
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Phase 2.E.5 — handoff path. Refs persist across useEffect re-runs so
+  // the timer survives parent state fan-out (the bug 2.D.F fixed for
+  // general flow). The mount-only effect above only runs once, so when
+  // the parent's setState arrives later (e.g. imageData hydrated from
+  // tibokHandoffPayload), the gate has already evaluated false. Detect
+  // the handoff explicitly and force-trigger with overrides pulled from
+  // consultationDataService.
+  const handoffTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const handoffScheduledRef = useRef(false)
+
+  useEffect(() => {
+    return () => {
+      if (handoffTimerRef.current !== null) {
+        clearTimeout(handoffTimerRef.current)
+        handoffTimerRef.current = null
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handoffFlag = sessionStorage.getItem('tibokHandoffJustHydrated')
+    const consultationId = (props.patientData as any)?.consultationId
+      || consultationDataService.getCurrentConsultationId()
+    const isHandoffMount = !!handoffFlag && handoffFlag === consultationId
+
+    console.log('AUTO-GENERATION CHECK [dermato]:', {
+      hasDiagnosis: !!diagnosis,
+      isGenerating,
+      hasImages,
+      isHandoffMount,
+      handoffFlag,
+      consultationId,
+    })
+
+    if (isHandoffMount && !diagnosis && !isGenerating && !handoffScheduledRef.current) {
+      console.log('🩺 [dermato] Handoff mount — preparing force-trigger')
+      handoffScheduledRef.current = true
+      sessionStorage.removeItem('tibokHandoffJustHydrated')
+
+      handoffTimerRef.current = setTimeout(() => {
+        handoffTimerRef.current = null
+        try {
+          const serviceData: any = consultationDataService.getAllData?.() || {}
+          // Dermato's "clinical" draft contains the OCR analysis (per
+          // dermatology-image-upload.tsx in this same phase). Image
+          // binaries themselves are NOT in the draft; if the doctor
+          // doesn't have them locally, dermatology-diagnosis still has
+          // ocrAnalysisData to drive its prompt.
+          const overrides = {
+            patientData: serviceData.patientData ?? props.patientData,
+            ocrAnalysisData:
+              serviceData.clinicalData?.ocrAnalysis
+              ?? serviceData.clinicalData
+              ?? props.ocrAnalysisData,
+            questionsData: serviceData.questionsData ?? props.questionsData,
+            imageData: props.imageData ?? uploadedImages,
+          }
+          console.log('🩺 [dermato] Calling generateDiagnosis() with service-fresh overrides:', {
+            hasPatient: !!overrides.patientData,
+            hasOcr: !!overrides.ocrAnalysisData,
+            hasQuestions: !!overrides.questionsData,
+            imageCount: Array.isArray(overrides.imageData) ? overrides.imageData.length : 0,
+          })
+          generateDiagnosis(overrides)
+        } catch (err) {
+          console.error('❌ [dermato] Handoff force-trigger threw:', err)
+          handoffScheduledRef.current = false
+        }
+      }, 1500)
+    }
+  }, [diagnosis, isGenerating, hasImages, props.patientData, props.ocrAnalysisData, props.questionsData, props.imageData])
 
   return (
     <div className="space-y-6">

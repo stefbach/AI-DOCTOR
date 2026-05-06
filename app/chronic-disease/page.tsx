@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation"
 
 // Import patient form (shared with normal consultation)
 import PatientForm from "@/components/patient-form"
+import { consultationDataService } from '@/lib/consultation-data-service'
 // Import chronic disease specific components
 import ChronicClinicalForm from "@/components/chronic-disease/chronic-clinical-form"
 import ChronicQuestionsForm from "@/components/chronic-disease/chronic-questions-form"
@@ -35,6 +36,46 @@ export default function ChronicDiseaseWorkflow() {
   const [isExistingPatient, setIsExistingPatient] = useState(false)
   const [chronicHistory, setChronicHistory] = useState<any[]>([])
   const [isSimulation, setIsSimulation] = useState(false)
+
+  // Phase 2.E.5 — handoff hydration (chronic).
+  // When the doctor lands on this page from the hub for a nurse-led
+  // consultation in handoff state, sessionStorage carries
+  // tibokHandoffPayload (set by app/consultation-hub/page.tsx after
+  // calling loadTibokDraft). We hydrate the 3 datasets, jump to step 3
+  // (Diagnosis), and set tibokHandoffJustHydrated so
+  // chronic-diagnosis-form's auto-gen branch fires with overrides.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const handoffRaw = sessionStorage.getItem('tibokHandoffPayload')
+      if (!handoffRaw) return
+      const payload = JSON.parse(handoffRaw)
+      if (!payload?.consultationId) return
+      console.log('🩺 [chronic page] Hydrating from nurse handoff:', payload.consultationId)
+      consultationDataService.setCurrentConsultationId(payload.consultationId)
+      ;(async () => {
+        if (payload.patientData) {
+          await consultationDataService.saveStepData(0, payload.patientData)
+          setPatientData(payload.patientData)
+        }
+        if (payload.clinicalData) {
+          await consultationDataService.saveStepData(1, payload.clinicalData)
+          setClinicalData(payload.clinicalData)
+        }
+        if (payload.questionsData) {
+          await consultationDataService.saveStepData(2, payload.questionsData)
+          setQuestionsData(payload.questionsData)
+        }
+        setCurrentStep(3)
+        sessionStorage.setItem('tibokHandoffJustHydrated', payload.consultationId)
+        console.log('🩺 [chronic page] Jumped to step 3 (Diagnosis); flag set for auto-gen.')
+      })()
+      sessionStorage.removeItem('tibokHandoffPayload')
+    } catch (err) {
+      console.warn('⚠️ [chronic page] Failed to hydrate handoff payload:', err)
+      sessionStorage.removeItem('tibokHandoffPayload')
+    }
+  }, [])
 
   // Load patient data from sessionStorage
   useEffect(() => {
