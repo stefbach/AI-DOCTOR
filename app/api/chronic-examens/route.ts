@@ -3,6 +3,14 @@
 // - Call 1: Laboratory Tests + Paraclinical Exams
 // - Call 2: Specialist Referrals + Monitoring Plan + Summary
 import { type NextRequest, NextResponse } from "next/server"
+import {
+  buildClinicalQuery,
+  inferSpecialty,
+  queryMedicalGuidelines,
+  formatGuidelinesForPrompt,
+  scrubAndEnrichEvidenceRefs,
+  type RAGContext,
+} from '@/lib/rag/medical-rag'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300
@@ -144,11 +152,47 @@ DIAGNOSTIC DATA: ${JSON.stringify(diagnosisData?.diseaseAssessment || {}, null, 
         }
 
         try {
+          // ========== Phase 2.E.4.4 — RAG enrichment ==========
+          // Same chain as chronic-diagnosis: retrieve once before the LLM
+          // calls and inject into both systemPrompts so each call can cite
+          // [ref-N] in the test/exam indication fields. Best-effort:
+          // failure leaves ragPromptBlock empty and the route runs as before.
+          let ragContext: RAGContext = {
+            chunks: [],
+            references: [],
+            totalChunks: 0,
+            avgSimilarity: 0,
+            ragUsed: false,
+          }
+          let ragPromptBlock = ''
+          try {
+            sendSSE('progress', { message: 'Consultation des guidelines médicales...', progress: 5 })
+            const ragQuery = buildClinicalQuery({
+              chiefComplaint: clinicalData?.chiefComplaint || 'Suivi maladie chronique',
+              symptoms: clinicalData?.symptoms || [],
+              ageYears: anonymizedPatient.age,
+              sex: anonymizedPatient.gender,
+              medicalHistory: chronicDiseases,
+              vitalSigns: clinicalData?.vitalSigns,
+              duration: clinicalData?.symptomDuration,
+            })
+            const inferredSpecialty = inferSpecialty(ragQuery)
+            console.log(`📚 [RAG-CHRONIC-EXAMENS] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
+            ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+            console.log(
+              `📚 [RAG-CHRONIC-EXAMENS] Retrieved ${ragContext.totalChunks} chunks ` +
+                `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
+            )
+            ragPromptBlock = formatGuidelinesForPrompt(ragContext)
+          } catch (ragErr: any) {
+            console.error('📚 [RAG-CHRONIC-EXAMENS] Enrichment failed (non-blocking):', ragErr?.message || ragErr)
+          }
+
           // ========== CALL 1: Laboratory Tests + Paraclinical Exams (50%) ==========
           sendSSE('progress', { message: 'Génération des analyses et examens paracliniques...', progress: 10 })
           console.log('🔬 Call 1: Laboratory Tests + Paraclinical Exams')
 
-          const clinicalOrders = await callOpenAI(apiKey, `Tu es un endocrinologue senior. Génère les analyses biologiques ET les examens paracliniques (imagerie, explorations fonctionnelles) pour le suivi des maladies chroniques.
+          const call1SystemPrompt = `${ragPromptBlock ? ragPromptBlock + '\n\n' : ''}Tu es un endocrinologue senior. Génère les analyses biologiques ET les examens paracliniques (imagerie, explorations fonctionnelles) pour le suivi des maladies chroniques.
 Utilise la terminologie médicale anglaise (Anglo-Saxon standards).
 
 Retourne UNIQUEMENT un JSON valide avec cette structure:
@@ -210,7 +254,8 @@ TESTS REQUIS selon les maladies:
 EXAMENS PARACLINIQUES:
 - DIABÈTE: Fond d'œil (annuel), ECG (annuel), Examen des pieds, Écho-Doppler artères MI si nécessaire
 - HYPERTENSION: ECG (annuel), Échocardiographie si mal contrôlée, Holter tensionnel si suspicion
-- OBÉSITÉ: Échographie abdominale (stéatose)`, patientContext, 4000)
+- OBÉSITÉ: Échographie abdominale (stéatose)`
+          const clinicalOrders = await callOpenAI(apiKey, call1SystemPrompt, patientContext, 4000)
 
           sendSSE('progress', { message: 'Analyses et examens générés, préparation du plan de suivi...', progress: 50 })
 
@@ -222,7 +267,7 @@ EXAMENS PARACLINIQUES:
           sendSSE('progress', { message: 'Génération des consultations spécialisées et récapitulatif...', progress: 55 })
           console.log('👨‍⚕️ Call 2: Specialist Referrals + Monitoring Plan + Summary')
 
-          const referralsAndSummary = await callOpenAI(apiKey, `Tu es un endocrinologue senior. Génère les consultations spécialisées, le plan de suivi, ET le récapitulatif des examens.
+          const call2SystemPrompt = `${ragPromptBlock ? ragPromptBlock + '\n\n' : ''}Tu es un endocrinologue senior. Génère les consultations spécialisées, le plan de suivi, ET le récapitulatif des examens.
 
 Nombre d'analyses biologiques prescrites: ${labCount}
 Nombre d'examens paracliniques prescrits: ${paraCount}
@@ -280,7 +325,8 @@ Retourne UNIQUEMENT un JSON valide:
 CONSULTATIONS selon maladies:
 - DIABÈTE: Ophtalmologue (fond d'œil annuel), Podologue, Cardiologue si complications
 - HYPERTENSION: Cardiologue si mal contrôlée, Néphrologue si atteinte rénale
-- OBÉSITÉ: Diététicien, Endocrinologue`, patientContext, 3000)
+- OBÉSITÉ: Diététicien, Endocrinologue`
+          const referralsAndSummary = await callOpenAI(apiKey, call2SystemPrompt, patientContext, 3000)
 
           sendSSE('progress', { message: 'Finalisation...', progress: 90 })
 
@@ -342,6 +388,17 @@ CONSULTATIONS selon maladies:
             }
           }
 
+          // Phase 2.E.4.4 — scrub hallucinated [ref-N] in narrative strings
+          // (test indications, exam rationale, monitoringPlan items, etc.),
+          // filter unused refs, and enrich a final evidence_references list
+          // with metadata. Same helper as chronic-diagnosis +
+          // chronic-prescription. Walks the entire combinedExamOrders tree.
+          const ragResult = scrubAndEnrichEvidenceRefs(
+            combinedExamOrders,
+            ragContext,
+            { logPrefix: '📚 [RAG-CHRONIC-EXAMENS]' }
+          )
+
           sendSSE('progress', { message: 'Ordonnances générées!', progress: 100 })
 
           // Send complete result
@@ -349,7 +406,23 @@ CONSULTATIONS selon maladies:
             success: true,
             examOrders: combinedExamOrders,
             orderId: orderId,
-            generatedAt: orderDate.toISOString()
+            generatedAt: orderDate.toISOString(),
+            // Phase 2.E.4.4 — top-level RAG fields, mirroring the
+            // diagnosis/prescription routes. Consumed downstream by
+            // generate-chronic-report's citation expansion (2.E.4.1).
+            rag_used: ragContext.ragUsed,
+            rag_metadata: {
+              chunks_retrieved: ragContext.totalChunks,
+              avg_similarity: Number(ragContext.avgSimilarity.toFixed(3)),
+              provided_references: ragContext.references.length,
+              cited_references: ragResult.evidenceReferences.length,
+              unknown_citations: ragResult.unknownCitedRefs,
+              citations_reconstructed: ragResult.citationsReconstructed,
+              hallucinated_refs_scrubbed: ragResult.hallucinatedRefsScrubbed,
+              hallucinated_refs_breakdown: ragResult.hallucinatedRefsBreakdown,
+              unused_refs_filtered: ragResult.unusedRefsFiltered,
+            },
+            evidence_references: ragResult.evidenceReferences,
           })
 
           console.log('✅ Complete exam orders sent to client (2-call approach)')

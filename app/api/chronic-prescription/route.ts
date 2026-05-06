@@ -1,6 +1,14 @@
 // app/api/chronic-prescription/route.ts - Chronic Disease Medication Prescription API
 // Generates prescriptions for chronic disease medications (antidiabetics, antihypertensives, statins, etc.)
 import { type NextRequest, NextResponse } from "next/server"
+import {
+  buildClinicalQuery,
+  inferSpecialty,
+  queryMedicalGuidelines,
+  formatGuidelinesForPrompt,
+  scrubAndEnrichEvidenceRefs,
+  type RAGContext,
+} from '@/lib/rag/medical-rag'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300
@@ -332,6 +340,47 @@ PRESCRIPTION INSTRUCTIONS:
 
 Generate the comprehensive chronic disease prescription now.`
 
+    // Phase 2.E.4.4 — RAG enrichment for chronic medication prescription.
+    // Same chain as chronic-diagnosis: build query, infer specialty, retrieve
+    // chunks, prepend the formatted block to the system prompt. The LLM is
+    // instructed (via formatGuidelinesForPrompt) to cite [ref-N] in
+    // medication "indication" / "rationale" fields when a guideline supports
+    // the prescription. Best-effort: if retrieval fails the route falls back
+    // to the existing prompt unchanged.
+    let ragContext: RAGContext = {
+      chunks: [],
+      references: [],
+      totalChunks: 0,
+      avgSimilarity: 0,
+      ragUsed: false,
+    }
+    let ragPromptBlock = ''
+    try {
+      const ragQuery = buildClinicalQuery({
+        chiefComplaint: clinicalData?.chiefComplaint || 'Suivi maladie chronique',
+        symptoms: clinicalData?.symptoms || [],
+        ageYears: anonymizedPatient.age,
+        sex: anonymizedPatient.gender,
+        medicalHistory: anonymizedPatient.medicalHistory || [],
+        vitalSigns: clinicalData?.vitalSigns,
+        duration: clinicalData?.symptomDuration,
+      })
+      const inferredSpecialty = inferSpecialty(ragQuery)
+      console.log(`📚 [RAG-CHRONIC-PRESCRIPTION] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
+      ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+      console.log(
+        `📚 [RAG-CHRONIC-PRESCRIPTION] Retrieved ${ragContext.totalChunks} chunks ` +
+          `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
+      )
+      ragPromptBlock = formatGuidelinesForPrompt(ragContext)
+    } catch (ragErr: any) {
+      console.error('📚 [RAG-CHRONIC-PRESCRIPTION] Enrichment failed (non-blocking):', ragErr?.message || ragErr)
+    }
+
+    const finalSystemPrompt = ragPromptBlock
+      ? `${ragPromptBlock}\n\n${systemPrompt}`
+      : systemPrompt
+
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
       return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 })
@@ -348,7 +397,7 @@ Generate the comprehensive chronic disease prescription now.`
       body: JSON.stringify({
         model: "gpt-5.5",
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: finalSystemPrompt },
           { role: "user", content: patientContext }
         ],
         max_completion_tokens: 8000,
@@ -400,12 +449,38 @@ Generate the comprehensive chronic disease prescription now.`
         { status: 500 }
       )
     }
-    
+
+    // Phase 2.E.4.4 — scrub hallucinated [ref-N], filter unused refs, enrich
+    // with metadata. Walk the entire prescriptionData tree (medications +
+    // any nested rationale/indication strings) so [ref-N] tokens emitted in
+    // medication "indication" / "rationale" fields are validated.
+    const ragResult = scrubAndEnrichEvidenceRefs(
+      prescriptionData,
+      ragContext,
+      { logPrefix: '📚 [RAG-CHRONIC-PRESCRIPTION]' }
+    )
+
     return NextResponse.json({
       success: true,
       prescription: prescriptionData.prescription,
       prescriptionId: prescriptionId,
-      generatedAt: prescriptionDate.toISOString()
+      generatedAt: prescriptionDate.toISOString(),
+      // Phase 2.E.4.4 — top-level RAG fields, mirroring openai-diagnosis /
+      // chronic-diagnosis / dermatology-diagnosis. Consumed downstream by
+      // generate-chronic-report's citation expansion.
+      rag_used: ragContext.ragUsed,
+      rag_metadata: {
+        chunks_retrieved: ragContext.totalChunks,
+        avg_similarity: Number(ragContext.avgSimilarity.toFixed(3)),
+        provided_references: ragContext.references.length,
+        cited_references: ragResult.evidenceReferences.length,
+        unknown_citations: ragResult.unknownCitedRefs,
+        citations_reconstructed: ragResult.citationsReconstructed,
+        hallucinated_refs_scrubbed: ragResult.hallucinatedRefsScrubbed,
+        hallucinated_refs_breakdown: ragResult.hallucinatedRefsBreakdown,
+        unused_refs_filtered: ragResult.unusedRefsFiltered,
+      },
+      evidence_references: ragResult.evidenceReferences,
     })
 
   } catch (error: any) {
