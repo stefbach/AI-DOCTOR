@@ -270,10 +270,7 @@ export async function POST(request: NextRequest) {
           }
         ],
         max_completion_tokens: 4000,
-        response_format: { type: "json_object" },
-        top_p: 0.9,
-        frequency_penalty: 0.1,
-        presence_penalty: 0.2
+        response_format: { type: "json_object" }
       }),
     })
 
