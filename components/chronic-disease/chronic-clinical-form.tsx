@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { saveTibokDraft } from '@/lib/tibok-draft-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -133,7 +134,7 @@ export default function ChronicClinicalForm({
  return Object.keys(newErrors).length === 0
  }
 
- const handleSubmit = () => {
+ const handleSubmit = async () => {
  if (validateForm()) {
  const chronicClinicalData = {
  // Visit information
@@ -201,6 +202,10 @@ export default function ChronicClinicalForm({
  : formData.visitReasonOther || "Chronic disease follow-up"
  }
  
+ // Phase 2.E.5: nurse-led draft → TIBOK (no-op for non-nurse).
+ // Same step name 'clinical' as the general flow so the TIBOK route
+ // writes consultation_records.clinical_data without per-workflow logic.
+ await saveTibokDraft('clinical', chronicClinicalData)
  onNext(chronicClinicalData)
  }
  }

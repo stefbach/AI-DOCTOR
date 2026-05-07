@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { saveTibokDraft } from '@/lib/tibok-draft-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -171,7 +172,7 @@ export default function ChronicQuestionsForm({
  }
 
  // ========== Handle Submit ==========
- const handleSubmit = () => {
+ const handleSubmit = async () => {
  const answeredQuestions = responses.filter(r => r.answer !== '')
  
  if (answeredQuestions.length === 0) {
@@ -184,12 +185,17 @@ export default function ChronicQuestionsForm({
  }
  
  console.log(`✅ Submitting ${answeredQuestions.length} answered questions`)
- 
- onNext({ 
- responses: answeredQuestions,
- allResponses: responses,
- metadata
- })
+
+ const submitPayload = {
+   responses: answeredQuestions,
+   allResponses: responses,
+   metadata,
+ }
+
+ // Phase 2.E.5: nurse-led draft → TIBOK (no-op for non-nurse).
+ await saveTibokDraft('questions', submitPayload)
+
+ onNext(submitPayload)
  }
 
  // ========== Calculate Progress ==========

@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
+import { saveTibokDraft } from '@/lib/tibok-draft-service'
 import { VoiceDictationButton } from "@/components/voice-dictation-button"
 
 interface Props {
@@ -80,8 +81,11 @@ export default function DermatologyQuestionsForm({ patientData, imageData, ocrAn
     setAnswers(prev => ({ ...prev, [questionId]: answer }))
   }
 
-  const handleSubmit = () => {
-    onNext({ questions, answers })
+  const handleSubmit = async () => {
+    const submitPayload = { questions, answers }
+    // Phase 2.E.5 — nurse-led draft → TIBOK (no-op for non-nurse).
+    await saveTibokDraft('questions', submitPayload)
+    onNext(submitPayload)
   }
 
   if (isLoading) {

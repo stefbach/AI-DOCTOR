@@ -23,6 +23,7 @@ import {
   RefreshCw
 } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
+import { saveTibokDraft } from '@/lib/tibok-draft-service'
 import { useTibokConsultation, DermatologyImageData } from "@/hooks/use-tibok-consultation"
 import { VoiceDictationButton } from "@/components/voice-dictation-button"
 
@@ -312,7 +313,7 @@ export default function DermatologyImageUpload({
     }
   }, [uploadedImages, patientData, additionalNotes])
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = useCallback(async () => {
     if (uploadedImages.length === 0) {
       toast({
         title: "No images uploaded",
@@ -330,6 +331,16 @@ export default function DermatologyImageUpload({
       })
       return
     }
+
+    // Phase 2.E.5 — nurse-led draft → TIBOK. The dermato workflow's step 1
+    // is image upload; the closest semantic to TIBOK's draft schema is to
+    // store the OCR analysis (textual structured findings) under the
+    // 'clinical' key. The actual binary images are NOT shipped — only the
+    // analysis result (small JSON). No-op for non-nurse roles.
+    await saveTibokDraft('clinical', {
+      ocrAnalysis: ocrResults,
+      imageCount: uploadedImages.length,
+    })
 
     onNext({
       images: uploadedImages,

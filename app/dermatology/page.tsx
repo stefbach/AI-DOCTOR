@@ -22,6 +22,7 @@ import DermatologyQuestionsForm from "@/components/dermatology/dermatology-quest
 import DermatologyDiagnosisForm from "@/components/dermatology/dermatology-diagnosis-form"
 import DermatologyProfessionalReport from "@/components/dermatology/dermatology-professional-report"
 import PatientForm from "@/components/patient-form"
+import { consultationDataService } from '@/lib/consultation-data-service'
 
 export default function DermatologyWorkflow() {
   const router = useRouter()
@@ -33,6 +34,56 @@ export default function DermatologyWorkflow() {
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
   const [isExistingPatient, setIsExistingPatient] = useState(false)
   const [isSimulation, setIsSimulation] = useState(false)
+
+  // Phase 2.E.5 — handoff hydration (dermato).
+  // Same pattern as app/page.tsx and app/chronic-disease/page.tsx. The hub
+  // staged tibokHandoffPayload after calling loadTibokDraft; we hydrate
+  // the 3 datasets (patientData, ocrAnalysis-as-clinical, questionsData),
+  // jump to step 3 (Diagnosis), and set tibokHandoffJustHydrated so
+  // dermatology-diagnosis-form's handoff branch fires with overrides.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const handoffRaw = sessionStorage.getItem('tibokHandoffPayload')
+      if (!handoffRaw) return
+      const payload = JSON.parse(handoffRaw)
+      if (!payload?.consultationId) return
+      console.log('🩺 [dermato page] Hydrating from nurse handoff:', payload.consultationId)
+      consultationDataService.setCurrentConsultationId(payload.consultationId)
+      ;(async () => {
+        if (payload.patientData) {
+          await consultationDataService.saveStepData(0, payload.patientData)
+          setPatientData(payload.patientData)
+        }
+        if (payload.clinicalData) {
+          // Dermato draft 'clinical' carries the OCR analysis (see
+          // dermatology-image-upload.tsx). Persist to step index 1
+          // (image upload step) and surface ocrAnalysis to the form.
+          await consultationDataService.saveStepData(1, payload.clinicalData)
+          if (payload.clinicalData.ocrAnalysis) {
+            setOcrAnalysisData(payload.clinicalData.ocrAnalysis)
+          } else {
+            setOcrAnalysisData(payload.clinicalData)
+          }
+          // imageData binaries are NOT in the draft (would be too large).
+          // The diagnosis form falls back to ocrAnalysisData when imageData
+          // is empty, so leave it empty for the doctor unless the doctor
+          // re-uploads images locally.
+        }
+        if (payload.questionsData) {
+          await consultationDataService.saveStepData(2, payload.questionsData)
+          setQuestionsData(payload.questionsData)
+        }
+        setCurrentStep(3)
+        sessionStorage.setItem('tibokHandoffJustHydrated', payload.consultationId)
+        console.log('🩺 [dermato page] Jumped to step 3 (Diagnosis); flag set for auto-gen.')
+      })()
+      sessionStorage.removeItem('tibokHandoffPayload')
+    } catch (err) {
+      console.warn('⚠️ [dermato page] Failed to hydrate handoff payload:', err)
+      sessionStorage.removeItem('tibokHandoffPayload')
+    }
+  }, [])
 
   // Load patient data from sessionStorage
   useEffect(() => {
