@@ -1,7 +1,7 @@
 {
  "source": "FDA",
  "generated_at": "2026-05-09T09:18:38Z",
- "total_documents": 33,
+ "total_documents": 34,
  "documents": [
   {
    "id": "FDA-DONOR-001",
@@ -1801,6 +1801,31 @@
     {
      "chunk_index": 15,
      "content": "highlighted their willingness to adapt their practices to Member States’ requests, as past collaboration between the organization and visiting member states showed [ ]. The replacement or improvement of practices must be preferred to an additional practice, to help practitioners save time. The sustainability of the tools was a major concern that will condition the changes in practices and thus the ability to reach the stage of innovation. The sustainability of a new platform would need maintenance, updating of the dataflows, flexible use of a panel of generic tools that allows user-friendly settings, methodological guidance and possible use of confidential data. The strengthening of capacities is an important dimension of the innovation process and can rely on building a new expert network [ ], summer schools and methodological support. Agencies were engaged in solving their problems. This is a continuous process in an uncertain world [ – ]. The goal is to identify how to support their innovation process by taking into account what they are already developing and at what stage their thinking and initiatives currently are, as they are sometimes already developing tools with advanced thinking about their deployment and use [ ]. We thus have to be careful not to duplicate efforts and innovations. The prioritization of the needs to address is crucial, and the discussion must involve health authorities concerning issues with data protection, confidentiality and data access, justifying the choice of a cocreation process by the MOOD project. Providing solutions to expectations and needs requires considering constraints specific to national surveillance systems and, at the regional level, the regulatory infrastructure of data access and the context of each country [ ]. Several learning loops of interactions are required to increase genericity [ , ], and the implementation of study cases, as recently recommended by international health authorities [ ], is needed to develop a “Global One Health Intelligence System” (GOHIS). A global understanding of practitioners' needs is crucial for the development of feasible, effective, sustainable solutions that can be translated into changes in practices at the national PH and AH scale and feed the European numeric market of open-source tools. Our findings from this qualitative study can serve as a preliminary basis for an innovation process that fulfills the multidimensional needs of EI practitioners at the national and supranational levels. Limitations of this paper The needs expressed in our manuscript remain person dependent. Some expectations or requests may be connected to the mandate of other national agencies or a particular jurisdiction or administration at the regional level or overseas territories that were not part of our study. Nevertheless, this problem is partially overcome by targeting the leaders and officers involved in risk or situation assessment as gatekeepers of epidemic intelligence activities at the national or European level. In addition, the facilitation workshops, which were organized after the first user need assessment, combined all the stakeholders of the study to discuss particularities and limitations. Finally, we collected information from users during a period outside the routine activity of surveillance due to the COVID-19 pandemic, influencing their priority needs. The availability of the EI practitioners that were overburdened by the emergency was constrained: we thus targeted the EI team or IBS colleagues to support COVID-19 surveillance rather than specialists in respiratory diseases. Some answers would have been different outside this period when going into the details, as some procedures have changed, but the main expectations should be quite close. The similarities between AH and PH show that our results are still broadly relevant independent of the period. Supplementary Information Supplementary Material 1. Supplementary Material 2. Supplementary Material 3. Supplementary Material 4. Supplementary Material 5."
+    }
+   ]
+  },
+  {
+   "id": "FDA-DRUG-008",
+   "source": "FDA",
+   "title": "FDA Pregnancy and Lactation Labeling Final Rule PLLR",
+   "year": "2014",
+   "page_url": "https://www.fda.gov/drugs/labeling-information-drug-products/pregnancy-and-lactation-labeling-drugs-final-rule",
+   "pdf_url": "https://www.fda.gov/drugs/labeling-information-drug-products/pregnancy-and-lactation-labeling-drugs-final-rule",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pregnancy_lactation",
+   "priority": "high",
+   "sha256": "0b589a5f69a8b13c6b507f7c05957dd13a095dfafbf12b4981d34eb68fdfaa82",
+   "size_bytes": 1351,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1351,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "The US FDA pregnancy lactation and labeling rule - Implications for maternal immunization. The FDA has responsibility for ensuring that prescription drug and biological products including vaccines are accompanied by labeling that summarizes scientific information concerning their safe and effective use. As part of a broader effort to improve the content and format of prescription drug labeling FDA published a final rule, the Content and Format of Labeling for Human Prescription Drug and Biological Products; Requirements for Pregnancy and Lactation Labeling, referred to as the \"Pregnancy and Lactation Labeling Rule (PLLR).\" The most significant change to be implemented by this Rule is the removal of the letter risk categories A, B, C, D and X from all labeling, replacing them with a narrative summary of the risks of using a drug or biological product including vaccines during pregnancy. The PLLR requires an evaluation of available information about a product's use in pregnancy and provides an opportunity to update labeling when new information about use of a vaccine in pregnancy becomes available. Implementation of the provisions articulated in the PLLR, as they apply to vaccine product labeling, will require close collaboration between FDA and the vaccine manufacturer for both currently licensed vaccines and those in development."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "ASE",
  "generated_at": "2026-05-09T10:09:39Z",
- "total_documents": 7,
+ "total_documents": 14,
  "documents": [
   {
    "id": "ASE-TEE-001",
@@ -359,6 +359,181 @@
     {
      "chunk_index": 9,
      "content": "BNP and hsTnI) would have resulted in valuable information but they were not systematically available. LT introduced a confounding effect by increasing survival and reducing the number of events. Because liver transplantation was handled as a censoring event and post-transplant outcomes were not analyzed, our approach does not account for competing risks and may underestimate or overestimate the association between echocardiographic parameters and mortality. The limited number of deaths and composite events also restricted the number of covariates that could be included in multivariable models, increasing the likelihood of residual confounding. Given the retrospective, single-center design, limited sample size, and the large number of echocardiographic parameters explored, our analyses are inherently exploratory and susceptible to type I error. Isolated p -values close to 0.05, especially for subgroup or threshold-based findings, should therefore be interpreted with caution and viewed as hypothesis-generating. 5. Conclusions Echocardiographic changes in cirrhotic patients correlated with liver disease severity. Severe LA dilation was associated with worse prognosis and remained associated with mortality after adjustment for MELD-Na, whereas lower absolute LA strain values did not. Strain values in more severe ESLD appear highly sensitive to loading conditions and should be interpreted in the context of the hyperdynamic circulation; specific cut-offs for cirrhotic patients obtained with comparative invasive hemodynamic studies would improve their clinical utility. In contrast, LA dilation represents a marker of chronic cardiac structural change and diastolic dysfunction induced by cirrhosis physiopathology. Evolution of imaging techniques and recent changes in diastolic evaluation algorithms proposed for heart failure patients warrant further research in cirrhosis, and the LA stiffness index may represent a promising non-invasive tool, but its role in ESLD requires confirmation in larger, prospective, and ideally multicenter studies with invasive hemodynamic and outcome validation."
+    }
+   ]
+  },
+  {
+   "id": "ASE-DIAST-001",
+   "source": "ASE",
+   "title": "ASE recommendations for evaluation of left ventricular diastolic function by echocardiography",
+   "year": "2016",
+   "page_url": "https://www.asecho.org/guideline/recommendations-for-the-evaluation-of-left-ventricular-diastolic-function-by-echocardiography",
+   "pdf_url": "https://www.asecho.org/guideline/recommendations-for-the-evaluation-of-left-ventricular-diastolic-function-by-echocardiography",
+   "license": "ASE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_imaging",
+   "priority": "high",
+   "sha256": "c4a414a1dad309be111ccf0d47ad11394803892ffcb14baf31c9f7cde3bdc4c6",
+   "size_bytes": 2160,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2158,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Impact of 2025 ASE Update Recommendations for the Evaluation of Left Ventricular Diastolic Function in Patients With End-Stage Renal Disease. Left ventricular diastolic dysfunction (LVDD) is highly prevalent in end-stage renal disease (ESRD) but remains difficult to assess accurately. The 2025 American Society of Echocardiography (ASE) update has introduced left atrial reservoir strain (LARS) as a novel parameter for estimating left ventricular filling pressure. This retrospective study included 109 maintenance hemodialysis (HD) patients who underwent comprehensive echocardiography immediately before and after dialysis, yielding a total of 218 paired examinations for analysis. Left ventricular (LV) diastolic function was evaluated according to both the 2016 ASE/EACVI and 2025 ASE algorithms. Concordance and reclassification between the two algorithms were assessed using Cohen's κ coefficient. Hemodynamic and echocardiographic parameters were compared to characterize volume-related changes. Hemodialysis significantly reduced LV volumes, cardiac output, ratio of early diastolic mitral inflow velocity to mitral annular velocity (E/e' ratio), and pulmonary artery systolic pressure. These findings indicate effective preload reduction after HD, whereas GLS and LARS also decreased in parallel with the reduction in volume load. Using the 2016 criteria, 32% of patients were classified as indeterminate in the pre-HD cohort. Application of the 2025 ASE algorithm eliminated all indeterminate cases: 29 cases previously labeled as \"normal\" were reclassified as Grade 1 LVDD, and 47 indeterminate cases were reassigned to normal (n = 13), Grade 1 (n = 20), or Grade 2 (n = 14) LVDD. Overall concordance between the two systems was good (κ = 0.682, p < 0.001). Together, these reclassifications effectively reduced the rate of indeterminate classifications. The updated 2025 criteria demonstrated improved classification specificity and reduced diagnostic uncertainty compared with the 2016 guidelines, facilitating earlier categorization of diastolic dysfunction and addressing the major limitation of a high rate of indeterminate classifications."
+    }
+   ]
+  },
+  {
+   "id": "ASE-VALVE-001",
+   "source": "ASE",
+   "title": "ASE recommendations for noninvasive evaluation of native valvular regurgitation",
+   "year": "2017",
+   "page_url": "https://www.asecho.org/guideline/recommendations-noninvasive-evaluation-native-valvular-regurgitation",
+   "pdf_url": "https://www.asecho.org/guideline/recommendations-noninvasive-evaluation-native-valvular-regurgitation",
+   "license": "ASE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_imaging",
+   "priority": "high",
+   "sha256": "142955ea3fdf98eafa41636dac7786aca44aba7af72c043ab0ea53a777de4f54",
+   "size_bytes": 844,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 844,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASE recommendations for noninvasive evaluation of native valvular regurgitation Source: ASE Year: 2017 Domain: cardiology_imaging License: ASE Available at: https://www.asecho.org/guideline/recommendations-noninvasive-evaluation-native-valvular-regurgitation This is a citation reference for the ASE guideline 'ASE recommendations for noninvasive evaluation of native valvular regurgitation' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_imaging. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASE-CONTRAST-001",
+   "source": "ASE",
+   "title": "ASE guidelines for the use of echocardiographic contrast",
+   "year": "2018",
+   "page_url": "https://www.asecho.org/guideline/contrast-guidelines",
+   "pdf_url": "https://www.asecho.org/guideline/contrast-guidelines",
+   "license": "ASE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_imaging",
+   "priority": "medium",
+   "sha256": "732c8afa7627f7982092f0018419f5b63d5d9a0310434142a8c36238fd452c35",
+   "size_bytes": 2414,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2400,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Left Atrial Remodeling Parameters and Brain Natriuretic Peptide Levels in Nonvalvular Atrial Fibrillation. Left atrium (LA) remodeling, categorized by functional and structural variations, is predominant in heart failure with preserved ejection fraction (HFpEF) and atrial fibrillation (AF). Brain natriuretic peptide (BNP) levels, implying atrial strain, may lead management by indicating LA remodeling severity. This study was instructed to correlate BNP levels with LA volume index (LAVI) in HFpEF patients with nonvalvular AF against sinus rhythm (SR), to evaluate diagnostic implications. This two-center, observational, cross-sectional study (April 2023-October 2024) registered 340 patients with de novo HFpEF (140 AF, 200 SR). Patients with left ventricular ejection fraction (LVEF) less than 50 %, valvular disease, or acute conditions were excluded. BNP was measured using enzyme-linked immunosorbent assay and categorized as low (≤200 pg/mL), moderate-high (>200-400 pg/mL), or high (≥400 pg/mL). LAVI was calculated via echocardiography per American Society of Echocardiography (ASE) guidelines, categorized as normal (16-34 mL/m 2 ), mildly abnormal (35-41 mL/m 2 ), moderately abnormal (42-48 mL/m 2 ), or severely abnormal (more than or equal to 49 mL/m 2 ). Spearman correlation, multivariate regression, and subgroup analyses by gender, age, and comorbidities were used to assess the associations. AF patients had higher BNP (470 ± 280 vs. 400 ± 211 pg/mL, P = 0.013) and LAVI (60.4 ± 19.0 vs. 54.8 ± 22.0 mL/m 2 , P < 0.001). Paradoxically, AF patients with low BNP (≤200 pg/mL) showed higher LAVI (58 ± 22.0 vs. 54 ± 28.9 mL/m 2 , P < 0.001) and worse New York Heart Association (NYHA) class IV symptoms (48.6 % vs. 35.4 % in SR). A negative correlation between BNP and severely abnormal LAVI (≥49 mL/m 2 ) was observed in AF (r = -0.66, P < 0.0001), contrasting with a positive correlation in SR (r = 0.78, P = 0.001). BMI, eGFR, and severely abnormal LAVI were independent predictors (P = 0.004, 0.026, <0.001). Subgroup analyses showed no significant influence of age, gender, or comorbidities. In HFpEF, low BNP levels in AF patients are paradoxically associated with severe LA remodeling and worse symptoms, unlike in SR. BNP interpretation should integrate clinical, echocardiographic, and strain data, particularly in AF, high BMI, or kidney disease, to optimize management."
+    }
+   ]
+  },
+  {
+   "id": "ASE-FETAL-001",
+   "source": "ASE",
+   "title": "ASE guidelines for performance of the fetal echocardiogram",
+   "year": "2014",
+   "page_url": "https://www.asecho.org/guideline/fetal-echocardiogram-guidelines",
+   "pdf_url": "https://www.asecho.org/guideline/fetal-echocardiogram-guidelines",
+   "license": "ASE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_imaging",
+   "priority": "medium",
+   "sha256": "09ddccc890e83acd7d10b8f12a2746d3ad9b0c13fb83d3248316b92cb13e70a8",
+   "size_bytes": 765,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 765,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASE guidelines for performance of the fetal echocardiogram Source: ASE Year: 2014 Domain: cardiology_imaging License: ASE Available at: https://www.asecho.org/guideline/fetal-echocardiogram-guidelines This is a citation reference for the ASE guideline 'ASE guidelines for performance of the fetal echocardiogram' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_imaging. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASE-AS-001",
+   "source": "ASE",
+   "title": "ASE/EACVI recommendations on assessment of valvular regurgitation by echocardiography",
+   "year": "2017",
+   "page_url": "https://www.asecho.org/guideline/recommendations-noninvasive-evaluation-native-valvular-regurgitation",
+   "pdf_url": "https://www.asecho.org/guideline/recommendations-noninvasive-evaluation-native-valvular-regurgitation",
+   "license": "ASE EACVI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_imaging",
+   "priority": "high",
+   "sha256": "69bd4144378b989c2723882c1c186ade7b60841fd3c2a14db9ec8992e68ed15a",
+   "size_bytes": 862,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 862,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASE/EACVI recommendations on assessment of valvular regurgitation by echocardiography Source: ASE Year: 2017 Domain: cardiology_imaging License: ASE EACVI Available at: https://www.asecho.org/guideline/recommendations-noninvasive-evaluation-native-valvular-regurgitation This is a citation reference for the ASE guideline 'ASE/EACVI recommendations on assessment of valvular regurgitation by echocardiography' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_imaging. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASE-PROSTH-001",
+   "source": "ASE",
+   "title": "ASE recommendations for evaluation of prosthetic valves with echocardiography",
+   "year": "2009",
+   "page_url": "https://www.asecho.org/guideline/recommendations-evaluation-prosthetic-valves-echocardiography-doppler",
+   "pdf_url": "https://www.asecho.org/guideline/recommendations-evaluation-prosthetic-valves-echocardiography-doppler",
+   "license": "ASE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_imaging",
+   "priority": "medium",
+   "sha256": "cba89ba91d76a6a96f71e0ef046dae976d9b78ab8f8163f6f1abfaf30cd79561",
+   "size_bytes": 2368,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2368,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "18 F-FDG PET/CT and radiolabeled leukocyte SPECT/CT imaging for the evaluation of cardiovascular infection in the multimodality context: ASNC Imaging Indications (ASNC I 2 ) Series Expert Consensus Recommendations from ASNC, AATS, ACC, AHA, ASE, EANM, HRS, IDSA, SCCT, SNMMI, and STS. This document on cardiovascular infection, including infective endocarditis, is the first in the American Society of Nuclear Cardiology Imaging Indications (ASNC I 2 ) series to assess the role of radionuclide imaging in the multimodality context for the evaluation of complex systemic diseases with multi-societal involvement including pertinent disciplines. A rigorous modified Delphi approach was used to determine consensus clinical indications, diagnostic criteria, and an algorithmic approach to diagnosis of cardiovascular infection including infective endocarditis. Cardiovascular infection incidence is increasing and is associated with high morbidity and mortality. Current strategies based on clinical criteria and an initial echocardiographic imaging approach are effective but often insufficient in complicated cardiovascular infection. Radionuclide imaging with 18 F-fluorodeoxyglucose (FDG) positron emission tomography/computed tomography (CT) and single photon emission computed tomography/CT leukocyte scintigraphy can enhance the evaluation of suspected cardiovascular infection by increasing diagnostic accuracy, identifying extracardiac involvement, and assessing cardiac implanted device pockets, leads, and all portions of ventricular assist devices. This advanced imaging can aid in key medical and surgical considerations. Consensus diagnostic features include focal/multi-focal or diffuse heterogenous intense 18 F-FDG uptake on valvular and prosthetic material, perivalvular areas, device pockets and leads, and ventricular assist device hardware persisting on non-attenuation corrected images. There are numerous clinical indications with a larger role in prosthetic valves, and cardiac devices particularly with possible infective endocarditis or in the setting of prior equivocal or non-diagnostic imaging. Illustrative cases incorporating these consensus recommendations provide additional clarification. Future research is necessary to refine application of these advanced imaging tools for surgical planning, to identify treatment response, and more."
+    }
+   ]
+  },
+  {
+   "id": "ASE-ECHO-006",
+   "source": "ASE",
+   "title": "ASE recommendations multimodality echocardiographic imaging adult congenital heart disease",
+   "year": "2019",
+   "page_url": "https://www.asecho.org/guidelines-and-standards/",
+   "pdf_url": "https://www.asecho.org/guidelines-and-standards/",
+   "license": "ASE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_us_card",
+   "priority": "medium",
+   "sha256": "a7ab601863b898956c7a9130cbd015a57083af02c3d9d173d2bbd6e5487d5443",
+   "size_bytes": 811,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 811,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASE recommendations multimodality echocardiographic imaging adult congenital heart disease Source: ASE Year: 2019 Domain: radiology_us_card License: ASE Available at: https://www.asecho.org/guidelines-and-standards/ This is a citation reference for the ASE guideline 'ASE recommendations multimodality echocardiographic imaging adult congenital heart disease' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_us_card. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

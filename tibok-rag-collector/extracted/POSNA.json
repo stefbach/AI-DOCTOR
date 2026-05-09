@@ -1,7 +1,7 @@
 {
  "source": "POSNA",
  "generated_at": "2026-05-09T10:32:45Z",
- "total_documents": 1,
+ "total_documents": 5,
  "documents": [
   {
    "id": "POSNA-PEDFX-001",
@@ -45,6 +45,106 @@
     {
      "chunk_index": 5,
      "content": "has been advocated by some to help identify nerve entrapment and the extent of nerve injury. , , , , The small caliber and winding course of peripheral nerves in the upper extremity make evaluation particularly challenging in children. Imaging can be optimized by neurography techniques, using a 3-T scanner, and use of the smallest body coil that fits tightly around the area of interest. A fusiform neuroma of an intact nerve will demonstrate enlargement with intermediate T1 signal and higher T2 signal, along with a ring-like fascicular pattern on axial T2 images. Meanwhile, a nerve with partial or complete transection will show an entering nerve ending in bulbous enlargement. In addition to the nerve itself, resultant muscle denervation can be apparent after about 1 month with hyperintensity on T2 sequences acutely. After 12 months, chronic denervation will be apparent by fatty infiltration on T1 images. What these studies have in common and support is that if the course of the nerve is affected by the fracture, then that can be evaluated on MRI and will show deviation of the nerve and entrapment. One retrospective study found MRI to detect and prognostically classify upper extremity nerve lesions with associated fractures in 10 of 12 children. Practical considerations include the potential need for anesthesia to reduce motion artifact in younger children, as acquisition times range from 45-90 minutes. Most children over age 9 can tolerate a non-sedated study, with some as young as 5-7 able to have minimal motion artifact if the extremity is immobilized. Ultrasound Neuromuscular ultrasound (US) is relatively inexpensive, painless, avoids the need for sedation in a young child, is not limited by the presence of metal implants, and can aid in localization and diagnosis of traumatic nerve lesions in sonographically accessible regions of the upper limb. US can determine if the nerve is in continuity and identify transected ends as well as anatomic landmarks. US can identify a neuroma in continuity or neuroma at a transected end, and visualize compression of the nerve by bone, scarring, implants, or other structures. Neuromas-in-continuity can be evaluated with some accuracy for the lack of continuity of axons, endoneurium, and perineurium with intact epineurium, which give information regarding prognosis and surgical planning. US evaluation of an acute nerve transection can allow early, direct nerve repair, while US evaluation in the chronic setting can also allow localization of the contracted, transected ends as well as estimation of gap length to plan for graft length and type preoperatively. Quality of the images and interpretation is of course user-dependent and requires both an experienced and skilled US technologist as well as radiologist. Given the increased access of US in the operating room to allow anesthesiologists to safely perform peripheral nerve blocks, US could potentially be used intraoperatively to safely identify nerve entrapment or tethering that might prompt immediate nerve exploration/decompression at the time of surgical fixation ( ). Summary While nerve injuries occur not infrequently with pediatric upper extremity fractures, the level of comfort regarding management of the nerve injuries varies amongst pediatric orthopaedists, especially when the nerve injury does not show clinical signs of improvement within the first 4-6 weeks. Ultrasound and nerve MRI can help show structural entrapment and nerve continuity, while EDx are useful in determining return of nerve conduction, especially when used serially in the setting of lack of clinical improvement. It is the hope of the authors that this review article offers reassurance as well as guidance to our colleagues as when these patients should be referred to a colleague who specializes in pediatric hand/upper extremity. Disclaimer No funding was received. The authors have no conflicts of interest to report related to this manuscript."
+    }
+   ]
+  },
+  {
+   "id": "POSNA-SCFE-001",
+   "source": "POSNA",
+   "title": "POSNA care of the child with slipped capital femoral epiphysis",
+   "year": "2019",
+   "page_url": "https://posna.org/Education",
+   "pdf_url": "https://posna.org/Education",
+   "license": "POSNA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_pediatric",
+   "priority": "high",
+   "sha256": "496562f4b90666094d2291f3e53a4932bde805e1ddbec651e39541145e24f206",
+   "size_bytes": 748,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 748,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: POSNA care of the child with slipped capital femoral epiphysis Source: POSNA Year: 2019 Domain: orthopedics_pediatric License: POSNA Available at: https://posna.org/Education This is a citation reference for the POSNA guideline 'POSNA care of the child with slipped capital femoral epiphysis' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "POSNA-PERTHES-001",
+   "source": "POSNA",
+   "title": "POSNA Legg-Calve-Perthes disease care recommendations",
+   "year": "2020",
+   "page_url": "https://posna.org/Education",
+   "pdf_url": "https://posna.org/Education",
+   "license": "POSNA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_pediatric",
+   "priority": "high",
+   "sha256": "c7467e96de2aa03cfac76d73fc1a080973d96ac422d5d30db2a8d9f5aee106d3",
+   "size_bytes": 730,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 730,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: POSNA Legg-Calve-Perthes disease care recommendations Source: POSNA Year: 2020 Domain: orthopedics_pediatric License: POSNA Available at: https://posna.org/Education This is a citation reference for the POSNA guideline 'POSNA Legg-Calve-Perthes disease care recommendations' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "POSNA-CLUBFOOT-001",
+   "source": "POSNA",
+   "title": "POSNA Ponseti method for clubfoot treatment recommendations",
+   "year": "2020",
+   "page_url": "https://posna.org/Education",
+   "pdf_url": "https://posna.org/Education",
+   "license": "POSNA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_pediatric",
+   "priority": "high",
+   "sha256": "38aadbc524260d862d7877471425089ac1704a38b751d19b583d3ac5e5a66e49",
+   "size_bytes": 2333,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2333,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Management of Clubfoot Relapses With the Ponseti Method: Results of a Survey of the POSNA Members. Despite the high rate of initial success using the Ponseti method to manage idiopathic clubfoot deformity, relapse continues to be a problem. We surveyed the Pediatric Orthopedic Society of North America (POSNA) members about their experience with relapsed deformity following the initial correction of clubfeet. We created a survey to focus on the management of clubfeet after initial correction of deformity. The survey included questions on postcorrective bracing, clinical findings used to identify relapse, the observed frequency of relapsed deformity, and how relapses are managed. The questionnaire was approved by the POSNA Evidence Based Committee and was sent electronically to all POSNA members. We received responses from 321 members (26%). Of those, 94% were fellowship trained in pediatric orthopaedics. The Ponseti method was used by 98% of respondents. The Mitchell-Ponseti orthosis was most commonly used (51%), followed by the Denis-Browne brace (25%). The duration of bracing used varied among members with 23% recommending only 2 years, 33% recommending 3 years, and 34% recommending 4 years. A tight heel cord was felt to be the first sign of relapse by 59% of respondents, and dynamic supination by 30%. The rate of relapse was observed to be <10% by 22% of the respondents, 10% to 20% by 52%, and 20% to 40% by 25%. Manipulation and cast treatment alone (55%) and cast treatment with tenotomy (23%) were reported as the 2 most common initial treatment approaches for a relapsed deformity. Cast treatment to correct relapsed deformity before tibialis anterior tendon transfer was reported by 62% of respondents. Heel cord tenotomy (75%) and posterior capsular release (43%) were the 2 most common procedures used in addition to tibialis anterior tendon transfer for the treatment of clubfoot relapse. This study highlights the wide variation with which clubfoot relapses are evaluated and treated among the POSNA membership with differences in the recommended duration of bracing, identification of relapses, and their management. These wide differences highlight the need for future research and educational programs to inform and standardize the management of clubfoot using the Ponseti Method. Not applicable."
+    }
+   ]
+  },
+  {
+   "id": "POSNA-FOREARMFX-001",
+   "source": "POSNA",
+   "title": "POSNA pediatric forearm fracture management consensus",
+   "year": "2019",
+   "page_url": "https://posna.org/Education",
+   "pdf_url": "https://posna.org/Education",
+   "license": "POSNA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_pediatric",
+   "priority": "medium",
+   "sha256": "ab25251fa26e2a9e94ba1b7d330308f4f205f19531ad6ebac24bc5dde8b08f18",
+   "size_bytes": 730,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 730,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: POSNA pediatric forearm fracture management consensus Source: POSNA Year: 2019 Domain: orthopedics_pediatric License: POSNA Available at: https://posna.org/Education This is a citation reference for the POSNA guideline 'POSNA pediatric forearm fracture management consensus' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

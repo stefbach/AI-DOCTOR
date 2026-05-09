@@ -1,7 +1,7 @@
 {
  "source": "ATA",
  "generated_at": "2026-05-02T17:10:13Z",
- "total_documents": 25,
+ "total_documents": 38,
  "documents": [
   {
    "id": "ATA-001",
@@ -1225,6 +1225,331 @@
     {
      "chunk_index": 8,
      "content": "Telemedicine is often credited with increasing access to care for patients and reducing health disparities and inequities [ ]. However, with the rise in telemedicine research during the pandemic, inequities and disparities in health became more apparent [ - ]. In our literature search, we found 32 articles that highlighted the need to consider accessibility in various forms—such as the need for interpreters, providers who can communicate in multiple languages, patients requiring the appropriate equipment for successful care, and the need for a distraction-free space [ , , , , , , , ]. Of these 32 articles, 19 focused on sociocultural considerations. For example, Comer [ ] noted that providers need expanded sociocultural training, as “telehealth offers new opportunities to treat individuals in underserved communities.” When providers are unable to adequately meet their patients’ needs, a barrier is created—one that is often most acutely felt by underserved populations [ ]. Zhu et al [ ] described a revealing need centered on increasing accessibility: “A report published by the Rural Policy Research Institute outlined a need for research to understand the acceptability for long-term TMH service use among rural adults, especially those who are older or racially/ethnically diverse. This also includes studying how to adapt evidence-based treatments to a cultural context and video-based platform.” Once again, the need for more research to determine best practices—especially when considering care inequities and health disparities in telemedicine—is critical. Looi et al [ ] also highlighted this vital consideration: “Sensitivity to cultural, health and socioeconomic disparities is also needed to avoid inequities in access.” Not only is sociocultural and socioeconomic consideration necessary in telemedicine implementation, but it should also be integrated into all aspects of the telemedicine visit. This includes providers’ understanding of whether a certain treatment or assessment may be less effective due to cultural factors or obstacles [ ]. As telemedicine has become more widely used, new research at larger scales will provide a better understanding of how to effectively increase access to care without exacerbating care inequities and health disparities. With only 19 out of 76 (25%) articles discussing sociocultural and socioeconomic factors in telemedicine implementation, there is a clear need for further research to address this gap in the literature. Limitations This scoping review aimed to provide a snapshot of the guidelines and recommendations produced for providers between 2020 and 2024. Future research could determine whether these themes were addressed through a larger, comprehensive systematic literature review. We intended was to identify what providers could easily find and access within peer-reviewed biomedical databases. As a result, our review is limited to guidelines published between 2020 and 2024. Because of the large number of results from our general search strategy, we conducted a title-and-abstract screening. Outside of the exclusion and inclusion criteria, we did not validate the resulting articles. Future research, particularly systematic reviews, should consider the types of guidelines available for providers; the types of assessments, guidelines, checklists, and techniques that are validated for TMH care; changes in the guidelines over time, especially beyond our restricted 2-year review; and evidence of the sustainable and successful implementation of TMH care in practice. Conclusions This scoping review of 76 articles characterizes the TMH guidelines published between 2020 and 2024 and identifies key, shared recommendations to support the implementation and success of TMH care. We applied systematic qualitative analyses to better understand the most frequently noted themes in the resulting peer-reviewed literature and how they contribute to successful TMH care. This methodology also helped identify how key themes are interconnected and build upon each other. Research at larger scales is essential to develop effective guidelines and protocols for successful therapy plans and to ensure that telemedicine does not exacerbate health inequities. Future research should examine how TMH guidelines have adapted and changed in response to provider and patient needs, how these guidelines address accessibility and inequities, and how they account for regional and international variations."
+    }
+   ]
+  },
+  {
+   "id": "ATA-THYROID-002",
+   "source": "ATA",
+   "title": "ATA Guidelines for the Management of Medullary Thyroid Carcinoma",
+   "year": "2015",
+   "page_url": "https://www.liebertpub.com/doi/10.1089/thy.2014.0335",
+   "pdf_url": "https://www.liebertpub.com/doi/10.1089/thy.2014.0335",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrine_surgery_thyroid",
+   "priority": "high",
+   "sha256": "ab5e8bde6c2d84779ad69785d8a90d443e1ec9d35d82fe7f348336554c85c0d9",
+   "size_bytes": 1927,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1927,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Thyroidectomy without lymph node dissection should be considered for stage T1 medullary thyroid carcinoma: a population-based cohort study. The necessity and therapeutic value of lymph node dissection (LND) in early stage T1 MTC patients remain controversial. Patients with T1MTC were identified from the Surveillance, Epidemiology, and End Results (SEER) database. Poisson regression analysis was utilized to investigate promotive factors for lymph node metastasis in T1MTC patients. Fisher's exact test was employed to calculate baseline differences between non-LND and LND groups. Propensity score match (PSM) was used to control baseline bias. Survival outcomes were calculated by Kaplan-Meier method and log-rank test. Multivariable Cox regression assessed the prognostic impact of LND across subgroups. Of 3298 MTC cases, 50.4% were T1MTC. The lymph node metastasis rate increased along with the T stage (from 22.2% to 90.5%). Among 1231 T1MTC patients included after exclusion criteria, 72.0% underwent LND and 22.0% had lymph node metastasis. Patients aged younger than 44 years (RR=1.700, p<0.001), male (RR=1.832, p<0.001), and with tumor larger than 10mm (RR=2.361, p<0.001) were more likely to have lymph node metastasis, while elderly patients (p<0.001) and those with microcarcinoma (p<0.001) were more likely to undergo non-LND procedures. LND provided no OS or DSS benefit over non-LND before and after propensity score match (matched 10-year OS/DSS: LND 83.8/96.2% vs non-LND 81.9/99.3%, p>0.05). Subgroup analyses revealed no prognostic gain with LND in any subgroup (p>0.05). Nearly half of MTC patients were diagnosed at T1 stage and had low lymph node risk. Different from ATA guidelines, avoiding routine LND conferred similar prognosis to standard procedures while potentially improving quality of life. Large-scale prospective multi-center studies should be conducted to further validate these findings."
+    }
+   ]
+  },
+  {
+   "id": "ATA-THYROID-003",
+   "source": "ATA",
+   "title": "ATA Guidelines for Management of Pediatric Thyroid Nodules and Differentiated Thyroid Cancer",
+   "year": "2015",
+   "page_url": "https://www.liebertpub.com/doi/10.1089/thy.2014.0460",
+   "pdf_url": "https://www.liebertpub.com/doi/10.1089/thy.2014.0460",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrine_surgery_thyroid",
+   "priority": "high",
+   "sha256": "6b59a2f369fb97c51c68d5d445f51c8f103c6f9f0d3dd786c4cea574c48e94b8",
+   "size_bytes": 1993,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1993,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Multicenter Retrospective Analysis of Pediatric Differentiated Thyroid Carcinoma: Treatment Practices and Outcomes Prior to Pediatric American Thyroid Association Guidelines Implementation. Differentiated thyroid carcinoma (DTC) is the most common pediatric thyroid malignancy, with papillary thyroid carcinoma (PTC) representing 90% of the cases. In 2015, the American Thyroid Association (ATA) developed management guidelines for pediatric DTC. Patients less than 21 years of age diagnosed with DTC between 2000 and 2015 at Texas Children's Hospital, Seattle Children's Hospital, Children's Healthcare of Atlanta, Children's Hospital Colorado, and Nationwide Children's Hospital were retrospectively analyzed to evaluate treatment practices before the implementation of the ATA guidelines. We included 216 pediatric patients with DTC. A majority were female (76%) with a median age at diagnosis of 14.8 years. Neck swelling (56%) and palpable nodules (49%) were common presenting symptoms. Diagnostic evaluations typically included thyroid ultrasound, with common features being microcalcifications (47.7%) and hypoechogenicity (39.0%). Fine-needle aspiration cytology confirmed diagnosis in 50.5%. The majority of patients underwent total thyroidectomy (78.7%) and lymph node dissection (75.5%). ATA risk stratification was low, intermediate, and high risk in 111 (51.4%), 29 (13.4%), and 76 patients (35.2%), respectively. Upfront radioactive iodine (RAI) was administered in 83%. At 1-year follow-up, 46% were disease-free (66% low risk, 59% intermediate risk, and 13% high risk). The 5-year progression-free survival for low, intermediate, and high risk were 86%, 53%, and 43%, respectively. The disease-related overall survival was 100%. Prior to the introduction of the ATA guidelines, a majority of patients underwent total thyroidectomy with lymph node dissection followed by RAI. Selective use of RAI for low-risk disease as recommended in the current guidelines may be appropriate."
+    }
+   ]
+  },
+  {
+   "id": "ATA-THYROID-004",
+   "source": "ATA",
+   "title": "ATA Guidelines for Management of Anaplastic Thyroid Cancer",
+   "year": "2021",
+   "page_url": "https://www.liebertpub.com/doi/10.1089/thy.2020.0944",
+   "pdf_url": "https://www.liebertpub.com/doi/10.1089/thy.2020.0944",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrine_surgery_thyroid",
+   "priority": "high",
+   "sha256": "37da83d945ea93a78965cd863bcedc3fc79806c8e23c76bba90e69ba5a3ec195",
+   "size_bytes": 2256,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2250,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Age, not tumor size, modifies the association between extrathyroidal extension and long-term outcomes in patients with follicular cell-derived thyroid carcinoma. Follicular cell-derived thyroid carcinomas (FCTC) are common, with stable mortality rates but significant recurrence risks. Extrathyroidal extension (ETE) affects recurrence risk and staging. The 8th edition of the AJCC/TNM classification excludes microscopic ETE from upstaging but considers gross ETE a significant factor in older patients. This study examines clinical outcomes and disease-free survival (DFS) in FCTC patients with and without ETE, evaluating the modifying effects of age and tumor size on incomplete response risk. A single-center retrospective chart review was conducted at King Abdulaziz University Hospital, Jeddah, Saudi Arabia. King Abdulaziz University Hospital. Patients aged ≥13 years diagnosed from January 2017 to December 2021 with long-term follow-up (≥18 months) were included. Medullary and anaplastic thyroid cancers were excluded. Data on demographics, tumor characteristics, risk stratification, and clinical outcomes were collected. Response to therapy was categorized per the 2015 ATA guidelines. Chi-square and Multivariable analysis assessed interactions between age, tumor size, and ETE in predicting incomplete response. Kaplan-Meier curves visualized survival differences. Identifying the interactions between age and tumor size with ETE to predict the risk of incomplete response to therapy among patients with FCTC. 255 patients. The median follow-up duration was 4 years. Patients with ETE were present in (n=38) 15.7% (8% microscopic, 7% gross). Older patients (≥55 years) with ETE had 26.47-fold higher odds of incomplete response than younger patients. Tumor size independently predicted incomplete response, but its interaction with ETE was not significant. Patients with ETE had a significantly higher incomplete response rate (58% vs. 17%, P =.0001). Older patients with ETE face a markedly higher risk of incomplete response. Tumor size is an independent risk factor in those patients. Management should be stratified by age, advocating more aggressive management for older patients with ETE. Retrospective, and single-center design."
+    }
+   ]
+  },
+  {
+   "id": "ATA-MEN2-001",
+   "source": "ATA",
+   "title": "ATA Guidelines for Management of Medullary Thyroid Carcinoma in MEN2",
+   "year": "2015",
+   "page_url": "https://www.liebertpub.com/doi/10.1089/thy.2014.0335",
+   "pdf_url": "https://www.liebertpub.com/doi/10.1089/thy.2014.0335",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrine_surgery_thyroid",
+   "priority": "high",
+   "sha256": "b9da4ebee0155f30b26f5542b82c0d8bc20c404d408948cbca52596f2f23abfe",
+   "size_bytes": 787,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 787,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATA Guidelines for Management of Medullary Thyroid Carcinoma in MEN2 Source: ATA Year: 2015 Domain: endocrine_surgery_thyroid License: ATA Available at: https://www.liebertpub.com/doi/10.1089/thy.2014.0335 This is a citation reference for the ATA guideline 'ATA Guidelines for Management of Medullary Thyroid Carcinoma in MEN2' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrine_surgery_thyroid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATA-PREG-CANCER-001",
+   "source": "ATA",
+   "title": "ATA Clinical Statement on Differentiated Thyroid Cancer in Pregnancy Surgical Considerations",
+   "year": "2017",
+   "page_url": "https://www.liebertpub.com/doi/10.1089/thy.2016.0457",
+   "pdf_url": "https://www.liebertpub.com/doi/10.1089/thy.2016.0457",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrine_surgery_thyroid",
+   "priority": "medium",
+   "sha256": "fd997a521faa97ab1807c9d6570d20d46afb34120709ded22a48ec6d3ac48ce9",
+   "size_bytes": 835,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 835,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATA Clinical Statement on Differentiated Thyroid Cancer in Pregnancy Surgical Considerations Source: ATA Year: 2017 Domain: endocrine_surgery_thyroid License: ATA Available at: https://www.liebertpub.com/doi/10.1089/thy.2016.0457 This is a citation reference for the ATA guideline 'ATA Clinical Statement on Differentiated Thyroid Cancer in Pregnancy Surgical Considerations' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrine_surgery_thyroid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATA-RAI-001",
+   "source": "ATA",
+   "title": "ATA Joint Statement on Optimal Use of Radioiodine in Differentiated Thyroid Cancer",
+   "year": "2018",
+   "page_url": "https://www.liebertpub.com/doi/10.1089/thy.2018.0597",
+   "pdf_url": "https://www.liebertpub.com/doi/10.1089/thy.2018.0597",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrine_surgery_thyroid",
+   "priority": "medium",
+   "sha256": "ff148305c024c7d4498a318f73de52eff9a64228d0646e3c2409cda8abee3907",
+   "size_bytes": 1617,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1617,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:51Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Evolving Paradigm in Radioactive Iodine Therapy for Differentiated Thyroid Cancer: Historical Perspectives, Current Practices and Future Directions. Therapy with radioactive iodine (I-131) following a total thyroidectomy has been a gold standard in the treatment of differentiated thyroid cancer (DTC) for over 80 years. Over the years, its role has shifted from routine use to a more selective, risk-adapted approach, informed by tumor biology, patient risk stratification and evolving clinical guidelines. This review examines the changing landscape of I-131 therapy, tracing its historical foundations, current indications, and future directions shaped by molecular medicine. We discuss the transition from a standardized, one-size-fits-all treatment approach to an individualized, dynamic stratification model that allows for ongoing risk reassessment and tailored treatment strategies. Key updates in clinical practice, such as the 2015 ATA Guidelines, the 2022 ETA Consensus Statement, and joint SNMMI and EANM nuclear medicine recommendations, are critically examined. We also address ongoing controversies in the management of low- and intermediate-risk patients, including the roles of I-131 whole-body scanning, activity selection, and overall treatment approach. Molecular theranostics is ushering in a new era in DTC management, enabling improved patient selection and more precise treatment. Advances in molecular profiling, imaging, and targeted therapies support a personalized treatment approach that aims to optimize therapeutic decisions while minimizing side effects and enhancing long-term safety."
+    }
+   ]
+  },
+  {
+   "id": "ATA-TIRADS-001",
+   "source": "ATA",
+   "title": "ATA management guidelines for adult patients with thyroid nodules and DTC",
+   "year": "2015",
+   "page_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "pdf_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_us_thyroid",
+   "priority": "high",
+   "sha256": "c7b715918ad1dddbf20c67bcab831f6f6231f6fb3eb1a4ee96a40322ed59dbf2",
+   "size_bytes": 1233,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1233,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "What Has Changed in the 2025 American Thyroid Association Management Guidelines for Adult Patients with Differentiated Thyroid Cancer? Part 2: Postoperative Initial Treatment. American Thyroid Association (ATA) guidelines for the management of thyroid nodules and differentiated thyroid cancer (DTC) were first published in 1996 and subsequently updated in 2006, 2009, and 2015. In 2025, the ATA released a revised version focusing exclusively on DTC and excluding thyroid nodules from its scope. In our previous review, we summarized the updates regarding preoperative evaluation, diagnosis, and surgical management of DTC. In this second part of the series, we aimed to compare the 2015 and 2025 ATA guidelines in terms of initial postoperative management. The main changes are evaluated at the level of recommendations, with a particular emphasis on recurrence risk stratification, postoperative risk-adapted surveillance, adjuvant radioactive iodine (RAI) use, postoperative imaging, and radiation safety. This review provides a comprehensive comparison of the 2015 and 2025 ATA guidelines, outlining the key changes in early postoperative management of DTC and highlighting their potential impact on individualized patient care."
+    }
+   ]
+  },
+  {
+   "id": "ATA-PED-001",
+   "source": "ATA",
+   "title": "ATA guidelines for management of thyroid nodules and differentiated thyroid cancer in children",
+   "year": "2015",
+   "page_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "pdf_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_pediatric",
+   "priority": "high",
+   "sha256": "6b59a2f369fb97c51c68d5d445f51c8f103c6f9f0d3dd786c4cea574c48e94b8",
+   "size_bytes": 1993,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1993,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:54Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Multicenter Retrospective Analysis of Pediatric Differentiated Thyroid Carcinoma: Treatment Practices and Outcomes Prior to Pediatric American Thyroid Association Guidelines Implementation. Differentiated thyroid carcinoma (DTC) is the most common pediatric thyroid malignancy, with papillary thyroid carcinoma (PTC) representing 90% of the cases. In 2015, the American Thyroid Association (ATA) developed management guidelines for pediatric DTC. Patients less than 21 years of age diagnosed with DTC between 2000 and 2015 at Texas Children's Hospital, Seattle Children's Hospital, Children's Healthcare of Atlanta, Children's Hospital Colorado, and Nationwide Children's Hospital were retrospectively analyzed to evaluate treatment practices before the implementation of the ATA guidelines. We included 216 pediatric patients with DTC. A majority were female (76%) with a median age at diagnosis of 14.8 years. Neck swelling (56%) and palpable nodules (49%) were common presenting symptoms. Diagnostic evaluations typically included thyroid ultrasound, with common features being microcalcifications (47.7%) and hypoechogenicity (39.0%). Fine-needle aspiration cytology confirmed diagnosis in 50.5%. The majority of patients underwent total thyroidectomy (78.7%) and lymph node dissection (75.5%). ATA risk stratification was low, intermediate, and high risk in 111 (51.4%), 29 (13.4%), and 76 patients (35.2%), respectively. Upfront radioactive iodine (RAI) was administered in 83%. At 1-year follow-up, 46% were disease-free (66% low risk, 59% intermediate risk, and 13% high risk). The 5-year progression-free survival for low, intermediate, and high risk were 86%, 53%, and 43%, respectively. The disease-related overall survival was 100%. Prior to the introduction of the ATA guidelines, a majority of patients underwent total thyroidectomy with lymph node dissection followed by RAI. Selective use of RAI for low-risk disease as recommended in the current guidelines may be appropriate."
+    }
+   ]
+  },
+  {
+   "id": "ATA-STORM-001",
+   "source": "ATA",
+   "title": "ATA management of thyroid storm consensus",
+   "year": "2016",
+   "page_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "pdf_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_thyroid",
+   "priority": "high",
+   "sha256": "8e1d1ede837b03072abc2b48ef843eafb24abac3dc79acf14eaab7efd414a1d8",
+   "size_bytes": 739,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 739,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATA management of thyroid storm consensus Source: ATA Year: 2016 Domain: endocrinology_thyroid License: ATA Available at: https://www.thyroid.org/professionals/ata-professional-guidelines/ This is a citation reference for the ATA guideline 'ATA management of thyroid storm consensus' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_thyroid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATA-MYXEDEMA-001",
+   "source": "ATA",
+   "title": "ATA myxedema coma management",
+   "year": "2014",
+   "page_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "pdf_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_thyroid",
+   "priority": "high",
+   "sha256": "e5688756b7499ce3d441b79230b725b90606a0dc8acd7513142c5572bbe9e4e0",
+   "size_bytes": 713,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 713,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:56Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATA myxedema coma management Source: ATA Year: 2014 Domain: endocrinology_thyroid License: ATA Available at: https://www.thyroid.org/professionals/ata-professional-guidelines/ This is a citation reference for the ATA guideline 'ATA myxedema coma management' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_thyroid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATA-PPT-001",
+   "source": "ATA",
+   "title": "ATA postpartum thyroiditis statement within thyroid pregnancy guideline",
+   "year": "2017",
+   "page_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "pdf_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_thyroid",
+   "priority": "medium",
+   "sha256": "e899af284af5bf9692e911eeb910695309bb328ab2cde3d17aeb32d7cfd1a197",
+   "size_bytes": 799,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 799,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATA postpartum thyroiditis statement within thyroid pregnancy guideline Source: ATA Year: 2017 Domain: endocrinology_thyroid License: ATA Available at: https://www.thyroid.org/professionals/ata-professional-guidelines/ This is a citation reference for the ATA guideline 'ATA postpartum thyroiditis statement within thyroid pregnancy guideline' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_thyroid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATA-PEDHYPER-001",
+   "source": "ATA",
+   "title": "ATA management of hyperthyroidism in pediatric population guidelines",
+   "year": "2024",
+   "page_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "pdf_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_pediatric",
+   "priority": "medium",
+   "sha256": "0a211d3b8f2f8655345d14d0d96d372c2e870ab1b31e20a561b0541c4633c7b4",
+   "size_bytes": 797,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 797,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:59Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATA management of hyperthyroidism in pediatric population guidelines Source: ATA Year: 2024 Domain: endocrinology_pediatric License: ATA Available at: https://www.thyroid.org/professionals/ata-professional-guidelines/ This is a citation reference for the ATA guideline 'ATA management of hyperthyroidism in pediatric population guidelines' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATA-DRUG-THY-001",
+   "source": "ATA",
+   "title": "ATA position statement on drug-induced thyroid dysfunction",
+   "year": "2020",
+   "page_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "pdf_url": "https://www.thyroid.org/professionals/ata-professional-guidelines/",
+   "license": "ATA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_thyroid",
+   "priority": "medium",
+   "sha256": "01a5bb3da3a532b116b5851e9880b36fdf82324357d58535e0fd119b54bbe887",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:01Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATA position statement on drug-induced thyroid dysfunction Source: ATA Year: 2020 Domain: endocrinology_thyroid License: ATA Available at: https://www.thyroid.org/professionals/ata-professional-guidelines/ This is a citation reference for the ATA guideline 'ATA position statement on drug-induced thyroid dysfunction' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_thyroid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

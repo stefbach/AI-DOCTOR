@@ -1,7 +1,7 @@
 {
  "source": "BJSM",
  "generated_at": "2026-05-09T16:43:10Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "BJSM-RTP-001",
@@ -53,6 +53,31 @@
     {
      "chunk_index": 7,
      "content": "The time frame is determined by the extent of tissue injury and healing, a process influenced by complex multiple variables. Although no standardized recovery criteria were reported in the literature, a new definition of the RTS process was proposed in this study. 4.5. Limitation The process of LAS to RTS is a long-term and complex process. This complexity has led to a substantial volume of research, yet the content is relatively fragmented. Therefore, there are limited studies that meet the screening criteria of this study. This scarcity might introduce inaccuracies in the results, as a small sample size of relevant studies may not comprehensively represent the full spectrum of the LAS to RTS process. Moreover, due to the paucity of studies, observational research designs were incorporated into this review. Observational studies are highly susceptible to confounding factors. These factors can distort the relationship between variables of interest, such as the factors influencing the transition from LAS to RTS. As a result, the data extracted from these observational studies may not be comprehensive, which potentially led to misinterpretations of the true nature of the LAS to RTS process. Further limitations in this review article shall be noted considering the multiple factors in the RTS process, which may be direct evidence and expected criteria. Currently, no consensus on evaluation and metrics measurement for LAS patients, RTS decisions, or post-RTS deficits were reported. Therefore, following a comprehensive literature search, this review article provided a thorough discussion and summary of the rehabilitation approaches and timeline for the process of LAS to post-RTS and summarized a standardized procedural paradigm for the rehabilitation care of RTS with different LAS degrees. However, the physiological environment and individual motor capacities may lead to uncertainties for the RTS time and strategy. Thus, no unified paradigm standard, especially for a process entirely of uncertainties, could be found and summarized from the current literature. However, an “all-suit” model shall be focused. The current study established dynamic paradigms and identified the point of balance with retained mobility and RTS. Therefore, in future studies, the rehabilitation treatment measures, decision-making, and defects of the RTS of the LAS from the experimental, clinical, and theoretical fields shall be investigated via the dynamic paradigm system of RTS with the inclusion of new variables and linear relations. 5. Conclusion In the current literature, no studies have identified the application of a standard paradigm for rehabilitation care for RTS of LAS. Therefore, we summarized and discussed the time for LAS to RTS, the rehabilitation plan, outcome indicators, and the assessment of return to performance after decision-making. Based on the time from LAS to RTS, we divided into three processes, recovery participation, recovery performance, and RTS. However, there were no standardized outcome metrics for each process. Therefore, future studies should explore RTS following LAS in relation to various facets and areas of rehabilitation treatment measures, decisions, and shortcomings. Supplementary Material 6_PRISMA_2020_checklist.docx"
+    }
+   ]
+  },
+  {
+   "id": "BJSM-OVERTRAIN-001",
+   "source": "BJSM",
+   "title": "Joint Consensus on Unexplained Underperformance Syndrome Overtraining",
+   "year": "2013",
+   "page_url": "https://bjsm.bmj.com/",
+   "pdf_url": "https://bjsm.bmj.com/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_exercise_rx",
+   "priority": "medium",
+   "sha256": "81e4d3f2f91f4d9582f4987d58f856c306619ab19e03ade421fb2cee2d5b0731",
+   "size_bytes": 754,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 754,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Joint Consensus on Unexplained Underperformance Syndrome Overtraining Source: BJSM Year: 2013 Domain: sports_exercise_rx License: Proprietary Available at: https://bjsm.bmj.com/ This is a citation reference for the BJSM guideline 'Joint Consensus on Unexplained Underperformance Syndrome Overtraining' published in 2013. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_exercise_rx. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

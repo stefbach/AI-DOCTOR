@@ -1,7 +1,7 @@
 {
  "source": "NACB",
  "generated_at": "2026-05-09T09:34:28Z",
- "total_documents": 3,
+ "total_documents": 6,
  "documents": [
   {
    "id": "NACB-THYROID-001",
@@ -179,6 +179,81 @@
     {
      "chunk_index": 17,
      "content": ", X ® CL cTnI , X ® CL ( + ) Ctrl , X ® CL ( − ) Ctrl ]). In each subsequent iteration, one feature was systematically removed from the current best-performing subset, and the models were evaluated on training datasets. The subsets achieving the highest accuracy (for classification models) or the lowest MSE/RMSLE loss (for quantification models) were carried forward to the next round. This process was repeated until subsets with a single feature remained. The optimal set of features for each model was determined based on the subset that achieved the highest overall performance. The final optimal feature sets for all models are summarized in Table , while Fig. presents a detailed comparison of model performance across test feature sets with different condition numbers during the feature selection process. Statistical analysis For spiking experiments involving CK-MB, NT-proBNP, and cTnI, results were reported as mean ± SD from at least three independent replicates. Clinical sample measurements were reported as the mean of two replicates ± SD. The number of replicates for each experiment is specified in the corresponding figure captions. For comparing the groups, we used an unpaired two-sample t -test, with statistical significance set at P < 0.05. The CV was calculated as the SD divided by the mean, expressed as a percentage. For cTnI, ground truth values obtained from UCLA Health using the hs-cTnI analyzer were directly used. For CK-MB and NT-proBNP, duplicate measurements were performed using a Luminex-based immunoassay and an ELISA, respectively, and the average values were adopted as the ground truth concentrations. Across all clinical samples, the validation assays showed mean CVs of 6.1% for CK-MB and 10.2% for NT-proBNP. Supplementary information Supplementary Information"
+    }
+   ]
+  },
+  {
+   "id": "NACB-TUMOR-001",
+   "source": "NACB",
+   "title": "NACB laboratory medicine practice guidelines tumor markers",
+   "year": "2008",
+   "page_url": "https://academic.oup.com/clinchem/article/54/12/e11/5630232",
+   "pdf_url": "https://academic.oup.com/clinchem/article/54/12/e11/5630232",
+   "license": "NACB",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_tumor_markers",
+   "priority": "high",
+   "sha256": "244e130b2296b7b7261ae47a80a4bec416aab7f86f60e15a07e54657a6ad60b1",
+   "size_bytes": 2290,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2290,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "National Academy of Clinical Biochemistry laboratory medicine practice guidelines for use of tumor markers in testicular, prostate, colorectal, breast, and ovarian cancers. Updated National Academy of Clinical Biochemistry (NACB) Laboratory Medicine Practice Guidelines for the use of tumor markers in the clinic have been developed. Published reports relevant to use of tumor markers for 5 cancer sites--testicular, prostate, colorectal, breast, and ovarian--were critically reviewed. For testicular cancer, alpha-fetoprotein, human chorionic gonadotropin, and lactate dehydrogenase are recommended for diagnosis/case finding, staging, prognosis determination, recurrence detection, and therapy monitoring. alpha-Fetoprotein is also recommended for differential diagnosis of nonseminomatous and seminomatous germ cell tumors. Prostate-specific antigen (PSA) is not recommended for prostate cancer screening, but may be used for detecting disease recurrence and monitoring therapy. Free PSA measurement data are useful for distinguishing malignant from benign prostatic disease when total PSA is <10 microg/L. In colorectal cancer, carcinoembryonic antigen is recommended (with some caveats) for prognosis determination, postoperative surveillance, and therapy monitoring in advanced disease. Fecal occult blood testing may be used for screening asymptomatic adults 50 years or older. For breast cancer, estrogen and progesterone receptors are mandatory for predicting response to hormone therapy, human epidermal growth factor receptor-2 measurement is mandatory for predicting response to trastuzumab, and urokinase plasminogen activator/plasminogen activator inhibitor 1 may be used for determining prognosis in lymph node-negative patients. CA15-3/BR27-29 or carcinoembryonic antigen may be used for therapy monitoring in advanced disease. CA125 is recommended (with transvaginal ultrasound) for early detection of ovarian cancer in women at high risk for this disease. CA125 is also recommended for differential diagnosis of suspicious pelvic masses in postmenopausal women, as well as for detection of recurrence, monitoring of therapy, and determination of prognosis in women with ovarian cancer. Implementation of these recommendations should encourage optimal use of tumor markers."
+    }
+   ]
+  },
+  {
+   "id": "NACB-HCG-001",
+   "source": "NACB",
+   "title": "NACB practice guidelines hCG testing pregnancy malignancy",
+   "year": "2008",
+   "page_url": "https://academic.oup.com/clinchem/article/54/12/e11/5630232",
+   "pdf_url": "https://academic.oup.com/clinchem/article/54/12/e11/5630232",
+   "license": "NACB",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_tumor_markers",
+   "priority": "medium",
+   "sha256": "04a1a713e17947fb9ae0a202bc5af79c9a5be8c7cd4040c0fffd0cb63667c959",
+   "size_bytes": 759,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 759,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NACB practice guidelines hCG testing pregnancy malignancy Source: NACB Year: 2008 Domain: lab_tumor_markers License: NACB Available at: https://academic.oup.com/clinchem/article/54/12/e11/5630232 This is a citation reference for the NACB guideline 'NACB practice guidelines hCG testing pregnancy malignancy' published in 2008. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_tumor_markers. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "NACB-HCG-002",
+   "source": "NACB",
+   "title": "NACB practice guidelines pregnancy hCG quantitative interpretation",
+   "year": "2010",
+   "page_url": "https://academic.oup.com/clinchem/article/56/12/e36/5621305",
+   "pdf_url": "https://academic.oup.com/clinchem/article/56/12/e36/5621305",
+   "license": "NACB",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_tumor_markers",
+   "priority": "medium",
+   "sha256": "888393a4a142416e3f17bcbfc1a1405de66a659798b982ff0c3fd56b58424eac",
+   "size_bytes": 777,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 777,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NACB practice guidelines pregnancy hCG quantitative interpretation Source: NACB Year: 2010 Domain: lab_tumor_markers License: NACB Available at: https://academic.oup.com/clinchem/article/56/12/e36/5621305 This is a citation reference for the NACB guideline 'NACB practice guidelines pregnancy hCG quantitative interpretation' published in 2010. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_tumor_markers. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

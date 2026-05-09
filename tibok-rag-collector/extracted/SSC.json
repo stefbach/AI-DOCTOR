@@ -1,7 +1,7 @@
 {
  "source": "SSC",
  "generated_at": "2026-05-09T09:39:58Z",
- "total_documents": 6,
+ "total_documents": 7,
  "documents": [
   {
    "id": "SSC-LACTATE-001",
@@ -322,6 +322,31 @@
     {
      "chunk_index": 11,
      "content": "response and defense against pathogen invasion. MAIT cells are capable of swiftly recognizing and eliminating infected cells and pathogens, thereby curtailing the further dissemination of infection. In the context of sepsis, peripheral blood MAIT cells can modulate the inflammatory response through various mechanisms, such as functional activation and cytokine secretion, thereby ultimately mitigating additional hepatic damage. Although the role of MAIT cells in SRLI has been elucidated, future studies are needed to investigate the specific mechanisms underlying their actions in this condition. Additional investigation is also required to explore how modulation of MAIT cell function could potentially enhance therapeutic outcomes for sepsis-associated liver injury."
+    }
+   ]
+  },
+  {
+   "id": "SSC-PCT-001",
+   "source": "SSC",
+   "title": "Surviving Sepsis Campaign procalcitonin antimicrobial stewardship",
+   "year": "2021",
+   "page_url": "https://www.sccm.org/SurvivingSepsisCampaign/Guidelines",
+   "pdf_url": "https://www.sccm.org/SurvivingSepsisCampaign/Guidelines",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_inflammation",
+   "priority": "high",
+   "sha256": "5d0e155445b3c3a86ce5f7027ab02d9fc9b30f1f75d102b9dc7b512d648bfd20",
+   "size_bytes": 767,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 767,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Surviving Sepsis Campaign procalcitonin antimicrobial stewardship Source: SSC Year: 2021 Domain: lab_inflammation License: SCCM Available at: https://www.sccm.org/SurvivingSepsisCampaign/Guidelines This is a citation reference for the SSC guideline 'Surviving Sepsis Campaign procalcitonin antimicrobial stewardship' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_inflammation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

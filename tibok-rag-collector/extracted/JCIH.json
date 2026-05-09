@@ -1,7 +1,7 @@
 {
  "source": "JCIH",
  "generated_at": "2026-05-09T15:51:27Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "JCIH-HEARING-001",
@@ -41,6 +41,31 @@
     {
      "chunk_index": 4,
      "content": "implantation. Parents play a decisive role in this rehabilitation process. Rout and Khanna [ ] investigated the key concerns of mothers regarding the needs and difficulties faced by the child with hearing impairment and reinforced on the need of language and cultural directed materials to address the parental concerns. In our study, a 10-point parental satisfaction scale and a questionnaire was administered. The median parental satisfaction score improved to 8 post-surgery which was recorded to be 1 before implantation. Most of the parents were satisfied with children’s auditory abilities after the cochlear implantation. The questionnaire comprising of seven questions to assess the subject’s communication abilities among peer groups and at school was administered. Majority of the parents rated the performance of their children 4 or 5 on a 5-point rating scale after the implantation indicating improved communication skills of the subjects while interacting with the peer group and at the school. The ambispective analysis of our study concluded that the delayed intervention with cochlear implantation in prelingual children can result in improvement in all domains including auditory behavior and language skills. In a prospective study by Kos, et al. [ ], the late implanted subjects showed improved awareness of oral language structures and better performance on CAP and SIR. Similarly, Liu, et al. [ ] reported the speech assessment of retrospectively studied group of 94 late implanted prelingual subjects. The study stated that cochlear implantation in late prelinguals is an effective intervention option but can take a longer duration for rehabilitation compared to their early implanted counterparts. Therefore, cochlear implantation in late prelinguals is a viable option and should be considered along with intensive post-implantation speech and language rehabilitation. The present study explored the clinico-social outcomes of cochlear implantation in children with severe to profound prelingual deafness who underwent cochlear implantation later than recommended age of implantation. The findings indicated that the outcomes with CI at the later age may not parallel with the implantation at younger age, but it still provides measurable benefits even after longer period of auditory deprivation. These findings should encourage the concerned authorities and funding agencies in the country to extend the support for select groups of these children who have not been able to get the benefits of implantation at an early age. Thorough evaluation of such patients and due recommendations by board of experts are however strongly recommended. Also, future studies can be carried out by employing dual arm analysis within a demographically more comparable patient cohort."
+    }
+   ]
+  },
+  {
+   "id": "JCIH-NHS-001",
+   "source": "JCIH",
+   "title": "JCIH year 2019 position statement on principles and guidelines for early hearing detection",
+   "year": "2019",
+   "page_url": "https://www.jcih.org/JCIH_2019_Position_Statement.pdf",
+   "pdf_url": "https://www.jcih.org/JCIH_2019_Position_Statement.pdf",
+   "license": "JCIH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_pediatric",
+   "priority": "high",
+   "sha256": "ff5a62210fa9aa5fbfa61cb4dff04ace03a2162335deb7f25e952dff335bbfd5",
+   "size_bytes": 811,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 811,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: JCIH year 2019 position statement on principles and guidelines for early hearing detection Source: JCIH Year: 2019 Domain: ent_pediatric License: JCIH Available at: https://www.jcih.org/JCIH_2019_Position_Statement.pdf This is a citation reference for the JCIH guideline 'JCIH year 2019 position statement on principles and guidelines for early hearing detection' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

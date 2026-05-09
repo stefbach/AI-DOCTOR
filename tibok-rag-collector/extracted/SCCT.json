@@ -1,7 +1,7 @@
 {
  "source": "SCCT",
  "generated_at": "2026-05-09T10:09:57Z",
- "total_documents": 4,
+ "total_documents": 9,
  "documents": [
   {
    "id": "SCCT-CT-001",
@@ -316,6 +316,131 @@
     {
      "chunk_index": 11,
      "content": "Coupled with “last-mile” workflow design (seamless PACS/RIS integration and clear, structured outputs), these steps can turn AI from promising prototypes into reliable service tools that shorten and simplify exams, standardise quantification, and scale access, while keeping clinicians in charge. 9. Conclusions AI is beginning to reform cardiovascular imaging and influence clinical practice. Across echocardiography, CT, nuclear imaging, and CMR, AI shows potential to aid in more consistent image acquisition, automated reporting, disease detection, phenotyping, and risk stratification. These advances could help to overcome persistent barriers to high-quality imaging, including operator dependence, variable interpretation, and lack of time for expert analysis. AI models show potential to improve consistency of quantified measurements, including LVEF, CAC scores, myocardial perfusion indices, and CMR-derived functional measures. Beyond this, AI may streamline workflows by reducing laborious reporting, shortening scan times, lowering repeat-scan rates, and detecting and phenotyping diseases earlier. This may improve clinical decision-making, whilst improving patient safety and expanding access to high-quality imaging, particularly in busy or resource-limited clinical settings. However, key limitations currently restrict the widespread integration of these models into clinical practice. These include the biased nature of datasets, lack of multicentre prospective validation, and unresolved ethical and practical challenges. Despite this, with robust validation and ethical integration, AI shows promise in strengthening every stage of cardiovascular healthcare as a decision-support tool to augment but not replace clinical expertise. Future research should aim to optimise convergence of the principal modalities and focus on evidencing improvements in patient outcomes rather than direct algorithmic performance."
+    }
+   ]
+  },
+  {
+   "id": "SCCT-CAC-001",
+   "source": "SCCT",
+   "title": "SCCT consensus on coronary artery calcium scoring",
+   "year": "2018",
+   "page_url": "https://www.jcct.org/article/S1934-5925(18)30237-9/fulltext",
+   "pdf_url": "https://www.jcct.org/article/S1934-5925(18)30237-9/fulltext",
+   "license": "SCCT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ct",
+   "priority": "high",
+   "sha256": "62ba3f9f2ef70451c2b08138755cc351c57dde7c3655cc9ee0e4a89e5d9610dd",
+   "size_bytes": 952,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 952,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:09Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "CAC-DRS: Coronary Artery Calcium Data and Reporting System. An expert consensus document of the Society of Cardiovascular Computed Tomography (SCCT). The goal of CAC-DRS: Coronary Artery Calcium Data and Reporting System is to create a standardized method to communicate findings of CAC scanning on all noncontrast CT scans, irrespective of the indication, in order to facilitate clinical decision-making, with recommendations for subsequent patient management. The CAC-DRS classification is applied on a per-patient basis and represents the total calcium score and the number of involved arteries. General recommendations are provided for further management of patients with different degrees of calcified plaque burden based on CAC-DRS classification. In addition, CAC-DRS will provide a framework of standardization that may benefit quality assurance and tracking patient outcomes with the potential to ultimately result in improved quality of care."
+    }
+   ]
+  },
+  {
+   "id": "SCCT-CAD-RADS-001",
+   "source": "SCCT",
+   "title": "CAD-RADS 2.0 reporting and data system for coronary CT angiography",
+   "year": "2022",
+   "page_url": "https://www.jcct.org/article/S1934-5925(22)00216-X/fulltext",
+   "pdf_url": "https://www.jcct.org/article/S1934-5925(22)00216-X/fulltext",
+   "license": "SCCT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ct",
+   "priority": "high",
+   "sha256": "f3b2f8aeb9658eca1079171bff6b86ea9d7c7aad7c96b9629c26bc379222369d",
+   "size_bytes": 2238,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2233,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Comparative evaluation of large language models for generating CAD-RADS 2.0-compliant diagnostic conclusions in cardiac CT reports. Coronary computed tomography angiography (CCTA) has become a cornerstone in non-invasive CAD diagnosis and risk stratification. To standardize reporting and improve clinical decision-making, the CAD-RADS 2.0 system was introduced. This study evaluates the performance of four LLMs, GPT-4o, Gemini 2.0 Flash, DeepSeek V, and Copilot in generating CAD-RADS 2.0-compliant conclusions from standardized CCTA reports. A total of 196 anonymized CCTA reports were retrospectively analyzed. Each LLM was prompted to provide CAD-RADS 2.0 classifications and follow-up recommendations. Ground truth labels were assigned by a senior radiologist. Performance metrics (accuracy, precision, recall, F1-score), execution times, and agreement (Cohen's kappa) with expert interpretation were computed. Interobserver agreement between junior and senior radiologists was also assessed. LLMs demonstrated good-to-excellent agreement with expert classifications: DeepSeek V (κ = 0.771), Copilot (κ = 0.761), GPT-4o (κ = 0.759), and Gemini 2.0 Flash (κ = 0.634). DeepSeek V achieved the highest accuracy (91.83%). Intra-model consistency was perfect (κ = 1). However, LLMs failed to assign CAD-RADS modifiers. ChatGPT-4o provided the most accurate follow-up recommendations (71.94%). All LLMs outperformed radiologists in execution time (3-9 s vs. 15-20 s; p < 0.05). Generic LLMs demonstrate promising performance in automating CAD-RADS 2.0 classification from CCTA reports. However, limitations in modifier assignment and recommendation accuracy highlight areas for refinement before clinical integration. This study explores the potential of large language models to facilitate standardized CAD-RADS 2.0 reporting from coronary CT angiography, highlighting a possible avenue to support workflow efficiency and clinical decision-making in non-invasive coronary artery disease evaluation. LLMs demonstrated strong potential in automating CAD-RADS 2.0-compliant structured reporting for CCTA. LLMs could significantly enhance efficiency in radiological reporting. LLMs need further optimization before clinical integration."
+    }
+   ]
+  },
+  {
+   "id": "SCCT-CTA-001",
+   "source": "SCCT",
+   "title": "SCCT guidelines for the performance and acquisition of coronary CTA",
+   "year": "2021",
+   "page_url": "https://www.jcct.org/article/S1934-5925(21)00097-5/fulltext",
+   "pdf_url": "https://www.jcct.org/article/S1934-5925(21)00097-5/fulltext",
+   "license": "SCCT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ct",
+   "priority": "high",
+   "sha256": "4b56bb5e4e08617462e32d5e83a233cdc627757b840843b4f96a932d31600607",
+   "size_bytes": 3815,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3657,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Impact of an institutional process change adopting end-systolic coronary CTA acquisition and automated dose selection on patient throughput and image quality. Guidelines recommend prospective ECG-triggered mid-diastolic coronary computed tomographic angiography (CCTA) acquisition after achieving optimal heart rate (HR) control in order to optimize scan image quality. With dual-source CCTA, prospective end-systolic acquisition has been shown to be less prone to motion artifacts at higher heart rates and may improve scan and CT laboratory efficiency by allowing CCTA without routine pre-scan beta-blocker (BB) administration. We implemented an institutional process change in CCTA performance effective January 2023, comprising a transition from prospective ECG-triggered mid-diastolic acquisitions individually supervised by a physician at the scanner to an algorithmic approach predominately utilizing prospective end-systolic acquisition (200-400 ​ms after R peak), employing an automated dose selection algorithm, without BB administration. All scans were performed on a third-generation 192-slice dual-source scanner. We reviewed 300 consecutive CCTAs done pre- and post-process change in Jan 2022 (phase 0), Jan 2023 (phase 1), and in May 2023 (phase 2) after implementation of a process improvement involving more selective utilization of automated tube potential/current algorithms (CARE kV) to optimize image quality. Coronary segmental image quality was assessed by two experienced CCTA readers by consensus using an 18-segment SCCT model on a 5-point Likert scale (1 ​= ​non-interpretable; 2 ​= ​poor; 3 ​= ​acceptable; 4 ​= ​good; 5 ​= ​excellent). Measures of radiation dose, medication administration, and time required for patient scanning were compared. Logistic regression was used to determine factors associated with patient-level reduction in image quality (IQ) and with repeat scans. Post-process change, there was a significant reduction in the median overall patient appointment [phase 0: 95 (75-125) min vs. phase 1: 68 (52-88) min and phase 2: 72 (59-90) min; P ​< ​0.001] and scan times [phase 0: 13 (10-16) min vs. phase 1: 8 (6-13) min and phase 2: 9 (7-13) min; P ​< ​0.001]. Median IQ score in both post-process change phases was 4 (4-5) compared to a median score of 5 (4-5) pre-process change (P for comparison <0.001). The majority of segments post-process change had \"good\" IQ (Phase 1 segmental IQ scores: 5 ​= ​36.7 ​%, 4 ​= ​46.8 ​%, 3 ​= ​13 ​%, 2 ​= ​2.6 ​%, 1 ​= ​0.9 ​%; Phase 2 segmental IQ scores: 5 ​= ​26 ​%, 4 ​= ​49.7 ​%, 3 ​= ​16.3 ​%, 2 ​= ​6.1 ​%, 1 ​= ​1.9 ​%), whereas pre-process change, the majority of segments had \"excellent\" IQ (Phase 0 segmental IQ scores: 5 ​= ​56 ​%, 4 ​= ​34.3 ​%, 3 ​= ​7.5 ​%, 2 ​= ​1.8 ​%, 1 ​= ​0.4 ​%) There was no significant increase in non-interpretable scans at the patient level. The 22 ​% re-scan rate in phase 1 (vs. 6 ​% in phase 0, P ​= ​.002) improved to 15 ​% in phase 2. While patient related factors of body mass index [adjusted OR obese 2.64, 95 ​% CI 1.12-6.51, P ​= ​0.03; aOR morbidly obese 6.94, 95 ​% CI 2.21-23.52, P ​= ​0.001] and average HR [aOR (per 10 bpm increase) 1.51, 95 ​% CI 1.21-1.9, P ​< ​0.001] were associated with the scoring of any segment as ​≤ ​3 ​at the patient level in a fully adjusted model, the improved phase 2 of the process change was not [aOR 1.61, 95 ​% CI 0.78-3.32]. Implementation of an institutional process change utilizing prospective ECG-triggered dual-source end-systolic acquisition avoided the use of beta-blockers, significantly reduced patient appointment and scan times with acceptable diagnostic performance."
+    }
+   ]
+  },
+  {
+   "id": "SCCT-CTA-002",
+   "source": "SCCT",
+   "title": "SCCT 2016 SCMR appropriate use criteria for chest pain in adult patients",
+   "year": "2021",
+   "page_url": "https://www.jcct.org/article/S1934-5925(21)00097-5/fulltext",
+   "pdf_url": "https://www.jcct.org/article/S1934-5925(21)00097-5/fulltext",
+   "license": "SCCT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ct",
+   "priority": "high",
+   "sha256": "2edb0132b40dcadb1752863d17b6231f0fd942758e1678abc20bb01c208d7613",
+   "size_bytes": 779,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 779,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCCT 2016 SCMR appropriate use criteria for chest pain in adult patients Source: SCCT Year: 2021 Domain: radiology_ct License: SCCT Available at: https://www.jcct.org/article/S1934-5925(21)00097-5/fulltext This is a citation reference for the SCCT guideline 'SCCT 2016 SCMR appropriate use criteria for chest pain in adult patients' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_ct. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SCCT-FFR-CT-001",
+   "source": "SCCT",
+   "title": "SCCT expert consensus on FFR-CT clinical use coronary",
+   "year": "2017",
+   "page_url": "https://www.jcct.org/article/S1934-5925(17)30164-0/fulltext",
+   "pdf_url": "https://www.jcct.org/article/S1934-5925(17)30164-0/fulltext",
+   "license": "SCCT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ct",
+   "priority": "high",
+   "sha256": "884bc22fd11a57cfe2fddd59503485e25f370464d5f023ba2fd275a18eea7b1d",
+   "size_bytes": 2170,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2168,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:12Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "CAD-RADS™ 2.0 - 2022 Coronary Artery Disease - Reporting and Data System.: An expert consensus document of the Society of Cardiovascular Computed Tomography (SCCT), the American College of Cardiology (ACC), the American College of Radiology (ACR) and the North America Society of Cardiovascular Imaging (NASCI). Coronary Artery Disease Reporting and Data System (CAD-RADS) was created to standardize reporting system for patients undergoing coronary CT angiography (CCTA) and to guide possible next steps in patient management. The goal of this updated 2022 CAD-RADS 2.0 is to improve the initial reporting system for CCTA by considering new technical developments in Cardiac CT, including data from recent clinical trials and new clinical guidelines. The updated CAD-RADS classification will follow an established framework of stenosis, plaque burden, and modifiers, which will include assessment of lesion-specific ischemia using CT fractional-flow-reserve (CT-FFR) or myocardial CT perfusion (CTP), when performed. Similar to the method used in the original CAD-RADS version, the determinant for stenosis severity classification will be the most severe coronary artery luminal stenosis on a per-patient basis, ranging from CAD-RADS 0 (zero) for absence of any plaque or stenosis to CAD-RADS 5 indicating the presence of at least one totally occluded coronary artery. Given the increasing data supporting the prognostic relevance of coronary plaque burden, this document will provide various methods to estimate and report total plaque burden. The addition of P1 to P4 descriptors are used to denote increasing categories of plaque burden. The main goal of CAD-RADS, which should always be interpreted together with the impression found in the report, remains to facilitate communication of test results with referring physicians along with suggestions for subsequent patient management. In addition, CAD-RADS will continue to provide a framework of standardization that may benefit education, research, peer-review, artificial intelligence development, clinical trial design, population health and quality assurance with the ultimate goal of improving patient care."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "SMFM",
  "generated_at": "2026-05-09T15:43:02Z",
- "total_documents": 23,
+ "total_documents": 28,
  "documents": [
   {
    "id": "SMFM-MFM-001",
@@ -1047,6 +1047,131 @@
     {
      "chunk_index": 2,
      "content": "birth compared with either intervention alone. However, these findings should be interpreted cautiously, and further well-designed, adequately powered randomized controlled trials are required to confirm the efficacy and clinical utility of this combined therapeutic approach ( ). The Bouquet Speculum ™ may enhance AI-POCUS and cervical cerclage outcomes in neonatal and obstetric care by improving cervical visualization, ease of use, and patient comfort ( ). The radially expanding design of the Bouquet Speculum allows circumferential engagement of the cervix, facilitating controlled anterior traction and centering within the visual field ( ). This may improve access in cases of high, posterior, or anatomically challenging cervices ( ). Radial dilation provides uniform circumferential exposure of the cervix without preferential compression in the anterior–posterior plane. This can reduce reliance on additional vaginal wall retractors to visualize posterior and lateral cervical tissue ( ). By gently clasping the cervix, the device may reduce cervical mobility during needle passage. Improved stabilization can support more symmetric tissue bites and higher stitch placement, particularly in exam-indicated or rescue cerclage. Integrated visualization and stabilization may decrease the need for weighted posterior speculums or multiple retractors. This has the potential to simplify procedural setup and reduce operative or in-office procedural complexity. The adaptable radial expansion accommodates variability in vaginal anatomy, including increased vaginal wall pressure or cervical position ( ). This may enhance exposure in patients where standard bivalve speculums provide limited visualization. Radial expansion distributes pressure circumferentially rather than concentrating force across opposing blades ( ). This may reduce tissue distortion around the cervix during exposure. The device’s ability to provide stable, circumferential exposure and cervical control aligns with key technical objectives emphasized in cerclage literature. The design directly addresses recognized limitations of traditional bivalve exposure strategies ( ). Discussion All published clinical data regarding the Bouquet Speculum ™ to date have been generated or co-authored by its inventors or investigators affiliated with the originating institution; independent studies conducted by unaffiliated research groups have not yet been published. Although this necessarily limits the current evidentiary base supporting broader integration of the Bouquet Speculum ™ , it would be neither scientifically sound nor ethically appropriate to withhold potentially practice-informing innovations that may improve outcomes for mothers and infants at risk of preterm birth. This perspective article further acknowledges that the proposed approach integrates a novel, preliminarily validated vaginal speculum with an emerging AI-assisted ultrasound model, together offering the potential to reduce both neonatal and maternal morbidity and mortality associated with preterm birth. Notably, the most substantial challenge lies in the successful implementation and sustainable deployment of this combined model, particularly within resource-constrained settings. Critical considerations include long-term sustainability, in-country regulatory requirements, potential biases inherent to machine-learning algorithms, and the generalizability of the model across diverse clinical settings and populations ( ). By integrating AI-assisted ultrasound with the Bouquet Speculum ™ , it is possible to overcome the limitations of traditional specula and standard ultrasound and provide point of care, accurate, effective, affordable, and safe solutions for reducing premature births. This method draws attention to a preventable cause of preterm birth and helps reduce mortality and morbidity while promoting better health for mothers and newborns, particularly in low-resource environments. Future efforts will be directed at researching and implementing this combination of technologies for real-world impact and the positive outcome of reducing the number of infants that are born too soon."
+    }
+   ]
+  },
+  {
+   "id": "SMFM-MFM-002",
+   "source": "SMFM",
+   "title": "SMFM Consult Series 45 Mild Fetal Ventriculomegaly Diagnosis Evaluation Management",
+   "year": "2018",
+   "page_url": "https://www.smfm.org/publications/230",
+   "pdf_url": "https://www.smfm.org/publications/230",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_fetal_growth",
+   "priority": "medium",
+   "sha256": "dfa538f7bf91d9a40c90d1acde67f9f5ac287cc6a75bd02a6a79dd7df8b03ec1",
+   "size_bytes": 791,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 791,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SMFM Consult Series 45 Mild Fetal Ventriculomegaly Diagnosis Evaluation Management Source: SMFM Year: 2018 Domain: mfm_fetal_growth License: Restricted Available at: https://www.smfm.org/publications/230 This is a citation reference for the SMFM guideline 'SMFM Consult Series 45 Mild Fetal Ventriculomegaly Diagnosis Evaluation Management' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_fetal_growth. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SMFM-MFM-010",
+   "source": "SMFM",
+   "title": "SMFM Consult Series 58 Use of Antenatal Corticosteroids Periviable Birth",
+   "year": "2021",
+   "page_url": "https://www.smfm.org/publications/327",
+   "pdf_url": "https://www.smfm.org/publications/327",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_preterm",
+   "priority": "high",
+   "sha256": "9de336e12cd07a616cfcb17ac6949c25bdc46271a5ecc68c4db920007225609b",
+   "size_bytes": 761,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 761,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SMFM Consult Series 58 Use of Antenatal Corticosteroids Periviable Birth Source: SMFM Year: 2021 Domain: mfm_preterm License: Restricted Available at: https://www.smfm.org/publications/327 This is a citation reference for the SMFM guideline 'SMFM Consult Series 58 Use of Antenatal Corticosteroids Periviable Birth' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_preterm. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SMFM-MFM-012",
+   "source": "SMFM",
+   "title": "SMFM Consult Series 61 Diabetes Insipidus in Pregnancy",
+   "year": "2022",
+   "page_url": "https://www.smfm.org/publications/351",
+   "pdf_url": "https://www.smfm.org/publications/351",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_chronic_disease",
+   "priority": "medium",
+   "sha256": "81fc1cd9dc6dea2872eb90aa7e70684f2459ce7d3dece5996702540f64160041",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SMFM Consult Series 61 Diabetes Insipidus in Pregnancy Source: SMFM Year: 2022 Domain: mfm_chronic_disease License: Restricted Available at: https://www.smfm.org/publications/351 This is a citation reference for the SMFM guideline 'SMFM Consult Series 61 Diabetes Insipidus in Pregnancy' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_chronic_disease. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SMFM-MFM-014",
+   "source": "SMFM",
+   "title": "SMFM Consult Series 63 Cervical Insufficiency and Cerclage",
+   "year": "2023",
+   "page_url": "https://www.smfm.org/publications/420",
+   "pdf_url": "https://www.smfm.org/publications/420",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_preterm",
+   "priority": "high",
+   "sha256": "f144197a5701820be8159ca94fba2aead44eb29e18c740044901dd84cca4dc2f",
+   "size_bytes": 733,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 733,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SMFM Consult Series 63 Cervical Insufficiency and Cerclage Source: SMFM Year: 2023 Domain: mfm_preterm License: Restricted Available at: https://www.smfm.org/publications/420 This is a citation reference for the SMFM guideline 'SMFM Consult Series 63 Cervical Insufficiency and Cerclage' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_preterm. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SMFM-MFM-016",
+   "source": "SMFM",
+   "title": "SMFM Consult Series 65 Prenatal Care for Twin Pregnancies",
+   "year": "2023",
+   "page_url": "https://www.smfm.org/publications/422",
+   "pdf_url": "https://www.smfm.org/publications/422",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_fetal_growth",
+   "priority": "high",
+   "sha256": "53d0d2ce24c44dcac45461cab2b37a6b20a89e02f4554f0175328afd52c1664b",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SMFM Consult Series 65 Prenatal Care for Twin Pregnancies Source: SMFM Year: 2023 Domain: mfm_fetal_growth License: Restricted Available at: https://www.smfm.org/publications/422 This is a citation reference for the SMFM guideline 'SMFM Consult Series 65 Prenatal Care for Twin Pregnancies' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_fetal_growth. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "EUBS",
  "generated_at": "2026-05-09T16:53:45Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "EUBS-FITNESS-001",
@@ -90,6 +90,31 @@
     {
      "chunk_index": 7,
      "content": "asked questions: ear equalizing. Avai- lable from: http://www.diversalertnetwork.org/medical/faq/. NARDYTOJŲ ELGESYS IR 15. Klingmann C, Preatorius M, Böhm F, Tetzlaff K, Plinkert OTORINOLARINGOLOGŲ REKOMENDACIJOS: PK. Fitness to dive in the otorhinolaryngological field. HNO BANDOMASIS TYRIMAS 2008;56:509-518. L. Kornilenko, J. Stanislavovienė, I. Arechvo https://doi.org/10.1007/s00106-008-1743-9 Raktažodžiai: nardymas, kontraindikacijos, ausų barotrauma. Santrauka 16. Eichhorn L, Leyk D. Diving medicine in clinical practice. Dtsch Tyrimo tikslas buvo išsiaiškinti, ar Lietuvoje gyvenantys nar- Arztebl Int 2015;112:147-158. dytojai rizikuoja savo ausų sveikata, ir sužinoti gydytojų otori- https://doi.org/10.3238/arztebl.2015.0147 nolaringologų nuomonę apie nardymo kontraindikacijas bei šių 17. DAN medical frequently asked questions: tympanic membrane specialistų rekomendacijas dėl tam tikrų su nardymu susijusių rupture. Available from: http://www.diversalertnetwork.org/ sveikatos sutrikimų. medical/faq/. Medžiaga ir metodai. Autorių sukurtos anketos buvo išsiųs- 18. Ear problems in diving. ProEar 2000. Available from: https:// tos Lietuvoje gyvenantiems nardytojams ir otorinolaringologams www.proear2000.com/pages/table.html. užpildyti. Atgal su atsakytais klausimais iš respondentų tyrėjams 19. Klingmann C, Wallner F. Health aspects of diving in ENT grįžo 84 anketos. medicine. Part II: diving fitness. HNO 2004;52:845-847. Rezultatai. Iš viso 47,5 % apklaustų narų jautė sunkumą, ban- https://doi.org/10.1007/s00106-004-1105-1 dydami išlyginti slėgį po vandeniu. Daugiau nei pusė narų (57,9 %) 55 nekreipė į šį pojūtį dėmesio ir nardė toliau. Ausies skausmą nar- rinito laikotarpiu ir įvykus stapedoplastikai, otorinolaringologų dydami jautė 37,5 % apklaustų narų. Dėl šios priežasties pusė iš nuomonės išsiskyrė. Iš viso 15 % šių gydytojų rekomendavo ne- jų kreipėsi į specialistus, kita dalis nekreipė į skausmą dėmesio nardyti tam tikrą laikotarpį. Nepaisant specialistų rekomendacijų, ir tęsė nardymą. Trečdalis apklaustųjų nardė, sirgdami sloga. Di- 17,9 % apklaustų narų tęsė nardymą. džioji dalis jų užsiėmė nardymu, prieš tai neišgėrę jokių vaistų. Išvados. Tyrimas atskleidė gana rizikingą su ausų sveikatos bū- Tik 13 % nardytojų, patyrusių galvos svaigimą, kreipėsi į specia- kle susijusį nardytojų elgesį. Lietuvos otorinolaringologų nuomo- listus. Dažniausiai ototrinolaringologų nurodomos absoliučiosios nės dėl nardymo kontraindikacijų išsiskyrė – trūksta bendro suta- nardymo kontraindikacijos yra būgnelio perforacija (90,9 %), bū- rimo, konsultuojant narus. gnelyje esantis timpanostominis vamzdelis (79,5 %) ir ausies tri- Adresas susirašinėti: jelena.stanislavoviene@mf.vu.lt mito disfunkcija (61,4 %). Apskritai 61,3 % apklaustų otorinola- ringologų leistų savo pacientui nardyti, kai po galvos svaigimo yra Gauta 2019-11-15 praėjęs 3–6 mėn. besimptominis laikotarpis. Dėl nardymo ūmaus"
+    }
+   ]
+  },
+  {
+   "id": "EUBS-DCS-001",
+   "source": "EUBS",
+   "title": "EUBS Recommendations on Treatment of Decompression Illness",
+   "year": "2018",
+   "page_url": "https://www.eubs.org/",
+   "pdf_url": "https://www.eubs.org/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "diving_dcs",
+   "priority": "high",
+   "sha256": "f9bab23878d6cada27ef322b37ec3bab84f4e14ae54bca152a542de6badea91b",
+   "size_bytes": 716,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 716,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EUBS Recommendations on Treatment of Decompression Illness Source: EUBS Year: 2018 Domain: diving_dcs License: Proprietary Available at: https://www.eubs.org/ This is a citation reference for the EUBS guideline 'EUBS Recommendations on Treatment of Decompression Illness' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: diving_dcs. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

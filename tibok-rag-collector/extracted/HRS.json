@@ -1,7 +1,7 @@
 {
  "source": "HRS",
  "generated_at": "2026-05-02T17:11:09Z",
- "total_documents": 27,
+ "total_documents": 30,
  "documents": [
   {
    "id": "HRS-001",
@@ -2795,6 +2795,81 @@
     {
      "chunk_index": 25,
      "content": "the basic occurrence and subsequent extent of an evaluation of the living, whether she/he is an SCA survivor or the first‐degree relative of an SUD victim or an SCA survivor, must become standard of care. After initial cardiological evaluation (examination, ECGs, stress test, and echocardiogram) has been completed, the true contribution of SCA‐predisposing genetic heart disease will be exposed. Furthermore, the composition and contribution of advanced investigations ranging from sodium channel drug provocation studies, to MRI, to genetic testing requires further study, as does the recommended interval for a repeat cardiological evaluation of the first‐degree relatives when their first evaluation is either normal or inconclusive. Finally, when such investigations are commenced, future studies to minimize the collateral damage from uncertain clinical findings and genetic “variants of uncertain significance” will be needed. While it is recognized that the correct necropsy diagnosis of the SUD decedent and the correct diagnosis of the SCA survivor may give patients and their families some answers and resolution to the event, the premature and erroneous diagnosis due to excessive confidence in or overinterpretation of clinical or genetic findings of uncertain significance can cause remarkable harm. If we are to “first do no harm,” the model of multidisciplinary teams with the expertise to correctly evaluate all the investigations and potential (mis)diagnoses should be made accessible to all. Supporting information Supplementary Material Click here for additional data file."
+    }
+   ]
+  },
+  {
+   "id": "HRS-CRT-001",
+   "source": "HRS",
+   "title": "2012 HRS/ACCF/AHA expert consensus on cardiac resynchronization therapy",
+   "year": "2012",
+   "page_url": "https://www.heartrhythmjournal.com/article/S1547-5271(12)00568-3/fulltext",
+   "pdf_url": "https://www.heartrhythmjournal.com/article/S1547-5271(12)00568-3/fulltext",
+   "license": "HRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_arrhythmia",
+   "priority": "medium",
+   "sha256": "c4829d2070388e149d3f2dba9512356798c1af213c2b42fa072fb81ba381e35f",
+   "size_bytes": 806,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 806,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:57Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: 2012 HRS/ACCF/AHA expert consensus on cardiac resynchronization therapy Source: HRS Year: 2012 Domain: cardiology_arrhythmia License: HRS Available at: https://www.heartrhythmjournal.com/article/S1547-5271(12)00568-3/fulltext This is a citation reference for the HRS guideline '2012 HRS/ACCF/AHA expert consensus on cardiac resynchronization therapy' published in 2012. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_arrhythmia. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "HRS-AED-002",
+   "source": "HRS",
+   "title": "2008 ACCF/AHA/HRS recommendations for AED implantation",
+   "year": "2008",
+   "page_url": "https://www.heartrhythmjournal.com/article/S1547-5271(08)00518-7/fulltext",
+   "pdf_url": "https://www.heartrhythmjournal.com/article/S1547-5271(08)00518-7/fulltext",
+   "license": "HRS ACC AHA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_arrhythmia",
+   "priority": "low",
+   "sha256": "60041530b8f8aa58c50868b426da9d8ceffba7e1c4d855d2aaeb7c5917e74aba",
+   "size_bytes": 780,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 780,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:57Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: 2008 ACCF/AHA/HRS recommendations for AED implantation Source: HRS Year: 2008 Domain: cardiology_arrhythmia License: HRS ACC AHA Available at: https://www.heartrhythmjournal.com/article/S1547-5271(08)00518-7/fulltext This is a citation reference for the HRS guideline '2008 ACCF/AHA/HRS recommendations for AED implantation' published in 2008. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_arrhythmia. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "HRS-MRI-PACE-001",
+   "source": "HRS",
+   "title": "HRS expert consensus on MRI for patients with cardiac implantable electronic devices",
+   "year": "2017",
+   "page_url": "https://www.hrsonline.org/clinical-resources/clinical-guidelines-documents",
+   "pdf_url": "https://www.hrsonline.org/clinical-resources/clinical-guidelines-documents",
+   "license": "HRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_safety",
+   "priority": "high",
+   "sha256": "209ac021c3b51ecda4669bd1f0315339e3ae0f5445afd91518f29d5683ee9803",
+   "size_bytes": 1781,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1781,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "State-of-the-art approach towards magnetic resonance imaging of the nervous system structures in patients with cardiac implantable electronic devices. MRI generated forces are the source of potential complications in patients with cardiac implantable electronic devices (CIED). The technological progress, and growing clinical evidence concerning the operation of the contemporary MR non-conditional CIEDs during MRI, have started to significantly change our every-day clinical practice. Nevertheless, a lot of patients who could have an MRI performed safely, still have been refused the examination. In many clinical situations, an MRI examination in a patient with a CIED is reasonable, and is linked to a negligible risk of complications if performed under strict precautions. The MagnaSave Registry that evaluated the influence of nonthoracic MRI on the function of MR non-conditional CIEDs, and numerous studies involving thoracic and non-thoracic MRIs in patients with legacy CIEDs, have confirmed the feasibility and safety of such examinations. In this article, practical tips aimed towards improving the safety of MRI in MR conditional and non-conditional CIED patients are largely based on the very recently released (2017) HRS expert consensus statement. Clinical data emphasize the necessity of making the MRI more accessible to CIED patients, also in the case of MR non-conditional systems or when the thorax MR imaging is clinically reasonable. This goal should be achieved by increasing the number of centers complying with respective recommendations and applying protocols that would guarantee the highest safety level. Further studies are warranted to assess safety issues related to the main current contraindication to MRI, i.e., the presence of abandoned leads."
     }
    ]
   }

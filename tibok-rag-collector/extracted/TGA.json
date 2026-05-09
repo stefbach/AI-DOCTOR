@@ -1,7 +1,7 @@
 {
  "source": "TGA",
  "generated_at": "2026-05-09T13:44:49Z",
- "total_documents": 4,
+ "total_documents": 5,
  "documents": [
   {
    "id": "TGA-DRUG-002",
@@ -184,6 +184,31 @@
     {
      "chunk_index": 7,
      "content": "be considered preliminary and hypothesis-generating. Larger-scale, multicentre, prospective studies are required to further validate these results. In conclusion, for early threatened miscarriage associated with spleen and kidney deficiency, GBATD combined with dydrogesterone demonstrated favourable clinical efficacy. In this study, we demonstrated that the combined treatment improves symptoms and significantly increases foetal survival rates based on systematic clinical observations and data analysis, providing a new and effective treatment option for patients with this condition."
+    }
+   ]
+  },
+  {
+   "id": "TGA-DRUG-004",
+   "source": "TGA",
+   "title": "TGA Australian Public Assessment Reports AusPARs",
+   "year": "2024",
+   "page_url": "https://www.tga.gov.au/resources/auspar",
+   "pdf_url": "https://www.tga.gov.au/resources/auspar",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_regulatory",
+   "priority": "high",
+   "sha256": "ab9a451ca1898114b926cd186eb8c37809c3ab1d29cc118080d883fce8e309e4",
+   "size_bytes": 978,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 978,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Transparency in drug regulation: public assessment reports in Europe and Australia. Openness and transparency are important considerations for medicines regulators, where public health is of paramount concern. As part of their commitment to transparency, the European Medicines Agency (EMA) and Therapeutic Goods Administration (TGA) in Australia publish information relating to their evaluation of medicines via public assessment reports. European Public Assessment Reports (EPARs) and Australian Public Assessment Reports (AusPARs) provide information about the considerations that led the regulator to approve or refuse the application. The reports summarise assessments by each regulator of the information provided on the quality, safety, and efficacy of the medicine under evaluation. Here, we describe the experiences of two established medicines regulators in publishing public assessment reports, and reflect on their future role in communicating medicines information."
     }
    ]
   }

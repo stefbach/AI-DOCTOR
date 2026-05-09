@@ -1,7 +1,7 @@
 {
  "source": "AIUM",
  "generated_at": "2026-05-09T11:00:18Z",
- "total_documents": 15,
+ "total_documents": 16,
  "documents": [
   {
    "id": "AIUM-US-004",
@@ -839,6 +839,31 @@
     {
      "chunk_index": 11,
      "content": "the Board for the International Society for Therapeutic Ultrasound 2025–2027. Charlotte J. Stagg is a Deputy Editor at Brain Stimulation. Christy K. Holland reports relationships with Lantheus™ and Boston Scientific Corp. which includes consulting and material transfer agreements. Bradley E. Treeby reports a relationship with NeuroHarmonics LTD that includes: board membership, employment, and equity or stocks. Eleanor Martin reports a relationship with Brainbox that includes: consulting or advisory. Eleanor Martin is a member of the Ultrasonics Technical Committee of the IEC. Lennart Verhagen reports a relationship with Brainbox that includes: non-financial support. Lennart Verhagen reports a relationship with Sonic Concepts that includes: non-financial support. Lennart Verhagen reports a relationship with Image Guided Therapy that includes: non-financial support. Lennart Verhagen reports a relationship with Nudge that includes: consulting or advisory. Kim Butts Pauly reports a relationship with Attune Neurosciences that includes: consulting or advisory and equity or stocks. Kim Butts Pauly reports a relationship with Surf Therapeutics that includes: consulting or advisory. Kim Butts Pauly reports a relationship with MR Instruments that includes: non-financial support. If there are other authors, they declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper."
+    }
+   ]
+  },
+  {
+   "id": "AIUM-US-012",
+   "source": "AIUM",
+   "title": "AIUM practice parameter for performance of neonatal head US",
+   "year": "2020",
+   "page_url": "https://www.aium.org/resources/official-statements",
+   "pdf_url": "https://www.aium.org/resources/official-statements",
+   "license": "AIUM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_us_general",
+   "priority": "medium",
+   "sha256": "47007f84b4d9d1b8576205d2ae5c6652da116ecda8760a2dd95560522311f6a7",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AIUM practice parameter for performance of neonatal head US Source: AIUM Year: 2020 Domain: radiology_us_general License: AIUM Available at: https://www.aium.org/resources/official-statements This is a citation reference for the AIUM guideline 'AIUM practice parameter for performance of neonatal head US' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_us_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

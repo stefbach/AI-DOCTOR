@@ -1,0 +1,32 @@
+{
+ "source": "SFC",
+ "generated_at": "2026-05-09T19:16:12Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "SFC-001",
+   "source": "SFC",
+   "title": "Cardiopathie Ischemique Stable",
+   "year": "2018",
+   "page_url": "https://www.sfcardio.fr/sites/default/files/PDF/sfc_recommandations_cardiopathies_ischemiques.pdf",
+   "pdf_url": "https://www.sfcardio.fr/sites/default/files/PDF/sfc_recommandations_cardiopathies_ischemiques.pdf",
+   "license": "SFC ©",
+   "commercial_use": "restricted",
+   "clinical_domain": "cardiology",
+   "priority": "medium",
+   "sha256": "aed01bd24880c11044e63a4b8efbfd91b1ebd735c186b8ec516dfc9752af78eb",
+   "size_bytes": 1253,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1235,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "[Heart Patients and Exposure to Altitude]. Overall, heart patients should be advised individually with respect to their tolerance of altitudes. However, the historical reflex that altitude 'per se' is bad for heart patients should become a thing of the past. Adequately treated and stable patients can usually go up to an altitude of 2500 m without any restrictions. Higher altitudes are also possible for a large number of patients, but may require an adaptation of the medication and further clarification. This is especially the case when physical work is to be performed at great heights. Zusammenfassung. Herzpatientinnen und -patienten sollten bezüglich ihrer Toleranz gegenüber Höhe individuell beraten werden. Dabei sollte der historische Reflex, dass Höhe für Herzpatientinnen und -patienten per se schlecht sei, der Vergangenheit angehören. Adäquat behandelte und stabile Patientinnen und Patienten können meistens ohne jegliche Einschränkung bis in 2500 m Höhe gehen. Höhere Höhenlagen sind bei einer Vielzahl der Betroffenen ebenfalls möglich, bedürfen aber ggf. einer Anpassung der Medikation und weiterführender Abklärungen. Dies insbesondere, wenn in der grossen Höhe auch eine körperliche Leistung erbracht werden soll."
+    }
+   ]
+  }
+ ]
+}

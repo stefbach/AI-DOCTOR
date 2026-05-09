@@ -1,7 +1,7 @@
 {
  "source": "GOLD",
  "generated_at": "2026-05-02T14:08:35Z",
- "total_documents": 4,
+ "total_documents": 5,
  "documents": [
   {
    "id": "GOLD-001",
@@ -848,6 +848,31 @@
     {
      "chunk_index": 8,
      "content": "miR-155 in COPD pathophysiology and clinical assessment. Key findings include: (1) miR-155 is significantly elevated in smoking-related COPD, with potential utility for identifying AECOPD and shows discriminative value in differentiating IPA from non-IPA infections; (2) miR-155 correlates positively with inflammatory cytokines and disease severity, indicating value in assessing inflammatory burden and clinical severity; (3) prospective analysis reveals miR-155’s predictive capacity for exacerbation frequency. These findings position miR-155 as a promising molecular biomarker for enhanced risk stratification, exacerbation prediction, and personalized COPD management. In future studies, we will focus on integrating miR-155 with multi-omics data and clinical predictors to further promote the application of precision medicine in COPD management, while also employing high-throughput screening techniques for the development of multi-miRNA panels to further refine and optimize the biomarker landscape in COPD."
+    }
+   ]
+  },
+  {
+   "id": "GOLD-DRUG-001",
+   "source": "GOLD",
+   "title": "GOLD Pocket Guide to COPD Diagnosis Management Prevention pharmacotherapy",
+   "year": "2024",
+   "page_url": "https://goldcopd.org/2024-gold-report/",
+   "pdf_url": "https://goldcopd.org/2024-gold-report/",
+   "license": "GOLD",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_lipid_htn_diabetes",
+   "priority": "high",
+   "sha256": "23fd60582a3e6e2567a0acf8f8e03fd622fddc394d08205e5e083ef84e4a3575",
+   "size_bytes": 782,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 782,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: GOLD Pocket Guide to COPD Diagnosis Management Prevention pharmacotherapy Source: GOLD Year: 2024 Domain: drug_lipid_htn_diabetes License: GOLD Available at: https://goldcopd.org/2024-gold-report/ This is a citation reference for the GOLD guideline 'GOLD Pocket Guide to COPD Diagnosis Management Prevention pharmacotherapy' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_lipid_htn_diabetes. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

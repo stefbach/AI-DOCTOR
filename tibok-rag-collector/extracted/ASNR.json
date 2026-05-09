@@ -1,7 +1,7 @@
 {
  "source": "ASNR",
  "generated_at": "2026-05-09T11:37:50Z",
- "total_documents": 8,
+ "total_documents": 9,
  "documents": [
   {
    "id": "ASNR-MRI-001",
@@ -484,6 +484,31 @@
     {
      "chunk_index": 13,
      "content": "56 Boyle K, Joundi RA, Aviv RI. An historical and contemporary trast-enhanced MR angiography and perfusion for acute isch- review of endovascular therapy for acute ischemic stroke. emic stroke at 3T: a more efficient stroke protocol. AJNR Am J Neurovascular Imaging 2017;3(1):1 Neuroradiol 2014;35(6):1078–1084 57 Riedel CH, Zimmermann P, Jensen-Kondering U, Stingele 75 Rahul KR, Santhosh P, Dilip Kumar MP, Mehta P, Cherian M. R, Deuschl G, Jansen O. The importance of size: ­successful Arterial Spin Labeling—Can Neurointerventionists Rely on This recanalization by intravenous thrombolysis in acute Novel Technique? A Case Series on Successful Use of Arteri- anterior stroke depends on thrombus length. Stroke al Spin Labeling in Acute Stroke Imaging. J Clin Interv Radiol 2011;42(6):1775–1777 ISVIR 2017;01(03):144–149 Journal of Clinical Interventional Radiology ISVIR Vol. 2 No. 3/2018 168 Acute Ischemic Stroke: A Review Kumar, Nagesh 76 Zaharchuk G. Arterial spin-labeled perfusion imaging in acute 85 Austein F, Riedel C, Kerby T, et al. Comparison of perfusion ct ischemic stroke. Stroke 2014;45(4):1202–1207 software to predict the final infarct volume after thrombecto- 77 Wang DJ, Alger JR, Qiao JX, et al; UCLA Stroke Investigators. my. Stroke 2016;47(9):2311–2317 Multi-delay multi-parametric arterial spin-labeled perfusion 86 Campbell BC, Mitchell PJ, Kleinig TJ, et al; EXTEND-IA Investi- MRI in acute ischemic stroke - Comparison with dynamic sus- gators. Endovascular therapy for ischemic stroke with perfu- ceptibility contrast enhanced perfusion imaging. Neuroimage sion-imaging selection. N Engl J Med 2015;372(11):1009–1018 Clin 2013;3:1–7 87 Albers GW, Marks MP, Kemp S, et al; DEFUSE 3 Investigators. 78 Lin L, Bivard A, Krishnamurthy V, Levi CR, Parsons MW, Whole- Thrombectomy for stroke at 6 to 16 hours with selection by Brain CT. Whole-brain CT perfusion to quantify acute ischemic perfusion imaging. N Engl J Med 2018;378(8):708–718 penumbra and core. Radiology 2016;279(3):876–887 88 Mokin M, Levy EI, Saver JL, et al; SWIFT PRIME Investigators. 79 Bivard A, Levi C, Spratt N, Parsons M. Perfusion CT in acute Predictive Value of RAPID assessed perfusion thresholds on stroke: a comprehensive analysis of infarct and penumbra. final infarct volume in SWIFT PRIME (Solitaire With the Inten- Radiology 2013;267(2):543–550 tion for Thrombectomy as Primary Endovascular Treatment) 80 Kameda K, Uno J, Otsuji R, et al. Optimal thresholds for Stroke 2017;48(4):932–938 ischemic penumbra predicted by computed tomography 89 Turk AS, Magarick JA, Frei D, et al. CT perfusion-guided perfusion in patients with acute ischemic stroke t­reated patient selection for endovascular recanalization in acute with mechanical thrombectomy. J Neurointerv Surg ischemic stroke: a multicenter study. J Neurointerv Surg 2018;10(3):279–284 2013;5(6):523–527 81 Campbell BC, Christensen S, Levi CR, et al. Cerebral blood flow 90 Demeestere J, Garcia-Esperon C, Garcia-Bermejo P, et al. Eval- is the optimal CT perfusion parameter for assessing infarct uation of hyperacute infarct volume using ASPECTS and brain core. Stroke 2011;42(12):3435–3440 CT perfusion core volume. Neurology 2017;88(24):2248–2253 82 Bivard A, Krishnamurthy V, Stanwell P, et al. Arterial spin 91 Sims JR, Gharai LR, Schaefer PW, et al. ABC/2 for rapid clinical labeling versus bolus-tracking perfusion in hyperacute stroke. estimate of infarct, perfusion, and mismatch volumes. Neurol- Stroke 2014;45(1):127–133 ogy 2009;72(24):2104–2110 83 Zussman BM, Boghosian G, Gorniak RJ, et al. The relative effect 92 Lansberg MG, Lee J, Christensen S, et al. RAPID automated of vendor variability in CT perfusion results: a method com- patient selection for reperfusion therapy: a pooled analysis of parison study. AJR Am J Roentgenol 2011;197(2):468–473 the Echoplanar Imaging Thrombolytic Evaluation Trial (EPI- 84 Straka M, Albers GW, Bammer R. Real-time diffusion-perfu- THET) and the Diffusion and Perfusion Imaging Evaluation sion mismatch analysis in acute stroke. J Magn Reson Imaging for Understanding Stroke Evolution (DEFUSE) study. Stroke 2010;32(5):1024–1037 2011;42(6):1608–1614 Journal of Clinical Interventional Radiology ISVIR Vol. 2 No. 3/2018"
+    }
+   ]
+  },
+  {
+   "id": "ASNR-EMERG-NEURO-001",
+   "source": "ASNR",
+   "title": "ASNR ASER consensus on emergency neuroimaging",
+   "year": "2020",
+   "page_url": "https://www.ajnr.org/content/41/9/1525",
+   "pdf_url": "https://www.ajnr.org/content/41/9/1525",
+   "license": "ASNR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_emergency",
+   "priority": "high",
+   "sha256": "704035d5a586374dde54623816724274f04380d314b72e0d82c7d69af3e2261f",
+   "size_bytes": 718,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 718,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASNR ASER consensus on emergency neuroimaging Source: ASNR Year: 2020 Domain: radiology_emergency License: ASNR Available at: https://www.ajnr.org/content/41/9/1525 This is a citation reference for the ASNR guideline 'ASNR ASER consensus on emergency neuroimaging' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_emergency. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

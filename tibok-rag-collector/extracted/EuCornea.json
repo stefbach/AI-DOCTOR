@@ -1,0 +1,107 @@
+{
+ "source": "EuCornea",
+ "generated_at": "2026-05-09T19:10:47Z",
+ "total_documents": 4,
+ "documents": [
+  {
+   "id": "EUCORNEA-KC-001",
+   "source": "EuCornea",
+   "title": "EuCornea consensus on keratoconus diagnosis and management",
+   "year": "2021",
+   "page_url": "https://www.eucornea.org/guidelines",
+   "pdf_url": "https://www.eucornea.org/guidelines",
+   "license": "EuCornea",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_anterior",
+   "priority": "high",
+   "sha256": "dba22920ed70e4bf097fb9df54100fa5279afc2cbb7d6777902bdefbb989136f",
+   "size_bytes": 759,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 759,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EuCornea consensus on keratoconus diagnosis and management Source: EuCornea Year: 2021 Domain: ophthalmology_anterior License: EuCornea Available at: https://www.eucornea.org/guidelines This is a citation reference for the EuCornea guideline 'EuCornea consensus on keratoconus diagnosis and management' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_anterior. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EUCORNEA-CXL-001",
+   "source": "EuCornea",
+   "title": "EuCornea guidelines for corneal cross-linking in progressive keratoconus",
+   "year": "2020",
+   "page_url": "https://www.eucornea.org/guidelines/cxl",
+   "pdf_url": "https://www.eucornea.org/guidelines/cxl",
+   "license": "EuCornea",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_anterior",
+   "priority": "high",
+   "sha256": "3118042f75337f6e2879f0f37f91dc850cdad7538dffc80bdd30b98a04a0b34c",
+   "size_bytes": 791,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 791,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EuCornea guidelines for corneal cross-linking in progressive keratoconus Source: EuCornea Year: 2020 Domain: ophthalmology_anterior License: EuCornea Available at: https://www.eucornea.org/guidelines/cxl This is a citation reference for the EuCornea guideline 'EuCornea guidelines for corneal cross-linking in progressive keratoconus' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_anterior. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EUCORNEA-DYS-001",
+   "source": "EuCornea",
+   "title": "EuCornea Fuchs endothelial corneal dystrophy management",
+   "year": "2019",
+   "page_url": "https://www.eucornea.org/guidelines/dystrophies",
+   "pdf_url": "https://www.eucornea.org/guidelines/dystrophies",
+   "license": "EuCornea",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_anterior",
+   "priority": "medium",
+   "sha256": "8a50f57f8f96b221701dda62cfca09ec966a72c88dc8b75205112c5c9536ae4b",
+   "size_bytes": 765,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 765,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EuCornea Fuchs endothelial corneal dystrophy management Source: EuCornea Year: 2019 Domain: ophthalmology_anterior License: EuCornea Available at: https://www.eucornea.org/guidelines/dystrophies This is a citation reference for the EuCornea guideline 'EuCornea Fuchs endothelial corneal dystrophy management' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_anterior. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EUCORNEA-HSV-001",
+   "source": "EuCornea",
+   "title": "EuCornea consensus on herpes simplex keratitis",
+   "year": "2020",
+   "page_url": "https://www.eucornea.org/guidelines/hsv",
+   "pdf_url": "https://www.eucornea.org/guidelines/hsv",
+   "license": "EuCornea",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_anterior",
+   "priority": "high",
+   "sha256": "a02a3c6272d618a012afd944f4928ed4f08700c9caa7ea5d5ab78c3dc693baca",
+   "size_bytes": 739,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 739,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EuCornea consensus on herpes simplex keratitis Source: EuCornea Year: 2020 Domain: ophthalmology_anterior License: EuCornea Available at: https://www.eucornea.org/guidelines/hsv This is a citation reference for the EuCornea guideline 'EuCornea consensus on herpes simplex keratitis' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_anterior. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

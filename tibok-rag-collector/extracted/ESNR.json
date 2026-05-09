@@ -1,7 +1,7 @@
 {
  "source": "ESNR",
  "generated_at": "2026-05-09T11:53:32Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "ESNR-MS-001",
@@ -49,6 +49,31 @@
     {
      "chunk_index": 6,
      "content": "Data protection and security Data protection emerged as another concern, especially given the sensitivity of medical data and the increasing regulations surrounding data privacy. Ensuring that these tools comply with local and international data protection standards is essential to protect patient information and institutional integrity, which in turn, could support broader implementation. To address these concerns, several actionable options can be considered: Adopt robust encryption methods: Implement advanced encryption techniques for data storage and transmission to safeguard sensitive patient information against unauthorized access. This is already present for most electronic hospital environments and developers of QReports could make use of this expertise. Conduct regular compliance audits: Establish routine assessments to ensure adherence to local and international data privacy regulations, such as the GDPR, or other region-specific standards. Incorporate role-based access controls: Limit access to QReport data and tools based on user roles, ensuring that only authorized personnel can view or modify sensitive information. Provide user education on data privacy: Train clinicians and technical staff on best practices for data handling, emphasizing their roles in maintaining data security within the QReport ecosystem. Limitations This survey was not without limitations. First, the initial questionnaire was distributed through the MAGNIMS email network. Despite encouragement to distribute this questionnaire among fellow neurologists and (neuro)radiologists, the majority of responders were within this network. Second, the vast majority of responders work in academic hospitals with specialized MS clinicians present. This will under-represent non-academic clinicians. Third, the responders were primarily from European academic centers, introducing a bias that may not fully reflect the needs of the global market or community-based settings. Since QReport software targets a worldwide audience, future studies should include diverse participants to better capture international and non-academic perspective. Fourth, not every question was answered by the same number of responders. Exclusion of the “I don’t know” option could have led to an overestimation of consensus. This is especially true for the second questionnaire, where the response rate was generally lower. However, we observed a low fraction (< 9%) with “I don’t know” answers. Another limitation is the lack of detailed information on the familiarity and experience of respondents with QReport tools. Our findings reflect the current low adoption rates of these tools, which may, in part, reflect dissatisfaction with available products—a gap we aim to address. Future research should include measures of user familiarity with these technologies to provide a more comprehensive understanding of the results and inform the development of targeted solutions for varying levels of expertise. Conclusion In conclusion, while QReports offer significant potential to improve the management of MS, their widespread adoption depends on addressing the financial, educational, and technical challenges identified in this study. Tailoring these tools to meet the specific needs of clinicians and seamlessly integrating them into clinical workflows has the potential to improve patient care and disease management in MS. The user requirements identified in this study could therefore represent an important step towards improving the utility and functionality of QReports. Supplementary information ELECTRONIC SUPPLEMENTARY MATERIAL"
+    }
+   ]
+  },
+  {
+   "id": "ESNR-NEURO-001",
+   "source": "ESNR",
+   "title": "ESNR neurological imaging guidelines compendium",
+   "year": "2022",
+   "page_url": "https://www.esnr.org/guidelines/",
+   "pdf_url": "https://www.esnr.org/guidelines/",
+   "license": "ESNR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_neuro",
+   "priority": "medium",
+   "sha256": "476cb79ae73897c67477563c153b546bae79e151cd6b5d0c8fb9982feb4ef676",
+   "size_bytes": 716,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 716,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESNR neurological imaging guidelines compendium Source: ESNR Year: 2022 Domain: radiology_mri_neuro License: ESNR Available at: https://www.esnr.org/guidelines/ This is a citation reference for the ESNR guideline 'ESNR neurological imaging guidelines compendium' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_mri_neuro. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

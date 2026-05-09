@@ -1,7 +1,7 @@
 {
  "source": "AGS",
  "generated_at": "2026-05-02T16:22:11Z",
- "total_documents": 27,
+ "total_documents": 33,
  "documents": [
   {
    "id": "AGS-001",
@@ -1479,6 +1479,156 @@
     {
      "chunk_index": 14,
      "content": "the present institution. In such cases, the palliative care team may request consultation from an HF specialist. If, after interdisciplinary review and shared decision-making with the patient and family, ICD deactivation is considered consistent with the patient’s goals of care, the HF specialist may then refer the patient to a cardiologist with expertise in electrophysiology for the formal ICD deactivation process ( ). LIMITATIONS AND APPLICABILITY OF INDIRECT EVIDENCE A limitation of this guideline is that, for several key questions, direct evidence in patients with advanced HF was sparse or unavailable, and some recommendations therefore relied partly on data derived from non-HF populations, particularly patients with advanced cancer or COPD. Such extrapolation should be interpreted cautiously. Although these populations share important palliative care needs with advanced HF—such as refractory dyspnea, anxiety, depression, pain, and high symptom burden—the underlying pathophysiology, illness trajectory, comorbidity profile, and treatment context differ substantially. Patients with advanced HF often have fluctuating hemodynamics, polypharmacy, renal dysfunction, and vulnerability to hypotension, arrhythmia, sedation, and drug–drug interactions, which may alter both the efficacy and safety of symptom-directed interventions. Accordingly, evidence from non-HF populations was used primarily to inform the direction of effect and potential harms rather than to assume direct equivalence of treatment benefit in HF. Recommendations based on indirect evidence were therefore interpreted conservatively and weighed together with available HF-specific observational data, expert consensus, and clinical applicability. CONSENSUS ON RECOMMENDATION AND GUIDELINE UPDATE PLAN Consensus on the recommendations was achieved using the RAND-UCLA Appropriateness Method, which incorporates a modified Delphi process to provide a comprehensive prioritization of issues and the level of agreement among participants. This process ensured that recommendation strength reflected not only the available evidence but also collective expert judgment in areas where empirical data were limited. All developers participated by voting on a scale of 1 (disagree) to 9 (agree) for each recommendation, classifying them as appropriate (median 7–9, no disagreement), inappropriate (median 1–3, no disagreement), or uncertain (median 4–6 or presence of disagreement). A plan was in place to share the results of the first-round voting and conduct a second-round vote with discussion for any recommendations where appropriateness or agreement remained uncertain; however, all recommendations reached an appropriate level of consensus after the first round ( ). During the guideline development process, the literature review revealed a significant lack of high-quality evidence. Therefore, updates are planned approximately every 5 years, incorporating new recommendations or revisions/supplements to existing ones as additional evidence accumulates and high-quality data on new medications and therapies emerge. Key questions for updates will be selected by surveying guideline users for additional needs and prioritizing through expert discussions on newly introduced drugs and treatments. The update process will follow the existing methodology, and evidence for previously developed recommendations will include newly added content published after December 19, 2025."
+    }
+   ]
+  },
+  {
+   "id": "AGS-GLAU-001",
+   "source": "AGS",
+   "title": "AGS position statement on minimally invasive glaucoma surgery",
+   "year": "2021",
+   "page_url": "https://www.americanglaucomasociety.net/position-statements",
+   "pdf_url": "https://www.americanglaucomasociety.net/position-statements",
+   "license": "AGS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_glaucoma",
+   "priority": "medium",
+   "sha256": "8e54e6bd53c7b2674b115514ae1ba509dba690aae0f20a7806c3b3359081503c",
+   "size_bytes": 774,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 774,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AGS position statement on minimally invasive glaucoma surgery Source: AGS Year: 2021 Domain: ophthalmology_glaucoma License: AGS Available at: https://www.americanglaucomasociety.net/position-statements This is a citation reference for the AGS guideline 'AGS position statement on minimally invasive glaucoma surgery' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_glaucoma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AGS-GLAU-002",
+   "source": "AGS",
+   "title": "AGS clinical statement on glaucoma medication adherence",
+   "year": "2020",
+   "page_url": "https://www.americanglaucomasociety.net/position-statements",
+   "pdf_url": "https://www.americanglaucomasociety.net/position-statements",
+   "license": "AGS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_glaucoma",
+   "priority": "medium",
+   "sha256": "f23e6af1b2a1c42d1051fb5c1a3f9403b82da59231a6ecd9a60de9ba741a6e8f",
+   "size_bytes": 762,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 762,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AGS clinical statement on glaucoma medication adherence Source: AGS Year: 2020 Domain: ophthalmology_glaucoma License: AGS Available at: https://www.americanglaucomasociety.net/position-statements This is a citation reference for the AGS guideline 'AGS clinical statement on glaucoma medication adherence' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_glaucoma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AGS-ELDERLY-DM-001",
+   "source": "AGS",
+   "title": "AGS choosing wisely diabetes management in older adults",
+   "year": "2019",
+   "page_url": "https://www.americangeriatrics.org/",
+   "pdf_url": "https://www.americangeriatrics.org/",
+   "license": "AGS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_diabetes",
+   "priority": "medium",
+   "sha256": "225455d8e88e9003a7bb110fafd357afe06c0b5099ceae337078886d000e6225",
+   "size_bytes": 2121,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2121,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Implementation of a Behavioral Economics Electronic Health Record (BE-EHR) Module to Reduce Overtreatment of Diabetes in Older Adults. Intensive glycemic control is of unclear benefit and carries increased risk for older adults with diabetes. The American Geriatrics Society's (AGS) Choosing Wisely (CW) guideline promotes less aggressive glycemic targets and reduction in pharmacologic therapy for older adults with type II diabetes. Meanwhile, behavioral economic (BE) approaches offer promise in influencing hard-to-change behavior, and previous studies have shown the benefits of using electronic health record (EHR) technology to encourage guideline adherence. This study aimed to develop and pilot test an intervention that leverages BE with EHR technology to promote appropriate diabetes management in older adults. A pilot study within the New York University Langone Health (NYULH) EHR and Epic system to deliver BE-inspired nudges at five NYULH clinics at varying time points from July 12, 2018, through October 31, 2019. Clinicians across five practices in the NYULH system whose patients were older adults (age 76 and older) with type II diabetes. A BE-EHR module comprising six nudges was developed through a series of design workshops, interviews, user-testing sessions, and clinic visits. BE principles utilized in the nudges include framing, social norming, accountable justification, defaults, affirmation, and gamification. Patient-level CW compliance. CW compliance increased 5.1% from a 16-week interval at baseline to a 16-week interval post intervention. From February 14 to June 5, 2018 (prior to the first nudge launch in Vanguard clinics), CW compliance for 1278 patients was mean (95% CI)-16.1% (14.1%, 18.1%). From July 3 to October 22, 2019 (after BE-EHR module launch at all five clinics), CW compliance for 680 patients was 21.2% (18.1%, 24.3%). The BE-EHR module shows promise for promoting the AGS CW guideline and improving diabetes management in older adults. A randomized controlled trial will commence to test the effectiveness of the intervention across 66 NYULH clinics. NCT03409523."
+    }
+   ]
+  },
+  {
+   "id": "BEERS-001",
+   "source": "AGS",
+   "title": "AGS Beers Criteria for Potentially Inappropriate Medication Use in Older Adults",
+   "year": "2023",
+   "page_url": "https://www.americangeriatrics.org/publications-tools/clinical-guidelines-recommendations",
+   "pdf_url": "https://www.americangeriatrics.org/publications-tools/clinical-guidelines-recommendations",
+   "license": "AGS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_formulary",
+   "priority": "high",
+   "sha256": "87f2be28168926b33a503f6eb1cf1d28203d46c254358398895e058166b0dbd9",
+   "size_bytes": 1765,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1763,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Association Between Real-Time Alerts in Electronic Prescribing Systems and Potentially Inappropriate Prescribing Among Older Adults. Older adults are highly susceptible to adverse effects from potentially inappropriate medications (PIMs). Real-time clinical decision support systems (CDSS) may reduce unsafe prescribing; yet evidence from low- and middle-income countries is limited. This study assessed the association between a national electronic alert system and outpatient PIM prescribing in Iran. We examined 230,719 electronic outpatient prescriptions for adults aged 65 years and older. Prescriptions from May to August 2023 (pre-alert) were compared with those from May to August 2024 (post-alert). The primary outcome was the proportion of prescriptions containing ≥ 1 PIM, defined using the 2023 AGS Beers Criteria. Subgroup analyses stratified outcomes by age, sex, physician specialty, and drug class. Across 2023-2024, 230,719 prescriptions were recorded. After alert implementation, the greatest reductions occurred in adults aged 85-100 years (-9.85%) and in women (-7.89%). Significant declines were also observed in gastrointestinal drugs (-14.14%), pain medications (-11.99%), central nervous system agents (-3.03%), antihistamines (-4.60%), and in specific medications including ketorolac, clidinium-chlordiazepoxide, methocarbamol, nortriptyline, chlorpheniramine, indomethacin, and dicyclomine. By specialty, the largest reductions were seen in Surgery (-18.13%), Internal Medicine (-12.56%), and General Practice (-6.99%). A national, real-time, non-interruptive alert system was associated with meaningful reductions in PIM prescribing among older adults. Scalable CDSS tools may enhance medication safety in resource-constrained settings."
+    }
+   ]
+  },
+  {
+   "id": "AGS-FOR-001",
+   "source": "AGS",
+   "title": "AGS Position Statement Elder Abuse Detection and Reporting",
+   "year": "2022",
+   "page_url": "https://www.americangeriatrics.org/policy-advocacy/position-statements",
+   "pdf_url": "https://www.americangeriatrics.org/policy-advocacy/position-statements",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_violence",
+   "priority": "high",
+   "sha256": "a394075ddae7401326fe55bf02bac1b8390cda3c2852ccb8f80f7fc8e3307e47",
+   "size_bytes": 776,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 776,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AGS Position Statement Elder Abuse Detection and Reporting Source: AGS Year: 2022 Domain: forensic_violence License: Restricted Available at: https://www.americangeriatrics.org/policy-advocacy/position-statements This is a citation reference for the AGS guideline 'AGS Position Statement Elder Abuse Detection and Reporting' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_violence. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AGS-GER-007",
+   "source": "AGS",
+   "title": "AGS Position Statement Aging in Place Home-Based Primary Care",
+   "year": "2021",
+   "page_url": "https://www.americangeriatrics.org/policy-advocacy/position-statements",
+   "pdf_url": "https://www.americangeriatrics.org/policy-advocacy/position-statements",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "geriatric_assessment",
+   "priority": "medium",
+   "sha256": "070a2a0932ce93078eb5bfc4828497e8b03fd43162a38aa2450b0eefa0e7d22e",
+   "size_bytes": 788,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 788,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AGS Position Statement Aging in Place Home-Based Primary Care Source: AGS Year: 2021 Domain: geriatric_assessment License: Restricted Available at: https://www.americangeriatrics.org/policy-advocacy/position-statements This is a citation reference for the AGS guideline 'AGS Position Statement Aging in Place Home-Based Primary Care' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: geriatric_assessment. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "EFSUMB",
  "generated_at": "2026-05-09T11:05:13Z",
- "total_documents": 8,
+ "total_documents": 9,
  "documents": [
   {
    "id": "EFSUMB-CEUS-001",
@@ -524,6 +524,31 @@
     {
      "chunk_index": 6,
      "content": "which is more evident during the parenchymal phase due to earlier contrast washout. On the contrary, more often focal thickening in benign LN displays the same enhancement features as the adjacent nodal tissue [ ]. Furthermore, to improve differentiation between benign and metastatic LN perfusion kinetics has been examined too. Benign LN shows a centrifugal progression of enhancement, while a prominent centripetal enhancement is more often observed in a metastatic LN. By analysing signal time-intensity curves and the parametric images obtained through the perfusion parameters, it has also been noted that in metastatic LN compared to non-pathological LN, the difference between peak signal intensity in hyper enhancing and hypo enhancing regions is emphasized more [ ]. In most of these studies the conventional US and CEUS combination is compared to histological examinations (by dissection, gun biopsy) or FNA cytology as gold standard. Hong et al. found some US and CEUS parameters useful in differential diagnosis between benign vs. metastatic LN with high specificity and statistical significance. In particular: L/S ratio < 2, ill-defined margins, hyper-echogenicity, cystic necrosis, calcification and peripheral vascularity are found at baseline US; meanwhile, centripetal or asynchronous perfusion ( a,b), non- or hyper-enhancement, perfusion defects and ring enhancing margins are found using CEUS; lymph nodes with one or more of the previous features are considered metastatic [ ]. The six largest studies regarding differentiation between benign and metastatic cervical lymp nodes, conducted between 2014 and 2019, show that CEUS has a good diagnostic accuracy superior to standard US and Color-Doppler grayscale alone [ , , , , ] ( ). Furthermore, both Hong et al. and Chen et al. demonstrate how a combination of US and CEUS is more accurate on the whole than any of these two techniques used individually: the Hong et al. paper reported a detected a B mode US + CEUS accuracy of 92.2% (vs. 89.3% of CEUS and 84.6% of grayscale US alone) [ ]; the Chen et al. paper reported a B mode US + CEUS accuracy of 92.7% (vs. 89.1% of CEUS and 80.0% of grayscale US alone) [ ]. In addition, Zhan et al. proved that homogeneity, cystic change or calcification and above, all peak-time intensity, were the three strongest independent predictors for CLNM using CEUS [ ]. However, only one previous study showed that no single conventional ultrasonography or CEUS characteristics were conclusive enough to distinguish metastatic thyroid nodules from indolent ones; anyway iso- or hypo-enhancements at peak time, especially in combination with several other parameters, might still be good predictors for CLNM prognoses in PTC patients [ ]. In conclusion, although the studies published to date are still too few, besides being based on limited sample populations and the sensitivity and specificity values reported are quite inhomogeneous, it is possible to state that CEUS could play a role in loco-regional lymph-node evaluation in patients with malignant thyroid nodule."
+    }
+   ]
+  },
+  {
+   "id": "EFSUMB-US-003",
+   "source": "EFSUMB",
+   "title": "EFSUMB Position Paper on Liver Ultrasound Elastography Update 2024",
+   "year": "2024",
+   "page_url": "https://www.efsumb.org/guidelines/",
+   "pdf_url": "https://www.efsumb.org/guidelines/",
+   "license": "EFSUMB",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_us_general",
+   "priority": "high",
+   "sha256": "4fa0e0952cf66738b8d7dae2826b35b44ebd3cf30916f9dae95a77977a67620f",
+   "size_bytes": 764,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 764,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EFSUMB Position Paper on Liver Ultrasound Elastography Update 2024 Source: EFSUMB Year: 2024 Domain: radiology_us_general License: EFSUMB Available at: https://www.efsumb.org/guidelines/ This is a citation reference for the EFSUMB guideline 'EFSUMB Position Paper on Liver Ultrasound Elastography Update 2024' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_us_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

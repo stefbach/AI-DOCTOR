@@ -1,7 +1,7 @@
 {
  "source": "USPSTF",
  "generated_at": "2026-05-02T14:13:02Z",
- "total_documents": 63,
+ "total_documents": 89,
  "documents": [
   {
    "id": "USPSTF-002",
@@ -3375,6 +3375,664 @@
     {
      "chunk_index": 1,
      "content": "in other states. Following the Supreme Court's 2022 Dobbs v. Jackson Women's Health Organization decision that overturned Roe v Wade , many states enacted laws that criminalize or severely penalize women and their clinicians, creating legal uncertainty that has curtailed provision of evidence-based reproductive care. These restrictions extend to prescribing abortion-inducing medications (e.g., mifepristone and misoprostol) through state bans, prescribing limitations and ongoing regulatory and legal challenges, collectively reducing access and exacerbating geographic and socioeconomic inequities in reproductive healthcare. These deadly public policies will ultimately undermine progress towards eliminating HIV [ ]. In contrast, several countries, including Argentina, Colombia, Mexico, Ireland, France, and Spain, have expanded women's reproductive autonomy by decriminalizing abortion, protecting clinicians and integrating accessibility for abortion medications into routine healthcare [ ]. Structural interventions offer a more effective and sustainable pathway for the prevention of gender-based violence and HIV risk reduction. Trauma-informed health systems can play a vital role in delivering confidential IPV screening alongside on-site advocates, social workers and legal-medical partnerships in HIV and prenatal care settings and may reduce structural barriers to planning safety support [ ]. HIV strategists should explicitly integrate IPV into prevention metrics. Funding cross-sector collaborations, such as housing, legal, and social services is needed to achieve consistent and sustainable outcomes. The HOPE study emphasizes that pregnancy and the postpartum period are critical touchpoints of engagement with HIV care but are also vulnerable periods when the cumulative effects of trauma, structural deprivation and gendered power imbalances are laid bare. Elevated IPV and RC risk during this period does not stem from pregnancy, but rather from entrenched inequities that are exacerbated by heightened institutional surveillance across health, social, and legal systems. A transformative shift is needed; instead of solely responding to crises, prevention approaches should be prioritized that forgo blame and embrace accountability. Ending HIV requires confronting gender-based violence across the life course through a multisystemic approach. Acknowledgements The authors acknowledge support from the National Institute on Drug Abuse (U01DA063078 and T32 DA023356-19). The funders had no role in the preparation of this manuscript. The views expressed are solely those of the authors. Conflicts of interest There are no conflicts of interest."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-VISION-001",
+   "source": "USPSTF",
+   "title": "USPSTF recommendation vision screening in children ages 3 to 5 years",
+   "year": "2022",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/vision-in-children-ages-6-months-to-5-years-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/vision-in-children-ages-6-months-to-5-years-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "ophthalmology_pediatric",
+   "priority": "high",
+   "sha256": "b6b1b0d87233f6ce63c4e9b198646efb3f841a0f1526d13df8cd73c4c7cba41f",
+   "size_bytes": 861,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 861,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: USPSTF recommendation vision screening in children ages 3 to 5 years Source: USPSTF Year: 2022 Domain: ophthalmology_pediatric License: USPSTF Available at: https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/vision-in-children-ages-6-months-to-5-years-screening This is a citation reference for the USPSTF guideline 'USPSTF recommendation vision screening in children ages 3 to 5 years' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-VISIONADULT-001",
+   "source": "USPSTF",
+   "title": "USPSTF recommendation impaired visual acuity screening in older adults",
+   "year": "2022",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/impaired-visual-acuity-screening-older-adults",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/impaired-visual-acuity-screening-older-adults",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "ophthalmology_neuro",
+   "priority": "medium",
+   "sha256": "947cb38fa962fa54d6916d0eb17eb8a91a0bf611d958bf98b105005e7c20a878",
+   "size_bytes": 1569,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1569,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Screening for Impaired Visual Acuity in Older Adults: US Preventive Services Task Force Recommendation Statement. Impairment of visual acuity is a serious public health problem in older adults. The number of persons 60 years or older with impaired visual acuity (defined as best corrected visual acuity worse than 20/40 but better than 20/200) was estimated at 2.91 million in 2015, and the number who are blind (defined as best corrected visual acuity of 20/200 or worse) was estimated at 760 000. Impaired visual acuity is consistently associated with decreased quality of life in older persons, including reduced ability to perform activities of daily living, work, and drive safely, as well as increased risk of falls and other unintentional injuries. To update its 2016 recommendation, the US Preventive Services Task Force (USPSTF) commissioned a systematic review to evaluate the benefits and harms of screening for impaired visual acuity in older adults. Asymptomatic adults 65 years or older who present in primary care without known impaired visual acuity and are not seeking care for vision problems. The USPSTF concludes that the evidence is insufficient to assess the balance of benefits and harms of screening for impaired visual acuity in asymptomatic older adults. The evidence is lacking, and the balance of benefits and harms cannot be determined. More research is needed. The USPSTF concludes that the current evidence is insufficient to assess the balance of benefits and harms of screening for impaired visual acuity in older adults. (I statement)."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-HEARING-001",
+   "source": "USPSTF",
+   "title": "USPSTF recommendation hearing loss screening in older adults",
+   "year": "2021",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hearing-loss-in-older-adults-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hearing-loss-in-older-adults-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "ent_otology",
+   "priority": "high",
+   "sha256": "a39670b0114eb61debff34e02352245b5d2bb9ad78f6d63ce3d9afdc75e96356",
+   "size_bytes": 806,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 806,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: USPSTF recommendation hearing loss screening in older adults Source: USPSTF Year: 2021 Domain: ent_otology License: USPSTF Available at: https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hearing-loss-in-older-adults-screening This is a citation reference for the USPSTF guideline 'USPSTF recommendation hearing loss screening in older adults' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_otology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-EYEPRO-001",
+   "source": "USPSTF",
+   "title": "USPSTF ocular prophylaxis for gonococcal ophthalmia neonatorum recommendation",
+   "year": "2019",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "neonatology_screening",
+   "priority": "medium",
+   "sha256": "e2a66922ff6e2d368511ae0b8ae5a131f011e7637302b5ba0655695caff5bfd7",
+   "size_bytes": 10135,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 10113,
+   "chunk_count": 2,
+   "extracted_at": "2026-05-09T19:16:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Ophthalmia Neonatorum Ophthalmia neonatorum is a type of conjunctivitis that occurs in the neonatal period, affecting 1% to 12% of neonates (see Image. Ophthalmia Neonatorum). This condition commonly gets transmitted during vaginal delivery, and it correlates with severe complications (eg, corneal ulceration and perforation), which can potentially result in permanent blindness. Due to the significant morbidity associated with this disease, the United States Preventive Services Task Force (USPSTF) has issued new guidelines regarding antibiotic use in all newborns to prevent ophthalmia neonatorum. These guidelines were established to prevent the vertical transmission of gonococcal infection, which can occur in up to 50% of cases when prophylaxis is not administered. In 2010, The Centers for Disease Control and Prevention (CDC) developed the guidelines for the management of sexually transmitted infections (STIs), in which prophylaxis with erythromycin ointment (0.5%) or azithromycin solution 1% (if erythromycin not available) is recommended as a part of the routine newborn care for ophthalmia neonatorum prevention, considering that is effective and inexpensive. In these guidelines, routine screening and appropriate treatment, including for the partners of all pregnant women during the first trimester, are also recommended. During the third trimester, screening follow-up for those women considered high risk (eg, multiple sex partners and individuals aged 24 years or younger) is advisable. Silver nitrate effectively prevents gonococcal ophthalmia neonatorum; however, its use has been discontinued due to the high risk of developing chemical conjunctivitis in approximately 50% of the cases. Ophthalmia neonatorum, also known as neonatal conjunctivitis, is a severe form of conjunctival inflammation occurring within the first month of life. This condition represents a significant cause of neonatal ocular morbidity worldwide and, if not promptly recognized and treated, can lead to corneal ulceration, scarring, and permanent visual impairment. Historically, ophthalmia neonatorum was most commonly associated with Neisseria gonorrhoeae infection, but in modern practice, a broader spectrum of bacterial, viral, and chemical etiologies is recognized. Early identification and management are therefore critical to prevent complications that can have lifelong consequences. The incidence of ophthalmia neonatorum varies geographically, reflecting differences in maternal infection rates, availability of prenatal care, and adherence to prophylactic protocols. In high-resource settings, the incidence has declined markedly following the implementation of universal ocular prophylaxis—most commonly topical erythromycin ointment applied shortly after birth—and routine screening and treatment of maternal STIs during pregnancy. However, in low- and middle-income countries, limited access to prenatal screening and inconsistent application of prophylaxis contribute to higher rates of neonatal conjunctivitis. Recent epidemiological surveys estimate incidence rates ranging from <1% in well-resourced maternity services to >10% in underserved regions. Etiologically, ophthalmia neonatorum is classified according to the causative agent and the timing of onset. Early-onset cases (within 24–48 hours of birth) often result from chemical irritants, such as silver nitrate or povidone-iodine drops used for prophylaxis, or from viruses vertically transmitted in utero (notably herpes simplex virus). Bacterial causes, which may manifest between days 2 and 7 of life, include N. gonorrhoeae, Chlamydia trachomatis, Staphylococcus aureus, Streptococcus pneumoniae , and Haemophilus influenzae . Gonococcal conjunctivitis typically presents most aggressively, with copious purulent discharge, eyelid edema, and rapid progression to corneal involvement if untreated. Chlamydial conjunctivitis, in contrast, tends to have a more indolent course with watery or mucopurulent discharge emerging around day 5 to 14, often accompanied by nasopharyngeal colonization and potential otitis media. Viral etiologies, particularly herpes simplex virus type 2, may present later (days 7–14) with conjunctivitis often accompanied by systemic signs, eg, fever, irritability, and vesicular skin lesions. The pathophysiology of ophthalmia neonatorum centers on the immature anatomy and immunology of the newborn eye. The neonatal conjunctiva and cornea exhibit increased permeability, and tear film production is limited, thereby reducing the natural clearance of pathogens. In addition, maternal antibodies—while providing some passive immunity—may not fully protect against pathogens acquired during passage through the birth canal. For N. gonorrhoeae , bacterial adherence to conjunctival epithelial cells triggers a robust inflammatory response, characterized by the infiltration of polymorphonuclear leukocytes and the release of proteolytic enzymes that can damage the corneal stroma. Chlamydia induces a less fulminant but chronic inflammatory milieu that can lead to conjunctival scarring if untreated. Viral replication in epithelial cells contributes to cytopathic effects and secondary bacterial superinfection. Clinically, the diagnosis of ophthalmia neonatorum requires a high index of suspicion. Infants present with varying degrees of eyelid swelling, conjunctival redness, and ocular discharge. The nature of the discharge—watery, mucopurulent, or frankly purulent—guides the differential. Gonococcal infection is suspected when heavy purulence appears as early as 2 to 3 days of life; chlamydial infection should be considered with milder, delayed-onset discharge. Chemical conjunctivitis typically develops within hours of prophylactic instillation and resolves within 24 to 48 hours without the need for specific antimicrobial therapy. The presence of eyelid vesicles or systemic signs may distinguish viral conjunctivitis. A thorough history—particularly of maternal"
+    },
+    {
+     "chunk_index": 1,
+     "content": "diagnosis of ophthalmia neonatorum requires a high index of suspicion. Infants present with varying degrees of eyelid swelling, conjunctival redness, and ocular discharge. The nature of the discharge—watery, mucopurulent, or frankly purulent—guides the differential. Gonococcal infection is suspected when heavy purulence appears as early as 2 to 3 days of life; chlamydial infection should be considered with milder, delayed-onset discharge. Chemical conjunctivitis typically develops within hours of prophylactic instillation and resolves within 24 to 48 hours without the need for specific antimicrobial therapy. The presence of eyelid vesicles or systemic signs may distinguish viral conjunctivitis. A thorough history—particularly of maternal STI status, duration of membrane rupture, and prophylactic measures administered at birth—is essential. Laboratory confirmation involves gram staining and culture of conjunctival scrapings for gonorrhea, as well as nucleic acid amplification tests (NAATs) for chlamydia and gonococcus. Additionally, viral culture or polymerase chain reaction (PCR) is used for the herpes simplex virus. Management of ophthalmia neonatorum hinges on prompt, appropriate antimicrobial therapy tailored to the suspected or confirmed pathogen. For gonococcal conjunctivitis, systemic antibiotic therapy is mandatory—typically a single intramuscular dose of ceftriaxone, accompanied by saline eyelid cleansing and topical antibiotic drops to reduce surface bacterial load. Chlamydial conjunctivitis is treated with oral erythromycin or azithromycin, which reach therapeutic concentrations in tears and reduce the risk of nasopharyngeal and ear involvement. Chemical conjunctivitis typically requires only supportive care, including lubrication of the affected area. In suspected neonatal herpes infection, systemic acyclovir should be initiated urgently, given the risk of disseminated disease. Close ophthalmologic follow-up is necessary to monitor for corneal complications. Any sign of corneal ulceration or scarring requires intensive management, possibly including topical antibiotics, antiviral agents, or surgical intervention in severe cases. Prevention of ophthalmia neonatorum is equally paramount. Universal ocular prophylaxis remains a cornerstone of newborn care, with current guidelines favoring the application of erythromycin 0.5% ointment within 1 hour of birth. Some settings have adopted povidone-iodine as an alternative, given concerns about erythromycin resistance and availability. However, prophylaxis does not obviate the need for maternal STI screening and treatment: prenatal testing for N. gonorrhoeae and C. trachomatis , and treatment of positive cases, substantially reduces neonatal infection risk. Education of expectant mothers about safe sexual practices, diligent prenatal care, and early recognition of symptoms in neonates further enhances prevention efforts. Ophthalmia neonatorum poses a significant public health challenge, spanning the domains of obstetrics, neonatology, infectious diseases, and ophthalmology. Effective control requires an integrated approach, ensuring access to prenatal screening and treatment, guaranteeing the consistent application of ocular prophylaxis at birth, educating healthcare practitioners and parents about the early signs of infection, and establishing protocols for rapid diagnosis and treatment. In resource-limited settings, strengthening healthcare infrastructure, eg, supply chains for prophylactic agents, laboratory capacity for NAAT testing, and training of primary care clinicians, can markedly reduce the burden of neonatal conjunctivitis and its sequelae. Despite advances, challenges remain. Antimicrobial resistance among gonococcal strains poses a threat to undermine current treatment regimens, necessitating ongoing surveillance and potential adjustments to treatment regimens. The emergence of new enteric and respiratory pathogens capable of causing neonatal conjunctivitis underscores the need for vigilant epidemiological monitoring. Ultimately, disparities in healthcare access persist, driving uneven outcomes worldwide. Achieving universal coverage of prenatal STI screening and ocular prophylaxis, coupled with timely therapeutic interventions, is essential to safeguarding the vision and health of newborns worldwide. Ophthalmia neonatorum is a preventable and treatable condition whose successful management hinges on interprofessional collaboration, adherence to evidence-based guidelines, and equitable access to healthcare resources. By integrating robust preventive strategies with prompt, pathogen-specific treatments, clinicians can virtually eliminate the risk of vision-threatening complications in this vulnerable population, fulfilling the promise of modern neonatal care and preserving the gift of sight from the very first days of life."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-CVD-002",
+   "source": "USPSTF",
+   "title": "Aspirin for Primary Prevention of CVD",
+   "year": "2022",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/aspirin-to-prevent-cardiovascular-disease-preventive-medication",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/aspirin-to-prevent-cardiovascular-disease-preventive-medication",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "27611ea7299bbed8a0410b999748cf0c093017e6bbebe83a2051f3b303f1554e",
+   "size_bytes": 2394,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2394,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "The efficacy and safety of lower-dose aspirin for primary and secondary prevention of cardiovascular disease in the elderly: an interim analysis of a multicenter, prospective, observational study. Although low-dose aspirin effectively reduces atherothrombosis occurrence in individuals diagnosed with cardiovascular disease (CVD) or in those with high-risk factors, it is significantly associated with increased bleeding. No evidence has been established for a lower dose of aspirin. The Lower-dose Aspirin for Primary and Secondary Prevention of Cardiovascular Disease in the Elderly (LAPIS) is a multicenter, prospective, observational cohort study, which compared the benefits and risks in adults aged 60 years and older taking aspirin 50 or 100 mg/day for primary and secondary CVD prevention in a propensity score-matched population. The efficacy outcome was a composite of the first occurrence of major adverse cardiovascular events (MACE). The safety outcome was the first occurrence of any hemorrhagic events. In this interim analysis of LAPIS, 7,021 participants were followed up for a median of 183 (95% CI 169-197) days (primary prevention cohort, 2,070; secondary prevention cohort, 4,951). After adjusting for baseline characteristics using propensity score matching, the MACE incidence did not differ significantly between the two dosage groups in either cohort. However, in the primary prevention cohort, the incidence of any bleeding [8.89 vs. 3.45 events/100 patient-years, hazard ratio (HR) 2.917, 95% confidence interval (CI) 1.719-4.952, P < 0.001] and gastrointestinal events (8.30 vs. 5.04 events/100 patient-years, HR 1.745, 95% CI 1.047-2.907, P = 0.037) was higher in the 100 mg/day group. In the secondary prevention cohort, the 100 mg/day group showed higher rates of any bleeding (9.19 vs. 6.37 events/100 patient-years, HR 1.473, 95% CI 1.087-1.998, P = 0.015), minor bleeding (9.10 vs. 6.06 events/100 patient-years, HR 1.541, 95% CI 1.116-2.127, P = 0.009), and gastrointestinal adverse events (7.10 vs. 3.53 events/100 patient-years, HR 1.943, 95% CI 1.291-2.925, P = 0.002). Aspirin 50 mg/day was associated with lower hemorrhage and gastrointestinal adverse event risks, with similar cardiovascular benefits, compared with aspirin 100 mg/day, and may be preferred to balance efficacy and safety for older Chinese adults in primary and secondary CVD prevention."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-CVD-003",
+   "source": "USPSTF",
+   "title": "Screening for Hypertension in Adults",
+   "year": "2021",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hypertension-in-adults-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hypertension-in-adults-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "5713ea7f2624872517cceb5c1a201d7e55f09f98a0973a40a43295f3cd8f96bb",
+   "size_bytes": 770,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 770,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Screening for Hypertension in Adults Source: USPSTF Year: 2021 Domain: preventive_screening License: USPSTF Available at: https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hypertension-in-adults-screening This is a citation reference for the USPSTF guideline 'Screening for Hypertension in Adults' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: preventive_screening. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-CVD-004",
+   "source": "USPSTF",
+   "title": "Behavioral Counseling for Cardiovascular Disease Prevention",
+   "year": "2020",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/healthy-diet-and-physical-activity-counseling-adults-with-high-risk-of-cvd",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/healthy-diet-and-physical-activity-counseling-adults-with-high-risk-of-cvd",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_behavioral",
+   "priority": "high",
+   "sha256": "d817f9208e4fcba28523a9f63a581ea83240143749dccc807d0383ba8c6a5b50",
+   "size_bytes": 2847,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2845,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:41Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Clinical Decision Support for Chronic Kidney Disease in Primary Care: A Cluster Randomized Clinical Trial. Optimal clinical decision support system (CDSS) implementation for chronic kidney disease (CKD) management in Chinese primary care remains undefined despite the high disease burden. To examine whether a CDSS for CKD could improve physician behavior and patient outcomes in primary care. This cluster randomized clinical trial is being conducted in Chinese primary care centers. The trial spans a 3-year period (January 1, 2023, to December 31, 2026) and is divided into 2 phases; this phase 1 analysis includes data from the initial 6-month follow-up (June 10 to December 10, 2023). Centers were stratified by size and randomized 1:1 to intervention or control. Participants are adults (aged ≥18 years) with CKD who had 2 visits or more during the 1-year screening period, all enrolled before randomization. Both groups received government-supported, nephrologist-delivered training on CKD management. The intervention group was additionally equipped with a CDSS embedded into the electronic health record. The primary outcome was a 36-month composite of kidney-related and cardiovascular hospitalizations (phase 2). This phase 1 analysis evaluated 6-month process measures (ie, CKD diagnosis and renin-angiotensin-aldosterone system inhibitor or sodium-dependent glucose transporter 2 inhibitor use) and clinical outcomes (ie, blood pressure, glycated hemoglobin, and low-density lipoprotein cholesterol control). A total of 3390 patients (mean [SD] age, 72.0 [10.2] years; 1881 [55.5%] female) from 30 primary care centers were included (1912 in the intervention group and 1478 in the control group). Follow-up at 6 months was completed by 3055 patients (90.1%; 1743 [91.2%] in the intervention group and 1312 [88.8%] in the control group). CKD diagnosis rates increased by 21.4 (95% CI, 18.6-24.3) percentage points in the intervention group and by 27.9 (95% CI, 24.4-31.3) percentage points in the control group, with a nonsignificant between-group difference (adjusted odds ratio [AOR], 0.91; 95% CI, 0.72-1.14). Renin-angiotensin-aldosterone system inhibitor use (AOR, 0.96; 95% CI, 0.78-1.19), sodium-dependent glucose transporter 2 inhibitor use (AOR, 1.02; 95% CI, 0.78-1.32), and low-density lipoprotein cholesterol control (AOR, 1.10; 95% CI, 0.83-1.46) showed parallel improvements with no between-group differences. Blood pressure (AOR, 0.88; 95% CI, 0.71-1.09) and glycated hemoglobin (AOR, 1.22; 95% CI, 0.74-2.01) control showed no improvement. In this cluster randomized trial of a CDSS for CKD in primary care, both the intervention and control groups demonstrated comparable improvements in 6-month outcomes, with no independent effect of the CDSS detected. Chinese Clinical Trial Registry Identifier: ChiCTR2300070555."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-CA-001",
+   "source": "USPSTF",
+   "title": "Screening for Breast Cancer",
+   "year": "2024",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "7674a0e4c69516ad204c7e15c6cf93ab9a2548fcd8c423164b78642f18d2a9f5",
+   "size_bytes": 1667,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1665,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Triple-Negative Breast Cancer Versus Non-Triple-Negative Breast Cancer: The Impact of Pd and Pt Complexes on Basal-Like Triple-Negative Breast Cancer. Breast cancer (BC) is the most common cancer in women, with a high mortality. Triple-negative breast cancer (TNBC) is a biologically aggressive tumour, characterised by high rates of metastasis. Improved chemotherapeutic approaches against BC are therefore an urgent clinical need. In this study, complexes with two and three metal centres linked by the biogenic polyamines: putrescine (Pt 2 Put 2 (NH 3 ) 4 and Pd 2 Put 2 ) and spermidine (Pt 3 Spd 2 and Pd 3 Spd 2 ), as well as cisplatin were tested against non-malignant (MCF-12A), a TNBC (MDA-MB-468) and a non-TNBC (MCF-7) human cell lines by 3-(4,5-dimethylthiazol-2-yl)-2,5-diphenyltetrazolium bromide assay. Fourier transform infrared and Raman microspectroscopies allow to probe biological samples with unmatched sub-cellular spatial resolution. The results revealed that the polynuclear complexes showed activity for the TNBC cell line. While Pd 3 Spd 2 showed significant impact on DNA (B-DNA to A- or Z-DNA), Pt 2 Put 2 (NH 3 ) 4 had a stronger effect on proteins (seen through Amide II vibrational mode). In addition, these complexes exhibited a greater impact on δC=C-H from phospholipids and CH 2 deformations from lipids. For non-TNBC, Pd 3 Spd 2 also displayed a strong contribution from Z-DNA (νOPO backbone ), whereas Pt 2 Put 2 (NH 3 ) 4 had a significant impact on Amide I and Amide III signals. This knowledge is expected to contribute for the rational design of improved anticancer drugs, with a higher efficiency coupled to lower toxicity."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-CA-002",
+   "source": "USPSTF",
+   "title": "Screening for Colorectal Cancer",
+   "year": "2021",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "b9e03e3812fa57362ed58e9add420de6e380f0c8a9111572eaaadaf87ab8ebd2",
+   "size_bytes": 755,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 755,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Screening for Colorectal Cancer Source: USPSTF Year: 2021 Domain: preventive_screening License: USPSTF Available at: https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening This is a citation reference for the USPSTF guideline 'Screening for Colorectal Cancer' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: preventive_screening. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-CA-003",
+   "source": "USPSTF",
+   "title": "Screening for Cervical Cancer",
+   "year": "2018",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "b020f6262dd2c1f1c4aca71092a8247830170622ab681afa42676db70e63edba",
+   "size_bytes": 1809,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1808,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Exploring barriers to women's participation in breast and cervical cancer screening programs: insights from national health surveys in Türkiye. The utilization of breast and cervical cancer screening services among women remains low in Turkiye, despite their importance for early diagnosis. Therefore, this study examines the influences of financial and physical barriers in accessing healthcare and socio-economic and demographic factors on Turkish women's participation in mammography and Pap smear screenings. The microdata from the Turkey Health Survey (TSA) conducted by the Turkish Statistical Institute (TURKSTAT) in 2014, 2016, 2019, and 2022 were pooled. A total of 26,931 women aged 35 and over were included. To analyze the factors affecting the likelihood of undergoing mammography and Pap smear tests, separate binary logistic regression (logit) models were estimated for each dependent variable. In the first stage, the effects of the variables were reported as odds ratios, and in the second stage, average marginal effects (AME) were calculated and presented through graphs. Participation rates were 43.73% for breast cancer screening and 43.06% for cervical cancer screening. 20% of women faced financial barriers in accessing healthcare services, while 34% faced physical barriers. Encountering financial barriers, education and income levels, having access to a physician, and performing self-breast examinations were related to the level of mammography and Pap smear screening. To increase the effectiveness of screening programs, health policies must prioritize reducing financial barriers, promoting healthy behaviors, and improving physician services. Furthermore, strengthening the role of primary care services in this regard would also be a significant contribution. Not applicable."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-CA-004",
+   "source": "USPSTF",
+   "title": "Screening for Lung Cancer",
+   "year": "2021",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "b536c528c62ef8972d0d575cc7df6d9b102572e666c99b0e23df483f7b58fadc",
+   "size_bytes": 2025,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2025,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Leveraging mitochondrial dynamics-related risk signatures to predict the prognosis and tumor microenvironment of lung adenocarcinoma. Lung adenocarcinoma (LUAD) is a highly heterogeneous disease, bringing daunting challenges in prognosis prediction. Alterations in mitochondrial dynamics (MD) are crucial in tumor generation and progression. Therefore, this study is the first to build a prognostic model based on mitochondrial dynamics-related genes (MDRGs) to predict microenvironment and potential drugs for LUAD. LUAD transcriptomic data were sourced from the Cancer Genome Atlas (TCGA) and the Gene Expression Omnibus (GEO), respectively. First, differentially expressed genes (DEGs) were screened between normal and LUAD samples in the TCGA cohort. The intersection of DEGs and MDRGs yielded differentially expressed MDRGs (DE-MDRGs). Then, a prognostic model was constructed through univariate Cox regression, LASSO Cox regression, and multivariate Cox regression analysis. A nomogram was graphed using clinical factors and the MD-related risk score (MDRS). The predictive performance of the model and the nomogram was evaluated using ROC curves. Finally, analyses on tumor microenvironment (TME), mutation, and predicted in vitro drug response were undertaken. A prognostic model based on 8 MDRGs (SLC52A3, HMGA2, CPS1, GLS2, CYP27A1, CFTR, STAR, and DRP2) was established, demonstrating relatively accurate predictive ability. The low-MDRS group had higher levels of immune cell infiltration, such as aDCs, B cells, neutrophils, and tumor-infiltrating lymphocytes. We also discovered that the tumor mutation burden in the high-MDRS group was considerably higher than that in the low-MDRS group. Additionally, the low-MDRS group was more sensitive to AZD8055, ZM447439, ERK-6604, SB505124, Tozasertib, and BMS-754807, while the high-MDRS group was more sensitive to BI-2536 and Venetoclax. This work set up a prognostic model for LUAD based on 8 MDRGs, pinpointing promising biomarkers and targets for LUAD treatment."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-CA-005",
+   "source": "USPSTF",
+   "title": "Screening for Prostate Cancer",
+   "year": "2018",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "0dc5bcca3aabf58a32864863ac606dea2e80c2a7c56810520bc9975ecb5b5466",
+   "size_bytes": 2107,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2103,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:45Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Risk Stratification of Suspected Clinically Localized Prostate Cancer Using Multi-Indicator Functional Differentiation: A Predictive Model With fPSA/tPSA, PHI, PCA3, and MRI. Accurate risk stratification is crucial for managing men with suspected clinically localized prostate cancer, particularly those with total prostate-specific antigen (tPSA) in the diagnostic grey zone (4-10 ng/mL). This study aimed to develop and validate a predictive model integrating multi-dimensional indicators to distinguish clinically insignificant prostate cancer from significant disease. This retrospective cohort study analysed 242 patients with suspected clinically localized prostate cancer who underwent biopsy from January 2020-December 2021. Patients were stratified into low-risk (n = 118) and high-risk (n = 124) groups based on biopsy pathology. Key biomarkers including free prostate-specific antigen (fPSA)/tPSA ratio, Prostate Health Index (PHI), and Prostate Cancer Antigen 3 (PCA3) score were measured before biopsy. Multiparametric magnetic resonance imaging (mp-MRI) parameters were also assessed. The high-risk group had significantly lower percentage of free to total prostate‑specific antigen (%fPSA) and prostate volume, but higher PHI, PCA3 scores, and positive Prostate Imaging-Reporting and Data System (PI-RADS) findings (all p < 0.05). Multivariate analysis identified %fPSA, PHI, PCA3 score, prostate volume, PI-RADS score ≥ 4, and index lesion diameter as independent predictors. A nomogram incorporating these factors demonstrated excellent discrimination, with an area under the curve (AUC) of 0.885 in the development cohort, remaining robust upon 10-fold cross-validation (AUC = 0.871). Temporal validation in an independent cohort (n = 80) yielded an AUC of 0.863. The developed nomogram, integrating initial fPSA/tPSA screening, PHI risk quantification, PCA3 molecular confirmation, and magnetic resonance imaging (MRI) features, provides an effective tool for personalized risk stratification, with direct comparative analyses confirming its advantage over single-modality approaches."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-MH-001",
+   "source": "USPSTF",
+   "title": "Screening for Depression and Suicide Risk in Adults",
+   "year": "2023",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-depression-suicide-risk-adults",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-depression-suicide-risk-adults",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "24943f2a65c7e4e468e96d5db0749cd2b6be6cd0e05bc4e4110184109d69a466",
+   "size_bytes": 1993,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1993,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Mental health patterns and associated social determinants among university and college students in sub-Saharan Africa during the COVID-19 pandemic era: a scoping review. Evidence on student mental health in sub-Saharan Africa (SSA) remains limited, particularly studies examining how mental health patterns intersect with social determinants within higher education institutions (HEIs). This scoping review identifies gaps in the literature documenting student mental health and associated social determinants during the COVID-19 period and highlights priorities for future research in SSA. Eight databases (MEDLINE, PsycInfo, Open Access Journals, CINAHL, Google Scholar, Cochrane Library, ProQuest, Scopus) and grey literature were searched for English-language studies from 2020 to 2023. Sixty-seven studies from 214 full-text articles screened met the inclusion criteria. The included studies varied widely in their examination of student mental health and its links to social determinants of health (SDOH). Mental health was most frequently assessed in terms of depression, anxiety, suicidality, substance use disorders, and psychological distress. Mood disorders were the most commonly reported outcomes. Few studies explored help-seeking behavior. Reported social determinants aligned with structural factors (socioeconomic and political contexts, cultural norms, gender disparities) and intermediary factors such as academic stress, service access, and behavioral patterns including substance use, physical activity, sleep, and diet. Although many studies addressed social determinants of student mental health in SSA, none provided comparable, multi-country data across HEIs. Most research focused on undergraduate particularly medical students, with limited attention to postgraduate populations. Future work should prioritize multi-country comparative studies and context-specific approaches that strengthen help-seeking and support for at-risk students across diverse SSA settings."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-MH-002",
+   "source": "USPSTF",
+   "title": "Screening for Anxiety Disorders in Adults",
+   "year": "2023",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-anxiety-adults",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-anxiety-adults",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "4e1abfc521d4742f26738f801c64d425b94bd71712c543f8e386acce6f2f749f",
+   "size_bytes": 1766,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1762,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Prevalence and types of anxiety disorders among patients with cardiac conditions and elevated HADS-A scores: findings from the initial screening phase of the Heart and Mind trial in Denmark. To identify whether patients with arrhythmia, heart failure or ischaemic heart disease presenting with anxiety symptoms measured by the Hospital Anxiety and Depression Scale (HADS) have identifiable anxiety according to the Structured Clinical Interview for Diagnostic and Statistical Manual of Mental Disorders (SCID) and, if so, which type of anxiety disorder based on the SCID. Initial screening data from the Heart and Mind randomised clinical trial. Patients with arrhythmia, heart failure or ischaemic heart disease were screened using HADS, and patients with a HADS-anxiety (HADS-A) score≥8 were invited to participate. Participants were interviewed by trained cardiac nurses using the SCID to determine whether they met the criteria for anxiety and, if so, the type of anxiety disorder. Of the 7816 patients who completed the HADS questionnaire, 1803 (23%) had a HADS-A score≥8. Among these, 398 (22%) agreed to the SCID interview, and 336 (84%) met the diagnostic criteria for an anxiety disorder. The mean age was 61 years, with 40% being female. The mean HADS-A score was 11.3 (SD=2.7). The most common types of anxiety were generalised anxiety disorder (61%), panic disorder (23%) and specific phobia (8%). The majority of individuals identified by the instrument also met the diagnostic criteria for an anxiety disorder. Generalised anxiety disorder and panic disorder were the most prevalent subtypes. Anxiety was common across the cardiac population, underscoring the need for routine assessment and targeted intervention in clinical practice. NCT04582734."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-IPV-001",
+   "source": "USPSTF",
+   "title": "Intimate Partner Violence Screening",
+   "year": "2018",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/intimate-partner-violence-and-abuse-of-elderly-and-vulnerable-adults-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/intimate-partner-violence-and-abuse-of-elderly-and-vulnerable-adults-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "0170ebc9f5570cccab12f28482745101b908123c0a11156aeb93ff0f66cd6392",
+   "size_bytes": 1207,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1207,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "When Pregnancy Isn't \"Safe\": The Struggle of Intimate Partner Violence and Traumatic Stress on Women's Mental and Physical Health. Intimate partner violence (IPV) and traumatic stress during pregnancy are major public health issues, particularly for women of color. Using data from the 2019 to 2021 Pregnancy Risk Assessment Monitoring System, this cross-sectional study examines the association of IPV and traumatic stress on the prenatal physical and mental health of women of color who have recently given birth. Hispanic women reporting IPV during pregnancy had increased odds of prenatal depression and diabetes compared to non-Hispanic White women with no IPV. Significant risk for diabetes was observed only among Hispanic women when stratified by race/ethnicity. Financial instability, partner incarceration, income, and being uninsured are structural factors that amplify these effects. These findings highlight the value of culturally competent trauma-informed prenatal care, screens for IPV, and address systemic disparities. A collaborative initiative is necessary to ensure women can safely conceive by acknowledging survivor's experiences and eliminating obstacles to reproductive health care."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-AUD-001",
+   "source": "USPSTF",
+   "title": "Unhealthy Alcohol Use in Adolescents and Adults Screening",
+   "year": "2018",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/unhealthy-alcohol-use-in-adolescents-and-adults-screening-and-behavioral-counseling-interventions",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/unhealthy-alcohol-use-in-adolescents-and-adults-screening-and-behavioral-counseling-interventions",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_behavioral",
+   "priority": "high",
+   "sha256": "7c8e713a19e83fb9256395450365105305fc0b5be6b027cbf764d9e9d3a11d35",
+   "size_bytes": 3794,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3794,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Effectiveness of the Components of a Digital Multiple Health Behavior Intervention Among University Students (Buddy): Factorial Randomized Trial. Digital interventions have shown promise in supporting healthy behaviors among university students; however, few interventions support simultaneous change across multiple health behaviors. Moreover, behavioral interventions are typically evaluated as a whole, making it challenging to disentangle the contribution of individual components to the overall effects. This study estimated the effects of the components of a digital behavior intervention on alcohol, diet, physical activity, and smoking outcomes among university students in Sweden. A double-blind randomized factorial trial with 6 two-level factors was conducted. University students in Sweden were proactively recruited through student health care centers and social media. Participants were eligible if they were aged 18 years or older and had at least one health behavior classified as unhealthy. The effects of 6 components were estimated: screening and feedback; goal-setting and planning; motivation; skills and know-how; mindfulness; and self-authored SMS text messages. Primary outcomes were weekly alcohol consumption and frequency of heavy episodic drinking, average daily fruit and vegetable consumption, weekly sugary drink consumption, weekly moderate-to-vigorous physical activity (MVPA), and 4-week point prevalence of smoking. A total of 1704 students were randomized. The effectiveness of individual and pairwise components was estimated using available data from 1118 (65.61%) participants at 2 months and 874 (51.29%) at 4 months, with sensitivity analyses conducted using imputed missing data. Most consistently, the evidence indicated that screening and feedback affected fruit and vegetable consumption (2-month mean difference 0.11, compatibility interval [CoI] -0.02 to 0.24; probability of effect [POE] 94.7% and 4-month mean difference 0.12, CoI -0.03 to 0.26; POE 94.4%), as did skills and know-how (2-month mean difference 0.19, CoI 0.06-0.33; POE 99.8% and 4-month mean difference 0.14, CoI 0.01-0.28; POE 96.9%). The combination of these 2 components was even more effective (2-month mean difference 0.30, CoI 0.11-0.48; POE 99.9% and 4-month mean difference 0.26, CoI 0.05-0.46; POE 99.4%). The motivation and mindfulness components, both individually and in combination, increased MVPA at 2 months (combined mean difference 78.0, CoI 28.3-128.2; POE 99.9%); however, this effect was not observed at 4 months. Combining screening and feedback with skills and know-how increased MVPA at 4 months (mean difference 60.1, CoI 3.6-116.5; POE 98.2%). Heavy episodic drinking was reduced at 2 months by screening and feedback (incidence rate ratio 0.87, CoI 0.74-1.02; POE 95.2%), and the effect was greater when combined with goal-setting and mindfulness. There was some evidence that the motivation component was harmful with respect to heavy episodic drinking and that self-authored SMS text messages were harmful with respect to sugary drink consumption. We dismantled a complex digital multiple behavior intervention and examined it using a factorial design to provide novel insights into the effectiveness of the intervention's different components. Both marginal and synergistic effects were observed across multiple behaviors, providing evidence regarding which components are most promising in complex interventions. These findings should be considered in light of the risk of bias introduced by attrition to follow-up, which was high in this effectiveness trial with low barriers to participation. International Standard Randomised Controlled Trial Number (ISRCTN) ISRCTN23310640; https://www.isrctn.com/ISRCTN23310640. RR2-10.1136/bmjopen-2021-051044."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-OB-001",
+   "source": "USPSTF",
+   "title": "Behavioral Weight Loss Interventions for Adult Obesity",
+   "year": "2018",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/obesity-in-adults-interventions",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/obesity-in-adults-interventions",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_behavioral",
+   "priority": "high",
+   "sha256": "8b248ad0d39a9ae5f75cda3f247e9393b86de127c4cd6e263bb3f7c4376e65c3",
+   "size_bytes": 5319,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 5300,
+   "chunk_count": 2,
+   "extracted_at": "2026-05-09T19:16:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Effectiveness and cost-effectiveness of text message and financial incentives for weight management in men with obesity: The Game of Stones RCT. Men with obesity infrequently engage with weight management services. To determine: (1) percentage weight loss at 12 and 24 months for text messages with or without financial incentives compared to control; (2) secondary outcomes; (3) cost-effectiveness; (4) moderators of effectiveness and (5) participant and stakeholder perspectives. Assessor-blinded randomised controlled trial. United Kingdom National Health Service perspective cost-effectiveness over 24 months and modelled lifetime horizon. Mixed-methods process evaluation. Five hundred and eighty-five men with body mass index ≥ 30 kg/m 2 enrolled (July 2021-May 2022) in Belfast, Bristol and Glasgow; final follow-up June 2024. Random allocation to 12 months of behavioural text messages plus financial incentives ( N = 196), same texts alone ( N = 194) or 12-month waiting list control group offered 3 months of texts between 12 and 15 months ( N = 195). A £400 financial incentive was lost if weight loss targets were not met. Weight change as a percentage of baseline weight at 12 and 24 months comparing control with (1) texts with financial incentives and (2) texts alone. Of 585 men (mean age 51 years; mean weight: 119 kg), 227 (39%) lived in lower socioeconomic areas, 146 (25%) reported a mental health condition and 253 (40%) had multiple long-term conditions. Follow-up was completed by 426 (73%) at 12 months and 377 (64%) at 24 months. At 12 months, mean percentage weight changes (standard deviation) were -4.8% (6.1) (-5.7 kg), -2.7% (6.3) (-3.0 kg), and - 1.3% (5.5) (-1.5 kg) for the incentives, text-only, and control groups, respectively. Compared to control, weight loss was significantly greater with incentives [-3.2% (97.5% confidence interval -4.6 to -1.9; p < 0.001)] but not texts alone (-1.4%; confidence interval -2.9 to 0.0; p = 0.053). At 24 months, changes were -3.9% (-4.6 kg), -2.6% (-3.1 kg), and -2.2% (-2.6 kg), no significant between-group differences. Intervention costs were £243 for texts with incentives, £110 for texts alone. There were no significant differences between 24-month costs and quality-adjusted life-years. Long-term modelling found texts with incentives versus control were: quality-adjusted life-year difference (95% confidence interval): 0.02 (0.007 to 0.029); cost difference: £176 (£43; £311); incremental cost-effectiveness ratio: £9748 (£7705 to £11,791). For texts alone versus control: quality-adjusted life-year difference: 0.03 (0.015 to 0.037); cost difference: £16.5 (-£117; £152); incremental cost-effectiveness ratio: £628 (-£5914 to £5384). There were no moderator effects for socioeconomic, health or well-being status for either comparison versus control. The texts with incentives group had a higher engagement in weight goal setting, food changes, self-weighing, confidence, satisfaction and quality of life compared to the control. Generalisability to women, diverse ethnic groups and people with low literacy is uncertain. Not generalisable to people with no mobile phone access. Retention was lowest in the text messages alone group. Texts with financial incentives have a modest but important effect to 12 months with clinically relevant weight loss maintenance to 24 months, are cost-effective and equally effective regardless of socioeconomic or health characteristics. Implementation, adapt for women, other cultures and longer-term follow-up. This synopsis presents independent research funded by the National Institute for Health and Care Research (NIHR) Public Health Research programme as award number NIHR129703. The Game of Stones study aimed to help men lose weight and keep it off for at least 2 years. Five hundred and eighty-five men living with obesity across the United Kingdom were split into three groups by chance: supportive text messages for 1 year and opportunity to get money for weight loss the same text messages alone for 1 year neither for 1 year, then text messages for 3 months. The first two groups received the same daily text messages about changing weight-related behaviours. Group 1 was told at the start that £400 had been put aside for them and that money would be lost if weight targets were missed. The targets were 5% weight loss at 3 months, 10% at 6 months and maintaining that 10% loss at 12 months. Money was then paid to the men after being weighed at 12 months. Every man was asked questions about their health, well-being and experiences of being in the study. After 1 year, the men in group 1 lost the most weight (5%, 5.7 kg). The men in group 2 lost some weight (3%, 3.0 kg) but not as much as the first group. The men in group 3 lost the smallest amount of weight (1%, 1.5 kg). On average, men in group 1 received £128 for meeting weight loss targets. One year after the 12-month measures, men in groups 1 and 2 had gained back some weight. Men in group 3 lost a bit more weight between year 1 and 2. Weight loss was similar"
+    },
+    {
+     "chunk_index": 1,
+     "content": "being in the study. After 1 year, the men in group 1 lost the most weight (5%, 5.7 kg). The men in group 2 lost some weight (3%, 3.0 kg) but not as much as the first group. The men in group 3 lost the smallest amount of weight (1%, 1.5 kg). On average, men in group 1 received £128 for meeting weight loss targets. One year after the 12-month measures, men in groups 1 and 2 had gained back some weight. Men in group 3 lost a bit more weight between year 1 and 2. Weight loss was similar whether or not men had long-term health conditions, disability, mental health issues or lived in the most deprived areas. This study showed that Game of Stones was a popular, low-cost and modestly effective way of helping men to lose weight."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-FALL-001",
+   "source": "USPSTF",
+   "title": "Falls Prevention in Community-Dwelling Older Adults",
+   "year": "2018",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/falls-prevention-in-older-adults-interventions",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/falls-prevention-in-older-adults-interventions",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "fbf0e8de97d95272fef11fc04089c9dd72a06616f1be1fc3569a186fc5237de1",
+   "size_bytes": 1642,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1642,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Modifiable risk factors for falls in community-dwelling older adults. Nearly 30% of U.S. adults aged 65 and older fall each year, and falls are the leading cause of injury and injury-related deaths in this population. Our objective was to identify potentially modifiable risk factors for falls, which will be important in determining the most effective targets for interventions and help refine fall prevention guidelines. Our sample included 3,111 community-dwelling older adults (65 years and older, 57% women) without dementia from the Health and Retirement Study (2010 wave) who reported falls at baseline and two years later. We examined the association between reported falls at follow-up and fifteen potentially modifiable medical and lifestyle risk factors using logistic regression models, overall and stratified by sex. We calculated the adjusted odds ratio (aOR) and Population Attributable Fraction (PAF) for each risk factor. Falls were reported in 1,027 participants (33%) at follow-up. In females, previous fall history (aOR 2.95), heart conditions (aOR 1.38) and pain (aOR 1.40) predicted incident falls and together accounted for 42% of the PAF for falls. In males, previous fall history (aOR 4.74), poor balance (aOR 1.64), poor hearing (aOR 1.83), and physical inactivity (aOR 1.42) predicted incident falls and together accounted for 52% of the PAF for falls. Several potentially modifiable risk factors were associated with incident falls in older adults and differed by sex. These results are a key initial step in identifying older adults with the highest fall-risk and who may most benefit from targeted interventions."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-OST-001",
+   "source": "USPSTF",
+   "title": "Osteoporosis Screening to Prevent Fractures",
+   "year": "2018",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "8eba47e38c9b1356cbb0a456bd1bf4dc06359077cf406c8413fa750e7009be98",
+   "size_bytes": 774,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 774,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Osteoporosis Screening to Prevent Fractures Source: USPSTF Year: 2018 Domain: preventive_screening License: USPSTF Available at: https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening This is a citation reference for the USPSTF guideline 'Osteoporosis Screening to Prevent Fractures' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: preventive_screening. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-HEP-001",
+   "source": "USPSTF",
+   "title": "Screening for Hepatitis B Virus Infection in Adolescents and Adults",
+   "year": "2020",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "9901c9da7208ff807dc76c42f86a678b8f5df4b67288279d2bed293adf9a36a2",
+   "size_bytes": 2476,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2471,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "The role of interleukin-1 beta as an early biomarker for renal dysfunction in Egyptian sickle cell disease patients. Sickle cell nephropathy is a recognized complication increasingly seen in young individuals with sickle cell disease (SCD). The typical progression of glomerular disease is thought to involve hyperfiltration and albuminuria, eventually leading to a decline in glomerular filtration rates and ultimately end-stage renal disease (ESRD). This study sought to investigate the relationship between urinary interleukin-1 beta (IL-1β), a marker of inflammation, and existing biomarkers of renal damage in SCD patients. The goal was to identify IL-1β as a novel, early diagnostic biomarker for sickle nephropathy. This case-control study enrolled forty-six patients (both genders, aged 18-40 years) with sickle cell disease and forty-six healthy controls. All patients were subjected to the following: A complete medical history, physical examination, and laboratory investigation including a complete blood analysis, blood chemistry (which included kidney function tests and liver function, serum ferritin, urinalysis, hepatitis B surface antigen and hepatitis C antibody, estimated GFR, urinary IL-1 beta using the ELISA technique, and urinary albumin/creatinine ratio). These measurements were taken for both the case and control groups. The mean estimated glomerular filtration rate (eGFR) level showed a statistically significant increase in SCD patients. The median value of the albumin/creatinine ratio level was statistically different between cases and controls. The median value of urinary IL-1 beta level was statistically different between cases and controls. Assessment of correlations between urinary IL-1 beta and eGFR revealed a statistically significant negative correlation between them, while assessment of the correlation between urinary IL-1 beta and the urinary albumin/creatinine ratio revealed a statistically significant positive correlation between them in sickle cell patients. In this study, significant renal hyperfiltration, a high frequency of albuminuria, and elevated urine IL-1β levels are all present in Egyptian adults with sickle cell disease. Urinary IL-1β, albuminuria, and eGFR are strongly correlated, highlighting the crucial role of inflammation in sickle cell nephropathy pathogenesis. A promising non-invasive biomarker for early renal injury and disease progression in sickle cell disease (SCD) may be urinary IL-1β."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-HEP-002",
+   "source": "USPSTF",
+   "title": "Screening for Hepatitis C Virus Infection in Adolescents and Adults",
+   "year": "2020",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "9901c9da7208ff807dc76c42f86a678b8f5df4b67288279d2bed293adf9a36a2",
+   "size_bytes": 2476,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2471,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "The role of interleukin-1 beta as an early biomarker for renal dysfunction in Egyptian sickle cell disease patients. Sickle cell nephropathy is a recognized complication increasingly seen in young individuals with sickle cell disease (SCD). The typical progression of glomerular disease is thought to involve hyperfiltration and albuminuria, eventually leading to a decline in glomerular filtration rates and ultimately end-stage renal disease (ESRD). This study sought to investigate the relationship between urinary interleukin-1 beta (IL-1β), a marker of inflammation, and existing biomarkers of renal damage in SCD patients. The goal was to identify IL-1β as a novel, early diagnostic biomarker for sickle nephropathy. This case-control study enrolled forty-six patients (both genders, aged 18-40 years) with sickle cell disease and forty-six healthy controls. All patients were subjected to the following: A complete medical history, physical examination, and laboratory investigation including a complete blood analysis, blood chemistry (which included kidney function tests and liver function, serum ferritin, urinalysis, hepatitis B surface antigen and hepatitis C antibody, estimated GFR, urinary IL-1 beta using the ELISA technique, and urinary albumin/creatinine ratio). These measurements were taken for both the case and control groups. The mean estimated glomerular filtration rate (eGFR) level showed a statistically significant increase in SCD patients. The median value of the albumin/creatinine ratio level was statistically different between cases and controls. The median value of urinary IL-1 beta level was statistically different between cases and controls. Assessment of correlations between urinary IL-1 beta and eGFR revealed a statistically significant negative correlation between them, while assessment of the correlation between urinary IL-1 beta and the urinary albumin/creatinine ratio revealed a statistically significant positive correlation between them in sickle cell patients. In this study, significant renal hyperfiltration, a high frequency of albuminuria, and elevated urine IL-1β levels are all present in Egyptian adults with sickle cell disease. Urinary IL-1β, albuminuria, and eGFR are strongly correlated, highlighting the crucial role of inflammation in sickle cell nephropathy pathogenesis. A promising non-invasive biomarker for early renal injury and disease progression in sickle cell disease (SCD) may be urinary IL-1β."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-HIV-001",
+   "source": "USPSTF",
+   "title": "Screening for HIV Infection in Adolescents and Adults",
+   "year": "2019",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "503722b6c77dc9aee8702f6e7b683617a61d17bdd0e47da5e4e6153167c9f9bf",
+   "size_bytes": 2330,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2324,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:51Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Estimating HIV incidence and assessing associated risk factors among adults: Evidence from the 2018-2022 HIV vaccine preparedness cohort in Masaka, Uganda. Despite global reports of declining HIV incidence, current data are limited. This study presents findings on HIV incidence and risk factors in a HIV trial preparedness cohort. Between 18 July 2018 and 13 October 2022, individuals 18-45-year-old were recruited from communities along the trans-African highway and the shores of Lake Victoria in Masaka district, Uganda. Eligible individuals were HIV-negative and met at least one of the following criteria: suspected or confirmed sexually transmitted infection (STI), unprotected sex with ≥2 partners, unprotected sex with a new partner in the past 3 months, or unprotected sex in exchange for money/goods in the past month. Baseline data included demographics, sexual behaviour, and HIV risk factors. Follow-up assessments of HIV risk and sexual behaviour were conducted every six months, while HIV counselling and testing (HCT) were provided every 3 months, with linkage to care for those testing positive. Data were summarised descriptively, and associations with HIV incidence were analysed using uni-variable and multi-variable Poisson regression models. Of the 1422 individuals enrolled, 1115 (78.4%) attended ≥1 follow-up visit; 69% were female and 55% were aged ≤24 years. Over 900.3 person-years of observation (PYO), 24 individuals acquired HIV, yielding an incidence rate (IR) of 2.7 PYO [95% Confidence Interval (CI): 1.8-4.0]. Baseline factors independently associated with incident HIV included female sex [adjusted incidence rate ratio (aIRR) = 6.84 PYO, 95% CI 1.60-29.30], residence in a fishing community [aIRR = 3.04 PYO, 95% CI 1.05-8.78] and recreational drug use in the past 3 months [aIRR = 3.08 PYO, 95% CI 1.19-7.99]. In a separate analysis, using time-updated variables assessed during follow-up, HIV acquisition was associated with sex after alcohol consumption [aIRR = 2.65 PYO, 95% CI 1.11-6.31], and STI diagnosis/treatment within the past 3 months [aIRR = 2.52 PYO, 95% CI 1.09-5.80]. HIV incidence remains high among women, fishing community residents, and individuals with high risk behaviours, underscoring the need for targeted interventions to reduce the burden in these populations."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-PREP-001",
+   "source": "USPSTF",
+   "title": "Pre-Exposure Prophylaxis to Prevent HIV Infection",
+   "year": "2023",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prevention-of-human-immunodeficiency-virus-hiv-infection-pre-exposure-prophylaxis",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prevention-of-human-immunodeficiency-virus-hiv-infection-pre-exposure-prophylaxis",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "936de3fa9205c33feecba1c1380f00d7c9340fbf8fb32dd6ff4fe9738dd738c7",
+   "size_bytes": 2852,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2852,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Factors influencing PrEP adoption in sexual health clinics within Ontario's public health system: a qualitative study using the Consolidated Framework for Implementation Research (CFIR). HIV pre-exposure prophylaxis (PrEP) utilization in Ontario is concentrated in two large urban centers, resulting in geographic and structural inequities in access. Little is known about adoption in Public Health Sexual Health Clinics (PHSHCs) or the implementation factors influencing uneven uptake. This study aimed to: (1) assess the extent of PrEP adoption in PHSHCs; (2) identify barriers and facilitators affecting implementation; and (3) explore factors supporting successful and equitable PrEP implementation. Semi-structured interviews were conducted with 18 staff and managers across 12 PHSHCs. The Consolidated Framework for Implementation Research (CFIR) guided data collection and analysis, while the Health Equity Implementation Framework (HEIF) was applied to examine structural, organizational, and socio-cultural influences on PrEP access. Clinics were categorized into five adoption categories using the diffusion of innovations model. A content analysis was done to identify common facilitators, barriers, and equity-relevant factors distinguishing clinics at different adoption categories. PrEP adoption varied widely across clinics. Two were innovators, providing on-site PrEP; three were early adopters with formal referral pathways; four were early majority, relying on informal referrals; and five lacked established services. Facilitators included strong PrEP knowledge and beliefs, inter-organizational partnerships, and supportive organizational cultures. Key barriers were post-COVID-19 service recovery constraints, limited external prescribers, insufficient medication funding, constrained internal capacity, and social individual-level barriers. Differences between advanced and less advanced adopters reflected perceived relative advantage of PrEP within PHSHC mandates, workflow integration complexity, and the presence of a supportive learning climate. Equity-focused analysis highlighted obstacles affecting clients experiencing socioeconomic disadvantage, rurality, stigma, and limited healthcare navigation capacity. This study highlights that inequities in PrEP access across Ontario PHSHCs are shaped not only by clinic readiness but also by broader structural and organizational conditions. These findings advance understanding of PrEP adoption outside large urban centers, identifying barriers and strategies to expand services and enhance implementation readiness. Using the CFIR and HEIF, we delineated factors to support adoption in early-stage PHSHCs while learning from those with successful integration. Addressing these factors will be critical to expanding equitable access to PrEP and advancing HIV prevention goals."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-FOL-001",
+   "source": "USPSTF",
+   "title": "Folic Acid Supplementation for Prevention of Neural Tube Defects",
+   "year": "2023",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/folic-acid-for-the-prevention-of-neural-tube-defects-preventive-medication",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/folic-acid-for-the-prevention-of-neural-tube-defects-preventive-medication",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "083e43a3b1bf3126e81965c8bbb9508c03cc4b618ab79baabe272a0eb9b6eeca",
+   "size_bytes": 1522,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1522,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Spina Bifida Occulta, Syringomyelia, and Diastematomyelia in a Toddler: A Two-Year Case Report. Spinal dysraphisms are a heterogeneous group of congenital spinal cord anomalies resulting from defective neurulation. They include both open and closed forms, with spina bifida (SB) being the most clinically recognized. These conditions frequently coexist with other anomalies, such as syringomyelia and diastematomyelia, significantly complicating clinical presentation and management. We report the case of a male neonate born at term with a lumbar spinal defect consistent with SB occulta. Initial evaluation revealed a closed, skin-colored lesion with preserved neurological function. Early spinal magnetic resonance imaging (MRI) showed vertebral arch defects, a dorsal cystocele and syringomyelia at the L1-L2 level. The patient underwent early neurosurgical repair of SB at 5 days of age, followed by cyst drainage at 1 year of age when lower extremity weakness developed. Subsequent imaging revealed persistent syringomyelia and diastematomyelia, necessitating additional surgical intervention for spinal cord mobilization. The coexistence of these complex anomalies required multiple staged interventions and close longitudinal monitoring. Complex spinal dysraphism demands a multidisciplinary approach with early surgical management and long-term follow-up to prevent neurological deterioration. This case reinforces the importance of timely diagnosis and staged surgical intervention in improving patient outcomes."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-PE-001",
+   "source": "USPSTF",
+   "title": "Aspirin Use to Prevent Preeclampsia and Related Morbidity",
+   "year": "2021",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/aspirin-use-to-prevent-preeclampsia-and-related-morbidity-and-mortality-preventive-medication",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/aspirin-use-to-prevent-preeclampsia-and-related-morbidity-and-mortality-preventive-medication",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "high",
+   "sha256": "671fde84d400c1738cb07599be98592429c8df8d1a1372867f995d22ee6068c0",
+   "size_bytes": 2064,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2064,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Low-dose aspirin and anaemia risk in pregnancy: A scoping review with emphasis on low- and middle-income contexts. Anaemia remains a major public health concern in pregnancy and is associated with adverse maternal and perinatal outcomes. Low-dose aspirin (LDA) is widely prescribed to reduce the risk of preeclampsia (PE), yet its effects on haemoglobin (Hb) levels and anaemia risk are poorly characterised. This scoping review mapped available evidence on the association between LDA use and Hb concentration or anaemia outcomes in pregnant women. The review followed Joanna Briggs Institute methodology and was reported in accordance with PRISMA-ScR. PubMed, Google Scholar, Scopus, Web of Science and the Cochrane Library were searched from inception to December 2025. Eligible studies included pregnant women prescribed LDA, a comparator group and reported Hb- or anaemia-related outcomes, with particular focus on low- and middle-income country (LMIC) settings. Studies were screened, and data were extracted using a standardised charting tool by one reviewer and independently checked by a second reviewer. Evidence was analysed descriptively using a two-stage approach. Thirteen studies met the inclusion criteria, comprising one case report with a narrative review, four observational cohort studies, four systematic reviews, two randomised controlled trials (RCTs) and two secondary analyses of RCTs. Most studies evaluated LDA for PE prevention, while only two pregnancy-specific studies directly assessed Hb outcomes. Bleeding-related haematologic endpoints were variably reported, but no study evaluated anaemia incidence. Evidence on the relationship between LDA use and anaemia in pregnancy remains limited and inconclusive. Available studies lack standardised haematologic endpoints, and LMIC-specific data are sparse.Contribution: This review highlights critical evidence gaps and underscores the need for well-designed prospective studies incorporating standardised anaemia-related outcomes in pregnant populations, particularly in LMIC contexts."
+    }
+   ]
+  },
+  {
+   "id": "USPSTF-VIT-001",
+   "source": "USPSTF",
+   "title": "Vitamin Mineral and Multivitamin Supplements for CVD and Cancer",
+   "year": "2022",
+   "page_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/vitamin-supplementation-to-prevent-cvd-and-cancer-preventive-medication",
+   "pdf_url": "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/vitamin-supplementation-to-prevent-cvd-and-cancer-preventive-medication",
+   "license": "USPSTF",
+   "commercial_use": "allowed",
+   "clinical_domain": "preventive_screening",
+   "priority": "medium",
+   "sha256": "c14b3f4e75e34bc9999c49c359d84d3953c08ca020f5c05c284006e063aef063",
+   "size_bytes": 863,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 863,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Vitamin Mineral and Multivitamin Supplements for CVD and Cancer Source: USPSTF Year: 2022 Domain: preventive_screening License: USPSTF Available at: https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/vitamin-supplementation-to-prevent-cvd-and-cancer-preventive-medication This is a citation reference for the USPSTF guideline 'Vitamin Mineral and Multivitamin Supplements for CVD and Cancer' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: preventive_screening. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

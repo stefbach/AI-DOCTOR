@@ -1,7 +1,7 @@
 {
  "source": "EAU",
  "generated_at": "2026-05-02T15:52:45Z",
- "total_documents": 50,
+ "total_documents": 52,
  "documents": [
   {
    "id": "EAU-001",
@@ -2402,6 +2402,56 @@
     {
      "chunk_index": 3,
      "content": "within 3 months after surgery, provided that an adequate number of ejaculations (at least 20) has occurred ( ). If motile sperm are still present after 6 months of follow-up, a repeat vasectomy should be considered ( ). While such cases are infrequent, they highlight the need for better patient education and more rigorous follow-up procedures to ensure the procedure’s success. In this study, only one male mentioned having undergone semen cryopreservation prior to vasectomy. Overall, the practice of autologous sperm cryopreservation started relatively late in China and lags significantly behind Western countries. Between 2010 and 2020, only 5,055 cases of autologous sperm cryopreservation were accumulated across 23 public sperm banks in China, equivalent to just 2.05 cases per 10,000 males aged 15 to 59 years, which is significantly lower than the rates of 15 to 30 cases observed in Western countries ( ). In China, cancer was the primary indication, accounting for 66.1% of cases. Fertility preservation for nonmedical reasons (such as unmarried status, separation, or planned vasectomy) constituted only 23% of cases, whereas in Western countries this proportion has increased to 30% to 50% ( ). Moreover, significant regional disparities were observed, with the number of cases in eastern provinces being twice that in central provinces and 1.8 times that in western provinces. Regarding regulations and policies, China prohibits anonymous sperm donation and commercial surrogacy, imposes a maximum sperm storage period of 10 years requiring regular renewals, and mandates that costs be borne by the individuals. In contrast, Western countries generally permit commercial chain operations, anonymous sperm donation, and long-term storage (up to 55 years). Some countries also include the cost of sperm cryopreservation for cancer patients within their national health insurance systems, reflecting a higher degree of marketization ( ). Limitations While the study provides valuable insights into public perceptions of vasectomy in China, it has several limitations. First, the sample is limited to posts on Rednote, which may not be fully representative of the entire Chinese population. Rednote is a platform that appeals primarily to younger, urban, and digitally literate individuals, which may skew the data toward a specific demographic. The relatively small dataset size remains a limitation and future studies could expand the sample across multiple platforms to improve generalizability. Second, the study relies on self-reported user-generated content, which could introduce biases, such as selective reporting of positive or negative experiences. In addition, as the data were collected through public posts, there was no control over the accuracy of the medical information shared, and some posts might have contained inaccuracies or misconceptions, particularly regarding the procedure’s reversibility and potential complications. Finally, the study did not explore the underlying motivations for choosing vasectomy beyond what was shared in the posts. Further research could explore these motivations in more depth, particularly by conducting interviews or surveys with individuals who have undergone the procedure. Conclusion The Rednote data show that vasectomy is mainly discussed by younger, urban men (often already with children), but also by DINK individuals who reject parenthood. Posts are overwhelmingly positive, with strong engagement, suggesting that on Chinese social media, vasectomy is becoming part of progressive conversations about modern lifestyles, gender equality in reproductive choices, and responsible family planning."
+    }
+   ]
+  },
+  {
+   "id": "EAU-PCa-001",
+   "source": "EAU",
+   "title": "EAU prostate cancer guideline imaging staging recommendations",
+   "year": "2024",
+   "page_url": "https://uroweb.org/guidelines/prostate-cancer",
+   "pdf_url": "https://uroweb.org/guidelines/prostate-cancer",
+   "license": "EAU",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_abdomen",
+   "priority": "high",
+   "sha256": "4a7e222f965a706dc06f3f81b484d98b487b2f4c29e9af45528efa39de4c0fda",
+   "size_bytes": 3011,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3011,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:00Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Impact of Negative Prostate-specific Membrane Antigen Positron Emission Tomography on the Decision to Perform a Pelvic Lymph Node Dissection During Radical Prostatectomy for Intermediate- to High-risk Prostate Cancer Patients: Results of an International Survey. Pelvic lymph node dissection (PLND) is considered the most reliable method for managing prostate cancer (PCa). However, the role of PLND remains controversial in both clinical practice and guideline recommendations. This study aims to characterize contemporary practices and attitudes related to extended and/or limited PLND in PCa management during radical prostatectomy (RP). A cross-sectional survey was conducted from February to May 2025. The survey was disseminated through the official mailing lists of several prominent urological societies worldwide. Multivariable logistic regression models were used to identify the predictors of the performance and perceived benefits of PLND in high-risk PCa patients, considering clinical, institutional, and practitioner-related factors. Our survey of 438 urologists revealed that 80% always perform PLND in European Association of Urology (EAU) high-risk patients during RP, while 18% do so selectively and only 2.6% never do. Among high-risk, prostate-specific membrane antigen (PSMA) positron emission tomography (PET)-negative patients, 53% opt for extended PLND and 39% for standard PLND. The remaining 7.6% either undergo limited/unilateral PLND or do not receive it at all. Notably, only 22% believe in the therapeutic benefit of extended PLND in high-risk PSMA-PET-negative patients, with this proportion increasing to 47% for PSMA-PET-positive cases. The primary rationale for PLND was staging (43%), followed by detecting micrometastases (31%). Multivariable analyses showed that PLND for EAU high-risk patients during RP was independently associated with treatments performed in university/referral centers structured risk stratification following the National Comprehensive Cancer Network guidelines ,and the use of nomograms. Resource limitations, particularly concerns about hospital stays due to complications (58.9%), and reimbursement policy for PLND (30%) impacted PLND practices significantly. Key limitations of the study include a potential selection bias and mainly European responses. Significant variability persists in PLND practices despite evolving guidelines and imaging. Pelvic lymph node dissection (PLND) is a procedure in which lymph nodes are removed and examined during prostate cancer surgery (prostatectomy) to determine whether the cancer has spread. We surveyed urologists worldwide about their current use of this procedure during prostatectomy. The introduction of prostate-specific membrane antigen positron emission tomography scans has changed how doctors decide when to perform PLND. Our findings show considerable variation in practice and persistent uncertainty about its benefits, underscoring the need for further research to guide treatment decisions."
+    }
+   ]
+  },
+  {
+   "id": "EAU-PROST-MRI-001",
+   "source": "EAU",
+   "title": "EAU European Association of Urology guideline on prostate MRI before biopsy",
+   "year": "2024",
+   "page_url": "https://uroweb.org/guidelines/prostate-cancer",
+   "pdf_url": "https://uroweb.org/guidelines/prostate-cancer",
+   "license": "EAU",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_abdomen",
+   "priority": "high",
+   "sha256": "40f21f0eecf61733821013a0a56e3c2a4e6a1e1fc027e342e5a47e2b73906325",
+   "size_bytes": 2141,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2141,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:01Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "An Evidenced Based Review and Common-Sense Approach to Prostate Cancer Screening for Primary Care Physicians, in an Era of Conflicting Guideline Recommendations and Debate. Prostate-specific antigen (PSA) screening has played a critical role in reducing prostate cancer mortality but remains controversial due to concerns regarding overdiagnosis, overtreatment, and inconsistent screening guidelines. In 2012, the United States Preventive Services Task Force (USPSTF) issued a grade D recommendation against PSA screening, leading to a national decline in PSA testing and prostate biopsy rates. This was followed by an increase in the incidence of metastatic prostate cancer at diagnosis. The USPSTF has since revised its recommendation to grade C, emphasizing shared decision-making for men aged 55 to 69 years. However, variability in screening recommendations across professional societies has resulted in clinical uncertainty, particularly for primary care physicians (PCPs), who frequently initiate PSA testing and urology referrals. This review provides an evidence-based overview of PSA screening tailored for the PCP. We performed a comprehensive literature review using Ovid MEDLINE, PubMed, Embase, and the Cochrane Library, including systematic reviews published between January 2020 and April 2025, and current guidelines from the American Urological Association (AUA), National Comprehensive Cancer Network (NCCN), European Association of Urology (EAU), and American Cancer Society (ACS). We summarize the evolving landscape of PSA screening and its integration with contemporary tools such as shared decision-making, multiparametric magnetic resonance imaging (mpMRI), and transperineally targeted biopsy. We advocate for initiating PSA screening between the ages of 45 and 49 in men with average or elevated risk, based on long-term evidence demonstrating the value of an early baseline PSA level and risk-stratified follow-up. This approach, coupled with improved diagnostic tools, can help PCPs navigate guideline variability and implement a rational, common-sense strategy to maximize early detection while minimizing harm."
     }
    ]
   }

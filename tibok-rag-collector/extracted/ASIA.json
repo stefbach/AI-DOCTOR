@@ -1,7 +1,7 @@
 {
  "source": "ASIA",
  "generated_at": "2026-05-09T08:38:39Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "ASIA-SCI-001",
@@ -146,6 +146,31 @@
     {
      "chunk_index": 11,
      "content": ", , ]. SR devices use soft actuators, which are frequently back-drivable, and flexible connections to improve comfort and flexibility while adapting to the natural curves of the human body. SR hand-function devices are lightweight and portable, making them easy to use at home for rehabilitation [ , ]. 5. Conclusions Early decompressive surgery, MAP optimization, and targeted rehabilitation have all been shown to be beneficial in the management of SCI. Current research in the area of pharmacological agents, cell-based therapies, endogenous regeneration and electrical stimulation aims to mitigate different components of the secondary injury cascade as well as to enhance damage repair mechanisms. The key to improvements in long-term patient outcomes will be the translation of these interventions and their subsequent application in the care of traumatic SCI patients."
+    }
+   ]
+  },
+  {
+   "id": "ASIA-SCI-002",
+   "source": "ASIA",
+   "title": "ASIA ISCoS clinical practice guideline acute management of cervical spinal cord injury",
+   "year": "2017",
+   "page_url": "https://asia-spinalinjury.org/clinical-practice-guidelines/",
+   "pdf_url": "https://asia-spinalinjury.org/clinical-practice-guidelines/",
+   "license": "ASIA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_critical_care",
+   "priority": "high",
+   "sha256": "73b18b21914867918e908359c17c48e0946b01491bc217926aebd63846ca232f",
+   "size_bytes": 829,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 829,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASIA ISCoS clinical practice guideline acute management of cervical spinal cord injury Source: ASIA Year: 2017 Domain: neurology_critical_care License: ASIA Available at: https://asia-spinalinjury.org/clinical-practice-guidelines/ This is a citation reference for the ASIA guideline 'ASIA ISCoS clinical practice guideline acute management of cervical spinal cord injury' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

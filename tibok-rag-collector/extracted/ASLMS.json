@@ -1,7 +1,7 @@
 {
  "source": "ASLMS",
  "generated_at": "2026-05-09T15:39:29Z",
- "total_documents": 2,
+ "total_documents": 4,
  "documents": [
   {
    "id": "ASLMS-LASER-001",
@@ -90,6 +90,56 @@
     {
      "chunk_index": 5,
      "content": "the patient’s hair covered and makeup Is there a sign posted on the door indicating removed? laser is in use (or is the door locked)? Are a fire extinguisher and fire blanket readily available? Is all gauze wet or nonflammable? For specific uses: Are there wet drapes to be used? (eg, ablative lasers) Do all personnel have face shields in place? (eg, tattoo removal, ablative lasers) WWW.MDEDGE.COM/DERMATOLOGY VOL. 106 NO. 2 I AUGUST 2020 91 Copyright Cutis 2020. No part of this publication may be reproduced, stored, or transmitted without the prior written permission of the Publisher. LASER SAFETY properly. Improving checklist compliance also improves patient outcomes.17 The American National Standards Institute, in their ANSI Z136 series, and the World Health Organization provide checklist templates. We include our checklist for use in laser surgery (Table 3). Understanding that each laser treatment area is unique, the templates can serve as a starting point and can then be customized to suit the needs of each dermatologist. REFERENCES 1. Goldman L, Blaney DJ, Kindel DJ, et al. Effect of the laser beam on the y skin. J Invest Dermatol. 1963;40:121-122. 2. Daggett C, Daggett A. The surgical check list revisited. Int J Surg Res Pract. 2017;4:051. op 3. Pritzker RN, Rohrer TE. Laser safety: standards and guidelines. In: Nouri K, ed. Handbook of Lasers in Dermatology. London, England: Springer; 2014:11-28. 4. Husain Z, Alster TS. The role of lasers and intense pulsed light technol- ogy in dermatology. Clin Cosmet Investig Dermatol. 2016;9:29-40. 5. Ries WR, Clymer MA, Reinisch L. Laser safety features of eye shields. tc Lasers Surg Med. 1996;18:309-315. 6. Oganesyan G, Eimputh S, Kim SS, et al. Surgical smoke detection in dermatologic surgery. Dermatol Surg. 2014;40:1373-1377. 7. Chuang GS, Farinelli W, Christiani DC, et al. Gaseous and particulate content of laser hair removal plume. JAMA Dermatol. 2016;152:1320-1326. no 8. Baggish MS, Poiesz BJ, Joret D, et al. Presence of human immunodefi- ciency DNA in laser smoke. Lasers Surg Med. 1991;11:197-203. 9. Garden JM, O’Banion MK, Shelnitz LS, et al. Papilloma virus in the vapor of carbon dioxide laser-treated verrucae. JAMA. 1988;259: 1199-1202. 10. Gloster HM Jr, Roenigk RK. Risk of acquiring human papillomavirus from the plume produced by the carbon dioxide laser in the treatment o of warts. J Am Acad Dermatol. 1995;32:436-441. 11. American Society for Laser Medicine and Surgery. ASLMS laser and energy device plume position statement. http://www.aslms.org D /for-professionals/professional-resources/safety-and-complications /aslms-laser-and-energy-device-plume-position-statement. Accessed October 4, 2019. 12. A comparison of surgical masks, surgical N95 respirators, and industrial N95 respirators. OH&S website. https://ohsonline.com S /Articles/2014/05/01/Comparison-Respiratory.aspx?Page=3. Published May 1, 2014. Accessed October 4, 2019. TI 13. 3M Infection Prevention N95 particulate respirators, 1860/1860s and 1870. Frequently Asked Questions. http://multimedia.3m.com /mws/media/323208O/n95-particulate-respirators-1860 -1860s-1870-faqs.pdf. Accessed October 4, 2019. 14. Lewin JM, Brauer JA, Ostad A. Surgical smoke and the dermatologist. CU J Am Acad Dermatol. 2011;65:636-641. 15. Arefiev K, Warycha M, Whiting D, et al. Flammability of topical prepara- tions and surgical dressings in cutaneous and laser surgery: a controlled simulation study. J Am Acad Dermatol. 2012;67:700-705. 16. ASDS survey on dermatologic procedures. American Society for Dermatologic Surgery website. https://www.asds.net/Medical -Professionals/Practice-Resources/ASDS-Survey-on-Dermatologic -Procedures. Accessed October 4, 2019. 17. Jalian HR, Jalian CA, Avram MM. Common causes of injury and legal action in laser surgery. JAMA Dermatol. 2013;149:188-193. 92 I CUTIS® WWW.MDEDGE.COM/DERMATOLOGY Copyright Cutis 2020. No part of this publication may be reproduced, stored, or transmitted without the prior written permission of the Publisher."
+    }
+   ]
+  },
+  {
+   "id": "ASLMS-LASER-003",
+   "source": "ASLMS",
+   "title": "ASLMS Position on Photoaging Treatment with Laser and Light Devices",
+   "year": "2022",
+   "page_url": "https://www.aslms.org/for-professionals",
+   "pdf_url": "https://www.aslms.org/for-professionals",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "plastic_aesthetic",
+   "priority": "low",
+   "sha256": "065ff60c86a4b6b5bbe51916f4cf967d5570c24fe0dcf3ef855faf9bf7596d78",
+   "size_bytes": 768,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 768,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASLMS Position on Photoaging Treatment with Laser and Light Devices Source: ASLMS Year: 2022 Domain: plastic_aesthetic License: Proprietary Available at: https://www.aslms.org/for-professionals This is a citation reference for the ASLMS guideline 'ASLMS Position on Photoaging Treatment with Laser and Light Devices' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: plastic_aesthetic. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASLMS-PEDS-001",
+   "source": "ASLMS",
+   "title": "ASLMS Position on Laser Treatment in Pediatric Vascular Lesions",
+   "year": "2020",
+   "page_url": "https://www.aslms.org/for-professionals",
+   "pdf_url": "https://www.aslms.org/for-professionals",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "plastic_pediatric",
+   "priority": "low",
+   "sha256": "ec2bcf8c72bc7bc40c6cded1b85cf031fae3a8f285dcb8134de76b56c7027b11",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASLMS Position on Laser Treatment in Pediatric Vascular Lesions Source: ASLMS Year: 2020 Domain: plastic_pediatric License: Proprietary Available at: https://www.aslms.org/for-professionals This is a citation reference for the ASLMS guideline 'ASLMS Position on Laser Treatment in Pediatric Vascular Lesions' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: plastic_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "KDOQI",
  "generated_at": "2026-05-09T10:21:34Z",
- "total_documents": 12,
+ "total_documents": 13,
  "documents": [
   {
    "id": "KDOQI-SHPT-001",
@@ -588,6 +588,31 @@
     {
      "chunk_index": 6,
      "content": "based on BMI be used as a predictor of lower mortality in CKD 5D MHD patients, although the mortality risk associated with overweight or obesity status (based on BMI) is not clear in patients with CKD 1–5. Treatment of obesity involves a multidimensional approach involving lifestyle modifications, anti-obesity medications, and bariatric surgery. Lifestyle interventions include modified diet, increased physical activity, and better sleep, and needs to be integrated into the overall management of the patient. Formulating a diet plan, given the CKD-specific restrictions on macro- and micronutrients, is challenging and needs access to renal dietitians and frequent monitoring of biochemical parameters. The recent KDOQI 2020 guidelines advice energy intake of 25–35 kcal/kg based on age, sex, activity level, and body weight goals. Overweight and obese patients should be prescribed the lower end of the recommended energy intake of 25 kcal/kg. Dietary interventions like Dietary Approaches to Stop Hypertension (DASH) and the Mediterranean diet can be prescribed to adolescent and adult CKD patients with obesity along with moderate physical activity. , Obesity and metabolic syndrome affects 15–30% of children with CKD. The management includes a comprehensive nutrition care plan involving physical activity, behavioral modification, and dietary adjustments. Unlike in adults, anti-obesity medications are not advised in children. It is recommended to prescribe a diet plan that has individualized energy intake adjusted for age, CKD stage, and dialysis to achieve weight loss in children without compromising overall nutrition. The nutritional management of patients with CKD is a vital component of their overall care, aimed at preserving kidney function, managing symptoms, preventing complications, and improving quality of life. A key component of nutritional therapy is using comprehensive age-appropriate nutritional assessment tools to identify deficits in diet and body composition. Dietary management of CKD patients should be customized to each patient based on dietary and nutritional assessment findings, biochemical parameters, and symptom complex. General principles in adults include providing adequate calories, vigilant protein restriction when needed, managing fluid intake, restricting sodium intake, and prescribing a diet low in phosphate and potassium when required. Children have unique dietary needs and need energy-dense food with normal or increased protein and maintain positive calcium balance to allow for normal growth. Fluid and electrolyte requirements are higher in the majority of children with CKD due to tubular pathology and dysplastic kidneys. Enteral feeding and fortification of feeds might be needed in infants and toddlers to address risk of growth failure due to inadequate nutrition. By adhering to these tailored dietary strategies, clinicians can optimize the nutritional status of CKD patients across the age spectrum, fostering better outcomes and improved overall well-being."
+    }
+   ]
+  },
+  {
+   "id": "KDOQI-VA-002",
+   "source": "KDOQI",
+   "title": "KDOQI commentary clinical practice guideline for vascular access",
+   "year": "2020",
+   "page_url": "https://www.ajkd.org/article/S0272-6386(19)31137-0/fulltext",
+   "pdf_url": "https://www.ajkd.org/article/S0272-6386(19)31137-0/fulltext",
+   "license": "KDOQI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_access",
+   "priority": "medium",
+   "sha256": "efce028bbf5ddf94a0a0db1becf457302ade1d502063e7394e09aa10cbaa89c8",
+   "size_bytes": 772,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 772,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: KDOQI commentary clinical practice guideline for vascular access Source: KDOQI Year: 2020 Domain: vascular_access License: KDOQI Available at: https://www.ajkd.org/article/S0272-6386(19)31137-0/fulltext This is a citation reference for the KDOQI guideline 'KDOQI commentary clinical practice guideline for vascular access' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_access. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

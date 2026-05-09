@@ -1,7 +1,7 @@
 {
  "source": "ELSO",
  "generated_at": "2026-05-09T10:17:02Z",
- "total_documents": 10,
+ "total_documents": 12,
  "documents": [
   {
    "id": "ELSO-ECMO-001",
@@ -534,6 +534,56 @@
     {
      "chunk_index": 20,
      "content": "is crucial to advocate AKI-related biomarker screening for early detection and subsequent protective measures to maintain renal function during cancer progression and exposure to diverse therapies. While biomarkers for predicting AKI and small molecular inhibitors for AKI alleviation have emerged, it is vital to tackle the challenges linked to identifying AKI or subclinical AKI within the cancer context. Currently, only a limited number of novel biomarkers have been incorporated into conventional clinical management. Shi K et al. performed a meta-analysis and unveiled that CCL14 emerges as the optimal biomarker for predicting persistent AKI, particularly persistent stage 2–3 AKI [ ]. With the advent of artificial intelligence (AI), its application has predominantly been centered on predicting AKI. However, more advanced methods are also being employed to categorize existing AKI into distinct phenotypes [ ]. Early prediction of AKI by novel biomarkers or AI-based prediction models may provide a crucial opportunity for AKI prevention [ ]. Postoperative acute kidney injury requiring dialysis (PO-AKID) is a serious adverse event strongly associated with acute morbidity and mortality, as well as long-term prognosis. A web-based risk calculator called the PO-AKID-teller can accurately predict an individual's risk for PO-AKID in an easy-to-understand way. This tool may help with informed decision-making, patient counseling, perioperative optimization, and longer-term care planning [ ]. Timely intervention is critical for controlling AKI. Targeted therapies should be devised, focusing on the pivotal molecular pathways implicated in AKI pathogenesis. Uncertainty persists regarding the association between AKI and novel agents like CDK4/6 inhibitors, necessitating extensive prospective studies to elucidate incidence rates and risk factors for AKI in patients undergoing such therapies [ ]. Likely, some innovative cancer treatments regarding small renal mass such as focal therapy and active surveillance and associated renal function detriments including AKI are arrived and paid more focus [ ]. As for metastatic renal carcinoma, cytoreductive nephrectomy and metastasectomy showed different advantages [ ]. Therapeutic targeting of mitochondria is an emerging strategy for AKI. Yet, additional studies are required prior to its application in clinical therapeutic contexts. Meanwhile, postponing the progression from AKI to CKD is a viable and manageable treatment approach. Specifically, Zn-D/DTH has been shown to reduce renal IRI and delay the transition from AKI to CKD by downregulating the TLR4/MyD88/NF-κB signaling cascade and reducing the expression of apoptotic caspases, thereby inhibiting inflammation and decreasing cell apoptosis [ ]. Furthermore, recognizing high-risk individuals and clinical conditions, as well as high-risk situations and procedures, is an important step toward preventing AKI. Early detection of AKI may present a critical opportunity for AKI prophylaxis. Once considered a transient condition, AKI is now recognized as having significant long-term consequences. Acute alterations in kidney function are increasingly understood to be associated with the progression to CKD, adverse cardiovascular effects, persistent functional impairment, and increased mortality. The majority of significant “treatments” for AKI majority address complications of AKI rather than AKI itself. On the same note, AKI causes mutual damage within multi-organ injuries. During cardiac arrest, ischemia–reperfusion followed by successful cardiopulmonary resuscitation was prone to lead to AKI. Traditional complications of AKI, including electrolyte imbalances, uremia, and fluid overload, have long been identified as major factors contributing to adverse pulmonary outcomes in patients with AKI, respiratory complications/inflammatory lung injury. Moreover, AKI also led to intestinal injury, liver injury, and immunoparalysis. Likewise, the injuries of these organs also resulted in or exacerbated AKI. Most of these interventions are also highly debated. Among them, diuretics and bicarbonate are particularly contentious. Regarding diuretics, KDIGO advises against their use for treating AKI, except in cases of fluid overload. As for bicarbonate supplementation, the evidence from randomized controlled trials is extremely limited, which makes its efficacy highly questionable. It is crucial to establish a sustainable infrastructure that can provide appropriate care for all AKI patients. In summary, AKI remains a catastrophic issue among hospitalized patients, particularly for those in critical condition. Although the development of biomarkers for early diagnosis is still ongoing, raising awareness of AKI is crucial for early detection. This early recognition is highly contingent upon the specific context and the resources available at the site where AKI occurs. These findings can provide the pathological mechanism of AKI and may establish novel therapeutic strategies. Undoubtedly, future investigations will identify additional biomarkers, targets, and therapies for AKI. Supplementary Information Supplementary Material 1: Table 1. The patients-related risk factor associated with AKI. Table 2. AKI-related anti-cancer drugs"
+    }
+   ]
+  },
+  {
+   "id": "ELSO-ECMO-004",
+   "source": "ELSO",
+   "title": "ELSO general guidelines for all ECMO cases",
+   "year": "2017",
+   "page_url": "https://www.elso.org/Resources/Guidelines.aspx",
+   "pdf_url": "https://www.elso.org/Resources/Guidelines.aspx",
+   "license": "ELSO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiothoracic_surgery",
+   "priority": "high",
+   "sha256": "a2056fa215a9adcd4a1e5992c51d0205cdf2dff6bbd5bb5733b955544ddfb0f2",
+   "size_bytes": 726,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 726,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ELSO general guidelines for all ECMO cases Source: ELSO Year: 2017 Domain: cardiothoracic_surgery License: ELSO Available at: https://www.elso.org/Resources/Guidelines.aspx This is a citation reference for the ELSO guideline 'ELSO general guidelines for all ECMO cases' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiothoracic_surgery. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ELSO-TX-001",
+   "source": "ELSO",
+   "title": "ELSO Position Statement Bridge to Heart-Lung Transplantation",
+   "year": "2020",
+   "page_url": "https://www.elso.org/ECMO/Guidelines.aspx",
+   "pdf_url": "https://www.elso.org/ECMO/Guidelines.aspx",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "transplant_heart",
+   "priority": "medium",
+   "sha256": "4de426745d8dd220462fcb274c0f8280e2b1336f253e27b9ac4877a063faeb9e",
+   "size_bytes": 751,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 751,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:09Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ELSO Position Statement Bridge to Heart-Lung Transplantation Source: ELSO Year: 2020 Domain: transplant_heart License: Restricted Available at: https://www.elso.org/ECMO/Guidelines.aspx This is a citation reference for the ELSO guideline 'ELSO Position Statement Bridge to Heart-Lung Transplantation' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: transplant_heart. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

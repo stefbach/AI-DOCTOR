@@ -1,7 +1,7 @@
 {
  "source": "SIR",
  "generated_at": "2026-05-09T12:13:10Z",
- "total_documents": 13,
+ "total_documents": 17,
  "documents": [
   {
    "id": "SIR-BIOPSY-001",
@@ -593,6 +593,106 @@
     {
      "chunk_index": 8,
      "content": "extravasation injuries are uncommon (2–6%) and relatively mild [ , ]. Potent peripheral vasoconstrictors, such as noradrenaline, may be infused for short durations through appropriately positioned short peripheral catheters and at dilute concentrations, with strict protocols followed (Table ). Training Regular and thorough education and training in vascular access device usage and aftercare can significantly reduce or prevent many issues and complications. All healthcare providers who handle such devices should undergo regular mandatory training in standard inspection; assessment; aseptic non‐touch technique and flushing regimes; basic problem‐solving; and the early identification and appropriate escalation of complications. The vascular access device exit site, along with every connection, should be monitored for signs of infection or mechanical problems such as kinking or detachment or dislodgement, and there should be clear guidelines for changing dressings, securement devices and bungs. These practices should be standard in ongoing aftercare to preserve the longevity of the device and, ultimately, the health of the vessels. Currently, no comprehensive training scheme exists which covers all aspects of advanced vascular access. The Working Party recommends that a systematic evidence‐based curriculum is developed at a national level, supported by appropriate cloud‐based education tools. Practical training can take place locally, perhaps utilising a hub‐and‐spoke model. Training in, and provision of, vascular access should be open to all appropriately qualified members of staff and should be competency‐based rather than based on role or title. The Working Party recommends training standards based on achievement of core competence (Table ). Discussion These guidelines and recommendations have been made using the best available contemporary evidence and pragmatic expert consensus involving multiple stakeholders. Core to the guidelines is the need for modernised vascular access services and provision where the patient is at the heart and lifetime vein preservation is prioritised. Short‐ and longer‐term vascular access is vital to modern healthcare, and it is envisaged that these guidelines will move practice towards greater consistency, reduced harm and improved patient outcomes. Our guideline has limitations. We synthesised data qualitatively and did not perform any statistical analysis, neither did we attempt to grade recommendations. The entire breadth and depth of vascular access cannot be fully captured in concise guidelines and our recommendations are necessarily selective and should be considered alongside full guidance. Some recommendations were adapted from guidance produced by others. Our recommendations may also not be applicable to other healthcare systems; however, our aim was to generate a UK‐centric guideline. Supporting information Appendix S1. Association of Anaesthetists Safe Vascular Access Guidelines 2025 (full version). Plain Language Summary."
+    }
+   ]
+  },
+  {
+   "id": "SIR-EVAR-001",
+   "source": "SIR",
+   "title": "SIR position statement on management of endoleaks after EVAR",
+   "year": "2018",
+   "page_url": "https://www.jvir.org/article/S1051-0443(18)30148-1/fulltext",
+   "pdf_url": "https://www.jvir.org/article/S1051-0443(18)30148-1/fulltext",
+   "license": "SIR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ir_vascular",
+   "priority": "medium",
+   "sha256": "042b5aecfdebfabfaf4de3883d8a214a1936bf8715f389dd0574051b497df22c",
+   "size_bytes": 770,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 770,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SIR position statement on management of endoleaks after EVAR Source: SIR Year: 2018 Domain: radiology_ir_vascular License: SIR Available at: https://www.jvir.org/article/S1051-0443(18)30148-1/fulltext This is a citation reference for the SIR guideline 'SIR position statement on management of endoleaks after EVAR' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_ir_vascular. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SIR-TACE-001",
+   "source": "SIR",
+   "title": "SIR Quality Improvement Guidelines for transcatheter arterial embolization TACE",
+   "year": "2017",
+   "page_url": "https://www.jvir.org/article/S1051-0443(17)30495-2/fulltext",
+   "pdf_url": "https://www.jvir.org/article/S1051-0443(17)30495-2/fulltext",
+   "license": "SIR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ir_oncology",
+   "priority": "high",
+   "sha256": "03bcefce17d933b153a335a76ef113d772f2b59f21d293e6054660aebb1170f9",
+   "size_bytes": 808,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 808,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SIR Quality Improvement Guidelines for transcatheter arterial embolization TACE Source: SIR Year: 2017 Domain: radiology_ir_oncology License: SIR Available at: https://www.jvir.org/article/S1051-0443(17)30495-2/fulltext This is a citation reference for the SIR guideline 'SIR Quality Improvement Guidelines for transcatheter arterial embolization TACE' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_ir_oncology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SIR-TRAUMA-001",
+   "source": "SIR",
+   "title": "SIR EAST joint consensus on transcatheter embolization in trauma",
+   "year": "2017",
+   "page_url": "https://www.jvir.org/article/S1051-0443(17)30495-2/fulltext",
+   "pdf_url": "https://www.jvir.org/article/S1051-0443(17)30495-2/fulltext",
+   "license": "SIR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ir_vascular",
+   "priority": "high",
+   "sha256": "90fb3834985d16fe36fd7f6732103f8b0f3183b039d909c44f36d7761c55d3ea",
+   "size_bytes": 778,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 778,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SIR EAST joint consensus on transcatheter embolization in trauma Source: SIR Year: 2017 Domain: radiology_ir_vascular License: SIR Available at: https://www.jvir.org/article/S1051-0443(17)30495-2/fulltext This is a citation reference for the SIR guideline 'SIR EAST joint consensus on transcatheter embolization in trauma' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_ir_vascular. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SIR-VERTEBRO-001",
+   "source": "SIR",
+   "title": "SIR ASNR ASSR position statement on percutaneous vertebroplasty and kyphoplasty",
+   "year": "2019",
+   "page_url": "https://www.jvir.org/article/S1051-0443(19)30421-9/fulltext",
+   "pdf_url": "https://www.jvir.org/article/S1051-0443(19)30421-9/fulltext",
+   "license": "SIR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ir_nonvascular",
+   "priority": "high",
+   "sha256": "f138e11a0657c858a697f1ab9f4faa8f076616a30ecfa9900fa6f004dc17eb62",
+   "size_bytes": 814,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 814,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SIR ASNR ASSR position statement on percutaneous vertebroplasty and kyphoplasty Source: SIR Year: 2019 Domain: radiology_ir_nonvascular License: SIR Available at: https://www.jvir.org/article/S1051-0443(19)30421-9/fulltext This is a citation reference for the SIR guideline 'SIR ASNR ASSR position statement on percutaneous vertebroplasty and kyphoplasty' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_ir_nonvascular. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

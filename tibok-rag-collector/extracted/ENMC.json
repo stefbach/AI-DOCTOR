@@ -1,7 +1,7 @@
 {
  "source": "ENMC",
  "generated_at": "2026-05-09T08:27:34Z",
- "total_documents": 3,
+ "total_documents": 6,
  "documents": [
   {
    "id": "ENMC-MYOPATHY-002",
@@ -143,6 +143,81 @@
     {
      "chunk_index": 5,
      "content": "effect can mimic true geographic differences. If SARD clusters do exist in Australia, they may be driven by local environmental exposures or regional demographic differences. Proposed exposures include silica dust (mining, quarrying, agriculture, forestry and construction), organic solvents and other chemicals. , , , , , National research using spatial statistics , may help to clarify these patterns. Strengths and limitations The strengths of this paper are that it is based on a systematic literature search, informed by the JBI guidance and Preferred Reporting Items for Systematic Reviews and Meta‐Analyses (PRISMA) statement, and used a validated tool for appraising prevalence study bias. Limitations relate to the underlying data, particularly the number of regionally based studies, which may limit generalisability. While inclusion of overlapping studies mostly had minimal impact on pooled estimates, in some cases the effect was material, necessitating their exclusion. This further reduced the number of studies available for meta‐analysis and underscores the uneven geographic distribution of research across Australia, with some regions studied multiple times and others not at all. Additionally, certain population groups remain under‐represented, including paediatric populations and Australians of different ethnic backgrounds. Most pooled estimates broadly aligned with international data, except SSc, where our estimate (25.58 per 100 000) exceeded the estimate for Australia (6.69 per 100 000) reported in a recent global meta‐analysis. The international estimate was based on three studies , , as opposed to our nine, as conference abstracts, , , registry studies , and regional studies were excluded. We are therefore confident in the robustness of our SSc estimate despite the difference from the global meta‐analysis. Conclusion This paper provides pooled incidence or prevalence estimates for AAV, SLE, LN, SSc, IIM and IBM, contributing to a growing body of SARD research in Australia. We identified three opportunities for future research. First, there are limited data on the prevalence of non‐ANCA‐associated vasculitis, RA, SpA, SjD and MCTD in Australia and a general paucity of studies on SARD prevalence in the paediatric population and Australians of diverse ethnic backgrounds. Second, there are few validation studies of Australian administrative health data for SARD research. Third, given the challenge of accurately identifying true geographic clusters of a rare disease, larger studies using spatial statistics are needed to identify clusters, in turn yielding aetiological clues. Disclaimers During the preparation of this work, generative AI was not used. Supporting information Data S1: Supporting Information."
+    }
+   ]
+  },
+  {
+   "id": "ENMC-ALS-001",
+   "source": "ENMC",
+   "title": "ENMC workshop revised El Escorial criteria for ALS diagnosis",
+   "year": "2015",
+   "page_url": "https://www.enmc.org/publications",
+   "pdf_url": "https://www.enmc.org/publications",
+   "license": "ENMC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_als",
+   "priority": "high",
+   "sha256": "7150e636cc433e1c5888ee0f16d005aeabdd6e5ac90b6217fa9f23b97138bf2d",
+   "size_bytes": 731,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 731,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ENMC workshop revised El Escorial criteria for ALS diagnosis Source: ENMC Year: 2015 Domain: neurology_als License: ENMC Available at: https://www.enmc.org/publications This is a citation reference for the ENMC guideline 'ENMC workshop revised El Escorial criteria for ALS diagnosis' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_als. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ENMC-MYOPATHY-001",
+   "source": "ENMC",
+   "title": "224th ENMC International Workshop clinico sero pathological classification idiopathic inflammatory myopathies",
+   "year": "2018",
+   "page_url": "https://www.enmc.org/publications",
+   "pdf_url": "https://www.enmc.org/publications",
+   "license": "ENMC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_neuromuscular",
+   "priority": "high",
+   "sha256": "7fc5b1ce6cf1d2246318d8dc33217d98e187f9840056b0287cc1cf6b45d027b6",
+   "size_bytes": 849,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 849,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: 224th ENMC International Workshop clinico sero pathological classification idiopathic inflammatory myopathies Source: ENMC Year: 2018 Domain: neurology_neuromuscular License: ENMC Available at: https://www.enmc.org/publications This is a citation reference for the ENMC guideline '224th ENMC International Workshop clinico sero pathological classification idiopathic inflammatory myopathies' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_neuromuscular. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ENMC-MYOPATHY-003",
+   "source": "ENMC",
+   "title": "272nd ENMC workshop diagnostic criteria for inclusion body myositis",
+   "year": "2023",
+   "page_url": "https://www.enmc.org/publications",
+   "pdf_url": "https://www.enmc.org/publications",
+   "license": "ENMC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_neuromuscular",
+   "priority": "medium",
+   "sha256": "095b7ace97e91e22fa206835d299d1dbac741725847a74e9f1f3d3aabb05366e",
+   "size_bytes": 1262,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1262,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "272nd ENMC international workshop: 10 Years of progress - revision of the ENMC 2013 diagnostic criteria for inclusion body myositis and clinical trial readiness. 16-18 June 2023, Hoofddorp, The Netherlands. Since the publication of the 2013 European Neuromuscular Center (ENMC) diagnostic criteria for Inclusion Body Myositis (IBM), several advances have been made regarding IBM epidemiology, pathogenesis, diagnostic tools, and clinical trial readiness. Novel diagnostic tools include muscle imaging techniques such as MRI and ultrasound, and serological testing for cytosolic 5'-nucleotidase-1A antibodies. The 272nd ENMC workshop aimed to develop new diagnostic criteria, discuss clinical outcome measures and clinical trial readiness. The workshop started with patient representatives highlighting several understudied symptoms and the urge for a timely diagnosis. This was followed by presentations from IBM experts highlighting the new developments in the field. This report is composed of two parts, the first part providing new diagnostic criteria on which consensus was achieved. The second part focuses on the use of outcome measures in clinical practice and clinical trials, highlighting current limitations and outlining the goals for future studies."
     }
    ]
   }

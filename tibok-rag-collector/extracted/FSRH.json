@@ -1,7 +1,7 @@
 {
  "source": "FSRH",
  "generated_at": "2026-05-09T12:26:19Z",
- "total_documents": 6,
+ "total_documents": 8,
  "documents": [
   {
    "id": "FSRH-IUD-001",
@@ -254,6 +254,56 @@
     {
      "chunk_index": 3,
      "content": "of a bankruptcy proceeding; • pursuant to a subpoena, court order, or other legal process or as otherwise required or requested by law, regulation, or government authority programs, or to protect our rights or the rights or safety of third parties; • to our professional advisors, lawyers, accountants and auditors; or • with your consent or as otherwise disclosed at the time of data collection or sharing. How do we contact members? We currently communicate with our members via post, email and telephone. As part of our commitment to reducing administration costs and streamlining membership services and communications, we are transitioning to sending all membership subscription reminder notices and other reminders regarding recertification by email. As part of CoSRH membership, we also send the BMJ Sexual and Reproductive Healthcare Journal by post where you have opted in to a paper copy. It is your responsibility to ensure that your contact details are up to date, so that we can continue to send you reminders, the Journal and the latest clinical guidance as part of your membership package. Update your details online by logging in to your account on our website. Is my information secure? We are committed to ensuring that your information is safe. Your information will be held in a secure environment, and access to it will be restricted according to the “need to know” principle. To prevent unauthorized access or disclosure we have put in place suitable physical, electronic and managerial procedures to safeguard and protect the information we collect online. While we seek to use appropriate organisational, technical and administrative measures to protect personal information within our organisation, unfortunately no data transmission or storage system can be guaranteed to be 100% secure. If you have reason to believe that your interaction with us is no longer secure, please immediately notify us in accordance with the “Contact us” section below. Cookies and similar tracking technology Our website uses cookies to distinguish you from other users of our website. This helps us to provide you with a good experience when you browse our website and also allows us to improve our website. For more information, please see our separate Cookie Policy. Links to other websites Our website may contain links to other websites. Once you have used these links to leave our website, you should note that we do not have any control over the website that you visit. We cannot be responsible for the protection and privacy of any information which you may provide whilst visiting such websites and such websites are not governed by this privacy statement. You should exercise caution and look at the privacy statement applicable to the website in question. Recruitment The CoSRH engages Hireful Ltd as a data processor to manage candidate information collected during the recruitment process. All candidate data is processed through the Hireful Applicant Tracking System (ATS) in strict accordance with the General Data Protection Regulation (GDPR) with mandatory consent requested to proceed with application. Unless you explicitly request otherwise, personal data of unsuccessful candidates will be securely destroyed after a period of 6 months from the end of the recruitment process. Successful candidate information will be retained for the duration of employment and destroyed in accordance with our CoSRH data retention schedule and legal requirements. Membership terms and conditions Please read our separate Membership Terms and Conditions Policy and our membership FAQs for more information about member services, communications and payment policies. Contact us For any queries relating to this policy and its application, please write to CoSRH, 10-18 Union Street, London SE1 1SZ or email: support@cosrh.org"
+    }
+   ]
+  },
+  {
+   "id": "FSRH-MFM-001",
+   "source": "FSRH",
+   "title": "FSRH Clinical Guideline Contraception After Pregnancy",
+   "year": "2020",
+   "page_url": "https://www.fsrh.org/standards-and-guidance/documents/contraception-after-pregnancy-guideline-january-2017/",
+   "pdf_url": "https://www.fsrh.org/standards-and-guidance/documents/contraception-after-pregnancy-guideline-january-2017/",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_postpartum",
+   "priority": "high",
+   "sha256": "7fcf14cd27f2f9a96b46517436a06c2795fceabaac53d4835e6cd164bf89c9b0",
+   "size_bytes": 1914,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1914,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "[Contraception for women after 40: CNGOF Contraception Guidelines]. Choosing contraception for women over 40 can be sometimes difficult but it is crucial since fertility and pregnancy's risks still exist. It requires a thorough evaluation of the situation, in order to identify any vascular and metabolic risk factors, along with the uterine and mammary benign pathologies already diagnosed. The objective of this review was to elaborate some guidelines for clinical practice regarding contraception's prescription for women over 40. A systematic review of the French and English existing literature was conducted. Pubmed and the Cochrane library were used to identify studies about contraception for perimenopausal women. International guidelines published by scientific societies were also reviewed (RCOG, FSRH, ESHRE, ACOG, WHO, HAS). No contraceptive methods are contraindicated on the sole basis of age alone. However, because age is a risk factor for vascular and metabolic diseases, combined hormonal contraception and DMPA should not be prescribed at first intention. Copper IUD and progestin-only contraceptives (pill, implant, intrauterine device) should primarily be considered, since they offer good efficacy with lower risks. Contraception for women over 40 should not be put aside. Long acting reversible contraception and progestin-only pill have to be prescribed as first-ine. Contraception is no longer needed for women over 50 who use non-hormonal contraception, after a 12 month-amenorrhea. Patients treated with combined hormonal contraception must stop using it over 50. Measuring hormonal levels while using hormonal contraception is not recommended. An hormonal-contraception-free interval must be considered, while using barrier contraception method. If an ovarian activity persists, a non-hormonal contraception or progestin-only contraception (except for DMPA) should be (re-)established."
+    }
+   ]
+  },
+  {
+   "id": "FSRH-MFM-002",
+   "source": "FSRH",
+   "title": "FSRH UK Medical Eligibility Criteria for Contraceptive Use",
+   "year": "2016",
+   "page_url": "https://www.fsrh.org/standards-and-guidance/uk-medical-eligibility-criteria-for-contraceptive-use-ukmec/",
+   "pdf_url": "https://www.fsrh.org/standards-and-guidance/uk-medical-eligibility-criteria-for-contraceptive-use-ukmec/",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_postpartum",
+   "priority": "high",
+   "sha256": "d35369b711968e16794e859d85eaf851a9eafea6bc76893fc1c82b12d563afba",
+   "size_bytes": 806,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 806,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: FSRH UK Medical Eligibility Criteria for Contraceptive Use Source: FSRH Year: 2016 Domain: mfm_postpartum License: Restricted Available at: https://www.fsrh.org/standards-and-guidance/uk-medical-eligibility-criteria-for-contraceptive-use-ukmec/ This is a citation reference for the FSRH guideline 'FSRH UK Medical Eligibility Criteria for Contraceptive Use' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_postpartum. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

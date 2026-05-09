@@ -1,7 +1,7 @@
 {
  "source": "IFCC",
  "generated_at": "2026-05-09T09:25:54Z",
- "total_documents": 3,
+ "total_documents": 5,
  "documents": [
   {
    "id": "IFCC-HBA1C-001",
@@ -155,6 +155,56 @@
     {
      "chunk_index": 10,
      "content": "glucose. The response variable in all models was the natural logarithm of the original measurement to stabilize variance and normalize residuals, and all hypothesis tests and model comparisons were performed on this transformed scale. Estimated marginal means and contrasts were subsequently back-transformed to the original response scale to aid interpretation. Model comparisons between the default and covariate models were performed using maximum likelihood estimation and evaluated with Analysis of Variance (ANOVA). The covariate model was retained when the inclusion of HbA1c and glucose significantly improved model fit, as indicated by a p-value ≤ 0.05. In most cases, the default model was selected; however, for certain outcomes such as body weight, body mass index (BMI), body fat percentage, triglycerides (TG), estimated glomerular filtration rate (eGFR), E-selectin, self-efficacy for physical activity, self-efficacy for diet, the dietary health diet index (DHDI), and health-related quality of life (EQ-5D), the covariate model provided a better fit and was therefore used. For HbA1c and fasting glucose themselves, only the default model was applied, as these variables were used as covariates in other models. To reduce the influence of extreme values, observations with absolute standardized residuals greater than 3 were excluded from the final model fitting. No imputation was performed. The interaction between timepoint and group was assessed by including a timepoint-by-group interaction term in the mixed-effects model. This term tested whether the change from baseline to follow-up differed significantly between the intervention and control groups. The significance of the interaction term was evaluated as part of the fixed effects summary of the model. Estimated marginal means (EMMs) were used to further explore the pattern of results. These EMMs, derived from the final model, represented the model-predicted means for each group and timepoint combination on the response scale. Contrasts based on these EMMs were calculated to examine within-group changes over time, between-group differences at each timepoint, and differences in change between groups, thereby providing a detailed decomposition of the interaction effect. All contrasts and estimated means were based on the fixed effects of the model and averaged over random effects. Standard errors, confidence intervals, and model-based estimates of variability were extracted to support interpretation and reporting of results. Wilcoxon tests were performed for inflammatory biomarkers that did not meet the criteria for using linear mixed-effects models to assess differences between groups and timepoints, using the rstatix package . Three different comparisons were made : changes in inflammatory biomarkers were calculated for each participant by subtracting baseline values from follow-up values. Cases with missing values were excluded from further analysis. Wilcoxon tests were then applied to change in values to compare different groups . Paired Wilcoxon tests were used to compare values between the two timepoints within each group . Unpaired Wilcoxon tests were utilized to compare values between different groups at each timepoint. Finally, appreciation question outcomes were analysed using two-sided Student’s T-test, since data were only available at the 6 months timepoint. Supplementary Information Below is the link to the electronic supplementary material. Supplementary Material 1"
+    }
+   ]
+  },
+  {
+   "id": "IFCC-POCT-001",
+   "source": "IFCC",
+   "title": "IFCC task force POCT recommendations clinical application",
+   "year": "2020",
+   "page_url": "https://www.ifcc.org/ifcc-emerging-technologies-division/etd-task-forces/tf-poct/",
+   "pdf_url": "https://www.ifcc.org/ifcc-emerging-technologies-division/etd-task-forces/tf-poct/",
+   "license": "IFCC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_poct",
+   "priority": "high",
+   "sha256": "250e85aabda8f8ae4e18b387f1ce5bd850daec0319c2fb6ac31877019fef0cea",
+   "size_bytes": 763,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 763,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IFCC task force POCT recommendations clinical application Source: IFCC Year: 2020 Domain: lab_poct License: IFCC Available at: https://www.ifcc.org/ifcc-emerging-technologies-division/etd-task-forces/tf-poct/ This is a citation reference for the IFCC guideline 'IFCC task force POCT recommendations clinical application' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_poct. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IFCC-COMMUTABILITY-001",
+   "source": "IFCC",
+   "title": "IFCC working group commutability reference materials",
+   "year": "2019",
+   "page_url": "https://www.ifcc.org/ifcc-scientific-division/sd-working-groups/commutability/",
+   "pdf_url": "https://www.ifcc.org/ifcc-scientific-division/sd-working-groups/commutability/",
+   "license": "IFCC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_quality",
+   "priority": "medium",
+   "sha256": "164a41185206ba7deb1b3c6aeb7922c7be4820768c32963a0ece9361830ab51b",
+   "size_bytes": 756,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 756,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IFCC working group commutability reference materials Source: IFCC Year: 2019 Domain: lab_quality License: IFCC Available at: https://www.ifcc.org/ifcc-scientific-division/sd-working-groups/commutability/ This is a citation reference for the IFCC guideline 'IFCC working group commutability reference materials' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_quality. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

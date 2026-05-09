@@ -1,7 +1,7 @@
 {
  "source": "HemOnc",
  "generated_at": "2026-05-09T15:19:52Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "HEMONC-001",
@@ -41,6 +41,31 @@
     {
      "chunk_index": 4,
      "content": "regimens in the literature and our empirical experience in clinical practice, we have recorded 1,138 acronyms representing these regimens (Data Supplement). This is not intended to be comprehensive but nevertheless illustrates the scope of the problem. Individual regimens have a median of six distinct representations, with a maximum of 31 for one four-drug combination (bortezomib, cyclophosphamide, lenalidomide, and dexamethasone). This heterogeneity in representation creates challenges in determining prior treatment exposure, and therefore eligibility for subsequent therapy at relapse, which is inevitable for this incurable malignancy. Using the rules-based approach for uniform nomenclature, we collapsed these myeloma regimens into representations fitting our schema ( ). Although alternate representations for these concepts exist, this approach does so in a way that allows significant abbreviation and minimal ambiguity as to the regimen being used. To our knowledge, this is the first proposal for a schema to normalize chemotherapy regimen nomenclature. We have demonstrated with two use cases that this schema is useful to disambiguate regimen representation. Our schema can be used to adjudicate differences in regimen representation and can collapse an increasingly complex landscape of regimen representation into a short, digestible list of concepts. We acknowledge that different potential methodologies exist to standardize chemotherapy regimen representation. We do not claim or aim to demonstrate that our proposal is definitively superior to possible alternatives. Because no standardization schema yet exists, were the standard presented in this paper adopted, the uniformity of treatment representation in the literature and in clinical documentation could increase. As regimens grow more complex and involved over time, it is becoming increasingly important to develop a priori best practices for naming new regimens. Adopting a standard nomenclature, whether the one proposed here or an alternative, would facilitate this. We hope that this effort stimulates discussion surrounding standardization of chemotherapy nomenclature. This would facilitate a variety of efforts, including knowledge aggregation, real-world data analysis, and developing an oncology learning health system."
+    }
+   ]
+  },
+  {
+   "id": "HEMONC-002",
+   "source": "HemOnc",
+   "title": "HemOnc.org chemotherapy regimen reference cards",
+   "year": "2024",
+   "page_url": "https://hemonc.org/wiki/Reference_pages",
+   "pdf_url": "https://hemonc.org/wiki/Reference_pages",
+   "license": "HemOnc Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_oncology",
+   "priority": "high",
+   "sha256": "8b7712b223d3f74b613321617cb830c5873e441308bc0e45485f453a5dceaf11",
+   "size_bytes": 722,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 722,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:00Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: HemOnc.org chemotherapy regimen reference cards Source: HemOnc Year: 2024 Domain: drug_oncology License: HemOnc Open Available at: https://hemonc.org/wiki/Reference_pages This is a citation reference for the HemOnc guideline 'HemOnc.org chemotherapy regimen reference cards' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_oncology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,0 +1,32 @@
+{
+ "source": "HSG",
+ "generated_at": "2026-05-09T19:10:58Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "HSG-HUNTINGTON-001",
+   "source": "HSG",
+   "title": "Huntington Study Group recommendations for clinical care",
+   "year": "2020",
+   "page_url": "https://huntingtonstudygroup.org/clinical-care/",
+   "pdf_url": "https://huntingtonstudygroup.org/clinical-care/",
+   "license": "HSG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_movement",
+   "priority": "medium",
+   "sha256": "495e4dfd4f258850e8b1c7c70e0086ef42d18293af08dc83623b5a41803fbf0a",
+   "size_bytes": 744,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 744,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Huntington Study Group recommendations for clinical care Source: HSG Year: 2020 Domain: neurology_movement License: HSG Available at: https://huntingtonstudygroup.org/clinical-care/ This is a citation reference for the HSG guideline 'Huntington Study Group recommendations for clinical care' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_movement. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

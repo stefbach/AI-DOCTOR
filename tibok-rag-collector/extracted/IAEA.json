@@ -1,7 +1,7 @@
 {
  "source": "IAEA",
  "generated_at": "2026-05-09T12:04:49Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "IAEA-RAD-001",
@@ -158,6 +158,31 @@
     {
      "chunk_index": 23,
      "content": "nurses, physicists and radiochemists is critical for ensuring that safe and effective imaging and nuclear medicine services can be provided and that quality systems make available accurate and reliable information for cancer care. Digital solutions and virtual platforms that facilitate the development of workforce planning and training could enable rapid scale-up of training in LMICs. Target: By 2030, 80% of LMICs should establish plans for workforce development and for the use of digital platforms for workforce training. Action 6: Invest in training, research, development and innovation to develop affordable cancer imaging diagnostics in LMICs Research funding related to cancer imaging diagnostics in LMICs is small, fragmented and largely inaccessible to researchers outside high-income countries. The lack of affordable solutions for imaging diagnostics hinders the achievement of improved health outcomes for cancer patients. Investments are needed in research and innovation in LMICs to ensure better use of available interventions and create affordable and accessible imaging solutions and new care delivery models for cancer patients appropriate for LMICs. Target: By 2025, the establishment of a $100 million ‘Innovation Fund for Cancer Imaging Diagnostics' to improve coordination of funding for education, training, research and development, and innovation in LMICs, with a target of mobilising and investing thereafter at least $25 million per year. Conclusions There is compelling evidence of the substantial health benefits of scaling up medical imaging and nuclear medicine access for cancer patients. Improvements in science have enabled rapid developments in affordable imaging technologies and solutions and flexible low-cost digital platforms for virtual training. Science and technology are not the barriers to worldwide equitable scale-up of effective cancer imaging diagnostics; rather, achieving equitable scale-up is a matter of vision and will. Success will be realised through political leadership, active participation from all major stakeholders, and alignment of country-level and global efforts to expand access to medical imaging and nuclear medicine, leading to better outcomes for cancer patients. Supplementary Material Web appendix"
+    }
+   ]
+  },
+  {
+   "id": "IAEA-RAD-002",
+   "source": "IAEA",
+   "title": "IAEA Bonn Call for Action 10 actions for global radiation protection",
+   "year": "2014",
+   "page_url": "https://www.iaea.org/resources/rpop/resources/bonn-call-for-action",
+   "pdf_url": "https://www.iaea.org/resources/rpop/resources/bonn-call-for-action",
+   "license": "IAEA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_safety",
+   "priority": "medium",
+   "sha256": "a242a8a858dbdfe6bcfe5a22267da52e4867daeeb8623550bfccc6a4e873db98",
+   "size_bytes": 786,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 786,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:00Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IAEA Bonn Call for Action 10 actions for global radiation protection Source: IAEA Year: 2014 Domain: radiology_safety License: IAEA Available at: https://www.iaea.org/resources/rpop/resources/bonn-call-for-action This is a citation reference for the IAEA guideline 'IAEA Bonn Call for Action 10 actions for global radiation protection' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_safety. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

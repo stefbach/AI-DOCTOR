@@ -1,0 +1,57 @@
+{
+ "source": "BESS",
+ "generated_at": "2026-05-09T19:07:24Z",
+ "total_documents": 2,
+ "documents": [
+  {
+   "id": "BESS-RC-001",
+   "source": "BESS",
+   "title": "BESS BOA patient care pathway rotator cuff disorders",
+   "year": "2020",
+   "page_url": "https://www.bess.ac.uk/page/Guidelines",
+   "pdf_url": "https://www.bess.ac.uk/page/Guidelines",
+   "license": "BESS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_sports",
+   "priority": "high",
+   "sha256": "cb0a5605dfe4c4c072f47f1b39dc4279fe1f1dd919751dfd722aa114a1afd868",
+   "size_bytes": 730,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 730,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BESS BOA patient care pathway rotator cuff disorders Source: BESS Year: 2020 Domain: orthopedics_sports License: BESS Available at: https://www.bess.ac.uk/page/Guidelines This is a citation reference for the BESS guideline 'BESS BOA patient care pathway rotator cuff disorders' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_sports. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "BESS-INSTAB-001",
+   "source": "BESS",
+   "title": "BESS shoulder instability patient care pathway",
+   "year": "2018",
+   "page_url": "https://www.bess.ac.uk/page/Guidelines",
+   "pdf_url": "https://www.bess.ac.uk/page/Guidelines",
+   "license": "BESS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_sports",
+   "priority": "medium",
+   "sha256": "d5891a8319de330f322f17e43a9acc83887e39c0a570ad2b72e40a04ecd48893",
+   "size_bytes": 1772,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1772,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "British Elbow and Shoulder Society practice guidelines: Rehabilitation following traumatic anterior shoulder dislocation (post-operative and non-operative care). Traumatic anterior shoulder dislocation is common and carries a high risk of recurrence. Rehabilitation is central to management following both surgical and non-surgical treatment. However, consistency in rehabilitation practice and continuity of care are lacking. The British Elbow and Shoulder Society (BESS) therefore commissioned the development of guidelines for post-operative and non-operative rehabilitation. This guideline was developed through a multi-staged process that combined a UK national survey, Delphi consensus, evidence synthesis, and a final expert workshop. The post-operative guideline was based on a BESS best-practice framework, while the non-operative guideline was informed by the ARTISAN intervention development methodology, with both organised into phase-based protocols. The process produced aligned rehabilitation protocols comprising five sequential phases: (1) Acute protection and education (0-3 weeks), (2) Movement and early strengthening (3-6 weeks), (3) Progressive strengthening (6-12 weeks), and (4) Return to sport (>12 weeks) and (5) high-level function. Key guidance following surgical treatment included sling use after surgery, initiation of through-range resisted exercise, and criteria-based progression to contact sport. The non-operative pathway mirrored these phases, with earlier sling weaning. Through a rigorous process, BESS has established pragmatic, evidence-informed rehabilitation guidelines for traumatic anterior shoulder dislocation, promoting consistent, safe, and adaptable patient-centred care across both operative and non-operative management."
+    }
+   ]
+  }
+ ]
+}

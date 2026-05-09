@@ -1,7 +1,7 @@
 {
  "source": "AsMA",
  "generated_at": "2026-05-09T16:40:55Z",
- "total_documents": 3,
+ "total_documents": 6,
  "documents": [
   {
    "id": "ASMA-INFLIGHT-001",
@@ -151,6 +151,81 @@
     {
      "chunk_index": 9,
      "content": "Information Technologies. 2015;6(5):4392-4396 [14] RMA V, Fernando Gómez Comendador V, Sanz LP, Sanz AR. Prediction of aircraft safety incidents using Bayesian inference and hierarchical structures. Safety Science. 2018;104: 216-203 [15] Wang H, Jun G. Bayesian network assessment method for civil aviation safety based on flight delays. Mathematical Problems in Engineering. 2013;2013(Article ID 594187):12 [16] Xu N, Donohue G, Laskey KB, Chen CH. Estimation of delay propagation in the national aviation system using Bayesian networks. In: Proceedings of the Fifth USA/Europe Air Traffic management (ATM) R&D Seminar. Baltimore: 2005 [17] Liu Y, Wu H. A remixed Bayesian Netwrok based algorithm for flight delay estimating. International Journal of Pure and Applied Mathematics. 2013;3:465-475 [18] Cosmas A. Bayesian networks for departure delay prediction. In: NASA Ames Research Center Airline Operations Workshop; 2015 [19] Yorukoglu M, Kayakutlu G. Bayesian network scenarios to improve the aviation supply chain. In: Proceedings of the World Congress on Engineering, WCE. London; 2011;Vol II [20] Rodríguez-Sanz Á et al. Analysis of saturarion at the airport and airspace integrated operations. A case study regarding delay indicators and their predictability. In: Twelfth USA/Europe Air Traffic Management Research and Development Seminar (ATM2017); 2017 [21] Schumann J, Mbaya T, Mengshoel O. Software health management with Bayesian net- works. Innovations in Systems and Software Engineering. December 2013;9(4):271-292 [22] Pereiraa JC, Limaa GBA, Annibal. A bow-tie based risk framework integrated with a Bayesian belief network applied to the probabilistic risk analysis. Brazilian Journal of Operations & Production Management. 2015;12:350-359 [23] Gautam B, Mack DL, Kouts XD. Learning Bayesian network structures to augment aircraft diagnostic reference models. IEEE Transactions on Automation Science and Engineering. Jan. 2017;14(1) [24] Huiling C et al. Research on in-flight shutdown fault diagnosis of civil aviation engine based on Bayesian networks. Advanced Materials Research. 2012;403-408:1416-1419 [25] Wei Chen SH. Human reliability analysis for visual inspection in aviation maintenance by a Bayesian network approach. In: Transportation Research Record Journal of the Trans- portation Research Board. December 2014;2449(1):105-113 38 Bayesian Networks - Advances and Novel Applications [26] Saada M, Meng Q, Huang T. A novel approach for pilot error detection using dynamic Bayesian networks. Cognitive Neurodynamics. 2014;8(3):227-238 [27] Gao PZX. Real-time aviation decision based on structure variable Bayesian network. In: 3rd International Conference on Advanced Computer Theory and Engineering (ICACTE); 2010 [28] Valdés RA, Fernando Gomez Comendador V, Sanz AR, Castán AP, Sanz LP, Ayra ES. Bayesian approach to safety compliance assessment and acceptance under uncertainty for air navigation service providers. Safety Science. Under revision [29] Sanchez Ayra E. Risk analysis and safety decision-making in commercial air transport operations [PhD thesis]; 2013 [30] Nielsen T, Jensen F. Bayesian Networks and Decision Graphs. Berlin: Springer Publishing Company Inc; 2007 [31] Cowell R, Dawid P, Lauritzen S, Spiegelhalter D. Probabilistic Networks and Expert Systems: Exact Computational Methods for Bayesian Networks. Springer; 2007 [32] Cheng A, Dillard A, Hackler L, Van Der Geest P, Van Es G. Study of Normal Operational Landing Performance on Subsonic, Civil, Narrow-Body Jet Aircraft during Instrument Landing System Approaches. Federal Aviation Administration (FAA); 2007 [33] FSF. Reducing the Risk of Runway Excursions. Flight Safety Foundation (FSF), Virginia U.S.; 2009 [34] Rodríguez-Sanz Á, Comendador FG, Valdés RA, Pérez-Castán JA. Characterization and prediction of the airport operational saturation. Journal of Air Transport Management. 2018;69:147-172"
+    }
+   ]
+  },
+  {
+   "id": "ASMA-RADIATION-001",
+   "source": "AsMA",
+   "title": "AsMA Position on Cosmic Radiation Exposure in Aircrew",
+   "year": "2021",
+   "page_url": "https://www.asma.org/publications/",
+   "pdf_url": "https://www.asma.org/publications/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "aviation_space",
+   "priority": "medium",
+   "sha256": "bf8d394f7d659410a1dabf49f987ec65e47aaba575c1a3ddced96aa585094d2b",
+   "size_bytes": 727,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 727,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AsMA Position on Cosmic Radiation Exposure in Aircrew Source: AsMA Year: 2021 Domain: aviation_space License: Proprietary Available at: https://www.asma.org/publications/ This is a citation reference for the AsMA guideline 'AsMA Position on Cosmic Radiation Exposure in Aircrew' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: aviation_space. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASMA-DCS-001",
+   "source": "AsMA",
+   "title": "AsMA Position on Decompression Sickness in High Altitude Aviation",
+   "year": "2020",
+   "page_url": "https://www.asma.org/publications/",
+   "pdf_url": "https://www.asma.org/publications/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "aviation_inflight",
+   "priority": "medium",
+   "sha256": "26a51906183a35bd0317809731ad7f5fcb1ce49a8c721484fc71fde077ad5d6a",
+   "size_bytes": 757,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 757,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AsMA Position on Decompression Sickness in High Altitude Aviation Source: AsMA Year: 2020 Domain: aviation_inflight License: Proprietary Available at: https://www.asma.org/publications/ This is a citation reference for the AsMA guideline 'AsMA Position on Decompression Sickness in High Altitude Aviation' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: aviation_inflight. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AsMA-CIRC-001",
+   "source": "AsMA",
+   "title": "AsMA Recommendations on Circadian Disruption and Pilot Sleep",
+   "year": "2022",
+   "page_url": "https://www.asma.org/publications/",
+   "pdf_url": "https://www.asma.org/publications/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "aviation_certification",
+   "priority": "medium",
+   "sha256": "5f74c07f45d872dc171a0d8a1f2e9f8d6bac34380d056d80ddea0814be9c104b",
+   "size_bytes": 757,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 757,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AsMA Recommendations on Circadian Disruption and Pilot Sleep Source: AsMA Year: 2022 Domain: aviation_certification License: Proprietary Available at: https://www.asma.org/publications/ This is a citation reference for the AsMA guideline 'AsMA Recommendations on Circadian Disruption and Pilot Sleep' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: aviation_certification. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

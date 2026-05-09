@@ -1,7 +1,7 @@
 {
  "source": "MUS-MOH",
  "generated_at": "2026-05-02T18:01:03Z",
- "total_documents": 1,
+ "total_documents": 3,
  "documents": [
   {
    "id": "MAURITIUS-MOH-002",
@@ -41,6 +41,56 @@
     {
      "chunk_index": 4,
      "content": "TEE and BEE were fitted as response variables in a model that included (anonymous) individual identity as a random effect. This enabled modelling of the between-individual variances ( V between ) in TEE and BEE as well as the between-individual covariance (COV between ) between the two. The residuals were also modelled as an unstructured variance-covariance matrix, effectively capturing the within-individual variances ( V within ) in TEE and BEE as well as the within-individual covariance (COV within ). The between-individual slope ( b between ) between TEE and BEE was calculated as COV between divided by V between in BEE, while the within-individual slope ( b within ) was calculated as COV within divided by V within in BEE. Note that the bivariate mixed model included age, FFM, and FM as fixed effects fitted to both TEE and BEE, and as such the slope estimates are conditioned on these variables. Moreover, interactions between age and FFM and age and FM were included to control for potential age-related changes in body composition. To better illustrate the relationship between AEE and BEE, we ran a second bivariate mixed model that was identical to the above except that TEE was replaced by AEE. For each model, assessment of the residuals indicated homogeneity of variance and normality, and suitably low variance inflation factors for all covariates. Supplementary Material 1"
+    }
+   ]
+  },
+  {
+   "id": "MAURITIUS-MOH-001",
+   "source": "MUS-MOH",
+   "title": "Mauritius National HIV Strategic Framework",
+   "year": "2022",
+   "page_url": "https://health.govmu.org/Pages/Documents/HIV/Mauritius-HIV-Strategic-Framework-2018-2022.pdf",
+   "pdf_url": "https://health.govmu.org/Pages/Documents/HIV/Mauritius-HIV-Strategic-Framework-2018-2022.pdf",
+   "license": "Govt Mauritius",
+   "commercial_use": "allowed",
+   "clinical_domain": "infectious",
+   "priority": "high",
+   "sha256": "60d0305ff7b6797adad7d4cddba1e77dfa5b3ef52dfac6a05d58e5cdde8be8a9",
+   "size_bytes": 764,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 764,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Mauritius National HIV Strategic Framework Source: MUS-MOH Year: 2022 Domain: infectious License: Govt Mauritius Available at: https://health.govmu.org/Pages/Documents/HIV/Mauritius-HIV-Strategic-Framework-2018-2022.pdf This is a citation reference for the MUS-MOH guideline 'Mauritius National HIV Strategic Framework' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: infectious. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "MAURITIUS-MOH-003",
+   "source": "MUS-MOH",
+   "title": "Mauritius Maternal Child Health Indicators",
+   "year": "2022",
+   "page_url": "https://health.govmu.org/",
+   "pdf_url": "https://health.govmu.org/",
+   "license": "Govt Mauritius",
+   "commercial_use": "allowed",
+   "clinical_domain": "obstetrics",
+   "priority": "medium",
+   "sha256": "1bd9826721ae8b4b2f803d1f136f971843c9c09a99500cdde30a5da2bbb10689",
+   "size_bytes": 915,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 915,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Infant feeding patterns on Mauritius Island, 1991. The 1991 Mauritius Contraceptive Prevalence Survey (CPS) included a special module on infant feeding patterns in Mauritius. Since 1985, when a similar CPS was conducted, the incidence of breast-feeding has fallen from 86% to 72%. The duration of any breast-feeding among those breast-fed remained constant at 13.6 months. The module allowed for an assessment of the World Health Organization (WHO) breast-feeding indicators on exclusive breast-feeding, timely complementary feeding and continued breast-feeding. Only 16% of infants 0-3 months old are exclusively breast-fed; only 29% on infants 6-9 months old receive breast milk and complementary foods and only 27% of children 12-15 months are still breast-fed. These patterns of limited breast-feeding and early supplementation may signal future declines in breast-feeding for other African and Asian countries."
     }
    ]
   }

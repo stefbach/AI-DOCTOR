@@ -1,7 +1,7 @@
 {
  "source": "NATA",
  "generated_at": "2026-05-09T14:59:50Z",
- "total_documents": 3,
+ "total_documents": 6,
  "documents": [
   {
    "id": "NATA-PBM-001",
@@ -147,6 +147,81 @@
     {
      "chunk_index": 11,
      "content": "construction of the survey platform. 41 Lippmann J, Walker D, Lawrence C, Fock A, Wodak T, Jamieson S. Provisional report on diving-related fatalities in Conflicts of interest Australian waters 2007. Diving Hyperb Med. 2012;42:151- 170. John Lippmann is the Founder and Chairman of DAN AP. DAN is 42 Lippmann J, Walker D, Lawrence C, Fock A, Wodak T, involved in the collection and reporting of dive accident data and Jamieson S. Provisional report on diving-related fatalities in provides evacuation cover and dive injury insurance to recreational Australian waters 2006. Diving Hyperb Med. 2011;41:70-84. divers. 43 Walker D, Lippmann J, Lawrence C, Fock A, Wodak T, Jamieson S. Provisional report on diving-related fatalities in Funding Australian waters 2005. Diving Hyperb Med. 2010;40:131-49. 44 Walker D, Lippmann J, Lawrence C, Houston J, Fock A. This study was funded by DAN AP. Provisional report on diving-related fatalities in Australian waters 2004. Diving Hyperb Med. 2009;39:138-61. Submitted: 18 April 2017; revised 20 and 28 July 2017 45 Mitchell SJ, Bove AA. Medical screening of recreational Accepted: 02 August 2017 divers for cardiovascular disease: consensus discussion at the"
+    }
+   ]
+  },
+  {
+   "id": "NATA-CONCUSS-001",
+   "source": "NATA",
+   "title": "NATA Position Statement Management of Sport Concussion",
+   "year": "2014",
+   "page_url": "https://www.nata.org/about/foundation/research-resources/position-statements",
+   "pdf_url": "https://www.nata.org/about/foundation/research-resources/position-statements",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_concussion",
+   "priority": "high",
+   "sha256": "4ac56d4a47b846ed67f6ae83846a52d49dabcc28c5ecce98523fb6dbb2a33d92",
+   "size_bytes": 1487,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1487,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "National Athletic Trainers' Association Bridge Statement: Management of Sport-Related Concussion. To provide athletic trainers and team physicians with updated recommendations to the 2014 National Athletic Trainers' Association (NATA) concussion position statement regarding concussion management, specifically in the areas of education, assessment, prognostic factors, mental health, return to academics, physical activity, rest, treatment, and return to sport. Athletic trainers have benefited from the 2 previous NATA position statements on concussion management, and although the most recent NATA position statement is a decade old, knowledge gains in the medical literature warrant updating several (but not all) recommendations. Furthermore, in various areas of the body of literature, current evidence now exists to address items not adequately addressed in the 2014 statement, necessitating the new recommendations. This document therefore serves as a bridge from the 2014 position statement to the current state of concussion evidence, recommendations from other organizations, and discrepancies between policy and practice. These recommendations are intended to update the state of the evidence concerning the management of patients with sport-related concussion, specifically in the areas of education; assessment advances; prognostic recovery indicators; mental health considerations; academic considerations; and exercise, activity, and rehabilitation management strategies."
+    }
+   ]
+  },
+  {
+   "id": "NATA-EAP-001",
+   "source": "NATA",
+   "title": "NATA Position Statement Emergency Action Planning in Athletics",
+   "year": "2019",
+   "page_url": "https://www.nata.org/about/foundation/research-resources/position-statements",
+   "pdf_url": "https://www.nata.org/about/foundation/research-resources/position-statements",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_cardiac",
+   "priority": "high",
+   "sha256": "f7e2ae83e257408fffbb0aa63b2b45a5be56ee0bb614a9ffb4ce80438b8e87f6",
+   "size_bytes": 2118,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2117,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Emergency Action Planning in Secondary School Athletics: A Comprehensive Evaluation of Current Adoption of Best Practice Standards. Emergency action plans (EAPs) are policies that improve response times and ensure access to emergency equipment for the management of patients with acute injuries and medical conditions, yet the extent to which EAP standards are adopted and implemented is unknown. To describe the extent of EAP adoption and implementation in secondary school (SS) athletics with athletic trainer (AT) services in the United States. Cross-sectional study. Web-based questionnaire. A national sample of ATs (n = 9642) was invited to participate in a Web-based questionnaire. Twelve components of EAP minimum best practices were derived from the \"National Athletic Trainers' Association (NATA) Position Statement: Emergency Planning in Athletics.\" Emergency action plan components were analyzed using descriptive statistics with 95% confidence intervals (CIs) around proportions. Contingency tables (2 × 2) were used to calculate odds ratios (with 95% CIs) to assess adoption of the components (dichotomized as yes or no), employment factors (eg, full time versus part time, employed by clinic/district), and access to emergency equipment. The response rate for the questionnaire was 13.2% (n = 1273). A majority of ATs (89.1%) reported having an EAP; however, only 9.9% described implementing all 12 components cited in the NATA position statement. Athletic trainers stated that they created the EAP in 62.8% (95% CI = 60.1%, 65.4%) of schools with an EAP. Athletic trainers employed full time were at greater odds of adopting 9 or more components of the EAP compared with ATs employed part time (odds ratio = 2.42 [95% CI = 1.66, 3.53]). A total of 85.7% of ATs noted access to an automated external defibrillator. Although a majority of SSs had EAPs, the EAPs were often incomplete and lacked the necessary components for full compliance with the NATA position statement. These findings demonstrate the need for efforts to promote the adoption and implementation of comprehensive EAPs in SS athletics."
+    }
+   ]
+  },
+  {
+   "id": "NATA-PED-001",
+   "source": "NATA",
+   "title": "NATA Position Statement on Preventing Sudden Death in Sports",
+   "year": "2012",
+   "page_url": "https://www.nata.org/about/foundation/research-resources/position-statements",
+   "pdf_url": "https://www.nata.org/about/foundation/research-resources/position-statements",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_cardiac",
+   "priority": "high",
+   "sha256": "a51778744adf897518cecbd530e792d6c2e331c3f1030d9c7c7cc23e8ea9a44b",
+   "size_bytes": 783,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 783,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NATA Position Statement on Preventing Sudden Death in Sports Source: NATA Year: 2012 Domain: sports_cardiac License: Proprietary Available at: https://www.nata.org/about/foundation/research-resources/position-statements This is a citation reference for the NATA guideline 'NATA Position Statement on Preventing Sudden Death in Sports' published in 2012. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_cardiac. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

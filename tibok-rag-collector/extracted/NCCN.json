@@ -1,7 +1,7 @@
 {
  "source": "NCCN",
  "generated_at": "2026-05-02T16:03:56Z",
- "total_documents": 23,
+ "total_documents": 27,
  "documents": [
   {
    "id": "NCCN-001",
@@ -1123,6 +1123,106 @@
     {
      "chunk_index": 4,
      "content": "This contrasts with our study, where walking alone significantly enhanced quality of life, suggesting that even low-intensity exercise may be effective in improving overall well-being in HNC patients. Similarly, Avancini A et al.’s review [ ] noted improvements in quality of life through combined aerobic and resistance training, though not all trials observed significant changes. Our findings support the idea that even low-to-moderate intensity exercises, like walking, can sufficiently boost psychological components of quality of life without drastically affecting physical fitness. Satish et al. [ ] further corroborated this, showing that structured exercise programs led to significant improvements in global health status, physical functioning, and cognitive functioning, with moderate effect sizes, while the control group saw a decline in these areas. This resonates with the present study, where structured exercise produced better outcomes in both mental and physical Quality of life components. Similarly, Samuel et al.’s study [ ], which used the SF-36 questionnaire, found significant increases in both Physical and Mental Component Scores after 11 weeks of combined aerobic and resistance training, suggesting that more comprehensive and prolonged exercise interventions can yield substantial improvements in quality of life across both physical and mental domains in HNC patients. Lastly in present study functional capacity, assessed through the Timed-Up-and-Go (TUG) test and the Six-Minute Walk Test (6MWT), demonstrated clear advantages for Control Group, reflecting the efficacy of combined aerobic and resistance training in improving mobility and endurance. These improvements suggest that resistance training, in combination with aerobic exercise, enhances both mobility and cardiovascular endurance, which are critical components of functional capacity in cancer patients. On the contrary, the decline in TUG performance in Intervention Group suggests that walking alone may be insufficient to counteract the negative effects of CRT on mobility and balance. The TUG test is a measure of dynamic balance and lower-body strength, both of which are heavily impacted by muscle loss and fatigue. Without the inclusion of resistance training, Intervention Group participants likely experienced greater muscle loss, leading to a decline in functional mobility. Samuel SR et al. [ ] found that after an 11-week exercise program, participants in the exercise group improved their 6MWT distance by 37 meters, while the control group experienced a significant decline of 73 meters. This highlights the impact of exercise in preserving and enhancing functional capacity during and after CRT, aligning with the present study’s findings These results emphasize the role of structured exercise in maintaining mobility and endurance in cancer patients undergoing intensive treatments like CRT. Satish et al. [ ] similarly demonstrated that their experimental group achieved better 6MWT results post-treatment, corroborating the moderate effect size for functional improvements seen in structured exercise programs across studies. The findings of this study have important implications for the design of rehabilitation programs for HNC patients undergoing CRT. The superior performance of the combined aerobic and resistance training regimen in preserving muscle mass, improving functional capacity, and reducing sarcopenia underscores the importance of including resistance training in cancer rehabilitation programs. This study has several strengths, including its randomized controlled design, the use of objective measures for sarcopenia and its focus on a vulnerable population with significant treatment-related side effects. However, there are also limitations to consider. The study’s relatively short duration may have limited the ability to fully capture long-term benefits or potential delayed effects of the interventions on quality of life. In conclusion, sarcopenia was lesser in the Intervention Group compared to the Control Group. However, Control Group that demonstrated significant improvements in quality of life as compared to Intervention Group. Therefore thos is study demonstrates that structured exercise-based rehabilitation, particularly incorporating resistance training, can play a crucial role in mitigating the adverse effects of CRT in head and neck cancer patients. These findings highlight the importance of integrating exercise into routine cancer care to improve patient outcomes and suggest that more intensive exercise regimens may offer greater benefits in terms of physical performance, and muscle preservation. Further research is needed to explore the optimal balance between exercise intensity and quality of life and to investigate the long-term effects of exercise interventions in this population. Author Contribution Statement All authors contributed to the by contributing to the Protocol writing, Data Collection and Interpretation, Writing and approving the manuscript"
+    }
+   ]
+  },
+  {
+   "id": "NCCN-DRUG-002",
+   "source": "NCCN",
+   "title": "NCCN Chemotherapy Order Templates standardized regimens",
+   "year": "2024",
+   "page_url": "https://www.nccn.org/professionals/order_templates/default.aspx",
+   "pdf_url": "https://www.nccn.org/professionals/order_templates/default.aspx",
+   "license": "NCCN",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_oncology",
+   "priority": "high",
+   "sha256": "52f69d3af8d654e2a03147e08eaf9a38985fa48f603b71602e7636f0ca4eeb3c",
+   "size_bytes": 751,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 751,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:41Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NCCN Chemotherapy Order Templates standardized regimens Source: NCCN Year: 2024 Domain: drug_oncology License: NCCN Available at: https://www.nccn.org/professionals/order_templates/default.aspx This is a citation reference for the NCCN guideline 'NCCN Chemotherapy Order Templates standardized regimens' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_oncology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "NCCN-EVIDENCE-001",
+   "source": "NCCN",
+   "title": "NCCN Evidence Blocks oncology drug benefit assessment",
+   "year": "2024",
+   "page_url": "https://www.nccn.org/professionals/evidence_blocks/default.aspx",
+   "pdf_url": "https://www.nccn.org/professionals/evidence_blocks/default.aspx",
+   "license": "NCCN",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_oncology",
+   "priority": "medium",
+   "sha256": "4780e7042e6687ab996a0e0c02bb1efb937888cb2a708917db8061abf2df5c5d",
+   "size_bytes": 3087,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3087,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Value Frameworks for the Patient-Provider Interaction: A Comparison of the ASCO Value Framework Versus NCCN Evidence Blocks in Determining Value in Oncology. To address the rising concern about oncology drug costs, the American Society of Clinical Oncology (ASCO) and the National Comprehensive Cancer Network (NCCN) recently developed unique tools to help providers and patients make informed decisions about the value of an anticancer regimen. The ASCO Value Framework (AVF) allows users to generate a net health benefit (NHB) score along with drug acquisition costs for oncology regimens that have been compared in a prospective randomized clinical trial. In contrast, the NCCN Evidence Blocks (NEB) derives ratings from an expert panel assessment in the categories of efficacy, safety, quality and consistency of evidence, and affordability. To compare the results of the AVF and NEB by applying each tool to the same clinical scenarios. We evaluated 2 regimens using the AVF and NEB scores: (1) enzalutamide for treatment of metastatic castration-resistant prostate cancer and (2) nivolumab versus docetaxel in treatment of advanced squamous and nonsquamous non-small cell lung cancer (NSCLC). Enzalutamide generated a total NHB score of 44.8 (range 0-180) for use before chemotherapy and 70.8 for use after chemotherapy with a monthly cost of $8,495 in the AVF. The NEB scored enzalutamide 4 (very effective) for efficacy, 4 (occasionally toxic) for safety, and 2 (expensive) for affordability in the no visceral metastases block. It scored 3 (moderately effective) for efficacy, 4 for safety, and 2 for affordability in the visceral metastases block. Nivolumab in advanced nonsquamous NSCLC scored 36.0 and 73.2 in advanced squamous NSCLC, with a monthly cost of $7,010 in the AVF. The NEB gave nivolumab a score of 4 for efficacy and safety and 1 (very expensive) for affordability in the NEB in advanced nonsquamous and advanced squamous NSCLC. The AVF and NEB are novel tools that take different approaches in assessing the value of an oncology treatment regimen. From this study, it is clear that the findings generated by these tools are distinct. The AVF provides a summary score for treatments across all clinical benefit and toxicity categories, whereas the NEB provides component scores for treatment efficacy, safety, quality and consistency of evidence, and affordability. Both tools are novel and come with their own challenges. No outside funding supported this study. Shah-Manek is also employed by Ipsos Healthcare, a consulting firm. The authors have no conflicting interests to report. Study concept and design were contributed by Shah-Manek and Ignoffo. Galanto and Nguyen collected the data, and data interpretation was performed by all the authors. All the authors contributed to writing the manuscript, which was revised primarily by Shah-Manek, along with Galanto, Nguyen, and Ignoffo. This research was previously presented as a poster and podium presentation at the Academy of Managed Care Pharmacy Nexus 2016 held October 3-6 in National Harbor, Maryland."
+    }
+   ]
+  },
+  {
+   "id": "NCCN-BONE-001",
+   "source": "NCCN",
+   "title": "NCCN Guidelines Bone Cancer",
+   "year": "2024",
+   "page_url": "https://www.nccn.org/guidelines/category_1",
+   "pdf_url": "https://www.nccn.org/guidelines/category_1",
+   "license": "NCCN",
+   "commercial_use": "restricted",
+   "clinical_domain": "oncology_bone_sarcoma",
+   "priority": "high",
+   "sha256": "f54704cb259fb34d3ee53513434676e6d0037c516a11f507d858b951d034f345",
+   "size_bytes": 2010,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2006,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Association of the European Society for Medical Oncology Magnitude of Clinical Benefit Scale (ESMO-MCBS) Scores with Guideline Recommendations in Breast Cancer. To evaluate the association between European Society for Medical Oncology Magnitude of Clinical Benefit Scale (ESMO-MCBS) scores and treatment recommendations from European Society for Medical Oncology, National Comprehensive Cancer Network (NCCN), and American Society of Clinical Oncology (ASCO) in curative and metastatic breast cancer (BC), and to assess inter-guideline concordance. We conducted a comparative review of 47 systemic BC therapies with published ESMO-MCBS scores (accessed 30 June 2025). Guideline recommendations from ESMO, NCCN, and ASCO were extracted from the most recent versions and harmonized into ordinal tiers. Associations between MCBS scores and recommendation categories were evaluated using Fisher's exact test and Spearman's rank correlation in the palliative setting. Curative therapies were analyzed descriptively due to limited variability. Among 38 palliative therapies, 40% achieved high clinical benefit (MCBS 4-5). A significant association was observed between MCBS scores and NCCN recommendations ( p = 0.003; ρ = 0.48), with 62% of NCCN Category 1 therapies demonstrating high benefit versus 13% in other categories. No significant associations were observed with ASCO ( p = 0.101; ρ = 0.18) or ESMO guideline recommendations ( p = 0.073; ρ = 0.19). Inter-guideline concordance was strongest between ASCO and ESMO ( p = 0.033; ρ = 0.48). In the curative setting ( n = 9), most therapies received an MCBS grade A and top-tier guideline endorsement. Alignment between ESMO-MCBS and guideline recommendations is moderate and framework-dependent, strongest with NCCN in metastatic BC. Discordance primarily reflects differences between magnitude-of-benefit thresholds and evidence-certainty frameworks. ESMO-MCBS may serve as a complementary tool to enhance value-based clinical and policy decision-making."
+    }
+   ]
+  },
+  {
+   "id": "NCCN-ALL",
+   "source": "NCCN",
+   "title": "NCCN Guidelines Acute Lymphoblastic Leukemia",
+   "year": "2024",
+   "page_url": "https://www.nccn.org/guidelines/category_1",
+   "pdf_url": "https://www.nccn.org/guidelines/category_1",
+   "license": "NCCN",
+   "commercial_use": "restricted",
+   "clinical_domain": "oncology_leukemia_acute",
+   "priority": "high",
+   "sha256": "e14da6be138b06d35908a5fd34c927f921822c457c0910948b45e523e863c711",
+   "size_bytes": 1880,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1880,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "A Systematic Literature Review of the Economic and Healthcare Resource Utilization Burden of Relapsed/Refractory Follicular Lymphoma. To quantify the economic or healthcare resource utilization (HCRU) burden and examine the value of interventions for relapsed or refractory (R/R) follicular lymphoma (FL). The PubMed and Embase databases were searched for full-text studies and conference abstracts published between 1 January 2019 and 31 December 2023 that reported either the economic or HCRU burden of R/R FL or reported the results of health economic models assessing interventions for R/R FL. A supplemental manual search was also undertaken to identify conference abstracts that may not have been indexed in the primary databases. A data extraction sheet was used to develop evidence tables. A total of 30 records were included spanning 11 retrospective or prospective studies, 11 cost-effectiveness evaluations, and 8 other economic models. Costs and HCRU generally tended to increase as the line of therapy increased, reaching over US$400,000 annually in later lines. Costs associated with recently approved chimeric antigen receptor T-cell therapy (CAR-T) ranged from US$450,000 to over US$700,000 per patient. Economic models evaluating novel therapies, such as CAR-T, tazemetostat, and mosunetuzumab, estimated they would generally be cost-effective and have minimal budget impact or cost-savings. However, these models noted considerable assumptions regarding treatment duration and discontinuation. Real-world costs and resource use for newly approved therapies including CAR-Ts and bispecifics were limited. The burden of R/R FL is substantial and increases as patients progress. Considerable gaps exist for the real-world impact of novel therapies, including CAR-Ts and bispecifics, on the economic burden and will need to be studied to properly assess their value."
     }
    ]
   }

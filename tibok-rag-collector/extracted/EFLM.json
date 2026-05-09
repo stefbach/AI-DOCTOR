@@ -1,7 +1,7 @@
 {
  "source": "EFLM",
  "generated_at": "2026-05-09T09:07:30Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "EFLM-EGFR-001",
@@ -82,6 +82,31 @@
     {
      "chunk_index": 4,
      "content": "[ ]. Total protein readout remains the standard screening read-out on test strips in the majority of clinical laboratories. However, our data demonstrate that protein readout may be suboptimal, and screening by the ACR pad on the urine test strip may be a more effective strategy. In conclusion, our data further add to the evidence that urine test strips may be a valuable screening tool for CKD in low-risk individuals. Moreover, if urine test strips are used to screen for albuminuria and CKD, ACR-readout is preferred as a decision criterion for reflex testing."
+    }
+   ]
+  },
+  {
+   "id": "EFLM-PREANALYTICAL-001",
+   "source": "EFLM",
+   "title": "EFLM working group preanalytical phase recommendations",
+   "year": "2021",
+   "page_url": "https://www.eflm.eu/site/page/a/1188",
+   "pdf_url": "https://www.eflm.eu/site/page/a/1188",
+   "license": "EFLM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_quality",
+   "priority": "high",
+   "sha256": "6fb06b52500e71a849cd22a8644dc313cde1a48f7afc4fd70e34caa489f6de90",
+   "size_bytes": 718,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 718,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:06Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EFLM working group preanalytical phase recommendations Source: EFLM Year: 2021 Domain: lab_quality License: EFLM Available at: https://www.eflm.eu/site/page/a/1188 This is a citation reference for the EFLM guideline 'EFLM working group preanalytical phase recommendations' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_quality. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

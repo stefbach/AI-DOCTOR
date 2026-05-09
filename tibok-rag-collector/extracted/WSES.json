@@ -1,7 +1,7 @@
 {
  "source": "WSES",
  "generated_at": "2026-05-09T10:15:53Z",
- "total_documents": 10,
+ "total_documents": 18,
  "documents": [
   {
    "id": "WSES-APPENDIX-001",
@@ -858,6 +858,206 @@
     {
      "chunk_index": 13,
      "content": "sudden onset of unexplained fever, malaise, chills, or other constitutional symptoms, especially when medical review is not readily accessible. The recommended options for emergency standby in adults include the following: (a) Amoxycillin, 3 g starting dose followed by 1 g, every 8 h; (b) Levofloxacin 500 mg every 24 h or Moxifloxacin 400 mg every 24 h (for beta-lactam allergic patients). The recommended emergency standby treatment in children is Amoxycillin 50 mg/Kg in three divided daily doses. For beta-lactam allergic patients, an alternative should be proposed by a specialist (fluoroquinolones are generally contraindicated in children, but due to the possible severity of OPSI, they might still be considered). Antibiotic prophylaxis is necessary in patients with asplenia/hyposplenia who are bitten by dogs and other animals because of increased risk of severe sepsis (Amoxycillin/Clavulanic acid for 5 days) [ , , ]. If the patient is being treated in an outpatient setting, he/she should be referred immediately to the nearest emergency department. Clinical deterioration can be rapid even after antibiotic administration. Antibiotics should be modified once blood culture results become available [ ]. Failures of antibiotic prophylaxis have been reported, so patients should be warned that prophylaxis reduces but does not abolish the risk of sepsis. Due to the increased risk of severe malaria, asplenic/hyposplenic travelers to endemic areas should receive an adequate pre-departure counseling, regarding both measures aimed at reducing the exposure to mosquitos’ bites and chemoprophylaxis. Conclusions The management of spleen trauma must be multidisciplinary and must keep into consideration the physiological and anatomical derangement together with the immunological effects. Critical and operative decisions can be taken more effectively if both anatomy of injury and its physiological effects, and the associated lesions are considered especially considering the modern tools for integrated bleeding management. The treatment algorithm must differ within adults, and children these lasts should always be treated in dedicated trauma centers."
+    }
+   ]
+  },
+  {
+   "id": "WSES-AMI-001",
+   "source": "WSES",
+   "title": "WSES guidelines on acute mesenteric ischemia",
+   "year": "2022",
+   "page_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-022-00443-x",
+   "pdf_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-022-00443-x",
+   "license": "WSES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_arterial",
+   "priority": "high",
+   "sha256": "28c8e3991ea17c63a283d1e097a60fd4e2315baf773da6e7c4cb4569fb30801b",
+   "size_bytes": 2554,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2554,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Cesena guidelines: WSES consensus statement on laparoscopic-first approach to general surgery emergencies and abdominal trauma. Laparoscopy is widely adopted across nearly all surgical subspecialties in the elective setting. Initially finding indication in minor abdominal emergencies, it has gradually become the standard approach in the majority of elective general surgery procedures. Despite many technological advances and increasing acceptance, the laparoscopic approach remains underutilized in emergency general surgery and in abdominal trauma. Emergency laparotomy continues to carry a high morbidity and mortality. In recent years, there has been a growing interest from emergency and trauma surgeons in adopting minimally invasive surgery approaches in the acute surgical setting. The present position paper, supported by the World Society of Emergency Surgery (WSES), aims to provide a review of the literature to reach a consensus on the indications and benefits of a laparoscopic-first approach in patients requiring emergency abdominal surgery for general surgery emergencies or abdominal trauma. This position paper was developed according to the WSES methodology. A steering committee performed the literature review and drafted the position paper. An international panel of 54 experts then critically revised the manuscript and discussed it in detail, to develop a consensus on a position statement. A total of 323 studies (systematic review and meta-analysis, randomized clinical trial, retrospective comparative cohort studies, case series) have been selected from an initial pool of 7409 studies. Evidence demonstrates several benefits of the laparoscopic approach in stable patients undergoing emergency abdominal surgery for general surgical emergencies or abdominal trauma. The selection of a stable patient seems to be of paramount importance for a safe adoption of a laparoscopic approach. In hemodynamically stable patients, the laparoscopic approach was found to be safe, feasible and effective as a therapeutic tool or helpful to identify further management steps and needs, resulting in improved outcomes, regardless of conversion. Appropriate patient selection, surgeon experience and rigorous minimally invasive surgical training, remain crucial factors to increase the adoption of laparoscopy in emergency general surgery and abdominal trauma. The WSES expert panel suggests laparoscopy as the first approach for stable patients undergoing emergency abdominal surgery for general surgery emergencies and abdominal trauma."
+    }
+   ]
+  },
+  {
+   "id": "WSES-VTRAUMA-001",
+   "source": "WSES",
+   "title": "WSES position paper on vascular emergency surgery",
+   "year": "2018",
+   "page_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-018-0220-3",
+   "pdf_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-018-0220-3",
+   "license": "WSES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_arterial",
+   "priority": "medium",
+   "sha256": "543864c48aa312e6fc503759ea8da6b16a4c90a20bfa7b3bc9d0213a042f38ee",
+   "size_bytes": 1150,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1150,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Strategies to prevent blood loss and reduce transfusion in emergency general surgery, WSES-AAST consensus paper. Emergency general surgeons often provide care to severely ill patients requiring surgical interventions and intensive support. One of the primary drivers of morbidity and mortality is perioperative bleeding. In general, when addressing life threatening haemorrhage, blood transfusion can become an essential part of overall resuscitation. However, under all circumstances, indications for blood transfusion must be accurately evaluated. When patients decline blood transfusions, regardless of the reason, surgeons should aim to provide optimal care and respect and accommodate each patient's values and target the best outcome possible given the patient's desires and his/her clinical condition. The aim of this position paper was to perform a review of the existing literature and to provide comprehensive recommendations on organizational, surgical, anaesthetic, and haemostatic strategies that can be used to provide optimal peri-operative blood management, reduce, or avoid blood transfusions and ultimately improve patient outcomes."
+    }
+   ]
+  },
+  {
+   "id": "WSES-CHEST-001",
+   "source": "WSES",
+   "title": "WSES guidelines on the management of severe blunt chest trauma",
+   "year": "2020",
+   "page_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-020-00316-1",
+   "pdf_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-020-00316-1",
+   "license": "WSES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiothoracic_surgery",
+   "priority": "high",
+   "sha256": "1e540c12238582c347ed6a1362558555ec7ad174f9148f97c8dfaf65bbaa061f",
+   "size_bytes": 786,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 786,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WSES guidelines on the management of severe blunt chest trauma Source: WSES Year: 2020 Domain: cardiothoracic_surgery License: WSES Available at: https://wjes.biomedcentral.com/articles/10.1186/s13017-020-00316-1 This is a citation reference for the WSES guideline 'WSES guidelines on the management of severe blunt chest trauma' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiothoracic_surgery. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WSES-SBO-001",
+   "source": "WSES",
+   "title": "WSES Guidelines on Adhesive Small Bowel Obstruction",
+   "year": "2018",
+   "page_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-018-0185-2",
+   "pdf_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-018-0185-2",
+   "license": "WSES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_emergency",
+   "priority": "high",
+   "sha256": "ab325e16074a46d3157e1c064f52f07afea2152b4c0a6af7123b73d89c111289",
+   "size_bytes": 2814,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2812,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Small bowel obstruction outcomes according to compliance with the World Society of Emergency Surgery Bologna guidelines. Small bowel obstruction (SBO) is a common surgical emergency associated with substantial morbidity, hospital length of stay (LOS), and healthcare cost. The World Society of Emergency Surgery (WSES) Bologna guidelines provide evidence-informed recommendations for managing adhesive SBO, promoting timely surgical intervention (or non-operative management (NOM) when ischaemia, strangulation, or peritonitis are absent). However, guideline adoption and its impact on outcomes remain under studied. Compliance with the Bologna guidelines was evaluated to determine the impact of compliance on outcomes. SnapSBO, a prospective, multicentre, time-bound, observational cohort study, captured data on patients with adhesive SBO across diverse healthcare settings and patient populations. Patient care was categorized into: successful NOM, surgery after an unsuccessful appropriate trial of NOM (NOM-T), and direct to surgery (DTS). Compliance with diagnostic, therapeutic, and postoperative Bologna guideline recommendations was assessed as either complete or partial. Primary outcomes included adherence to the Bologna guidelines, LOS, complications, and the incidence of the composite metric 'optimal outcomes' (LOS ≤5 days, discharge without complications, and no readmission within 30 days). Among 982 patients with adhesive SBO, successful NOM occurred in 561 (57.1%), 224 (22.8%) underwent NOM-T, and 197 (20.1%) proceeded DTS. The mean(s.d.) LOS was 5.3(9.0), 12.9(11.4), and 7.7(8.0) days respectively (P < 0.001). Optimal outcomes were achieved in 61.0%, 16.1%, and 37.6% respectively (P < 0.001) and full guideline compliance was observed in 17.2%, 10.1%, and 0.4% respectively. Patients with adhesive SBO whose care was aligned with the Bologna guidelines had a shorter LOS and a greater incidence of optimal outcomes. Addressing evidence-to-practice gaps through implementation strategies that consider contextual factors will enhance guideline adoption and patient outcomes. Small bowel obstruction happens when the intestine becomes blocked, often due to scar tissue from previous surgery. It is a common reason people are admitted to hospitals for emergency surgery worldwide. Doctors have created clear guidelines (expert advice) on how best to treat this condition to improve patient outcomes. This study looked at whether doctors follow these guidelines and how it affects patient results. Researchers found that hospitals frequently struggle to fully follow the guidelines because they lack necessary resources or due to differences in medical practices. Improving how closely doctors follow these guidelines could help patients recover faster and experience fewer complications."
+    }
+   ]
+  },
+  {
+   "id": "WSES-DAMAGECTRL-001",
+   "source": "WSES",
+   "title": "WSES Position Paper on Damage Control Surgery",
+   "year": "2016",
+   "page_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-016-0078-1",
+   "pdf_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-016-0078-1",
+   "license": "WSES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_emergency",
+   "priority": "high",
+   "sha256": "1ccbb784817e23d4ce741a2bc3698b1b397847ea204d47e6c46d9ea277d4ed38",
+   "size_bytes": 1793,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1793,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Management of complicated diaphragmatic hernia in the acute setting: a WSES position paper. Diaphragmatic hernia (DH) presenting acutely can be a potentially life-threatening condition. Its management continues to be debatable. A bibliographic search using major databases was performed using the terms \"emergency surgery\" \"diaphragmatic hernia,\" \"traumatic diaphragmatic rupture\" and \"congenital diaphragmatic hernia.\" GRADE methodology was used to evaluate the evidence and give recommendations. CT scan of the chest and abdomen is the diagnostic gold standard to evaluate complicated DH. Appropriate preoperative assessment and prompt surgical intervention are important for a clinical success. Complicated DH repair is best performed via the use of biological and bioabsorbable meshes which have proven to reduce recurrence. The laparoscopic approach is the preferred technique in hemodynamically stable patients without significant comorbidities because it facilitates early diagnosis of small diaphragmatic injuries from traumatic wounds in the thoraco-abdominal area and reduces postoperative complications. Open surgery should be reserved for situations when skills and equipment for laparoscopy are not available, where exploratory laparotomy is needed, or if the patient is hemodynamically unstable. Damage Control Surgery is an option in the management of critical and unstable patients. Complicated diaphragmatic hernia is a rare life-threatening condition. CT scan of the chest and abdomen is the gold standard for diagnosing the diaphragmatic hernia. Laparoscopic repair is the best treatment option for stable patients with complicated diaphragmatic hernias. Open repair is considered necessary in majority of unstable patients in whom Damage Control Surgery can be life-saving."
+    }
+   ]
+  },
+  {
+   "id": "WSES-OPENABDO-001",
+   "source": "WSES",
+   "title": "WSES Position Paper on the Use of the Open Abdomen",
+   "year": "2018",
+   "page_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-018-0167-4",
+   "pdf_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-018-0167-4",
+   "license": "WSES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_emergency",
+   "priority": "high",
+   "sha256": "1ccbb784817e23d4ce741a2bc3698b1b397847ea204d47e6c46d9ea277d4ed38",
+   "size_bytes": 1793,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1793,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Management of complicated diaphragmatic hernia in the acute setting: a WSES position paper. Diaphragmatic hernia (DH) presenting acutely can be a potentially life-threatening condition. Its management continues to be debatable. A bibliographic search using major databases was performed using the terms \"emergency surgery\" \"diaphragmatic hernia,\" \"traumatic diaphragmatic rupture\" and \"congenital diaphragmatic hernia.\" GRADE methodology was used to evaluate the evidence and give recommendations. CT scan of the chest and abdomen is the diagnostic gold standard to evaluate complicated DH. Appropriate preoperative assessment and prompt surgical intervention are important for a clinical success. Complicated DH repair is best performed via the use of biological and bioabsorbable meshes which have proven to reduce recurrence. The laparoscopic approach is the preferred technique in hemodynamically stable patients without significant comorbidities because it facilitates early diagnosis of small diaphragmatic injuries from traumatic wounds in the thoraco-abdominal area and reduces postoperative complications. Open surgery should be reserved for situations when skills and equipment for laparoscopy are not available, where exploratory laparotomy is needed, or if the patient is hemodynamically unstable. Damage Control Surgery is an option in the management of critical and unstable patients. Complicated diaphragmatic hernia is a rare life-threatening condition. CT scan of the chest and abdomen is the gold standard for diagnosing the diaphragmatic hernia. Laparoscopic repair is the best treatment option for stable patients with complicated diaphragmatic hernias. Open repair is considered necessary in majority of unstable patients in whom Damage Control Surgery can be life-saving."
+    }
+   ]
+  },
+  {
+   "id": "WSES-EMERGENCY-001",
+   "source": "WSES",
+   "title": "WSES Guidelines on Sigmoid Volvulus Management",
+   "year": "2021",
+   "page_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-021-00362-3",
+   "pdf_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-021-00362-3",
+   "license": "WSES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_emergency",
+   "priority": "medium",
+   "sha256": "f2709a9ea1128a1ae09777c2330ead39069f2c753fd67cd3127391d62ac5c2e4",
+   "size_bytes": 582,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 582,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "WSES consensus guidelines on sigmoid volvulus management. Sigmoid volvulus is a common surgical emergency, especially in elderly patients. Patients can present with a wide range of clinical states: from asymptomatic, to frank peritonitis secondary to colonic perforation. These patients generally need urgent treatment, be it endoscopic decompression of the colon or an upfront colectomy. The World Society of Emergency Surgery united a worldwide group of international experts to review the current evidence and propose a consensus guidelines on the management of sigmoid volvulus."
+    }
+   ]
+  },
+  {
+   "id": "WSES-CECAL-VOLVULUS-001",
+   "source": "WSES",
+   "title": "WSES Position Paper on the Management of Cecal Volvulus",
+   "year": "2021",
+   "page_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-021-00362-3",
+   "pdf_url": "https://wjes.biomedcentral.com/articles/10.1186/s13017-021-00362-3",
+   "license": "WSES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_emergency",
+   "priority": "medium",
+   "sha256": "9f2d8c73d8f87abc654c2d31d3cb0cf511fecbae210ce6e3106e8ed2e51f3d9e",
+   "size_bytes": 782,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 782,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WSES Position Paper on the Management of Cecal Volvulus Source: WSES Year: 2021 Domain: digestive_surgery_emergency License: WSES Available at: https://wjes.biomedcentral.com/articles/10.1186/s13017-021-00362-3 This is a citation reference for the WSES guideline 'WSES Position Paper on the Management of Cecal Volvulus' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: digestive_surgery_emergency. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

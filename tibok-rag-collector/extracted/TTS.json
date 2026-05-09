@@ -1,7 +1,7 @@
 {
  "source": "TTS",
  "generated_at": "2026-05-09T16:18:33Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "TTS-DON-001",
@@ -53,6 +53,31 @@
     {
      "chunk_index": 7,
      "content": "of both living and deceased organ donation and that such ambiguity engenders unique ethical challenges. To address these concerns, separating MAiD and OD processes to prevent conflicts of interests, implementing effective and timely communication and enhanced consent, and introducing the figure of a donor advocate could help safeguard and advance donors' interests in optimal end‐of‐life care and organ donation. Conflicts of Interest The authors declare no conflicts of interest."
+    }
+   ]
+  },
+  {
+   "id": "TTS-TX-001",
+   "source": "TTS",
+   "title": "TTS DICG Consensus Statement DCD Worldwide Practice Guidance",
+   "year": "2021",
+   "page_url": "https://tts.org/dicg-resources",
+   "pdf_url": "https://tts.org/dicg-resources",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "transplant_donor",
+   "priority": "high",
+   "sha256": "73cd21c9c3def2cdfa26690e957e6530c71a1ddc81966d53dda7fa59e626d8f5",
+   "size_bytes": 732,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 732,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: TTS DICG Consensus Statement DCD Worldwide Practice Guidance Source: TTS Year: 2021 Domain: transplant_donor License: Open Available at: https://tts.org/dicg-resources This is a citation reference for the TTS guideline 'TTS DICG Consensus Statement DCD Worldwide Practice Guidance' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: transplant_donor. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

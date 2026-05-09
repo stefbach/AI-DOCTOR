@@ -1,7 +1,7 @@
 {
  "source": "HFA",
  "generated_at": "2026-05-09T09:18:47Z",
- "total_documents": 18,
+ "total_documents": 19,
  "documents": [
   {
    "id": "HFA-BIOMARKERS-001",
@@ -970,6 +970,31 @@
     {
      "chunk_index": 16,
      "content": "core committee members were involved the conceptualisation and design of the guidelines, drafting the PICO questions, conducting the literature search, drafting and editing the manuscript, and critical review and approved the final version of the manuscript. AP, DKP, SLS, RK and SD as adult Guideline Subcommittee members provided specialised inputs in the development of the recommendations, contributed to the literature review, reviewed the manuscript for accuracy and relevance, and approved the final version. All authors contributed to reviewing and editing of the manuscript for intellectual content and are responsible for the content of this guideline. Conflicts of interest Dr Amit Shah- inventor of Patwashahi video laryngoscope (non-commercial), designer of HFNO device HuFlo2. Dr Apeksh Patwa-inventor of Patwashahi video laryngoscope (non-commercial), designer of HFNO device HuFlo2. Dr Rakesh Garg, Dr Pankaj Kundra, Dr Sheila Nainan Myatra, Dr Syed Moied Ahmed, and Dr Jeson R Doctor, who are co-authors of this manuscript, are editors of this journal. They were not involved in the decision-making process, and an independent editor handled this manuscript. Other authors declare that they have no conflicts of interest. Supplementary material This article has supplementary material and can be accessed at this link. Supplementary Material at http://links.lww.com/IJOA/A46 ."
+    }
+   ]
+  },
+  {
+   "id": "HFA-DEVICE-001",
+   "source": "HFA",
+   "title": "HFA position statement on remote monitoring CIED in HF",
+   "year": "2019",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1002/ejhf.1736",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1002/ejhf.1736",
+   "license": "HFA ESC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_hf",
+   "priority": "medium",
+   "sha256": "1baf4333ea39dd42e3fa89762e3eb937c26aedc5b5d5eae8ef661afaeda57e34",
+   "size_bytes": 740,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 740,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:56Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: HFA position statement on remote monitoring CIED in HF Source: HFA Year: 2019 Domain: cardiology_hf License: HFA ESC Available at: https://onlinelibrary.wiley.com/doi/10.1002/ejhf.1736 This is a citation reference for the HFA guideline 'HFA position statement on remote monitoring CIED in HF' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_hf. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

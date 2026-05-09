@@ -1,7 +1,7 @@
 {
  "source": "CLSI",
  "generated_at": "2026-05-09T08:13:02Z",
- "total_documents": 13,
+ "total_documents": 18,
  "documents": [
   {
    "id": "CLSI-AST-001",
@@ -517,6 +517,131 @@
     {
      "chunk_index": 4,
      "content": "OK317695 ); Hyphopichia burtonii ( OK303419 ); Wickerhamiella pararugosa ( OK303420 ), Naganishia species, including N. albida ( OK305958 , OK305951 and OK317688 ), N. adeliensis ( OK305933 ), N. diffluens ( OK305959 ), and N. liquefaciens ( OK305932 ); Magnusiomyces capitatus ( OK310776 ); Filobasidium magnum ( OK317686 , OK317685 ); and Filobasidium chernovii ( OM756729 )."
+    }
+   ]
+  },
+  {
+   "id": "CLSI-COAG-001",
+   "source": "CLSI",
+   "title": "CLSI H47 one stage prothrombin time activated partial thromboplastin time",
+   "year": "2022",
+   "page_url": "https://clsi.org/standards/products/hematology/documents/h47/",
+   "pdf_url": "https://clsi.org/standards/products/hematology/documents/h47/",
+   "license": "CLSI",
+   "commercial_use": "restricted",
+   "clinical_domain": "lab_coagulation",
+   "priority": "high",
+   "sha256": "3d7b722eab839ce8afd4a39759a344418b59261a2bbcc9da97afbce6fea7d79f",
+   "size_bytes": 789,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 789,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CLSI H47 one stage prothrombin time activated partial thromboplastin time Source: CLSI Year: 2022 Domain: lab_coagulation License: CLSI Available at: https://clsi.org/standards/products/hematology/documents/h47/ This is a citation reference for the CLSI guideline 'CLSI H47 one stage prothrombin time activated partial thromboplastin time' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_coagulation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CLSI-URINE-001",
+   "source": "CLSI",
+   "title": "CLSI GP16 urinalysis approved guideline routine",
+   "year": "2016",
+   "page_url": "https://clsi.org/standards/products/clinical-chemistry-and-toxicology/documents/gp16/",
+   "pdf_url": "https://clsi.org/standards/products/clinical-chemistry-and-toxicology/documents/gp16/",
+   "license": "CLSI",
+   "commercial_use": "restricted",
+   "clinical_domain": "lab_urinalysis",
+   "priority": "high",
+   "sha256": "da15c5614a2e73ad7ca107e58b72d9bc672e448fe915a68c73d6404710cb3464",
+   "size_bytes": 759,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 759,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CLSI GP16 urinalysis approved guideline routine Source: CLSI Year: 2016 Domain: lab_urinalysis License: CLSI Available at: https://clsi.org/standards/products/clinical-chemistry-and-toxicology/documents/gp16/ This is a citation reference for the CLSI guideline 'CLSI GP16 urinalysis approved guideline routine' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_urinalysis. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CLSI-PHLEB-001",
+   "source": "CLSI",
+   "title": "CLSI GP41 collection diagnostic venous blood specimens",
+   "year": "2017",
+   "page_url": "https://clsi.org/standards/products/general-laboratory/documents/gp41/",
+   "pdf_url": "https://clsi.org/standards/products/general-laboratory/documents/gp41/",
+   "license": "CLSI",
+   "commercial_use": "restricted",
+   "clinical_domain": "lab_quality",
+   "priority": "high",
+   "sha256": "6e4d9fb95a92893eaad53313cb2f11f5e638e20f4a366e0610f84c3c950d8e05",
+   "size_bytes": 3164,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3136,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Laboratory Diagnostics and Quality of Blood Collection. Diagnostic blood samples collected by phlebotomy are the most common type of biological specimens drawn and sent to laboratory medicine facilities for being analyzed, thus supporting caring physicians in patient diagnosis, follow-up and/or therapeutic monitoring. Phlebotomy, a relatively invasive medical procedure, is indeed critical for the downstream procedures accomplished either in the analytical phase made in the laboratory or in the interpretive process done by the physicians. Diagnosis, management, treatment of patients and ultimately patient safety itself can be compromised by poor phlebotomy quality. We have read with interest a recent article where the authors addressed important aspects of venous blood collection for laboratory medicine analysis. The authors conducted a phlebotomy survey based on the Clinical and Laboratory Standard Institute (CLSI) H03-A6 document (presently replaced by the GP41-A6 document) in three government hospitals in Ethiopia to evaluate 120 professionals (101 non-laboratory professionals vs. 19 laboratory professionals) as regards the venous blood collection practice. The aim of this mini (non-systematic) review is to both take a cue from the above article and from current practices we had already observed in other laboratory settings, and discuss four questionable activities performed by health care professionals during venous blood collection. We refer to: i) diet restriction assessment; ii) puncture site cleansing; iii) timing of tourniquet removal and; iv) mixing specimen with additives. Uzorci krvi za dijagnostiku uzeti pomoću flebotomije najčešći su od svih bioloških uzoraka koji se uzimaju i šalju u medicinske laboratorije na analizu, čime se pruža podrška nadležnim lekarima u postavljanju dijagnoze, praćenju i/ili terapijskom nadzoru bolesnika. Flebotomija, kao relativno invazivna medicinska procedura, zaista je presudna za postupke koji slede bilo u analitičkoj fazi u laboratoriji ili u procesu interpretacije koji obavljaju lekari. Loš kvalitet flebotomije može kompromitovati postavljanje dijagnoze, upravljanje pacijentom, njegovo lečenje i najzad bezbednost pacijenta. Sa zanimanjem smo nedavno pročitali članak u kom se autori bave važnim aspektima uzimanja uzoraka venske krvi za medicinske laboratorijske analize. Autori su sproveli anketu o flebotomiji zasnovanu na dokumentu H03-A6 (danas ga zamenjuje dokument GP41-A6) Instituta za kliničke i laboratorijske standarde (IKLS) u tri vladine bolnice u Etiopiji da bi ispitali 120 zaposlenih (101 nije bio laboratorijski radnik, dok 19 jesu bili laboratorijski radnici) o praksi uzimanja uzoraka venske krvi. Cilj ovog mini (nesistematičnog) pregleda je osvrt na sugestije iz pomenutog članka kao i na trenutne prakse koje smo već primetili u drugim laboratorijama, i uz to kratka diskusija o četiri problematične aktivnosti koje prilikom uzimanja uzoraka venske krvi obavljaju zdravstveni radnici. Ovo se odnosi na: i) procenu restrikcija u ishrani; ii) čišćenje mesta punkcije; iii) vreme uklanjanja poveske i iv) mešanje uzoraka sa aditivima."
+    }
+   ]
+  },
+  {
+   "id": "CLSI-FISH-001",
+   "source": "CLSI",
+   "title": "CLSI MM07 fluorescence in situ hybridization clinical practice",
+   "year": "2013",
+   "page_url": "https://clsi.org/standards/products/molecular-diagnostics/documents/mm07/",
+   "pdf_url": "https://clsi.org/standards/products/molecular-diagnostics/documents/mm07/",
+   "license": "CLSI",
+   "commercial_use": "restricted",
+   "clinical_domain": "lab_molecular",
+   "priority": "high",
+   "sha256": "7b575b61992d329b8521d3b74c14f78799fdaad4f791be8bd5c86ac42efe312e",
+   "size_bytes": 775,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 775,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CLSI MM07 fluorescence in situ hybridization clinical practice Source: CLSI Year: 2013 Domain: lab_molecular License: CLSI Available at: https://clsi.org/standards/products/molecular-diagnostics/documents/mm07/ This is a citation reference for the CLSI guideline 'CLSI MM07 fluorescence in situ hybridization clinical practice' published in 2013. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_molecular. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CLSI-EQA-001",
+   "source": "CLSI",
+   "title": "CLSI GP27 using proficiency testing improve laboratory",
+   "year": "2007",
+   "page_url": "https://clsi.org/standards/products/general-laboratory/documents/gp27/",
+   "pdf_url": "https://clsi.org/standards/products/general-laboratory/documents/gp27/",
+   "license": "CLSI",
+   "commercial_use": "restricted",
+   "clinical_domain": "lab_quality",
+   "priority": "high",
+   "sha256": "8a1fd40062c08409d70fb2ff2e294fb845659a7e2ac2be83362a52233cdc58a4",
+   "size_bytes": 752,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 752,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CLSI GP27 using proficiency testing improve laboratory Source: CLSI Year: 2007 Domain: lab_quality License: CLSI Available at: https://clsi.org/standards/products/general-laboratory/documents/gp27/ This is a citation reference for the CLSI guideline 'CLSI GP27 using proficiency testing improve laboratory' published in 2007. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_quality. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

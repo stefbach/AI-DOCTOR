@@ -1,7 +1,7 @@
 {
  "source": "EUGOGO",
  "generated_at": "2026-05-09T13:22:50Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "EUGOGO-TED-001",
@@ -98,6 +98,31 @@
     {
      "chunk_index": 6,
      "content": "hyperthyroidism but can also occur in euthyroid or hypothyroid individuals ( ). All too frequently, the correct diagnosis of TED is delayed. This delay could be attributed to poorly informed doctors and patients ( – ). The lacrimal signs and symptoms (i.e. dry eye, grittiness, etc.) frequently associated with TED can be mistaken for seasonal allergies and other causes of ocular inflammation. Edmunds et al. have advocated enhancing awareness of TED with surveys and questionnaires ( ). Multidisciplinary Care The multisystemic nature of GD, including TED, makes a collaboration between endocrinologists and ophthalmologists necessary to achieve optimal management ( ). Sight-threatening TED should be immediately referred to an oculoplastic surgeon for the prompt evaluation and necessary treatment aimed at vision preservation. A comprehensive eye exam should be conducted at the initial presentation of every patient. Conclusions/Perspectives The lacrimal system is frequently involved in TED. Treatment of thyroid dysfunction is essential to optimize the best possible disease outcomes; however normalizing thyroid function alone represents inadequate treatment for clinically significant TED. Local measures, including preserving the ocular surface and minimizing exposure frequently suffice in mild disease. Medical and surgical remediation might be necessary in more severe disease. Lacrimal symptoms can be associated with among the most emotionally and physically burdensome intrusions in the lives of patients with TED. Teprotumumab, currently the only approved medication for the treatment of TED, can substantially reduce disease activity and severity and provide meaningful relief from lacrimal system-related signs and symptoms. Collaboration between endocrinologists and ophthalmologists should facilitate optimal disease management."
+    }
+   ]
+  },
+  {
+   "id": "EUGOGO-TED-002",
+   "source": "EUGOGO",
+   "title": "EUGOGO clinical activity score and severity assessment of thyroid eye disease",
+   "year": "2021",
+   "page_url": "https://www.eugogo.eu/cas",
+   "pdf_url": "https://www.eugogo.eu/cas",
+   "license": "EUGOGO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_oculoplastic",
+   "priority": "high",
+   "sha256": "bef949bf056bff558bd7478c40ad3df9343c34b7aa05d2025230bf2e45bfac4a",
+   "size_bytes": 1835,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1835,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "What has changed in thyroid eye disease in the last five years (2020-2025). Significant progress has been made in the management of thyroid eye disease (TED), based on the elucidation of important pathogenic mechanisms. This has led to novel therapeutics validated in randomized clinical trials. Autoreactive antigens that elicit specific orbital immune reactions have not yet been identified, although it has been shown that fibrocytes, circulating stem cells that differentiate into fibroblasts, are expressing the thyroid-stimulating hormone receptor (TSHR) and insulin-like growth factor-1 receptor (IGF-1R) and may be stimulated in the orbit by a cascade of inflammatory reactions inducing adipogenesis. Moderate-severe forms of TED are the target for immunosuppressive therapy. Improvement in the assessment of the active and progressive phase of disease is becoming compelling, as the outcome of a treatment depends on how early during the progressive phase the disease is treated. The clinical activity score may not always help define the right time for treating. In 2020, teprotumumab, an anti-IGF-1 receptor blocker, has been approved by FDA for the treatment of TED. Since then, other drugs were studied or are under investigation and will seek regulatory approval. A series of studies have investigated the role of microbiome in thyroid autoimmunity and TED more in detail, based on the observation that treatment with antibiotics may modify the disease phenotype in a murine model of TED. This approach is being studied for the assessment of TED, especially trying to standardize the use of orbital and facial images for improving the diagnosis of the disease in the early, progressive phase. In the future, these applications will allow the use of synthetic data, in addition to training on real patient images and data."
     }
    ]
   }

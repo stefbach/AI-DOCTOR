@@ -1,7 +1,7 @@
 {
  "source": "ESMO",
  "generated_at": "2026-05-02T15:35:24Z",
- "total_documents": 68,
+ "total_documents": 81,
  "documents": [
   {
    "id": "ESMO-001",
@@ -3548,6 +3548,331 @@
     {
      "chunk_index": 4,
      "content": "confounding by indication whereby treatment use marks greater baseline symptom severity. Depression showed a strong and consistent association with substantially worse menopause-related HRQoL, including women with and without a history of cancer, and across gynecologic and non-gynecologic cancer subgroups. Overall, these findings emphasize sexual wellbeing and mental health as key targets for integrated, patient-centered menopausal care in all menopausal women, with special relevance for cancer survivors [ , , ]."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-MPN-001",
+   "source": "ESMO",
+   "title": "ESMO clinical practice guidelines philadelphia-negative chronic myeloproliferative neoplasms",
+   "year": "2024",
+   "page_url": "https://www.esmo.org/guidelines/guidelines-by-topic/haematological-malignancies",
+   "pdf_url": "https://www.esmo.org/guidelines/guidelines-by-topic/haematological-malignancies",
+   "license": "ESMO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_malignancy",
+   "priority": "high",
+   "sha256": "b20ca16b0f33475a14fa261b2e67dff055572bae4c19cad454a494b4d1afb948",
+   "size_bytes": 857,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 857,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESMO clinical practice guidelines philadelphia-negative chronic myeloproliferative neoplasms Source: ESMO Year: 2024 Domain: hematology_malignancy License: ESMO Available at: https://www.esmo.org/guidelines/guidelines-by-topic/haematological-malignancies This is a citation reference for the ESMO guideline 'ESMO clinical practice guidelines philadelphia-negative chronic myeloproliferative neoplasms' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: hematology_malignancy. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-MELANOMA-002",
+   "source": "ESMO",
+   "title": "Uveal melanoma ESMO Clinical Practice Guideline",
+   "year": "2024",
+   "page_url": "https://www.esmo.org/guidelines/melanoma/uveal-melanoma",
+   "pdf_url": "https://www.esmo.org/guidelines/melanoma/uveal-melanoma",
+   "license": "ESMO Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "oncology_skin_melanoma",
+   "priority": "medium",
+   "sha256": "d1fc6f129af8c778db7fbf7ce608eb1798bf5fe0d22a858db3bf9e5a2b157310",
+   "size_bytes": 636,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 624,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:51Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Uveal melanoma: ESMO-EURACAN Clinical Practice Guideline for diagnosis, treatment and follow-up. • This ESMO CPG provides key recommendations and algorithms for diagnosis, staging, treatment and follow-up of UM. • This ESMO CPG focuses solely on UM; refer to the ESMO CPG on Cutaneous Melanoma for other types. • ESMO-MCBS scores are given to describe the levels of evidence for treatment choices. • Recommendations are based on available scientific data and the authors’ collective expert opinion. • In clinical practice, all recommendations provided need to be discussed with patients in a shared decision-making approach."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-BCC-001",
+   "source": "ESMO",
+   "title": "Basal cell carcinoma ESMO EADO EDF clinical practice guideline",
+   "year": "2023",
+   "page_url": "https://www.esmo.org/guidelines/skin-cancers/basal-cell-carcinoma",
+   "pdf_url": "https://www.esmo.org/guidelines/skin-cancers/basal-cell-carcinoma",
+   "license": "ESMO Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "oncology_skin_bcc",
+   "priority": "high",
+   "sha256": "790c79df7898b2be0001f5ecae11257e61cedecd5dce6b1edb5ce1734346b3a6",
+   "size_bytes": 787,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 787,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Basal cell carcinoma ESMO EADO EDF clinical practice guideline Source: ESMO Year: 2023 Domain: oncology_skin_bcc License: ESMO Open Access Available at: https://www.esmo.org/guidelines/skin-cancers/basal-cell-carcinoma This is a citation reference for the ESMO guideline 'Basal cell carcinoma ESMO EADO EDF clinical practice guideline' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: oncology_skin_bcc. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-FIBROLAM",
+   "source": "ESMO",
+   "title": "Fibrolamellar hepatocellular carcinoma rare cancer recommendations",
+   "year": "2023",
+   "page_url": "https://www.esmo.org/guidelines/gastrointestinal-cancers/hepatocellular-carcinoma",
+   "pdf_url": "https://www.esmo.org/guidelines/gastrointestinal-cancers/hepatocellular-carcinoma",
+   "license": "ESMO Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "oncology_liver",
+   "priority": "medium",
+   "sha256": "5af2adb0971cc3a352c7fb462ac990229afb1fefb8efe775e85c71c3f1039556",
+   "size_bytes": 1806,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1804,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Fibrolamellar hepatocellular carcinoma in the USA, 2000-2010: A detailed report on frequency, treatment and outcome based on the Surveillance, Epidemiology, and End Results database. Epidemiological and clinical information on fibrolamellar hepatocellular carcinoma (fHCC) is scarce. We performed a Surveillance, Epidemiology and End Results (SEER) database analysis with the aim of collecting information to better understand the biology and clinical aspects of this rare disease. Incidence trends, race- and age-specific rates, tumor size, first course surgery and five-year relative survival of 191 US cases (SEER) diagnosed with fHCC during 2000-2010 were compared to cases with hepatocellular carcinoma (HCC), HCC-not otherwise specified (HCC-NOS) and other HCC-types. While HCC-NOS incidence rates increased by 5.2% annually from 2000-2008 (p < 0.05) before leveling, the 1.3% change in fHCC incidence was not statistically significant. The rates of fHCC were similar across ethnic groups while HCC-NOS incidence rates were higher among non-whites. Although 16% of fHCC patients had primary tumors ≤5 cm compared to 37% of HCC-NOS cases five-year survival was better among fHCC (34%) than HCC-NOS cases (16%). Fibrolamellar HCC cases of 0-39 years of age were more likely to receive radiofrequency ablation, transplant or resection than HCC-NOS cases of that age. Survival was similar among fibrolamellar and HCC-NOS cases receiving surgery. In this largest case series, fibrolamellar and HCC-NOS age- and race-specific incidence rates and time trends differed. Despite larger tumor size than HCC-NOS cases fibrolamellar cases received surgery more often and had better survival rates. Differences in co-morbidity may influence treatment. Studies of fHCC biology, including by age, are recommended."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-BURKITT-001",
+   "source": "ESMO",
+   "title": "Burkitt lymphoma ESMO EHA recommendations",
+   "year": "2020",
+   "page_url": "https://www.esmo.org/guidelines/haematological-malignancies/burkitt-lymphoma",
+   "pdf_url": "https://www.esmo.org/guidelines/haematological-malignancies/burkitt-lymphoma",
+   "license": "ESMO Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "oncology_lymphoma_nh",
+   "priority": "high",
+   "sha256": "f5977cb9983c1f2ca78fab06d1ecb1d8f35bf6532ea56214242d18c97ae47af3",
+   "size_bytes": 762,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 762,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Burkitt lymphoma ESMO EHA recommendations Source: ESMO Year: 2020 Domain: oncology_lymphoma_nh License: ESMO Open Access Available at: https://www.esmo.org/guidelines/haematological-malignancies/burkitt-lymphoma This is a citation reference for the ESMO guideline 'Burkitt lymphoma ESMO EHA recommendations' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: oncology_lymphoma_nh. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-CTCL-001",
+   "source": "ESMO",
+   "title": "Primary cutaneous lymphomas ESMO EORTC",
+   "year": "2018",
+   "page_url": "https://www.esmo.org/guidelines/haematological-malignancies/primary-cutaneous-lymphomas",
+   "pdf_url": "https://www.esmo.org/guidelines/haematological-malignancies/primary-cutaneous-lymphomas",
+   "license": "ESMO Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "oncology_lymphoma_nh",
+   "priority": "high",
+   "sha256": "5f1be8c037f17a8b30187d72c61be6ae13fe1f87d11360e24a4cc1d4cf9f8760",
+   "size_bytes": 767,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 767,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:56Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Primary cutaneous lymphomas ESMO EORTC Source: ESMO Year: 2018 Domain: oncology_lymphoma_nh License: ESMO Open Access Available at: https://www.esmo.org/guidelines/haematological-malignancies/primary-cutaneous-lymphomas This is a citation reference for the ESMO guideline 'Primary cutaneous lymphomas ESMO EORTC' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: oncology_lymphoma_nh. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-ALL-001",
+   "source": "ESMO",
+   "title": "Acute lymphoblastic leukaemia adults ESMO",
+   "year": "2024",
+   "page_url": "https://www.esmo.org/guidelines/haematological-malignancies/acute-lymphoblastic-leukaemia",
+   "pdf_url": "https://www.esmo.org/guidelines/haematological-malignancies/acute-lymphoblastic-leukaemia",
+   "license": "ESMO Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "oncology_leukemia_acute",
+   "priority": "high",
+   "sha256": "732471b4f6cb4d5eb8ebcd0652d7bd51eb05486e648274c76ab45808ccac2a59",
+   "size_bytes": 1223,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1223,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Managing toxicities with asparaginase-based therapies in adult ALL: summary of an ESMO Open-Cancer Horizons roundtable discussion. With recent prospective clinical trials that used paediatric regimens with multiple doses of pegylated form of asparaginase (PEG asparaginase) in adults reporting significantly improved survival compared with historical data with regimens that used less asparaginase, PEG asparaginase is increasingly being used in the treatment of adult acute lymphoblastic leukaemia (ALL). However, administering asparaginase still comes with its challenges, especially in adult patients. Therefore, it is important to understand how to manage its toxicities properly. An expert group met in November 2019 in London to discuss recent data of paediatric as well as adult studies using paediatric regimens with regard to the best management of several key toxicities that can occur in adults treated with asparaginase including hepatotoxicity, pancreatitis, hypertriglyceridaemia, thrombosis and hypersensitivity. Several recommendations were made for each one of these toxicities, with the goal of safe administration of the drug and to educate clinicians when the drug can be continued despite side effects."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-CSUPP-001",
+   "source": "ESMO",
+   "title": "Management cancer pain ESMO Clinical Practice Guideline",
+   "year": "2018",
+   "page_url": "https://www.esmo.org/guidelines/supportive-and-palliative-care/management-of-cancer-pain",
+   "pdf_url": "https://www.esmo.org/guidelines/supportive-and-palliative-care/management-of-cancer-pain",
+   "license": "ESMO Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "oncology_supportive",
+   "priority": "high",
+   "sha256": "c2ef0a2b6e7bb44659aca820fd3f1358247e3f66ad7bd32aa28ba0544c8d152a",
+   "size_bytes": 1990,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1990,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:00Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "2024 SOGC, 2024 NCCN, 2022 ESO-ESMO, and 2018 ASCO: a comparison of female cancer survivorship guidelines for the management of sexual health concerns. Female cancer survivors often experience sexual dysfunction, which is a significant and increasingly recognized aspect of survivorship. This review compares guidelines from the American Society of Clinical Oncology (ASCO), the European School of Oncology-European Society of Medical Oncology (ESO-ESMO), the National Comprehensive Cancer Network (NCCN), and the Society of Obstetricians and Gynaecologists of Canada (SOGC) for managing sexual health symptoms. The most recent guidelines from ASCO, ESO-ESMO, NCCN, and SOGC were examined and compared. The recommendations were grouped by type of sexual dysfunction: vaginal dryness, low sex drive, pain, orgasmic dysfunction, and psychological concerns. All guidelines strongly recommend non-hormonal therapies (i.e., lubricants or moisturizers) as first-line treatments for managing vaginal dryness. If unsuccessful, there is consensus for low-dose estrogen creams, tablets, capsules, or rings as second-line treatments. Multidisciplinary care is also recommended by all, including psychosocial and relationship counselling, specialist referrals, and cognitive behavioral therapy to address psychological concerns. ASCO, NCCN, and SOGC recommend vaginal dilators, and pelvic physical therapy for relieving pain. ASCO recommends any kind of stimulation (including masturbation) to improve sexual response, while NCCN and SOGC recommend the use of sexual aids (e.g., vibrators) to enhance arousal. Although all guidelines, except ESO-ESMO, include recommendations for androgens, bupropion, flibanserin, bremelanotide, and buspirone for low sex drive, there is limited data. There is consensus among guidelines on certain sexual health recommendations, with some variation. Additional research is needed on pharmacological interventions and types of counselling to strengthen their evidence."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-CSUPP-002",
+   "source": "ESMO",
+   "title": "Antiemetics ESMO MASCC Clinical Practice Guideline",
+   "year": "2024",
+   "page_url": "https://www.esmo.org/guidelines/supportive-and-palliative-care/antiemetics",
+   "pdf_url": "https://www.esmo.org/guidelines/supportive-and-palliative-care/antiemetics",
+   "license": "ESMO Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "oncology_supportive",
+   "priority": "high",
+   "sha256": "3e6e450840338dd678b7e9beb8f0e2c4ad5a4673ea8574b8ecf9ad709a419380",
+   "size_bytes": 1721,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1721,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:01Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Going beyond the 2023 MASCC and ESMO guideline update for the prevention of chemotherapy- and radiotherapy-induced nausea and vomiting. The MASCC/ESMO guidelines for the prevention of chemotherapy- and radiotherapy-induced nausea and vomiting were updated in 2023 by a Consensus Committee of 34 multidisciplinary international healthcare professionals and three patient advocates. Guideline-recommended prophylactic anti-emetic strategies can control chemotherapy-induced nausea and vomiting (CINV) in many patients, but unaddressed issues remain. Across a series of meetings, we evaluated these guidelines to identify possible evidence gaps which warrant further exploration. Key topics identified and discussed included the use of dexamethasone-sparing regimens with cisplatin (and other non-anthracycline and cyclophosphamide)-based highly emetogenic chemotherapy regimens, the importance of individual patient risk factors for CINV, the use of a second agent in patients receiving low emetogenic chemotherapy, how to manage CINV with certain new antibody-drug conjugates, the most appropriate approach for managing breakthrough CINV, the options for patients with CINV even after following best guidance, the use of lower than standard doses of olanzapine (<10 mg/day), and the management of long-delayed CINV and CINV in patients receiving oral therapies. Through identifying the current gaps in the updated MASCC/ESMO guidelines and discussing the available evidence, we aim to address these issues and support oncologists who may encounter them in clinical practice. These and other questions need to be considered to help ensure choice of anti-emetic treatments provide optimal effectiveness in clinical practice."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-CSUPP-003",
+   "source": "ESMO",
+   "title": "Febrile neutropenia ESMO Clinical Practice Guideline",
+   "year": "2016",
+   "page_url": "https://www.esmo.org/guidelines/supportive-and-palliative-care/management-of-febrile-neutropenia",
+   "pdf_url": "https://www.esmo.org/guidelines/supportive-and-palliative-care/management-of-febrile-neutropenia",
+   "license": "ESMO Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "oncology_supportive",
+   "priority": "high",
+   "sha256": "370ecf76a14bb1a6bfb89e207ffcad7c58f951fe204bd2fc7717cd10e1c68b50",
+   "size_bytes": 4582,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 4565,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:02Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Atezolizumab plus chemotherapy versus placebo plus chemotherapy in untreated locally advanced or metastatic urothelial carcinoma (IMvigor130): final overall survival analysis results from a randomised, controlled, phase 3 study. IMvigor130 demonstrated statistically significant investigator-assessed progression-free survival benefit with first-line atezolizumab plus platinum-based chemotherapy (group A) versus placebo plus platinum-based chemotherapy (group C) in patients with locally advanced or metastatic urothelial carcinoma. Overall survival was not improved in interim analyses. Here we report the final overall analysis for group A versus group C. In this global, partially blinded, randomised, controlled, phase 3 study, patients (aged ≥18 years) with previously untreated locally advanced or metastatic urothelial cancer and who had an Eastern Cooperative Oncology Group performance status of 0-2 were enrolled at 221 hospitals and oncology centres in 35 countries. Patients were randomly assigned (1:1:1), with a permuted block method (block size of six) and an interactive voice and web response system, stratified by PD-L1 status, Bajorin risk factor score, and investigator's choice of platinum-based chemotherapy, to receive atezolizumab plus platinum-based chemotherapy (group A), atezolizumab monotherapy (group B), or placebo plus platinum-based chemotherapy (group C). Sponsors, investigators, and patients were masked to assignment to atezolizumab or placebo (ie, group A and group C) and atezolizumab monotherapy (group B) was open label. For groups A and C, all patients received gemcitabine (1000 mg/m 2 intravenously; day 1 and day 8 of each 21-day cycle), plus investigator's choice of carboplatin (area under curve 4·5 mg/mL per min or 5 mg/mL per min; intravenously) or cisplatin (70 mg/m 2 intravenously), plus either atezolizumab (1200 mg intravenously) or placebo on day 1 of each cycle. Co-primary endpoints of the study were investigator-assessed progression-free survival and overall survival for group A versus group C in the intention-to-treat (ITT) population (ie, all randomised patients), and overall survival for group B versus group C, tested hierarchically. Final overall survival and updated safety outcomes (safety population; all patients who received any amount of any study treatment component) for group A versus group C are reported here. The final prespecified boundary for significance of the overall survival analysis was one-sided p=0·021. The trial is registered with ClinicalTrials.gov, NCT02807636, and is active but no longer recruiting. Between July 15, 2016, and July 20, 2018, 1213 patients were enrolled and randomly assigned to treatment, of whom 851 were assigned to group A (n=451) and group C (n=400). 338 (75%) patients in group A and 298 (75%) in group C were male, 113 (25%) in group A and 102 (25%) in group C were female, and 346 (77%) in group A and 304 (76%) in group C were White. At data cutoff (Aug 31, 2022), after a median follow up of 13·4 months (IQR 6·2-30·8), median overall survival was 16·1 months (95% CI 14·2-18·8; 336 deaths) in group A versus 13·4 months (12·0-15·3; 310 deaths) in group C (stratified hazard ratio 0·85 [95% CI 0·73-1·00]; one-sided p=0·023). The most common grade 3-4 treatment-related adverse events were anaemia (168 [37%] of 454 patients who received atezolizumab plus chemotherapy vs 133 [34%] of 389 who received placebo plus chemotherapy), neutropenia (167 [37%] vs 115 [30%]), decreased neutrophil count (98 [22%] vs 95 [24%]), thrombocytopenia (95 [21%] vs 70 [18%]), and decreased platelet count (92 [20%] vs 92 [24%]). Serious adverse events occurred in 243 (54%) patients who received atezolizumab plus chemotherapy and 196 (50%) patients who received placebo plus chemotherapy. Treatment-related deaths occurred in nine (2%; acute kidney injury, dyspnoea, hepatic failure, hepatitis, neutropenia, pneumonitis, respiratory failure, sepsis, and thrombocytopenia [n=1 each]) patients who received atezolizumab plus chemotherapy and four (1%; unexplained death, diarrhoea, febrile neutropenia, and toxic hepatitis [n=1 each]) who received placebo plus chemotherapy. Progression-free survival benefit with first-line combination of atezolizumab plus platinum-based chemotherapy did not translate into a significant improvement in overall survival in the ITT population of IMvigor130. Further research is needed to understand which patients might benefit from first-line combination treatment. No new safety signals were observed. F Hoffmann-La Roche."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-CSUPP-004",
+   "source": "ESMO",
+   "title": "Cancer associated venous thromboembolism ESMO",
+   "year": "2023",
+   "page_url": "https://www.esmo.org/guidelines/supportive-and-palliative-care/venous-thromboembolism",
+   "pdf_url": "https://www.esmo.org/guidelines/supportive-and-palliative-care/venous-thromboembolism",
+   "license": "ESMO Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "oncology_supportive",
+   "priority": "high",
+   "sha256": "7bcfa9cef00a6c1db18fe8b24db26cc158a9b4846da9bfaaa8ae42a16252efad",
+   "size_bytes": 1678,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1678,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Managing adverse events in patients with metastatic colorectal cancer receiving trifluridine/tipiracil in combination with bevacizumab. For patients with metastatic colorectal cancer (mCRC) that is refractory to standard chemotherapy, a recommended standard-of-care treatment in the third-line setting is trifluridine/tipiracil (FTD/TPI) alone or in combination with bevacizumab; other treatment options include fruquintinib or regorafenib. The safety profiles of FTD/TPI and bevacizumab as individual agents are well characterized. Common adverse events (AEs) associated with FTD/TPI include neutropenia, anemia, nausea, and diarrhea, and AEs frequently observed with bevacizumab include hypertension, proteinuria, hemorrhage, venous thromboembolism, and gastrointestinal perforation. Approval of the combination of FTD/TPI plus bevacizumab for the treatment of patients with refractory mCRC in the United States and Europe was based on results from the phase III SUNLIGHT trial. There is clinical value in developing a specific set of recommendations for the prevention or management of the key AEs associated with the combination regimen to inform clinical care and improve patient benefit. In this review, we summarize the safety profile of combination treatment with FTD/TPI plus bevacizumab in patients with refractory mCRC who were enrolled in the SUNLIGHT trial, with a focus on the key AEs of neutropenia, anemia, nausea or vomiting, diarrhea, fatigue, hypertension, and hemorrhage. In addition, we provide recommendations for the management or prevention of these key AEs in clinical practice, based on published literature and expert opinions on effective strategies."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-CSUPP-007",
+   "source": "ESMO",
+   "title": "Cancer cardiotoxicity ESMO Clinical Practice Guideline",
+   "year": "2020",
+   "page_url": "https://www.esmo.org/guidelines/supportive-and-palliative-care/cardiovascular-toxicity-induced-by-chemotherapy",
+   "pdf_url": "https://www.esmo.org/guidelines/supportive-and-palliative-care/cardiovascular-toxicity-induced-by-chemotherapy",
+   "license": "ESMO Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "oncology_supportive",
+   "priority": "high",
+   "sha256": "de4c1c934b183a87cd52752069408725e87b4a976dd49adad0fcc2b793047279",
+   "size_bytes": 820,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 820,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:05Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Cancer cardiotoxicity ESMO Clinical Practice Guideline Source: ESMO Year: 2020 Domain: oncology_supportive License: ESMO Open Access Available at: https://www.esmo.org/guidelines/supportive-and-palliative-care/cardiovascular-toxicity-induced-by-chemotherapy This is a citation reference for the ESMO guideline 'Cancer cardiotoxicity ESMO Clinical Practice Guideline' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: oncology_supportive. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESMO-LIQUIDBIOPSY-001",
+   "source": "ESMO",
+   "title": "ESMO precision medicine working group circulating tumor DNA",
+   "year": "2022",
+   "page_url": "https://www.annalsofoncology.org/article/S0923-7534(21)02333-7/fulltext",
+   "pdf_url": "https://www.annalsofoncology.org/article/S0923-7534(21)02333-7/fulltext",
+   "license": "ESMO Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "lab_molecular",
+   "priority": "high",
+   "sha256": "0bddb556bc1de9e5c6a26898fe3920f776a28efddd08c6d542ff668f6f92d2e4",
+   "size_bytes": 779,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 779,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESMO precision medicine working group circulating tumor DNA Source: ESMO Year: 2022 Domain: lab_molecular License: ESMO Open Access Available at: https://www.annalsofoncology.org/article/S0923-7534(21)02333-7/fulltext This is a citation reference for the ESMO guideline 'ESMO precision medicine working group circulating tumor DNA' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_molecular. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

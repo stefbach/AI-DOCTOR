@@ -1,7 +1,7 @@
 {
  "source": "ESSR",
  "generated_at": "2026-05-09T11:07:07Z",
- "total_documents": 5,
+ "total_documents": 6,
  "documents": [
   {
    "id": "ESSR-MSK-US-001",
@@ -265,6 +265,31 @@
     {
      "chunk_index": 6,
      "content": "separation methods. J Magn Reson Imaging 2014;40:251–68. opens new chapters of using MRI in clinical and research 12. Østergaard M, Haavardsholm EA. Imaging: MRI in healthy volunteers - important to do, and do correctly. Nat Rev Rheumatol applications to the benefit of patients in rheumatology. 2016;12:563–4. In our view, communication and collaboration between 13. Özgen A. The Value of the T2-Weighted multipoint dixon sequence rheumatologists and radiologists is instrumental in devel- in MRI of sacroiliac joints for the diagnosis of active and chronic sacroiliitis. AJR Am J Roentgenol 2017;208:603–8. oping the bright side of MRI while avoiding the dark side. 14. Liu J, Pedoia V, Heilmeier U, et al. High-temporospatial-resolution Furthermore, novel techniques like modified Dixon and dynamic contrast-enhanced (DCE) wrist MRI with variable-density pseudo-random circular Cartesian undersampling (CIRCUS) functional quantitative Gd-chelate-enhanced dynamic acquisition: evaluation of perfusion in rheumatoid arthritis patients. MRI are appetising prospects waiting to be explored in NMR Biomed 2016;29:15–23. the near future. 15. Barker PB, Lin DDM, Mahesh M. Retention concerns about mr studies using gadolinium-based contrast agents. J Am Coll Radiol 2018;15:934–6. Acknowledgements The authors thank Dr Eva Llopis for providing Figure 4. 16. Kanda T, Ishii K, Kawaguchi H, et al. High signal intensity in the Contributors All authors contributed to the writing and approved the final dentate nucleus and globus pallidus on unenhanced T1-weighted manuscript. MR images: relationship with increasing cumulative dose of a gadolinium-based contrast material. Radiology 2014;270:834–41. Funding The authors have not declared a specific grant for this research from any 17. Kanal E. Gadolinium-based contrast agents: the plot thickens. funding agency in the public, commercial or not-for-profit sectors. Radiology 2017;285:340–2. 18. Fingerhut S, Sperling M, Holling M, et al. Gadolinium-based contrast Competing interests None declared. agents induce gadolinium deposits in cerebral vessel walls, while the Patient consent Not required. neuropil is not affected: an autopsy study. Acta Neuropathol 2018. 19. European Medicines Agency. (EMA) recommendations on Provenance and peer review Commissioned; externally peer reviewed. gadolinium-containing contrast agents. 2018. http://www.​ema.​ Data sharing statement No additional data are available. europa.​eu/​docs/​en_​GB/​document_ library/Referrals_document/ gadolinium_contrast_agents_31/Recommendation_provided_by_ Open access This is an Open access article distributed in accordance with the Pharmacovigilance_Risk_Assessment_Committee/​WC500230928.​ Creative Commons Attribution Non Commercial (CC BY-NC 4.0) license, which pdf (accessed 30 May 2018). permits others to distribute, remix, adapt, build upon this work non-commercially, 20. US Food and Drug Administration. FDA drug safety communication: and license their derivative works on different terms, provided the original work is FDA warns that gadolinium-based contrast agents (GBCAs) are properly cited, appropriate credit is given, any changes made indicated, and the retained in the body; requires new class warnings. https://www.​fda.​ use is non-commercial. See: http://​creativecommons.​org/​licenses/​by-​nc/​4.​0/. gov/​Drugs/​DrugSafety/​ucm589213.​htm (accessed 30 May 2018). 21. Gulani V, Calamante F, Shellock FG, et al. Gadolinium deposition in the brain: summary of evidence and recommendations. Lancet Neurol 2017;16:564–70. References 22. Meng XH, Wang Z, Guo L, et al. Quantitative evaluation of knee 1. Rudwaleit M, van der Heijde D, Landewé R, et al. The development cartilage and meniscus destruction in patients with rheumatoid of assessment of spondyloarthritis international society classification arthritis using T1ρ and T2 mapping. Eur J Radiol 2017;96:91–7. criteria for axial spondyloarthritis (part II): validation and final 23. Lambert RGW, Bakker PAC, van der Heijde D, et al. Defining active selection. Ann Rheum Dis 2009;68:777–83. sacroiliitis on MRI for classification of axial spondyloarthritis: update 2. Lambert RG, Bakker PA, van der Heijde D, et al. Defining active by the ASAS MRI working group. Ann Rheum Dis 2016;75:75–. sacroiliitis on MRI for classification of axial spondyloarthritis: update 24. Maksymowych WP, Inman RD, Salonen D, et al. Spondyloarthritis by the ASAS MRI working group. Ann Rheum Dis 2016;75:1958–63. research consortium of Canada magnetic resonance imaging index 3. Aletaha D, Neogi T, Silman AJ, et al. 2010 rheumatoid arthritis for assessment of spinal inflammation in ankylosing spondylitis. classification criteria: an American College of Rheumatology/ Arthritis Rheum 2005;53:502–9. 6 Bloem JL, et al. RMD Open 2018;4:e000728. doi:10.1136/rmdopen-2018-000728"
+    }
+   ]
+  },
+  {
+   "id": "ESSR-MSK-MRI-002",
+   "source": "ESSR",
+   "title": "ESSR consensus on MRI of shoulder rotator cuff",
+   "year": "2017",
+   "page_url": "https://link.springer.com/article/10.1007/s00330-016-4548-3",
+   "pdf_url": "https://link.springer.com/article/10.1007/s00330-016-4548-3",
+   "license": "ESSR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_msk",
+   "priority": "high",
+   "sha256": "3e42202202a6d17527046182c85beb42085edf7a3177feecb234c51f249f82e3",
+   "size_bytes": 737,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 737,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESSR consensus on MRI of shoulder rotator cuff Source: ESSR Year: 2017 Domain: radiology_mri_msk License: ESSR Available at: https://link.springer.com/article/10.1007/s00330-016-4548-3 This is a citation reference for the ESSR guideline 'ESSR consensus on MRI of shoulder rotator cuff' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_mri_msk. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

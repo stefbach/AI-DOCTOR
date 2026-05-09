@@ -1,7 +1,7 @@
 {
  "source": "ACR",
  "generated_at": "2026-05-02T15:37:12Z",
- "total_documents": 154,
+ "total_documents": 163,
  "documents": [
   {
    "id": "ACR-001",
@@ -10250,6 +10250,231 @@
     {
      "chunk_index": 6,
      "content": "of new autoimmune diseases. AIs have been identified as potential triggers for anti-synthetase antibody syndrome, observed three months after initiating letrozole in a patient with a history of rheumatoid arthritis. [ ] Among inflammatory myopathies, a case of DM was linked to anastrozole usage, with skin rash onset occurring 2.5 years post-initiation of the drug. Symptoms remitted after discontinuing the AI, with intravenous immunoglobulin, azathioprine, and hydroxychloroquine employed for dermatomyositis treatment. [ ] However, there is a case report of a patient who experienced dermatomyositis improvement while taking anastrozole. [ ] Discussion Sex hormones play a significant role in the development and functioning of both innate and adaptive immune responses. Dysregulation of these mechanisms can induce autoimmune abnormalities. [ ] Intentional or physiologic changes in sex hormone levels could trigger autoimmune skin disease flares. This comprehensive literature review shows that there remains considerable debate regarding the use of OCPs and HRT in individuals with autoimmune skin conditions. Nonetheless, it is well established that their use is contraindicated in patients with APS or APL Ab positive. Individuals experiencing disease flares and uncontrolled symptoms should also avoid these interventions. Pregnancy planning should be timed to coincide with inactive disease states to minimize obstetric and neonatal complications. Patients with breast cancer undergoing hormone receptor-positive treatment should monitored closely for cutaneous flares, particularly if they have a personal or family history of autoimmune diseases. One limitation of this study is that we considered only publications from the last 10 years and focused solely on papers published in the English language. Grey literature was not included in the search, and some of the presented data relied on case reports and expert opinions due to the scarcity of controlled randomized clinical studies on this subject. Conclusions This study provides an extensive and updated review of the impact of sex hormones on two autoimmune skin conditions: CLE/SLE and DM. Fluctuations in sex hormone levels are characteristic of physiological states such as pregnancy and menopause. Moreover, these hormones are frequently employed as therapeutic agents in contraception and hormone replacement therapy, resulting in substantial shifts in hormone levels. Additionally, hormone levels are altered through breast cancer treatments involving aromatase inhibitors and anti-estrogen medications. These fluctuations can modulate mechanisms influencing autoimmune skin abnormalities."
+    }
+   ]
+  },
+  {
+   "id": "ACR-INFUSION-001",
+   "source": "ACR",
+   "title": "ACR position statement on biosimilar infusion safety",
+   "year": "2020",
+   "page_url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Position-Statements",
+   "pdf_url": "https://www.rheumatology.org/Practice-Quality/Clinical-Support/Position-Statements",
+   "license": "ACR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "rheumatology_inflammatory",
+   "priority": "low",
+   "sha256": "f0a62b12dd79d103aceabc51c68ec2a35d1d00dc32b5f68b7169cf82214d1f0d",
+   "size_bytes": 785,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 785,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACR position statement on biosimilar infusion safety Source: ACR Year: 2020 Domain: rheumatology_inflammatory License: ACR Available at: https://www.rheumatology.org/Practice-Quality/Clinical-Support/Position-Statements This is a citation reference for the ACR guideline 'ACR position statement on biosimilar infusion safety' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: rheumatology_inflammatory. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACR-BREAST-DENSE-001",
+   "source": "ACR",
+   "title": "ACR position statement on supplemental screening in dense breasts",
+   "year": "2023",
+   "page_url": "https://www.acr.org/Advocacy-and-Economics/ACR-Position-Statements/Dense-Breast-Tissue",
+   "pdf_url": "https://www.acr.org/Advocacy-and-Economics/ACR-Position-Statements/Dense-Breast-Tissue",
+   "license": "ACR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_breast",
+   "priority": "high",
+   "sha256": "ea06c2da3c66362001fa1bcff411e72a40ef5586f8b6a0ef51af671723b5fa40",
+   "size_bytes": 797,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 797,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACR position statement on supplemental screening in dense breasts Source: ACR Year: 2023 Domain: radiology_breast License: ACR Available at: https://www.acr.org/Advocacy-and-Economics/ACR-Position-Statements/Dense-Breast-Tissue This is a citation reference for the ACR guideline 'ACR position statement on supplemental screening in dense breasts' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_breast. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACR-CONTRAST-003",
+   "source": "ACR",
+   "title": "ACR ASNR position statement on use of gadolinium contrast agents",
+   "year": "2021",
+   "page_url": "https://www.acr.org/Advocacy-and-Economics/ACR-Position-Statements/Gadolinium-Based-Contrast-Agents",
+   "pdf_url": "https://www.acr.org/Advocacy-and-Economics/ACR-Position-Statements/Gadolinium-Based-Contrast-Agents",
+   "license": "ACR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_contrast",
+   "priority": "high",
+   "sha256": "704194c7ea2a171c1aaeb9f9a14b6c5f54f969e95e0216e4e1ada7bcef443f49",
+   "size_bytes": 812,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 812,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:56Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACR ASNR position statement on use of gadolinium contrast agents Source: ACR Year: 2021 Domain: radiology_contrast License: ACR Available at: https://www.acr.org/Advocacy-and-Economics/ACR-Position-Statements/Gadolinium-Based-Contrast-Agents This is a citation reference for the ACR guideline 'ACR ASNR position statement on use of gadolinium contrast agents' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_contrast. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACR-CT-ANGIO-001",
+   "source": "ACR",
+   "title": "ACR practice parameter for performance and interpretation of body CT angiography",
+   "year": "2022",
+   "page_url": "https://www.acr.org/-/media/ACR/Files/Practice-Parameters/Body-CTA.pdf",
+   "pdf_url": "https://www.acr.org/-/media/ACR/Files/Practice-Parameters/Body-CTA.pdf",
+   "license": "ACR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ct",
+   "priority": "high",
+   "sha256": "ccb1f6dcf5048758ae10895fb8c82bafeb9f39a02d863d2910ff86f765d5fffd",
+   "size_bytes": 803,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 803,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACR practice parameter for performance and interpretation of body CT angiography Source: ACR Year: 2022 Domain: radiology_ct License: ACR Available at: https://www.acr.org/-/media/ACR/Files/Practice-Parameters/Body-CTA.pdf This is a citation reference for the ACR guideline 'ACR practice parameter for performance and interpretation of body CT angiography' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_ct. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACR-CT-COL-001",
+   "source": "ACR",
+   "title": "ACR-SAR-SCBT-MR practice parameter for performance of CT colonography",
+   "year": "2024",
+   "page_url": "https://www.acr.org/-/media/ACR/Files/Practice-Parameters/CT-Colonography.pdf",
+   "pdf_url": "https://www.acr.org/-/media/ACR/Files/Practice-Parameters/CT-Colonography.pdf",
+   "license": "ACR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ct",
+   "priority": "high",
+   "sha256": "6c92d9722912e41ff02a6beac7586be0ee1050f147f79a9a2cad5fcbd08ed185",
+   "size_bytes": 788,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 788,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:59Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACR-SAR-SCBT-MR practice parameter for performance of CT colonography Source: ACR Year: 2024 Domain: radiology_ct License: ACR Available at: https://www.acr.org/-/media/ACR/Files/Practice-Parameters/CT-Colonography.pdf This is a citation reference for the ACR guideline 'ACR-SAR-SCBT-MR practice parameter for performance of CT colonography' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_ct. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACR-MRI-CARDIAC-001",
+   "source": "ACR",
+   "title": "ACR-NASCI-SCMR practice parameter for performance and interpretation of cardiac MRI",
+   "year": "2021",
+   "page_url": "https://www.acr.org/-/media/ACR/Files/Practice-Parameters/MR-Cardiac.pdf",
+   "pdf_url": "https://www.acr.org/-/media/ACR/Files/Practice-Parameters/MR-Cardiac.pdf",
+   "license": "ACR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_general",
+   "priority": "high",
+   "sha256": "fb042182f76a2afff9d9bfab560f2f2777c4064d1610656fd4f549708ab8732e",
+   "size_bytes": 829,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 829,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:01Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACR-NASCI-SCMR practice parameter for performance and interpretation of cardiac MRI Source: ACR Year: 2021 Domain: radiology_mri_general License: ACR Available at: https://www.acr.org/-/media/ACR/Files/Practice-Parameters/MR-Cardiac.pdf This is a citation reference for the ACR guideline 'ACR-NASCI-SCMR practice parameter for performance and interpretation of cardiac MRI' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_mri_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACR-MRI-IMPLANT-001",
+   "source": "ACR",
+   "title": "ACR ASNR statement on MRI safety implanted devices and pacemakers",
+   "year": "2021",
+   "page_url": "https://www.acr.org/Clinical-Resources/Radiology-Safety/MR-Safety",
+   "pdf_url": "https://www.acr.org/Clinical-Resources/Radiology-Safety/MR-Safety",
+   "license": "ACR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_safety",
+   "priority": "high",
+   "sha256": "f01067a9ed624b7b25e3370000e52a505acdfeb115a033bf8930b77e58b98d8f",
+   "size_bytes": 784,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 784,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:02Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACR ASNR statement on MRI safety implanted devices and pacemakers Source: ACR Year: 2021 Domain: radiology_mri_safety License: ACR Available at: https://www.acr.org/Clinical-Resources/Radiology-Safety/MR-Safety This is a citation reference for the ACR guideline 'ACR ASNR statement on MRI safety implanted devices and pacemakers' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_mri_safety. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACR-PSMA-001",
+   "source": "ACR",
+   "title": "ACR-SNMMI practice parameter for performance of PSMA targeted PET prostate",
+   "year": "2023",
+   "page_url": "https://www.acr.org/-/media/ACR/Files/Practice-Parameters/PSMA-PET.pdf",
+   "pdf_url": "https://www.acr.org/-/media/ACR/Files/Practice-Parameters/PSMA-PET.pdf",
+   "license": "ACR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_nuclear_pet",
+   "priority": "high",
+   "sha256": "8f0c0430b9065e1c9dc0765098c48bdf6ebf2a790324cebd14d2a2f224a4c191",
+   "size_bytes": 809,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 809,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACR-SNMMI practice parameter for performance of PSMA targeted PET prostate Source: ACR Year: 2023 Domain: radiology_nuclear_pet License: ACR Available at: https://www.acr.org/-/media/ACR/Files/Practice-Parameters/PSMA-PET.pdf This is a citation reference for the ACR guideline 'ACR-SNMMI practice parameter for performance of PSMA targeted PET prostate' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_nuclear_pet. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACR-ANA-001",
+   "source": "ACR",
+   "title": "ACR position statement methodology testing antinuclear antibodies",
+   "year": "2019",
+   "page_url": "https://rheumatology.org/position-statements",
+   "pdf_url": "https://rheumatology.org/position-statements",
+   "license": "ACR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_immunology",
+   "priority": "high",
+   "sha256": "9e8943479b483f7a0a8ed102f7e6449022a2d0435e308d1b20ccd086da6e6a3e",
+   "size_bytes": 751,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 751,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:05Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACR position statement methodology testing antinuclear antibodies Source: ACR Year: 2019 Domain: lab_immunology License: ACR Available at: https://rheumatology.org/position-statements This is a citation reference for the ACR guideline 'ACR position statement methodology testing antinuclear antibodies' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_immunology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

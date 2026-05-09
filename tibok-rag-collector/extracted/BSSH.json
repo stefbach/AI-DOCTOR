@@ -1,7 +1,7 @@
 {
  "source": "BSSH",
  "generated_at": "2026-05-09T10:15:54Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "BSSH-HAND-001",
@@ -61,6 +61,31 @@
     {
      "chunk_index": 9,
      "content": "surgical care: a model for safety and statements. PLOS Global Public Health, 2(3): e0000160. quality in the developing world, part II: program development 62. Lawrence DS, Hirsch LA (2020) Decolonising global health: and quality care. J Craniofac Surg 25:1680–1684 transnational research partnerships under the spotlight. Int Health 45. Citron I, Saluja S, Amundson J et al (2018) Surgical quality 12(6):518–523 indicators in low-resource settings: a new evidence-based tool. 63. WHO Guidelines for Safe Surgery (2009) Safe surgery saves Surgery 164:946–952 lives. World Health Organization, Geneva, p 2009 46. Farmer PE, Kim JY (2008) Surgery and global health: a view 64. Fletcher SW, Fletcher RH (1998) Development of clinical from beyond the OR. World J Surg 32:533–536 guidelines. The Lancet 352(9144):1876 47. Leversedge FJ (2019) Guidelines for short-term hand surgery 65. Yamey G (2011) Scaling up global health interventions: a pro- outreach trips: building trust and establishing continuity. Hand posed framework for success. PLoS Med 8(6):e1001049. https:// Clin 35:449–455 doi.org/10.1371/journal.pmed.1001049 48. Melby MK, Loh LC, Evert J et al (2016) Beyond medical 66. Theobald S, Brandes N, Gyapong M, El-Saharty S, Proctor E, ‘‘missions’’ to impact-driven short-term experiences in global Diaz T, Wanji S, Elloker S, Raven J, Elsey H, Bharal S, Pelletier health (STEGHs): ethical principles to optimize community D, Peters DH (2018) Implementation research: new imperatives benefit and learner experience. Acad Med 91:633–638 and opportunities in global health. Lancet 392(10160):2214–2228 123 60 World J Surg (2023) 47:50–60 67. de Klerk S, Jerosch-Herold C, Buchanan H et al (2019) Shared 71. Richards CA, Doorenbos AZ (2016) Intercultural competency decision making and the practice of community translation in development of health professions students during study abroad presenting a pre-final Afrikaans for the Western Cape Disabilities in India. J Nurs Educ Pract 6:89–98 of the Arm, Shoulder and Hand (DASH) questionnaire: a pro- 72. Alkire BC, Shrime MG, Dare AJ et al (2015) Global economic posal for improved translation and cross-cultural adaptation. consequences of selected surgical diseases: a modelling study. J Patient Rep Outcomes 3:52 Lancet Glob Health 3(Suppl 2):S21–S27 68. Shapiro LM, Park MO, Mariano DJ et al (2020) Development of 73. Hendriks TC, Botman M, Rahmee CN et al (2019) Impact of a needs assessment tool to promote capacity building in hand short-term reconstructive surgical missions: a systematic review. surgery outreach trips: a methodological triangulation approach. BMJ Glob Health 4:e001176 J Hand Surg Am 45:729-737.e1 69. Botman M, Hendriks TC, Keetelar AJ et al (2020) From short- Publisher’s Note Springer Nature remains neutral with regard to term surgical missions towards sustainable partnerships. a survey jurisdictional claims in published maps and institutional affiliations. among members of foreign teams. Intl J Surg Open 28:63–69 70. Tran Y, Jarrett J, Gardner S et al (2021) Long-term impact of interprofessional medical mission service trips in Sierra Leone. Front Med (Lausanne) 8:742406 123"
+    }
+   ]
+  },
+  {
+   "id": "BSSH-DUPUYTREN-001",
+   "source": "BSSH",
+   "title": "BSSH evidence-based guideline Dupuytren disease",
+   "year": "2021",
+   "page_url": "https://www.bssh.ac.uk/professionals/guidelines.aspx",
+   "pdf_url": "https://www.bssh.ac.uk/professionals/guidelines.aspx",
+   "license": "BSSH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_hand",
+   "priority": "high",
+   "sha256": "649b22e92d8d85a51fc1f51ec9b2795013d0f956c1e82c517a5c788b49ccd602",
+   "size_bytes": 730,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 730,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BSSH evidence-based guideline Dupuytren disease Source: BSSH Year: 2021 Domain: orthopedics_hand License: BSSH Available at: https://www.bssh.ac.uk/professionals/guidelines.aspx This is a citation reference for the BSSH guideline 'BSSH evidence-based guideline Dupuytren disease' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_hand. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "NeoFax",
  "generated_at": "2026-05-09T16:03:19Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "NEOFAX-002",
@@ -41,6 +41,31 @@
     {
      "chunk_index": 4,
      "content": "on dosing references other than the BNFC alone, was associated with the highest likelihood of deviation from the BNFC reference. In contrast, Northern Europe, predominately represented by UK NICUs, had the best compliance with BNFC recommendations. The main limitation of the study is the lack of data on the indications for which antibiotics were prescribed. The majority of antibiotics are prescribed to neonates for suspected rather than proven infection [ ]. In our study about 2/3 of antibiotics were prescribed within the first three days of life. Only 3–8% of such neonates have been found to develop proven sepsis [ - ]. Infections like meningitis, osteomyelitis or endocarditis requiring specific dosing of beta-lactam antibiotics, are extremely rare in neonates [ , , ]. The reported incidences range from 0.21 and 0.12 per 1000 live births for meningitis and osteomyelitis, respectively [ , ] to 0.7 per 1000 Special Care Nursery admissions in the case of endocarditis [ , ]. Therefore, the wide dosing variations seen in our study cannot be explained by treatment indications. Furthermore, accepting the dose recommended for severe infections in all cases, as done in our analysis, reflects the most conservative approach. BNFC was used as the dosing reference in this analysis, while other sources may have been used in some centres. However, this fact does not undermine our main finding of the high variability in the dosing of most frequently used antibiotics in neonates. Neither clinical studies nor epidemiological data provide any rational explanation. In addition, therapeutic drug monitoring (TDM) data may have affected vancomycin and aminoglycoside dosing in the study. Even assuming TDM results to be the underlying reason for all dose deviations supports our thesis that the precision/value of current dosing recommendations needs to be or is being questioned by clinicians. As the data were collected in a large multi-national setting with no data monitoring and queries applied, extreme deviations were excluded from analysis. Conclusions In conclusion, the prescribing practice of antibiotics in European neonatal units is highly variable but is not random. There are some systematic influences on dose being selected. These influences stem from demographic and geographic variables and from the class of antibiotics used. Clinicians’ and experts’ distrust of newer dosing recommendations needs to be overcome by adequate clinical trials to support PK/PD, efficacy and safety. In addition, new data should be critically reviewed and SPCs, together with internationally accepted guidelines, updated accordingly. The ultimate goal for the paediatric community would be to have evidence based dosing recommendations for the most commonly used antibiotics and for these to be disseminated effectively. Our study suggests a strategy to optimise antibiotic prescribing for European neonates. Firstly, improved dissemination strategies are urgently needed for antibiotics with clear evidence to support a dosage regimen, e.g. aminoglycosides and cephalosporins. Secondly, other antibiotics need an improved evidence base that could be disseminated using the knowledge translation strategies that have been applied for aminoglycosides."
+    }
+   ]
+  },
+  {
+   "id": "NEOFAX-001",
+   "source": "NeoFax",
+   "title": "NeoFax neonatal drug reference Thomson Micromedex",
+   "year": "2024",
+   "page_url": "https://www.micromedexsolutions.com/",
+   "pdf_url": "https://www.micromedexsolutions.com/",
+   "license": "Micromedex",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_pediatric",
+   "priority": "high",
+   "sha256": "80d4b98c951cdb1381fe13a276ab0d3eda1ee8ed3d226a68a7a70380a6e15d4b",
+   "size_bytes": 724,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 724,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NeoFax neonatal drug reference Thomson Micromedex Source: NeoFax Year: 2024 Domain: drug_pediatric License: Micromedex Available at: https://www.micromedexsolutions.com/ This is a citation reference for the NeoFax guideline 'NeoFax neonatal drug reference Thomson Micromedex' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

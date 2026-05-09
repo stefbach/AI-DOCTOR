@@ -1,7 +1,7 @@
 {
  "source": "ASHP",
  "generated_at": "2026-05-09T13:55:52Z",
- "total_documents": 13,
+ "total_documents": 20,
  "documents": [
   {
    "id": "ASHP-COMPOUND-002",
@@ -1033,6 +1033,181 @@
     {
      "chunk_index": 10,
      "content": "first responders on EP&R. g. Enable and facilitate pharmacists and trainees to step in during emergencies and to incentivize EP&R participation by employers or institutions. 2. Operations management a. Ensure adequate resources and tools for pharmacy professionals to provide patient care and protect their own health and safety during emergencies. b. Develop and share best practices for emergencies through adequate planning and deliberation to ensure an optimal response during emergencies. c. Develop plans to address the mental health challenges and impacts on pharmacists and other HCWs with regard to burnout, stress and PTSD. 3. Patient care and population health a. Ensure adequate resources and tools for pharmacy professionals to provide patient care and population health interventions during emergencies. b. Continue to serve as highly accessible drug information experts and provide evidence-based information and education about and during emergencies. c. Identify, serve and evaluate evolving community health needs during and after emergencies. d. Implement and evaluate community-based initiatives in EP&R for effectiveness. 4. Education and CPE a. Incorporate EP&R into pharmacy curricula, CPE, IPE, CAPE Educational Outcomes, and ACPE accreditation standards. b. Incorporate EP&R content on the NAPLEX and State Boards of Pharmacy licensure exams. c. Identify and promote the utilization of EP&R educational and training opportunities outside of the Academy or traditional pharmacy education platforms. 5. Evaluation, research and dissemination a. Study, evaluate, and disseminate the impacts and outcomes of the pharmacy profession's response to the COVID-19 pandemic and other emergencies. b. Conduct interdisciplinary research on EP&R. 6. Policymaking a. Seek elected and appointed positions on influential policy-making boards, committees and task forces. b. Work together to support pharmacists for elected legislative or appointed positions on impactful community, state, federal, or international boards, committees, and task forces. c. Support the “ Pharmacy Organizations' Joint Policy Recommendations to Combat the COVID-19 Pandemic ” statement. d. Continue to advocate for provider status to ensure that pharmacy professionals are duly recognized and reimbursed for cognitive services. Alt-text: Box 2"
+    }
+   ]
+  },
+  {
+   "id": "ASHP-IV-001",
+   "source": "ASHP",
+   "title": "ASHP Standardize 4 Safety IV Push Medications adult",
+   "year": "2022",
+   "page_url": "https://www.ashp.org/Pharmacy-Practice/Standardize-4-Safety-Initiative",
+   "pdf_url": "https://www.ashp.org/Pharmacy-Practice/Standardize-4-Safety-Initiative",
+   "license": "ASHP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "e0cd6a145aa527916231e540a1b5bcd2d889710527a0c7f06dbabd5685a8005e",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASHP Standardize 4 Safety IV Push Medications adult Source: ASHP Year: 2022 Domain: drug_critical_care License: ASHP Available at: https://www.ashp.org/Pharmacy-Practice/Standardize-4-Safety-Initiative This is a citation reference for the ASHP guideline 'ASHP Standardize 4 Safety IV Push Medications adult' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASHP-SHORT-001",
+   "source": "ASHP",
+   "title": "ASHP Drug Shortages current shortages list",
+   "year": "2024",
+   "page_url": "https://www.ashp.org/drug-shortages",
+   "pdf_url": "https://www.ashp.org/drug-shortages",
+   "license": "ASHP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_shortage_recall",
+   "priority": "high",
+   "sha256": "ea94ac23ab263679dcf3d91750be8763052906178dbad3f3b432c79177fd3928",
+   "size_bytes": 1973,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1973,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "A comparison of the essential medicines lists of the U.S. Department of Health and Human Services, the U.S. Department of Defense, the U.S. Food and Drug Administration, and the World Health Organization. An inability to obtain high-quality essential medications for U.S. warfighters constitutes a significant national security concern. An essential medicines list (EML) contains the medicines that a functioning health system must always have available to satisfy priority health needs. A comparison of EMLs across U.S. agencies will facilitate focused decision-making for policymakers who are working to provide solutions to strengthen the U.S. pharmaceutical supply chain by highlighting the national and international competition for essential medicines. We identified and obtained EMLs from the Department of Health and Human Services (2022), the Department of Defense (2023), the Food and Drug Administration (2020), and the World Health Organization (2023). Each EML was categorized to compare characteristics across EMLs. We then compared EML data between lists. Items that were present on all EMLs were classified as Tier 1 medicines and items that were present on any 3 EMLs were classified as Tier 2 medicines. We compared our list of Tier 1 and Tier 2 medicines with both the FDA and ASHP lists of current drug shortages as of May 9, 2025. We identified 25 Tier 1 medicines and 74 Tier 2 medicines. Nineteen Tier 1 medicines (76%) and 27 Tier 2 medicines (36%) were currently in shortage. Twelve Tier 1 and 8 Tier 2 medicines have formulations that have been in shortage for over 5 years. For medicines essential for operational readiness, a secure domestic supply chain is vital to minimize risk to national security. Identification of these high-priority medicines are intended to facilitate focused decision-making for policymakers who are working to provide solutions to strengthen the pharmaceutical supply chain both within the DoD and throughout the U.S."
+    }
+   ]
+  },
+  {
+   "id": "ASHP-NEONATAL-001",
+   "source": "ASHP",
+   "title": "ASHP Pediatric and Neonatal Drug Information Pediatric Lexi-Drugs",
+   "year": "2024",
+   "page_url": "https://www.ashp.org/",
+   "pdf_url": "https://www.ashp.org/",
+   "license": "ASHP",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_pediatric",
+   "priority": "high",
+   "sha256": "035ac2f963e63a79f7a4a11ce91b22ccc9f55272ea1a1a646f8cf6400c0e088a",
+   "size_bytes": 731,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 731,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASHP Pediatric and Neonatal Drug Information Pediatric Lexi-Drugs Source: ASHP Year: 2024 Domain: drug_pediatric License: ASHP Available at: https://www.ashp.org/ This is a citation reference for the ASHP guideline 'ASHP Pediatric and Neonatal Drug Information Pediatric Lexi-Drugs' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASHP-DEPRESCRIBE-001",
+   "source": "ASHP",
+   "title": "ASHP Resources on Deprescribing in Older Adults",
+   "year": "2024",
+   "page_url": "https://www.ashp.org/",
+   "pdf_url": "https://www.ashp.org/",
+   "license": "ASHP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_formulary",
+   "priority": "medium",
+   "sha256": "31f2ba5a5a7c2592c194aae4ac44fe705b5d3a0ce9423a00c1f7215d36ac6ecb",
+   "size_bytes": 695,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 695,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASHP Resources on Deprescribing in Older Adults Source: ASHP Year: 2024 Domain: drug_formulary License: ASHP Available at: https://www.ashp.org/ This is a citation reference for the ASHP guideline 'ASHP Resources on Deprescribing in Older Adults' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_formulary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASHP-PEDS-DOSE-001",
+   "source": "ASHP",
+   "title": "ASHP Pediatric Dosage Handbook 28th edition",
+   "year": "2023",
+   "page_url": "https://www.ashp.org/",
+   "pdf_url": "https://www.ashp.org/",
+   "license": "ASHP",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_pediatric",
+   "priority": "high",
+   "sha256": "5cf2b37524c3f3c8d5a6c6a57886b335cb1a29872e9eaaf9b1d703f71b5eeb08",
+   "size_bytes": 687,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 687,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASHP Pediatric Dosage Handbook 28th edition Source: ASHP Year: 2023 Domain: drug_pediatric License: ASHP Available at: https://www.ashp.org/ This is a citation reference for the ASHP guideline 'ASHP Pediatric Dosage Handbook 28th edition' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASHP-VTE-001",
+   "source": "ASHP",
+   "title": "ASHP Therapeutic Position Statement on the Use of Direct Oral Anticoagulants",
+   "year": "2022",
+   "page_url": "https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines",
+   "pdf_url": "https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines",
+   "license": "ASHP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "medium",
+   "sha256": "b46dc51e3e319a9db8bb3555fc9963bd9130e0b1700dd48f82df9d5e43a07263",
+   "size_bytes": 716,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 716,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "ASHP therapeutic position statement on the use of the International Normalized Ratio system to monitor oral anticoagulant therapy. The INR system of standardizing PT measurements can minimize variability between laboratories, PT reagents, and instruments. The INR system can also facilitate international agreement on therapeutic ranges and allow direct comparison of clinical trials. This should provide greater uniformity in the management of oral anticoagulant therapy and ultimately may improve patient outcomes. ASHP supports the use of the INR system on the basis of studies demonstrating that this system permits warfarin dosing that is less dependent on the variability of thromboplastin reagent sensitivity."
+    }
+   ]
+  },
+  {
+   "id": "ASHP-PHARMD-PALL-001",
+   "source": "ASHP",
+   "title": "ASHP Statement on the Pharmacist Role in Palliative and Hospice Care",
+   "year": "2016",
+   "page_url": "https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines",
+   "pdf_url": "https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines",
+   "license": "ASHP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_pain",
+   "priority": "medium",
+   "sha256": "4c4d217077b476cdf8f0cb9c409898a7184192d39fc27ddf35c2c496965c0efb",
+   "size_bytes": 776,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 776,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASHP Statement on the Pharmacist Role in Palliative and Hospice Care Source: ASHP Year: 2016 Domain: drug_pain License: ASHP Available at: https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines This is a citation reference for the ASHP guideline 'ASHP Statement on the Pharmacist Role in Palliative and Hospice Care' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

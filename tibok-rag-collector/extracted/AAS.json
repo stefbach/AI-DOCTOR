@@ -1,7 +1,7 @@
 {
  "source": "AAS",
  "generated_at": "2026-05-09T09:00:18Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "POTS-AUTONOMIC-001",
@@ -33,6 +33,31 @@
     {
      "chunk_index": 2,
      "content": "from symptom presentation to diagnosis is frustrating for patients because medical costs can accumulate, and they may not receive the proper medical treatment when the correct diagnosis is not made. Knowing the strong association between hEDS and POTS, and POTS as a potential adverse event to the HPV vaccine, is crucial to reduce the time between the presentation and diagnosis of POTS. Patients with hEDS should be more frequently tested for POTS, especially after receiving an HPV vaccine. Patients with hEDS should also be educated about the potential risk for developing POTS as part of pre-vaccination education. This report is not meant to be construed as an anti-vaccination statement but rather as an opportunity to improve patient care. A potential association between POTS and hEDS exists [ ]. We recognize that the incidence of POTS associated with hEDS is low; however, given the clear considerations and impacts for patients with hEDS, additional monitoring in these cases is warranted before administering HPV vaccinations, as the vaccine may initiate POTS. Here, we recommend additional research and vigilance to identify potential associations with patients with hEDS developing POTS after HPV vaccination."
+    }
+   ]
+  },
+  {
+   "id": "AAS-AUTONOMIC-001",
+   "source": "AAS",
+   "title": "Consensus statement on the definition of orthostatic hypotension neurally mediated syncope POTS",
+   "year": "2011",
+   "page_url": "https://link.springer.com/article/10.1007/s10286-011-0119-5",
+   "pdf_url": "https://link.springer.com/article/10.1007/s10286-011-0119-5",
+   "license": "AAS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_autonomic",
+   "priority": "medium",
+   "sha256": "1cb79a28bc6c3297e94e263b9ae0aa5cc45046855e119a1e8b72ecd3f56949d9",
+   "size_bytes": 836,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 836,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Consensus statement on the definition of orthostatic hypotension neurally mediated syncope POTS Source: AAS Year: 2011 Domain: neurology_autonomic License: AAS Available at: https://link.springer.com/article/10.1007/s10286-011-0119-5 This is a citation reference for the AAS guideline 'Consensus statement on the definition of orthostatic hypotension neurally mediated syncope POTS' published in 2011. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_autonomic. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

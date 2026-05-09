@@ -1,7 +1,7 @@
 {
  "source": "ASCRS",
  "generated_at": "2026-05-02T16:23:30Z",
- "total_documents": 14,
+ "total_documents": 19,
  "documents": [
   {
    "id": "ASCRS-001",
@@ -1498,6 +1498,131 @@
     {
      "chunk_index": 1,
      "content": "be complex. Other conditions that are not complex or are usually short-term/self-limited might include (but not limited to) conjunctivitis, subconjunctival hemorrhage, blepharitis, and corneal abrasion. Added Guidance from Noridian:4 • “The complexity code would support a long-term patient-provider relationship and would indicate the provider will be managing the health care over a long period of time. • The provider would build the trusting relationship and be the continuing focal point for all needed health care services related to the ongoing patient’s single, serious condition or complex condition. • Every patient would be unique with their health care needs and templated language for the add-on code may not support medical necessity. • The most important information used to determine whether the add-on code could be billed is the relationship between the practitioner and the patient. • The add-on code captures the inherent complexity of the visit that is derived from the longitudinal nature of the practitioner and patient relationship.” 1 https://www.federalregister.gov/documents/2023/11/16/2023-24184/medicare-and-medicaid-programs-cy-2024-payment-policies-under-the- physician-fee-schedule-and-other 2 https://www.cms.gov/files/document/mm13473-how-use-office-and-outpatient-evaluation-and-management-visit-complexity-add-code- g2211.pdf 3 https://www.cms.gov/medicare/medicare-fee-service-payment/physicianfeesched/pfs-federal-regulation-notices/cms-1784-f 4 https://med.noridianmedicare.com/web/jeb/specialties/em/complexity-add-on-code-g2211 Published February 2024"
+    }
+   ]
+  },
+  {
+   "id": "ASCRS-DIVERTICULITIS-001",
+   "source": "ASCRS",
+   "title": "ASCRS Clinical Practice Guidelines for the Treatment of Left Sided Colonic Diverticulitis",
+   "year": "2020",
+   "page_url": "https://journals.lww.com/dcrjournal/fulltext/2020/06000/the_american_society_of_colon_and_rectal_surgeons.10.aspx",
+   "pdf_url": "https://journals.lww.com/dcrjournal/fulltext/2020/06000/the_american_society_of_colon_and_rectal_surgeons.10.aspx",
+   "license": "ASCRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_colorectal",
+   "priority": "high",
+   "sha256": "4f61a74dd3294f749a480c38476e84395a01568eef67bcf3c1cf0b69e74ff887",
+   "size_bytes": 1208,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1208,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Trends in the Management of Non-emergent Surgery for Diverticular Disease and the Impact of Practice Parameters. Due to the rise in diverticular disease, the ASCRS developed practice parameters to ensure high-quality patient care. Our study aims to evaluate the impact of the 2014 practice parameters on the treatment of non-emergent left-sided diverticular disease. This is a retrospective cohort study using the ACS-National Surgical Quality Improvement Project (ACS-NSQIP). Elective sigmoid resections performed by year were evaluated and compared before and after practice parameters were published. Overall, 46,950 patients met inclusion criteria. There was a significant decrease in the number of non-emergent operations when evaluating before and after guideline implementation ( P < .001). There was a significant decrease in the number of patients younger than 50 years of age operated electively for diverticular disease (25.8% vs. 23.9%, P = .005). Adoption of minimally invasive surgery continued to increase significantly throughout the study period. Publication of the 2014 ASCRS practice parameters is associated with a change in management of diverticular disease in the non-emergent setting."
+    }
+   ]
+  },
+  {
+   "id": "ASCRS-PILONIDAL-001",
+   "source": "ASCRS",
+   "title": "ASCRS Clinical Practice Guidelines for the Management of Pilonidal Disease",
+   "year": "2019",
+   "page_url": "https://journals.lww.com/dcrjournal/fulltext/2019/02000/the_american_society_of_colon_and_rectal_surgeons.10.aspx",
+   "pdf_url": "https://journals.lww.com/dcrjournal/fulltext/2019/02000/the_american_society_of_colon_and_rectal_surgeons.10.aspx",
+   "license": "ASCRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_colorectal",
+   "priority": "high",
+   "sha256": "638d44147e48d0b97c0945201475aa3c30e43b68aba0b9f58b61574f457b4610",
+   "size_bytes": 872,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 872,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASCRS Clinical Practice Guidelines for the Management of Pilonidal Disease Source: ASCRS Year: 2019 Domain: digestive_surgery_colorectal License: ASCRS Available at: https://journals.lww.com/dcrjournal/fulltext/2019/02000/the_american_society_of_colon_and_rectal_surgeons.10.aspx This is a citation reference for the ASCRS guideline 'ASCRS Clinical Practice Guidelines for the Management of Pilonidal Disease' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: digestive_surgery_colorectal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASCRS-FISTULA-001",
+   "source": "ASCRS",
+   "title": "ASCRS Clinical Practice Guidelines for the Management of Anorectal Abscess Fistula in Ano",
+   "year": "2022",
+   "page_url": "https://journals.lww.com/dcrjournal/fulltext/2022/06000/the_american_society_of_colon_and_rectal_surgeons.10.aspx",
+   "pdf_url": "https://journals.lww.com/dcrjournal/fulltext/2022/06000/the_american_society_of_colon_and_rectal_surgeons.10.aspx",
+   "license": "ASCRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_colorectal",
+   "priority": "high",
+   "sha256": "e73df0db9a000e0fe7012cffaaa5709975f9f022cfa3ab0e5b6f42dddc497b08",
+   "size_bytes": 902,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 902,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASCRS Clinical Practice Guidelines for the Management of Anorectal Abscess Fistula in Ano Source: ASCRS Year: 2022 Domain: digestive_surgery_colorectal License: ASCRS Available at: https://journals.lww.com/dcrjournal/fulltext/2022/06000/the_american_society_of_colon_and_rectal_surgeons.10.aspx This is a citation reference for the ASCRS guideline 'ASCRS Clinical Practice Guidelines for the Management of Anorectal Abscess Fistula in Ano' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: digestive_surgery_colorectal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASCRS-PROCTOLOGY-001",
+   "source": "ASCRS",
+   "title": "ASCRS Clinical Practice Guidelines for the Treatment of Anal Fissures",
+   "year": "2017",
+   "page_url": "https://journals.lww.com/dcrjournal/fulltext/2017/01000/the_american_society_of_colon_and_rectal_surgeons.10.aspx",
+   "pdf_url": "https://journals.lww.com/dcrjournal/fulltext/2017/01000/the_american_society_of_colon_and_rectal_surgeons.10.aspx",
+   "license": "ASCRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_colorectal",
+   "priority": "high",
+   "sha256": "aaa49e18f33f971b5bc719e159dcddaba49e712a82868fe12b957e287b95daee",
+   "size_bytes": 862,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 862,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASCRS Clinical Practice Guidelines for the Treatment of Anal Fissures Source: ASCRS Year: 2017 Domain: digestive_surgery_colorectal License: ASCRS Available at: https://journals.lww.com/dcrjournal/fulltext/2017/01000/the_american_society_of_colon_and_rectal_surgeons.10.aspx This is a citation reference for the ASCRS guideline 'ASCRS Clinical Practice Guidelines for the Treatment of Anal Fissures' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: digestive_surgery_colorectal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASCRS-LASIK-002",
+   "source": "ASCRS",
+   "title": "ASCRS guidelines for management of post-refractive surgery ectasia",
+   "year": "2021",
+   "page_url": "https://ascrs.org/clinical-resources",
+   "pdf_url": "https://ascrs.org/clinical-resources",
+   "license": "ASCRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_anterior",
+   "priority": "high",
+   "sha256": "73ec0d8685279a4fb6a7f3dfcd62bfb811cdc23b1d12d7c655069ed06f354d88",
+   "size_bytes": 767,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 767,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASCRS guidelines for management of post-refractive surgery ectasia Source: ASCRS Year: 2021 Domain: ophthalmology_anterior License: ASCRS Available at: https://ascrs.org/clinical-resources This is a citation reference for the ASCRS guideline 'ASCRS guidelines for management of post-refractive surgery ectasia' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_anterior. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,0 +1,57 @@
+{
+ "source": "ASFR",
+ "generated_at": "2026-05-09T19:06:20Z",
+ "total_documents": 2,
+ "documents": [
+  {
+   "id": "ASFR-FOR-001",
+   "source": "ASFR",
+   "title": "ASFR Practice Standards for Postmortem Forensic Imaging",
+   "year": "2020",
+   "page_url": "https://www.asfr.org/standards",
+   "pdf_url": "https://www.asfr.org/standards",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_death",
+   "priority": "medium",
+   "sha256": "670284e9fab719b92e2ee68803e4e7c3916f81aa76c23d3b1387e0f6f016a1a2",
+   "size_bytes": 720,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 720,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASFR Practice Standards for Postmortem Forensic Imaging Source: ASFR Year: 2020 Domain: forensic_death License: Open Available at: https://www.asfr.org/standards This is a citation reference for the ASFR guideline 'ASFR Practice Standards for Postmortem Forensic Imaging' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_death. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASFR-FOR-002",
+   "source": "ASFR",
+   "title": "ASFR Postmortem CT MRI Imaging Standards",
+   "year": "2021",
+   "page_url": "https://www.asfr.org",
+   "pdf_url": "https://www.asfr.org",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_death",
+   "priority": "medium",
+   "sha256": "fd21aa30d9bf455d26477e23d66ff1969db456a00c4e76cb4723efdba72b645d",
+   "size_bytes": 680,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 680,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASFR Postmortem CT MRI Imaging Standards Source: ASFR Year: 2021 Domain: forensic_death License: Open Available at: https://www.asfr.org This is a citation reference for the ASFR guideline 'ASFR Postmortem CT MRI Imaging Standards' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_death. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

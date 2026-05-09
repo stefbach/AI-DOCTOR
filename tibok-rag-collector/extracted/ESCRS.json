@@ -1,7 +1,7 @@
 {
  "source": "ESCRS",
  "generated_at": "2026-05-09T13:16:24Z",
- "total_documents": 4,
+ "total_documents": 8,
  "documents": [
   {
    "id": "ESCRS-CAT-001",
@@ -160,6 +160,106 @@
     {
      "chunk_index": 4,
      "content": "for routine use in ophthalmic preoperative protocols. Nevertheless, it is important to recognize the limitations of this study. First, although the sample size is substantial, the population was relatively homogeneous. The non-randomized and unblinded design may introduce allocation bias and subjective assessment bias, particularly in the evaluation of discomfort and clinical grading, which are inherently observer-dependent. Second, although no cases of endophthalmitis were observed in either group, the study is underpowered to detect differences in events with extremely low incidence. Third, our assessment focused exclusively on short-term tolerability surrounding a single injection episode, and no information regarding long-term or repeated-use effects can be inferred. These aspects will require confirmation through adequately powered, randomized, masked clinical trials. Conclusions In conclusion, 0.5% LOZ represents a next-generation ophthalmic antiseptic that addresses the limitations of traditional povidone-iodine preparations. While these findings suggest that LOZ may be a promising alternative for improving patient comfort within the context of short-term pre-injection prophylaxis, definitive conclusions regarding long-term advantages should be explored in future randomized and masked trials."
+    }
+   ]
+  },
+  {
+   "id": "ESCRS-CAT-004",
+   "source": "ESCRS",
+   "title": "ESCRS guidelines for femtosecond laser-assisted cataract surgery",
+   "year": "2020",
+   "page_url": "https://www.escrs.org/guidelines/flacs",
+   "pdf_url": "https://www.escrs.org/guidelines/flacs",
+   "license": "ESCRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_anterior",
+   "priority": "medium",
+   "sha256": "203c7164a621ae0aee2fff9e7cb3b69e15c7e7583c3f29205d90daa5173a2e4c",
+   "size_bytes": 765,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 765,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESCRS guidelines for femtosecond laser-assisted cataract surgery Source: ESCRS Year: 2020 Domain: ophthalmology_anterior License: ESCRS Available at: https://www.escrs.org/guidelines/flacs This is a citation reference for the ESCRS guideline 'ESCRS guidelines for femtosecond laser-assisted cataract surgery' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_anterior. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESCRS-REFR-001",
+   "source": "ESCRS",
+   "title": "ESCRS guidelines for refractive surgery patient selection",
+   "year": "2019",
+   "page_url": "https://www.escrs.org/guidelines/refractive",
+   "pdf_url": "https://www.escrs.org/guidelines/refractive",
+   "license": "ESCRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_anterior",
+   "priority": "high",
+   "sha256": "dc8c9078db2ae2f5f1d77d58eaa8671a38204ef0556f39a2de64389548475e97",
+   "size_bytes": 756,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 756,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESCRS guidelines for refractive surgery patient selection Source: ESCRS Year: 2019 Domain: ophthalmology_anterior License: ESCRS Available at: https://www.escrs.org/guidelines/refractive This is a citation reference for the ESCRS guideline 'ESCRS guidelines for refractive surgery patient selection' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_anterior. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESCRS-IOL-001",
+   "source": "ESCRS",
+   "title": "ESCRS guidelines for intraocular lens calculation and biometry",
+   "year": "2021",
+   "page_url": "https://www.escrs.org/iol-calculation",
+   "pdf_url": "https://www.escrs.org/iol-calculation",
+   "license": "ESCRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_anterior",
+   "priority": "medium",
+   "sha256": "5be29021808cc3bdbe033c8337f12a2bcd67b25c9e053bb1bfe9a613e1355e96",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESCRS guidelines for intraocular lens calculation and biometry Source: ESCRS Year: 2021 Domain: ophthalmology_anterior License: ESCRS Available at: https://www.escrs.org/iol-calculation This is a citation reference for the ESCRS guideline 'ESCRS guidelines for intraocular lens calculation and biometry' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_anterior. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESCRS-TORIC-001",
+   "source": "ESCRS",
+   "title": "ESCRS guidelines for toric intraocular lens implantation",
+   "year": "2020",
+   "page_url": "https://www.escrs.org/toric-iol",
+   "pdf_url": "https://www.escrs.org/toric-iol",
+   "license": "ESCRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_anterior",
+   "priority": "medium",
+   "sha256": "19d16e80fc8683e9139618972520c0d2579bd3ef3400a7d4043d3d27221cb892",
+   "size_bytes": 742,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 742,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESCRS guidelines for toric intraocular lens implantation Source: ESCRS Year: 2020 Domain: ophthalmology_anterior License: ESCRS Available at: https://www.escrs.org/toric-iol This is a citation reference for the ESCRS guideline 'ESCRS guidelines for toric intraocular lens implantation' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_anterior. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

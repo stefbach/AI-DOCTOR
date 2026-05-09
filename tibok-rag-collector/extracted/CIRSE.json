@@ -1,7 +1,7 @@
 {
  "source": "CIRSE",
  "generated_at": "2026-05-09T10:15:52Z",
- "total_documents": 30,
+ "total_documents": 34,
  "documents": [
   {
    "id": "CIRSE-EMBO-001",
@@ -1618,6 +1618,106 @@
     {
      "chunk_index": 14,
      "content": "Kamei S, Yamashita K, Shida Y, Okaf- porotic vertebral compression fractures (OVCFs)? J Orthop Sci. uji T, et al. The usefulness of vertebral needle targeting simula- 2018;23(1):39–44. tion training system using ray-summation imaging: experimental 107. Liu JT, Li CS, Chang CS, Liao WJ. Long-term follow-up study study. Jpn J Radiol. 2022 [Online ahead of print]. of osteoporotic vertebral compression fracture treated using balloon kyphoplasty and vertebroplasty. J Neurosurg Spine. Publisher's Note Springer Nature remains neutral with regard to 2015;23(1):94–8. jurisdictional claims in published maps and institutional affiliations. 108. Cheng J, Muheremu A, Zeng X, Liu L, Liu Y, Chen Y. Percu- taneous vertebroplasty vs balloon kyphoplasty in the treatment of newly onset osteoporotic vertebral compression fractures: a retrospective cohort study. Medicine. 2019;98(10): e14793. 109. Gan M, Zou J, Song D, Zhu X, Wang G, Yang H. Is bal- loon kyphoplasty better than percutaneous vertebroplasty for 13"
+    }
+   ]
+  },
+  {
+   "id": "CIRSE-EVAR-001",
+   "source": "CIRSE",
+   "title": "CIRSE standards of practice on aortic endograft surveillance",
+   "year": "2019",
+   "page_url": "https://link.springer.com/article/10.1007/s00270-019-02295-6",
+   "pdf_url": "https://link.springer.com/article/10.1007/s00270-019-02295-6",
+   "license": "CIRSE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_aorta",
+   "priority": "medium",
+   "sha256": "7533dd5394c7cb12eeac3f05371ebefc9ea7594fae3b16ffdbbf00e9e4fed136",
+   "size_bytes": 763,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 763,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CIRSE standards of practice on aortic endograft surveillance Source: CIRSE Year: 2019 Domain: vascular_aorta License: CIRSE Available at: https://link.springer.com/article/10.1007/s00270-019-02295-6 This is a citation reference for the CIRSE guideline 'CIRSE standards of practice on aortic endograft surveillance' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_aorta. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CIRSE-ACCESS-001",
+   "source": "CIRSE",
+   "title": "CIRSE standards of practice on hemodialysis arteriovenous access",
+   "year": "2021",
+   "page_url": "https://link.springer.com/article/10.1007/s00270-021-02923-0",
+   "pdf_url": "https://link.springer.com/article/10.1007/s00270-021-02923-0",
+   "license": "CIRSE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_access",
+   "priority": "medium",
+   "sha256": "d1d4784f1b94c7ee20b940314a00a3e14a17360951843d58de6df55676f2ff5c",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CIRSE standards of practice on hemodialysis arteriovenous access Source: CIRSE Year: 2021 Domain: vascular_access License: CIRSE Available at: https://link.springer.com/article/10.1007/s00270-021-02923-0 This is a citation reference for the CIRSE guideline 'CIRSE standards of practice on hemodialysis arteriovenous access' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_access. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CIRSE-GASTRO-001",
+   "source": "CIRSE",
+   "title": "CIRSE Standards of Practice on percutaneous radiologic gastrostomy and gastrojejunostomy",
+   "year": "2018",
+   "page_url": "https://link.springer.com/article/10.1007/s00270-018-2025-x",
+   "pdf_url": "https://link.springer.com/article/10.1007/s00270-018-2025-x",
+   "license": "CIRSE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ir_nonvascular",
+   "priority": "medium",
+   "sha256": "49c07781d3fc3a091530520dd7adb718e61a21d439b68390e12204d1cf8b8d84",
+   "size_bytes": 1811,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1811,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "CIRSE Standards of Practice Guidelines on Gastrostomy. Surgical Gastrostomy has been around since the 19th century but in 1980 the first successful percutaneous endoscopic gastrostomy was reported. A year later the first successful percutaneous gastrostomy was performed using fluoroscopic guidance. The technique for percutaneous insertion and the equipment used has been refined since then and it is now considered the gold standard for gastrostomy insertion. Here we present guidelines for image-guided enteral feeding tubes in adults. We performed a review and analysis of the scientific literature, other national and international guidelines and expert opinion. Studies have shown fluoroscopic techniques have consistently higher success rates with lower rates of major complications than endoscopic techniques. However, the Achilles' heel of many fluoroscopic techniques is the requirement for smaller gastrostomy tube sizes resulting in them being more prone to blockages and thus requiring further intervention. Radiological feeding tube insertion is a safe and effective procedure. Success rates are higher, and complication rates lower than PEG or surgical gastrostomy tube placement and innovative techniques for gastric and jejunal access mean that there are very few cases in which RIG is not possible. The principal weakness of radiologically inserted gastrostomies is the limitiation on tube size which leads to a higher rate of tube blockage. Per-oral image-guided gastrostomies have to an extent addressed this but have not been popularised. Currently many centres still consider endoscopic gastrostomies as the first line unless patients are too unwell to undergo this procedure or previous attempts have failed, in which case radioloically inserted gastrostomies are the technique of choice."
+    }
+   ]
+  },
+  {
+   "id": "CIRSE-PORT-001",
+   "source": "CIRSE",
+   "title": "CIRSE Standards of Practice on totally implantable venous access ports",
+   "year": "2020",
+   "page_url": "https://link.springer.com/article/10.1007/s00270-020-02633-z",
+   "pdf_url": "https://link.springer.com/article/10.1007/s00270-020-02633-z",
+   "license": "CIRSE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ir_vascular",
+   "priority": "medium",
+   "sha256": "23e6b60b804c9e486442d7ef9766170dcefbdaf9dde254bfd6e649926c5b969b",
+   "size_bytes": 797,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 797,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CIRSE Standards of Practice on totally implantable venous access ports Source: CIRSE Year: 2020 Domain: radiology_ir_vascular License: CIRSE Available at: https://link.springer.com/article/10.1007/s00270-020-02633-z This is a citation reference for the CIRSE guideline 'CIRSE Standards of Practice on totally implantable venous access ports' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_ir_vascular. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

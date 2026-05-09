@@ -1,7 +1,7 @@
 {
  "source": "ASA",
  "generated_at": "2026-05-02T16:25:42Z",
- "total_documents": 14,
+ "total_documents": 15,
  "documents": [
   {
    "id": "ASA-001",
@@ -846,6 +846,31 @@
     {
      "chunk_index": 3,
      "content": "antiarrhythmic drugs may contribute as possible causes [ ]. In this case, acid-base and electrolyte imbalances were ruled out by performing arterial blood gas analysis. Additionally, the pacing threshold usually increases in cases of pacemaker malfunction caused by myocardial ischemia [ ]. Myocardial ischemia can be confirmed using coronary angiography. To manage this situation, the patient’s escape rate and cardiac rhythm should be analyzed. If the rate is slow, intravenous atropine 0.5 mg or isoproterenol infusion (1–2 μg/min) may be considered as medical treatment [ ]. Cardiopulmonary resuscitation and advanced cardiac life support are not contraindicated when hemodynamic instability occurs because of pacemaker malfunction. Defibrillation or cardioversion can be performed, but the current may damage the pacing and sensing circuits of the pacemaker. To minimize this risk, the defibrillation paddle should be located as far as possible from the generator. Additionally, external pacing should be considered for possible pacing failure after defibrillation or cardioversion [ ]. Anesthesiologists should be alert when treating patients with implantable pacemakers because minor errors may lead to inadvertent pacing failure or severe hemodynamic instability. In particular, the hemodynamics of cirrhotic patients should be monitored cautiously because increased arrhythmic risk and subsequent cardiovascular symptoms have been reported, including chronotropic incompetence, cardiomyopathy, prolonged QT intervals, hyperdynamic circulation, and impaired ventricular contractility [ ]. As hemodynamic instability during liver transplantation is an independent predictor of recipient mortality and graft failure [ ], cautious preoperative and intraoperative management is required to prevent unexpected pacing failure and surgical complications."
+    }
+   ]
+  },
+  {
+   "id": "ASA-BG-001",
+   "source": "ASA",
+   "title": "ASA practice guidelines blood gas analysis",
+   "year": "2018",
+   "page_url": "https://pubs.asahq.org/anesthesiology/article/128/3/437/19097",
+   "pdf_url": "https://pubs.asahq.org/anesthesiology/article/128/3/437/19097",
+   "license": "ASA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_chemistry",
+   "priority": "medium",
+   "sha256": "06f94e2f6b4f9c0ac3870d31ec9b7405bfc15e52874ee4fcb227cfb0ccfb459f",
+   "size_bytes": 2104,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2096,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "The effect of oxygen reserve index guided oxygen titration on oxidative stress in rhinoplasty surgery: a randomized controlled trial. The aim of this study is to evaluate whether the use of Oxygen Reserve Index (ORi) can prevent hyperoxia in patients undergoing rhinoplasty surgery and whether it can reduce oxidative stress caused by hyperoxia. A total of 60 patients, who were scheduled for rhinoplasty surgery and had an American Society of Anesthesiologists (ASA) score of I and II, were included in the study. The patients were randomly divided into two groups: the ORi group (Group R) and the control group (Group C). In Group R, oxygen support was titrated to keep the ORi values close to zero. In the control group, oxygen support was provided conventionally. Arterial blood gas samples were taken after intubation, at the 120th minute of the surgery and at the end of the surgery to record partial arterial oxygen pressure (PaO₂) values. During this process, patients' peripheral oxygen saturation (SpO₂) and ORi values were continuously recorded along with hemodynamic data. Preoperative and postoperative blood samples were collected from both groups, and oxidative stress was assessed by evaluating thiol-disulfide homeostasis and ischemia-modified albumin (IMA), which are current indicators of oxidative stress. The demographic characteristics and the surgical durations were similar between the groups. PaO₂ values were lower in Group R compared to Group C. ORi values were correlated with PaO₂ values. Preoperative native thiol, total thiol, and disulfide values were similar in both groups. In both groups, postoperative native thiol, total thiol, and disulfide values decreased compared to the preoperative period, while IMA values increased. In Group R, the decrease in native thiol and total thiol values and the increase in IMA values were less than in Group C. We concluded that ORi guided oxygen titration may reduce the severity of hyperoxia and may decrease oxidative stress in rhinoplasty surgery. ClinicalTrials.gov Identifier NCT07158073. Registered on 21 August 2025."
     }
    ]
   }

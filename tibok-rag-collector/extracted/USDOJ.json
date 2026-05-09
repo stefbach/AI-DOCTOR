@@ -1,0 +1,82 @@
+{
+ "source": "USDOJ",
+ "generated_at": "2026-05-09T19:16:32Z",
+ "total_documents": 3,
+ "documents": [
+  {
+   "id": "USDOJ-FOR-001",
+   "source": "USDOJ",
+   "title": "USDOJ National Protocol for Sexual Assault Medical Forensic Examinations Adults Adolescents",
+   "year": "2013",
+   "page_url": "https://www.ncjrs.gov/pdffiles1/ovw/241903.pdf",
+   "pdf_url": "https://www.ncjrs.gov/pdffiles1/ovw/241903.pdf",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "forensic_violence",
+   "priority": "high",
+   "sha256": "9e307467183761d54829a4db65484a0a6fb039eaf508f220271301520e26cab3",
+   "size_bytes": 825,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 825,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: USDOJ National Protocol for Sexual Assault Medical Forensic Examinations Adults Adolescents Source: USDOJ Year: 2013 Domain: forensic_violence License: Public Domain Available at: https://www.ncjrs.gov/pdffiles1/ovw/241903.pdf This is a citation reference for the USDOJ guideline 'USDOJ National Protocol for Sexual Assault Medical Forensic Examinations Adults Adolescents' published in 2013. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_violence. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "USDOJ-FOR-002",
+   "source": "USDOJ",
+   "title": "USDOJ National Protocol for Sexual Assault Medical Forensic Examinations Pediatric",
+   "year": "2016",
+   "page_url": "https://www.justice.gov/ovw/page/file/846856/download",
+   "pdf_url": "https://www.justice.gov/ovw/page/file/846856/download",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "forensic_violence",
+   "priority": "high",
+   "sha256": "eeb05fcb6dec2d86bd89f69f04467cecc17d358d89c9094706f657de44b96077",
+   "size_bytes": 814,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 814,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: USDOJ National Protocol for Sexual Assault Medical Forensic Examinations Pediatric Source: USDOJ Year: 2016 Domain: forensic_violence License: Public Domain Available at: https://www.justice.gov/ovw/page/file/846856/download This is a citation reference for the USDOJ guideline 'USDOJ National Protocol for Sexual Assault Medical Forensic Examinations Pediatric' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_violence. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "USDOJ-FOR-003",
+   "source": "USDOJ",
+   "title": "USDOJ National Best Practices for Sexual Assault Kits",
+   "year": "2017",
+   "page_url": "https://www.ncjrs.gov/pdffiles1/nij/250384.pdf",
+   "pdf_url": "https://www.ncjrs.gov/pdffiles1/nij/250384.pdf",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "forensic_violence",
+   "priority": "medium",
+   "sha256": "39f71809efa6df82c8a950258c7b7f994f63ce28067e989a3f223e25eeddd495",
+   "size_bytes": 749,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 749,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: USDOJ National Best Practices for Sexual Assault Kits Source: USDOJ Year: 2017 Domain: forensic_violence License: Public Domain Available at: https://www.ncjrs.gov/pdffiles1/nij/250384.pdf This is a citation reference for the USDOJ guideline 'USDOJ National Best Practices for Sexual Assault Kits' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_violence. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

@@ -1,7 +1,7 @@
 {
  "source": "EADV",
  "generated_at": "2026-05-09T15:26:09Z",
- "total_documents": 7,
+ "total_documents": 8,
  "documents": [
   {
    "id": "EADV-CLE-001",
@@ -327,6 +327,31 @@
     {
      "chunk_index": 4,
      "content": "wenn die Erhaltungstherapie vertragen wurde. In Fällen mit hohem Risiko, etwa bei Mastozytose oder schweren Reaktionen, kann eine längere Therapie erwogen werden. Bei Patienten mit SAR Grad III oder höher oder weiteren Risikofaktoren wird empfohlen, ein Notfallset mit Adrenalin-Autoinjektor (AAI) mitzuführen, auch nach Ende der HG-AIT. Im Jahr 2023 wurden von der DDG bzw. mit Beteiligung der DDG weitere Leitlinien veröffentlicht, darunter: S3-Leitlinie: Lokaltherapie schwerheilender und/oder chronischer Wunden, S2k-Leitlinie: Diagnostik, Prävention und Therapie des Handekzems, S1-Leitlinie: Diagnostik und Therapie der Necrobiosis lipoidica, S2k-Leitlinie: Lipödem, S2k-Leitlinie: Diagnostik und Therapie des Ulcus cruris venosum. Fazit für die Praxis Leitlinien werden kontinuierlich aktualisiert und an das medizinische Wissen angepasst. Aufzufinden sind die deutschen Leitlinien unter www.awmf.org . Jede Leitlinienempfehlung sollte unter Berücksichtigung der individuellen Situation des Patienten sorgfältig geprüft, angepasst und bei Bedarf modifiziert werden."
+    }
+   ]
+  },
+  {
+   "id": "EADV-MELASMA-001",
+   "source": "EADV",
+   "title": "EADV consensus on melasma diagnosis and management",
+   "year": "2020",
+   "page_url": "https://onlinelibrary.wiley.com/",
+   "pdf_url": "https://onlinelibrary.wiley.com/",
+   "license": "EADV",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "dermatology_acne",
+   "priority": "low",
+   "sha256": "7512d13c24f329a46c516baafe96922efbdfb8c3633ce3e4f7b3bb2d2450cb2b",
+   "size_bytes": 716,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 716,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EADV consensus on melasma diagnosis and management Source: EADV Year: 2020 Domain: dermatology_acne License: EADV Available at: https://onlinelibrary.wiley.com/ This is a citation reference for the EADV guideline 'EADV consensus on melasma diagnosis and management' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: dermatology_acne. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "NIH",
  "generated_at": "2026-05-02T15:41:42Z",
- "total_documents": 5,
+ "total_documents": 7,
  "documents": [
   {
    "id": "NIH-COVID-001",
@@ -257,6 +257,56 @@
     {
      "chunk_index": 10,
      "content": "be run to include the cost for parents who terminate treatment prematurely due to either parent or Coach choice without achieving successful graduation. Model validation will include structure assessment (i.e., does the structure reflect the real world?) [ ] and surprise behavior (i.e., are there discrepancies between model behavior and the real world?) [ ]. These will be completed with the Just Care for Families developer and Just Care for Families Coaches, given their expertise in Just Care for Families delivery. Behavior reproduction will entail calibrating baseline model estimates to clinic data from the proposed study period to demonstrate that real-world trends are simulated [ ]. Minimum and maximum observed values will be used for one-way sensitivity analyses and probabilistic sensitivity analyses (PSA) over 10,000 Monte Carlo simulations [ , ]. PSA parameter distributions will be selected following best practices (e.g., gamma for costs, beta for probabilities) [ , ]. One-way sensitivity analyses will be conducted in Stella Architect and Microsoft Excel. PSA will be conducted in Crystal Ball [ ]. The proposed model could be extended to other perspectives or to conduct different economic evaluations. For example, a benefit-cost analysis [ , , ] could include costs important to parents (e.g., wages foregone while addressing other SRFOH) and monetize benefits or outcomes (e.g., days free from suicidal ideation, an additional year of education completed) [ ] using well-established procedures [ ]. The proposed analyses could also be extended into budget impact analyses for child welfare or other systemic perspectives by including costs associated with second-generation/child outcomes (e.g., foster care placements). Finally, analyses could consider the impact of providing Coach incentives for documentation for research purposes on clinic operations. Though not proposed as an implementation strategy for program delivery, this data collection strategy might demonstrate benefit to clinic efficiencies. Discussion Ongoing system engagement This protocol will be conducted with ODHS serving as a key community partner. As noted, county offices will provide referrals and collaborate with Coaches to work with parents to set goals consistent with system recommendations. Further, state ODHS leadership will collaborate by supporting the program in the participating counties and encouraging sustainment. At a minimum, ODHS will be updated on study outcomes annually. If outcomes are promising, partner meetings will transition to planning for potential scale-up into other Oregon counties. These meetings will include policymakers and legislators to consider funding streams. Summary This protocol describes a study of 250 parents enrolled in Just Care for Families in five rural Oregon counties. With a goal of examining the prevention of IV drug use and suicide in parents involved or at-risk for involvement with the CWS with an O/MU and MH disorder, this study will evaluate the impact of Just Care for Families on SRFOH and evaluate mechanisms through which Just Care for Families impacts prevention outcomes. Multi-component interventions like Just Care for Families have the potential to significantly change the SRFOH of families involved in child welfare, improving the long-term trajectory for well-being across generations, creating a significant public health impact."
+    }
+   ]
+  },
+  {
+   "id": "NIH-CLINICALINFO-001",
+   "source": "NIH",
+   "title": "NIH ClinicalInfo HIV opportunistic infections drug guidance",
+   "year": "2024",
+   "page_url": "https://clinicalinfo.hiv.gov/",
+   "pdf_url": "https://clinicalinfo.hiv.gov/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_specialty_hiv_hcv_tb",
+   "priority": "high",
+   "sha256": "9dea9b241b35710b2899efacc5c8289783044cd116184187f6d11591da160226",
+   "size_bytes": 756,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 756,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NIH ClinicalInfo HIV opportunistic infections drug guidance Source: NIH Year: 2024 Domain: drug_specialty_hiv_hcv_tb License: Public Domain Available at: https://clinicalinfo.hiv.gov/ This is a citation reference for the NIH guideline 'NIH ClinicalInfo HIV opportunistic infections drug guidance' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_specialty_hiv_hcv_tb. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "NIH-MEDLINE-001",
+   "source": "NIH",
+   "title": "MedlinePlus Drug Information Database",
+   "year": "2024",
+   "page_url": "https://medlineplus.gov/druginformation.html",
+   "pdf_url": "https://medlineplus.gov/druginformation.html",
+   "license": "US Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "pharmacology",
+   "priority": "low",
+   "sha256": "e6b2bd84366c5e214fa80ca303afd0fcce01ec623bd4ca5d5ea71bd93887764b",
+   "size_bytes": 2154,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2154,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Molecular pharmacology of inflammation: Medicinal plants as anti-inflammatory agents. Except for an essential step for the pathology of multiple diseases including atherosclerosis and rheumatoid arthritis, inflammation is an imperative therapeutic target for developing novel approaches for pharmacological interventions. Thus, molecular understanding of inflammation not only revealed the mechanisms of drug action and their biological targets but also has spawned innovative maneuvers to influence multifaceted biological systems, providing new prospects for drug designing and suggesting important new implications for existing clinical medicine. Meanwhile, modulation of inflammation with the use of medicinal plants proposed an alternate to conventional therapeutic strategies for numerous ailments, particularly when suppression of inflammation is expected. In modern literature, several species of medicinal plants have been shown substantial antiinflammatory and immunomodulatory actions including inhibitory effects on suppression of cellular and humoral immunity, lymphocyte activation, and propagation of apoptosis. Herein, we reviewed the molecular pharmacology of inflammation, chemical components and biological activities of medicinal plants such as, curcumin from Curcuma longa, and epigallocatechin-3-gallate from Camellia sinensis as well as their mechanism of action during inflammation at molecular level. An extensive review of the literature and electronic databases was conducted, encompassing PubMed, GoogleScholar, ScienceDirect, medlineplus, www.clinicaltrial.gov, www.fda.gov, www.ema.europa.eu, www.drugbank.ca, TrialBulletin.com, www.theplantlist.org, and www.pharmacodia.com for assembling the information. Additionally, data was attained from books, ethnopharmacological literature, and relevant publications for essential elements of molecular mechanisms, signal transduction networks, transcription factors, complement system, reactive species, and clinical trials are selected for substantial understanding of biochemistry, pathophysiology as well as clinical importance of medicinal plants during inflammatory diseases."
     }
    ]
   }

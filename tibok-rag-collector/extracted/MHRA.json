@@ -1,7 +1,7 @@
 {
  "source": "MHRA",
  "generated_at": "2026-05-09T13:43:31Z",
- "total_documents": 2,
+ "total_documents": 6,
  "documents": [
   {
    "id": "MHRA-DSU-002",
@@ -90,6 +90,106 @@
     {
      "chunk_index": 5,
      "content": "our study (24%). Further large-scale studies are needed to clarify the potential association between inter-hospital HI and poor 3-month outcomes. Therapeutic strategies aimed at preventing its occurrence or limiting its progression—such as interventions targeting neuroinflammation, thromboinflammation, or blood-brain barrier damage—merit further investigation. , The necessity of repeating brain imaging upon CSC admission in transferred AIS-LVO patients remains a subject of debate. Imaging findings that may justify aborting EVT in transfer patients include arterial recanalization and HT, both of which are associated with inter-hospital clinical improvement. Therefore, repeating imaging in patients with clinical improvement during transfer appears warranted to avoid unnecessary invasive procedures. To minimize delays in reperfusion caused by repeat conventional imaging, cone-beam non-contrast CT and CT perfusion in the angiosuite have emerged as a promising alternative. The ANGIOCAT trial (Evaluation of Direct Transfer to Angiography Suite vs Computed Tomography Suite in Endovascular Treatment: Randomized Clinical Trial) assessed the safety and efficacy of direct transfer to the angiosuite —bypassing conventional imaging and using on-table flat-panel non-contrast CT to exclude HT—. Notably, 75% of enrolled patients were inter-hospital transfers for EVT, all with a persistent NIHSS score > 10 upon CSC arrival. The study demonstrated that, in this situation, direct transfer to the angiosuite significantly reduced door-to-reperfusion time and improved 3-month functional outcomes without compromising safety. This study has several limitations. First, 10% of patients were excluded due to the lack of inter-hospital HT assessment, which may have introduced bias into our sample. Second, the imaging modality used to assess HT was not standardized, with 83% of patients undergoing MRI and 17% CT. Given the higher sensitivity of MRI compared to CT for detecting HT, this heterogeneity may have introduced bias into our findings. In particular, for patients who had a CT at PSC followed by an MRI upon admission to the CSC, some HTs identified at the CSC might have already been present but went undetected on the initial CT due to its poorer sensitivity. Third, as previously discussed, HT volumes were compared across different imaging modalities in two-thirds of cases, which may have limited the accuracy of assessing HT expansion over time. Fourth, data on blood pressure variability or management during transfer, which could influence HT occurrence, were not collected. Also, the relationship between inter-hospital HT and potentially relevant imaging biomarkers—such as markers of small vessel disease or the severity of hypoperfusion—could not be assessed due to the lack of consistent imaging data across the entire cohort. Fifth, the median transfer time (defined as the time between the PSC and CSC imaging, encompassing more than just transportation time) in our study was relatively long, as reported in other settings. , Results may differ in regions with shorter transfer times. Sixth, some differences were observed between the French and US cohorts. However, the inter-hospital HT rate was similar across the two cohorts, and the outcome analysis was adjusted for study center. Finally, due to the observational nature of the study, a causal relationship between inter-hospital HT and poor functional outcome cannot be established. Conclusion This study demonstrates that HT is uncommon (5%) in AIS-LVO patients transferred from a PSC to a CSC for evaluation of EVT, and predominantly of mild initial severity (HI1 or HI2 in 75% of cases). However, inter-hospital HT is associated with a high rate of subsequent expansion and poor functional outcomes at 3 months, particularly among patients who develop parenchymal hematomas. Inter-hospital HT is linked to higher baseline NIHSS scores, longer time from symptom onset, and higher rates of inter-hospital recanalization. There is a role for the development of inter-hospital strategies and treatments that reduce the risk of HT. Supplementary Material sj-docx-1-eso_23969873251349713"
+    }
+   ]
+  },
+  {
+   "id": "MHRA-DSU-001",
+   "source": "MHRA",
+   "title": "MHRA Drug Safety Update monthly bulletin archive",
+   "year": "2024",
+   "page_url": "https://www.gov.uk/drug-safety-update",
+   "pdf_url": "https://www.gov.uk/drug-safety-update",
+   "license": "Crown Copyright",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacovigilance",
+   "priority": "high",
+   "sha256": "a57cc9383088f559674a05b3f20d4638ffd1493b7efd6f9a48d50cadb96a718b",
+   "size_bytes": 740,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 740,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: MHRA Drug Safety Update monthly bulletin archive Source: MHRA Year: 2024 Domain: drug_pharmacovigilance License: Crown Copyright Available at: https://www.gov.uk/drug-safety-update This is a citation reference for the MHRA guideline 'MHRA Drug Safety Update monthly bulletin archive' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pharmacovigilance. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "MHRA-DSU-003",
+   "source": "MHRA",
+   "title": "MHRA Public Assessment Reports PARs database",
+   "year": "2024",
+   "page_url": "https://products.mhra.gov.uk/",
+   "pdf_url": "https://products.mhra.gov.uk/",
+   "license": "Crown Copyright",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_regulatory",
+   "priority": "high",
+   "sha256": "5d28454f19e57becf94c11daf5e0d55008f0067368de3c317dcd73c8b3b6d10e",
+   "size_bytes": 710,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 710,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: MHRA Public Assessment Reports PARs database Source: MHRA Year: 2024 Domain: drug_regulatory License: Crown Copyright Available at: https://products.mhra.gov.uk/ This is a citation reference for the MHRA guideline 'MHRA Public Assessment Reports PARs database' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_regulatory. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "MHRA-DSU-005",
+   "source": "MHRA",
+   "title": "MHRA Sodium valproate use in pregnancy regulatory action",
+   "year": "2024",
+   "page_url": "https://www.gov.uk/government/publications/valproate-use-by-women-and-girls",
+   "pdf_url": "https://www.gov.uk/government/publications/valproate-use-by-women-and-girls",
+   "license": "Crown Copyright",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pregnancy_lactation",
+   "priority": "high",
+   "sha256": "efbfa3746394f15c6847990d28a33be35bbbd8af06d7c52163898d58474f9e42",
+   "size_bytes": 798,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 798,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: MHRA Sodium valproate use in pregnancy regulatory action Source: MHRA Year: 2024 Domain: drug_pregnancy_lactation License: Crown Copyright Available at: https://www.gov.uk/government/publications/valproate-use-by-women-and-girls This is a citation reference for the MHRA guideline 'MHRA Sodium valproate use in pregnancy regulatory action' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pregnancy_lactation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "MHRA-DSU-006",
+   "source": "MHRA",
+   "title": "MHRA Drug Alerts and Recalls archive",
+   "year": "2024",
+   "page_url": "https://www.gov.uk/drug-device-alerts",
+   "pdf_url": "https://www.gov.uk/drug-device-alerts",
+   "license": "Crown Copyright",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_shortage_recall",
+   "priority": "high",
+   "sha256": "8957da4201f9db45891147c60031ddff2ede01d62f91e6d5575acf9f29862528",
+   "size_bytes": 712,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 712,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: MHRA Drug Alerts and Recalls archive Source: MHRA Year: 2024 Domain: drug_shortage_recall License: Crown Copyright Available at: https://www.gov.uk/drug-device-alerts This is a citation reference for the MHRA guideline 'MHRA Drug Alerts and Recalls archive' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_shortage_recall. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

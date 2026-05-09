@@ -1,0 +1,32 @@
+{
+ "source": "SPLF",
+ "generated_at": "2026-05-09T19:16:21Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "SPLF-001",
+   "source": "SPLF",
+   "title": "Sevrage Tabagique en Pneumologie",
+   "year": "2018",
+   "page_url": "https://splf.fr/wp-content/uploads/2018/02/Sevrage-tabagique-recommandations-2018.pdf",
+   "pdf_url": "https://splf.fr/wp-content/uploads/2018/02/Sevrage-tabagique-recommandations-2018.pdf",
+   "license": "SPLF ©",
+   "commercial_use": "restricted",
+   "clinical_domain": "respiratory",
+   "priority": "medium",
+   "sha256": "9491d0bc9c78f8718a2348934bec26cfc81cc979cf524f1fe9b36f54735766b1",
+   "size_bytes": 726,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 725,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Sevrage Tabagique en Pneumologie Source: SPLF Year: 2018 Domain: respiratory License: SPLF © Available at: https://splf.fr/wp-content/uploads/2018/02/Sevrage-tabagique-recommandations-2018.pdf This is a citation reference for the SPLF guideline 'Sevrage Tabagique en Pneumologie' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: respiratory. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

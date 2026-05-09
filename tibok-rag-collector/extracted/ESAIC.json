@@ -1,7 +1,7 @@
 {
  "source": "ESAIC",
  "generated_at": "2026-05-09T15:32:24Z",
- "total_documents": 5,
+ "total_documents": 6,
  "documents": [
   {
    "id": "ESAIC-PONV-001",
@@ -229,6 +229,31 @@
     {
      "chunk_index": 6,
      "content": "Scientific GmbH & Co KG, which received consultancy fees for performing, analyzing, and communicating the work presented here. F. M. Radtke has received funding from Medtronic Europe for SBI-related research. J. Berger-Estilita is a member of the Scientific Committee and Chair of the Education and Training Committee of the ESAIC. She has received support from Medtronic Europe for the implementation of the SBI. Funding: None. This manuscript was handled by: Girish P Joshi, MBBS, MD, FFARCSI. Supplementary Material"
+    }
+   ]
+  },
+  {
+   "id": "ESAIC-PREOP-001",
+   "source": "ESAIC",
+   "title": "ESAIC pre-operative evaluation of adults undergoing elective non-cardiac surgery",
+   "year": "2018",
+   "page_url": "https://journals.lww.com/ejanaesthesiology/",
+   "pdf_url": "https://journals.lww.com/ejanaesthesiology/",
+   "license": "ESAIC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_general",
+   "priority": "high",
+   "sha256": "1c91ad99dccfab24b76b0735630abd80905093cf03be5e4b98bdd9a20ee5b4b5",
+   "size_bytes": 2447,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2447,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Anaesthesiologists' guideline adherence in pre-operative evaluation: a retrospective observational study. Surveys suggest a low level of implementation of clinical guidelines, although they are intended to improve the quality of treatment and patient safety. Which guideline recommendations are not followed and why has yet to be analysed. In this study, we investigate the proportion of European and national guidelines followed in the area of pre-operative anaesthetic evaluation prior to non-cardiac surgery. We conducted this monocentric retrospective observational study at a German university hospital with the help of software that logically links guidelines in such a way that individualised recommendations can be derived from a patient's data. We included routine logs of 2003 patients who visited our pre-anaesthesia outpatient clinic between June 2018 and June 2020 and compared the actual conducted pre-operative examinations with the recommendations issued by the software. We descriptively analysed the data for examinations not performed that would have been recommended by the guidelines and examinations that were performed even though they were not covered by a guideline recommendation. The guidelines examined in this study are the 2018 ESAIC guidelines for pre-operative evaluation of adults undergoing elective non-cardiac surgery, the 2014 ESC/ESA guidelines on non-cardiac surgery and the German recommendations on pre-operative evaluation on non-cardiothoracic surgery from the year 2017. Performed ECG (78.1%) and cardiac stress imaging tests (86.1%) indicated the highest guideline adherence. Greater adherence rates were associated with a higher ASA score (ASA I: 23.7%, ASA II: 41.1%, ASA III: 51.8%, ASA IV: 65.8%, P < 0.001), lower BMI and age > 65 years. Adherence rates in high-risk surgery (60.5%) were greater than in intermediate (46.5%) or low-risk (44.6%) surgery (P < 0.001). 67.2% of technical and laboratory tests performed preoperatively were not covered by a guideline recommendation. Guideline adherence in pre-operative evaluation leaves room for improvement. Many performed pre-operative examinations, especially laboratory tests, are not recommended by the guidelines and may cause unnecessary costs. The reasons for guidelines not being followed may be the complexity of guidelines and organisational issues. A software-based decision support tool may be helpful. ClinicalTrials.gov ID NCT04843202."
     }
    ]
   }

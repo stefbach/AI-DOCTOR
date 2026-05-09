@@ -1,7 +1,7 @@
 {
  "source": "NSGC",
  "generated_at": "2026-05-09T16:19:18Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "NSGC-GENETIC-001",
@@ -61,6 +61,31 @@
     {
      "chunk_index": 9,
      "content": "Yoshihiro Matsudate (Department of Dermatology, Ehime Prefectural Central Hospital) Haruki Mizuta (Department of Plastic and Reconstructive Surgery, Osaka City University) Yuichiro Miyoshi (Department of Breast Oncology, NHO Shikoku Cancer Center) Kazutoshi Murao (Department of Dermatology, Tokushima University Graduate School of Biomedical Sciences) Masami Morimoto (Department of Thoracic, Endocrine Surgery and Oncology, Tokushima Graduate School of Biomedical Sciences) Akira Tangoku (Department of Thoracic, Endocrine Surgery and Oncology, Tokushima University Graduate School of Biomedical Sciences) Atsushi Yamada (Department of Therapeutic Oncology, Graduate School of Medicine, Kyoto University) Masayoshi Yamada (Endoscopy Division, National Cancer Center Hospital) Masaya Yamoto (Department of Pediatric Surgery, Shizuoka Children's Hospital) Masahiro Yoshioka (Department of Therapeutic Oncology, Graduate School of Medicine, Kyoto University) The original Japanese version of these guidelines was published in Journal of Hereditary Tumors in Japanese. Conflicts of Interest Prior to the preparation of these clinical guidelines, all members of the guidelines committee declared any conflicts of interest. TT received grants from Fujifilm Co. KB received payment for lectures from ASKA Pharmaceutical Holdings Co., Ltd. and grants from Sanofi, SA; Sysmex Co.; Taiho Pharmaceutical Co., Ltd.; KISSEI Pharma, Co., Ltd.; Fuji Pharma, Co., Ltd.; Astellas Pharma, Inc.; and HEARZEST Co., Ltd. YF has institutional COI of receiving grants from Onco Therapy Science, Inc. and the Uehara memorial foundation. NT received grants from Taiho Pharmaceutical Co. Ltd. HI received grants from Taiho Pharmaceutical Co. Ltd. and Yakult Honsha Co. Ltd. The other authors declare no conflicts of interest. Sources of Funding This article was supported by Grants-in-Aid from the Ministry of Health, Labour, and Welfare Sciences Research on rare and intractable diseases (grant nos. 201711053A and 20FC1007; HI and YN). Author Contributions TT, MI, SO, SO, FK, YK, HK, MS, TS, KS, YT, HD, KB, SF, YF, TH, NM, HI, TI, YO, YS, NM, MM, NT, TA, TY, HI, and YN developed the clinical guidelines. All authors critically revised the report, commented on the drafts of the manuscript, and approved the final report. Ethics Statement The authors have no ethical conflicts to disclose. Disclaimer Naohiro Tomita is the Deputy Editor-in-Chief of Journal of the Anus, Rectum and Colon and on the journal's Editorial Board. Yutaka Saito is one of the Associate Editors of Journal of the Anus, Rectum and Colon and on the journal's Editorial Board. They are not involved in the editorial evaluation or decision to accept this article for publication at all. The Japanese original version had already been published in Journal of Hereditary Tumors, and is available at https://minds.jcqhc.or.jp/docs/gl_pdf/G0001222/4/cowden_syndrome_pten_syndrome.pdf The submission of this English-version guideline to JRAC had been permitted by both the publisher of original version (the Japanese Society of Hereditary Tumor) and the editor-in-chief of JARC. Supplementary Files Supplementary Figure 1. Diagnostic flowchart for Cowden syndrome/PHTS including PTEN testing criteria. CS: Cowden syndrome, PHTS: PTEN hamartoma tumor syndrome, LDD: Lhermitte-Duclos disease (adult form). Please find supplementary file(s); http://dx.doi.org/10.23922/jarc.2023-028 Click here for additional data file."
+    }
+   ]
+  },
+  {
+   "id": "NSGC-COUNSEL-001",
+   "source": "NSGC",
+   "title": "NSGC National Society of Genetic Counselors practice guidelines genetic counseling and testing",
+   "year": "2023",
+   "page_url": "https://www.nsgc.org/Policy-Research-and-Publications/Practice-Guidelines",
+   "pdf_url": "https://www.nsgc.org/Policy-Research-and-Publications/Practice-Guidelines",
+   "license": "NSGC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "genetics_counseling",
+   "priority": "high",
+   "sha256": "77023c7109f2cc0b76f678fa2a0fa1b06bb23808d6db864f0648541a355b8e0e",
+   "size_bytes": 2899,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2898,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Barriers to the implementation of epilepsy genetic testing and counseling guidelines. In 2022, the National Society of Genetic Counselors (NSGC) published a practice guideline for genetic testing and counseling for unexplained epilepsy. It is endorsed by the American Epilepsy Society and recommends genetic testing for all patients with unexplained epilepsy (prioritizing exome/genome sequencing [ES/GS] or multi-gene panel [MGP] as first-tier testing) and providing professional pre-/post-test counseling. This study investigates the alignment of neurologists' practice with this guideline and identifies barriers to implementation. Neurologists who treat epilepsy in the United States completed a survey about guideline awareness, current practices, and barriers to genetic testing/counseling. Recruitment occurred through newsletters/listservs of professional organizations and public contact information. A total of, 91 participants accessed the survey, and 84 completed enough for inclusion in data analysis. Approximately half (43.9%, 36/82) of participants offer genetic testing to most/all their patients with unexplained epilepsy, while the other half (46.3%, 38/82) offer genetic testing only to patients with epilepsy for whom they suspect a genetic etiology. Neurologists caring for adult patients were significantly more likely than those caring for pediatric patients to fall into the latter category (χ 2 [1, N = 69] = 22.66, p < 0.001). When ordering genetic testing, 75.5% (n = 40/53) of participants choose MGP most often, while 20.8% (n = 11/53) choose ES/GS and 3.8% (n = 2/53) choose microarray. Barriers to genetic testing and pre-/post-test counseling included insurance coverage, test coordination, limited expertise, and access to a genetic counselor (GC). Barriers were more significant for adult providers. Over half of participants (56.1%, n = 46/82) were aware of the NSGC guideline, but almost all (91.3%, n = 36/82) thought it was not broadly publicized. Increased insurance coverage, access to GCs, and awareness of guidelines are needed to improve access to genetic testing and counseling for unexplained epilepsies, particularly for the adult population. In 2022, the National Society of Genetic Counselors published a practice guideline recommending genetic testing and counseling for all patients with unexplained epilepsy, using exome/genome sequencing or a multi-gene panel as the first-tier test. This survey study examined neurologists' current practices compared to the guideline and identified barriers. A total of, 44% of participants offer genetic testing to most/all their patients, while 46% test only when they suspect a genetic cause. Adult neurologists rate most barriers higher than pediatric neurologists. Better insurance coverage and increased access to genetic counselors are key to improving access to epilepsy genetic testing and counseling."
     }
    ]
   }

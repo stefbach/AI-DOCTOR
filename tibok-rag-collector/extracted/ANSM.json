@@ -1,7 +1,7 @@
 {
  "source": "ANSM",
  "generated_at": "2026-05-09T14:33:37Z",
- "total_documents": 3,
+ "total_documents": 5,
  "documents": [
   {
    "id": "ANSM-DRUG-002",
@@ -127,6 +127,56 @@
     {
      "chunk_index": 3,
      "content": "rRNA gene present in 85% of the population tested ( n = 88). We found no difference between the primary and secondary stages of syphilis ( ). None of the samples presented the A2059G mutation. DISCUSSION The first-line treatment for early syphilis is BPG ( , ), with no rival treatment of equivalent efficacy. The only alternative currently available is a 2-week course of doxycycline. Macrolides, such as azithromycin, are not recommended in European countries, Australia or China ( ), due to the high rates of resistance to these drugs in TPA strains. In the USA, azithromycin is still listed as an alternative when treatment with penicillin and doxycycline is not feasible; meanwhile, the high rate of resistance to macrolide in this country ( ). In this context, the primary goal of this study was to assess the frequencies of the A2058G and A2059G mutations of the 23S rRNA gene responsible for macrolide resistance in the DNA of the TPA strains from patients. As expected, macrolide frequency was high, at 85% in clinical isolates from various regions of France. This result is consistent with the findings of a previous study reporting a resistance rate of 86.4% in the population studied ( ). Macrolide resistance has been emerging in TPA over a period of more than 20 years, and this resistance is now widespread. The spread of macrolide resistance may be due, at least in part, to the frequent use of antibiotics of this class, and of azithromycin in particular, to treat other STIs, such as Chlamydia trachomatis and Mycoplasma genitalium urethritis and cervicitis ( ). The recent emergence of azithromycin resistance in Mycoplasma genitalium has been attributed to an increase in the use of this antibiotic to treat chlamydial infections ( ) and has led to the establishment of new recommendations favouring doxycycline (200 mg per day for 7 days) as the first-line treatment of uncomplicated chlamydial infection ( ). The presence of mutations of the 16S rRNA gene or the acquisition of genes capable of decreasing susceptibility to doxycycline ( ) has never been investigated in a population of French patients with syphilis. We addressed this issue by analysing point mutations in the 16S rRNA gene of TPA DNA, known to induce doxycycline resistance when they occur in the equivalent genes of other bacteria. We found no such mutations in any of the samples studied. This finding is consistent with those of previous studies on syphilis patients in China and Southern Europe exploring point mutations at positions 965–968 and 1058 of the 16S rRNA gene ( , , ). We also explored 2 other previously described point mutations ( ), at positions 927–928 and 939 of the 16S rRNA gene, neither of which was found in any of our patients. In our cohort, we do not have information about the number of patients receiving doxycycline treatment. However, in a previous prevalence study conducted by the National Reference Center in Paris, we have shown that approximately 5% of patients had been treated by doxycycline for early syphilis between 2000 and 2007 ( ). Resistance can also be linked to the presence of tet genes in bacterial genomes ( ) where the tet(M) gene plays a major role in tetracyclines resistance in genital bacteria, including Mycoplasma spp and Ureaplasma , ( ). To date, whole-genome sequencing of TPA strains did not demonstrate the presence of tet genes. Therefore, searching for such gene in our study did not seem relevant. The lack of evidence for genomic resistance to doxycycline in TPA suggests that this antibiotic can safely be used to treat early syphilis and for post-exposure prophylaxis against infections caused by TPA strains in populations of MSM exposed to PrEP. However, continuous monitoring is required to detect the possible occurrence of doxycycline-related mutations in this population. In conclusion, resistance to macrolides was wide-spread, but no genomic resistance to doxycycline was detected in this study."
+    }
+   ]
+  },
+  {
+   "id": "ANSM-DRUG-001",
+   "source": "ANSM",
+   "title": "ANSM Repertoire des specialites pharmaceutiques France",
+   "year": "2024",
+   "page_url": "https://base-donnees-publique.medicaments.gouv.fr/",
+   "pdf_url": "https://base-donnees-publique.medicaments.gouv.fr/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_regulatory",
+   "priority": "high",
+   "sha256": "bebe42315a276c58d59ef8b4ae16dcf9b953d00448ca31e7a95c343e505593d4",
+   "size_bytes": 749,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 749,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:41Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ANSM Repertoire des specialites pharmaceutiques France Source: ANSM Year: 2024 Domain: drug_regulatory License: Public Domain Available at: https://base-donnees-publique.medicaments.gouv.fr/ This is a citation reference for the ANSM guideline 'ANSM Repertoire des specialites pharmaceutiques France' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_regulatory. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ANSM-DRUG-004",
+   "source": "ANSM",
+   "title": "ANSM Recommandations et bon usage des medicaments",
+   "year": "2024",
+   "page_url": "https://ansm.sante.fr/documents/reference/recommandations-et-bon-usage",
+   "pdf_url": "https://ansm.sante.fr/documents/reference/recommandations-et-bon-usage",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_regulatory_guidance",
+   "priority": "high",
+   "sha256": "8d640d76f2206d27f63ab294e3204ce73395696b5c3988c4c915790fceb629c9",
+   "size_bytes": 777,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 777,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:41Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ANSM Recommandations et bon usage des medicaments Source: ANSM Year: 2024 Domain: drug_regulatory_guidance License: Public Domain Available at: https://ansm.sante.fr/documents/reference/recommandations-et-bon-usage This is a citation reference for the ANSM guideline 'ANSM Recommandations et bon usage des medicaments' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_regulatory_guidance. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

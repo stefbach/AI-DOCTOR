@@ -1,7 +1,7 @@
 {
  "source": "DailyMed",
  "generated_at": "2026-05-09T14:59:04Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "NLM-DAILYMED-002",
@@ -41,6 +41,31 @@
     {
      "chunk_index": 4,
      "content": "H 2 O 2 under the action of uricase, and H 2 O 2 is catalyzed by peroxidase to form quinone imide compounds with 4-AAP and TOOS, its production amount is proportional to the concentration of UA. We speculate that baicalein in human serum might be consuming the intermediate product H 2 O 2 to falsely reduce the UA results, and our results show that Tempol does not interfere with these two chemical reactions while eliminating baicalein. The results of Hahn et al. also showed that Tempol does not consume H 2 O 2 . Therefore, we added a certain concentration of Tempol to R1 of UA assay kit to consume baicalein before the official start of UA detection to ensure the correctness of the amount of chromogenic substrate. The two substances may react through the HAT mechanism and mainly occur in the 6-OH of baicalein, as shown in Fig. , . The QC of laboratory testing mainly includes three aspects: pre-analytical quality assurance, QC during analysis, and post-analytical quality evaluation. Among these three aspects, pre-analysis quality assurance is the most difficult to control, with many influencing factors and the largest variables. Drug interference is one of the influencing factors. For example, ascorbate oxidase has been added to many reagents to reduce the interference of vitamin C on the results of biochemical testing. Vitamin C can reduce the intermediate product H 2 O 2 and the final product generated in the process of UA determination, thus resulting in the false reduction of serum UA results. Currently, there is no authoritative statistical data on the exact number of people in China who consume Scutellaria baicalensis . However, as a key component in traditional Chinese medicine and modern compound formulations, it is widely used among the population for treating various diseases, such as respiratory and digestive system disorders, as well as infectious diseases. With ongoing advancements in anti-tumor and anti-viral research, its clinical applications are expected to expand further in the future. We found that baicalein causes negative interference in the detection of UA by the uricase-peroxidase method. The addition of stable radical Tempol to the UA reagent can resist the interference of baicalein in the testing process of UA, provide more accurate clinical test results, and guide the clinical application of baicalein and similar drugs with antioxidant effects. Our current study has several limitations. First, while we validated Tempol’s interference-suppression efficacy in UA quantification, its applicability to the other four Trinder’s reaction-based assays (CHOL, TG, HDL-C, LDL-C) remains unverified. Second, the experimental design focused exclusively on pure baicalein, without accounting for potential synergistic interference effects from its major metabolites (e.g., baicalein-O‐diglucuronide and baicalein- 7-O-sulfate) that circulate in treated patients. Third, we may not fully replicate the complex biomatrix of patients undergoing baicalein-containing therapy, where concurrent medications and individual metabolic variations could modulate interference dynamics. Conclusion This study systematically validated the negative interference of baicalein on Trinder’s reaction-based clinical assays by adding a gradient concentration of baicalein (0–200 µg/mL) to human serum. The results revealed that uric acid quantification exhibited the most pronounced susceptibility, demonstrating a dose-dependent interference up to − 89.98% deviation at maximal concentration. To address this pharmacological interference, we developed an optimized uric acid assay incorporating 5 mmol/L Tempol as a selective antioxidant scavenger, which effectively neutralized baicalein-induced interference. It provides a way to solve the problem that taking drugs with antioxidant properties can interfere with clinical test results."
+    }
+   ]
+  },
+  {
+   "id": "NLM-DAILYMED-001",
+   "source": "DailyMed",
+   "title": "DailyMed NIH NLM official prescribing information SPL",
+   "year": "2024",
+   "page_url": "https://dailymed.nlm.nih.gov/dailymed/",
+   "pdf_url": "https://dailymed.nlm.nih.gov/dailymed/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_formulary",
+   "priority": "high",
+   "sha256": "78fef7f99da3179d70191cc468c570751b11951c77e905d3a22562276b89f805",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: DailyMed NIH NLM official prescribing information SPL Source: DailyMed Year: 2024 Domain: drug_formulary License: Public Domain Available at: https://dailymed.nlm.nih.gov/dailymed/ This is a citation reference for the DailyMed guideline 'DailyMed NIH NLM official prescribing information SPL' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_formulary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

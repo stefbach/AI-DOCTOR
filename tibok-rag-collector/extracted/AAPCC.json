@@ -1,7 +1,7 @@
 {
  "source": "AAPCC",
  "generated_at": "2026-05-09T14:29:27Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "AAPCC-002",
@@ -53,6 +53,31 @@
     {
      "chunk_index": 7,
      "content": "to identify symptoms of gastrointestinal damage and prioritize urgent care. Flexible endoscopic extraction should be performed within 48 hours of ingestion to reduce complications like mucosal injury or perforation, and the procedure should ideally be completed within 30 minutes to minimize patient discomfort and procedural risks. This study also highlights the occurrence of cases where endoscopy was performed but no foreign body was ultimately retrieved, suggesting possible spontaneous passage prior to the procedure. Such cases underscore the importance of clearly defined indications for endoscopy to avoid unnecessary exposure to anesthesia and the inherent risks of an invasive procedure. Establishing and adhering to specific criteria for intervention—especially in clinically stable patients or when the ingested object is presumed to be low-risk—may help minimize avoidable procedures while maintaining patient safety. This reinforces the value of thorough clinical evaluation and judicious use of imaging and observation in appropriate scenarios. The findings that coins stuck in the stomach measured less than the international cutoff of 25 mm for spontaneous passage beyond the pylorus suggest that the anatomical and physiological differences among populations, including possibly smaller pyloric dimensions in Filipino children, may warrant reconsideration of this size threshold in local clinical practice. Further studies focusing on regional anthropometric data may be valuable in developing population-specific recommendations to better guide clinical decision-making and avoid unnecessary delays in intervention. This study has several limitations inherent to its retrospective design. Selection bias may be present, although we attempted to mitigate this by including all eligible pediatric patients who were referred for possible endoscopic foreign body removal during the study period through comprehensive and consecutive record review. In addition, information bias may have occurred due to missing or incomplete documentation; however, only cases with sufficient and detailed records across key time points were included. While we analyzed associations between foreign body type and clinical outcomes, potential confounding factors (e.g., comorbidities, symptom onset timing, procedural factors) could not be fully controlled due to limitations in available data. Finally, the findings represent a single-center experience and this, together with a relatively small sample size which was less than the computed sample size of 381, restricts further interpretation of association and may limit generalizability to other settings. CONCLUSION Pediatric FBI remains a significant concern due to its prevalence and varied presentations. This study described the clinical profile, management, and outcomes of pediatric patients with FBI in a tertiary referral center. Coins were the most commonly ingested foreign bodies with most cases not having any serious complications. While many cases were managed conservatively, a substantial number required endoscopic intervention. The findings support existing evidence that early recognition and timely management, particularly with flexible endoscopy, are crucial for favorable outcomes. Delays in intervention were often due to logistical factors, underscoring the need for system-level improvements. The continued development and refinement of clinical guidelines, along with efforts to address the challenges faced in low-resource settings, are key to improving the management of pediatric FBI. These results may help inform local protocol development and optimize patient outcomes in similar contexts."
+    }
+   ]
+  },
+  {
+   "id": "AAPCC-001",
+   "source": "AAPCC",
+   "title": "AAPCC NPDS annual report and clinical practice guidance",
+   "year": "2023",
+   "page_url": "https://www.aapcc.org/national-poison-data-system",
+   "pdf_url": "https://www.aapcc.org/national-poison-data-system",
+   "license": "AAPCC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_acute",
+   "priority": "medium",
+   "sha256": "d5cee8ba2a31122c9d6f5c414790bfcee16a295321bd106df3c2d263b0dc075f",
+   "size_bytes": 746,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 746,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAPCC NPDS annual report and clinical practice guidance Source: AAPCC Year: 2023 Domain: toxicology_acute License: AAPCC Available at: https://www.aapcc.org/national-poison-data-system This is a citation reference for the AAPCC guideline 'AAPCC NPDS annual report and clinical practice guidance' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_acute. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

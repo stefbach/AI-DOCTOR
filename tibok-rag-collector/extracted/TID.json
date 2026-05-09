@@ -1,7 +1,7 @@
 {
  "source": "TID",
  "generated_at": "2026-05-09T16:01:16Z",
- "total_documents": 3,
+ "total_documents": 5,
  "documents": [
   {
    "id": "TID-TX-002",
@@ -155,6 +155,56 @@
     {
      "chunk_index": 4,
      "content": "effect of TMP-SMX prophylaxis was similar in a more modern subset as compared to the overall cohort. The effect estimate was similar after restricting our study period from 2015–2020 (odds ratio of 0.33 versus 0.34), indicating time does not seem to be significantly influencing these results and they are likely applicable to modern patients. While this was not statistically significant for the restricted sample period ( p = 0.070), this is likely due to the reduction in sample size limiting the power of the sensitivity analysis. Our study has several limitations of note. This was performed retrospectively and is subject to intrinsic sources of bias. We relied on culture to identify case patients. It is possible some patients were undiagnosed or diagnosed through non-culture-based methods, such as molecular diagnostics. We were unable to exactly match our multiorgan transplant recipients with controls based on first transplanted organ, though most were ultimately able to be matched to patients with a one common transplanted organ that follows similar immunosuppression and prophylaxis practices. Our patients also received variable doses of TMP-SMX prophylaxis. We performed a sensitivity analysis that excluded less frequent dosing schedules that are less likely to be impactful, but we were unable to determine the optimal prophylactic dosing strategy. Finally, these results may not necessarily apply to secondary prophylaxis, as recurrent infection may be reliant on different factors. In conclusion, our study found several associations with nocardiosis in SOT recipients that largely represent measures of immunosuppression. TMP-SMX was associated with reduced odds of nocardiosis in most analyses, noting the time-period sensitivity analysis was similar in effect but non-significant. Given the overlap of risk factors for Nocardia and other preventable post-transplant infections, measures to increase use of TMP-SMX as the preferred prophylactic agent should be considered. Future studies should examine exposure-related characteristics and further identify which patients may benefit from Nocardia -directed prophylaxis. Supplementary Material Supplementary Material"
+    }
+   ]
+  },
+  {
+   "id": "TID-TX-003",
+   "source": "TID",
+   "title": "AST IDCOP Guidelines EBV PTLD in Solid Organ Transplant Recipients",
+   "year": "2019",
+   "page_url": "https://www.myast.org/practice-resources/professional-society-guidelines",
+   "pdf_url": "https://www.myast.org/practice-resources/professional-society-guidelines",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "transplant_complications",
+   "priority": "high",
+   "sha256": "c2f2bfb8d57b1d1b4c139a978a9f1365e783d666e09437f56e15dce7b2f16376",
+   "size_bytes": 808,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 808,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AST IDCOP Guidelines EBV PTLD in Solid Organ Transplant Recipients Source: TID Year: 2019 Domain: transplant_complications License: Restricted Available at: https://www.myast.org/practice-resources/professional-society-guidelines This is a citation reference for the TID guideline 'AST IDCOP Guidelines EBV PTLD in Solid Organ Transplant Recipients' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: transplant_complications. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "TID-TX-004",
+   "source": "TID",
+   "title": "AST IDCOP Guidelines Tuberculosis in Solid Organ Transplant Candidates and Recipients",
+   "year": "2019",
+   "page_url": "https://www.myast.org/practice-resources/professional-society-guidelines",
+   "pdf_url": "https://www.myast.org/practice-resources/professional-society-guidelines",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "transplant_complications",
+   "priority": "high",
+   "sha256": "ecca0bb161e575e627f16c263979c83e1b0b7263ab332635cdca3154b697906a",
+   "size_bytes": 846,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 846,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AST IDCOP Guidelines Tuberculosis in Solid Organ Transplant Candidates and Recipients Source: TID Year: 2019 Domain: transplant_complications License: Restricted Available at: https://www.myast.org/practice-resources/professional-society-guidelines This is a citation reference for the TID guideline 'AST IDCOP Guidelines Tuberculosis in Solid Organ Transplant Candidates and Recipients' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: transplant_complications. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

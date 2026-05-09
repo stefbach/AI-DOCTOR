@@ -1,7 +1,7 @@
 {
  "source": "SUN",
  "generated_at": "2026-05-09T13:18:20Z",
- "total_documents": 4,
+ "total_documents": 5,
  "documents": [
   {
    "id": "SUN-UVE-002",
@@ -172,6 +172,31 @@
     {
      "chunk_index": 2,
      "content": "VKH, which resolves with successful treatment. The SUN data base did not have sufficient data on OCT EDI to evaluate it directly as a diagnostic criterion. Choroidal thickening on OCT EDI was included in the Chinese criteria, and all cases of early-stage VKH in the SUN data base had evidence of choroidal disease, even if a serous detachment was not evident. Therefore, demonstration of choroidal involvement either by clinical examination or multi-modal imaging were included for identification of “panuveitis” in patients with early-stage VKH and neurologic findings, but without serous detachments. The presence of any of the exclusions in and suggests an alternate diagnosis, and the diagnosis of VKH should not be made in their presence. In prospective studies many of these tests will be performed routinely, and the alternative diagnoses excluded. However, in retrospective studies based on clinical care, not all of these tests may have been performed. Hence the presence of an exclusionary criterion excludes VKH, but the absence of such testing does not always exclude the diagnosis of VKH if the criteria for the diagnosis are met. Classification criteria are employed to diagnose individual diseases for research purposes. Classification criteria differ from clinical diagnostic criteria, in that although both seek to minimize misclassification, when a trade-off is needed, diagnostic criteria typically emphasize sensitivity, whereas classification criteria emphasize specificity, in order to define a homogeneous group of patients for inclusion in research studies and limit the inclusion of patients without the disease in question that might confound the data. The machine learning process employed did not explicitly use sensitivity and specificity; instead it minimized the misclassification rate. Because we were developing classification criteria and because the typical agreement between two uveitis experts on diagnosis is moderate at best, the selection of cases for the final database (“case selection”) included only cases which achieved supermajority agreement on the diagnosis. As such, some cases which clinicians would diagnose with early-stage VKH or late-stage VKH will not be so classified by classification criteria. The selection of cases during case selection which achieved supermajority agreement on the diagnosis for inclusion in the final data base was used because we were developing classification criteria. In conclusion, the criteria for early-stage VKH disease and late-stage VKH disease outlined in and appear to perform sufficiently well for use as classification criteria in clinical research. ,"
+    }
+   ]
+  },
+  {
+   "id": "SUN-UVE-001",
+   "source": "SUN",
+   "title": "SUN working group standardization of uveitis nomenclature for reporting clinical data",
+   "year": "2005",
+   "page_url": "https://www.sunworkinggroup.org/",
+   "pdf_url": "https://www.sunworkinggroup.org/",
+   "license": "SUN",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_anterior",
+   "priority": "high",
+   "sha256": "0d6e941d726815ebed047e251886114fd3936e975af0e80dacc94ebe58bfe93f",
+   "size_bytes": 795,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 795,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SUN working group standardization of uveitis nomenclature for reporting clinical data Source: SUN Year: 2005 Domain: ophthalmology_anterior License: SUN Available at: https://www.sunworkinggroup.org/ This is a citation reference for the SUN guideline 'SUN working group standardization of uveitis nomenclature for reporting clinical data' published in 2005. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_anterior. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

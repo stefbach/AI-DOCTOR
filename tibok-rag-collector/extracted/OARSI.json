@@ -1,7 +1,7 @@
 {
  "source": "OARSI",
  "generated_at": "2026-05-09T10:31:29Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "OARSI-OA-002",
@@ -53,6 +53,31 @@
     {
      "chunk_index": 7,
      "content": "longitudinal studies with uniform outcome measures are required to assess long-term structural and functional benefits of emerging pharmacologic and regenerative therapies. Further efforts should also focus on refining patient selection criteria, standardizing treatment protocols, and integrating multimodal data to guide personalized therapeutic decision-making. Advancements in surgical techniques, postoperative rehabilitation strategies, and patient-reported outcome measures should be aligned with these developments to improve overall clinical effectiveness. A coordinated, multidisciplinary approach that bridges molecular research, clinical practice, and technological innovation will be critical for advancing OA management and improving long-term patient outcomes. Conclusions OA is a complex and multidimensional joint disorder driven by interactions between mechanical loading, inflammatory processes, metabolic factors, and progressive structural changes across cartilage, synovium, subchondral bone, and periarticular tissues. Contemporary understanding characterizes OA as a whole-joint disease rather than an isolated cartilage pathology, with important implications for diagnosis and management. Advances in imaging and emerging biomarker strategies have improved disease characterization; however, early detection remains limited by a lack of standardization, incomplete validation, and variable clinical applicability. Current pharmacologic and non-pharmacologic approaches provide symptomatic relief and functional improvement but do not consistently alter long-term structural progression. Surgical interventions offer clinical benefit in advanced disease, supported by ongoing refinements in alignment techniques, implant design, and perioperative care. Emerging biological and regenerative therapies are being investigated for their potential to target underlying disease mechanisms, including matrix repair and modulation of cellular signaling, although clinical outcomes remain variable and require further validation. Overall, despite notable advances, important gaps persist in early diagnosis, disease modification, and personalized management, highlighting the need for integrated diagnostic frameworks and continued evaluation of targeted therapeutic strategies across diverse OA phenotypes."
+    }
+   ]
+  },
+  {
+   "id": "OARSI-OA-001",
+   "source": "OARSI",
+   "title": "OARSI guidelines for the non-surgical management of knee hip and polyarticular osteoarthritis",
+   "year": "2019",
+   "page_url": "https://www.oarsi.org/research/guidelines",
+   "pdf_url": "https://www.oarsi.org/research/guidelines",
+   "license": "OARSI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "rheumatology_oa",
+   "priority": "high",
+   "sha256": "c9b93b290d75e5d4a255a6e3571e95e97e957469f80b89a086b6fbb859ab4fdd",
+   "size_bytes": 2762,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2762,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "OARSI guidelines for the non-surgical management of knee, hip, and polyarticular osteoarthritis. To update and expand upon prior Osteoarthritis Research Society International (OARSI) guidelines by developing patient-focused treatment recommendations for individuals with Knee, Hip, and Polyarticular osteoarthritis (OA) that are derived from expert consensus and based on objective review of high-quality meta-analytic data. We sought evidence for 60 unique interventions. A systematic search of all relevant databases was conducted from inception through July 2018. After abstract and full-text screening by two independent reviewers, eligible studies were matched to PICO questions. Data were extracted and meta-analyses were conducted using RevMan software. Grading of Recommendations Assessment, Development, and Evaluation (GRADE) Evidence Profiles were compiled using the GRADEpro web application. Voting for Core Treatments took place first. Four subsequent voting sessions took place via anonymous online survey, during which Panel members were tasked with voting to produce recommendations for all joint locations and comorbidity classes. We designated non-Core treatments to Level 1A, 1B, 2, 3, 4A, 4B, or 5, based on the percentage of votes in favor, in addition to the strength of the recommendation. Core Treatments for Knee OA included arthritis education and structured land-based exercise programs with or without dietary weight management. Core Treatments for Hip and Polyarticular OA included arthritis education and structured land-based exercise programs. Topical non-steroidal anti-inflammatory drugs (NSAIDs) were strongly recommended for individuals with Knee OA (Level 1A). For individuals with gastrointestinal comorbidities, COX-2 inhibitors were Level 1B and NSAIDs with proton pump inhibitors Level 2. For individuals with cardiovascular comorbidities or frailty, use of any oral NSAID was not recommended. Intra-articular (IA) corticosteroids, IA hyaluronic acid, and aquatic exercise were Level 1B/Level 2 treatments for Knee OA, dependent upon comorbidity status, but were not recommended for individuals with Hip or Polyarticular OA. The use of Acetaminophen/Paracetamol (APAP) was conditionally not recommended (Level 4A and 4B), and the use of oral and transdermal opioids was strongly not recommended (Level 5). A treatment algorithm was constructed in order to guide clinical decision-making for a variety of patient profiles, using recommended treatments as input for each decision node. These guidelines offer comprehensive and patient-centered treatment profiles for individuals with Knee, Hip, and Polyarticular OA. The treatment algorithm will facilitate individualized treatment decisions regarding the management of OA."
     }
    ]
   }

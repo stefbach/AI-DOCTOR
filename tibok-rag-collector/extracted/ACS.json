@@ -1,7 +1,7 @@
 {
  "source": "ACS",
  "generated_at": "2026-05-09T09:44:44Z",
- "total_documents": 5,
+ "total_documents": 6,
  "documents": [
   {
    "id": "ATLS-001",
@@ -233,6 +233,31 @@
     {
      "chunk_index": 9,
      "content": "in particular, to control of fomite mediated transmission in the operating theatre and prevention of mesh contamination with S. aureus CFUs . Risk management strategies should also target the niche ecological conditions which enable bacterial survival and subsequent biofilm formation on an implanted mesh. These include hyperglycaemia, hypoxia, hypothermia, hypoperfusion, hypovitaminosis, haematoma, large lipocutaneous flaps, inadequate tissue levels of prophylactic antibiotics and microporous mesh. Outcomes of mesh infection after hernia surgery are closely related to mesh type and porosity, patient smoking status, presence of MRSA, bacterial adhesion and biofilm production. The use of macroporous polypropylene versus absorbable biosynthetic P-4HB mesh or biological mesh in contaminated wounds requires further RCTs. Suction drains may be a surrogate marker for more complex hernia surgery or high-risk patients. There is a paucity of evidence that CSD prevent SSIs after hernia surgery. Prophylactic NPWT may provide an alternative to CSD in high-risk wounds after VHR. The utility of the ACS-NSQIP Surgical Risk Calculator in predicting complications and outcomes in individual patients, and the importance of QI initiatives in surgical units is emphasized."
+    }
+   ]
+  },
+  {
+   "id": "ATLS-DRUG-001",
+   "source": "ACS",
+   "title": "ATLS Advanced Trauma Life Support drug list 10th edition",
+   "year": "2018",
+   "page_url": "https://www.facs.org/quality-programs/trauma/education/advanced-trauma-life-support/",
+   "pdf_url": "https://www.facs.org/quality-programs/trauma/education/advanced-trauma-life-support/",
+   "license": "ACS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "f9659e9b43b9dd76195ad9a97299cafd61be0a3a16d8b34e3387ded3a8e9fa41",
+   "size_bytes": 781,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 781,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:06Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATLS Advanced Trauma Life Support drug list 10th edition Source: ACS Year: 2018 Domain: drug_critical_care License: ACS Available at: https://www.facs.org/quality-programs/trauma/education/advanced-trauma-life-support/ This is a citation reference for the ACS guideline 'ATLS Advanced Trauma Life Support drug list 10th edition' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

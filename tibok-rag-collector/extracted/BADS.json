@@ -1,0 +1,32 @@
+{
+ "source": "BADS",
+ "generated_at": "2026-05-09T19:07:23Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "BADS-DAY-001",
+   "source": "BADS",
+   "title": "BADS British Association of Day Surgery directory of procedures",
+   "year": "2022",
+   "page_url": "https://daysurgeryuk.net/",
+   "pdf_url": "https://daysurgeryuk.net/",
+   "license": "BADS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_general",
+   "priority": "medium",
+   "sha256": "93adfd69f8eb3946904377847a4b0db6baad8adb110470d0611f0503ca909136",
+   "size_bytes": 1350,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1350,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Unnecessary sleepovers? A retrospective audit identifying day surgery rates and reasons for overnight admission following elective urology procedures. Same-day discharge after elective surgery improves hospital efficiency, reduces costs, and enhances patient outcomes. This audit evaluated current practice at Fiona Stanley Hospital, Perth, for elective urological procedures often considered appropriate for day surgery according to the British Association of Day Surgery (BADS) directory. A retrospective review of elective cases performed between 31 August 2023 and 31 August 2024 was undertaken. Of 241 patients audited, 16 met exclusion criteria, 87 (38.7%) were completed as day cases, and 138 (61.3%) were admitted overnight. Common reasons for overnight admission included administration of intravenous antibiotics, awaiting urinary catheter removal/trial of void, continuous bladder irrigation, and social or non-medical factors. In a large number of cases, there was no documented justification for overnight admission. Late arrival at the ward following a surgical procedure was common in those admitted overnight. This audit demonstrates scope to improve same-day discharge rates through improved theatre scheduling, preoperative planning and careful consideration regarding the necessity of certain intra and postoperative interventions."
+    }
+   ]
+  }
+ ]
+}

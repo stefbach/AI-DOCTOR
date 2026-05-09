@@ -1,7 +1,7 @@
 {
  "source": "ESRA",
  "generated_at": "2026-05-09T15:37:45Z",
- "total_documents": 1,
+ "total_documents": 3,
  "documents": [
   {
    "id": "ESRA-PNB-001",
@@ -45,6 +45,56 @@
     {
      "chunk_index": 5,
      "content": "projected benefits remain theoretical. The model also fails to account for cultural, behavioral, or organizational factors that can significantly influence the adoption of safety tools. Furthermore, the checklist was specifically tailored to the Italian healthcare setting, which may limit its generalizability until it is adapted and tested in other healthcare systems. Future research should focus on multicenter validation, assessing user compliance over time, and evaluating the checklist’s impact on clinical outcomes, team performance, and training effectiveness. 5. Conclusions The LRA checklist is a structured tool developed through consensus to improve the safety, standardization, and documentation of regional anesthesia practices. Its creation followed a rigorous methodology, which included expert validation of the content. Additionally, a theoretical model suggested potential organizational and economic benefits for healthcare institutions. While these findings are preliminary, they support the integration of the LRA checklist into routine clinical practice as part of a larger patient safety strategy. The effectiveness of checklist implementation should be evaluated through prospective audits measuring adherence to checklist items, quality of documentation, and trends in complication recognition. Future steps include multicenter implementation studies and quality-improvement initiatives comparing safety indicators before and after checklist adoption, in order to quantify its real-world clinical impact. Further multicenter prospective studies are warranted to validate its real-world effectiveness and assess its impact on clinical outcomes, team performance, and healthcare costs."
+    }
+   ]
+  },
+  {
+   "id": "ESRA-NEURAX-001",
+   "source": "ESRA",
+   "title": "ESRA-ASRA joint guidelines on regional anaesthesia in patients on antithrombotics",
+   "year": "2022",
+   "page_url": "https://esraeurope.org/",
+   "pdf_url": "https://esraeurope.org/",
+   "license": "ESRA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_regional",
+   "priority": "high",
+   "sha256": "ac83bcf585ad1dc7497cd7fd2f880c0fd7f6515bb34e392708c47b11fe488142",
+   "size_bytes": 775,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 775,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESRA-ASRA joint guidelines on regional anaesthesia in patients on antithrombotics Source: ESRA Year: 2022 Domain: anesthesia_regional License: ESRA Available at: https://esraeurope.org/ This is a citation reference for the ESRA guideline 'ESRA-ASRA joint guidelines on regional anaesthesia in patients on antithrombotics' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: anesthesia_regional. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESRA-ACUTE-001",
+   "source": "ESRA",
+   "title": "ESRA-ASRA Joint procedure-specific postoperative pain management PROSPECT working group recommendations",
+   "year": "2021",
+   "page_url": "https://esraeurope.org/prospect/",
+   "pdf_url": "https://esraeurope.org/prospect/",
+   "license": "ESRA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_pain",
+   "priority": "high",
+   "sha256": "9872907005a8c056a1dbc83faa4e3d76e5d5197ff65a037b13eb4b2278251636",
+   "size_bytes": 820,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 820,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESRA-ASRA Joint procedure-specific postoperative pain management PROSPECT working group recommendations Source: ESRA Year: 2021 Domain: anesthesia_pain License: ESRA Available at: https://esraeurope.org/prospect/ This is a citation reference for the ESRA guideline 'ESRA-ASRA Joint procedure-specific postoperative pain management PROSPECT working group recommendations' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: anesthesia_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

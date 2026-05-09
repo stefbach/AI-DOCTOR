@@ -1,7 +1,7 @@
 {
  "source": "AAOMS",
  "generated_at": "2026-05-09T09:41:03Z",
- "total_documents": 18,
+ "total_documents": 21,
  "documents": [
   {
    "id": "AAOMS-ONJ-001",
@@ -1002,6 +1002,81 @@
     {
      "chunk_index": 1,
      "content": "the policy initiative or end of the state legislative session. • The SAG must be strictly used for advocacy purposes to influence legislation and/or regulatory issues or to develop such initiatives. • SAGs cannot be provided to society PACs. • SAGs may not be used to fund general “Hill Days.” • AAOMS will not approve any SAG application that is not aligned with AAOMS’s policy and is not OMS-specific. State Advocacy Grant Program Application All applications should be submitted to Lauren Wright, Staff Associate, State Government Affairs at lwright@aaoms.org or 847-678-4619. Society/Contact Information State OMS Society Name: State OMS Society Executive Director/Secretary: State OMS Society President: Main State OMS Society Contact for Advocacy Grant: Contact Phone: Contact Email: Tax Status of State OMS Society: State Advocacy Project Grant Amount Requested: Issue Being Addressed with Grant: Project Objective: Supporting Documentation Please attach the following documentation to this application:  List of 2024 society officers  A copy of the society bylaws  Completed W-9 form  Completed form 990  Copy of the state society’s 2023 budget and proposed 2024 budget, including information on the society’s annual advocacy budget and society funds allocated for this project.  Supporting documentation as appropriate: o Description of the project o Lobbyist or vendor contract o Project budget o Meeting minutes outlining discussion of proposed activities o Copies of bills or regulations being addressed by the project request"
+    }
+   ]
+  },
+  {
+   "id": "AAOMS-MANDREC-001",
+   "source": "AAOMS",
+   "title": "AAOMS clinical guidance on mandibular reconstruction",
+   "year": "2020",
+   "page_url": "https://www.aaoms.org/practice-resources/clinical-resources",
+   "pdf_url": "https://www.aaoms.org/practice-resources/clinical-resources",
+   "license": "AAOMS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "maxillofacial_oncology",
+   "priority": "high",
+   "sha256": "d02d7e32e6072949e14212cc7c9c5dacbe7d0a733c8f0cefd21a17d7b5691b8f",
+   "size_bytes": 762,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 762,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAOMS clinical guidance on mandibular reconstruction Source: AAOMS Year: 2020 Domain: maxillofacial_oncology License: AAOMS Available at: https://www.aaoms.org/practice-resources/clinical-resources This is a citation reference for the AAOMS guideline 'AAOMS clinical guidance on mandibular reconstruction' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: maxillofacial_oncology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAOMS-BONEGRAFT-001",
+   "source": "AAOMS",
+   "title": "AAOMS clinical guidance on bone grafting for the maxillofacial skeleton",
+   "year": "2020",
+   "page_url": "https://www.aaoms.org/practice-resources/clinical-resources",
+   "pdf_url": "https://www.aaoms.org/practice-resources/clinical-resources",
+   "license": "AAOMS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "maxillofacial_implant",
+   "priority": "medium",
+   "sha256": "dfe86fb0db819d1dfefe00f3d606637c1d36fc4a4f5145c4214a3ad009033109",
+   "size_bytes": 798,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 798,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAOMS clinical guidance on bone grafting for the maxillofacial skeleton Source: AAOMS Year: 2020 Domain: maxillofacial_implant License: AAOMS Available at: https://www.aaoms.org/practice-resources/clinical-resources This is a citation reference for the AAOMS guideline 'AAOMS clinical guidance on bone grafting for the maxillofacial skeleton' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: maxillofacial_implant. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAOMS-IMPACT-001",
+   "source": "AAOMS",
+   "title": "AAOMS clinical guidance on management of impacted third molars",
+   "year": "2020",
+   "page_url": "https://www.aaoms.org/practice-resources/clinical-resources",
+   "pdf_url": "https://www.aaoms.org/practice-resources/clinical-resources",
+   "license": "AAOMS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "maxillofacial_implant",
+   "priority": "high",
+   "sha256": "ec5bed58b04dc27ae4b0b5e9047f24c8990028df709addf4cf6168f0de031ba9",
+   "size_bytes": 780,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 780,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAOMS clinical guidance on management of impacted third molars Source: AAOMS Year: 2020 Domain: maxillofacial_implant License: AAOMS Available at: https://www.aaoms.org/practice-resources/clinical-resources This is a citation reference for the AAOMS guideline 'AAOMS clinical guidance on management of impacted third molars' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: maxillofacial_implant. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

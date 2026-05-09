@@ -1,0 +1,32 @@
+{
+ "source": "King-Guide",
+ "generated_at": "2026-05-09T19:12:23Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "KING-GUIDE-001",
+   "source": "King-Guide",
+   "title": "King Guide to Parenteral Admixtures IV compatibility reference",
+   "year": "2024",
+   "page_url": "https://www.kingguide.com/",
+   "pdf_url": "https://www.kingguide.com/",
+   "license": "King Guide",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_compounding",
+   "priority": "high",
+   "sha256": "728bbe65b26fdebb012baf8320a12eb10662968d5ce7b4043466f4f82ba0ec55",
+   "size_bytes": 2003,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2003,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Evaluation of seven i.v. drug compatibility references by using requests from a drug information center. The scope of coverage and clinical performance of i.v. drug compatibility references were evaluated for drug pairs. Compatibility pairs were selected from a drug information center database of previous questions. Duplicate pairs, contrast media, and nondrug chemicals were excluded. Scope of coverage was defined as whether i.v. compatibility information was present for each pair and was reported as a percentage. Clinical performance included the agreement among the references on compatibility, the inclusion of specific concentration information for each drug in a pair, and the presence of references for the information provided. The analysis included one print reference (Handbook on Injectable Drugs, 14th edition) and six electronic i.v. drug compatibility references (King Guide to Parenteral Admixtures, Trissel's 2 Clinical Pharmaceutics Database, Micromedex's IV INDEX, Gold Standard's Clinical Pharmacology, Facts and Comparisons 4.0 IV Chek, and CompoundingToday.com). The manufacturers' online labeling was also consulted. A total of 97 unique drug pairs were analyzed. Four databases contained i.v. compatibility information on 76% of the drug pairs, one contained 62%, one contained 58%, one contained 56%, and the manufacturers' labeling contained 13% of the pairs. Seventy-nine percent of the pairs had agreement among the references as to whether the pair was compatible, incompatible, or variable. Compounding Today.com, Facts and Comparisons IV Chek, the Handbook on Injectable Drugs, IV INDEX, and Trissel's 2 reported concentrations and references for the information given on all pairs. The highest-performing references included in the evaluation used the compatibility information provided in Trissel's 2 database as their source of information. Other popular references identified fewer pairs, and the manufacturers' labeling rarely contained compatibility information."
+    }
+   ]
+  }
+ ]
+}

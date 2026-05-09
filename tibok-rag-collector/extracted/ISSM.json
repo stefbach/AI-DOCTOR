@@ -1,7 +1,7 @@
 {
  "source": "ISSM",
  "generated_at": "2026-05-09T12:34:52Z",
- "total_documents": 4,
+ "total_documents": 8,
  "documents": [
   {
    "id": "ISSM-PE-001",
@@ -248,6 +248,106 @@
     {
      "chunk_index": 8,
      "content": "Patients After Barbosa SRM. Assessment of female sexual function Mastectomy. Iranian Journal of Psychiatry and Behavioral and quality of life among breast cancer survivors who Sciences. 2017;1(1):e3482. doi: 10.5812/ijpbs.3482. underwenthormone therapy. Mastology, 2017;27(3):237-44 34. Farah LK, Shahram V, Zeinab H. Sexual skills training, body 46. Gambardella A, Esposito D, Accardo G, et al. Sexual image and sexual function in breast cancer. Procedia-Social function and sex hormones in breast cancer patients. and Behavioral Sciences 2014; 159: 288-92. doi: 10.1016/j. Endocrine 2018; 60: 510-5. sbspro.2014.12.374 47. Speer JJ, Hillenberg B, Sugrue DP, et al. Study of sexual 35. Agha PH, Jafari M. Psychometric properties of Iranian functioning determinants in breast cancer survivors. Breast version of female sexual function index. Jundishapur J 2005; 11: 440-7. © 2019 The Author (s); This is an open-access article distributed under the terms of the Creative Commons Attribution License (http://creativecommons.org/licenses/by/4.0), which permits unrestricted use, distribution, and reproduction in any medium, provided the original work is properly cited. International Journal of Women’s Health and Reproduction Sciences, Vol. 7, No. 4, October 2019 441"
+    }
+   ]
+  },
+  {
+   "id": "ISSM-DE-001",
+   "source": "ISSM",
+   "title": "ISSM Position on Delayed Ejaculation and Anejaculation",
+   "year": "2018",
+   "page_url": "https://www.issm.info/sexual-health-headlines/issm-publications-guidelines",
+   "pdf_url": "https://www.issm.info/sexual-health-headlines/issm-publications-guidelines",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sexual_male",
+   "priority": "medium",
+   "sha256": "679f48ede6d3731938d31d8ef3e145b602a5613b20b5b1133d40b0a9337df35a",
+   "size_bytes": 763,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 763,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:06Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISSM Position on Delayed Ejaculation and Anejaculation Source: ISSM Year: 2018 Domain: sexual_male License: Proprietary Available at: https://www.issm.info/sexual-health-headlines/issm-publications-guidelines This is a citation reference for the ISSM guideline 'ISSM Position on Delayed Ejaculation and Anejaculation' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sexual_male. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ISSM-WOMEN-001",
+   "source": "ISSM",
+   "title": "ISSM Standards for Women Sexual Health Diagnosis and Management",
+   "year": "2019",
+   "page_url": "https://www.issm.info/sexual-health-headlines/issm-publications-guidelines",
+   "pdf_url": "https://www.issm.info/sexual-health-headlines/issm-publications-guidelines",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sexual_female",
+   "priority": "high",
+   "sha256": "3b12505cbdf0bf7f000e1e023f6182a1ccb655cadd8962fce312c2b9c0b0e445",
+   "size_bytes": 785,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 785,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISSM Standards for Women Sexual Health Diagnosis and Management Source: ISSM Year: 2019 Domain: sexual_female License: Proprietary Available at: https://www.issm.info/sexual-health-headlines/issm-publications-guidelines This is a citation reference for the ISSM guideline 'ISSM Standards for Women Sexual Health Diagnosis and Management' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sexual_female. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ISSM-AGING-001",
+   "source": "ISSM",
+   "title": "ISSM Recommendations on Sexual Health in Aging",
+   "year": "2020",
+   "page_url": "https://www.issm.info/sexual-health-headlines/issm-publications-guidelines",
+   "pdf_url": "https://www.issm.info/sexual-health-headlines/issm-publications-guidelines",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sexual_male",
+   "priority": "medium",
+   "sha256": "c6a7951664aba334fc3bd71c5e67db4c17b23693683db9947d2fbe8e88e994db",
+   "size_bytes": 747,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 747,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISSM Recommendations on Sexual Health in Aging Source: ISSM Year: 2020 Domain: sexual_male License: Proprietary Available at: https://www.issm.info/sexual-health-headlines/issm-publications-guidelines This is a citation reference for the ISSM guideline 'ISSM Recommendations on Sexual Health in Aging' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sexual_male. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ISSM-NONSURG-001",
+   "source": "ISSM",
+   "title": "ISSM Position on Non-Surgical Penile Augmentation",
+   "year": "2019",
+   "page_url": "https://www.issm.info/",
+   "pdf_url": "https://www.issm.info/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sexual_male",
+   "priority": "low",
+   "sha256": "8ebd150c4ff0446e48694502002004b2df9fe6e5844f795355f0a6eecfda24f3",
+   "size_bytes": 701,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 701,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISSM Position on Non-Surgical Penile Augmentation Source: ISSM Year: 2019 Domain: sexual_male License: Proprietary Available at: https://www.issm.info/ This is a citation reference for the ISSM guideline 'ISSM Position on Non-Surgical Penile Augmentation' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sexual_male. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

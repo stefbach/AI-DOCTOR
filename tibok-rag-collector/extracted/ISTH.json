@@ -1,7 +1,7 @@
 {
  "source": "ISTH",
  "generated_at": "2026-05-02T16:02:33Z",
- "total_documents": 18,
+ "total_documents": 22,
  "documents": [
   {
    "id": "ISTH-001",
@@ -930,6 +930,106 @@
     {
      "chunk_index": 7,
      "content": "practice, cardiology and hepatology often operate in parallel rather than in coordination, which may lead to delayed diagnosis, inconsistent treatment strategies, and uncertainty around anticoagulation. This divide is reflected in the systematic exclusion of cirrhotic patients from major randomized anticoagulation trials, leaving clinicians to rely largely on observational data and expert opinion [ ]. Against this backdrop, the accelerating mortality observed in our study, especially among vulnerable groups such as Hispanic individuals and residents of rural areas underscores the urgent need for targeted AF screening, improved access to specialty care, and integrated cardiovascular–hepatology management models. Addressing these gaps will be essential to mitigating the growing public health burden posed by the coexistence of AF and cirrhosis. This study represents a comprehensive nationwide analysis of age-adjusted mortality trends associated with the coexistence of AF and cirrhosis in the United States using CDC WONDER data; however, several limitations should be acknowledged. First, the analysis relies on death certificate–based cause-of-death coding, which is subject to misclassification and may influence mortality estimates. Additionally, the application of the 2013 National Center for Health Statistics urban–rural classification scheme across all study years may result in misclassification of counties whose urbanization status changed over time, which should be considered when interpreting long-term trends. Furthermore, we were only able to analyze racial disparities for Hispanic, White, and Black or African American patients. Patients of other ethnic groups (Asian or Pacific Islander, American Indian or Alaska Native, etc.) could not be analyzed because of suppressed data for many years in each subgroup. A small proportion of records contained missing demographic or geographic information, limiting the precision of subgroup analyses. Finally, the absence of individual-level clinical and socioeconomic data, including comorbidity burden, disease severity, anticoagulation status, and access to care, precludes adjustment for important confounders and limits causal inference. Conclusions In this nationwide CDC WONDER analysis from 1999 to 2023, mortality associated with the coexistence of cirrhosis and AF increased substantially over time, with age-adjusted mortality rising more than eightfold and accelerating notably after 2016. This increase was observed across all demographic groups, with consistently higher mortality among males, markedly higher rates in adults aged 65 years or older, and the greatest long-term increases among Hispanic or Latino individuals. Geographic and urbanization-based analyses revealed significant heterogeneity, with the steepest increases in mortality occurring in the West and South, and the most rapid growth observed in noncore rural areas. State level analyses further demonstrated wide variation in AAMRs, indicating that the burden of cirrhosis and AF–related mortality is unevenly distributed across the United States. Overall, our findings demonstrate a sustained and worsening national mortality trend related to the coexistence of cirrhosis and AF, with accelerating increases in recent years and consistent disparities by age, sex, race and ethnicity, geography, and urban–rural status. These results highlight the growing public health impact of this dual disease burden and underscore the need for focused surveillance and population-level strategies to address the populations and regions experiencing the greatest increases in mortality. Supplementary Material Suppl 1 APC stratified by gender. Suppl 2 AAPC stratified by gender. Suppl 3 Age Adjusted Mortality Rate stratified by gender. Suppl 4 APC stratified by race. Suppl 5 AAPC stratified by race. Suppl 6 Age adjusted mortality rate stratified by race. Suppl 7 APC stratified by age groups. Suppl 8 Age adjusted mortality rate stratified by age groups. Suppl 9 APC stratified by census region. Suppl 10 AAPC stratified by census region. Suppl 11 Age-adjusted mortality rate stratified by census region. Suppl 12 APC stratified by urban–rural classification. Suppl 13 AAPC stratified by urban–rural classification. Suppl 14 AAMR stratified by urban–rural classification. Suppl 15 AAMR from 1999 to 2020. Suppl 16 Total deaths stratified by place of death from 1999 to 2023."
+    }
+   ]
+  },
+  {
+   "id": "ISTH-ANTIPHOS-001",
+   "source": "ISTH",
+   "title": "ISTH guidance on diagnosis and management of antiphospholipid syndrome thrombosis",
+   "year": "2020",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/jth.14781",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/jth.14781",
+   "license": "ISTH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_venous",
+   "priority": "medium",
+   "sha256": "7536843577a51dc768d67d4cfa86c78a8ceb0f783aba8b69ba85b8f24d451083",
+   "size_bytes": 2114,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2112,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "An update on laboratory detection and interpretation of antiphospholipid antibodies for diagnosis of antiphospholipid syndrome: guidance from the ISTH-SSC Subcommittee on Lupus Anticoagulant/Antiphospholipid Antibodies. Antiphospholipid syndrome (APS) diagnosis is dependent on the accurate detection and interpretation of antiphospholipid antibodies (aPL). Lupus anticoagulant (LA), anticardiolipin antibodies (aCL), and anti-beta2 glycoprotein I antibodies (aβ2GPI) remain the cornerstone of the laboratory part of APS diagnosis. In the 2023 American College of Rheumatology (ACR)/European Alliance of Associations for Rheumatology (EULAR) APS classification criteria, the type of laboratory parameters remain essentially unchanged compared with the updated Sapporo classification criteria, and aCL and aβ2GPI measurement are still restricted to enzyme-linked immunosorbent assays (ELISAs) with moderate and high titer aPL thresholds defined as 40 and 80 Units, respectively, and a cutoff calculated by the 99th percentile has been abandoned. We must differentiate between classification criteria and assessment of aPL in clinical care. Classification criteria are strict and meant for participant inclusion in studies and trials to study homogeneous populations of patients. In contrast, laboratory detection for APS diagnosis in daily practice is broader, meant to diagnose each APS patient to optimize their management. Nowadays, there is increasing use of measurement of aPL by methods other than ELISAs , the semiquantitative reporting of titers is a matter of debate, as well as the role of the isotypes immunoglobulin (Ig)M and IgA, and the role of other aPL, such as antiphosphatidylserine (aPS)/prothrombin (PT) antibodies. Patients diagnosed with the disease may or may not fulfill the classification criteria, and inappropriate use of classification criteria may lead to mis(under)diagnosis. The aim of this guidance, based on literature and expert opinion, is to provide guidance recommendations for laboratory workers and clinicians on routine diagnostic assessment of patients with suspected APS."
+    }
+   ]
+  },
+  {
+   "id": "ISTH-LIVER-001",
+   "source": "ISTH",
+   "title": "ISTH coagulation in liver disease consensus",
+   "year": "2021",
+   "page_url": "https://www.isth.org/page/Guidance",
+   "pdf_url": "https://www.isth.org/page/Guidance",
+   "license": "ISTH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_bleeding",
+   "priority": "high",
+   "sha256": "22d239c6cac253df5ed087c23648c8cfe1c9743005f38951c8de11b3c369a6b2",
+   "size_bytes": 710,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 710,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISTH coagulation in liver disease consensus Source: ISTH Year: 2021 Domain: hematology_bleeding License: ISTH Available at: https://www.isth.org/page/Guidance This is a citation reference for the ISTH guideline 'ISTH coagulation in liver disease consensus' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: hematology_bleeding. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ISTH-PPHCOAG-001",
+   "source": "ISTH",
+   "title": "ISTH SSC postpartum hemorrhage coagulopathy management consensus",
+   "year": "2022",
+   "page_url": "https://www.isth.org/page/Guidance",
+   "pdf_url": "https://www.isth.org/page/Guidance",
+   "license": "ISTH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_bleeding",
+   "priority": "high",
+   "sha256": "a140d01059b86f714aba9ba2a46a1ae6ca39bf6cea0b7f781d876892872a2391",
+   "size_bytes": 752,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 752,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:12Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISTH SSC postpartum hemorrhage coagulopathy management consensus Source: ISTH Year: 2022 Domain: hematology_bleeding License: ISTH Available at: https://www.isth.org/page/Guidance This is a citation reference for the ISTH guideline 'ISTH SSC postpartum hemorrhage coagulopathy management consensus' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: hematology_bleeding. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ISTH-PEDIATRIC-001",
+   "source": "ISTH",
+   "title": "ISTH SSC pediatric and neonatal coagulation consensus statements",
+   "year": "2021",
+   "page_url": "https://www.isth.org/page/Guidance",
+   "pdf_url": "https://www.isth.org/page/Guidance",
+   "license": "ISTH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_pediatric",
+   "priority": "medium",
+   "sha256": "97022481e2829d805d4d3b5d19eba85b1960ffe15f551e074927da5f43bc1ffb",
+   "size_bytes": 754,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 754,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISTH SSC pediatric and neonatal coagulation consensus statements Source: ISTH Year: 2021 Domain: hematology_pediatric License: ISTH Available at: https://www.isth.org/page/Guidance This is a citation reference for the ISTH guideline 'ISTH SSC pediatric and neonatal coagulation consensus statements' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: hematology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

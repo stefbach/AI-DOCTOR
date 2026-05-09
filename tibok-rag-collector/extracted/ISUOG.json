@@ -1,7 +1,7 @@
 {
  "source": "ISUOG",
  "generated_at": "2026-05-09T09:32:24Z",
- "total_documents": 14,
+ "total_documents": 16,
  "documents": [
   {
    "id": "ISUOG-NIPT-001",
@@ -630,6 +630,56 @@
     {
      "chunk_index": 5,
      "content": "Based upon this, cut‐off values for increased intrapartum surveillance might be determined, as the three protective mechanisms provide an explanation for the association between relevant cord anomalies and poor neonatal outcomes found in the literature. Additionally, future research might consider recommendations for patient‐tailored contraction management in case of such relevant cord anomalies. 5 CONCLUSION Epidemiological data indicate that isolated single umbilical artery is associated with a higher perinatal risk profile, which is reflected in our cohort by different intrapartum fetal heart rate patterns compared with controls. These observed differences might explain increased rates of intrapartum intervention and lower neonatal condition in iSUA as reported in previous studies. At present, however, international guidelines do not provide specific recommendations for intrapartum surveillance in iSUA. Our findings support the notion that additional attentiveness during labor may be appropriate, but further prospective research is needed to determine whether tailored intrapartum management for iSUA is warranted. AUTHOR CONTRIBUTIONS PB : Conceptualization, methodology, formal analysis, data curation, visualization, writing—original draft, project administration. IV: Conceptualization, methodology, formal analysis, data curation, software, visualization, writing—original draft, project administration. RV : Supervision, writing—review & editing. MB: Supervision, funding acquisition, writing—review & editing. SO: Conceptualization, methodology, supervision, funding acquisition, writing—review & editing. JL : Conceptualization, methodology, supervision, funding acquisition, writing—review & editing. FUNDING INFORMATION This research was partly funded by ZonMW – Highly Specialised Care & Research Programme, The Hague, The Netherlands (BIRTHSCREEN project, grant number 10070022010001). CONFLICT OF INTEREST STATEMENT All authors declare no conflicts of interest. ETHICS STATEMENT This study involves a retrospective analysis of data originally collected as part of a prospective study approved by the Medical Ethics Committee (METC) of Máxima MC (Veldhoven, the Netherlands). The METC reviewed the research protocol of the prospective study (reference no. N19.032, April 17th, 2019) and this study (reference no. N24.028, N25.049, July 18th, 2025) and confirmed that the Medical Research involving Human Subjects Act (WMO) does not apply to both studies. Supporting information Data S1."
+    }
+   ]
+  },
+  {
+   "id": "ISUOG-PRENATAL-001",
+   "source": "ISUOG",
+   "title": "ISUOG practice guidelines invasive procedures for prenatal diagnosis",
+   "year": "2016",
+   "page_url": "https://www.isuog.org/",
+   "pdf_url": "https://www.isuog.org/",
+   "license": "ISUOG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "genetics_screening",
+   "priority": "medium",
+   "sha256": "16ccb4e98e16b55e9b05ae6dac6bc7631e706067beefd73a0debdd96ee658056",
+   "size_bytes": 2880,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2879,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Vasa previa screening: comparison of national and international obstetric imaging guidelines. To evaluate national and international obstetric ultrasound guidelines regarding their recommendations for vasa previa (VP) screening, and to assess the consistency, scope and evidence base of the recommendations. We conducted a comprehensive review of accessible national obstetric imaging guidelines from 15 countries worldwide, as well as two international guidelines by the International Society of Ultrasound in Obstetrics and Gynecology (ISUOG). Guidelines were assessed for whether they explicitly mentioned VP, recommended screening for VP or incorporated VP detection strategies, such as placental cord insertion assessment, color flow Doppler assessment of the lower uterine segment or third-trimester transvaginal ultrasound with color flow Doppler in patients with second-trimester placenta previa or low-lying placenta. Additionally, we evaluated whether any national societies or international organizations had specific guidelines on VP, which were then assessed for whether they included recommendations for VP screening and outlined specific screening policies or strategies. Of 20 national and two international obstetric imaging guidelines reviewed, 12 mentioned VP and none explicitly recommended routine screening for VP in pregnant individuals. Nine national obstetric imaging guidelines recommended routine assessment of the placental cord insertion, while none endorsed routine color flow Doppler assessment of the lower uterine segment. Five national guidelines recommended third-trimester transvaginal ultrasound examination with color flow Doppler to rule out VP in pregnancies with a second-trimester low-lying placenta or placenta previa. In our search, only five national societies were found to have developed dedicated VP guidelines, although some of their recommendations were inconsistent with recent evidence. For example, the 2019 guideline from the Royal College of Obstetricians and Gynaecologists in the UK does not recommend routine VP screening, citing insufficient evidence and an uncertain balance of benefit vs harm. Despite the high mortality rate associated with undiagnosed VP and the mounting evidence supporting the feasibility of screening, many national and international obstetric imaging guidelines either omit mention of VP or fall short of recommending a structured screening approach. Given the demonstrated accuracy of VP screening, its remarkable impact in reducing the rate of VP-related stillbirth and the minimal additional resources required for VP detection strategies, current imaging guidelines should be updated to incorporate evidence-based VP screening strategies into routine obstetric imaging protocols to reduce preventable perinatal deaths. © 2026 International Society of Ultrasound in Obstetrics and Gynecology."
+    }
+   ]
+  },
+  {
+   "id": "ISUOG-MFM-006",
+   "source": "ISUOG",
+   "title": "ISUOG Practice Guidelines Role of Ultrasound in Twin Pregnancy",
+   "year": "2016",
+   "page_url": "https://www.isuog.org/clinical-resources/isuog-guidelines.html",
+   "pdf_url": "https://www.isuog.org/clinical-resources/isuog-guidelines.html",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_fetal_growth",
+   "priority": "high",
+   "sha256": "2741a457bf46abc82aeb479b7607c2cc372c0f2fe80b7ded97a470db15759ed5",
+   "size_bytes": 778,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 778,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISUOG Practice Guidelines Role of Ultrasound in Twin Pregnancy Source: ISUOG Year: 2016 Domain: mfm_fetal_growth License: Restricted Available at: https://www.isuog.org/clinical-resources/isuog-guidelines.html This is a citation reference for the ISUOG guideline 'ISUOG Practice Guidelines Role of Ultrasound in Twin Pregnancy' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_fetal_growth. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

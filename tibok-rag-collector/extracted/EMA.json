@@ -1,7 +1,7 @@
 {
  "source": "EMA",
  "generated_at": "2026-05-09T13:42:54Z",
- "total_documents": 21,
+ "total_documents": 25,
  "documents": [
   {
    "id": "EMA-EPAR-004",
@@ -1161,6 +1161,106 @@
     {
      "chunk_index": 8,
      "content": "through journals and publications. Once considered a niche for mainstream high-impact journals, AI-related research has been increasingly presented in cardiac imaging journals. By thoughtfully curating specific topics that engage AI algorithms’ downstream impact, journal editors can contribute significantly to responsible AI research. Moreover, improving the ability of non-technical experts and reviewers to assess the potential impact of AI research is critical for timely, constructive peer review and acceptance. Guidelines for scientific rigor and reporting in AI, as well as general educational opportunities, will create a deeper bench of qualified reviewers for cardiovascular imaging AI papers. The development of such steps enables a significant proportion of non-technical clinical reviewers to assess complex AI-related topics while focusing primarily on clinical translation of the AI approaches. Finally, expanding the use of preprint servers in partnership with peer-reviewed journals can improve timely dissemination of novel research. Conclusion There are several multi-disciplinary research opportunities and additional developmental work that are all important to translate AI of cardiovascular imaging forward into clinical practice. Some of these opportunities that were identified in the workshop include: Developing methods to assess data quality and diversity, data harmonization, and data security, all while also promoting a diverse AI workforce Expanding methods for data- and label-efficient algorithms, multi-modality algorithms, and methods for evaluation of AI models’ robustness, generalizability, and learned features Developing methods for interoperable and sustainable code across computing platforms that are easy for biomedical researchers to learn and use In regulatory science, addressing the lack of consensus methods for enhancing algorithm training for small clinical datasets, a better understanding of failure modes for AI devices, developing assessment methods to evaluate adaptive and autonomous devices, and forging a clear path to updating AI-based SaMD as technology rapidly evolves Formulating clinical trials, healthcare utilization studies, and other implementation studies to demonstrate AI’s ability to impact clinical outcomes and thus help facilitate payer reception of AI-based tools Educating clinicians in AI to improve trust in the methods and thus promote evaluation of AI for clinical cardiology by leading clinical trials and contributing to quality improvement, and engaging societies in the education process, in supporting AI-friendly datasets and registries that are readily accessible to users, and in helping to create guidelines Clinical cardiology is well-positioned for implementation of artificial intelligence that is expected to bring improvement across cardiovascular imaging workflow, diagnosis, management, and prognosis. Much work remains to be done in all areas of artificial intelligence in cardiovascular imaging, but with clear challenges and opportunities set out by a multi-disciplinary, cohesive community, progress can and will be achieved. Supplementary Material 1"
+    }
+   ]
+  },
+  {
+   "id": "EMA-EPAR-002",
+   "source": "EMA",
+   "title": "EMA Pharmacovigilance Risk Assessment Committee PRAC monthly recommendations",
+   "year": "2024",
+   "page_url": "https://www.ema.europa.eu/en/committees/pharmacovigilance-risk-assessment-committee-prac",
+   "pdf_url": "https://www.ema.europa.eu/en/committees/pharmacovigilance-risk-assessment-committee-prac",
+   "license": "EMA Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacovigilance",
+   "priority": "high",
+   "sha256": "2ad15f828292e3a8bed8626032debd140eaff81a551859329c08f0dcd39d8936",
+   "size_bytes": 838,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 838,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:09Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EMA Pharmacovigilance Risk Assessment Committee PRAC monthly recommendations Source: EMA Year: 2024 Domain: drug_pharmacovigilance License: EMA Open Available at: https://www.ema.europa.eu/en/committees/pharmacovigilance-risk-assessment-committee-prac This is a citation reference for the EMA guideline 'EMA Pharmacovigilance Risk Assessment Committee PRAC monthly recommendations' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pharmacovigilance. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EMA-EPAR-010",
+   "source": "EMA",
+   "title": "EMA Investigation of drug interactions guideline CHMP",
+   "year": "2012",
+   "page_url": "https://www.ema.europa.eu/en/investigation-drug-interactions",
+   "pdf_url": "https://www.ema.europa.eu/en/investigation-drug-interactions",
+   "license": "EMA Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_interactions",
+   "priority": "high",
+   "sha256": "0c6f533caa660dd2ff289d4a9454dfb4bfcd0f11ebfa6c238840098c0f62cc28",
+   "size_bytes": 754,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 754,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EMA Investigation of drug interactions guideline CHMP Source: EMA Year: 2012 Domain: drug_interactions License: EMA Open Available at: https://www.ema.europa.eu/en/investigation-drug-interactions This is a citation reference for the EMA guideline 'EMA Investigation of drug interactions guideline CHMP' published in 2012. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_interactions. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EMA-SHORT-001",
+   "source": "EMA",
+   "title": "EMA Catalogue of medicines for veterinary use shortages and supply problems",
+   "year": "2024",
+   "page_url": "https://www.ema.europa.eu/en/human-regulatory/post-authorisation/availability-medicines/shortages",
+   "pdf_url": "https://www.ema.europa.eu/en/human-regulatory/post-authorisation/availability-medicines/shortages",
+   "license": "EMA Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_shortage_recall",
+   "priority": "medium",
+   "sha256": "ec72dffe0ca43e3521910cb826f91a7bde7309bde67d3cf87f171513d686f5dc",
+   "size_bytes": 841,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 841,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EMA Catalogue of medicines for veterinary use shortages and supply problems Source: EMA Year: 2024 Domain: drug_shortage_recall License: EMA Open Available at: https://www.ema.europa.eu/en/human-regulatory/post-authorisation/availability-medicines/shortages This is a citation reference for the EMA guideline 'EMA Catalogue of medicines for veterinary use shortages and supply problems' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_shortage_recall. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EMA-PROBLEMATIC-001",
+   "source": "EMA",
+   "title": "EMA Public statement on falsified medicines and unauthorized products",
+   "year": "2024",
+   "page_url": "https://www.ema.europa.eu/en/news",
+   "pdf_url": "https://www.ema.europa.eu/en/news",
+   "license": "EMA Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_shortage_recall",
+   "priority": "low",
+   "sha256": "b5507e9130f15d2ae7f965285bdfc17381e0fd22e459d7bcefede921b09ea1de",
+   "size_bytes": 765,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 765,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EMA Public statement on falsified medicines and unauthorized products Source: EMA Year: 2024 Domain: drug_shortage_recall License: EMA Open Available at: https://www.ema.europa.eu/en/news This is a citation reference for the EMA guideline 'EMA Public statement on falsified medicines and unauthorized products' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_shortage_recall. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

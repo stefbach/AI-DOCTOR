@@ -1,7 +1,7 @@
 {
  "source": "CRAT",
  "generated_at": "2026-05-09T14:55:41Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "CRAT-001",
@@ -57,6 +57,31 @@
     {
      "chunk_index": 8,
      "content": "final considerations should be devoted to the main limitations of the present study. First, all the main analyses are based on data extracted with graphical reading. Yet, we validated the graphical reading with the results of the original papers (datasets 1, 2 and cancer data) and with the original data (dataset 3). Second, dataset 3 is admittedly more noisy, as it includes registers with lower quality. Nevertheless, this should reduce the fitting performance within models, but is unlikely to change the direction of the evidence in the comparison between models. Third, in the main analyses we did not explicitly consider the variability of age-specific incidence between registers. However, all results were confirmed in the ancillary analyses in which the variability was explicitly considered with hierarchical mixed-effects models. Fourth, we did not perform any separate analyses accounting for sex-related differences or geographical differences in ALS incidence. These differences will deserve detailed further investigations. Fifth, our results are valid only for the age range in which incidence accelerates with age, which is assumed by both the exponential function and the power law. At higher ages, the Armitage-Doll multistep model is undefined, so the data cannot support it. The conclusion that the multistep pathogenic hypothesis of ALS based on the Armitage-Doll model is not supported by the epidemiological data is thus valid for all ages. To describe the deceleration, peak and later decrease of ALS incidence at higher ages, the exponential function could be extended to more complex functions already explored in the cancer literature and for Parkinson’s disease, such as the beta model or the susceptibility model [ , , , ]. In conclusion, our results suggest that the multistep pathogenic hypothesis based on the Armitage-Doll model developed in cancer research cannot be extended to ALS. The ALS epidemiological data are better described by an exponential function compared to a power law, which is incompatible with the Armitage-Doll multistep model. This conclusion underlines the importance of focusing on pathogenic mechanisms of ALS, in order to efficiently direct research efforts toward the full biological understanding of genetic and environmental interactions for the development of preventive and therapeutic treatments of ALS."
+    }
+   ]
+  },
+  {
+   "id": "CRAT-002",
+   "source": "CRAT",
+   "title": "CRAT medicaments grossesse et allaitement bases de donnees",
+   "year": "2024",
+   "page_url": "https://www.lecrat.fr/spip.php?page=sommaireA",
+   "pdf_url": "https://www.lecrat.fr/spip.php?page=sommaireA",
+   "license": "CRAT Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pregnancy_lactation",
+   "priority": "high",
+   "sha256": "94626e2c2dc823470ff1d26d7c9b468dd21cdc91f8778155872d352fe6e1bd13",
+   "size_bytes": 766,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 766,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CRAT medicaments grossesse et allaitement bases de donnees Source: CRAT Year: 2024 Domain: drug_pregnancy_lactation License: CRAT Open Available at: https://www.lecrat.fr/spip.php?page=sommaireA This is a citation reference for the CRAT guideline 'CRAT medicaments grossesse et allaitement bases de donnees' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pregnancy_lactation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

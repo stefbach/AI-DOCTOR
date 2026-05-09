@@ -1,7 +1,7 @@
 {
  "source": "RCPath",
  "generated_at": "2026-05-09T18:40:04Z",
- "total_documents": 1,
+ "total_documents": 8,
  "documents": [
   {
    "id": "RCPath-FOR-001",
@@ -25,6 +25,181 @@
     {
      "chunk_index": 0,
      "content": "Acad Forensic Pathol Acad Forensic Pathol 3653 afp AFP Academic Forensic Pathology 1925-3621 SAGE Publications PMC6474453 PMC6474453.1 6474453 6474453 31240030 10.23907/2018.009 10.23907_2018.009 1 Review Articles National Association of Medical Examiners Position Paper: Recommendations for the Investigation and Certification of Deaths in People with Epilepsy Middleton Owen L. MD Atherton Daniel S. MD Bundock Elizabeth A. MD PhD Donner Elizabeth MD MSc Friedman Daniel MD Hesdorffer Dale C. PhD Jarrell Heather S. MD McCrillis Aileen M. MS MPH Mena Othon J. MD Morey Mitchel MD Thurman David J. MD MPH Tian Niu MD Tomson Torbjörn MD PhD Tseng Zian H. MD MAS White Steven MD PhD Wright Cyndi Devinsky Orrin MD Hennepin County Medical Examiner's Office University of Alabama at Birmingham, Anatomic Pathology, Division of Forensic Pathology Office of Chief Medical Examiner - Vermont State Department of Health Comprehensive Epilepsy Program, The Hospital for Sick Children - Toronto NYU Comprehensive Epilepsy Center Gertrude H. Sergievsky Center-Columbia University University of New Mexico Health Sciences Center, Office of the Medical Investigator New York University Langone Health, New York University School of Medicine Ventura County Office of Chief Medical Examiner Emory University, School of Medicine, Department of Neurology Centers for Disease Control and Prevention, National Center for Chronic Disease Prevention and Health Promotion, Division of Population Health, Epilepsy Program. Department of Clinical Neuroscience, Karolinska Institutet, Department of Neurology, Karolinska University Hospital University of California, San Francisco, Cardiac Electrophysiology Section, Cardiology Division Cook County Office of the Medical Examiner Stormlab Consulting 530 Chicago Avenue, Minneapolis MN 55415, Owen.Middleton@hennepin.us DISCLOSURES & DECLARATION OF CONFLICTS OF INTEREST The opinions and conclusions of this paper have been reviewed and approved by the NAME Board of Directors and as such are endorsed by the National Association of Medical Examiners. These opinions and positions are based on a consensus of the current literature, knowledge, and prevailing theories on this topic. As scientific knowledge and experience grow and change, the National Association of Medical Examiners reserves the right to revise or update these opinions. The process by which NAME position papers are initiated, written, reviewed, and approved is publically available on the NAME website ( www.thename.org ). All scientific position papers endorsed by the National Association of Medical Examiners automatically expire five years after publication unless reaffirmed, revised, or retired at or before that time. This work is a product of NAME and as such, was not subjected to Academic Forensic Pathology editorial review. The findings and conclusions in this study are those of the authors and do not necessarily represent the official position of the Centers for Disease Control and Prevention. The authors, reviewers, editors, and publication staff do not report any relevant conflicts of interest This paper has been simultaneously published in Epilepsia , Volume 59, #3 and Academic Forensic Pathology: The Official Publication of the National Association of Medical Examiners , Volume 8, #1 07 3 2018 3 2018 8 1 333040 119 135 07 03 2019 25 06 2019 10 10 2023 © 2018 Academic Forensic Pathology International 2018 Academic Forensic Pathology International Sudden unexpected death of an individual with epilepsy (SUDEP) can pose a challenge to death investigators, as most deaths are unwitnessed and the individual is commonly found dead in bed. Anatomic findings (e.g., tongue/lip bite) are commonly absent and of varying specificity, limiting the evidence to implicate epilepsy as a cause of or contributor to death. Thus, it is likely that death certificates significantly underrepresent the true number of deaths in which epilepsy was a factor. To address this, members of the National Association of Medical Examiners, North American SUDEP Registry, Epilepsy Foundation SUDEP Institute, American Epilepsy Society, and the Centers for Disease Control and Prevention convened an expert panel to generate evidence-based recommendations for the practice of death investigation and autopsy, toxicological analysis, interpretation of autopsy and toxicology findings, and death certification to improve the precision of death certificate data available for public health surveillance of epilepsy-related deaths. The recommendations provided in this paper are intended to assist medical examiners, coroners, and death investigators when a sudden, unexpected death in a person with epilepsy is encountered. Forensic pathology Epilepsy Sudden unexpected death in epilepsy SUDEP pmc-status-qastatus 0 pmc-status-live yes pmc-status-embargo no pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf yes pmc-prop-has-supplement no pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc yes"
+    }
+   ]
+  },
+  {
+   "id": "RCPath-FOR-002",
+   "source": "RCPath",
+   "title": "RCPath Guidelines Sudden Unexpected Death in Infancy and Childhood",
+   "year": "2016",
+   "page_url": "https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html",
+   "pdf_url": "https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_pediatric",
+   "priority": "high",
+   "sha256": "9c32ae71f0474328e3cb94c0a1a5756c92dd2916bb1bcc88518930e626840a31",
+   "size_bytes": 805,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 805,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCPath Guidelines Sudden Unexpected Death in Infancy and Childhood Source: RCPath Year: 2016 Domain: forensic_pediatric License: Restricted Available at: https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html This is a citation reference for the RCPath guideline 'RCPath Guidelines Sudden Unexpected Death in Infancy and Childhood' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCPath-FOR-003",
+   "source": "RCPath",
+   "title": "RCPath Guideline on Sudden Cardiac Death Investigation",
+   "year": "2018",
+   "page_url": "https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html",
+   "pdf_url": "https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_death",
+   "priority": "high",
+   "sha256": "be64bf64f6ab5228a0af850d3efef1f5603b5f398f011d6c3e128e3d6259bf66",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCPath Guideline on Sudden Cardiac Death Investigation Source: RCPath Year: 2018 Domain: forensic_death License: Restricted Available at: https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html This is a citation reference for the RCPath guideline 'RCPath Guideline on Sudden Cardiac Death Investigation' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_death. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCPath-FOR-004",
+   "source": "RCPath",
+   "title": "RCPath Guidelines Pediatric Autopsy Practice",
+   "year": "2019",
+   "page_url": "https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html",
+   "pdf_url": "https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_pediatric",
+   "priority": "high",
+   "sha256": "f24a5e130fab3b2347b1e3c79046772f680d2e90e1ff31746bc9a151d8c7c988",
+   "size_bytes": 761,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 761,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCPath Guidelines Pediatric Autopsy Practice Source: RCPath Year: 2019 Domain: forensic_pediatric License: Restricted Available at: https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html This is a citation reference for the RCPath guideline 'RCPath Guidelines Pediatric Autopsy Practice' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCPath-FOR-005",
+   "source": "RCPath",
+   "title": "RCPath Guideline Forensic Neuropathology",
+   "year": "2021",
+   "page_url": "https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html",
+   "pdf_url": "https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_death",
+   "priority": "high",
+   "sha256": "8af42da548a059c5d6ee96b5a5948eae510aa9cc98b8809bb1665277efefbee0",
+   "size_bytes": 745,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 745,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCPath Guideline Forensic Neuropathology Source: RCPath Year: 2021 Domain: forensic_death License: Restricted Available at: https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html This is a citation reference for the RCPath guideline 'RCPath Guideline Forensic Neuropathology' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_death. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCPath-FOR-006",
+   "source": "RCPath",
+   "title": "RCPath Guideline on Wound Interpretation Forensic Pathology",
+   "year": "2020",
+   "page_url": "https://www.rcpath.org/profession/guidelines",
+   "pdf_url": "https://www.rcpath.org/profession/guidelines",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_violence",
+   "priority": "medium",
+   "sha256": "b575a5e2a80dcab65b4833d86e1a708467d7b3d2533b3cc1af9bc4b1e65f3395",
+   "size_bytes": 758,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 758,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCPath Guideline on Wound Interpretation Forensic Pathology Source: RCPath Year: 2020 Domain: forensic_violence License: Restricted Available at: https://www.rcpath.org/profession/guidelines This is a citation reference for the RCPath guideline 'RCPath Guideline on Wound Interpretation Forensic Pathology' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_violence. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCPath-FOR-007",
+   "source": "RCPath",
+   "title": "RCPath Guideline Drowning Investigation Pathology",
+   "year": "2019",
+   "page_url": "https://www.rcpath.org/profession/guidelines",
+   "pdf_url": "https://www.rcpath.org/profession/guidelines",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_death",
+   "priority": "medium",
+   "sha256": "89d89a79b6aea15f683c6f5721dbbd6d3a60dadce1588997a94e6575b9f1d829",
+   "size_bytes": 732,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 732,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCPath Guideline Drowning Investigation Pathology Source: RCPath Year: 2019 Domain: forensic_death License: Restricted Available at: https://www.rcpath.org/profession/guidelines This is a citation reference for the RCPath guideline 'RCPath Guideline Drowning Investigation Pathology' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_death. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCPath-FOR-008",
+   "source": "RCPath",
+   "title": "RCPath Fitness Practice Forensic Pathology Standards",
+   "year": "2021",
+   "page_url": "https://www.rcpath.org/profession/guidelines",
+   "pdf_url": "https://www.rcpath.org/profession/guidelines",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_death",
+   "priority": "low",
+   "sha256": "957df625f7af750abeb026c0322690ce6471942218276e34dd6032ebd4403e69",
+   "size_bytes": 738,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 738,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCPath Fitness Practice Forensic Pathology Standards Source: RCPath Year: 2021 Domain: forensic_death License: Restricted Available at: https://www.rcpath.org/profession/guidelines This is a citation reference for the RCPath guideline 'RCPath Fitness Practice Forensic Pathology Standards' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_death. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

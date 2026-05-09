@@ -1,7 +1,7 @@
 {
  "source": "PIDS",
  "generated_at": "2026-05-02T16:21:44Z",
- "total_documents": 4,
+ "total_documents": 6,
  "documents": [
   {
    "id": "PIDS-001",
@@ -204,6 +204,56 @@
     {
      "chunk_index": 6,
      "content": "and infection prevention expertise were convened to review draft manuscripts and to provide input to each section panel. An advisory group consisting of representatives from the five major partnering organizations (SHEA, IDSA, APIC, The Joint Commission, and AHA) provided broad oversight over the Compendium writing process (see Compendium Leadership section at end of the text). All participants complied with the SHEA and IDSA policies on conflict of interest disclosure. Literature Review and Analysis Section panel members reviewed previously published guidelines, systematic reviews, and meta-analyses as well as relevant literature published since 2008. Consensus Development Section panel members for each Compendium article met as needed via teleconference to discuss recommendations, ranking of the quality of evidence for these recommendations, and classification as basic practices, special approaches, or unresolved issues. Section leads assigned responsibilities to panel members. Compendium article drafts were reviewed and final versions were approved by the respective section panel members. Review and Approval Process A critical stage in the development process is peer review. Peer reviewers are relied on for expert, critical, and unbiased scientific appraisals of the documents. SHEA and IDSA employed a process that included multilevel review and approval. Comments were obtained from the expert panel members who complied with the SHEA and IDSA policies on conflict of interest disclosure. In addition, the 5 partnering organizations as well as a number of stakeholder organizations provided comments, support, and endorsement (see Endorsing and Supporting Organizations section at end of text). Finally, the guidance documents were reviewed and approved by the SHEA Guidelines Committee, the IDSA Standards and Practice Guidelines Committee, and the board of directors of SHEA, IDSA, APIC, and The Joint Commission before dissemination. Disclosure of Conflicts of Interest All members of the Compendium section panels, expert panel, and advisory group complied with the IDSA and SHEA policies on conflicts of interest, which require disclosure of any financial or other interest within the past 2 years that might be construed as constituting an actual, potential, or apparent conflict. All participants were provided with the SHEA conflicts of interest disclosure statement and were asked to identify ties to companies developing products that might be affected by promulgation of the Compendium. Information was requested regarding employment, consultancies, stock ownership, honoraria, research funding, expert testimony, and membership on company advisory committees, and participants with potential conflicts were required to submit a plan detailing the process that would be used to avoid conflicts. Decisions were made by the Compendium co-chairs and a disclosure review committee on a case-by-case basis as to whether an individual’s role should be limited as a result of a conflict. Potential conflicts are listed in the Acknowledgments of each section. Mechanism for Updating the Compendium At annual intervals, the SHEA Guidelines Committee, in collaboration with IDSA, AHA, APIC, and The Joint Commission, will determine the need for revisions to the Compendium on the basis of an examination of the current literature. If necessary, the section leads and other content experts will be consulted to discuss the need for changes."
+    }
+   ]
+  },
+  {
+   "id": "PIDS-DRUG-001",
+   "source": "PIDS",
+   "title": "PIDS Pediatric Infectious Diseases Society antimicrobial stewardship recommendations",
+   "year": "2017",
+   "page_url": "https://pids.org/clinical-practice/clinical-guidelines/",
+   "pdf_url": "https://pids.org/clinical-practice/clinical-guidelines/",
+   "license": "PIDS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_pediatric",
+   "priority": "high",
+   "sha256": "1604c70986c35a2eab7413eee8345678406fead270114751534db899d56c1d97",
+   "size_bytes": 803,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 803,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: PIDS Pediatric Infectious Diseases Society antimicrobial stewardship recommendations Source: PIDS Year: 2017 Domain: drug_pediatric License: PIDS Available at: https://pids.org/clinical-practice/clinical-guidelines/ This is a citation reference for the PIDS guideline 'PIDS Pediatric Infectious Diseases Society antimicrobial stewardship recommendations' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "PIDS-VAN-001",
+   "source": "PIDS",
+   "title": "PIDS IDSA SIDP ASHP Therapeutic Monitoring of Vancomycin in Pediatric Patients",
+   "year": "2020",
+   "page_url": "https://academic.oup.com/jpids/article/9/2/138/5715608",
+   "pdf_url": "https://academic.oup.com/jpids/article/9/2/138/5715608",
+   "license": "PIDS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_pediatric",
+   "priority": "high",
+   "sha256": "f4e956bc77b28b028037e1d44f28b017e2b85fd9976f1ad2c0193207758c553b",
+   "size_bytes": 790,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 790,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: PIDS IDSA SIDP ASHP Therapeutic Monitoring of Vancomycin in Pediatric Patients Source: PIDS Year: 2020 Domain: drug_pediatric License: PIDS Available at: https://academic.oup.com/jpids/article/9/2/138/5715608 This is a citation reference for the PIDS guideline 'PIDS IDSA SIDP ASHP Therapeutic Monitoring of Vancomycin in Pediatric Patients' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

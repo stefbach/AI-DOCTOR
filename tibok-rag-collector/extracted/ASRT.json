@@ -1,0 +1,32 @@
+{
+ "source": "ASRT",
+ "generated_at": "2026-05-09T19:06:39Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "ASRT-TX-001",
+   "source": "ASRT",
+   "title": "ASRT International Consensus Statements on Vascularized Composite Allotransplantation",
+   "year": "2020",
+   "page_url": "https://www.asrt.org/",
+   "pdf_url": "https://www.asrt.org/",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "transplant_kidney",
+   "priority": "medium",
+   "sha256": "4feeb270b7053bd529922063c0fff97742077aa95109fd0aea5b8b2a2ad2f7ca",
+   "size_bytes": 783,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 783,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASRT International Consensus Statements on Vascularized Composite Allotransplantation Source: ASRT Year: 2020 Domain: transplant_kidney License: Restricted Available at: https://www.asrt.org/ This is a citation reference for the ASRT guideline 'ASRT International Consensus Statements on Vascularized Composite Allotransplantation' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: transplant_kidney. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

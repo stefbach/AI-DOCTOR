@@ -1,7 +1,7 @@
 {
  "source": "ACEP",
  "generated_at": "2026-05-02T15:57:46Z",
- "total_documents": 9,
+ "total_documents": 11,
  "documents": [
   {
    "id": "ACEP-001",
@@ -589,6 +589,56 @@
     {
      "chunk_index": 8,
      "content": "Cluster Coordination. UN Office for the Coordination of Humanitarian challenges and lessons to be learned. New York: Inter-agency Affairs Web site. Available at: http://www.unocha.org/what-we-do/ Standing Committee. 2010. Available at: https://www.ifrc.org/docs/ coordination-tools/cluster-coordination. Accessed September 20, 2016. IDRL/Haiti/IASC-Haiti_6Mos_Review_USA-2010-005-1.pdf. 19. General requirements. Médicins sans Frontières Web site. Available Accessed Sep 24, 2016. at: http://www.doctorswithoutborders.org/work-us/work-field/ Western Journal of Emergency Medicine 614 Volume 18, no. 4: June 2017 Parmar et al. The Role of Emergency Physicians in a Humanitarian Crisis general-requirements. Accessed September 30, 2016. 2017. 20. What are Emergency Health Kits? World Health Organization Web 28. McDonald B. Humanitarian agencies need to stop failing their staff on site. Available at: http://www.who.int/hac/techguidance/ems/healthkit/ mental health. The Guardian. July 31, 2015. Available at: https:// en/. Accessed September 20, 2016. www.theguardian.com/global-development-professionals- 21. Diamond LC, Luft HS, Chung S, et al. “Does this doctor speak my network/2015/jul/31/aid-workers-casualties-mental-health. Accessed language?” Improving the characterization of physician non-English January 23, 2017. language skills. Health Serv Res. 2012;47(1 Pt 2):556-69. 29. Young TP, Brown MM, Reibling ET, et al. Effect of educational debt 22. Alexander J. Don’t go to Nepal to help. Stay home and send money on Emergency Medicine residents: a qualitative study using individual instead. Slate.com. April 27, 2015. Available at: http://www.slate.com/ interviews. Ann Emerg Med. 2016;68(4):409-18. articles/news_and_politics/foreigners/2015/04/how_to_help_ 30. GEMA: Global Emergency Medicine Academy Web site. Available at: nepal_s_survivors_stay_home_and_send_money_to_aid_ http://community.saem.org/communities/community- organizations.html. Accessed September 30, 2016. home?CommunityKey=f465fb9b-df5d-4809-9810-942d625f963a. 23. Médicins sans Frontières website. Available at: http://www. Accessed January 23, 2017. doctorswithoutborders.org/support-us/donation-faq/what-your- 31. ACEP Section on International Emergency Medicine Web site. support-provides. Accessed January 19, 2017. Available at: https://www.acep.org/content.aspx?id=25144. Accessed 24. Nelson BD, Kasper J, Hibberd PL, et al. Developing a career in January 23, 2017. global health: considerations for physicians-in-training and academic 32. International Emergency Medicine Fellowships Web site. Available at: mentors. J Grad Med Educ.2012;4(3):301–6. http://www.iemfellowships.com. Accessed January 23, 2017. 25. Dell EM, Varpio L, Petrosoniak A, et al. The ethics and safety of 33. Johnson E and Gil Baizan P. What people in humanitarian crises medical student global health electives. Int J Med Educ. 2014;5:63–72. need is cash not commodities. The Guardian.com. Jun 27, 2016. 26. Module 8: the significant harm of worst practices. Unite for Sight Web Available at: https://www.theguardian.com/global-development/2016/ site. Available at: http://www.uniteforsight.org/global-health-course/ jun/27/humanitarian-crises-cash-not-commodities-un-economic-and- module8. Accessed September 30, 2016. social-council. Accessed: September 24, 2016. 27. National Student Program. Physicians for Human Rights 34. Global Humanitarian Assistance. Mind The Gaps. Available at: http:// Web site. Available at: http://physiciansforhumanrights.org/ www.globalhumanitarianassistance.org/data-guides/mind-the-gaps students/?referrer=https://www.google.com. Accessed January 23, Accessed April 11, 2017. Volume 18, no. 4: June 2017 615 Western Journal of Emergency Medicine"
+    }
+   ]
+  },
+  {
+   "id": "ACEP-PROCSED-001",
+   "source": "ACEP",
+   "title": "ACEP clinical policy procedural sedation and analgesia in the emergency department",
+   "year": "2014",
+   "page_url": "https://www.acep.org/patient-care/clinical-policies/",
+   "pdf_url": "https://www.acep.org/patient-care/clinical-policies/",
+   "license": "ACEP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "emergency_resuscitation",
+   "priority": "high",
+   "sha256": "31c69f47598e82d8a6dd4c7d9c4c66ba56b0893104e3c05c588c4952263bfaf5",
+   "size_bytes": 814,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 814,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACEP clinical policy procedural sedation and analgesia in the emergency department Source: ACEP Year: 2014 Domain: emergency_resuscitation License: ACEP Available at: https://www.acep.org/patient-care/clinical-policies/ This is a citation reference for the ACEP guideline 'ACEP clinical policy procedural sedation and analgesia in the emergency department' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: emergency_resuscitation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACEP-FOR-001",
+   "source": "ACEP",
+   "title": "ACEP Policy Domestic Family Violence in the Emergency Department",
+   "year": "2019",
+   "page_url": "https://www.acep.org/patient-care/policy-statements/",
+   "pdf_url": "https://www.acep.org/patient-care/policy-statements/",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_violence",
+   "priority": "medium",
+   "sha256": "d9e16a73f53159a6479cbebbb83933720851da06b60a557e8e0b6ee49fede40f",
+   "size_bytes": 772,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 772,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACEP Policy Domestic Family Violence in the Emergency Department Source: ACEP Year: 2019 Domain: forensic_violence License: Restricted Available at: https://www.acep.org/patient-care/policy-statements/ This is a citation reference for the ACEP guideline 'ACEP Policy Domestic Family Violence in the Emergency Department' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_violence. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

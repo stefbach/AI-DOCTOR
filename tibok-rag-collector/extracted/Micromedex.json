@@ -1,7 +1,7 @@
 {
  "source": "Micromedex",
  "generated_at": "2026-05-09T15:54:27Z",
- "total_documents": 3,
+ "total_documents": 4,
  "documents": [
   {
    "id": "MICROMEDEX-002",
@@ -171,6 +171,31 @@
     {
      "chunk_index": 13,
      "content": "case reports document the consumption of amatoxin-containing mushrooms during pregnancy. In one instance, a 25-year-old woman consumed A. phalloides at 9 weeks gestation, leading to poisoning. She survived and underwent a therapeutic abortion at 12 weeks. The fetus exhibited hepatocellular damage, indicating that amatoxin could cross the placental barrier. Conversely, certain studies indicate that amatoxins don't traverse the placental barrier (Belliardo et al., 1983[ ]), even in the acute phase of poisoning. As a result, their harmful impact on fetal nucleic acids and proteins wouldn't occur, explaining the absence of fetal harm. A documented case describes a woman surviving A. phalloides ingestion without fetal damage or impairment to the child's growth and development. Consequently, even in the first trimester of pregnancy, maternal poisoning by A. phalloides might not necessarily warrant abortion (Boyer et al., 2001[ ]). Conclusion Numerous toxic reactions caused by wild mushrooms have been documented in the literature, some leading to severe or fatal consequences. These include brain edema, liver necrosis, and kidney damage from Gyromitra esculenta ingestion; acute renal failure from C. orellanus ingestion; convulsions and coma from Amanita pantherina ingestion; and combined liver and renal failure from A. phalloides ingestion. Some mushrooms, such as Coprinus atramentarius , Psilocybe cubensis , Amanita muscaria , and Chlorophyllum molybdites , are recognized as toxic but are associated with limited or no human fatalities. However, their consumption can lead to prolonged morbidity and disease progression. Toxins like gyromitrin, orellanine, and amatoxins are characterized by a latent period before the onset of illness, while gastrointestinal symptoms predominate in the groups exposed to amatoxins, gyromitrin, and GI irritants. Mushrooms containing psilocybin, ibotenic acid, and muscimol induce hallucinogenic and neurological effects when ingested. Muscarine-containing mushrooms trigger an acute peripheral cholinergic syndrome, and coprine toxicity arises only when consumed alongside alcohol. Mushrooms containing cyclopeptides are highly toxic and account for the majority of fatalities resulting from mushroom consumption. The exact mechanism of liver damage remains incompletely understood. Some researchers suggest that amatoxins hinder RNA polymerase II activity, leading to reduced mRNA levels, which in turn disrupts protein synthesis and triggers cell death, particularly in the liver. Oxidative stress has also been proposed to enhance the toxicity of these toxins, although the specific pro-oxidant mechanisms are not yet identified. Various antidotes have been provisionally utilized in cases of amatoxin poisoning. These include hormones (insulin, growth hormone, glucagon), steroids, vitamin C, vitamin E, cimetidine, α-lipoic acid, antibiotics (benzylpenicillin, ceftazidime), N-acetylcysteine, and silibinin. Among these, only thioctic acid, benzylpenicillin, ceftazidime, N-acetylcysteine, silibinin, and cimetidine have been employed in the pharmacological treatment of amatoxin poisoning in humans, yielding different degrees of success. Benzylpenicillin and other β-lactam antibiotics are commonly employed for treating amatoxin poisoning alone or alongside other medications. Yet, the specific mechanisms by which these drugs work are still unclear. In cases of liver failure, liver transplantation might be the sole viable option. Mistaking toxic mushrooms for edible ones during wild mushroom consumption is the primary cause of mushroom poisoning. The best prevention against mushroom poisoning is abstaining from eating wild mushrooms. In general, distinguishing between non-poisonous and poisonous mushrooms is challenging for individuals without expertise in mushroom identification. In conclusion, it is essential to advance our understanding of the toxic mechanisms caused by these toxins, particularly amatoxins. Such knowledge is pivotal for developing improved and more efficient antidotes. Notes Irene Gouvinhas and Juliana Garcia (AquaValor – Centro de Valorização e Transferência de Tecnologia da Água – Associação, Rua Dr. Júlio Martins n.º 1, 5400-342 Chaves, Portugal; E-mail: juliana.garcia@aquavalor.pt) contributed equally as corresponding author. Declaration Funding This work is supported by National Funds by FCT-Portuguese Foundation for Science and Technology, under the project UIDB/04033/2020 ( https://doi.org/10.54499/UIDB/04033/2020 ) (accessed on 2 April 2024). Conflict of interest The authors declare that they have no conflict of interest. Acknowledgments Irene Gouvinhas thanks FCT (Fundação para a Ciência e Tecnologia) for funding through the Scientific Employment Stimulus-Individual Call (2022.00498.CEECIND), https://doi.org/10.54499/2022.00498.CEECIND/CP1749/CT0001 (accessed on 2 April 2024). Juliana Garcia and Jani Silva are grateful for funding support from Portuguese public funding through Investimento RE-C05-i02-Missão Interface N.º 01/C05-i02/2022 and from FCT for the projects titled “AquaValor-Centro de Valorização e Transferência de Tecnologia da Água” (NORTE-01-0246-FEDER-000053), supported by Norte Portugal Regional Operational Programme (NORTE 2020), under the PORTUGAL 2020 Partnership Agreement, through the European Regional Development Fund (ERDF)."
+    }
+   ]
+  },
+  {
+   "id": "MICROMEDEX-001",
+   "source": "Micromedex",
+   "title": "Micromedex DRUGDEX comprehensive drug evaluation",
+   "year": "2024",
+   "page_url": "https://www.merative.com/clinical-decision-support",
+   "pdf_url": "https://www.merative.com/clinical-decision-support",
+   "license": "Merative",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_formulary",
+   "priority": "high",
+   "sha256": "3e7fb495e1c7e51137ef54616fe80f3bc0fe919fa9804084991bf14d1d010bb2",
+   "size_bytes": 1663,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1663,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Evaluation of five full-text drug databases by pharmacy students, faculty, and librarians: do the groups agree? The purpose of this study is to assess the usefulness of five full-text drug databases as evaluated by medical librarians, pharmacy faculty, and pharmacy students at an academic health center. Study findings and recommendations are offered as guidance to librarians responsible for purchasing decisions. Four pharmacy students, four pharmacy faculty members, and four medical librarians answered ten drug information questions using the databases AHFS Drug Information (STAT!Ref); DRUGDEX (Micromedex); eFacts (Drug Facts and Comparisons); Lexi-Drugs Online (Lexi-Comp); and the PDR Electronic Library (Micromedex). Participants noted whether each database contained answers to the questions and evaluated each database on ease of navigation, screen readability, overall satisfaction, and product recommendation. While each study group found that DRUGDEX provided the most direct answers to the ten questions, faculty members gave Lexi-Drugs the highest overall rating. Students favored eFacts. The faculty and students found the PDR least useful. Librarians ranked DRUGDEX the highest and AHFS the lowest. The comments of pharmacy faculty and students show that these groups preferred concise, easy-to-use sources; librarians focused on the comprehensiveness, layout, and supporting references of the databases. This study demonstrates the importance of consulting with primary clientele before purchasing databases. Although there are many online drug databases to consider, present findings offer strong support for eFacts, Lexi-Drugs, and DRUGDEX."
     }
    ]
   }

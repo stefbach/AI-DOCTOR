@@ -1,7 +1,7 @@
 {
  "source": "ACOG",
  "generated_at": "2026-05-02T15:40:09Z",
- "total_documents": 90,
+ "total_documents": 98,
  "documents": [
   {
    "id": "ACOG-001",
@@ -4262,6 +4262,206 @@
     {
      "chunk_index": 6,
      "content": "require sexual health support, particularly in areas of counseling, education, and preventive care [ ]. A notable finding from this study is the demand for contraceptive services among menopausal women. While fertility is significantly reduced at this stage, the request may reflect two main concerns: ongoing sexual activity and the risk of STIs. In similar African contexts, women have reported fear of infection due to partners’ extramarital affairs, with promiscuity of husbands being a recurring theme [ ]. This highlights the intersection of women’s sexual health with gender dynamics, marital relationships, and cultural silence surrounding male infidelity. Thus, the findings reinforce the need for a comprehensive sexual health approach that goes beyond reproductive concerns to include preventive services, safe sex counseling, and management of sexual health problems among aging women. Addressing these needs would not only improve quality of life but also align with the life-course model of sexual and reproductive health by the World Health Organization, which recognizes that sexual well-being is essential at all stages of life [ ]. Implication for nursing Maintaining the sexual health of women during menopause should be one of the concerns of health professionals specialized in women’s health promotion. This is important as women navigate the physical and emotional challenges associated with menopause. Studies have shown the benefits of sexual satisfaction on emotional well-being and quality of life [ ], a higher sense of purpose in life, interpersonal relations and marital happiness [ ]. Nurses can play the role of advocate between the policy makers and menopausal women for making sexual health services available in the three tiers of health facilities, especially in the first level of care. It is essential for healthcare workers to acknowledge the sexual health needs of menopausal women and to develop targeted programmes that respond to these needs. This study is also significant for policymakers to make decisions that can influence the availability and delivery of quality sexual health services for menopausal women. This will serve as a basis for structuring sexual and reproductive health programmes to include, sexual health promotional activities which can address the sexual health problems and service needs of women in the post-reproductive age. Strengths and limitations This study provided in-depth information about sexual health problems and service needs of menopausal women using a mixed methods approach. Some participants initially expressed reluctance to share sexual health information due to the sensitivity of the topic and the prevailing culture of silence in the study setting. However, the researcher emphasized confidentiality and clarified that the information would be used solely for research purposes. Data collection was conducted in private settings to encourage openness and ensure accuracy. However, the findings may not be generalizable to all menopausal women in Osun State. This is constrained by the research’s emphasis on a specific geographic region, IWLGA, which is mainly populated by Yoruba women. The cultural beliefs, communication styles, and social norms of this group may differ from those in other ethnic or regional contexts in Nigeria. Additionally, the reliance on self-reported retrospective data introduces the possibility of recall bias, particularly when participants reflect on past sexual problems, which may lead to underestimation or reinterpretation over time. Also, the absence of content validity index assessment is a limitation, which could have enhanced the rigor of the instrument. Conclusion A notable proportion of the women experienced sexual health problems, and they also have sexual health service needs. Menopausal women have the right to be sexually healthy as they desire. Efforts should be made by health care providers to improve menopausal women’s access to sexual health information and services to have a fulfilling sexual life. Therefore, all relevant stakeholders, most especially community health nurses and the government should strategize to make adequate health service delivery available at the first level of care to address the sexual health problems of menopausal women."
+    }
+   ]
+  },
+  {
+   "id": "ACOG-BARTH-001",
+   "source": "ACOG",
+   "title": "ACOG Committee Opinion Vulvovaginitis Bartholin Cyst Management",
+   "year": "2020",
+   "page_url": "https://www.acog.org/clinical/clinical-guidance/committee-opinion",
+   "pdf_url": "https://www.acog.org/clinical/clinical-guidance/committee-opinion",
+   "license": "ACOG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gynecologic_surgery_uterine",
+   "priority": "medium",
+   "sha256": "de36daacc355a455cff5b6ce21a972bbed754f753f541091895c1e66114cee06",
+   "size_bytes": 797,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 797,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:41Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACOG Committee Opinion Vulvovaginitis Bartholin Cyst Management Source: ACOG Year: 2020 Domain: gynecologic_surgery_uterine License: ACOG Available at: https://www.acog.org/clinical/clinical-guidance/committee-opinion This is a citation reference for the ACOG guideline 'ACOG Committee Opinion Vulvovaginitis Bartholin Cyst Management' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gynecologic_surgery_uterine. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACOG-FETAL-US-001",
+   "source": "ACOG",
+   "title": "ACOG ultrasound in pregnancy practice bulletin",
+   "year": "2016",
+   "page_url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin",
+   "pdf_url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin",
+   "license": "ACOG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_us_obs",
+   "priority": "high",
+   "sha256": "6ed43ab51e94d7a2173226a3868b9f8510af3a777ca21a62472e0611fc0d9416",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACOG ultrasound in pregnancy practice bulletin Source: ACOG Year: 2016 Domain: radiology_us_obs License: ACOG Available at: https://www.acog.org/clinical/clinical-guidance/practice-bulletin This is a citation reference for the ACOG guideline 'ACOG ultrasound in pregnancy practice bulletin' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_us_obs. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACOG-UAE-001",
+   "source": "ACOG",
+   "title": "ACOG Practice Bulletin uterine fibroids alternatives to hysterectomy including UAE",
+   "year": "2021",
+   "page_url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin",
+   "pdf_url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin",
+   "license": "ACOG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ir_vascular",
+   "priority": "medium",
+   "sha256": "2dd1f2ebe4574f1a01e79008f57e5fda711ff77d6c102015ea86a3ca74722721",
+   "size_bytes": 823,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 823,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACOG Practice Bulletin uterine fibroids alternatives to hysterectomy including UAE Source: ACOG Year: 2021 Domain: radiology_ir_vascular License: ACOG Available at: https://www.acog.org/clinical/clinical-guidance/practice-bulletin This is a citation reference for the ACOG guideline 'ACOG Practice Bulletin uterine fibroids alternatives to hysterectomy including UAE' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_ir_vascular. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACOG-PREGEST-001",
+   "source": "ACOG",
+   "title": "ACOG practice bulletin 201 pregestational diabetes",
+   "year": "2018",
+   "page_url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin",
+   "pdf_url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin",
+   "license": "ACOG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_diabetes",
+   "priority": "high",
+   "sha256": "cfc47e7527cc24db4d19f45d7fd76c7fd029cc1a6fca9568cb07312c590cdfc1",
+   "size_bytes": 1079,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1079,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "ACOG Practice Bulletin No. 201: Pregestational Diabetes Mellitus. Pregestational diabetes mellitus represents one of the most challenging medical complications of pregnancy because of the need for frequent monitoring and adjustment of medications as well as the potential for maternal and fetal complications. This document provides an overview of the current understanding of pregestational diabetes mellitus and suggests management guidelines during pregnancy. Because few well-designed studies have been performed, many of the guidelines are based on expert and consensus opinion. This document has been updated to reflect current data on pregestational diabetes. This Practice Bulletin is updated with summary information to counsel and manage women with pregestational diabetes before and during pregnancy, more recent literature reflecting experience with continuous subcutaneous insulin infusion during pregnancy, an expanded section on the role of oral hypoglycemic agents in pregnancy, and the option of long-acting reversible contraception during the postpartum period."
+    }
+   ]
+  },
+  {
+   "id": "ACOG-PREG-DRUG-001",
+   "source": "ACOG",
+   "title": "ACOG Committee Opinion Pharmacologic Treatment in Pregnancy",
+   "year": "2023",
+   "page_url": "https://www.acog.org/clinical/clinical-guidance",
+   "pdf_url": "https://www.acog.org/clinical/clinical-guidance",
+   "license": "ACOG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_pregnancy_lactation",
+   "priority": "high",
+   "sha256": "bc4400a3c7ba99406652e94990dd31595cafe54118982f5f5bbfc49002c02a6b",
+   "size_bytes": 2571,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2571,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Maternal Depression and Opioid Use After Cesarean Delivery. To evaluate the association between self-reported history of maternal depression by treatment status and opioid use after cesarean delivery. This was a secondary analysis of a multicenter randomized trial of individuals who underwent cesarean delivery at 12 U.S. hospitals from 2020 to 2022. We evaluated two exposures for patients with a self-reported history of depression assessed on the enrollment form: treatment (pharmacologic or nonpharmacologic therapy during pregnancy) or no treatment. The primary outcome was inpatient oral opioid use in morphine milligram equivalents (MMEs) per day from 12 hours after cesarean delivery through hospital discharge. Secondary outcomes included outpatient opioid use (MMEs of opioid prescriptions through 6 weeks postpartum) and moderate-to-severe perceived pain (score 4 or higher) and interference in daily activities (score 4 or higher) on a validated questionnaire, the BPI (Brief Pain Inventory, score 1-10) at 1 week after discharge. Multivariable modeling (quantile regression for continuous outcomes and logistic regression for binary outcomes) evaluated the association between untreated or treated depression compared with no depression and the selected outcomes. Of 5,504 study participants, 1,507 (27.4%) had self-reported depression, of whom 663 (44.0%) were treated. Those with depression were more likely to have a chronic pain condition (19.5% untreated, 18.9% treated, and 8.5% no depression, P<.0001), to use tobacco (22.5% untreated, 18.9% treated, and 8.1% no depression, P<.0001), and to experience disordered sleep (median score [IQR] 57.9 [52.8-63.7] for untreated, 59.3 [53.8-64.2] for treated, and 55.7 [50.3-60.6] for no depression, P<.0001). In adjusted modeling, neither treated nor untreated depression was associated with inpatient postpartum MMEs. However, untreated depression was associated with higher outpatient MME use through 6 weeks postpartum (adjusted median difference 16.7 MMEs/d [95% CI, 8.9-24.5]) and higher moderate-to-severe perceived pain at 1 week after discharge. Both treated depression and untreated depression were associated with higher perceived pain interference in daily activities (adjusted odds ratio 1.44 [95% CI, 1.2-1.8] and 1.37 [95% CI, 1.1-1.7], respectively). Self-reported history of depression, regardless of treatment status, was not associated with increased post-cesarean delivery inpatient opioid use, but untreated depression was associated with increased opioid use through 6 weeks postpartum."
+    }
+   ]
+  },
+  {
+   "id": "ACOG-PREG-DRUG-002",
+   "source": "ACOG",
+   "title": "ACOG Antenatal Corticosteroid Therapy for Fetal Maturation",
+   "year": "2020",
+   "page_url": "https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2020/02/antenatal-corticosteroid-therapy-for-fetal-maturation",
+   "pdf_url": "https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2020/02/antenatal-corticosteroid-therapy-for-fetal-maturation",
+   "license": "ACOG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_pregnancy_lactation",
+   "priority": "high",
+   "sha256": "816f4b1a92d00d945d0bac8ebfa87ba2eadc1a0778f2c8e0b784d83166beb970",
+   "size_bytes": 2291,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2291,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Antenatal Corticosteroids for Fetal Maturation: A Comprehensive Review of Major Guidelines. The administration of corticosteroids before anticipated preterm delivery represents a crucial antenatal intervention that enhances fetal lung maturity and reduces neonatal morbidity and mortality. This review aims to evaluate and compare the most recently published influential guidelines on the use of antenatal corticosteroids (ACS). A comparative review of guidelines from the American College of Obstetricians and Gynecologists (ACOG), the Royal College of Obstetricians and Gynaecologists (RCOG), the International Federation of Gynecology and Obstetrics (FIGO), the European Association of Perinatal Medicine (EAPM), the World Association of Perinatal Medicine (WAPM), the World Health Organization (WHO), the Society of Obstetricians and Gynaecologists of Canada (SOGC), and the Royal Australian and New Zealand College of Obstetricians and Gynaecologists (RANZCOG) was carried out. All the reviewed guidelines recommend the use of ACS between 24+0 and 33+6 weeks of gestation, when preterm delivery is anticipated and endorse the consideration of their use at the periviable period. In addition, there is an overall agreement regarding the recommended regimens and the use of ACS in case of pregnancies with existing comorbidities, such as preterm prelabor rupture of membranes, obesity, multiple pregnancy, fetal growth restriction, and diabetes. In contrast, the recommendations for the use of ACS in the late preterm period, in women with chorioamnionitis and in cases of recurrent or persistent threatened preterm delivery vary. Moreover, RCOG is the only medical society supporting that the administration of ACS in case of planned cesarean delivery should be considered up to 38+6 weeks of gestation. The favorable role of corticosteroids in improving the outcomes of preterm neonates is clearly outlined. However, the explicit articulation of the potential benefits and harms stemming from their use at different stages of pregnancy and in different delivery contexts is yet to be elucidated. Thus, it seems of paramount importance to develop consistent recommendations for the use of this antenatal intervention to maximize its beneficial effects and eliminate the associated risks."
+    }
+   ]
+  },
+  {
+   "id": "ACOG-MFM-034",
+   "source": "ACOG",
+   "title": "ACOG Practice Bulletin 235 Erythrocyte Alloimmunization Pregnancy",
+   "year": "2021",
+   "page_url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin",
+   "pdf_url": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_fetal_growth",
+   "priority": "high",
+   "sha256": "fd151503ba8745ad3d8fc52dc67a0b1167a5c1def288f77fe1ce5aafd0f6fdc3",
+   "size_bytes": 785,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 785,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACOG Practice Bulletin 235 Erythrocyte Alloimmunization Pregnancy Source: ACOG Year: 2021 Domain: mfm_fetal_growth License: Restricted Available at: https://www.acog.org/clinical/clinical-guidance/practice-bulletin This is a citation reference for the ACOG guideline 'ACOG Practice Bulletin 235 Erythrocyte Alloimmunization Pregnancy' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_fetal_growth. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACOG-MFM-035",
+   "source": "ACOG",
+   "title": "ACOG Committee Opinion 656 Coding Diagnosis Stillbirth",
+   "year": "2016",
+   "page_url": "https://www.acog.org/clinical/clinical-guidance",
+   "pdf_url": "https://www.acog.org/clinical/clinical-guidance",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_fetal_growth",
+   "priority": "medium",
+   "sha256": "53780ddfc2acde70a6e554ce3ddad00c9c21029a5bb05ff41021a704d37c5892",
+   "size_bytes": 745,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 745,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:51Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACOG Committee Opinion 656 Coding Diagnosis Stillbirth Source: ACOG Year: 2016 Domain: mfm_fetal_growth License: Restricted Available at: https://www.acog.org/clinical/clinical-guidance This is a citation reference for the ACOG guideline 'ACOG Committee Opinion 656 Coding Diagnosis Stillbirth' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_fetal_growth. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

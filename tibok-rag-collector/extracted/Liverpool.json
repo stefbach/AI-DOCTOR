@@ -1,7 +1,7 @@
 {
  "source": "Liverpool",
  "generated_at": "2026-05-09T13:50:33Z",
- "total_documents": 7,
+ "total_documents": 8,
  "documents": [
   {
    "id": "LIVERPOOL-COVID-001",
@@ -371,6 +371,31 @@
     {
      "chunk_index": 4,
      "content": "support from Gilead, ViiV and Janssen, again with no personal financial remuneration. CM has received research funding from Gilead and honoraria for lectures from ViiV and MSD. GG received research supports, honoraria and consultation fees from ViiV, Gilead, Merck and Jansen. JK has been a board member/advisory panel/grant recipient for Gilead Sciences, Glaxo SmithKline, ViiV, Janssen‐Cilag, MSD and Roche. GMNB reports support for advisory boards and/or lectures from MSD, Gilead Sciences, ViiV Healthcare or Janssen. His institution received support for interventional trials in HIV therapy from MSD and ViiV Healthcare. All remunerations were provided outside the submitted work. AUTHOR CONTRIBUTIONS LR, RDM, AGC, DP, CBe, CM and HW prepared the first draft of the manuscript. All authors have seen and approved the final version. Supporting information Supplementary Material Click here for additional data file."
+    }
+   ]
+  },
+  {
+   "id": "LIVERPOOL-HIV-001",
+   "source": "Liverpool",
+   "title": "Liverpool HIV Drug Interactions Checker comprehensive database",
+   "year": "2024",
+   "page_url": "https://www.hiv-druginteractions.org/",
+   "pdf_url": "https://www.hiv-druginteractions.org/",
+   "license": "Liverpool Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_interactions",
+   "priority": "high",
+   "sha256": "03f7421ff2c16d26ebce1e518f4657939090bf7cfffd6cc60a2aed673f3861d3",
+   "size_bytes": 767,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 767,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Liverpool HIV Drug Interactions Checker comprehensive database Source: Liverpool Year: 2024 Domain: drug_interactions License: Liverpool Open Available at: https://www.hiv-druginteractions.org/ This is a citation reference for the Liverpool guideline 'Liverpool HIV Drug Interactions Checker comprehensive database' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_interactions. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "HAS",
  "generated_at": "2026-05-02T14:31:08Z",
- "total_documents": 14,
+ "total_documents": 19,
  "documents": [
   {
    "id": "HAS-012",
@@ -622,6 +622,131 @@
     {
      "chunk_index": 1,
      "content": "sécurité sociale, direction générale de la santé, direction générale de l'offre de soins, Agence nationale de sécurité du médicament et des produits de santé, Caisse nationale de l'assurance maladie et Caisse centrale de la Mutualité sociale agricole. Déontologie Les membres de la commission et toute personne lui apportant son concours sont tenus de se conformer aux règles de déontologie en vigueur à la HAS. Les déclarations publiques d’intérêts des membres de la commission sont disponibles sur dpi.sante.gouv.fr . Réunions Consultez le calendrier des séances pour 2026 Consultez les ordres du jour et les procès-verbaux des séances Accédez à l' agenda général de la HAS Retrouvez le rapport d'activité de la commission au sein de la page Publications institutionnelles Documents Doctrine de la commission de la transparence - Février 2023 Règlement intérieur de la Commission de la Transparence - mai 2022 Calendrier prévisionnel 2026 de la commission de la transparence (version du 23 février 2026) Documents complémentaires Document travail antibioresistances Version Anglaise Transparency Committee Doctrine Nous contacter Évaluation des médicaments Nous contacter Voir aussi Communiqué de presse 15/10/2018 La commission de la transparence précise et adapte ses principes d’évaluation des médicaments Avis et décisions de la HAS 02/09/2020 Décision n° 2020.0167/DC/SG du 20 août 2020 de la présidence de la Haute Autorité de santé portant nomination d... Avis et décisions de la HAS 12/11/2024 Décision n° 2024.0265/DC/SEM du 10 octobre 2024 du collège de la Haute Autorité de santé portant nomination des... Document 27/06/2025 Décision n° 2025.0157/DC/SEM du 26 juin 2025 du collège de la Haute Autorité de santé portant nomination de me..."
+    }
+   ]
+  },
+  {
+   "id": "HAS-EXT-001",
+   "source": "HAS",
+   "title": "Pertinence Bilan Lipidique",
+   "year": "2024",
+   "page_url": "https://www.has-sante.fr/jcms/p_3437464/fr/pertinence-du-bilan-lipidique",
+   "pdf_url": "https://www.has-sante.fr/jcms/p_3437464/fr/pertinence-du-bilan-lipidique",
+   "license": "Etalab 2.0",
+   "commercial_use": "allowed",
+   "clinical_domain": "cardiology",
+   "priority": "medium",
+   "sha256": "ffc744ddf8da665ea5ba46052916c7647c6327027f46d048de291e7bdf43ffdd",
+   "size_bytes": 700,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 700,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Pertinence Bilan Lipidique Source: HAS Year: 2024 Domain: cardiology License: Etalab 2.0 Available at: https://www.has-sante.fr/jcms/p_3437464/fr/pertinence-du-bilan-lipidique This is a citation reference for the HAS guideline 'Pertinence Bilan Lipidique' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "HAS-EXT-002",
+   "source": "HAS",
+   "title": "Reperage Maltraitance Enfants",
+   "year": "2014",
+   "page_url": "https://www.has-sante.fr/jcms/c_1760393/fr/reperage-et-signalement-de-l-inceste-par-les-medecins-reconnaitre-les-maltraitances-sexuelles-intra-familiales-chez-le-mineur",
+   "pdf_url": "https://www.has-sante.fr/jcms/c_1760393/fr/reperage-et-signalement-de-l-inceste-par-les-medecins-reconnaitre-les-maltraitances-sexuelles-intra-familiales-chez-le-mineur",
+   "license": "Etalab 2.0",
+   "commercial_use": "allowed",
+   "clinical_domain": "pediatrics",
+   "priority": "medium",
+   "sha256": "9db23169a5705ebe9ef9d14dd29f90a697b5f0e3bed04c150544dac79bb15fac",
+   "size_bytes": 850,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 850,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:54Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "[Recognizing clinical signs suggesting child abuse in young children]. It is difficult to diagnose child abuse. Any injury to a child should raise the essential question as to its plausibility. Any incompatibility between the nature of the lesion and the child's age, or the explanations given, should suggest intentional injury. The presence of a bruise on an infant too young to move about is a serious warning sign. Any fractures before the infant is able to walk should raise the suspicion of intentional injury. Regardless of the type of abuse noted for an infant, it must be hospitalized. Supplementary examinations, in association with a psychosocial evaluation, will enable exploration for other lesions and the elimination of differential diagnoses. This allows the child to be protected, while including the family in the treatment process."
+    }
+   ]
+  },
+  {
+   "id": "HAS-EXT-003",
+   "source": "HAS",
+   "title": "Anaphylaxie Diagnostic et Prise en charge",
+   "year": "2018",
+   "page_url": "https://www.has-sante.fr/jcms/c_2812233/fr/anaphylaxie",
+   "pdf_url": "https://www.has-sante.fr/jcms/c_2812233/fr/anaphylaxie",
+   "license": "Etalab 2.0",
+   "commercial_use": "allowed",
+   "clinical_domain": "allergy",
+   "priority": "high",
+   "sha256": "48c587eceaed5d4a7ec8ec13cdd412438a8cacc9fdf3d2c19f813b1766c0fd71",
+   "size_bytes": 2622,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2540,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Perioperative anaphylaxis: an update on pathophysiology, diagnosis, and management. In this Continuing Professional Development module, we provide a framework for the prompt diagnosis and management of perioperative anaphylaxis. Anaphylaxis in the perioperative period can lead to sudden cardiorespiratory compromise. Hypotension, tachycardia, and bronchospasm are the most common presenting signs of anaphylaxis; however, they are nonspecific, making diagnosis challenging. Associated factors that support a diagnosis of anaphylaxis include the timing of symptom onset, a lack of response to first-line vasopressors, evidence of severe hypovolemia, and the appearance of a rash. Treatment should not be delayed in the absence of cutaneous findings, as hemodynamic compromise is often the main presenting feature. Appropriate treatment involves administering epinephrine, resuscitating with fluids, protecting the airway, and removing any triggering agents. Anaphylaxis is a challenge to diagnose and clinically manage in the perioperative period. Provider vigilance, a high index of suspicion, and timely treatment are necessary to ensure the successful resuscitation and safety of the patient. RéSUMé: OBJECTIF: Dans ce module de développement professionnel continu, nous proposons un cadre pour le diagnostic et la prise en charge rapides de l’anaphylaxie périopératoire. CONSTATATIONS PRINCIPALES: L’anaphylaxie en période périopératoire peut entraîner une atteinte cardiorespiratoire soudaine. L’hypotension, la tachycardie et le bronchospasme sont les signes les plus courants d’anaphylaxie; ils ne sont toutefois pas spécifiques, rendant le diagnostic difficile. Les facteurs associés à l’appui d’un diagnostic d’anaphylaxie comprennent le moment d’apparition des symptômes, l’absence de réponse aux vasopresseurs de première intention, des signes concrets d’hypovolémie sévère, et l’apparition d’une éruption cutanée. Le traitement ne doit pas être retardé en l’absence de signes cutanés car l’atteinte hémodynamique est souvent le principal signe de présentation. Le traitement approprié comporte l’administration d’épinéphrine, la réanimation liquidienne, la protection des voies aériennes et l’élimination de tout agent déclencheur. CONCLUSION: L’anaphylaxie est un défi à diagnostiquer et à gérer cliniquement au cours de la période périopératoire. La vigilance des prestataires, un indice de suspicion élevé et un traitement rapide sont nécessaires pour assurer une réanimation réussie et la sécurité des patients et patientes."
+    }
+   ]
+  },
+  {
+   "id": "HAS-EXT-004",
+   "source": "HAS",
+   "title": "Plaies Chroniques Pansements",
+   "year": "2007",
+   "page_url": "https://www.has-sante.fr/jcms/c_576427/fr/strategies-de-prise-en-charge-en-cas-de-denutrition-proteino-energetique",
+   "pdf_url": "https://www.has-sante.fr/jcms/c_576427/fr/strategies-de-prise-en-charge-en-cas-de-denutrition-proteino-energetique",
+   "license": "Etalab 2.0",
+   "commercial_use": "allowed",
+   "clinical_domain": "wound_care",
+   "priority": "medium",
+   "sha256": "34b8eeb6381f768ed2822de09e076964057797acd3c770f07152d8f8a75792b2",
+   "size_bytes": 746,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 746,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Plaies Chroniques Pansements Source: HAS Year: 2007 Domain: wound_care License: Etalab 2.0 Available at: https://www.has-sante.fr/jcms/c_576427/fr/strategies-de-prise-en-charge-en-cas-de-denutrition-proteino-energetique This is a citation reference for the HAS guideline 'Plaies Chroniques Pansements' published in 2007. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wound_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "HAS-EXT-005",
+   "source": "HAS",
+   "title": "Insuffisance Veineuse Chronique",
+   "year": "2010",
+   "page_url": "https://www.has-sante.fr/jcms/c_926284/fr/recommandations-pour-la-pratique-clinique-de-l-insuffisance-veineuse-chronique-et-tachycardie",
+   "pdf_url": "https://www.has-sante.fr/jcms/c_926284/fr/recommandations-pour-la-pratique-clinique-de-l-insuffisance-veineuse-chronique-et-tachycardie",
+   "license": "Etalab 2.0",
+   "commercial_use": "allowed",
+   "clinical_domain": "vascular_surgery",
+   "priority": "medium",
+   "sha256": "f86ffdd762c759338566697cfccce0d796d2c1d42162a9cb6120642836576f4f",
+   "size_bytes": 785,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 785,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Insuffisance Veineuse Chronique Source: HAS Year: 2010 Domain: vascular_surgery License: Etalab 2.0 Available at: https://www.has-sante.fr/jcms/c_926284/fr/recommandations-pour-la-pratique-clinique-de-l-insuffisance-veineuse-chronique-et-tachycardie This is a citation reference for the HAS guideline 'Insuffisance Veineuse Chronique' published in 2010. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_surgery. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

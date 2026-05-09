@@ -1,7 +1,7 @@
 {
  "source": "AASLD",
  "generated_at": "2026-05-02T15:41:10Z",
- "total_documents": 36,
+ "total_documents": 37,
  "documents": [
   {
    "id": "AASLD-001",
@@ -2492,6 +2492,31 @@
     {
      "chunk_index": 5,
      "content": "in ICP patients resulted in lower stillbirth rates compared with non-ICP controls, underscoring the effectiveness of contemporary strategies to reduce stillbirth risk at the expense of increased preterm births. However, in our cohort, 3 stillbirths occurred between 27 and 33 weeks of gestation with peak TBA levels >100 µmol/L, much earlier than current guidelines recommendations. This highlights the ongoing clinical challenge in managing ICP with high TBA levels, as clinicians must continually balance the competing risks of iatrogenic preterm delivery and stillbirth. A notable and unexpected finding was the increased occurrence of MSAF in the ICP with immune-active CHB group, with rates of 26.9% (14/52) at peak TBA levels of 40–99.9 µmol/L and 50.0% (25/50) at peak TBA levels ≥100 µmol/L. These rates were much higher than those observed in our isolated ICP cases and previous reports. In addition, the incidence of MSAF in the immune-active CHB with normal TBA group was 12.6% (11/87), comparable to the isolated ICP group. Nevertheless, it remains unclear whether the chronic liver inflammation induced by immune-active CHB is responsible for these elevated MSAF rates. Larger case–control cohort studies including more pregnant women who suffered CHB, with or without raised TBA levels, are needed to further evaluate the impact of CHB on MSAF risk. The primary strength of our study lies in the first attempt to comprehensively analyze the longitudinal biochemical profiles and pregnancy outcomes in a large cohort of women with isolated ICP and ICP involving various phases of CHB. Furthermore, the stratified analysis by TBA levels and CHB immune status provides nuanced insights into the correlation between bile acids and adverse pregnancy outcomes, as well as the underlying diagnostic approaches for ICP in the context of CHB. Even with limited postpartum laboratory data available, observed changes in biochemical parameters can offer valuable insights into different phases of CHB during pregnancy. However, there are several limitations that merit consideration. First, the retrospective design precluded the standardization of laboratory investigations for ICP and CHB cases, leading to incomplete data for certain biochemical markers at some time points, which would introduce bias in the analysis of longitudinal biochemical profiles. Secondly, the retrospective extraction of ICP diagnosis from inpatient electronic medical records may have led to potential diagnostic misclassification of ICP, particularly among women with immune-active CHB experiencing ALT flares. Thirdly, ICP cases were managed according to China’s guidelines over a 13-year period, potentially limiting the generalizability of our findings. Nonetheless, our comprehensive dataset provides important real-world evidence for evaluating the impact of these ICP management practices on pregnancy outcomes within China over the past decade. In addition, the assignment of CHB phases was based on laboratory parameters from a single time point at the initial diagnosis, potentially not capturing the dynamics of CHB immune status during pregnancy. Lastly, the absence of detailed treatment information, including the dosing, duration, and adherence to ursodeoxycholic acid and antiviral agents, hinders drawing conclusions regarding specific management strategies. CONCLUSIONS Pregnant women with ICP involving immune-active CHB experienced the most severe biochemical abnormalities and adverse pregnancy outcomes, likely due to the compounded influence of both CHB and elevated TBA levels. Whereas, ICP with other stages of CHB (immune-tolerant, inactive, or grey zone) exhibited biochemical patterns and outcome risks comparable to isolated ICP, indicating that elevated TBA levels, with or without mild ALT flares, are primarily driven by transient changes associated with ICP rather than CHB. Multivariable analysis identified peak TBA levels as a critical biomarker for evaluating the risk of adverse pregnancy outcomes in all ICP cases, irrespective of coexisting CHB. Overall, this study highlights the clinical importance of tailoring diagnostic approaches, surveillance protocols, and management strategies according to TBA levels and the immune phase of CHB. Supplementary Material"
+    }
+   ]
+  },
+  {
+   "id": "AASLD-LFT-001",
+   "source": "AASLD",
+   "title": "AASLD guideline evaluation abnormal liver chemistries",
+   "year": "2017",
+   "page_url": "https://journals.lww.com/ajg/Fulltext/2017/01000/ACG_Clinical_Guideline__Evaluation_of_Abnormal.10.aspx",
+   "pdf_url": "https://journals.lww.com/ajg/Fulltext/2017/01000/ACG_Clinical_Guideline__Evaluation_of_Abnormal.10.aspx",
+   "license": "AASLD",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_chemistry",
+   "priority": "high",
+   "sha256": "5224903cc8911ec6adf07d24232f2272c36e492fd1beb1388b72a37bc2dd4486",
+   "size_bytes": 790,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 790,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AASLD guideline evaluation abnormal liver chemistries Source: AASLD Year: 2017 Domain: lab_chemistry License: AASLD Available at: https://journals.lww.com/ajg/Fulltext/2017/01000/ACG_Clinical_Guideline__Evaluation_of_Abnormal.10.aspx This is a citation reference for the AASLD guideline 'AASLD guideline evaluation abnormal liver chemistries' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_chemistry. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

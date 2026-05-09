@@ -1,7 +1,7 @@
 {
  "source": "AMSSM",
  "generated_at": "2026-05-09T15:51:03Z",
- "total_documents": 5,
+ "total_documents": 10,
  "documents": [
   {
    "id": "AMSSM-CONCUSS-001",
@@ -217,6 +217,131 @@
     {
      "chunk_index": 8,
      "content": "time/sport specific needs) and providing delivery support (eg, supervision and feedback). Debunking the perception that injury prevention is for the elite/more experienced/serious athlete and addressing the stigma about warming-up in social sport through education, and local champions/ambassadors/opinion leaders of all ages and abilities may be valuable. Female/women/girl athletes in lower competition levels may be more likely to engage in sport for social reasons; however, this should not disbar them from access to best practice injury prevention. Sex-/gender-specific factors could be considered in intervention design and D&I strategies in some contexts. The effect of athlete sex/gender on D&I outcomes was unclear; however, it did influence D&I in 23/37 papers (in both directions, ). Gendered factors such as inequitable funding/support and expectations to conform to athletic ideals (eg, barrier to strength training) may affect D&I of interventions. Female-specific health factors (eg, breast tenderness and menstrual cycle/pelvic symptoms) may influence athlete participation (eg, reduced attendance or altered technique/performance in contact/impact activity due to symptoms). Raising coach awareness and providing strategies (eg, female health domain language they can use, environmental/personnel supports and technique/exercise modifications) that cater to needs specific to females/women/girls may enhance buy-in and uptake. However, some believe these approaches are unnecessarily progressive, and evaluation of sex/gender specific injury prevention interventions and D&I strategies is required. Practical targets: dissemination strategies Given that positive perceptions and attitudes among female/woman/girl athletes and coaches were associated with better D&I outcomes, pre-implementation initiatives to improve societal awareness and attitudes enhance implementation. Using social media campaigns to increase the uptake of evidence-based prevention interventions is effective (eg, immunology/vaccine uptake). Partnering with sporting organisations can help determine target markets, develop dissemination campaigns, while maintaining evidence-based messaging. Limitations This review only included publications in English, increasing the risk of language and publication bias. Sporting, education and government bodies may be employing injury prevention D&I initiatives without publishing their strategy or outcomes. The number of reviewers involved in screening and data extraction carries a small risk of error in data charting and interpretation. Under-representation of population groups (eg, Para sport, sub-elite and child athletes) limits the generalisability of findings. Conclusion This scoping review synthesised the state of quantitative and qualitative evidence to inform research and practice for the D&I of injury prevention interventions in female/woman/girl athletes. Perceptions and attitudes of coaches were mostly positive, whereas awareness, adoption and cumulative utilisation rates were moderate to high. Key facilitators of D&I include prior injury experience, higher competition level, greater sport experience and positive athlete and coach perceptions, attitudes, intentions and self-efficacy. Strategies to enhance D&I may include education and/or workshops in-person or online, delivered in pre-season by experts. There was limited attention on how well interventions are used or sustained and an unclear effect of supervision on D&I outcomes. Other critical gaps remain, and future research should prioritise under-represented regions (Asia, Africa and South America), populations (eg, studies on Para sport female/woman/girl only, sub-elite and children), D&I phases (sustainment) and study designs (D&I-focused trials). Most papers were focused on athletes and/or coaches. Engaging under-represented levels of the sport system (eg, parents, teachers, health/exercise/medical professionals, trainers and sport/school administrators) may help address the lower rates and understanding of fidelity and long-term sustainability and ultimately reduce injury risk in female/woman/girl athletes. Supplementary material 10.1136/bjsports-2025-109904 Supplementary file 1"
+    }
+   ]
+  },
+  {
+   "id": "AMSSM-FEMALE-001",
+   "source": "AMSSM",
+   "title": "AMSSM Position Statement on Female Athlete Triad and RED-S",
+   "year": "2021",
+   "page_url": "https://www.amssm.org/PositionStatements.php",
+   "pdf_url": "https://www.amssm.org/PositionStatements.php",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_nutrition",
+   "priority": "high",
+   "sha256": "27ee8c3f8c0653ddba78feda8774866bcfbfe886f290f6dd42c415758463d9c5",
+   "size_bytes": 753,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 753,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AMSSM Position Statement on Female Athlete Triad and RED-S Source: AMSSM Year: 2021 Domain: sports_nutrition License: Proprietary Available at: https://www.amssm.org/PositionStatements.php This is a citation reference for the AMSSM guideline 'AMSSM Position Statement on Female Athlete Triad and RED-S' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_nutrition. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AMSSM-HEAT-001",
+   "source": "AMSSM",
+   "title": "AMSSM Position Statement on Exertional Heat Illness",
+   "year": "2020",
+   "page_url": "https://www.amssm.org/PositionStatements.php",
+   "pdf_url": "https://www.amssm.org/PositionStatements.php",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_exercise_rx",
+   "priority": "high",
+   "sha256": "1e84186890a3487230f08ebdae38f2776979a00c8cf2dac48d1209a296fa2782",
+   "size_bytes": 743,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 743,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AMSSM Position Statement on Exertional Heat Illness Source: AMSSM Year: 2020 Domain: sports_exercise_rx License: Proprietary Available at: https://www.amssm.org/PositionStatements.php This is a citation reference for the AMSSM guideline 'AMSSM Position Statement on Exertional Heat Illness' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_exercise_rx. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AMSSM-OVERTRAINING-001",
+   "source": "AMSSM",
+   "title": "AMSSM Statement on Overtraining Syndrome",
+   "year": "2018",
+   "page_url": "https://www.amssm.org/PositionStatements.php",
+   "pdf_url": "https://www.amssm.org/PositionStatements.php",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_exercise_rx",
+   "priority": "medium",
+   "sha256": "c0430cca51df7fbecbe409e7d1a4de28e6c3d8820d1407068291304ddaa9a1d3",
+   "size_bytes": 721,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 721,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AMSSM Statement on Overtraining Syndrome Source: AMSSM Year: 2018 Domain: sports_exercise_rx License: Proprietary Available at: https://www.amssm.org/PositionStatements.php This is a citation reference for the AMSSM guideline 'AMSSM Statement on Overtraining Syndrome' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_exercise_rx. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AMSSM-STRESS-001",
+   "source": "AMSSM",
+   "title": "AMSSM Position on Bone Stress Injuries in Athletes",
+   "year": "2021",
+   "page_url": "https://www.amssm.org/PositionStatements.php",
+   "pdf_url": "https://www.amssm.org/PositionStatements.php",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_exercise_rx",
+   "priority": "high",
+   "sha256": "009d6fb5f5e83f6bdb2a46565adee0626acfdae4acf01fdc47ee3e6c9db6ec95",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AMSSM Position on Bone Stress Injuries in Athletes Source: AMSSM Year: 2021 Domain: sports_exercise_rx License: Proprietary Available at: https://www.amssm.org/PositionStatements.php This is a citation reference for the AMSSM guideline 'AMSSM Position on Bone Stress Injuries in Athletes' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_exercise_rx. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AMSSM-DOPING-001",
+   "source": "AMSSM",
+   "title": "AMSSM Position on Anti-Doping in Sport",
+   "year": "2020",
+   "page_url": "https://www.amssm.org/PositionStatements.php",
+   "pdf_url": "https://www.amssm.org/PositionStatements.php",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_doping",
+   "priority": "medium",
+   "sha256": "2434851807ff6908605c3bfa74994471115936edb9c3fc2ca901082287a0215b",
+   "size_bytes": 707,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 707,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AMSSM Position on Anti-Doping in Sport Source: AMSSM Year: 2020 Domain: sports_doping License: Proprietary Available at: https://www.amssm.org/PositionStatements.php This is a citation reference for the AMSSM guideline 'AMSSM Position on Anti-Doping in Sport' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_doping. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

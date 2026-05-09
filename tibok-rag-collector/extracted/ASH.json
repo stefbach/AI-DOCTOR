@@ -1,7 +1,7 @@
 {
  "source": "ASH",
  "generated_at": "2026-05-02T15:42:26Z",
- "total_documents": 48,
+ "total_documents": 51,
  "documents": [
   {
    "id": "ASH-001",
@@ -2416,6 +2416,81 @@
     {
      "chunk_index": 4,
      "content": "was difficult to evaluate whether there was an influence from the commercial industry. Third, AGREE II is a tool used to access the quality of the guideline development instead of the quality of the evidence. Recommendations from high-score CPGs might be based on weak evidence and vice versa. Fourth, because the number of guidelines on pregnancy VTE is limited, the guideline that is not specifically targeted on the pregnancy population but still with related recommendations was also included in this study [ ]. During the guideline appraisal, each item would presumably be assessed for the whole group of patients, which might impact the assessment of guideline quality and make a difference in reliability when compared with the guidance for pregnant women specifically. Conclusions In summary, the quality of pregnancy-associated VTE guidelines varied widely, especially in Rigor of development and Editorial independence. Recommendations were inconsistent both in prevention and treatment across guidelines. Increased efforts are required to provide high-quality evidence specific to the pregnancy population. Guideline developers should also pay more attention to methodological quality. Guidelines included ACCP [ ] ACOG [ ] ANZJOG [ , ] ASH [ ] Australia [ ] AVTF [ ] ESC [ ] GTH [2O] JOGNN [ ] Korea [ ] RCOG [ , ] SASTH [ ] SOGC [ ] Additional files Additional file 1: Table S1. Search strategies. (DOCX 15 kb) Additional file 2: Tables S2. Structure and content of the AGREE instrument. (DOCX 15 kb) Additional file 3: Tables S3. Data extraction template. (DOCX 14 kb) Additional file 4: Tables S4. Raw Data. (DOCX 16 kb)"
+    }
+   ]
+  },
+  {
+   "id": "ASH-SCD-003",
+   "source": "ASH",
+   "title": "ASH 2020 guidelines for sickle cell disease cardiopulmonary and kidney disease",
+   "year": "2020",
+   "page_url": "https://ashpublications.org/bloodadvances/article/4/16/3862/",
+   "pdf_url": "https://ashpublications.org/bloodadvances/article/4/16/3862/",
+   "license": "ASH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_anemia",
+   "priority": "high",
+   "sha256": "d9421c1696e7e24179602e5dbf2fbb72483e6a0ea2b485253d588bb60ef4a318",
+   "size_bytes": 799,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 799,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASH 2020 guidelines for sickle cell disease cardiopulmonary and kidney disease Source: ASH Year: 2020 Domain: hematology_anemia License: ASH Available at: https://ashpublications.org/bloodadvances/article/4/16/3862/ This is a citation reference for the ASH guideline 'ASH 2020 guidelines for sickle cell disease cardiopulmonary and kidney disease' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: hematology_anemia. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASH-THROMBOPHIL-001",
+   "source": "ASH",
+   "title": "ASH choosing wisely thrombophilia testing recommendations",
+   "year": "2020",
+   "page_url": "https://ashpublications.org/blood",
+   "pdf_url": "https://ashpublications.org/blood",
+   "license": "ASH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_thrombosis",
+   "priority": "medium",
+   "sha256": "3ece57f8c88b9a357b82890da5aae49ca7b2b60044f0ee9e007bd4f1eda66a9b",
+   "size_bytes": 1834,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1832,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "The ASH-ASPHO Choosing Wisely Campaign: 5 hematologic tests and treatments to question. Choosing Wisely is a medical stewardship and quality-improvement initiative led by the American Board of Internal Medicine Foundation in collaboration with leading medical societies in the United States. The American Society of Hematology (ASH) has been an active participant in the Choosing Wisely project. In 2019, ASH and the American Society of Pediatric Hematology/Oncology (ASPHO) formed a joint task force to solicit, evaluate, and select items for a pediatric-focused Choosing Wisely list. By using an iterative process and an evidence-based method, the ASH-ASPHO Task Force identified 5 hematologic tests and treatments that health care providers and patients should question because they are not supported by evidence, and/or they involve risks of medical and financial costs with low likelihood of benefit. The ASH-ASPHO Choosing Wisely recommendations are as follows: (1) avoid routine preoperative hemostatic testing in an otherwise healthy child with no previous personal or family history of bleeding, (2) avoid platelet transfusion in asymptomatic children with a platelet count >10 × 103/μL unless an invasive procedure is planned, (3) avoid thrombophilia testing in children with venous access-associated thrombosis and no positive family history, (4) avoid packed red blood cells transfusion for asymptomatic children with iron deficiency anemia and no active bleeding, and (5) avoid routine administration of granulocyte colony-stimulating factor for prophylaxis of children with asymptomatic autoimmune neutropenia and no history of recurrent or severe infections. We recommend that health care providers carefully consider the anticipated risks and benefits of these identified tests and treatments before performing them."
+    }
+   ]
+  },
+  {
+   "id": "ASH-MFM-002",
+   "source": "ASH",
+   "title": "ASH 2020 Guidelines Sickle Cell Disease Cardiopulmonary and Kidney Disease",
+   "year": "2020",
+   "page_url": "https://www.hematology.org/education/clinicians/guidelines-and-quality-care",
+   "pdf_url": "https://www.hematology.org/education/clinicians/guidelines-and-quality-care",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_chronic_disease",
+   "priority": "high",
+   "sha256": "ef25b76fac859ed65b2677b415a3f134ee7ca6b0693e083096b373b3e5a00a7d",
+   "size_bytes": 817,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 817,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASH 2020 Guidelines Sickle Cell Disease Cardiopulmonary and Kidney Disease Source: ASH Year: 2020 Domain: mfm_chronic_disease License: Restricted Available at: https://www.hematology.org/education/clinicians/guidelines-and-quality-care This is a citation reference for the ASH guideline 'ASH 2020 Guidelines Sickle Cell Disease Cardiopulmonary and Kidney Disease' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_chronic_disease. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

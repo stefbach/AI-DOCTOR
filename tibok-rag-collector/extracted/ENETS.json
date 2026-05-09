@@ -1,7 +1,7 @@
 {
  "source": "ENETS",
  "generated_at": "2026-05-09T08:21:38Z",
- "total_documents": 4,
+ "total_documents": 5,
  "documents": [
   {
    "id": "ENETS-PANCREAS-001",
@@ -260,6 +260,31 @@
     {
      "chunk_index": 6,
      "content": "Writing - review & editing. Adrian Gonzalez Aguirre: Data curation, Investigation, Writing - review & editing. Erica S. Alexander: Conceptualization, Methodology, Writing - original draft, Supervision, Writing - review & editing. Disclosure Dr. Ziv received grant support from the American Association for Cancer Research–Neuroendocrine Tumor Research Foundation (AACR-NETRF), Memorial Sloan Kettering, Druckenmiller, Society of Interventional Radiology, Radiological Society of North America, North American Neuroendocrine Tumor Society, Ethicon, and Novartis. Dr. Sofocleous received grant support from National Institutes of Health/National Cancer Institute (NIH/NCI), Society of Interventional Radiology Foundation, Society of Interventional Oncology, Ethicon Johnson and Johnson (J&J), Varian, Boston Scientific, and Sirtex; is a consultant for Ethicon J&J, Varian, Terumo, Medtronic, and Sirtex; and receives equipment/material support from MIM Software, a GE HealthCare company, (Beachwood, Ohio). Dr. Cooper received grant support from Amgen, Roche, Monte Rosa, Daiichi Sankyo, AbbVie, and Merck; is a consultant for Gilead Sciences, Daiichi Sankyo, Novartis, Boehringer Ingelheim (BI), Regeneron, and Amgen; and received payment or honoraria from MJH Life Sciences, Ideology Health, MedStar Health, PeerDirect, CancerGRACE, and Intellisphere LLC. Dr. Sotirchos is a consultant for Intera Oncology. Dr. Alexander is a consultant for Boston Scientific. Dr. Zhao received grant support from the Society of Interventional Radiology. The remaining authors declare no conflict of interest."
+    }
+   ]
+  },
+  {
+   "id": "ENETS-PNET-001",
+   "source": "ENETS",
+   "title": "ENETS Consensus Guidelines on Surgical Management of Pancreatic Neuroendocrine Tumors",
+   "year": "2020",
+   "page_url": "https://karger.com/journals/nen/article-abstract/110/6/444/170956",
+   "pdf_url": "https://karger.com/journals/nen/article-abstract/110/6/444/170956",
+   "license": "ENETS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrine_surgery_adrenal",
+   "priority": "high",
+   "sha256": "b814e333c0c914ab0ee69f01ff85831602e5bc0eb04de53e02247201f36d9b18",
+   "size_bytes": 2557,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2557,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Diagnostic Management of Gastroenteropancreatic Neuroendocrine Neoplasms: Technique Optimization and Tips and Tricks for Radiologists. Gastroenteropancreatic neuroendocrine neoplasms (GEP-NENs) comprise a heterogeneous group of neoplasms, which derive from cells of the diffuse neuroendocrine system that specializes in producing hormones and neuropeptides and arise in most cases sporadically and, to a lesser extent, in the context of complex genetic syndromes. Furthermore, they are primarily nonfunctioning, while, in the case of insulinomas, gastrinomas, glucagonomas, vipomas, and somatostatinomas, they produce hormones responsible for clinical syndromes. The GEP-NEN tumor grade and cell differentiation may result in different clinical behaviors and prognoses, with grade one (G1) and grade two (G2) neuroendocrine tumors showing a more favorable outcome than grade three (G3) NET and neuroendocrine carcinoma. Two critical issues should be considered in the NEN diagnostic workup: first, the need to identify the presence of the tumor, and, second, to define the primary site and evaluate regional and distant metastases. Indeed, the primary site, stage, grade, and function are prognostic factors that the radiologist should evaluate to guide prognosis and management. The correct diagnostic management of the patient includes a combination of morphological and functional evaluations. Concerning morphological evaluations, according to the consensus guidelines of the European Neuroendocrine Tumor Society (ENETS), computed tomography (CT) with a contrast medium is recommended. Contrast-enhanced magnetic resonance imaging (MRI), including diffusion-weighted imaging (DWI), is usually indicated for use to evaluate the liver, pancreas, brain, and bones. Ultrasonography (US) is often helpful in the initial diagnosis of liver metastases, and contrast-enhanced ultrasound (CEUS) can solve problems in characterizing the liver, as this tool can guide the biopsy of liver lesions. In addition, intraoperative ultrasound is an effective tool during surgical procedures. Positron emission tomography (PET-CT) with FDG for nonfunctioning lesions and somatostatin analogs for functional lesions are very useful for identifying and evaluating metabolic receptors. The detection of heterogeneity in somatostatin receptor (SSTR) expression is also crucial for treatment decision making. In this narrative review, we have described the role of morphological and functional imaging tools in the assessment of GEP-NENs according to current major guidelines."
     }
    ]
   }

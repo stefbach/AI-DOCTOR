@@ -1,7 +1,7 @@
 {
  "source": "BTF",
  "generated_at": "2026-05-09T08:37:48Z",
- "total_documents": 6,
+ "total_documents": 7,
  "documents": [
   {
    "id": "BTF-TBI-004",
@@ -310,6 +310,31 @@
     {
      "chunk_index": 7,
      "content": "and more severe long-term sequelae compared to other racial/ethnic groups. This heightened vulnerability is shaped by the state’s unique geographic and demographic characteristics, compounded by critical deficiencies in neurosurgical infrastructure, limited availability of specialized equipment, and a scarcity of neurosurgical providers. Barriers, including limited local healthcare resources, extended travel times to regional medical centers, and patient hesitancy toward non-Native physicians, further hinder efforts to optimize TBI care and implement effective preventive strategies. To improve TBI management for AI/ANs, especially in Alaska, a multifaceted approach is essential. This includes leveraging telemedicine for remote consultations, deploying mobile medical units to serve isolated communities, and increasing public awareness about TBI prevention and the importance of timely care. Additionally, it is vital to develop culturally appropriate care models that honor Alaska Native traditions and values and to collaborate with tribal health organizations and local partners to implement targeted, community-specific interventions. Enhancing emergency response systems — particularly through expanded air ambulance services — is also crucial. Ultimately, more evidence-based, contextually tailored interventions are needed to address the leading causes of TBI and reduce its burden among AI/AN populations in Alaska."
+    }
+   ]
+  },
+  {
+   "id": "BTF-HYPER-001",
+   "source": "BTF",
+   "title": "British Thyroid Foundation guidance on graves disease",
+   "year": "2024",
+   "page_url": "https://www.btf-thyroid.org/medical-guidelines",
+   "pdf_url": "https://www.btf-thyroid.org/medical-guidelines",
+   "license": "BTF",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_thyroid",
+   "priority": "medium",
+   "sha256": "f69fe55c00af5f986944da929098484d9434ec0432b96658ac3e9437a81811b3",
+   "size_bytes": 1826,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1826,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "British Thyroid Association Survey of Graves' Disease Management in the UK. Recent years have seen changes and uncertainties in evidence and guideline recommendations in Graves' disease treatment. To understand the impact of these developments on current practice, we undertook a survey of Graves' disease management in the United Kingdom and compared this to other national and international surveys. Members of the British Thyroid Association, the UK Society for Endocrinology and regional endocrinology networks, were invited by e-mail to complete a 15-min online survey (October 2022 to March 2023). Out of 158 eligible respondents, 99% were endocrinologists. For a 40-year-old female with a first presentation of Graves' hyperthyroidism, TSH-receptor antibodies (TRAb) were requested at diagnosis and at follow-up by 95% and 76%, respectively. Isotope scans and ultrasound were rarely requested (< 5%). Majority (95%) would treat with antithyroid drugs (ATD), predominantly Carbimazole (CMZ), while radioactive iodine (RAI) was preferred for recurrent disease (81%). Common reasons for avoiding RAI were thyroid eye disease, pregnancy intention, or contact with young children whereas biochemical severity, goitre, or male sex did not influence decision to use RAI. Propylthiouracil (PTU) was preferred in preconception and early pregnancy, but after the first-trimester, 50% would continue PTU while 50% switch back to CMZ. The survey confirms a growing application of TRAbs, both for diagnostic and prognostic purposes. ATDs remain the preferred first-line therapy for Graves' disease, which is consistent with global trends but contrary to National Institute of Health and Care Excellence (NICE) guidance. Further studies are required to explore the clinical and pragmatic determinants of current treatment approaches."
     }
    ]
   }

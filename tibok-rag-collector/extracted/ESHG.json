@@ -1,7 +1,7 @@
 {
  "source": "ESHG",
  "generated_at": "2026-05-09T09:10:31Z",
- "total_documents": 4,
+ "total_documents": 6,
  "documents": [
   {
    "id": "ESHG-LYNCH-001",
@@ -332,6 +332,56 @@
     {
      "chunk_index": 1,
      "content": "Assessment, Oxford University Hospitals NHS Foundation Trust, Oxford, UK 40 grid.10939.32 0000 0001 0943 7661 Department of Clinical Genetics, United Laboratories, Tartu University Hospital and Institute of Clinical Medicine, University of Tartu, Tartu, Estonia 10 10 2020 1 2021 29 1 372557 67 78 23 3 2020 6 8 2020 25 8 2020 01 01 2022 01 01 2022 09 02 2021 01 04 2026 © The Author(s), under exclusive licence to European Society of Human Genetics 2020 Newborn screening (NBS) is an important part of public healthcare systems in many countries. The provision of information to parents about NBS is now recognised as an integral part of the screening process. Informing parents on all aspects of screening helps to achieve the benefits, promote trust and foster support for NBS. Therefore, policies and guidelines should exist to govern how the information about NBS is provided to parents, taking into account evidence-based best practices. The purpose of our survey was to explore whether any legally binding provisions, guidelines or recommendations existed pertaining to the provision of information about NBS to parents across Europe. Questions were designed to determine the regulatory process of when, by whom and how parents should be informed about screening. Twenty-seven countries participated in the survey. The results indicated that most countries had some sort of legal framework or guidelines for the provision of information to parents. However, only 37% indicated that the provision of information was required prenatally. The majority of countries were verbally informing parents with the aid of written materials postnatally, just prior to sample collection. Information was provided by a neonatologist, midwife or nurse. A website dedicated to NBS was available for 67% of countries and 89% had written materials about NBS for parents. The survey showed that there is a lack of harmonisation among European countries in the provision of information about NBS and emphasised the need for more comprehensive guidelines at the European level. Subject terms Patient education Medical ethics Health policy Population screening https://doi.org/10.13039/501100001823 Ministerstvo Školství, Mládeže a Tělovýchovy (Ministry of Education, Youth and Sports) LM2018132 LM2018132 Franková Věra https://doi.org/10.13039/100007397 Univerzita Karlova v Praze (Charles University) PROGRES Q26 PROGRES Q26 PROGRES Q26 Franková Věra Driscoll Riona O. https://doi.org/10.13039/501100003243 Ministerstvo Zdravotnictví Ceské Republiky (Ministry of Health of the Czech Republic) RVO VFN 64165 RVO VFN 64165 Franková Věra pmc-status-qastatus 0 pmc-status-live yes pmc-status-embargo no pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf yes pmc-prop-has-supplement yes pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc yes issue-copyright-statement © European Society of Human Genetics 2021"
+    }
+   ]
+  },
+  {
+   "id": "ESHG-CANCER-001",
+   "source": "ESHG",
+   "title": "ESHG joint statement on hereditary breast and ovarian cancer testing",
+   "year": "2019",
+   "page_url": "https://www.eshg.org/",
+   "pdf_url": "https://www.eshg.org/",
+   "license": "ESHG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "genetics_cancer",
+   "priority": "medium",
+   "sha256": "308a53036d575f7ae59aba9d442d0c6902c289331e58ddff9ec906bfaa890ee1",
+   "size_bytes": 739,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 739,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESHG joint statement on hereditary breast and ovarian cancer testing Source: ESHG Year: 2019 Domain: genetics_cancer License: ESHG Available at: https://www.eshg.org/ This is a citation reference for the ESHG guideline 'ESHG joint statement on hereditary breast and ovarian cancer testing' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: genetics_cancer. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESHG-BRCA-001",
+   "source": "ESHG",
+   "title": "ESHG genetic testing inherited cancer susceptibility BRCA",
+   "year": "2019",
+   "page_url": "https://www.nature.com/articles/s41431-019-0479-1",
+   "pdf_url": "https://www.nature.com/articles/s41431-019-0479-1",
+   "license": "ESHG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_molecular",
+   "priority": "high",
+   "sha256": "d64a71805cfa12138e75060a3e9740be5ef0efd7ba499c46279df50c839fec7c",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESHG genetic testing inherited cancer susceptibility BRCA Source: ESHG Year: 2019 Domain: lab_molecular License: ESHG Available at: https://www.nature.com/articles/s41431-019-0479-1 This is a citation reference for the ESHG guideline 'ESHG genetic testing inherited cancer susceptibility BRCA' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_molecular. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,0 +1,32 @@
+{
+ "source": "JSH",
+ "generated_at": "2026-05-09T19:12:20Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "TACE-HCC-001",
+   "source": "JSH",
+   "title": "Japanese Society Hepatology consensus transarterial chemoembolization HCC",
+   "year": "2021",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/hepr.13670",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/hepr.13670",
+   "license": "JSH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "oncology_liver",
+   "priority": "medium",
+   "sha256": "44005d86a7e91a34bd2566950c17dc5166dfc69edabc6d2e0f4b5f9dadf14a1b",
+   "size_bytes": 2017,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2017,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Oncological Resectability Criteria for Hepatocellular Carcinoma in the Era of Novel Systemic Therapies: The Japan Liver Cancer Association and Japanese Society of Hepato-Biliary-Pancreatic Surgery Expert Consensus Statement 2023. Recent advances in systemic therapy for hepatocellular carcinoma (HCC) have led to debates about the feasibility of combination therapies, such as systemic therapy combined with surgery or transarterial chemoembolization, for patients with advanced HCC. However, a lack of consensus on the oncological resectability criteria has hindered discussions of \"conversion therapy\" and the optimal management in patients with HCC. To address this issue, the Japan Liver Cancer Association (JLCA) and the Japanese Society of Hepato-Biliary-Pancreatic Surgery (JSHBPS) established a working group and discussed the concept of borderline resectable HCC. Herein, we present a consensus statement from this expert panel on the resectability criteria for HCC from the oncological standpoint under the assumption of technically and liver-functionally resectable situations. The criteria for oncological resectability in HCC are classified into three grades: resectable, representing an oncological status for which surgery alone may be expected to offer clearly better survival outcomes as compared with other treatments; borderline resectable 1, representing an oncological status for which surgical intervention as a part of multidisciplinary treatment may be expected to offer survival benefit; and borderline resectable 2, representing an oncological status for which the efficacy of surgery is uncertain and the indication for surgery should be determined carefully under the standard multidisciplinary treatment. These criteria aim to provide a common language for discussing and analyzing the treatment strategies for advanced HCC. It is also expected that these criteria will be optimized, modified, and updated based on further advancements in systemic therapies and future validation studies."
+    }
+   ]
+  }
+ ]
+}

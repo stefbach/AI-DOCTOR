@@ -1,7 +1,7 @@
 {
  "source": "DPWG",
  "generated_at": "2026-05-09T14:58:42Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "DPWG-002",
@@ -29,6 +29,31 @@
     {
      "chunk_index": 1,
      "content": "CYP2D6 genotyping as being “potentially beneficial” for atomoxetine. CYP2D6 testing prior to treatment can be considered on an individual patient basis. Subject terms Pharmacogenetics Adverse effects Gene expression European Union’s Horizon 2020 research and innovation programme under grant agreement No 668353. Royal Dutch Pharmacists Association (no grant, but employer Marga Nijenhuis, Bianca Soree en Wafa Jama, and funding of the DPWG meetings). pmc-status-qastatus 0 pmc-status-live yes pmc-status-embargo no pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf yes pmc-prop-has-supplement yes pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc yes issue-copyright-statement © European Society of Human Genetics 2023"
+    }
+   ]
+  },
+  {
+   "id": "DPWG-001",
+   "source": "DPWG",
+   "title": "DPWG Dutch Pharmacogenetics Working Group guideline list",
+   "year": "2024",
+   "page_url": "https://www.knmp.nl/dossiers/farmacogenetica",
+   "pdf_url": "https://www.knmp.nl/dossiers/farmacogenetica",
+   "license": "DPWG Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "high",
+   "sha256": "e374cab129bfaebfbd7683340768ac5597f99fb0e9a62ec80dd3e57c0a8ac679",
+   "size_bytes": 755,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 755,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: DPWG Dutch Pharmacogenetics Working Group guideline list Source: DPWG Year: 2024 Domain: drug_pharmacogenomics License: DPWG Open Available at: https://www.knmp.nl/dossiers/farmacogenetica This is a citation reference for the DPWG guideline 'DPWG Dutch Pharmacogenetics Working Group guideline list' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pharmacogenomics. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

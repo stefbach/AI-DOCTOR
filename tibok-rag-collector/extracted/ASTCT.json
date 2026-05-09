@@ -1,7 +1,7 @@
 {
  "source": "ASTCT",
  "generated_at": "2026-05-09T14:16:05Z",
- "total_documents": 6,
+ "total_documents": 7,
  "documents": [
   {
    "id": "ASTCT-INDIC-001",
@@ -582,6 +582,31 @@
     {
      "chunk_index": 12,
      "content": "comparisons across grading systems. For ICANS, the forms capture the presence of different manifestations, and whether they resolved. Issues raised on the applicability of CTCAE to assess severity in hospitalized patients apply here as well. Beyond the abovementioned toxicities, centers can report subsequent neoplasms and pregnancies at any time through event-driven forms. These forms aid collection of time-sensitive information or biospecimens, if needed. We believe that it would be safest and most efficient to use CIBMTR database reporting to meet the mandates placed on the drug companies at a level that is feasible for centers offering immune effector cell therapies outside the research setting. Barring unusual or notable toxicity that any treating physician can choose to report to the FDA on a Medwatch form (as with any other approved therapy), we endorse a system in which the CIBMTR registry would be a single approach that centers can use for reporting for current and future approved cell therapies. The CIBMTR built the Cellular Therapy Registry to serve the community and to help advance the field by making the data available to investigators. Standardized collection of toxicity data in the real-world setting will help identify ways to make these therapies safer. Conclusion In conclusion, we have proposed consensus definitions and grading for CRS and ICANS, the two most common toxicities associated with immune effector cell therapies. We acknowledge that as new data becomes available from existing and novel immune effector cell therapies, this grading system may need to be revised in the future. However, we believe that the proposed grading system is objective, easy to use, and more accurately categorizes the severity of these toxicities. We strongly recommend the usage of this consensus grading system for reporting of CRS and neurotoxicity associated with immune effector cell-engaging therapies across all clinical trials as well as in the post-approval standard of care setting. This would allow comparison of the safety of different immune effector cell-engaging therapies and will also likely facilitate the development of optimal strategies for prevention and/or management of these toxicities."
+    }
+   ]
+  },
+  {
+   "id": "ASTCT-TX-003",
+   "source": "ASTCT",
+   "title": "ASTCT Standard of Care for Acute GVHD Treatment",
+   "year": "2020",
+   "page_url": "https://www.astct.org/",
+   "pdf_url": "https://www.astct.org/",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "transplant_hematopoietic",
+   "priority": "high",
+   "sha256": "081b40def4b142d2d6fc73e33a9fdd96f155157e87e8d4b1720fef37da28806c",
+   "size_bytes": 724,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 724,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:41Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASTCT Standard of Care for Acute GVHD Treatment Source: ASTCT Year: 2020 Domain: transplant_hematopoietic License: Restricted Available at: https://www.astct.org/ This is a citation reference for the ASTCT guideline 'ASTCT Standard of Care for Acute GVHD Treatment' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: transplant_hematopoietic. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

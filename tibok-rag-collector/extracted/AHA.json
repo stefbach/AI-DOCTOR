@@ -1,7 +1,7 @@
 {
  "source": "AHA",
  "generated_at": "2026-05-02T14:19:56Z",
- "total_documents": 63,
+ "total_documents": 75,
  "documents": [
   {
    "id": "AHA-001",
@@ -3827,6 +3827,306 @@
     {
      "chunk_index": 3,
      "content": "benchmarking and not prediction of mortality in individual patients [ – ]. However, as there is an urgent need for a scoring system that can be done in referring hospitals in LMIC, we hypothesized that PIM3 with its advantages could help in triaging patients to the scarce available PICU beds in Indonesia. The reason for this underestimating mortality might be caused by several factors such as differences in patient characteristics and variations in healthcare system standards, including different resources, demographic and geographic conditions, disease patterns, and prevalent pathogens during a specific period. Our population may have a higher risk for worse mortality outcomes. The majority of disease diagnoses in our study did not fit into the diagnostic categories in the PIM3 score. There is no classification of the diagnoses we frequently encounter and are clinically severe such as severe pneumonia, dengue shock syndrome, gastroenteritis with hypovolemic shock, meningo-encephalitis tuberculosis, multiple trauma and acute kidney injury. We experience many difficulties in daily practice if we only rely on the use of a priority system. The way we communicate with referring hospitals is by using an Information and Technology (IT)-based integrated health service delivery information system [ ], which does not yet accommodate direct communication. Much of the data we need to classify patients into groups based on the priority system is not available in the referral statements. Mortality risk prediction models in intensive care which have been developed in many high-income countries are not widely used in our setting, particularly in peripheral health services. Apart from this, although simple, one of the components of PIM3 is the blood gas analysis examination, which is one of the examinations that is quite expensive and not widely available in referring hospitals in Indonesia. We found that the PIM3 score system underestimates its role as a predictor of mortality in this study population. Comparable results were obtained in a multicenter study in South Africa that found an SMR of 1.28 [ ]. In contrast in a study conducted in Dubai, with an SMR of 0.53 (p-value < 0.001), indicated that the PIM3 scoring model overestimated mortality [ ]. Yet the studies may not be comparable as population characteristics differ between developed and developing countries [ , ]. The data from this study revealed that pupillary response, PaO2/FiO2, and the need of mechanical ventilator support in the first hour of PICU admission showed significant differences between the surviving and non-surviving groups. In the paediatric population, cardiac arrest is most frequently preceded by respiratory issues and airway obstruction, unlike adults, where heart-related problems are the primary cause [ ]. Pupillary conditions can be affected by prolonged hypoxia, an oxygen deficiency condition [ ]. These findings emphasise the importance of early detection of respiratory emergencies, initial management, and monitoring of every child with respiratory system problems in pre-referral settings to prevent the patients from deteriorating. Simple respiratory variables such as SpO2/FiO2 should be the an important parameter in developing triage scores in future studies. Given the limited capacity of the PICU beds, it is necessary to establish objective criteria that can serve as recommendations for prioritizing the admission of certain patients to the PICU and to be conducted at the referring hospital. There is a need to develop a specific scoring system tailored to the population in Indonesia. An established prioritization system and scores derived from anamnesis, physical examination, and basic laboratory tests can be utilized in a pre-referral setting. This study is the first to analyse the performance of the PIM3 score on the population of critically ill children referred to the PICU in a LMIC setting. There are limitations in this study. The findings may not be generalizable to all PICUs in Indonesia, as the study was conducted at a single center over a relatively short period with a limited sample size. We did not involve patients from other intensive care units such as Surgical ICU or ICU for cardiac surgery in the study. Conclusion The discriminative ability of the PIM3 scoring system in predicting mortality outcomes in a group of critically ill children who were referred and admitted to the tertiary PICU at DR. Sardjito General Hospital is good. However, the calibration is poor. PIM3 was unfitted as a mortality predictor in this study population. Supplementary Information Supplementary Material 1."
+    }
+   ]
+  },
+  {
+   "id": "AHA-KAWA-001",
+   "source": "AHA",
+   "title": "Diagnosis treatment and long-term management of Kawasaki disease scientific statement AHA",
+   "year": "2017",
+   "page_url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000000484",
+   "pdf_url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000000484",
+   "license": "AHA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "rheumatology_pediatric",
+   "priority": "high",
+   "sha256": "8d0f08cd6874c3468bd0721721a419131557b9e3b309b110215da30612a8de5e",
+   "size_bytes": 1351,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1351,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Update on Diagnosis and Management of Kawasaki Disease: A Scientific Statement From the American Heart Association. Kawasaki disease (KD), an acute self-limited febrile illness that primarily affects children <5 years old, is the leading cause of acquired heart disease in developed countries, with the potential of leading to coronary artery dilation and coronary artery aneurysms in 25% of untreated patients. This update summarizes relevant clinical data published since the 2017 American Heart Association scientific statement on KD related to diagnosis, cardiac imaging in acute KD treatment, and long-term management. Criteria defining North American patients at high risk for developing coronary artery aneurysms who may benefit from more intensive initial treatment have been published. Advances in cardiovascular imaging have improved the ability to identify coronary artery stenosis in patients with KD, yet knowledge gaps remain regarding optimal frequency of serial imaging and the best imaging modality to identify those at risk for inducible myocardial ischemia. Recent data have advanced the understanding of safety and dosing for several anti-inflammatory therapies in KD. New anticoagulation medication, myocardial infarction management, transition of health care for patients with KD, and future directions in research are discussed."
+    }
+   ]
+  },
+  {
+   "id": "AHA-FH-001",
+   "source": "AHA",
+   "title": "AHA scientific statement familial hypercholesterolemia screening and treatment",
+   "year": "2020",
+   "page_url": "https://www.ahajournals.org/journal/circ",
+   "pdf_url": "https://www.ahajournals.org/journal/circ",
+   "license": "AHA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_obesity",
+   "priority": "high",
+   "sha256": "3d5ebd663eeebbee76a95c25453406127877b67289dd959758f147f5ba49eb50",
+   "size_bytes": 1085,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1085,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "2026 ACC/AHA/AACVPR/ABC/ACPM/ADA/AGS/APhA/ASPC/NLA/PCNA Guideline on the Management of Dyslipidemia: A Report of the American College of Cardiology/American Heart Association Joint Committee on Clinical Practice Guidelines. The \"2026 ACC/AHA/AACVPR/ABC/ACPM/ADA/AGS/APhA/ASPC/NLA/PCNA Guideline on the Management of Dyslipidemia\" retires and replaces the \"2018 AHA/ACC/AACVPR/AAPA/ABC/ACPM/ADA/AGS/APhA/ASPC/NLA/PCNA Guideline on the Management of Blood Cholesterol.\" A comprehensive literature search was conducted from October 2024 to December 2024 to identify clinical studies, systematic reviews and meta-analyses, and other evidence conducted on human participants that were published in English from MEDLINE (through PubMed), EMBASE, the Cochrane Library, Agency for Healthcare Research and Quality, and other selected databases relevant to this guideline. The focus of this clinical practice guideline is to address the evaluation, management, and monitoring of individuals with dyslipidemias, including high blood cholesterol, hypertriglyceridemia, and elevated lipoprotein(a)."
+    }
+   ]
+  },
+  {
+   "id": "AHA-CVT-001",
+   "source": "AHA",
+   "title": "AHA scientific statement diagnosis and management of cerebral venous thrombosis",
+   "year": "2024",
+   "page_url": "https://www.ahajournals.org/journal/str",
+   "pdf_url": "https://www.ahajournals.org/journal/str",
+   "license": "AHA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_thrombosis",
+   "priority": "high",
+   "sha256": "cdb79a0e52036efbfca79651a5c20bbc9dac110cfc0e33c3047a9fc1e0bc2d0b",
+   "size_bytes": 1383,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1383,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Diagnosis and Management of Cerebral Venous Thrombosis: A Scientific Statement From the American Heart Association. Cerebral venous thrombosis accounts for 0.5% to 3% of all strokes. The most vulnerable populations include young individuals, women of reproductive age, and patients with a prothrombotic state. The clinical presentation of cerebral venous thrombosis is diverse (eg, headaches, seizures), requiring a high level of clinical suspicion. Its diagnosis is based primarily on magnetic resonance imaging/magnetic resonance venography or computed tomography/computed tomographic venography. The clinical course of cerebral venous thrombosis may be difficult to predict. Death or dependence occurs in 10% to 15% of patients despite intensive medical treatment. This scientific statement provides an update of the 2011 American Heart Association scientific statement for the diagnosis and management of cerebral venous thrombosis. Our focus is on advances in the diagnosis and management decisions of patients with suspected cerebral venous thrombosis. We discuss evidence for the use of anticoagulation and endovascular therapies and considerations for craniectomy. We also provide an algorithm to optimize the management of patients with cerebral venous thrombosis and those with progressive neurological deterioration or thrombus propagation despite maximal medical therapy."
+    }
+   ]
+  },
+  {
+   "id": "ALCS-DRUG-001",
+   "source": "AHA",
+   "title": "ACLS Drug Reference cardiac arrest and emergency cardiovascular drugs",
+   "year": "2020",
+   "page_url": "https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines",
+   "pdf_url": "https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines",
+   "license": "AHA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "1307842ae23e3eb67c7c39e4d0e5706d1b87ad9424840f877a351c6d6bb8f245",
+   "size_bytes": 1920,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1920,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Intravenous versus intraosseous adrenaline administration in out-of-hospital cardiac arrest: A retrospective cohort study. Adrenaline is an important component in the resuscitation of individuals experiencing out-of-hospital cardiac arrest (OHCA). The 2018 Advanced Cardiac Life Support (ACLS) algorithm gives the option of either intravenous (IV) or intraosseous (IO) routes for adrenaline administration during cardiac arrest. However, the optimal route during prehospital resuscitation remains controversial. This study aims to investigate whether IV and IO routes lead to different outcomes in OHCA patients who received prehospital adrenaline. This retrospective analysis included adult patients with OHCA of presumed cardiac origin who had Emergency Medical Services (EMS) CPR, received adrenaline, and were enrolled in the Resuscitation Outcomes Consortium (ROC) Cardiac Epistry version 3 database between 2011 and 2015. We divided the study population into IV and IO groups based on the administration route. Logistic regression analysis was performed to evaluate the association between adrenaline delivery routes and prehospital return of spontaneous circulation (ROSC), survival to hospital discharge, and favorable neurological outcome. Of the 35,733 patients included, 27,758 (77.7%) had adrenaline administered via IV access and 7975 (22.3%) via IO access. With the IO group as a reference in the logistic regression model, the adjusted odds ratios of the IV group for prehospital ROSC, survival and favorable neurological outcome were 1.367 (95%CI, 1.276-1.464), 1.468 (95%CI, 1.264-1.705) and 1.849 (95%CI, 1.526-2.240), respectively. Similar results were found in the propensity score matched population and subgroup analysis. Compared with the IO approach, the IV approach appears to be the optimal route for adrenaline administration in advanced life support for OHCA during prehospital resuscitation."
+    }
+   ]
+  },
+  {
+   "id": "AHA-LIPID-DRUG-001",
+   "source": "AHA",
+   "title": "AHA ACC Guideline on the Management of Blood Cholesterol",
+   "year": "2018",
+   "page_url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000000625",
+   "pdf_url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000000625",
+   "license": "AHA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_lipid_htn_diabetes",
+   "priority": "high",
+   "sha256": "3d5ebd663eeebbee76a95c25453406127877b67289dd959758f147f5ba49eb50",
+   "size_bytes": 1085,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1085,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "2026 ACC/AHA/AACVPR/ABC/ACPM/ADA/AGS/APhA/ASPC/NLA/PCNA Guideline on the Management of Dyslipidemia: A Report of the American College of Cardiology/American Heart Association Joint Committee on Clinical Practice Guidelines. The \"2026 ACC/AHA/AACVPR/ABC/ACPM/ADA/AGS/APhA/ASPC/NLA/PCNA Guideline on the Management of Dyslipidemia\" retires and replaces the \"2018 AHA/ACC/AACVPR/AAPA/ABC/ACPM/ADA/AGS/APhA/ASPC/NLA/PCNA Guideline on the Management of Blood Cholesterol.\" A comprehensive literature search was conducted from October 2024 to December 2024 to identify clinical studies, systematic reviews and meta-analyses, and other evidence conducted on human participants that were published in English from MEDLINE (through PubMed), EMBASE, the Cochrane Library, Agency for Healthcare Research and Quality, and other selected databases relevant to this guideline. The focus of this clinical practice guideline is to address the evaluation, management, and monitoring of individuals with dyslipidemias, including high blood cholesterol, hypertriglyceridemia, and elevated lipoprotein(a)."
+    }
+   ]
+  },
+  {
+   "id": "AHA-ACLS-DRUG-001",
+   "source": "AHA",
+   "title": "AHA ACLS Pharmacology cardiac arrest drug doses focused update",
+   "year": "2020",
+   "page_url": "https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines",
+   "pdf_url": "https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines",
+   "license": "AHA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "3bb410d3268647de8d8a235ed7542b456aa63655d4cf7b275eb01e5a924372d6",
+   "size_bytes": 778,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 778,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AHA ACLS Pharmacology cardiac arrest drug doses focused update Source: AHA Year: 2020 Domain: drug_critical_care License: AHA Available at: https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines This is a citation reference for the AHA guideline 'AHA ACLS Pharmacology cardiac arrest drug doses focused update' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AHA-PALS-DRUG-001",
+   "source": "AHA",
+   "title": "AHA PALS Pediatric Advanced Life Support drug doses",
+   "year": "2020",
+   "page_url": "https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines",
+   "pdf_url": "https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines",
+   "license": "AHA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "075233f8138b65a99744907f4242c3502b48cf9c6f4ad4eb5381a21736de8ceb",
+   "size_bytes": 3099,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3099,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "The Impact of a Tablet App on Adherence to American Heart Association Guidelines During Simulated Pediatric Cardiopulmonary Resuscitation: Randomized Controlled Trial. Evidence-based best practices are the cornerstone to guide optimal cardiopulmonary arrest resuscitation care. Adherence to the American Heart Association (AHA) guidelines for cardiopulmonary resuscitation (CPR) optimizes the management of critically ill patients and increases their chances of survival after cardiac arrest. Despite advances in resuscitation science and survival improvement over the last decades, only approximately 38% of children survive to hospital discharge after in-hospital cardiac arrest and only 6%-20% after out-of-hospital cardiac arrest. We investigated whether a mobile app developed as a guide to support and drive CPR providers in real time through interactive pediatric advanced life support (PALS) algorithms would increase adherence to AHA guidelines and reduce the time to initiation of critical life-saving maneuvers compared to the use of PALS pocket reference cards. This study was a randomized controlled trial conducted during a simulation-based pediatric cardiac arrest scenario caused by pulseless ventricular tachycardia (pVT). A total of 26 pediatric residents were randomized into two groups. The primary outcome was the elapsed time in seconds in each allocation group from the onset of pVT to the first defibrillation attempt. Secondary outcomes were time elapsed to (1) initiation of chest compression, (2) subsequent defibrillation attempts, and (3) administration of drugs, including the time intervals between defibrillation attempts and drug doses, shock doses, and the number of shocks. All outcomes were assessed for deviation from AHA guidelines. Mean time to the first defibrillation attempt (121.4 sec, 95% CI 105.3-137.5) was significantly reduced among residents using the app compared to those using PALS pocket cards (211.5 sec, 95% CI 162.5-260.6, P<.001). With the app, 11 out of 13 (85%) residents initiated chest compressions within 60 seconds from the onset of pVT and 12 out of 13 (92%) successfully defibrillated within 180 seconds. Time to all other defibrillation attempts was reduced with the app. Adherence to the 2018 AHA pVT algorithm improved by approximately 70% (P=.001) when using the app following all CPR sequences of action in a stepwise fashion until return of spontaneous circulation. The pVT rhythm was recognized correctly in 51 out of 52 (98%) opportunities among residents using the app compared to only 19 out of 52 (37%) among those using PALS cards (P<.001). Time to epinephrine injection was similar. Among a total of 78 opportunities, incorrect shock or drug doses occurred in 14% (11/78) of cases among those using the cards. These errors were reduced to 1% (1/78, P=.005) when using the app. Use of the mobile app was associated with a shorter time to first and subsequent defibrillation attempts, fewer medication and defibrillation dose errors, and improved adherence to AHA recommendations compared with the use of PALS pocket cards."
+    }
+   ]
+  },
+  {
+   "id": "AHA-NRP-DRUG-001",
+   "source": "AHA",
+   "title": "AHA NRP Neonatal Resuscitation Program drug doses",
+   "year": "2020",
+   "page_url": "https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines",
+   "pdf_url": "https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines",
+   "license": "AHA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "fbf1981028aa50f86485e8a163304b0887f9f6dc56418aa3463e4f41915d9dc8",
+   "size_bytes": 752,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 752,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AHA NRP Neonatal Resuscitation Program drug doses Source: AHA Year: 2020 Domain: drug_critical_care License: AHA Available at: https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines This is a citation reference for the AHA guideline 'AHA NRP Neonatal Resuscitation Program drug doses' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AHA-PPE-001",
+   "source": "AHA",
+   "title": "AHA Recommendations for Preparticipation Cardiovascular Screening of Young Athletes",
+   "year": "2020",
+   "page_url": "https://www.heart.org/en/professional/quality-improvement",
+   "pdf_url": "https://www.heart.org/en/professional/quality-improvement",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_cardiac",
+   "priority": "high",
+   "sha256": "e2b80fffd93804870cf5918f1c4aff9ccf2927132596ca027529921e63eb66b3",
+   "size_bytes": 1771,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1771,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Playing it safe: exercise and cardiovascular health. Regular physical activity controls acquired cardiovascular risk factors such as obesity, diabetes mellitus, hypertension and hyperlipidaemia. Exercise is generally associated with a 50% reduction in adverse events from coronary artery disease (CAD). The benefits of exercise extend well beyond the cardiovascular system. Recent evidence suggests that exercise prevents cell senescence, and active individuals are at lower risk of developing certain malignancies including cancer of the prostate and the colon, osteoporosis, depression and dementia. Individuals who exercise regularly extend their life expectancy by three to seven years. Healthy individuals should engage in 150 minutes of moderate-intensity, aerobic exercise per week. Recent studies have demonstrated that even lower volumes of exercise below these recommendations confer health benefits, which is highly relevant to individuals with established cardiac disease including heart failure. Sudden cardiac death in athletes under 35 is rare with.estimates ranging from 1 in 50,000 to 1 in 200,000. Hereditary and congenital abnormalities of the heart are the most common cause of nontraumatic death during sport in young athletes. In middle-aged recreational athletes more than 90% of sudden cardiac deaths occur in males and more than 90% are caused by atherosclerotic CAD. The AHA and the ESC advocate pre-participation screening of young athletes. The ECG has the ability to detect congenital accessory pathways and ion channelopathies, and is frequently abnormal in individuals with cardiomyopathy. Screening with a 12-lead ECG in older athletes is of limited value given the overwhelming contribution of atherosclerotic CAD to sudden cardiac death."
+    }
+   ]
+  },
+  {
+   "id": "AHA-EXERCISE-001",
+   "source": "AHA",
+   "title": "AHA Scientific Statement Exercise-Related Acute Cardiovascular Events",
+   "year": "2020",
+   "page_url": "https://www.heart.org/en/professional/quality-improvement",
+   "pdf_url": "https://www.heart.org/en/professional/quality-improvement",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_cardiac",
+   "priority": "high",
+   "sha256": "e352fb38adc29b271b5cd630a8a8373f1453fa3e91cce2ab5f650275d023f840",
+   "size_bytes": 1997,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1997,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Exercise-Related Acute Cardiovascular Events and Potential Deleterious Adaptations Following Long-Term Exercise Training: Placing the Risks Into Perspective-An Update: A Scientific Statement From the American Heart Association. Epidemiological and biological plausibility studies support a cause-and-effect relationship between increased levels of physical activity or cardiorespiratory fitness and reduced coronary heart disease events. These data, plus the well-documented anti-aging effects of exercise, have likely contributed to the escalating numbers of adults who have embraced the notion that \"more exercise is better.\" As a result, worldwide participation in endurance training, competitive long distance endurance events, and high-intensity interval training has increased markedly since the previous American Heart Association statement on exercise risk. On the other hand, vigorous physical activity, particularly when performed by unfit individuals, can acutely increase the risk of sudden cardiac death and acute myocardial infarction in susceptible people. Recent studies have also shown that large exercise volumes and vigorous intensities are both associated with potential cardiac maladaptations, including accelerated coronary artery calcification, exercise-induced cardiac biomarker release, myocardial fibrosis, and atrial fibrillation. The relationship between these maladaptive responses and physical activity often forms a U- or reverse J-shaped dose-response curve. This scientific statement discusses the cardiovascular and health implications for moderate to vigorous physical activity, as well as high-volume, high-intensity exercise regimens, based on current understanding of the associated risks and benefits. The goal is to provide healthcare professionals with updated information to advise patients on appropriate preparticipation screening and the benefits and risks of physical activity or physical exertion in varied environments and during competitive events."
+    }
+   ]
+  },
+  {
+   "id": "AHA-AED-001",
+   "source": "AHA",
+   "title": "AHA Statement on Sudden Cardiac Death in the Athlete",
+   "year": "2021",
+   "page_url": "https://www.heart.org/en/professional/quality-improvement",
+   "pdf_url": "https://www.heart.org/en/professional/quality-improvement",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_cardiac",
+   "priority": "high",
+   "sha256": "6d6465806706f0b917b33f50342d9c74b6ede9e94f9a6fa0586c738381217419",
+   "size_bytes": 3913,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3885,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Sports or no sports? How to manage the young arrhythmia patient. Inherited arrhythmia syndromes and cardiomyopathies are among the most concerning causes of sudden cardiac death in young individuals, particularly in the context of physical activity. Historically, sports participation in these patients has been broadly restricted due to safety concerns. However, emerging data and updated guidelines suggest that a more individualized approach may be both appropriate and safe. The aim of this study was to review current evidence and evolving recommendations regarding sports participation in young individuals with inherited cardiac diseases. This review synthesizes recent studies, expert consensus statements, and current international guidelines (ESC, AHA/ACC). Recent data indicate that, in selected patients with inherited arrhythmia syndromes and cardiomyopathies who have undergone thorough evaluation and counseling, participation in sports-under appropriate precautions-may be safe and well tolerated. Emerging studies report low incidence of adverse events in appropriately managed athletes. Guidelines have shifted away from blanket restrictions and towards shared decision-making, especially in asymptomatic individuals or those with controlled disease. Key factors include genotype-phenotype correlation, history of arrhythmic events, treatment adherence, and patient/family understanding of risks. In contrast to traditional dogma, a growing body of evidence supports less restrictive, patient-centered management for young individuals with inherited cardiac conditions. With proper evaluation, risk stratification, and informed decision-making, sports participation and leisure time activities may be possible-and even beneficial-for many of these patients. HINTERGRUND: Erbliche Arrhythmiesyndrome und Kardiomyopathien gehören zu den besorgniserregendsten Ursachen des plötzlichen Herztods bei jungen Menschen, insbesondere im Zusammenhang mit körperlicher Aktivität. Aus Sorge um die Sicherheit wurden sportliche Aktivitäten für betroffene Patienten in der Vergangenheit oft weitgehend eingeschränkt. Neue Daten und aktualisierte Leitlinien deuten jedoch darauf hin, dass ein individuelleres Vorgehen sowohl angemessen als auch sicher sein kann. Ziel dieses Beitrags ist es, die aktuelle Evidenz und die sich wandelnden Empfehlungen zur Sportbeteiligung junger Menschen mit erblichen Herzerkrankungen darzustellen. Diese Übersicht basiert auf der Analyse aktueller Studien, Expertenempfehlungen und internationaler Leitlinien (European Society of Cardiology [ESC], American Heart Association [AHA]/American College of Cardiology [ACC]) zu erblichen Arrhythmiesyndromen und Kardiomyopathien. Neue Daten zeigen, dass die Teilnahme an sportlichen Aktivitäten – unter angemessenen Vorsichtsmaßnahmen – bei ausgewählten Personen mit erblichen Arrhythmiesyndromen und Kardiomyopathien nach umfassender Evaluation und Aufklärung sicher und gut verträglich sein kann. Studien berichten über eine niedrige Inzidenz unerwünschter Ereignisse bei adäquat betreuten Athleten. Die aktuellen Leitlinien bewegen sich weg von generellen Sportverboten und hin zu einem Modell der gemeinsamen Entscheidungsfindung, insbesondere bei asymptomatischen Personen oder solchen mit gut kontrollierter Erkrankung. Entscheidende Faktoren sind unter anderem die Genotyp-Phänotyp-Korrelation, die Vorgeschichte arrhythmischer Ereignisse, die Therapietreue sowie das Risikoverständnis der Patienten und ihrer Familien. Im Gegensatz zur bisherigen Lehrmeinung unterstützt eine wachsende Evidenz ein weniger restriktives, patientenzentriertes Management junger Menschen mit erblichen Herzerkrankungen. Bei sorgfältiger Evaluation, Risikostratifizierung und informierter Entscheidungsfindung kann Sport einschließlich Freizeitaktivitäten für viele dieser Personen möglich und sogar vorteilhaft sein."
+    }
+   ]
+  },
+  {
+   "id": "AHA-MASTERS-001",
+   "source": "AHA",
+   "title": "AHA Scientific Statement on Cardiovascular Aspects of Masters Athletes",
+   "year": "2020",
+   "page_url": "https://www.heart.org/en/professional/quality-improvement",
+   "pdf_url": "https://www.heart.org/en/professional/quality-improvement",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_cardiac",
+   "priority": "medium",
+   "sha256": "4e85054a19108b904983aed1c74d7ed1d6ea99e17ef4fa5427c883ab4c13ed37",
+   "size_bytes": 782,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 782,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AHA Scientific Statement on Cardiovascular Aspects of Masters Athletes Source: AHA Year: 2020 Domain: sports_cardiac License: Proprietary Available at: https://www.heart.org/en/professional/quality-improvement This is a citation reference for the AHA guideline 'AHA Scientific Statement on Cardiovascular Aspects of Masters Athletes' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_cardiac. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "ASAPS",
  "generated_at": "2026-05-09T16:32:11Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "ASAPS-AESTHETIC-001",
@@ -45,6 +45,31 @@
     {
      "chunk_index": 5,
      "content": "studies are needed to assess the long-term outcomes and psychological impacts of FGCS on patients. Special attention should also be given to developing targeted training programs for providers, especially those with little clinical experience in FGCS. Finally, qualitative research involving both patients and providers could help uncover nuanced ethical dilemmas and guide culturally appropriate policy and educational development. Conclusion In this study, we assessed the knowledge, attitudes, and practices of healthcare providers toward FGCS in a culturally conservative setting. While many respondents reported formal training and recognized ethical considerations, only a small number actively performed FGCS, and significant gaps in confidence and long-term risk awareness remain. Overall, attitudes toward offering FGCS for aesthetic purposes were cautiously positive, with an emphasis on the importance of pre-procedure counseling and informed consent. Our findings suggest the need for more comprehensive, experience-based training and context-sensitive ethical guidance to better support both providers and patients in decision-making about FGCS."
+    }
+   ]
+  },
+  {
+   "id": "ASAPS-MEMBER-001",
+   "source": "ASAPS",
+   "title": "Aesthetic Surgery Journal Best Practices in Mommy Makeover",
+   "year": "2021",
+   "page_url": "https://academic.oup.com/asj",
+   "pdf_url": "https://academic.oup.com/asj",
+   "license": "Proprietary",
+   "commercial_use": "restricted",
+   "clinical_domain": "plastic_aesthetic",
+   "priority": "medium",
+   "sha256": "ea7f5cf9e98cf90350d91d0e294b45ae2e352a94126aed0a307c12629317907c",
+   "size_bytes": 739,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 739,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Aesthetic Surgery Journal Best Practices in Mommy Makeover Source: ASAPS Year: 2021 Domain: plastic_aesthetic License: Proprietary Available at: https://academic.oup.com/asj This is a citation reference for the ASAPS guideline 'Aesthetic Surgery Journal Best Practices in Mommy Makeover' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: plastic_aesthetic. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "PNS",
  "generated_at": "2026-05-09T08:32:45Z",
- "total_documents": 5,
+ "total_documents": 6,
  "documents": [
   {
    "id": "PNS-GBS-001",
@@ -301,6 +301,31 @@
     {
      "chunk_index": 5,
      "content": "response to cyclophosphamide, rituximab, and bortezomib in chronic immune-mediated sensorimotor neuropathies: a retrospective cohort study by Jeremias Motte, Anna Lena Fisse, Nuray Köse, Thomas Grüter, Hannah Mork, Diamantis Athanasopoulos, Miriam Fels, Susanne Otto, Ines Siglienti, Christiane Schneider-Gold, Kerstin Hellwig, Min-Suk Yoon, Ralf Gold and Kalliopi Pitarokoili in Therapeutic Advances in Neurological Disorders"
+    }
+   ]
+  },
+  {
+   "id": "PNS-VASCULITIC-001",
+   "source": "PNS",
+   "title": "EFNS PNS guideline on diagnosis and treatment of nonsystemic vasculitic neuropathy",
+   "year": "2010",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1529-8027.2010.00271.x",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1529-8027.2010.00271.x",
+   "license": "PNS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_neuropathy",
+   "priority": "medium",
+   "sha256": "2ab4791c79f1a5a36d676275bf67a649d1cfcff7bfd31e4822b251fe8632f595",
+   "size_bytes": 821,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 821,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EFNS PNS guideline on diagnosis and treatment of nonsystemic vasculitic neuropathy Source: PNS Year: 2010 Domain: neurology_neuropathy License: PNS Available at: https://onlinelibrary.wiley.com/doi/10.1111/j.1529-8027.2010.00271.x This is a citation reference for the PNS guideline 'EFNS PNS guideline on diagnosis and treatment of nonsystemic vasculitic neuropathy' published in 2010. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_neuropathy. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "BSG",
  "generated_at": "2026-05-09T09:57:12Z",
- "total_documents": 11,
+ "total_documents": 12,
  "documents": [
   {
    "id": "BSG-GERD-001",
@@ -635,6 +635,31 @@
     {
      "chunk_index": 7,
      "content": "seven studies. Compared to patients taking PPIs (omeprazole 20 mg or esomeprazole 20 mg daily for up to 90 and 60 days, respectively), controls not taking PPIs developed twice as many marginal ulcers. In a single-center study including 610 patients undergoing RYGB, a lower proportion of patients receiving postoperative pantoprazole 40 mg developed marginal ulcers compared to controls (1.2% vs. 7.3%, P < 0.001). Similarly, patients using PPIs experienced fewer gastro-intestinal complaints ( P < 0.001). Kang et al. evaluated data from 1016 patients undergoing RYGB who were administered a 30- or 90-day PPI (lansoprazole 30 mg daily) course after surgery. The incidence of marginal ulcers was significantly lower in those receiving a longer course of therapy (6.5% vs. 12.4%, P < 0.05). In another study, the impact of different modality of PPI assumption (open capsules [OC] or intact capsules [IC]; including omeprazole, pantoprazole, or esomeprazole 20 mg or 40 mg twice daily or lansoprazole 30 mg twice daily) was evaluated in terms of effectiveness in marginal ulcers healing. Data from a cohort of 162 patients showed that the median time for ulcer healing was lower in those treated with OC compared to IC (91 vs. 342 days, P < 0.001). Interestingly, OC resulted in the only independent predictor of time to ulcer healing ( P < 0.001). In conclusion, available evidence suggests that postprocedural PPI therapy could be effective in reducing the risk of marginal ulcers development and promote healing. Further prospective and controlled studies are required to strengthen this recommendation and to define the dosage and duration of PPI treatment. Concerning preprocedural PPI therapy, apart from specific and well-defined indications (e.g. HP eradication, erosive esophagitis), available data are scarce and conflicting. LITERATURE GAPS REQUIRING ADDITIONAL STUDIES Most published studies investigating the topic of these guidelines have several limitations (i.e. retrospective, case series, uncontrolled, etc.) that reduce the quality of evidence. We believe that efforts should be put in place to increase the level of evidence regarding esophago-gastric disorders affecting obese patients who are candidates for bariatric procedures. Future studies should have a prospective design and should address the impact of accurately evaluating GERD and esophageal motor function in the selection of one type of bariatric intervention compared to another. In addition, high-quality studies investigating GERD outcomes across the various bariatric procedures in the long-term are also needed, overcoming methodological flaws of available literature. In addition, well-designed studies investigating the outcomes of endoscopic bariatric procedures are needed. provides a list of key aspects that require further investigation and new research areas that need exploration. CONCLUSION Obesity is a highly prevalent disease that affects up to 22.4% of the population in the Americas and up to 20% in Europe, accounting for around 650 million obese adults worldwide. In addition, a BMI 30–40 kg/m 2 is associated with almost 50%, and a BMI over 40 kg/m 2 is associated with 100%, greater healthcare costs due to management of obesity-related comorbidities. Bariatric surgery represents the most effective intervention to treat severe obesity and improve both morbidity and mortality. However, it is important to note that obese patients often suffer from gastrointestinal conditions including GERD and HH, and bariatric procedures may further deteriorate esophageal motor abnormalities. Accordingly, an accurate, patient-tailored, preoperative assessment of gastro-esophageal function is important in the setting of bariatric surgical practice. This consensus, endorsed by the ISDE and ESDE, provided evidence and experience-based recommendations on the most appropriate diagnostic workup for the gastro-esophageal assessment in patients undergoing bariatric interventions. An international, multidisciplinary group of experts summarized key aspects in ten statements relevant to the management of bariatric patients. This document is intended to provide a practical guideline to support clinicians in their decision-making process, improve the outcomes of patients undergoing bariatric interventions, and reduce complications. ABBREVIATIONS AET, acid exposure time; ARM, ambulatory reflux monitoring; BE, barium esophagogram; BMI, body mass index; DMS, DeMeester Score; EB, endoscopic balloon placement; EGDS, esophagogastroduodenoscopy; GB, gastric banding; GERD, gastroesophageal reflux disease; HHR, HH repair; HRM, high-resolution esophageal manometry; IEM, ineffective esophageal motility; ISDE, International Society for Diseases of the Esophagus; LES, lower esophageal sphincter; LSG, laparoscopic sleeve gastrectomy; OR, odds ratio; PICO, population, intervention, comparator, and outcome; PPI, proton pump inhibitor; QoL, quality of life; RYGB, Roux-en-Y gastric by-pass"
+    }
+   ]
+  },
+  {
+   "id": "BSG-MICROSCOPIC-001",
+   "source": "BSG",
+   "title": "BSG NICE Diagnosis and Management of Microscopic Colitis",
+   "year": "2018",
+   "page_url": "https://gut.bmj.com/content/67/12/2095",
+   "pdf_url": "https://gut.bmj.com/content/67/12/2095",
+   "license": "BSG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gastro_colon",
+   "priority": "medium",
+   "sha256": "58d90823a56067a0574d076015ec7ce3247f816929db78dfa3158b62f1597480",
+   "size_bytes": 723,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 723,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BSG NICE Diagnosis and Management of Microscopic Colitis Source: BSG Year: 2018 Domain: gastro_colon License: BSG Available at: https://gut.bmj.com/content/67/12/2095 This is a citation reference for the BSG guideline 'BSG NICE Diagnosis and Management of Microscopic Colitis' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gastro_colon. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

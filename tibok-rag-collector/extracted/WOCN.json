@@ -1,7 +1,7 @@
 {
  "source": "WOCN",
  "generated_at": "2026-05-09T15:44:04Z",
- "total_documents": 6,
+ "total_documents": 8,
  "documents": [
   {
    "id": "WOCN-OSTOMY-001",
@@ -394,6 +394,56 @@
     {
      "chunk_index": 13,
      "content": "64. Wound Ostomy and Continence Nurses Society (WOCN). WOCN Society 89. Rubin EB, Buehler AE, Halpern SD. States worse than death among Position Statement: Competency and WOC Nursing. Glenview, IL: Wound hospitalized patients with serious illnesses. JAMA Intern Med. 2016;176(10): Ostomy and Continence Nurses Society; 2017. 1557–9. 65. British Geriatrics Society. Behind Closed Doors: The Use of the Toilet as a Marker of Human Rights. 2006. Publisher’s Note 66. Abrams P, Cardozo L, Wagg A, Wein AJ, editors. Incontinence. 6th ed. Springer Nature remains neutral with regard to jurisdictional claims in Anheim, The Netherlands: ICS-ICUD; 2017. published maps and institutional affiliations. 67. Veritas Health Innovation. Covidence systematic review software. Melbourne: Covidence systematic review software, Veritas Health Innovation; 2019. Available at www.covidence.org. 68. Borglin G, Hew Thach E, Jeppsson M, Sjögren Forss K. Registered nurse’s experiences of continence care for older people: a qualitative descriptive study. Int J Older People Nursing. 2019;0(0):e12275. 69. Buswell M, Goodman C, Roe B, Russell B, Norton C, Harwood R, et al. What works to mprove and manage fecal incontinence in care home residents liwing with dementia? A Realist Synthesis of the Evidence. J Am Med Dir Assoc. 2020;15(1):E12275. 70. Goodman C, Norton C, Buswell M, Russell B, Harari D, Harwood R, et al. Managing faecal incontinence in people with advanced dementia resident in care homes (FINCH) study: a realist synthesis of the evidence. Health Technol Assess 2017;21(42):1–219. 71. Manthorpe J, Iliffe S, Samsi K, Cole L, Goodman C, Drennan V, et al. Dementia, dignity and quality of life: nursing practice and its dilemmas. Int J Older People Nursing. 2010;5(3):235–44. 72. Ostaszkiewicz J, O'Connell B, Dunning T. Ethical challenges associated with providing continence care in residential aged care facilities: findings from a grounded theory study. Aust N Z Continence J. 2014;20(4):179–86. 73. Ostaszkiewicz J, O'Connell B, Dunning T. Night-time continence care in Australian residential aged care facilities: findings from a grounded theory study. Contemp Nurse. 2016;52(2–3):152–62. 74. Ostaszkiewicz J, O'Connell B, Dunning T. Residents' perspectives on urinary incontinence: A review of literature. Scand J Caring Sci. 2012;26:761–72. 75. Ostaszkiewicz J, Tomlinson E, Hutchinson A. Learning to accept incontinence and continence care in residential aged care facilities: family members' experiences. Aust N Z Continence J. 2016;22(3):66–73. 76. Roe B, Flanagan L, Maden M. Systematic review of systematic reviews for the management of urinary incontinence and promotion of continence using conservative behavioural approaches in older people in care homes. J Adv Nurs. 2015;71(7):1464–83."
+    }
+   ]
+  },
+  {
+   "id": "WOCN-PALL-001",
+   "source": "WOCN",
+   "title": "WOCN Position on Palliative Wound Care",
+   "year": "2017",
+   "page_url": "https://www.wocn.org/",
+   "pdf_url": "https://www.wocn.org/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wound_palliative",
+   "priority": "medium",
+   "sha256": "5b31048c20f54daf053d9cd8b272409ac2d21ef5147adad189f49e52eef55617",
+   "size_bytes": 688,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 688,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WOCN Position on Palliative Wound Care Source: WOCN Year: 2017 Domain: wound_palliative License: Proprietary Available at: https://www.wocn.org/ This is a citation reference for the WOCN guideline 'WOCN Position on Palliative Wound Care' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wound_palliative. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WOCN-MASD-001",
+   "source": "WOCN",
+   "title": "WOCN Best Practice Document on Moisture Associated Skin Damage",
+   "year": "2018",
+   "page_url": "https://www.wocn.org/",
+   "pdf_url": "https://www.wocn.org/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wound_pressure",
+   "priority": "medium",
+   "sha256": "5df230bc13e6f484bbd1f29548b9bfcdffa52f7748dd4934702798cb5e5e8379",
+   "size_bytes": 732,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 732,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WOCN Best Practice Document on Moisture Associated Skin Damage Source: WOCN Year: 2018 Domain: wound_pressure License: Proprietary Available at: https://www.wocn.org/ This is a citation reference for the WOCN guideline 'WOCN Best Practice Document on Moisture Associated Skin Damage' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wound_pressure. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

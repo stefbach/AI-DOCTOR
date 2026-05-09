@@ -1,7 +1,7 @@
 {
  "source": "STS",
  "generated_at": "2026-05-02T16:22:57Z",
- "total_documents": 17,
+ "total_documents": 18,
  "documents": [
   {
    "id": "STS-001",
@@ -829,6 +829,31 @@
     {
      "chunk_index": 8,
      "content": "addressing occupational hazards without compromising efficacy. These data confirm that robotic technology can safely expand the scope of PCI, improving accuracy, consistency, and overall procedural outcomes in routine clinical practice [ ]. The integration of robotic technology with TRA may prove transformative. Conclusion TRA has emerged as a cornerstone in modern interventional cardiology, progressively replacing TFA as the default approach for PCI. Its adoption is supported by a substantial body of evidence demonstrating consistent advantages across clinical outcomes, patient experience, and healthcare resource utilization. Compared with TFA, TRA is associated with lower rates of bleeding, vascular complications, and mortality, especially in high-risk groups such as patients with ACS [ ]. TRA offers important procedural benefits, including easier hemostasis, quicker patient mobilization, and reduced hospital stays – all of which contribute to enhanced patient comfort and lower overall costs. Advances such as LRA and DRA have further improved procedural ergonomics and vessel preservation, supporting broader adoption across diverse patient populations and case complexities. Despite these benefits, challenges remain. Operator preference, difficult vascular anatomy, and limited familiarity with advanced radial techniques may necessitate TFA. These barriers, however, are increasingly mitigated through dedicated training, ultrasound guidance, and adjunctive technologies such as sheathless systems and alternative forearm access routes [ ]. As radial-first adoption expands, operator proficiency continues to improve. In summary, TRA enhances clinical outcomes, patient experience, and resource utilization. With growing evidence and rising operator expertise, TRA is poised to remain the preferred route for coronary interventions, provided that continued efforts focus on skill development, technical refinement, and institutional support [ , , ]."
+    }
+   ]
+  },
+  {
+   "id": "STS-ESOPHAGECTOMY-001",
+   "source": "STS",
+   "title": "STS Practice Guidelines on the Surgical Management of Esophageal Cancer",
+   "year": "2021",
+   "page_url": "https://www.annalsthoracicsurgery.org/article/S0003-4975(21)00018-X/fulltext",
+   "pdf_url": "https://www.annalsthoracicsurgery.org/article/S0003-4975(21)00018-X/fulltext",
+   "license": "STS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_hpb",
+   "priority": "high",
+   "sha256": "e4b73de4231dd324485e576f60654218f7665f7ab6b03a50272c01794e44f90f",
+   "size_bytes": 809,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 809,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: STS Practice Guidelines on the Surgical Management of Esophageal Cancer Source: STS Year: 2021 Domain: digestive_surgery_hpb License: STS Available at: https://www.annalsthoracicsurgery.org/article/S0003-4975(21)00018-X/fulltext This is a citation reference for the STS guideline 'STS Practice Guidelines on the Surgical Management of Esophageal Cancer' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: digestive_surgery_hpb. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

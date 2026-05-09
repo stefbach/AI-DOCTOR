@@ -1,0 +1,32 @@
+{
+ "source": "EFISDS",
+ "generated_at": "2026-05-09T19:09:05Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "WHIPPLE-001",
+   "source": "EFISDS",
+   "title": "European Federation Whipple Disease Diagnosis and Management Consensus",
+   "year": "2018",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1002/ueg2.12029",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1002/ueg2.12029",
+   "license": "EFISDS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gastro_smallbowel",
+   "priority": "medium",
+   "sha256": "8b3a84a552c73b9b113dd6a0674d728d2b1221b2877eac71492ec4314a82c0ab",
+   "size_bytes": 786,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 786,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:05Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: European Federation Whipple Disease Diagnosis and Management Consensus Source: EFISDS Year: 2018 Domain: gastro_smallbowel License: EFISDS Available at: https://onlinelibrary.wiley.com/doi/10.1002/ueg2.12029 This is a citation reference for the EFISDS guideline 'European Federation Whipple Disease Diagnosis and Management Consensus' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gastro_smallbowel. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

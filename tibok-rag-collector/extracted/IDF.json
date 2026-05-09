@@ -1,7 +1,7 @@
 {
  "source": "IDF",
  "generated_at": "2026-05-02T16:21:19Z",
- "total_documents": 3,
+ "total_documents": 5,
  "documents": [
   {
    "id": "IDF-002",
@@ -283,6 +283,56 @@
     {
      "chunk_index": 41,
      "content": "(Hba1c at or above 75mol/mol) was still high in 2017. More feasibly, access to physicians or nurses with a special interest in diabetes could address this issue rather than relying on visiting, consulting physicians engaged only in short time shifts, which is the present reality in many locations outside of Nuuk. Skype consultation with physicians or nurses in Nuuk offers a possibility that already has been started in a pilot test setting. The implementation of common EMR for all patients in Greenland could be used as a step towards considering all patients based on their addresses rather than dealing only with those solely affiliated to local health care clinics. In this way all patients in Greenland would benefit from high quality primary health care available in a large central primary health care clinic. Furthermore, the model of diabetes care could be extended to many other areas of primary care including both chronic and non-chronic conditions. Potentially, the quality of primary health care in Greenland could improve after such a re-organisation. The management of gestational diabetes care improved from 2008 to 2014, through the development of organisation of care, clinical guidelines, and information provided to and gleaned from patients. Furthermore, testing effectiveness improved from 53% (2008) to 69% (2014). In Nuuk, a quite acceptable testing effectiveness of 84% was observed, whereas the national performance level was suboptimal, missing in fact approximately one-third of all women that should have been tested. An alternative and a more simple testing strategy may be considered. Testing all pregnant women once in pregnancy at gestational week 24 may be considered as proposed by The International Federation of Gynaecology and Obstetrics. Also, the cut-off values used in Greenland must be reconsidered, because the present cut-off was based on venous plasma values rather than on capillary whole blood glucose concentrations. This would result in an increased prevalence of GDM and an increased need for lifestyle interventions and treatments of new cases. Thus, the decision has to be balanced with the resources available within the health care system. An analysis is needed of the consequences of different strategies and cut-off values. Furthermore, it should be explored whether baseline Hba1c measured early in pregnancy could be used to identify women at risk of GDM in Greenland as observed in some international studies. The lower prevalence of retinopathy observed among Greenlanders compared to non-Greenlanders in Nuuk should also be confirmed in a larger study including all Greenlanders with diabetes. Other areas that should be explored in upcoming research projects include the prevalence of diagnosed T1D and the quality of diabetes care for this group, including not only quality of care, but possible differences in ethnicity, the presence of monogenic forms of diabetes in Greenland, and the prevalence of macrovascular complications. Furthermore, a study of distal outcome indicators is wished for, i.e. the rate of lower extremity amputation, end-stage renal disease, and cardiovascular death among patients with diabetes. Finally, undetected diabetes among children need to be explored, because children were not included in the former studies of diabetes in Greenland. In a global perspective, the model used to improve awareness and the quality of diabetes management in Greenland may also be used in other remote settings in the future along with the implementation of electronic medical record systems, which would allow continued monitoring and feasible access to the evaluation of initiatives taken."
+    }
+   ]
+  },
+  {
+   "id": "IDF-DR-001",
+   "source": "IDF",
+   "title": "IDF diabetes eye health guidelines",
+   "year": "2019",
+   "page_url": "https://www.idf.org/our-activities/care-prevention/eye-health",
+   "pdf_url": "https://www.idf.org/our-activities/care-prevention/eye-health",
+   "license": "IDF",
+   "commercial_use": "allowed",
+   "clinical_domain": "ophthalmology_retina",
+   "priority": "high",
+   "sha256": "5fe1fdae031a22cad4e6f7e9e1e20c80414c46eeb424ced0b839a48016f559ad",
+   "size_bytes": 1382,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1380,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "IDF diabetes Atlas: A worldwide review of studies utilizing retinal photography to screen for diabetic retinopathy from 2017 to 2024 inclusive. This study aimed to report the global prevalence of diabetic retinopathy (DR) based on retinal imaging, using English-language articles published from 2017 to June 2024. Three databases-Cochrane Library, Embase via OVID, and Medline via OVID-were searched using subject headings and keywords. An independent librarian conducted the initial search and developed the strategy. A total of 569 publications were uploaded to Rayyan for blinded screening, yielding 42 studies. Meta-analysis was performed to determine prevalence rates for any DR, proliferative DR (PDR), diabetic macular oedema (DMO), and sight-threatening DR (STDR). Global prevalence rates across the 7 IDF regions were: any DR 23 % (95 % CI: 20-26), PDR 6 % (95 % CI: 3-9), DMO 5 % (95 % CI: 4-6), and STDR 11 % (95 % CI: 9-14). Compared to 2015-2019 data, the rate of any DR decreased from 27 % to 23 %, while PDR increased from 1.4 % to 6 %. DMO rates remained stable (∼5%). Global DR prevalence remains between 20 and 30%. However, variations in study design and regional practices limit trend interpretation. International screening guidelines, supported by advancing technology, are needed to produce robust epidemiological data for global Eye Health policy planning."
+    }
+   ]
+  },
+  {
+   "id": "IDF-001",
+   "source": "IDF",
+   "title": "Diabetes Atlas 11th Edition",
+   "year": "2024",
+   "page_url": "https://diabetesatlas.org/",
+   "pdf_url": "https://diabetesatlas.org/",
+   "license": "IDF ©",
+   "commercial_use": "restricted",
+   "clinical_domain": "endocrinology",
+   "priority": "high",
+   "sha256": "4a58728faa6f24491d8ecf49558658cb2b4292c64364ff457144aa57e252d45b",
+   "size_bytes": 2253,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2220,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "11th edition of the IDF Diabetes Atlas: global, regional, and national diabetes prevalence estimates for 2024 and projections for 2050. Diabetes is a major global cause of morbidity and mortality. The aim of the 11th edition of the International Diabetes Federation (IDF) Diabetes Atlas is to provide national, regional, and global diabetes prevalence estimates for 2024, with projections to 2050. Diabetes (diagnosed and undiagnosed) prevalence among adults aged 20-79 years was estimated in 215 countries and territories, using 246 studies conducted between 2005 and 2024. Studies were filtered by sample size, diagnostic method, study year, representativeness, and publication type. Logistic regression generated 5-year age-specific prevalence estimates stratified by sex and urban-rural location. These estimates were aggregated and standardised to national population distributions to generate national, regional, and global estimates. Extrapolation was applied in countries without in-country data based on others of similar income, geography, ethnicity, and language. In 2024, diabetes affected 11·11% (95% uncertainty interval 11·05-11·17) of the global adult population, corresponding to 589 million adults (587-591), and is projected to affect 12·96% (12·91-13·02) and 853 million (851-856) people aged 20-79 years by 2050. Prevalence peaked at 24·79% (23·53-26·05) among those aged 75-79 years and was 23·72% (23·67-23·77) in adults aged >65 years. Prevalence was higher in males than females (11·55% [11·43-11·66] vs 10·68% [10·57-10·79]) and in urban than rural areas (12·26% [12·14-12·38] vs 9·23% [9·15-9·31]). Middle-income countries had the highest prevalence (11·46% [11·30-11·63]), followed by high-income (10·21% [9·91-10·50]) and low-income (7·47% [7·17-7·76]) countries. In 2024, one in nine adults worldwide was living with diabetes. The number of adults with diabetes in 2024 exceeded 500 million and is projected to rise to close to 900 million by 2050. As the diabetes epidemic has continued unchecked since the turn of the millennium, stronger efforts are needed to slow its progression, with strategies tailored appropriately across countries and population groups. Sanofi, Novo Nordisk, MSD."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "USP",
  "generated_at": "2026-05-09T13:49:37Z",
- "total_documents": 4,
+ "total_documents": 6,
  "documents": [
   {
    "id": "USP-DI-002",
@@ -200,6 +200,56 @@
     {
      "chunk_index": 1,
      "content": "des produits stériles dans les pharmacies hospitalières canadiennes et les comparer aux recommandations actuelles de la SCPH et aux normes du chapitre <797> de l’USP. Méthodes : Un sondage en ligne fondé sur des études antérieures des pratiques en matière de préparation des produits stériles, les lignes directrices de la SCPH et les normes du chapitre <797> a été créé et distribué à 193 pharmacies hospitalières au Canada. Résultats : Un total de 133 pharmacies ont répondu au sondage, soit un taux de réponse de 68,9 %. Tous les répondants ont déclaré préparer des produits stériles. Divers degrés de non-observance ont été notés dans presque toutes les sphères des lignes directrices de la SCPH et des normes de l’USP. Un faible taux d’observance était particulièrement remarquable en matière d’installations et d’équipement, de validation de la procédure et de contrôle des produits. L’accès à une salle blanche de classe 8 ou supérieure selon l’Organisation internationale de normalisation (ISO) dans la pharmacie centrale est une exigence du chapitre <797>, mais plus de 40 % des répondants ont déclaré ne pas disposer d’une telle salle. De meilleurs taux d’observance ont été notés au chapitre des politiques et procédures, des vêtements de protection, des techniques aseptiques et de la manipulation des produits dangereux. La première partie de cette série a décrit la méthodologie du sondage et les résultats concernant les politiques, le personnel, les matières premières, l’entreposage et la manipulation, les installations et l’équipement, et les vêtements. La deuxième partie traite des résultats portant sur la préparation des produits aseptiques, l’attribution de la date de péremption, l’étiquetage, la validation de la procédure, le contrôle et la délivrance des produits, les registres, et l’élimination des produits pharmaceutiques dangereux. Elle souligne aussi certains des domaines clés qui méritent une attention considérable. Conclusion : Ce sondage a mis au jour de nombreuses lacunes dans les pratiques de préparation des produits stériles dans les pharmacies hospitalières au Canada. La sensibilisation à ces lacunes pourrait donner l’élan nécessaire à une évaluation critique et à des améliorations de la pratique. [Traduction par l’éditeur] chapter <797> sterile compounding aseptic technique expiry dating process validation disposal of hazardous pharmaceuticals chapitre <797> préparation de produits stériles techniques aseptiques attribution de la date de péremption validation de la procédure élimination des produits pharmaceutiques dangereux pmc-status-qastatus 0 pmc-status-live yes pmc-status-embargo no pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf yes pmc-prop-has-supplement no pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc yes"
+    }
+   ]
+  },
+  {
+   "id": "USP-795-001",
+   "source": "USP",
+   "title": "USP General Chapter 795 Nonsterile Compounding",
+   "year": "2023",
+   "page_url": "https://www.usp.org/compounding/general-chapter-795",
+   "pdf_url": "https://www.usp.org/compounding/general-chapter-795",
+   "license": "USP Restricted",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_compounding",
+   "priority": "high",
+   "sha256": "028e752385b4031508f133fc6a7f7e5e8b9d7ce5c3d2a05caea3202482afe075",
+   "size_bytes": 2134,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2134,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Beyond-use date determination of buprenorphine buccal solution using a stability-indicating high-performance liquid chromatographic assay. The objectives of this study included developing and validating a stability-indicating high-performance liquid chromatographic (HPLC) method with ultraviolet (UV) detection for the determination of buprenorphine in a buccal solution for veterinary use, and applying that method to determine the stability of a 3 mg/ml buprenorphine preparation in room temperature and refrigerated storage conditions. This preparation, intended for buccal administration in feline patients, plays an important role in pain management in cats. A stability-indicating HPLC method was developed and validated for system suitability, accuracy, repeatability, intermediate precision, specificity, linearity and robustness based on US Pharmacopeia (USP) General Chapter <1225>. The method was then applied to the study of potency changes over 90 days in a buccal buprenorphine solution stored at two temperatures. All HPLC-UV method data met acceptable criteria for the quantification of buprenorphine in a buccal solution formulation. The buprenorphine concentrations found in each stability sample remained within the 90-110% of label claim throughout the 90 days of study. All stability test bottles of the buprenorphine buccal solution retained their original appearance. For the room temperature bottles, some white particulate matter was noted in the threads of the container bottles starting at day 21. The pH of the preparations during the course of the study was in the range of 3.57-4.06 and 4.01-4.16 for the room temperature and refrigerated samples, respectively. Pharmacists have compounded a concentrated 3 mg/ml buccal solution to use easily in the home care or outpatient setting for treatment of feline pain. Prior to this investigation, pharmacists empirically assigned beyond-use dates to this formulation based on standards in USP General Chapter <795> Pharmaceutical Compounding - Nonsterile Preparations. This study of a 3 mg/ml buprenorphine buccal solution indicates stability through 90 days."
+    }
+   ]
+  },
+  {
+   "id": "USP-825-001",
+   "source": "USP",
+   "title": "USP General Chapter 825 Radiopharmaceuticals Preparation Compounding Dispensing",
+   "year": "2022",
+   "page_url": "https://www.usp.org/compounding/general-chapter-825",
+   "pdf_url": "https://www.usp.org/compounding/general-chapter-825",
+   "license": "USP Restricted",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_compounding",
+   "priority": "medium",
+   "sha256": "f6a32dc3c18a77b9e6c09cb1f44d7db5f259cb3b88600d7195bd6e101825544f",
+   "size_bytes": 801,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 801,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: USP General Chapter 825 Radiopharmaceuticals Preparation Compounding Dispensing Source: USP Year: 2022 Domain: drug_compounding License: USP Restricted Available at: https://www.usp.org/compounding/general-chapter-825 This is a citation reference for the USP guideline 'USP General Chapter 825 Radiopharmaceuticals Preparation Compounding Dispensing' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_compounding. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

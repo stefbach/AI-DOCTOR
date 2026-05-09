@@ -1,7 +1,7 @@
 {
  "source": "NPIAP",
  "generated_at": "2026-05-09T15:40:26Z",
- "total_documents": 9,
+ "total_documents": 10,
  "documents": [
   {
    "id": "NPIAP-PI-001",
@@ -1221,6 +1221,31 @@
     {
      "chunk_index": 8,
      "content": "of dressings in pressure ulcer prevention. Wounds International; 2016. 47. Castelino I, Mercer D, Forrest Calland J. Poster presentation at the Symposium on Advanced Wound Care (Spring), Atlanta, Georgia, United States of America, 2012. 48. Yoshimura M, Ohura N, Tanaka J, Ichimura S, Kasuya Y, Hotta O, Kagaya Y, Sekiyama T, Tannba M, Suzuki N. Soft silicone foam dressing is more effective than polyurethane film dressing for preventing intraoperatively acquired pressure ulcers in spinal surgery patients: the Border Operating room Spinal Surgery (BOSS) trial in Japan. Int Wound J 2018;15:188–197. 49. Mölnlycke Health Care. Finite Element Simulation of Pressure Ulcer Prevention at the iliac crest in Operating Room with Mepilex Border Flex, Mölnlycke Health Care, Data on File; 2019. 57 Volume 28 Number 2 – June 2020"
+    }
+   ]
+  },
+  {
+   "id": "NPIAP-DEEP-001",
+   "source": "NPIAP",
+   "title": "NPIAP Position on Deep Tissue Pressure Injury Identification",
+   "year": "2017",
+   "page_url": "https://npiap.com/page/PressureInjuryStages",
+   "pdf_url": "https://npiap.com/page/PressureInjuryStages",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wound_pressure",
+   "priority": "medium",
+   "sha256": "5ebb7cd74f416ab2e10e9c07dcba0a136d97b8291a29f9d075c0419d3a894922",
+   "size_bytes": 752,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 752,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:12Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NPIAP Position on Deep Tissue Pressure Injury Identification Source: NPIAP Year: 2017 Domain: wound_pressure License: Proprietary Available at: https://npiap.com/page/PressureInjuryStages This is a citation reference for the NPIAP guideline 'NPIAP Position on Deep Tissue Pressure Injury Identification' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wound_pressure. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

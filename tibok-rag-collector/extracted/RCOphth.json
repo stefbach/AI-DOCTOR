@@ -1,7 +1,7 @@
 {
  "source": "RCOphth",
  "generated_at": "2026-05-09T14:52:43Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "RCOPHTH-CAT-001",
@@ -37,6 +37,31 @@
     {
      "chunk_index": 3,
      "content": ", Another study suggests that the increase in post-surgery mean SE may be due to the presence of myopia after cataract surgery. Ocular complications Overall, there was 16 and five ocular complications in the ECCE and MSICS groups respectively. The high prevalence of ocular complications in the ECCE group may be due to a large non-sealing incision after suturing of the wound as incision preparation is less traumatising to the trabeculum during the MSICS technique compared with the corneo-scleral incision with subsequent suturing during the ECCE technique. , , The MSICS technique produces a more closed procedure, owing to the self-sealing wound, where the risk of post-surgery ocular complications may be lower. The most common post-surgery anterior segment ocular complications were observed in the cornea including opacities (n = 3) and haziness (n = 4) in the ECCE group. Contradictory findings where corneal haziness was more prevalent in the MSICS group were reported in the literature. , , , Post-surgery corneal oedema affect the corneal endothelial cells which are essential for a transparent cornea as any alteration in the corneal endothelial cells is likely to result in corneal haziness, scarring and painful corneal bullae. Other post-surgery anterior segment ocular complications observed in this study included foreign body sensation, shallow anterior chamber, hyphaema and subconjunctival haemorrhage and such complications have been reported in previous studies. , , , A shallow anterior chamber which may be seen if proper wound integrity is not maintained was observed in only one participant. The presence of hyphaema was observed in only one participant in the ECCE group and may be due to focal vascularisation of the wound created during surgery. In developing countries, post-surgery ocular complications are major causes of VI. , , In this study, posterior segment ocular complications including posterior capsular rupture, vitreous opacity and neovascularisation were observed in the MSICS group while posterior capsular absence and/or rupture was observed in both groups. It has been suggested that trauma during insertion of IOL and puncture from loose canulas in the hydration process are likely to result in posterior capsular rupture. Furthermore, other factors including olderage, hypermature cataract, smaller pupils, long axial lengths and pseudoexfoliation increase the risks of posterior capsular rupture. , Although vitreous opacity is a common post-surgery ocular complication that impairs vision and reduces contrast sensitivity (CS) owing to the presence of lens epithelial cells in the capsular bag after cataract surgery, this was observed in only one participant in this study. , , , Strengths of this study included the use of a post-surgery six-week follow up period that is consistent with other studies and standardised measurement protocols during the follow up periods. The VA was measured with both the illiterate and literate versions of the LogMAR chart to minimise measurement error. , The sample also included an almost equal number of participants in the ECCE and MSICS groups to facilitate comparison of the outcomes. Possible limitations of this study include the sample consisted of mainly African (n = 100) and olderparticipants. The absence of near VA, stereopsis, color vision and CS in the assessment of outcomes. Absence of pre-surgery and post-surgery keratometry for comparison of possible surgery induced astigmatism. Conclusion The results of this study are important for the clinical management of patients undergoing the ECCE and MSICS techniques. In developing countries with human resource and equipment challenges, there is a need for low cost yet effective cataract surgery techniques. , The ECCE and MSICS techniques are performed to restore vision and enable previously visual impaired individuals to restart work and contribute to household income and engage in other activities. Therefore, it is essential to monitor post-surgery outcomes because it will help further improve expected outcomes 82 as they are of significant importance for the WHO “Vision 2020” programme. The results of this study demonstrated that the MSICS technique shows a significant clinical improvement in post-surgery aided VA, less post-surgery refractive astigmatism and is associated with few post-surgery ocular complications compared with ECCE technique. Therefore, wherever the requisite surgical expertise and physical resources are available, the MSICS technique is recommended as the technique of choice for optimal outcomes post-surgery in developing countries. ,"
+    }
+   ]
+  },
+  {
+   "id": "RCOPHTH-CAT-002",
+   "source": "RCOphth",
+   "title": "RCOphth managing posterior capsular rupture during cataract surgery",
+   "year": "2020",
+   "page_url": "https://www.rcophth.ac.uk/clinical-guidelines/",
+   "pdf_url": "https://www.rcophth.ac.uk/clinical-guidelines/",
+   "license": "RCOphth",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_anterior",
+   "priority": "medium",
+   "sha256": "c44ec5bda071551ddf9b173614dc1a8bb198249e9f5e149af179c41665144d5c",
+   "size_bytes": 1758,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1758,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Going paperless: improved cataract surgery outcome data quality in a new fully electronic unit. To report outcome data on the first 5000 consecutive cataract cases at a new paperless eye unit and benchmark against the Royal College of Ophthalmologists' National Ophthalmology Database (RCOphth NOD). Using the in-built audit tool of the electronic medical records system, data from all cataract operations performed between 1 April 2014 and 13 January 2017 were compiled. Five thousand and eight cases were recorded of which the overall intra-operative complication rate was 2.4%, the most common being posterior capsular rupture-1.14%. Follow-up data on post-operative complications were recorded in 98.6% of cases. Pre- and post-operative visual acuities was measured in 98.0% of cases. In all, 40.8% of eyes achieved a visual acuity of 6/6 or better and 90.7% achieved 6/12 or better. A data set of >5000 consecutive cataract operations was obtained in this eye department. The recording of pre- and post-operative visual acuity in 98% of cases compare very favourably to the RCOphth NOD Audit Report 2017 where pre- and post-operative visual acuities were recorded in only 57.1% of operations. Despite this difference, the outcome measures from this unit and RCOphth NOD were very similar, validating the results of the RCOphth NOD audit reports. Significantly, when applying the RCOphth NOD audit criteria for measuring post-operative visual acuity, approximately 15% of cases were excluded from the data set, reducing the completeness of the data set. Paperless ophthalmology units are feasible in today's NHS and can produce near complete cataract data sets; this can ultimately lead to more comprehensive and reliable aggregate cataract outcome data."
     }
    ]
   }

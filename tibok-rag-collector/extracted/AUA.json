@@ -1,7 +1,7 @@
 {
  "source": "AUA",
  "generated_at": "2026-05-02T15:51:20Z",
- "total_documents": 43,
+ "total_documents": 44,
  "documents": [
   {
    "id": "AUA-001",
@@ -2035,6 +2035,31 @@
     {
      "chunk_index": 4,
      "content": "PD patients who undergo reconstruction. The most commonly-reported outcome was curvature improvement post-surgery, which occurred in a majority of studies at a rate of 90% or higher. Because plication surgery is not a treatment for ED and because the consequences of plication surgery with regard to erectile function remain unclear, the most appropriate candidates for plication surgery are patients with intact erectile function or with ED responsive to oral medications or vacuum pump therapy or ICI therapy. 19 Clinicians may offer plaque incision or excision and/or grafting to patients with deformities whose rigidity is adequate for coitus (with or without pharmacotherapy and/or vacuum device therapy) to improve penile curvature. (Moderate Recommendation; Evidence Strength Grade C) Similar to other surgical procedures, the most commonly-reported outcome following plaque incision and/or excision with grafting was curvature improvement, which generally ranged from 25% to 100% with a majority of study arms reporting rates >80%. The Panel notes that, for most patients, plaque incision and/or excision with grafting results in curvature correction in the setting of a relatively low risk of serious adverse events. As with plication, the most appropriate candidates for this procedure are patients with intact erectile function or ED responsive to oral medications or vacuum pump therapy. 20 Clinicians may offer penile prosthesis surgery to patients with Peyronie’s disease with erectile dysfunction (ED) and/or penile deformity sufficient to prevent coitus despite pharmacotherapy and/or vacuum device therapy. (Moderate Recommendation; Evidence Strength Grade C) The literature in this area is challenging to interpret given the small sample sizes and diversity of surgical techniques and prostheses employed. In addition to prosthesis implantation, most studies used other surgical procedures, including modeling, plication, plaque incision or excision, tunica albuginea incision, and/or grafts of various materials. Curvature improvement post-surgery was reported at >80% in all studies reviewed. 21 Clinicians may perform adjunctive intraoperative procedures, such as modeling, plication or incision/grafting, when significant penile deformity persists after insertion of the penile prosthesis. (Moderate Recommendation; Evidence Strength Grade C) A majority of prosthetic surgery studies reviewed utilized intraoperative procedures, such as modeling, plication, plaque incision or excision, TA incision, and/or grafting as adjunctive techniques to prosthesis insertion to achieve optimal curvature correction and penile dimensions. Adjunctive procedures are frequently necessary to achieve patient and clinician goals for prosthesis surgery; the available adverse event evidence suggests no correlation between surgical complexity and infection or revision rates or patient satisfaction. 22 Clinicians should use inflatable penile prosthesis for patients undergoing penile prosthetic surgery for the treatment of Peyronie’s disease. (Expert Opinion) The Panel notes that modeling to maximize curvature correction is difficult to accomplish with semi-rigid devices. Given that it is not possible to know whether modeling is needed until the operation begins, the choice of a prosthesis that allows modeling is optimal. OTHER TREATMENTS The Panel identified the treatments listed in the as having insufficient evidence to support even a Conditional Recommendation. In the Panel’s view, the treatments in this category are unproven until a larger and/or more rigorous evidence base is available. RESEARCH NEEDS AND FUTURE DIRECTIONS Given its prevalence and significant psychosocial impact, better understanding of the pathophysiology of PD is greatly needed and is critical for development of clinical therapies that are effective and safe. The absence of knowledge regarding what causes PD has two major consequences: it is not possible to advise men regarding risk factors and how the disease may be prevented, and treatments remain focused on the alleviation of symptoms rather than on causal mechanisms. Ideally, future treatments will be developed with full understanding of the scientific basis of the disease and that demonstrate consistent clinical effectiveness for most or all patients. Research endeavors in this field should continue to address multiple disciplinary areas including epidemiology, risk associations, pathophysiology, psychosocial assessment, diagnostics, clinical pharmacology and therapeutics, and health-related outcomes. Clinical studies should be designed to control for PD natural history, account for placebo effects, and employ valid measures of relevant outcomes."
+    }
+   ]
+  },
+  {
+   "id": "AUA-STONE-CT-001",
+   "source": "AUA",
+   "title": "AUA EAU practice statement on CT for renal stone disease",
+   "year": "2019",
+   "page_url": "https://www.auanet.org/guidelines-and-quality/guidelines/kidney-stones-medical-mangement-guideline",
+   "pdf_url": "https://www.auanet.org/guidelines-and-quality/guidelines/kidney-stones-medical-mangement-guideline",
+   "license": "AUA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ct",
+   "priority": "high",
+   "sha256": "e5ee9ac4b14c797f58f86c6f6da336c377f79fdc3bdc004196888f58370f6cae",
+   "size_bytes": 783,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 783,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AUA EAU practice statement on CT for renal stone disease Source: AUA Year: 2019 Domain: radiology_ct License: AUA Available at: https://www.auanet.org/guidelines-and-quality/guidelines/kidney-stones-medical-mangement-guideline This is a citation reference for the AUA guideline 'AUA EAU practice statement on CT for renal stone disease' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_ct. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

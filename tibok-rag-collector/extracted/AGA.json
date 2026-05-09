@@ -1,7 +1,7 @@
 {
  "source": "AGA",
  "generated_at": "2026-05-09T08:40:57Z",
- "total_documents": 26,
+ "total_documents": 31,
  "documents": [
   {
    "id": "AGA-IRON-001",
@@ -1638,6 +1638,135 @@
     {
      "chunk_index": 6,
      "content": "advance in non-invasive mold diagnostics. Our findings show that mcfDNA-NGS results can guide diagnosis and management, highlighting the need for prospective studies to define its optimal clinical and economic role. Supplemental Material sj-docx-1-tai-10.1177_20499361261437009 – Supplemental material for Clinical impact of microbial cell-free DNA next-generation sequencing for invasive mold infection—a single-center retrospective observational study Supplemental material, sj-docx-1-tai-10.1177_20499361261437009 for Clinical impact of microbial cell-free DNA next-generation sequencing for invasive mold infection—a single-center retrospective observational study by Rebecca Berger, Nina Howard, Sarah Grant, Fernando Centeno, Todd Lasco and Mayar Al Mohajer in Therapeutic Advances in Infectious Disease"
+    }
+   ]
+  },
+  {
+   "id": "AGA-UGIB-001",
+   "source": "AGA",
+   "title": "AGA Clinical Practice Update on Endoscopic Therapies for Nonvariceal Upper GI Bleeding",
+   "year": "2020",
+   "page_url": "https://www.gastrojournal.org/article/S0016-5085(20)30326-0/fulltext",
+   "pdf_url": "https://www.gastrojournal.org/article/S0016-5085(20)30326-0/fulltext",
+   "license": "AGA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gastro_bleeding",
+   "priority": "high",
+   "sha256": "0bbe68b4e40c82b9a7535444a59b6ab43fe876888d93071653a8d57e78a26c95",
+   "size_bytes": 3687,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3687,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "AGA Clinical Practice Update on Endoscopic Therapies for Non-Variceal Upper Gastrointestinal Bleeding: Expert Review. The purpose of this American Gastroenterological Association (AGA) Institute Clinical Practice Update is to review the available evidence and best practice advice statements regarding the use of endoscopic therapies in treating patients with non-variceal upper gastrointestinal bleeding. This expert review was commissioned and approved by the AGA Institute Clinical Practice Updates Committee and the AGA Governing Board to provide timely guidance on a topic of high clinical importance to the AGA membership, and underwent internal peer review by the Clinical Practice Updates Committee and external peer review through standard procedures of Gastroenterology. This review is framed around the 10 best practice advice points agreed upon by the authors, which reflect landmark and recent published articles in this field. This expert review also reflects the experiences of the authors who are gastroenterologists with extensive experience in managing and teaching others to treat patients with non-variceal upper gastrointestinal bleeding (NVUGIB). BEST PRACTICE ADVICE 1: Endoscopic therapy should achieve hemostasis in the majority of patients with NVUGIB. BEST PRACTICE ADVICE 2: Initial management of the patient with NVUGIB should focus on resuscitation, triage, and preparation for upper endoscopy. After stabilization, patients with NVUGIB should undergo endoscopy with endoscopic treatment of sites with active bleeding or high-risk stigmata for rebleeding. BEST PRACTICE ADVICE 3: Endoscopists should be familiar with the indications, efficacy, and limitations of currently available tools and techniques for endoscopic hemostasis, and be comfortable applying conventional thermal therapy and placing hemoclips. BEST PRACTICE ADVICE 4: Monopolar hemostatic forceps with low-voltage coagulation can be an effective alternative to other mechanical and thermal treatments for NVUGIB, particularly for ulcers in difficult locations or those with a rigid and fibrotic base. BEST PRACTICE ADVICE 5: Hemostasis using an over-the-scope clip should be considered in select patients with NVUGIB, in whom conventional electrosurgical coagulation and hemostatic clips are unsuccessful or predicted to be ineffective. BEST PRACTICE ADVICE 6: Hemostatic powders are a noncontact endoscopic option that may be considered in cases of massive bleeding with poor visualization, for salvage therapy, and for diffuse bleeding from malignancy. BEST PRACTICE ADVICE 7: Hemostatic powder should be preferentially used as a rescue therapy and not for primary hemostasis, except in cases of malignant bleeding or massive bleeding with inability to perform thermal therapy or hemoclip placement. BEST PRACTICE ADVICE 8: Endoscopists should understand the risk of bleeding from therapeutic endoscopic interventions (eg, endoluminal resection and endoscopic sphincterotomy) and be familiar with the endoscopic tools and techniques to treat intraprocedural bleeding and minimize the risk of delayed bleeding. BEST PRACTICE ADVICE 9: In patients with endoscopically refractory NVUGIB, the etiology of bleeding (peptic ulcer disease, unknown source, post surgical); patient factors (hemodynamic instability, coagulopathy, multi-organ failure, surgical history); risk of rebleeding; and potential adverse events should be taken into consideration when deciding on a case-by-case basis between transcatheter arterial embolization and surgery. BEST PRACTICE ADVICE 10: Prophylactic transcatheter arterial embolization of high-risk ulcers after successful endoscopic therapy is not encouraged."
+    }
+   ]
+  },
+  {
+   "id": "AGA-CRC-IBD-001",
+   "source": "AGA",
+   "title": "AGA Clinical Practice Update on Surveillance for Hepatobiliary and Colorectal Cancers in PSC IBD",
+   "year": "2022",
+   "page_url": "https://www.gastrojournal.org/article/S0016-5085(22)00171-9/fulltext",
+   "pdf_url": "https://www.gastrojournal.org/article/S0016-5085(22)00171-9/fulltext",
+   "license": "AGA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gastro_ibd",
+   "priority": "medium",
+   "sha256": "5d756a715feee8c5778a8e62fce0a703c32b23471c02e7093322e9f765f4a437",
+   "size_bytes": 829,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 829,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AGA Clinical Practice Update on Surveillance for Hepatobiliary and Colorectal Cancers in PSC IBD Source: AGA Year: 2022 Domain: gastro_ibd License: AGA Available at: https://www.gastrojournal.org/article/S0016-5085(22)00171-9/fulltext This is a citation reference for the AGA guideline 'AGA Clinical Practice Update on Surveillance for Hepatobiliary and Colorectal Cancers in PSC IBD' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gastro_ibd. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AGA-FMT-001",
+   "source": "AGA",
+   "title": "AGA Clinical Practice Guideline on Fecal Microbiota Based Therapies for Select GI Diseases",
+   "year": "2024",
+   "page_url": "https://www.gastrojournal.org/article/S0016-5085(24)00001-1/fulltext",
+   "pdf_url": "https://www.gastrojournal.org/article/S0016-5085(24)00001-1/fulltext",
+   "license": "AGA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gastro_colon",
+   "priority": "high",
+   "sha256": "65961688bc6b37fcfc448c2f99bc75d6d9c55a0dd795f21eac7ea2528b797345",
+   "size_bytes": 821,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 821,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AGA Clinical Practice Guideline on Fecal Microbiota Based Therapies for Select GI Diseases Source: AGA Year: 2024 Domain: gastro_colon License: AGA Available at: https://www.gastrojournal.org/article/S0016-5085(24)00001-1/fulltext This is a citation reference for the AGA guideline 'AGA Clinical Practice Guideline on Fecal Microbiota Based Therapies for Select GI Diseases' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gastro_colon. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AGA-OPIOID-001",
+   "source": "AGA",
+   "title": "AGA Clinical Practice Update on Opioid Use in GI Practice",
+   "year": "2021",
+   "page_url": "https://www.gastrojournal.org/article/S0016-5085(20)35527-3/fulltext",
+   "pdf_url": "https://www.gastrojournal.org/article/S0016-5085(20)35527-3/fulltext",
+   "license": "AGA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gastro_smallbowel",
+   "priority": "medium",
+   "sha256": "403447f3c35d2a18d6e303964573a5a51b744e4ede14e783594524b0797a23cc",
+   "size_bytes": 7890,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 7889,
+   "chunk_count": 2,
+   "extracted_at": "2026-05-09T19:05:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "AGA Clinical Practice Update on GI Manifestations and Autonomic or Immune Dysfunction in Hypermobile Ehlers-Danlos Syndrome: Expert Review. The purpose of this Clinical Practice Update Expert Review is to describe key principles in the evaluation and management of patients with disorders of gut-brain interaction (DGBI) and hypermobile Ehlers-Danlos syndrome (hEDS) or hypermobility spectrum disorders (HSDs) with coexisting postural orthostatic tachycardia syndrome (POTS) and/or mast cell activation syndrome (MCAS). This expert review was commissioned and approved by the American Gastroenterological Association (AGA) Institute Clinical Practice Updates Committee and the AGA Governing Board to provide timely guidance on a topic of high clinical importance to the AGA membership, and underwent internal peer review by the Clinical Practice Updates Committee and external peer review through standard procedures of Clinical Gastroenterology and Hepatology. These Best Practice Advice statements were drawn from a review of the published literature and from expert opinion. Because systematic reviews were not performed, these Best Practice Advice statements do not carry formal ratings regarding the quality of evidence or strength of the presented considerations. BEST PRACTICE ADVICE 1: Clinicians should be aware of the observed associations between hEDS or HSDs and POTS and/or MCAS and their overlapping gastrointestinal (GI) manifestations; while theoretical explanations exist, experimental evidence of the biological mechanisms that explain relationships is limited and evolving. BEST PRACTICE ADVICE 2: Testing for POTS/MCAS should be targeted to patients presenting with clinical manifestations of POTS/MCAS, but universal testing for POTS/MCAS in all patients with hEDS/HSDs is not supported by the current evidence. BEST PRACTICE ADVICE 3: Gastroenterologists seeing patients with DGBI should inquire about joint hypermobility and strongly consider incorporating the Beighton score for assessing joint hypermobility into their practice as a screening tool; if the screen is positive, gastroenterologists may consider applying 2017 diagnostic criteria to diagnose hEDS (https://www.ehlers-danlos.com/wp-content/uploads/2017/05/hEDS-Dx-Criteria-checklist-1.pdf) or offer appropriate referral to a specialist where resources are available. BEST PRACTICE ADVICE 4: Testing for POTS through postural vital signs (eg, symptomatic increase in heart rate of 30 beats/min or more with 10 minutes of standing during an active stand or head-up tilt table test in the absence of orthostasis) and referral to specialty practices (eg, cardiology or neurology) for autonomic testing should be considered in patients with hEDS/HSDs and refractory GI symptoms who also report orthostatic intolerance after exclusion of medication side effects and appropriate lifestyle or behavioral modifications (eg, adequate hydration and physical exercise) have been attempted but is not required for all patients with hEDS/HSDs who report GI symptoms alone. BEST PRACTICE ADVICE 5: In patients presenting to gastroenterology providers, testing for mast cell disorders including MCAS should be considered in patients with hEDS/HSDs and DGBI who also present with episodic symptoms that suggest a more generalized mast cell disorder (eg, visceral and somatic pain, pruritus, flushing, sweating, urticaria, angioedema, wheezing, tachycardia, abdominal cramping, vomiting, nausea, diarrhea, urogynecological and neurological complaints) involving 2 or more physiological systems (eg, cutaneous, GI, cardiac, respiratory, and neuropsychiatric), but current data do not support the use of these tests for routine evaluation of GI symptoms in all patients with hEDS/HSDs without clinical or laboratory evidence of a primary or secondary mast cell disorder. BEST PRACTICE ADVICE 6: If MCAS is suspected, diagnostic testing with serum tryptase levels collected at baseline and 1-4 hours following symptom flares may be considered by the gastroenterologist; increases of 20% above baseline plus 2 ng/mL are necessary to demonstrate evidence of mast cell activation. BEST PRACTICE ADVICE 7: If a diagnosis of MCAS is supported through clinical and/or laboratory features, patients should be referred to an allergy specialist or mast cell disease research center where additional testing (eg, urinary N-methylhistamine, leukotriene E4, 11β-prostaglandin F2) may be performed. BEST PRACTICE ADVICE 8: Diagnostic evaluation of GI symptoms consistent with DGBI in patients with hEDS/HSDs and comorbid POTS and/or MCAS should follow a similar approach to the evaluation of DGBI as in the general population including the use of a positive symptom-based diagnostic strategy and limited noninvasive testing. BEST PRACTICE ADVICE 9: Testing for celiac disease may be considered earlier in the diagnostic evaluation of patients with hEDS/HSDs who report a variety of GI symptoms and not only limited to those with diarrhea. There is insufficient research to support routine testing for disaccharidase deficiencies or other diet-mediated mechanisms as causes of GI symptoms in hEDS/HSDs. BEST PRACTICE ADVICE 10: Diagnostic testing for functional defecation disorders with anorectal manometry, balloon expulsion test, or defecography should be considered in patients with hEDS/HSDs and lower GI symptoms such as incomplete evacuation given the high prevalence of pelvic floor dysfunction, especially rectal hyposensitivity, in this population. BEST PRACTICE ADVICE 11: In patients with hEDS/HSDs and comorbid POTS who report chronic upper GI symptoms, timely diagnostic testing of gastric motor functions (eg, measurement of gastric emptying and/or accommodation) should be considered"
+    },
+    {
+     "chunk_index": 1,
+     "content": "research to support routine testing for disaccharidase deficiencies or other diet-mediated mechanisms as causes of GI symptoms in hEDS/HSDs. BEST PRACTICE ADVICE 10: Diagnostic testing for functional defecation disorders with anorectal manometry, balloon expulsion test, or defecography should be considered in patients with hEDS/HSDs and lower GI symptoms such as incomplete evacuation given the high prevalence of pelvic floor dysfunction, especially rectal hyposensitivity, in this population. BEST PRACTICE ADVICE 11: In patients with hEDS/HSDs and comorbid POTS who report chronic upper GI symptoms, timely diagnostic testing of gastric motor functions (eg, measurement of gastric emptying and/or accommodation) should be considered after appropriate exclusion of anatomical and structural diseases, as abnormal gastric emptying may be more common than in the general population. BEST PRACTICE ADVICE 12: Medical management of GI symptoms in hEDS/HSDs and POTS/MCAS should focus on treating the most prominent GI symptoms and abnormal GI function test results. In addition to general DGBIs and GI motility disorder treatment, management should also include treating any symptoms attributable to POTS and/or MCAS. BEST PRACTICE ADVICE 13: Treatment of POTS may include increasing fluid and salt intake, exercise training, and use of compression garments. Special pharmacological treatments for volume expansion, heart rate control, and vasoconstriction with integrated care from multiple specialties (eg, cardiology, neurology) should be considered in patients who do not respond to conservative lifestyle measures. BEST PRACTICE ADVICE 14: When MCAS is suspected, patients can benefit from treatment with histamine receptor antagonists and/or mast cell stabilizers, in addition to avoiding triggers such as certain foods, alcohol, strong smells, temperature changes, mechanical stimuli (eg, friction), emotional distress (eg, pollen, mold), or specific medications (eg, opioids, nonsteroidal anti-inflammatory agents, iodinated contrast). BEST PRACTICE ADVICE 15: Besides general nutritional support, special diets including a gastroparesis diet (ie, small particle diet) and various elimination diets (eg, low fermentable carbohydrates, gluten- or dairy-free, low-histamine diets) can be considered for improving GI symptoms. Dietary interventions should be delivered with appropriate nutritional counseling or guidance to avoid the pitfalls of restrictive eating. BEST PRACTICE ADVICE 16: Management of chronic GI symptoms in patients with hEDS/HSDs who do not exhibit symptoms consistent with POTS or MCAS should align with existing approaches to management of DGBI and GI motility disorders in the general population, including integrated multidisciplinary care involving multiple specialties, where appropriate (eg, cardiology, rheumatology, dietician, psychology)."
+    }
+   ]
+  },
+  {
+   "id": "AGA-MICROSCOPIC-001",
+   "source": "AGA",
+   "title": "AGA Clinical Practice Guidelines on the Medical Management of Microscopic Colitis",
+   "year": "2016",
+   "page_url": "https://www.gastrojournal.org/article/S0016-5085(15)01708-5/fulltext",
+   "pdf_url": "https://www.gastrojournal.org/article/S0016-5085(15)01708-5/fulltext",
+   "license": "AGA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gastro_colon",
+   "priority": "medium",
+   "sha256": "28ba11a5a07517e7a8c527b7637984e0abd0cd59b1d79cdf6c06700cb4655ea4",
+   "size_bytes": 4440,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 4440,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "AGA Clinical Practice Update on Management of Refractory Celiac Disease: Expert Review. The purpose of this expert review is to summarize the diagnosis and management of refractory celiac disease. It will review evaluation of patients with celiac disease who have persistent or recurrent symptoms, differential diagnosis, nutritional support, potential therapeutic options, and surveillance for complications of this condition. This expert review was commissioned and approved by the American Gastroenterological Association (AGA) Institute Clinical Practice Updates Committee (CPUC) and the AGA Governing Board to provide timely guidance on a topic of high clinical importance to the AGA membership and underwent internal peer review by the CPUC and external peer review through standard procedures of Gastroenterology. These Best Practice Advice (BPA) statements were drawn from a review of the published literature and from expert opinion. Since systematic reviews were not performed, these BPA statements do not carry formal ratings of the quality of evidence or strength of the presented considerations. Best Practice Advice Statements BEST PRACTICE ADVICE 1: In patients believed to have celiac disease who have persistent or recurrent symptoms or signs, the initial diagnosis of celiac disease should be confirmed by review of prior diagnostic testing, including serologies, endoscopies, and histologic findings. BEST PRACTICE ADVICE 2: In patients with confirmed celiac disease with persistent or recurrent symptoms or signs (nonresponsive celiac disease), ongoing gluten ingestion should be excluded as a cause of these symptoms with serologic testing, dietitian review, and detection of immunogenic peptides in stool or urine. Esophagogastroduodenoscopy with small bowel biopsies should be performed to look for villous atrophy. If villous atrophy persists or the initial diagnosis of celiac disease was not confirmed, consider other causes of villous atrophy, including common variable immunodeficiency, autoimmune enteropathy, tropical sprue, and medication-induced enteropathy. BEST PRACTICE ADVICE 3: For patients with nonresponsive celiac disease, after exclusion of gluten ingestion, perform a systematic evaluation for other potential causes of symptoms, including functional bowel disorders, microscopic colitis, pancreatic insufficiency, inflammatory bowel disease, lactose or fructose intolerance, and small intestinal bacterial overgrowth. BEST PRACTICE ADVICE 4: Use flow cytometry, immunohistochemistry, and T-cell receptor rearrangement studies to distinguish between subtypes of refractory celiac disease and to exclude enteropathy-associated T-cell lymphoma. Type 1 refractory celiac disease is characterized by a normal intraepithelial lymphocyte population and type 2 is defined by the presence of an aberrant, clonal intraepithelial lymphocyte population. Consultation with an expert hematopathologist is necessary to interpret these studies. BEST PRACTICE ADVICE 5: Perform small bowel imaging with capsule endoscopy and computed tomography or magnetic resonance enterography to exclude enteropathy-associated T-cell lymphoma and ulcerative jejunoileitis at initial diagnosis of type 2 refractory celiac disease. BEST PRACTICE ADVICE 6: Complete a detailed nutritional assessment with investigation of micronutrient and macronutrient deficiencies in patients diagnosed with refractory celiac disease. Check albumin as an independent prognostic factor. BEST PRACTICE ADVICE 7: Correct deficiencies in macro- and micronutrients using oral supplements and/or enteral support. Consider parenteral nutrition for patients with severe malnutrition due to malabsorption. BEST PRACTICE ADVICE 8: Corticosteroids, most commonly open-capsule budesonide or, if unavailable, prednisone, are the medication of choice and should be used as first-line therapy in either type 1 or type 2 refractory celiac disease. BEST PRACTICE ADVICE 9: Patients with refractory celiac disease require regular follow-up by a multidisciplinary team, including gastroenterologists and dietitians, to assess clinical and histologic response to therapy. Identify local experts with expertise in celiac disease to assist with management. BEST PRACTICE ADVICE 10: Patients with refractory celiac disease without response to steroids may benefit from referral to a center with expertise for management or evaluation for inclusion in clinical trials."
     }
    ]
   }

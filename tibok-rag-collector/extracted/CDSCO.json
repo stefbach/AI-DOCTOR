@@ -1,7 +1,7 @@
 {
  "source": "CDSCO",
  "generated_at": "2026-05-09T13:47:24Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "CDSCO-001",
@@ -45,6 +45,31 @@
     {
      "chunk_index": 5,
      "content": "a supervised machine learning model.The supervised logistic regression model achieved an area under the ROC curve (AUC) of 0.60. At the same time, the PDMP-like rule corresponded to a fixed point with lower sensitivity at similar levels of specificity. As shown in Fig. , the ROC curve illustrates the comparative advantage of ML in discriminating overdose risk beyond threshold-based detection. Although modest due to the use of synthetic data, these results demonstrate the methodological benefit of multi-factor prediction. Expanded performance metrics (Table ) show that the ML model outperformed the PDMP rule in sensitivity, F1-score, and negative predictive value, capturing a larger proportion of true positives. This improvement came with a higher number of flagged cases. Specificity, while somewhat reduced, remained acceptable for population-level monitoring, reinforcing the framework's capacity to balance accuracy with operational feasibility. Lead-time analysis showed that the ML approach flagged overdose risk earlier than PDMP thresholds. Patients identified by ML received a more extended median warning period before overdose events, creating opportunities for preventive outreach that would not be possible under conventional rules, as presented in Fig. . This lead-time advantage illustrates the potential of supervised ML to transform opioid regulation from retrospective monitoring toward proactive, preventative action. Conclusion The proposed framework for opioid analgesics regulation integrates four key pillars: enhanced surveillance that incorporates social determinants of health; adaptive licensing with conditional approvals and continuous RWD submissions to update drug labels dynamically; pharmacist-led surveillance networks using blockchain technology to ensure secure, automated reporting; and harm reduction strategies that leverage community partnerships and real-time data collection. This comprehensive approach addresses the limitations of traditional REMS and PDMP systems by providing timely, evidence-based updates to prescribing information, improving resource allocation in high-risk communities, and ensuring that ethical and legal challenges are met with robust oversight and explicit regulatory protections. Ultimately, this model aims to reduce opioid misuse and enhance public health outcomes through a more responsive and equitable regulatory system."
+    }
+   ]
+  },
+  {
+   "id": "CDSCO-002",
+   "source": "CDSCO",
+   "title": "CDSCO India Pharmacovigilance Programme PvPI",
+   "year": "2024",
+   "page_url": "https://cdsco.gov.in/opencms/opencms/en/Pharmacovigilance/",
+   "pdf_url": "https://cdsco.gov.in/opencms/opencms/en/Pharmacovigilance/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacovigilance",
+   "priority": "medium",
+   "sha256": "18783a108452f6d8b1e381b4d8c75709929ba9659ff5a5a24bd98e360e17c19f",
+   "size_bytes": 2105,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2105,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "A Qualitative Study to Assess Challenges Faced During AEFI Surveillance. India has a functional and mature National Regulatory Authority which ensures that vaccines manufactured and used in the country are safe. Monitoring adverse events post-licensure is equally critical to identify infrequent adverse events due to the vaccine product. This was a cross-sectional observational qualitative study done in a Metropolitan city in Maharashtra from January 2017 to June 2018. Focus group discussions (FGDs) were conducted with healthcare workers and stakeholders involved in adverse event following immunization (AEFI) surveillance in the city. The data obtained were transcribed and analyzed using the inductive method. Thematic analysis was done using the grounded theory. Data were analyzed using ATLAS ti 5.7.1. It was found that both active and passive surveillance were being followed in the study area helped in improving reporting rates and in early detection and management of adverse events. It was noted that there was no proper training provided to doctors in the private sector. Reporting of adverse events depended upon a number of factors such as clinical seriousness, temporal proximity to vaccination and health care workers' awareness of and obligation to report particular adverse events, fear of blame, time pressures in completing a report, and confusion in whose responsibility it was to report. Mandatory training of all private practitioners conducting immunizations, CHVs to work in collaboration with private doctors for active surveillance of AEFI, and online reporting to be made available for easy reporting. Proper counseling of mothers regarding giving paracetamol to the vaccine beneficiaries. Greater convergence is required between national regulators, and vaccine pharmacovigilance stakeholders including Central drugs standard control organisation (CDSCO), Pharmacovigilance programme of India (PvPI), and AEFI surveillance program, especially at the city and state level is required to handle vaccine safety issues at various levels in a faster and more effective manner."
     }
    ]
   }

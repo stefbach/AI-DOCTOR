@@ -1,7 +1,7 @@
 {
  "source": "AHFS",
  "generated_at": "2026-05-09T14:32:23Z",
- "total_documents": 1,
+ "total_documents": 3,
  "documents": [
   {
    "id": "AHFS-003",
@@ -201,6 +201,56 @@
     {
      "chunk_index": 44,
      "content": "Cardiol 2024;9:114-124. Insights from the MEMS-HF study. cardiogenic shock. Eur J Heart Fail doi:10.1001/jamacardio.2023.4553 Eur J Heart Fail 2022;24:2320-2330. 2023;25:562-572. doi:10.1002/EJHF. 394. Arrigo M, Biegus J, Asakage A, doi:10.1002/EJHF.2656 2796 Mebazaa A, Davison B, Edwards C, 403. Brugts JJ, Radhoe SP, Clephas PRD, 386. Bogerd M, ten Berg S, Peters EJ, Vlaar et al. Safety, tolerability and efﬁcacy Aydin D, van Gent MWF, Szymanski APJ, Engström AE, Otterspoor LC, of up-titration of guideline-directed MK, et al. Remote haemodynamic et al. Impella and venoarterial extra- medical therapies for acute heart fail- monitoring of pulmonary artery pres- corporeal membrane oxygenation in ure in elderly patients: A sub-analysis sures in patients with chronic heart cardiogenic shock complicating acute of the STRONG-HF randomized clini- failure (MONITOR-HF): A randomised myocardial infarction. Eur J Heart Fail cal trial. Eur J Heart Fail 2023;25: clinical trial. The Lancet. 2023;401: 2023;25:2021-2031. doi:10.1002/ejhf. 1145-1155. doi:10.1002/EJHF.2920 2113-2123. doi:10.1016/S0140-6736 3025 395. Pagnesi M, Metra M, Cohen-Solal A, (23)00923-6 387. Thiele H, Zeymer U, Akin I, Behnes M, Edwards C, Adamo M, Tomasoni D, 404. D’Amario D, Meerkin D, Restivo A, Ince Rassaf T, Mahabadi AA, et al. Extracor- et al. Uptitrating treatment after heart H, Sievert H, Wiese A, et al. Safety, us- poreal life support in infarct-related failure hospitalization across the ability, and performance of a wireless cardiogenic shock. N Engl J Med. spectrum of left ventricular ejection left atrial pressure monitoring system 2023;389:1286-1297. doi:10.1056/ fraction. J Am Coll Cardiol 2023;81: in patients with heart failure: The NEJMOA2307227/SUPPL_FILE/ 2131-2144. doi:10.1016/j.jacc.2023. VECTOR-HF trial. Eur J Heart Fail NEJMOA2307227_DATA-SHARING. 03.426 2023;25:902-911. doi:10.1002/EJHF. PDF 396. Adamo M, Pagnesi M, Mebazaa A, 2869 388. Zeymer U, Freund A, Hochadel M, Davison B, Edwards C, Tomasoni D, 405. Ivey-Miranda JB, Wetterling F, Gaul R, Ostadal P, Belohlavek J, Rokyta R, et al. NT-proBNP and high intensity Sheridan S, Asher JL, Rao VS, et al. ESC Heart Failure 2025; 12: 8–42 DOI: 10.1002/ehf2.14857 20555822, 2025, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1002/ehf2.14857, Wiley Online Library on [09/05/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License 42 A. Beghini et al. Changes in inferior vena cava area rep- 2022;24:455-462. doi:10.1002/EJHF. plantable sensor in the inferior vena resent a more sensitive metric than 2395 cava under acute and chronic intravas- changes in ﬁlling pressures during ex- 406. Sheridan WS, Wetterling F, Testani JM, cular volume modulation. Eur J Heart perimental manipulation of intravascu- Borlaug BA, Fudim M, Damman K, et al. Fail 2023;25:754-763. doi:10.1002/ lar volume and tone. Eur J Heart Fail Safety and performance of a novel im- EJHF.2822 ESC Heart Failure 2025; 12: 8–42 DOI: 10.1002/ehf2.14857"
+    }
+   ]
+  },
+  {
+   "id": "AHFS-001",
+   "source": "AHFS",
+   "title": "AHFS Drug Information American Society of Health-System Pharmacists annual edition",
+   "year": "2024",
+   "page_url": "https://www.ashp.org/products-and-services/database-and-software-solutions/ahfs-drug-information",
+   "pdf_url": "https://www.ashp.org/products-and-services/database-and-software-solutions/ahfs-drug-information",
+   "license": "ASHP Restricted",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_formulary",
+   "priority": "high",
+   "sha256": "eb5d8148bacae722ad789cb7c7017c97e9b3dbf9369a3886487cb18332c14420",
+   "size_bytes": 851,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 851,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AHFS Drug Information American Society of Health-System Pharmacists annual edition Source: AHFS Year: 2024 Domain: drug_formulary License: ASHP Restricted Available at: https://www.ashp.org/products-and-services/database-and-software-solutions/ahfs-drug-information This is a citation reference for the AHFS guideline 'AHFS Drug Information American Society of Health-System Pharmacists annual edition' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_formulary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AHFS-002",
+   "source": "AHFS",
+   "title": "AHFS Pediatric and Neonatal Lexi-Drugs equivalent monographs",
+   "year": "2024",
+   "page_url": "https://www.ashp.org/",
+   "pdf_url": "https://www.ashp.org/",
+   "license": "ASHP Restricted",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_pediatric",
+   "priority": "medium",
+   "sha256": "5e60eac98cff03e4dfe204ec7ffee5792f981eded42a267325185156ae4bf59b",
+   "size_bytes": 732,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 732,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AHFS Pediatric and Neonatal Lexi-Drugs equivalent monographs Source: AHFS Year: 2024 Domain: drug_pediatric License: ASHP Restricted Available at: https://www.ashp.org/ This is a citation reference for the AHFS guideline 'AHFS Pediatric and Neonatal Lexi-Drugs equivalent monographs' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

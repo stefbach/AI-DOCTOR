@@ -1,7 +1,7 @@
 {
  "source": "IOC",
  "generated_at": "2026-05-09T15:53:26Z",
- "total_documents": 5,
+ "total_documents": 7,
  "documents": [
   {
    "id": "IOC-RED-S-001",
@@ -285,6 +285,56 @@
     {
      "chunk_index": 9,
      "content": "and cluster(s) in analyses, and reporting of unintended consequences. In addition, future research should consider multifaceted approaches to evaluate SRC and head impact/HAE prevention strategies through adequately powered studies and the combined use of validated concussion and injury surveillance, video analysis and wearable technologies (eg, instrumented mouth guards). Conclusion There is minimal evidence for female/woman/girl athlete-specific SRC and head impact/HAE prevention strategies and MRFs and is limited to supporting headgear use in adolescent soccer/lacrosse. To make appropriate recommendations and to better inform prevention strategies for female/woman/girl athletes, evidence for female/women/girl-specific SRC prevention and MRFs is needed. The development, implementation, and evaluation of female/woman/girl-specific SRC prevention strategies are needed to reduce the SRC burden in this under-researched sport population. Supplementary material 10.1136/bjsports-2025-109915 online supplemental file 1 10.1136/bjsports-2025-109915 online supplemental file 2 10.1136/bjsports-2025-109915 online supplemental file 3 10.1136/bjsports-2025-109915 online supplemental file 4 10.1136/bjsports-2025-109915 online supplemental file 5 10.1136/bjsports-2025-109915 online supplemental file 6"
+    }
+   ]
+  },
+  {
+   "id": "IOC-PREG-001",
+   "source": "IOC",
+   "title": "IOC Expert Group Statement on Pregnancy in Elite Athletes",
+   "year": "2017",
+   "page_url": "https://www.olympic.org/medical-and-scientific-commission",
+   "pdf_url": "https://www.olympic.org/medical-and-scientific-commission",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_exercise_rx",
+   "priority": "medium",
+   "sha256": "c65d2f185023ac63444fd63aa42e4b9d2d7c6dd7a15929dddcad59cd61cd48b5",
+   "size_bytes": 764,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 764,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:56Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IOC Expert Group Statement on Pregnancy in Elite Athletes Source: IOC Year: 2017 Domain: sports_exercise_rx License: Proprietary Available at: https://www.olympic.org/medical-and-scientific-commission This is a citation reference for the IOC guideline 'IOC Expert Group Statement on Pregnancy in Elite Athletes' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_exercise_rx. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IOC-FEMALE-001",
+   "source": "IOC",
+   "title": "IOC Statement on Sex Reassignment in Sport",
+   "year": "2015",
+   "page_url": "https://www.olympic.org/medical-and-scientific-commission",
+   "pdf_url": "https://www.olympic.org/medical-and-scientific-commission",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_doping",
+   "priority": "medium",
+   "sha256": "3adb951e4929dcd6a6611161d001db8537e76c5f50e2c05b51d567bbe4bcbcca",
+   "size_bytes": 724,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 724,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:57Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IOC Statement on Sex Reassignment in Sport Source: IOC Year: 2015 Domain: sports_doping License: Proprietary Available at: https://www.olympic.org/medical-and-scientific-commission This is a citation reference for the IOC guideline 'IOC Statement on Sex Reassignment in Sport' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_doping. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

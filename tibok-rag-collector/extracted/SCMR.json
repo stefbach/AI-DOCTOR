@@ -1,7 +1,7 @@
 {
  "source": "SCMR",
  "generated_at": "2026-05-09T10:09:50Z",
- "total_documents": 4,
+ "total_documents": 5,
  "documents": [
   {
    "id": "SCMR-CMR-001",
@@ -244,6 +244,31 @@
     {
      "chunk_index": 6,
      "content": "editing. Jadranka Stojanovska: Writing – original draft, Writing – review & editing. Anne-Marie Valente: Writing – original draft, Writing – review & editing. Elsie T. Nguyen: Conceptualization, Data curation, Formal analysis, Methodology, Project administration, Supervision, Validation, Writing – original draft, Writing – review & editing. Mark Westwood: Conceptualization, Data curation, Formal analysis, Methodology, Project administration, Supervision, Writing – original draft, Writing – review & editing. Karen G. Ordovas: Conceptualization, Data curation, Formal analysis, Methodology, Project administration, Resources, Supervision, Validation, Writing – original draft, Writing – review & editing. Sven Plein: Supervision, Writing – review & editing. Phil Herbst: Writing – original draft, Writing – review & editing. Rebecca Kozor: Writing – original draft, Writing – review & editing. Ming-Yen Ng: Writing – original draft, Writing – review & editing. Luigi Natale: Writing – review & editing. Robin Nijveldt: Writing – original draft, Writing – review & editing. Declaration of Competing Interest The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper."
+    }
+   ]
+  },
+  {
+   "id": "SCMR-CARDIAC-001",
+   "source": "SCMR",
+   "title": "SCMR consensus on cardiac MRI standardized image acquisition",
+   "year": "2020",
+   "page_url": "https://jcmr-online.biomedcentral.com/articles/10.1186/s12968-020-00682-4",
+   "pdf_url": "https://jcmr-online.biomedcentral.com/articles/10.1186/s12968-020-00682-4",
+   "license": "SCMR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_general",
+   "priority": "high",
+   "sha256": "73f18ad9e6f350a3ee9d8f54e59bbd081575a14a75edc0eb4bb13d8c8ea269b2",
+   "size_bytes": 787,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 787,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:12Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCMR consensus on cardiac MRI standardized image acquisition Source: SCMR Year: 2020 Domain: radiology_mri_general License: SCMR Available at: https://jcmr-online.biomedcentral.com/articles/10.1186/s12968-020-00682-4 This is a citation reference for the SCMR guideline 'SCMR consensus on cardiac MRI standardized image acquisition' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_mri_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

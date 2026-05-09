@@ -1,7 +1,7 @@
 {
  "source": "EASD",
  "generated_at": "2026-05-09T09:03:37Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "EASD-DIABETES-001",
@@ -250,6 +250,31 @@
     {
      "chunk_index": 25,
      "content": "of GLP-1 RA and SGLT2i in broad populations would help to better target interventions to have the greatest impact on outcomes. Glucose monitoring. Further studies to understand the role and optimal implementation of CGM and/or episodic CGM in type 2 diabetes are needed. Comorbidities. There are numerous studies under way to understand the role of interventions in the setting of NAFLD and cognitive impairment. NAFLD is highly prevalent and thus understanding the impact of interventions on person-centred outcomes and costs is essential. Cognitive impairment is a major burden to people with diabetes, their families and society; better understanding of the pathophysiology and the impact of interventions is a challenging but high reward area for investigation. There are virtually no data to inform best practice in the care of people with diabetes and advanced CKD, particularly in dialysis-dependent kidney disease. Additional studies, particularly of GLP-1 RA, GIP and GLP-1 RA, and SGLT2i, will hopefully provide new avenues to reduce mortality in this population, in which there are enormous health disparities. Screening and prevention. Screening for diabetes and its complications and comorbidities remains inadequate. Early intervention to prevent progression is also generally suboptimal. National healthcare systems should comprehensively assess the implementation of recommendations and create incentives for effective programmes. To optimally target resources, additional studies may be required on natural history and subpopulations, as much of the rationale for screening is based on studies conducted decades ago. Technology. Remote care, wearables, apps and decision support aids have exploded in availability and clear rationale exists as to why they may be of benefit. However, their optimal application is poorly understood. Sleep and chronotype. Poor sleep is common and clearly associated with poor outcomes. Further studies are needed to understand behavioural sleep therapy and its benefits more fully, as well as the benefits of medication and device aids. As chronotype is potentially modifiable, future research should focus on social and lifestyle factors to optimise interventional responses. Until science and medicine bring us further insights, we recommend empathic, person-centred decision making and support informed by an understanding of local resources and individual social determinants of health. Combined with consistent efforts to improve health behaviours (nutrition, activity, sleep and self-monitoring) and to provide DSMES, these form the foundation of diabetes management. In this context, acceptance of, adherence to and persistence with medical and behavioural interventions to support cardiorenal health, cardiovascular risk reduction and attainment of glycaemic and weight goals will prevent complications and optimise quality of life. We must establish and refine quality improvement efforts in diabetes care at the local level to equitably implement evidence-based interventions for the benefit of all people with type 2 diabetes. Supplementary Information ESM (PDF 246 kb)"
+    }
+   ]
+  },
+  {
+   "id": "EASD-T2D-001",
+   "source": "EASD",
+   "title": "EASD position statement on tight glycemic control in critically ill patients",
+   "year": "2024",
+   "page_url": "https://link.springer.com/journal/125",
+   "pdf_url": "https://link.springer.com/journal/125",
+   "license": "EASD",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_diabetes",
+   "priority": "medium",
+   "sha256": "d9f5f045f1d7be770f79177c0df96f98ab91e41c80342fa65cce07f66e9dfc63",
+   "size_bytes": 785,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 785,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EASD position statement on tight glycemic control in critically ill patients Source: EASD Year: 2024 Domain: endocrinology_diabetes License: EASD Available at: https://link.springer.com/journal/125 This is a citation reference for the EASD guideline 'EASD position statement on tight glycemic control in critically ill patients' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_diabetes. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

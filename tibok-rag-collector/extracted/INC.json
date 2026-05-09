@@ -1,0 +1,32 @@
+{
+ "source": "INC",
+ "generated_at": "2026-05-09T19:11:55Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "CMT-NEUROPATHY-001",
+   "source": "INC",
+   "title": "Inherited Neuropathies Consortium consensus on Charcot Marie Tooth diagnosis and management",
+   "year": "2019",
+   "page_url": "https://www.rarediseasesnetwork.org/cms/inc",
+   "pdf_url": "https://www.rarediseasesnetwork.org/cms/inc",
+   "license": "INC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_neuropathy",
+   "priority": "medium",
+   "sha256": "b6fd88984350238df1b344aae2fde9c2b650dcbbf4758e7fc19aaf95173ff489",
+   "size_bytes": 1919,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1919,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:56Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Clinical practice guideline for the management of paediatric Charcot-Marie-Tooth disease. Charcot-Marie-Tooth disease (CMT) is the most common inherited neuropathy and often presents during childhood. Guidelines for the optimal management of common problems experienced by individuals with CMT do not exist, for either children or adults. We formed the Paediatric CMT Best Practice Guidelines Consortium to develop evidence and consensus-based recommendations for the clinical management of children and adolescents with CMT, with the primary objective of promoting optimal, standardised care globally. Development of this clinical practice guideline involved a series of systematic reviews covering 10 clinical questions, modified Delphi methodology involving an international panel of clinicians to generate consensus where evidence did not exist, and application of the Grading of Recommendations, Assessment, Development and Evaluation (GRADE) approach to evaluate the body of literature and formulate recommendations. The final guideline includes three evidence-based and 31 consensus-based recommendations. They encompass the management of muscle weakness, balance and mobility impairment, sensory symptoms, muscle cramps, impaired upper limb function, respiratory impairment, maintenance of joint range of motion and non-surgical management of joint deformity. Consensus was not achieved in some management areas, reflecting differences in practice between clinicians and healthcare settings, and highlighting the need for further research. This clinical practice guideline provides practical and implementable guidance on the management of common clinical problems experienced by children with CMT and advocates for improved access to multidisciplinary care. Successful dissemination and implementation of these recommendations will be critical in ensuring their application across multiple healthcare settings."
+    }
+   ]
+  }
+ ]
+}

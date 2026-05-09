@@ -1,7 +1,7 @@
 {
  "source": "ASSH",
  "generated_at": "2026-05-09T16:40:01Z",
- "total_documents": 1,
+ "total_documents": 3,
  "documents": [
   {
    "id": "ASSH-HAND-001",
@@ -33,6 +33,56 @@
     {
      "chunk_index": 2,
      "content": "as the evidence does not strongly support the use of either practice. Multiplanar fluoroscopy and thoughtful screw and plate placement can be employed to evaluate for and prevent intra-articular and/or aberrant screw placement , , . Additionally, one high quality, randomized controlled trial exists that evaluated the functional and radiographic outcomes after distal radius fractures treated with a volar locked plate randomized to fluoroscopically-guided or arthroscopically-guided reduction . This study demonstrated no difference in outcomes at 48 months between the cohorts. Lastly, while concomitant soft tissue injuries (e.g. scapholunate ligament) are reported with a high incidence , , no high quality studies support improved outcomes with arthroscopic visualization and treatment of such injuries. In fact, a 2021 study evaluating differences in outcomes between patients with a radiographically apparent SL ligament injury (scapholunate angle >70’) and those without (scapholunate angle <70’) demonstrated no difference in outcomes . This supports the concept, that while these injuries may be present, evaluating them arthroscopically and/or addressing them via repair or reconstruction at the time of distal radius fracture treatment may not impact outcomes. We utilize supervised therapy on a case-by-case basis and employ a shared decision-making approach to this decision. As there is inconsistent evidence suggesting that there is no difference in outcomes between a home exercise program and supervised therapy, we evaluate the patient’s swelling, range of motion, ability to conduct activities at home along with the patient’s stated motivation and ability to go to and/or pay for supervised therapy. These care attributes are discussed in helping a patient make the decision if supervised or home therapy is the correct decision for them. Similar to other recommendations, the literature evaluates patient populations and does not necessarily account for the patient in front of you and while the spirit of this guideline is not meant to eliminate the use of supervised therapy after distal radius fractures, it instead serves to highlight that perhaps some subsets of patients may benefit from supervised hand therapy while others may not. In this particular case, the patient was motivated, working full time (and thus driving to therapy was difficult), had minimal swelling, and was making range of motion improvements on her own without the use of supervised therapy. There is limited evidence to guide the frequency of follow-up radiographic imaging. One moderate quality study provides evidence that eliminating routine radiographs after one- and two-week follow-up radiographs results in no difference in patient reported outcomes but minimally significantly worse differences in range of motion as compared to those receiving radiographs at 1-, 2-, 6-, and 12-weeks post-injury . As such, our practice as illustrated by this case is to obtain radiographs at 2 weeks, 3 months, and 1 year. Similar to prior recommendations, we advocate for a patient-centered approach and recommend discussing the risks and benefits of serial radiography with a patient as part of treatment. The patient illustrated received a pre-operative single-shot regional block and multi-modal, opioid-sparing post-operative medications. There is little high-quality evidence to support and/or guide the use of multi-modal and opioid-sparing pain management techniques in the treatment of distal radius fractures. A recent randomized, controlled trial evaluated the use of an infra-clavicular block versus general anesthesia and demonstrated lower pain scores at 1, 2, 24, and 48 hours after surgery . Morphine consumption in the post-operative anesthesia care unit was lower in the regional cohort, yet the oral analgesic consumption was similar between cohorts. Post-operative nausea and vomiting were also lower in the regional anesthesia cohort. Outside of the distal radius fracture literature, we rely upon the growing body of evidence as it relates to other musculoskeletal conditions to guide opioid stewardship and education – . This case illustrates the real-time use of the AAOS and ASSH CPG for the management of acute, adult distal radius fractures. Further investigation is needed to 1) evaluate areas of inconsistent evidence (e.g. supervised therapy for adults with arthritis) to improve these recommendations in the future, 2) assess how this new CPG changes and improves the delivery of evidence-based care over time, and 3) understand how to employ tools and decision aids to utilize these recommendations in practice in accordance with patient preferences and values."
+    }
+   ]
+  },
+  {
+   "id": "ASSH-TRIGGER-001",
+   "source": "ASSH",
+   "title": "ASSH clinical practice guideline trigger finger",
+   "year": "2018",
+   "page_url": "https://www.assh.org/s/clinical-guidelines",
+   "pdf_url": "https://www.assh.org/s/clinical-guidelines",
+   "license": "ASSH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_hand",
+   "priority": "medium",
+   "sha256": "9fbf49237d735081d05367fc40c95fbc313857efe6dc9a53e11f73b4ba2fdb03",
+   "size_bytes": 720,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 720,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASSH clinical practice guideline trigger finger Source: ASSH Year: 2018 Domain: orthopedics_hand License: ASSH Available at: https://www.assh.org/s/clinical-guidelines This is a citation reference for the ASSH guideline 'ASSH clinical practice guideline trigger finger' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_hand. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASSH-DUPUYTREN-001",
+   "source": "ASSH",
+   "title": "ASSH guideline on Dupuytren disease management",
+   "year": "2020",
+   "page_url": "https://www.assh.org/s/clinical-guidelines",
+   "pdf_url": "https://www.assh.org/s/clinical-guidelines",
+   "license": "ASSH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_hand",
+   "priority": "medium",
+   "sha256": "53545eb98f137af93cf6b55ae3c58d146457f63dfabbd7d36eab0735d33e0fa6",
+   "size_bytes": 718,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 718,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:41Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASSH guideline on Dupuytren disease management Source: ASSH Year: 2020 Domain: orthopedics_hand License: ASSH Available at: https://www.assh.org/s/clinical-guidelines This is a citation reference for the ASSH guideline 'ASSH guideline on Dupuytren disease management' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_hand. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

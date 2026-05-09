@@ -1,0 +1,57 @@
+{
+ "source": "Vidal",
+ "generated_at": "2026-05-09T19:16:54Z",
+ "total_documents": 2,
+ "documents": [
+  {
+   "id": "VIDAL-001",
+   "source": "Vidal",
+   "title": "Vidal Dictionnaire des medicaments France national formulary",
+   "year": "2024",
+   "page_url": "https://www.vidal.fr/",
+   "pdf_url": "https://www.vidal.fr/",
+   "license": "Vidal",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_formulary",
+   "priority": "high",
+   "sha256": "433bb855e62b148abdad9f86e1044adc777df397a2f902458fc15e75637fa0ed",
+   "size_bytes": 724,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 724,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:54Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Vidal Dictionnaire des medicaments France national formulary Source: Vidal Year: 2024 Domain: drug_formulary License: Vidal Available at: https://www.vidal.fr/ This is a citation reference for the Vidal guideline 'Vidal Dictionnaire des medicaments France national formulary' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_formulary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "VIDAL-002",
+   "source": "Vidal",
+   "title": "Vidal Recos recommandations pratiques cliniques France",
+   "year": "2024",
+   "page_url": "https://www.vidal.fr/maladies/recommandations.html",
+   "pdf_url": "https://www.vidal.fr/maladies/recommandations.html",
+   "license": "Vidal",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_formulary",
+   "priority": "high",
+   "sha256": "dfd5c3692c0de7cf425ba004f25b8c7e3192885505aae325f2defccb8d4c0a66",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Vidal Recos recommandations pratiques cliniques France Source: Vidal Year: 2024 Domain: drug_formulary License: Vidal Available at: https://www.vidal.fr/maladies/recommandations.html This is a citation reference for the Vidal guideline 'Vidal Recos recommandations pratiques cliniques France' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_formulary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

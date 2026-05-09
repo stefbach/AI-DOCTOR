@@ -1,7 +1,7 @@
 {
  "source": "SAHM",
  "generated_at": "2026-05-09T16:07:23Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "SAHM-ADOL-001",
@@ -90,6 +90,31 @@
     {
      "chunk_index": 5,
      "content": "from highly food-insecure households had a nearly 11-times lower likelihood of having flourishing mental wellbeing, which is similar to the study conducted by Burke et al. (2016) where it was observed that “Households with very low food security were markedly more deprived than other food-insecure households and it is within these households that hunger is most likely to exist [ ]. Adolescent females were roughly twice as likely as their male counterparts to have flourishing mental wellness. Adolescent girls are thought to be better shielded from food insecurity than boys, and it is conceivable that this protection could lower the likelihood of mental health issues in girls as opposed to boys [ ]. This, however, contradicts a prior study among similar status in Ethiopia, which found that food insecurity is substantially higher among girls than among boys [ ]. It might result from the limited resources being selectively made available to boys in the study instead of girls. Investigation of intrahousehold dynamics about the treatment of male and female adolescents, particularly regarding intrahousehold distribution of food and other resources through pairwise comparisons, was not possible in the current study because only one boy or girl was sampled from each household. Also, adolescents from households with middle-wealth status were about two times more likely to have flourishing mental wellbeing as compared to their counterparts in low wealth status households, this is particularly so with the study conducted among households of low-income family in the United State where parent reporting child food insecurity had greater mental wellbeing when compare with food insecure household [ ]. Conclusion This study showed that respondents in households experienced higher levels of severe food insecurity. Male adolescents, adolescents who were not enrolled in school, adolescents from households with a low wealth index, adolescents from households with severe food insecurity, and respondents with poor mental health were also more likely to experience languishing. Although an association between food insecurity and poor mental well-being was indicated in this study, a causal relationship could not be established due to the limitations of a cross-sectional study, suggesting that more research in this area is necessary to establish a causal relationship. Recommendation Given the high prevalence of food insecurity and its significant association with poor mental well-being among adolescents in this study, the following recommendations are proposed: Implementation of Targeted Food Assistance Programs: Government and non-governmental organizations should prioritize interventions that address food insecurity in semi-urban and rural communities, particularly through school feeding programs, food vouchers, and community food banks. These interventions should target households with adolescents, especially those with low socioeconomic status, to help alleviate the psychological burden associated with food scarcity. Integration of Mental Health Support into Adolescent Health Services: Mental health screening and support services should be incorporated into existing adolescent health and school-based programs, and special attention should be paid to vulnerable subgroups, such as male adolescents, those out of school, and those from households with low wealth index. Counseling, life skills training, and peer support initiatives can help enhance resilience and promote flourishing mental well-being despite socioeconomic challenges. Limitation This cross-sectional design limits causal inference, and the reliance on self-reported measures may introduce bias. Furthermore, the study’s focus on a single local government area restricts generalizability, and unmeasured factors such as dietary quality and parental mental health could have influenced the findings. This study highlights the need for a longitudinal survey in order to prove a link between the degree of food security and the mental health of adolescents. To fully understand the influence of food security on mental health, comprehensive policies addressing food production and its value chain must be devised and executed, despite the subregion’s limited study."
+    }
+   ]
+  },
+  {
+   "id": "SAHM-HEEADSSS-001",
+   "source": "SAHM",
+   "title": "SAHM HEEADSSS adolescent psychosocial assessment guideline",
+   "year": "2014",
+   "page_url": "https://www.adolescenthealth.org/",
+   "pdf_url": "https://www.adolescenthealth.org/",
+   "license": "SAHM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pediatrics_adolescent",
+   "priority": "medium",
+   "sha256": "c051b77c1901123074578c99a85695cb1faa07d5bbd92ef7d64124a87959a9dc",
+   "size_bytes": 743,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 743,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:51Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SAHM HEEADSSS adolescent psychosocial assessment guideline Source: SAHM Year: 2014 Domain: pediatrics_adolescent License: SAHM Available at: https://www.adolescenthealth.org/ This is a citation reference for the SAHM guideline 'SAHM HEEADSSS adolescent psychosocial assessment guideline' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pediatrics_adolescent. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

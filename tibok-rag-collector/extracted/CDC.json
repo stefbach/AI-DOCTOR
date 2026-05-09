@@ -1,7 +1,7 @@
 {
  "source": "CDC",
  "generated_at": "2026-05-02T14:13:57Z",
- "total_documents": 75,
+ "total_documents": 103,
  "documents": [
   {
    "id": "CDC-001",
@@ -7539,6 +7539,706 @@
     {
      "chunk_index": 26,
      "content": "existing prescriptions, ideally prior to the resident’s physical arrival to the facility. If this is not feasible, a nursing home may consider implementing an antimicrobial time-out within 1 to 2 days of the resident’s arrival. An antimicrobial time-out is an active assessment of the continued need and appropriateness of an antimicrobial prescription at a specific point after its initiation. The process calls for practitioners to reassess the patient’s overall clinical presentation, response to therapy, and laboratory data (including culture and sensitivity results) and to consider whether antimicrobials may be de-escalated or stopped altogether. Nurses may identify a new antimicrobial prescription and perform an initial assessment of a resident’s condition. Responsibility for reviewing the need to continue, change, or stop antimicrobials and other medications should rest with admitting practitioners, consultant pharmacists, and the medical director. 42. What is the role of external consultants in a nursing home’s ASP? Recommendation: External partners and/or consultants may serve as antimicrobial stewardship experts for nursing home ASPs, especially when the nursing home antimicrobial stewardship team lacks such expertise. These individuals may contribute toward development of antimicrobial use protocols, processes for tracking antimicrobial use, data analyses and interpretation, providing specific feedback for further improvement, and/or educating HCP, residents, and families. Rationale: Several studies have demonstrated the value of external partners as collaborators for nursing home ASPs (see Supplementary Material, Table 4 ). Felsen and colleagues reported that a hospital-based expert team developed educational modules for nursing homes, supported initial implementation of those modules, and then transitioned that role to the nursing home HCP. Sloane and colleagues described an intervention in which dissemination of educational materials related to antimicrobial use was the responsibility of the nursing home leadership in one arm of their study and a medical group in another arm. Both studies showed decreases in antimicrobial use following the intervention. The CDC Core Elements of Antimicrobial Stewardship for Nursing Homes recommends involving infectious diseases consultants or consultant pharmacists with training in antimicrobial stewardship. Indicative of the potential benefits, an on-site infectious diseases consultation service at a 160-bed nursing home reduced systemic antimicrobial use by 30% and rate of positive C. difficile tests. Additionally, an integrative review reported that involvement of infection diseases consultants supported effective antimicrobial stewardship interventions in nursing homes. The nursing home may consider partnering with ASPs at the hospitals within their referral network or developing relationships with infectious diseases consultants in their community. Furthermore, some public health departments may have antimicrobial stewardship experts who can assist the nursing home with program development and implementation. Dispensing pharmacies can also work with the nursing home to develop facility-specific antimicrobial use reports and to assess antimicrobial orders for safety and appropriateness (i.e., drug-drug interactions; avoidance of drug-bug mismatch, length of therapy, potential for intravenous to oral conversion, and/or de-escalation). These partnerships are especially important when the nursing home antimicrobial stewardship team lacks antimicrobial expertise. For a successful collaboration, a nursing home must have leadership support, including administrative and medical leadership along with regular communication and interactions between the nursing home and external consultant. Metrics should assess ASPs in general and the effectiveness of the external partners and/or consultant(s). Several metrics can be used to assess ASPs in nursing homes, including days of therapy and antimicrobial starts per month. Although these data offer an objective means to evaluate the external consultant(s), qualitative data also are important, including consideration for the relationship between the external consultant(s) and the nursing home leadership and HCP, with specific consideration as to frequency and ease of communication as well as the timeliness and clarity of recommendations. Future research Clinical trials in nursing homes and cluster randomized trials are needed to best understand effective solutions in this specialized setting. Examples of large-scale randomized clinical trials in nursing homes have included video-enhanced advanced planning, the comparative effectiveness of various types of influenza vaccines, , and an evaluation of universal chlorhexidine bathing soap and nasal iodophor on infection-related hospitalizations. , , , Supporting information Mody et al. supplementary material 1 Mody et al. supplementary material Mody et al. supplementary material 2 Mody et al. supplementary material"
+    }
+   ]
+  },
+  {
+   "id": "CDC-MERC-001",
+   "source": "CDC",
+   "title": "CDC ATSDR mercury exposure assessment and clinical management",
+   "year": "2022",
+   "page_url": "https://www.atsdr.cdc.gov/toxprofiles/tp.asp?id=115&tid=24",
+   "pdf_url": "https://www.atsdr.cdc.gov/toxprofiles/tp.asp?id=115&tid=24",
+   "license": "CDC",
+   "commercial_use": "allowed",
+   "clinical_domain": "toxicology_metals",
+   "priority": "medium",
+   "sha256": "4a8423e57a6dfff036cde05bd1794f3f137394180d925848aac47dbf66d51244",
+   "size_bytes": 763,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 763,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CDC ATSDR mercury exposure assessment and clinical management Source: CDC Year: 2022 Domain: toxicology_metals License: CDC Available at: https://www.atsdr.cdc.gov/toxprofiles/tp.asp?id=115&tid=24 This is a citation reference for the CDC guideline 'CDC ATSDR mercury exposure assessment and clinical management' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_metals. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-AS-001",
+   "source": "CDC",
+   "title": "CDC ATSDR arsenic exposure clinical guidance",
+   "year": "2022",
+   "page_url": "https://www.atsdr.cdc.gov/toxprofiles/tp.asp?id=22&tid=3",
+   "pdf_url": "https://www.atsdr.cdc.gov/toxprofiles/tp.asp?id=22&tid=3",
+   "license": "CDC",
+   "commercial_use": "allowed",
+   "clinical_domain": "toxicology_metals",
+   "priority": "medium",
+   "sha256": "9727f0860f3e366c42b0dfbdd6501876c93a4c04d2f6b081d6abdf88a485cb91",
+   "size_bytes": 727,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 727,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CDC ATSDR arsenic exposure clinical guidance Source: CDC Year: 2022 Domain: toxicology_metals License: CDC Available at: https://www.atsdr.cdc.gov/toxprofiles/tp.asp?id=22&tid=3 This is a citation reference for the CDC guideline 'CDC ATSDR arsenic exposure clinical guidance' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_metals. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-CD-001",
+   "source": "CDC",
+   "title": "CDC ATSDR cadmium exposure assessment guidance",
+   "year": "2021",
+   "page_url": "https://www.atsdr.cdc.gov/toxprofiles/tp.asp?id=48&tid=15",
+   "pdf_url": "https://www.atsdr.cdc.gov/toxprofiles/tp.asp?id=48&tid=15",
+   "license": "CDC",
+   "commercial_use": "allowed",
+   "clinical_domain": "toxicology_metals",
+   "priority": "low",
+   "sha256": "3d928ceecc92c7af29c22c92b55a7271a8c277bb75fe0d3b46f69f3224c5cff3",
+   "size_bytes": 1322,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1320,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Minimal Risk Level Derivation for Cadmium: Acute and Intermediate Duration Exposures. The Agency for Toxic Substances and Disease Registry (ATSDR) lists cadmium as one of its priority hazardous substances. The agency conducted a comprehensive literature review of cadmium and used the information to develop a toxicological profile that identified the full range of health effects associated with exposure to cadmium. It included an assessment that identified screening levels, termed health guidance values or minimal risk levels (MRLs), below which adverse health effects are not expected. In this paper, we describe how MRLs for cadmium are derived. For the acute inhalation MRL, the traditional no observed adverse effect level or lowest observed adverse effect level (NOAEL/LOAEL) approach is used; for the oral intermediate MRL, the benchmark dose (BMD) approach is used. MRLs were developed for the most sensitive route-specific end points, other than mortality and cancer that were sufficiently supported and justified by the data. These included an acute duration (1-14 day exposure) inhalation MRL of 0.03 µg Cd/m 3 for alveolar histiocytic infiltration and focal inflammation in alveolar septa and an intermediate duration (15-365 day exposure) oral MRL of 0.5 µg Cd/kg/day for decreased bone mineral density."
+    }
+   ]
+  },
+  {
+   "id": "CDC-ABX-001",
+   "source": "CDC",
+   "title": "CDC Antibiotic Use Antibiotic Spectrum chart",
+   "year": "2023",
+   "page_url": "https://www.cdc.gov/antibiotic-use/clinicians/index.html",
+   "pdf_url": "https://www.cdc.gov/antibiotic-use/clinicians/index.html",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_antimicrobial_stewardship",
+   "priority": "high",
+   "sha256": "b17b94d338639c7f1dd1f7b5c2853295b7cba3c6be2c6c4cc60b141dd386245e",
+   "size_bytes": 2657,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2657,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Advancing antimicrobial therapy: evaluating the ASTar (Q-linea) System for rapid AST in Gram-negative bloodstream infections. Bloodstream infections (BSIs) caused by Gram-negative bacteria are a leading cause of sepsis and mortality, underscoring the need for rapid, reliable antimicrobial susceptibility testing (AST) to guide targeted therapy. We evaluated the analytical performance, turnaround time, and potential clinical impact of the ASTar System (Q-linea), an automated rapid phenotypic AST platform that reports minimum inhibitory concentration-based results directly from positive blood cultures. A total of 76 prospective clinical and 32 antibiotic-resistant specimens from the CDC & FDA AR Isolate Bank selected to represent diverse and well-characterized resistance profiles were tested and compared with the Standard-of-Care (SoC) MicroScan-WalkAway method using 2021 FDA STIC breakpoints. ASTar demonstrated essential and categorical agreement of 98.4% and 99.3% with SoC for clinical isolates, and 95.4% and 97.0% for CDC & FDA AR Isolate Bank specimens, respectively. The median turnaround time for ASTar results was 13.1 h compared with 51.2 h for SoC ( P < 0.0001). Clinician-led retrospective chart review indicated earlier ASTar results could have influenced antimicrobial therapy in 83% of cases, enabling de-escalation in 66.2%, escalation in 13.8%, adjustment of route of administration in 15.4%, potential dose adjustment in 1.5%, and confirmation of the ongoing empiric therapy in 16.9%, with anticipated benefits, such as reduced antibiotic-related side effects in 47.7%, decreased antibiotic exposure in 46.2%, earlier discharge on oral therapy in 32.3%, correction of ineffective empiric therapy, and reduced length of stay, were each anticipated in 21.5% and 15.4% of cases, respectively. These findings support the use of ASTar to improve the management of Gram-negative BSIs through faster, targeted antimicrobial therapy. Delays in antimicrobial susceptibility testing for Gram-negative bloodstream infections prolong empiric broad-spectrum therapy and can worsen clinical outcomes. This study presents data on the analytical performance, turnaround time, and potential clinical impact of the ASTar System for rapid antimicrobial susceptibility testing of Gram-negative bloodstream infections. The comparison of ASTar results with a Standard-of-Care method offers data to support clinical laboratories in assessing rapid phenotypic AST platforms, such as ASTar, their role in antimicrobial stewardship, and possible workflow adjustments for faster, targeted therapy in the management of Gram-negative bloodstream infections."
+    }
+   ]
+  },
+  {
+   "id": "CDC-TB-003",
+   "source": "CDC",
+   "title": "CDC Treatment for Latent TB Infection LTBI rifapentine isoniazid",
+   "year": "2020",
+   "page_url": "https://www.cdc.gov/tb/topic/treatment/ltbi.htm",
+   "pdf_url": "https://www.cdc.gov/tb/topic/treatment/ltbi.htm",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_specialty_hiv_hcv_tb",
+   "priority": "high",
+   "sha256": "5699d89bff4d9d26d7bdfda3ea613fe29ccb05356de684acb46434f394abd615",
+   "size_bytes": 1932,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1932,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Acceptance of preventive therapy for latent tuberculosis infection in Chinese children and adolescents: a systematic review and meta-analysis. Tuberculosis preventive treatment (TPT) is essential for pediatric tuberculosis control in children and adolescents. Evidence indicates most attrition occurs prior to TPT initiation rather than from post-initiation nonadherence. This study systematically evaluated TPT acceptance for latent tuberculosis infection (LTBI) among Chinese children and adolescents and identified key influencing factors through comprehensive database searches (PubMed, Web of Science, Embase, Cochrane, CNKI, Wanfang database, CBM, VIP) up to February 21, 2025. The heterogeneity was assessed using I 2 statistics (95.770%, P < 0.001), with random-effects models employed for meta-analysis. Subgroup, meta-regression, and sensitivity analyses were performed to identify the sources of heterogeneity. Begg and Egger tests were used to detect any potential publication bias. Among 7,165 screened records, 31 eligible studies (n = 4,929) met inclusion criteria. The pooled TPT acceptance rate reached 64.0% (95%CI: 56.9%-70.9%), with significantly higher TPT acceptance rates observed among: central China residents (76.5%, 95% CI: 69.8%-82.5%), close household contacts (80.2%, 95% CI: 74.9% - 85.0%), IGRA positive (80.5%, 95% CI: 74.3% - 86.0%), recipients of isoniazid-rifapentine regimens (76.5%, 95% CI: 69.5%-82.9%), and twice-weekly dosing schedules (76.5%, 95% CI: 69.5%-82.9%). This study revealed the suboptimal uptake of TPT among children and adolescents with LTBI in China. These findings highlight the need to tailor interventions to regional epidemiological profiles, accurately identify the target population for TPT with reliable tools, and scale up optimized regimens under stringent monitoring, as these are critical strategies for enhancing TPT coverage and advancing the \"End TB\" initiative."
+    }
+   ]
+  },
+  {
+   "id": "CDC-OPIOID-002",
+   "source": "CDC",
+   "title": "CDC Calculating Total Daily Dose of Opioids MME conversion",
+   "year": "2022",
+   "page_url": "https://www.cdc.gov/opioids/healthcare-professionals/prescribing/index.html",
+   "pdf_url": "https://www.cdc.gov/opioids/healthcare-professionals/prescribing/index.html",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pain",
+   "priority": "high",
+   "sha256": "704f624c282af0583c761554c29d405bb509ae131cbbcc5a9ff35783a3d2303c",
+   "size_bytes": 768,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 768,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:45Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CDC Calculating Total Daily Dose of Opioids MME conversion Source: CDC Year: 2022 Domain: drug_pain License: Public Domain Available at: https://www.cdc.gov/opioids/healthcare-professionals/prescribing/index.html This is a citation reference for the CDC guideline 'CDC Calculating Total Daily Dose of Opioids MME conversion' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-IMMUNE-DRUG-001",
+   "source": "CDC",
+   "title": "CDC Treatment of Patients Bitten by Animals Rabies Postexposure Prophylaxis",
+   "year": "2022",
+   "page_url": "https://www.cdc.gov/rabies/medical_care/index.html",
+   "pdf_url": "https://www.cdc.gov/rabies/medical_care/index.html",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_specialty_hiv_hcv_tb",
+   "priority": "medium",
+   "sha256": "df908ccebf61e5f722b31bcae9362aa0e723ad2af1aa78d103c003cc15e8fc80",
+   "size_bytes": 4379,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 4379,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Rabies Rabies has been a much-feared disease affecting humans and animals since antiquity due to its near-uniform fatality once symptoms appear. Following an incubation period ranging from a few days to a few years, rabies presents with a vague, febrile illness, frequently with pain and paresthesias at the wound site. Within 2 weeks, the neurological phase typically progresses into encephalitic or paralytic rabies, followed by coma. Death typically occurs within 2 to 3 days of coma onset. Once symptoms begin, treatment typically focuses on minimizing the patient's pain and suffering. In resource-poor countries, many individuals die at home. Rabies (RABV) and other similar viruses are zoonotic, neurotropic viruses belonging to the family Rhabdoviridae, genus Lyssavirus . These viruses cause indistinguishable clinical illnesses. Rabies is distributed worldwide, infecting various mammals, including dogs, cats, bats, livestock, and wildlife. The RABV is transmitted through the saliva of infected animals, contaminating bites, open skin, or mucous membrane, and, in rare cases, through organ transplantation. Dog bites account for 99% of rabies cases, making dogs the primary reservoir worldwide. Human rabies is rare in resource-rich countries but remains a significant public health concern in resource-limited regions, causing tens of thousands of deaths annually. The burden is highest in Asia and Africa, primarily affecting children in areas without large-scale preventive measures. All suspected and confirmed human and animal rabies cases must be reported to the appropriate hospital infection prevention and control programs, local public health authorities, or animal health authorities. Clinicians often overlook the diagnosis of rabies at the initial presentation. Preventing rabies is crucial, as treatment options after symptoms appear are mostly limited to palliative care. Following exposure, rabies postexposure prophylaxis (PEP) should be administered urgently, especially in deep or multiple bites in areas with dense nerve endings, such as the hands or regions close to the central nervous system (CNS), including the head and neck. PEP includes thorough wound cleansing, the administration of multiple cell culture-derived rabies vaccines, and human rabies immunoglobulin (HRIg) if the patient has not received prior rabies vaccination. Preexposure prophylaxis (PrEP) is available for individuals likely to be exposed to the RABV, such as veterinarians and long-term travelers or residents in endemic countries. Clinicians must be familiar with local guidelines to determine appropriate PEP, as animal carriers, the prevalence of rabies, and the availability of vaccines and HRIg vary by region. In the United States, the Advisory Committee on Immunization Practices (ACIP) developed national human rabies prevention guidelines with support from the Centers for Disease Control (CDC) in 2008, updating them in 2010 to reduce the number of vaccines required for PEP. Local or state public health authorities develop guidelines specific to the region. The World Health Organization (WHO) revised its 2010 rabies vaccine position paper in 2018 to improve programmatic feasibility, simplify vaccination schedules, and improve cost-effectiveness. The opportunity to provide appropriate postexposure rabies prophylaxis may be missed due to patient, clinician, or structural factors. Patients may be unaware that a specific exposure carries a risk or may not realize they were bitten, especially in cases of bat bites. Clinicians may be unaware of the local rabies epidemiology where the bite occurred or appropriate pre- or postexposure treatment. On the systemic level, a lack of PEP availability due to geographic factors or the prohibitively high cost of PEP results in lost opportunities for treatment. Mass dog vaccination is the most cost-effective strategy for preventing dog-mediated human rabies worldwide. In its 2017 Zero by 30 global strategic plan, the United Against Rabies coalition, in collaboration with the WHO and other global animal and human health organizations, aims to eliminate human rabies by 2030. This activity reviews PrEP and PEP, the diagnosis and treatment of clinical rabies, public health management of rabies cases, and rabies control. Please see StatPearls' companion resource, \"Animal Bites,\" for further information."
+    }
+   ]
+  },
+  {
+   "id": "CDC-YELLOW-001",
+   "source": "CDC",
+   "title": "CDC Yellow Book Health Information for International Travel",
+   "year": "2024",
+   "page_url": "https://wwwnc.cdc.gov/travel/page/yellowbook-home",
+   "pdf_url": "https://wwwnc.cdc.gov/travel/page/yellowbook-home",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "travel_pretravel",
+   "priority": "high",
+   "sha256": "40d8e6e9298ad0b4f17cabd7e0b204fbd076516cf6c47d86f5177b55a2a61901",
+   "size_bytes": 3168,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3142,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Traveling Safely with Infants and Children Children increasingly are traveling and living outside of their home countries. Although data about the incidence of pediatric illnesses associated with international travel are limited, the risks that children face when traveling are, with a few caveats discussed below, largely similar to those faced by their adult travel companions. The most commonly reported health problems among child travelers are: Dermatologic conditions, including animal and arthropod bites, cutaneous larva migrans, and sunburn; Diarrheal illnesses; Respiratory disorders; Systemic febrile illnesses, especially malaria. Motor vehicle and water-related injuries, including drowning, are other major health and safety concerns for child travelers. See Box 6.3.1 for recommendations on assessing and preparing children for planned international travel. Box 6.3.1. ASSESSING AND PREPARING CHILDREN FOR INTERNATIONAL TRAVEL: A CHECKLIST FOR HEALTHCARE PROFESSIONALS ★: □. Review routine childhood vaccinations. The pre-travel visit is an opportunity to ensure that children are up to date on their routine vaccinations. Some routine vaccines, such as measles-mumps-rubella (MMR) or hepatitis A, may need to be given earlier than routinely recommended. □. Review the need for travel-related vaccines. □. Review the need for travel-related medications (malaria chemoprophylaxis, medication to prevent altitude illness, anti-diarrheal medication). □. Assess all anticipated travel-related activities. □. Provide preventive counseling and interventions tailored to specific risks, including special travel preparations and any treatment required for infants and children with underlying health conditions, chronic diseases, or immunocompromising conditions. □. Discuss how to establish a plan of where and how to seek medical care while traveling and discuss the need for travel health insurance. □. Encourage caregivers to carry an adequate supply of medications for children who require medications to manage chronic health conditions. □. Consider providing counseling on the following topics for adolescents traveling in a student group or program: Drug and alcohol use. Management and empiric treatment of common travel-related illnesses. Risks of sexually transmitted infections and sexual assault to include access to emergency contraception. Personal safety and security, to include enrollment in the U.S. State Department STEP program. Anticipating healthcare needs for chronic health conditions, including mental health conditions, particularly during extended periods of travel. □. Give special consideration to travelers visiting friends and relatives in low- and middle-income countries and assess risks for malaria, intestinal parasites, and tuberculosis. □. Consider advising adults traveling with children and older children to take a course in basic first aid before travel. □. Consider advising swimming lessons for non-swimmers planning travel near oceans or other bodies of water. Recognize that lifeguards may not be present. □. Discuss road safety, including helmets and car seats, for infants and children."
+    }
+   ]
+  },
+  {
+   "id": "CDC-MALARIA-001",
+   "source": "CDC",
+   "title": "CDC Yellow Book Chapter on Malaria",
+   "year": "2024",
+   "page_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/malaria",
+   "pdf_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/malaria",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "travel_malaria",
+   "priority": "high",
+   "sha256": "3701ebde700fdf3fdd6288fb8cc434106dbf82bbe2b2db4ebcb48bfa31978f08",
+   "size_bytes": 727,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 727,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CDC Yellow Book Chapter on Malaria Source: CDC Year: 2024 Domain: travel_malaria License: Public Domain Available at: https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/malaria This is a citation reference for the CDC guideline 'CDC Yellow Book Chapter on Malaria' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: travel_malaria. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-DIARRHEA-001",
+   "source": "CDC",
+   "title": "CDC Yellow Book Chapter on Travelers Diarrhea",
+   "year": "2024",
+   "page_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/travelers-diarrhea",
+   "pdf_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/travelers-diarrhea",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "travel_diarrhea",
+   "priority": "high",
+   "sha256": "c156a65521ef377a413678138bd5bbb2dd599bf7be3a52684e212acd9e6b9714",
+   "size_bytes": 1601,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1591,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:51Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Post-Travel Evaluation of the Ill Traveler As many as 43–79% of travelers to low- and middle-income countries (LMICs) become ill during or after travel. Although most of these illnesses are mild, some travelers become sick enough to seek care from a healthcare professional. Most post-travel infections become apparent soon after returning from abroad, but incubation periods vary, and some syndromes can present months to years after initial infection or after travel. The purpose of this chapter is to guide the healthcare professional’s initial approach to the evaluation of the ill returned traveler. Common syndromes observed in returned travelers include acute undifferentiated fevers, respiratory illnesses, acute or chronic gastrointestinal illnesses (including diarrhea and hepatitis), illnesses involving the central nervous system (e.g., meningitis or encephalitis), dermatologic complaints, and eosinophilia. A syndromic approach can help direct the differential diagnosis and diagnostic workup. Healthcare professionals who manage ill returned travelers are encouraged to stay informed of current outbreaks in the destination countries that their patients visit. A wealth of resources for health care professionals are available at the following: CDC’s Travelers’ Health website. CDC’s Outbreak website. The Program for Monitoring Emerging Diseases International Society for Infectious Diseases. Weekly communicable disease threat reports. Several other resources, some free and some by subscription, are also available at Travel Medicine Resources for Healthcare Professionals."
+    }
+   ]
+  },
+  {
+   "id": "CDC-YF-001",
+   "source": "CDC",
+   "title": "CDC Yellow Book Chapter on Yellow Fever Vaccine",
+   "year": "2024",
+   "page_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/yellow-fever-vaccine",
+   "pdf_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/yellow-fever-vaccine",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "travel_pretravel",
+   "priority": "high",
+   "sha256": "b27058662389d4c8359fbcbbe3502f87cb888bd4d9dfdc17fbceb373f8e62aff",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CDC Yellow Book Chapter on Yellow Fever Vaccine Source: CDC Year: 2024 Domain: travel_pretravel License: Public Domain Available at: https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/yellow-fever-vaccine This is a citation reference for the CDC guideline 'CDC Yellow Book Chapter on Yellow Fever Vaccine' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: travel_pretravel. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-RABIES-001",
+   "source": "CDC",
+   "title": "CDC Recommendations for Animal Bite Management and Rabies Postexposure Prophylaxis",
+   "year": "2022",
+   "page_url": "https://www.cdc.gov/mmwr/volumes/71/rr/rr7102a1.htm",
+   "pdf_url": "https://www.cdc.gov/mmwr/volumes/71/rr/rr7102a1.htm",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "travel_returning",
+   "priority": "high",
+   "sha256": "b13e887e7c622148f95324b38c026a1ef11c7db1f7a7459d566f707ff6cecdc1",
+   "size_bytes": 1480,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1480,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:54Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Human Rabies Deaths - Minnesota and California, 2024. Rabies is an enzootic viral disease in the continental United States and is typically transmitted through the bite of an infected mammal. Infection is almost always fatal if rabies postexposure prophylaxis (PEP) is not received before the onset of symptoms. Bats are the leading source of U.S. human rabies cases. In 2024, CDC identified two U.S. human rabies deaths in September (Minnesota) and November (California) in persons who had a recognized bat encounter but might not have been aware of the potential rabies risk. Neither patient reported the bat encounter to public health officials nor sought medical attention, including PEP, before symptom onset. Health officials conducted risk assessments among 384 persons in Minnesota, North Dakota, and California who had possible contact with either the bats that were presumed to have rabies or the patients while they were infectious; 45 (12%) of these persons were recommended to receive PEP. Bat bites often result in trivialized or inapparent wounds. Anyone with a possible bat exposure, even in the absence of a recognized bite, should immediately report the encounter to a health care provider or to public health officials for risk assessment, consideration of options for bat testing, and PEP administration, if indicated. Increased awareness of the potential risk for rabies after any bat interaction, even without a visible bite wound, might help prevent deaths."
+    }
+   ]
+  },
+  {
+   "id": "CDC-VFR-001",
+   "source": "CDC",
+   "title": "CDC Yellow Book Chapter on VFR Travelers Visiting Friends and Relatives",
+   "year": "2024",
+   "page_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/family-travel/vfrs",
+   "pdf_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/family-travel/vfrs",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "travel_special_pop",
+   "priority": "medium",
+   "sha256": "9df5a3242c8c4d782aeaa99cd63b8639a4d9b4eab5101519b96d22bfbcaf71c5",
+   "size_bytes": 965,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 955,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Visiting Friends and Relatives: VFR Travel There are multiple definitions of a “visiting friends and relatives (VFR)” traveler. In this chapter, “VFR” is defined as a person who currently resides in a higher-income country who returns to their former home (in a lower-income country) for the purpose of visiting friends and/or relatives. Family members (e.g., children, partners) born in the VFR traveler’s higher-income country of residence are also included in this traveler category. Migration patterns to the United States over the past 30 years have resulted in increasing numbers of refugees, immigrants, and migrants (RIM) arriving from Eastern Europe, the Middle East, Africa, Latin America, and Asia. Approximately 14% of U.S. residents (45 million people) are foreign born, 22% of U.S. households use a language other than English at home, and 45% of all international travelers coming from the United States list VFR as their reason for travel."
+    }
+   ]
+  },
+  {
+   "id": "CDC-CRUISE-001",
+   "source": "CDC",
+   "title": "CDC Vessel Sanitation Program Operations Manual",
+   "year": "2018",
+   "page_url": "https://www.cdc.gov/nceh/vsp/",
+   "pdf_url": "https://www.cdc.gov/nceh/vsp/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "travel_pretravel",
+   "priority": "low",
+   "sha256": "d85956f439916068179f1a97e382251a105de5cac28c2714224c8a8bf72ebf36",
+   "size_bytes": 714,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 714,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:57Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CDC Vessel Sanitation Program Operations Manual Source: CDC Year: 2018 Domain: travel_pretravel License: Public Domain Available at: https://www.cdc.gov/nceh/vsp/ This is a citation reference for the CDC guideline 'CDC Vessel Sanitation Program Operations Manual' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: travel_pretravel. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-DENGUE-001",
+   "source": "CDC",
+   "title": "CDC Yellow Book Chapter on Dengue Prevention",
+   "year": "2024",
+   "page_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/dengue",
+   "pdf_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/dengue",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "travel_returning",
+   "priority": "medium",
+   "sha256": "18a1e79671e72082ef2294cf5380ded7d60bd6c1021eaf725a25ff47d54b51cf",
+   "size_bytes": 750,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 750,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CDC Yellow Book Chapter on Dengue Prevention Source: CDC Year: 2024 Domain: travel_returning License: Public Domain Available at: https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/dengue This is a citation reference for the CDC guideline 'CDC Yellow Book Chapter on Dengue Prevention' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: travel_returning. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-ZIKA-001",
+   "source": "CDC",
+   "title": "CDC Yellow Book Chapter on Zika Virus",
+   "year": "2024",
+   "page_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/zika",
+   "pdf_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/zika",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "travel_special_pop",
+   "priority": "medium",
+   "sha256": "c1289d6fc4b1804303cbe16dcd9c51b9f134362a8fbebfe00fefef01767efe8a",
+   "size_bytes": 738,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 738,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:00Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CDC Yellow Book Chapter on Zika Virus Source: CDC Year: 2024 Domain: travel_special_pop License: Public Domain Available at: https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/zika This is a citation reference for the CDC guideline 'CDC Yellow Book Chapter on Zika Virus' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: travel_special_pop. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-SCHISTO-001",
+   "source": "CDC",
+   "title": "CDC Yellow Book Chapter on Schistosomiasis",
+   "year": "2024",
+   "page_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/schistosomiasis",
+   "pdf_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/schistosomiasis",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "travel_returning",
+   "priority": "medium",
+   "sha256": "e7c8c1c3e1c916d94f171653ded35f123cd2d6670b2275ed6fd0b502bde3fc65",
+   "size_bytes": 755,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 755,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:03Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CDC Yellow Book Chapter on Schistosomiasis Source: CDC Year: 2024 Domain: travel_returning License: Public Domain Available at: https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/schistosomiasis This is a citation reference for the CDC guideline 'CDC Yellow Book Chapter on Schistosomiasis' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: travel_returning. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-TYPHOID-001",
+   "source": "CDC",
+   "title": "CDC Yellow Book Chapter on Typhoid Fever",
+   "year": "2024",
+   "page_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/typhoid-paratyphoid-fever",
+   "pdf_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/typhoid-paratyphoid-fever",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "travel_pretravel",
+   "priority": "medium",
+   "sha256": "e8ddb20d4e3b3d0fbd8afda2b6c9c5505013d9ccade345085e77cd962599b80b",
+   "size_bytes": 761,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 761,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CDC Yellow Book Chapter on Typhoid Fever Source: CDC Year: 2024 Domain: travel_pretravel License: Public Domain Available at: https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/typhoid-paratyphoid-fever This is a citation reference for the CDC guideline 'CDC Yellow Book Chapter on Typhoid Fever' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: travel_pretravel. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-ALTITUDE-001",
+   "source": "CDC",
+   "title": "CDC Yellow Book Chapter on High Altitude Travel",
+   "year": "2024",
+   "page_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/high-elevation-travel",
+   "pdf_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/high-elevation-travel",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "travel_altitude",
+   "priority": "high",
+   "sha256": "c783d4f22f6509a4252c0e425694e7d579ee453359074820c890f86f141fdda4",
+   "size_bytes": 759,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 759,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:05Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CDC Yellow Book Chapter on High Altitude Travel Source: CDC Year: 2024 Domain: travel_altitude License: Public Domain Available at: https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/high-elevation-travel This is a citation reference for the CDC guideline 'CDC Yellow Book Chapter on High Altitude Travel' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: travel_altitude. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-DIVING-001",
+   "source": "CDC",
+   "title": "CDC Yellow Book Chapter on Scuba Diving",
+   "year": "2024",
+   "page_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/scuba-diving",
+   "pdf_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/scuba-diving",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "diving_fitness",
+   "priority": "medium",
+   "sha256": "7f92908cbfbea15f33ee608855ce8b010d2a4b303a27db5e0819b22190ab5320",
+   "size_bytes": 732,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 732,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CDC Yellow Book Chapter on Scuba Diving Source: CDC Year: 2024 Domain: diving_fitness License: Public Domain Available at: https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/scuba-diving This is a citation reference for the CDC guideline 'CDC Yellow Book Chapter on Scuba Diving' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: diving_fitness. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-OCC-002",
+   "source": "CDC",
+   "title": "CDC Hepatitis B Vaccination of Health Care Personnel",
+   "year": "2013",
+   "page_url": "https://www.cdc.gov/mmwr/preview/mmwrhtml/rr6210a1.htm",
+   "pdf_url": "https://www.cdc.gov/mmwr/preview/mmwrhtml/rr6210a1.htm",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "occupational_safety",
+   "priority": "high",
+   "sha256": "4235c5018c7dd78f6c8ac89502fec781b9701a41bde04b3466df065f47801592",
+   "size_bytes": 3834,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3834,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:09Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Impact of a pharmacist-led hepatitis C clinic on hepatitis A and B vaccination rates and treatment outcomes: A retrospective cohort study. Hepatitis C virus (HCV) affects approximately 2.4 million people in the United States, with Kentucky having one of the highest HCV infection rates. The Centers for Disease Control and Prevention (CDC) recommend that all patients diagnosed with HCV be screened and vaccinated as appropriate for hepatitis A virus (HAV) and hepatitis B virus (HBV). Despite these long-standing recommendations, vaccination rates remain below target goals. To evaluate the impact of a pharmacist-led Medication Management Clinic (MMC) on HAV and HBV vaccination rates and other treatment outcomes in patients diagnosed with HCV compared with a traditional care model. This retrospective cohort study compared patients diagnosed with HCV treated through a pharmacist-led MMC between August 1, 2022, and February 28, 2024, with those treated through traditional care between August 1, 2016, and February 28, 2018. Primary outcomes included HAV and HBV vaccination initiation rates among eligible patients. Secondary outcomes included screening rates for HAV and HBV, HCV treatment completion, sustained virologic response (SVR), and specialty pharmacy prescription retention. Logistic regression was performed to assess the relationship between vaccination rates and type of care received (traditional care vs MMC), adjusting for baseline demographic and clinical factors, including, age, sex, HCV genotype, and fibrosis stage. Adjusted odds ratios (aORs) with 95% CIs were calculated for HAV and HBV initiation. The study included 330 MMC patients and 250 traditional care patients. Among eligible patients, HAV vaccination rates were higher in the MMC group (33.3% vs 22.6%, P = 0.02; unadjusted OR = 1.71, 95% CI = 1.11-2.65). After adjusting for age, sex, genotype, and fibrosis stage, patients in the traditional care group were less likely to receive HAV compared with patients in the MMC group (aOR = 0.569, 95% CI = 0.362-0.893; P = 0.014). Similarly, HBV vaccination rates were higher in the MMC group (36.6% vs 23.7%, P = 0.01; unadjusted OR = 1.84, 95% CI = 1.15-2.94). In the adjusted analysis, patients in the MMC group were more likely to receive HBV compared with patients in the traditional care group (aOR = 1.85, 95% CI = 1.14-3.00; P = 0.013). Additionally, older age (OR = 1.03 per year, 95% CI = 1.01-1.05; P = 0.008) and female sex (OR = 2.29, 95% CI = 1.39-3.754; P = 0.001) were independent predictors of HBV vaccination. The MMC group also achieved higher screening rates for HAV (97.6% vs 76.4%, P < 0.001) and HBV (96.1% vs 28.8%, P < 0.001) and a greater proportion initiated HCV treatment (95.8% vs 24.4%, P < 0.001), although these treatment initiation differences may be partly attributable to changes in national guidelines and payor restrictions between study periods. A trend toward improved SVR rates was also observed (80.6% vs 68.9%, P = 0.06). The specialty pharmacy prescription retention rate in the MMC group was 81.0%. In a setting where HAV and HBV vaccination guidelines remained consistent over time, the pharmacist-led MMC model was associated with higher vaccination and screening rates compared with the traditional care model, and these associations remained robust after adjustment for age, sex, genotype, and fibrosis stage. The model may have contributed to increased treatment initiation during a period of evolving HCV treatment guidelines. These findings support the potential value of pharmacist-led collaborative care agreements in delivering comprehensive HCV management during a period of evolving HCV treatment guidelines. These findings support the potential value of pharmacist-led collaborative care agreements in delivering comprehensive HCV management."
+    }
+   ]
+  },
+  {
+   "id": "CDC-OCC-003",
+   "source": "CDC",
+   "title": "CDC Guidelines for Infection Control in Healthcare Personnel",
+   "year": "2019",
+   "page_url": "https://www.cdc.gov/infectioncontrol/guidelines/healthcare-personnel/",
+   "pdf_url": "https://www.cdc.gov/infectioncontrol/guidelines/healthcare-personnel/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "occupational_safety",
+   "priority": "high",
+   "sha256": "4235c5018c7dd78f6c8ac89502fec781b9701a41bde04b3466df065f47801592",
+   "size_bytes": 3834,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3834,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Impact of a pharmacist-led hepatitis C clinic on hepatitis A and B vaccination rates and treatment outcomes: A retrospective cohort study. Hepatitis C virus (HCV) affects approximately 2.4 million people in the United States, with Kentucky having one of the highest HCV infection rates. The Centers for Disease Control and Prevention (CDC) recommend that all patients diagnosed with HCV be screened and vaccinated as appropriate for hepatitis A virus (HAV) and hepatitis B virus (HBV). Despite these long-standing recommendations, vaccination rates remain below target goals. To evaluate the impact of a pharmacist-led Medication Management Clinic (MMC) on HAV and HBV vaccination rates and other treatment outcomes in patients diagnosed with HCV compared with a traditional care model. This retrospective cohort study compared patients diagnosed with HCV treated through a pharmacist-led MMC between August 1, 2022, and February 28, 2024, with those treated through traditional care between August 1, 2016, and February 28, 2018. Primary outcomes included HAV and HBV vaccination initiation rates among eligible patients. Secondary outcomes included screening rates for HAV and HBV, HCV treatment completion, sustained virologic response (SVR), and specialty pharmacy prescription retention. Logistic regression was performed to assess the relationship between vaccination rates and type of care received (traditional care vs MMC), adjusting for baseline demographic and clinical factors, including, age, sex, HCV genotype, and fibrosis stage. Adjusted odds ratios (aORs) with 95% CIs were calculated for HAV and HBV initiation. The study included 330 MMC patients and 250 traditional care patients. Among eligible patients, HAV vaccination rates were higher in the MMC group (33.3% vs 22.6%, P = 0.02; unadjusted OR = 1.71, 95% CI = 1.11-2.65). After adjusting for age, sex, genotype, and fibrosis stage, patients in the traditional care group were less likely to receive HAV compared with patients in the MMC group (aOR = 0.569, 95% CI = 0.362-0.893; P = 0.014). Similarly, HBV vaccination rates were higher in the MMC group (36.6% vs 23.7%, P = 0.01; unadjusted OR = 1.84, 95% CI = 1.15-2.94). In the adjusted analysis, patients in the MMC group were more likely to receive HBV compared with patients in the traditional care group (aOR = 1.85, 95% CI = 1.14-3.00; P = 0.013). Additionally, older age (OR = 1.03 per year, 95% CI = 1.01-1.05; P = 0.008) and female sex (OR = 2.29, 95% CI = 1.39-3.754; P = 0.001) were independent predictors of HBV vaccination. The MMC group also achieved higher screening rates for HAV (97.6% vs 76.4%, P < 0.001) and HBV (96.1% vs 28.8%, P < 0.001) and a greater proportion initiated HCV treatment (95.8% vs 24.4%, P < 0.001), although these treatment initiation differences may be partly attributable to changes in national guidelines and payor restrictions between study periods. A trend toward improved SVR rates was also observed (80.6% vs 68.9%, P = 0.06). The specialty pharmacy prescription retention rate in the MMC group was 81.0%. In a setting where HAV and HBV vaccination guidelines remained consistent over time, the pharmacist-led MMC model was associated with higher vaccination and screening rates compared with the traditional care model, and these associations remained robust after adjustment for age, sex, genotype, and fibrosis stage. The model may have contributed to increased treatment initiation during a period of evolving HCV treatment guidelines. These findings support the potential value of pharmacist-led collaborative care agreements in delivering comprehensive HCV management during a period of evolving HCV treatment guidelines. These findings support the potential value of pharmacist-led collaborative care agreements in delivering comprehensive HCV management."
+    }
+   ]
+  },
+  {
+   "id": "CDC-SURV-003",
+   "source": "CDC",
+   "title": "Syndromic Surveillance BioSense Platform Guidance",
+   "year": "2023",
+   "page_url": "https://www.cdc.gov/nssp/biosense/",
+   "pdf_url": "https://www.cdc.gov/nssp/biosense/",
+   "license": "CDC",
+   "commercial_use": "allowed",
+   "clinical_domain": "public_health_general",
+   "priority": "medium",
+   "sha256": "d5fb2ddbbb1c9b103e9fcca06fee1ce5fdce99078164d31c7bf0c07fc1806967",
+   "size_bytes": 723,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 723,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Syndromic Surveillance BioSense Platform Guidance Source: CDC Year: 2023 Domain: public_health_general License: CDC Available at: https://www.cdc.gov/nssp/biosense/ This is a citation reference for the CDC guideline 'Syndromic Surveillance BioSense Platform Guidance' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: public_health_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-FOOD-001",
+   "source": "CDC",
+   "title": "Foodborne Outbreak Response Reporting Manual",
+   "year": "2022",
+   "page_url": "https://www.cdc.gov/foodsafety/outbreaks/investigating-outbreaks/index.html",
+   "pdf_url": "https://www.cdc.gov/foodsafety/outbreaks/investigating-outbreaks/index.html",
+   "license": "CDC",
+   "commercial_use": "allowed",
+   "clinical_domain": "cd_control_outbreak",
+   "priority": "medium",
+   "sha256": "17020e00003d630f5fd8861a5f841504c6def91f281c6905dea07be95c44ce03",
+   "size_bytes": 2110,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2110,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Isolation of Salmonella from alfalfa seed and demonstration of impaired growth of heat-injured cells in seed homogenates. Three major foodborne outbreaks of salmonellosis in 1998 and 1999 were linked to the consumption of raw alfalfa sprouts. In this report, an improved method is described for isolation of Salmonella from alfalfa seed lots, which had been implicated in these outbreaks. From each seed lot, eight samples each containing 25 g of seed were tested for the presence of Salmonella by the US FDA Bacteriological Analytical Manual (BAM) procedure and by a modified method applying two successive pre-enrichment steps. Depending on the seed lot, one to four out of eight samples tested positive for Salmonella by the standard procedure and two to seven out of eight samples tested positive by the modified method. Thus, the use of two consecutive pre-enrichment steps led to a higher detection rate than a single pre-enrichment step. This result indirectly suggested that Salmonella cells on contaminated seeds might be injured and failed to fully resuscitate in pre-enrichment broth containing seed components during the first 24 h of incubation. Responses of heat-injured Salmonella cells grown in buffered peptone water (BPW) and in three alfalfa seed homogenates were investigated. For preparation of seed homogenates, 25 g of seeds were homogenized in 200 ml of BPW using a laboratory Stomacher and subsequently held at 37 degrees C for 24 h prior to centrifugation and filtration. While untreated cells grew at about the same rate in BPW and in seed homogenates, heat-injured cells (52 degrees C, 10 min) required approximately 0.5 to 4.0 h longer to resuscitate in seed homogenates than in BPW. This result suggests that the alfalfa seed components or fermented metabolites from native bacteria hinder the repair and growth of heat-injured cells. This study also shows that an additional pre-enrichment step increases the frequency of isolation of Salmonella from naturally contaminated seeds, possibly by alleviating the toxic effect of seed homogenates on repair or growth of injured cells."
+    }
+   ]
+  },
+  {
+   "id": "CDC-BSL-001",
+   "source": "CDC",
+   "title": "Biosafety in Microbiological and Biomedical Laboratories BMBL Sixth Edition",
+   "year": "2020",
+   "page_url": "https://www.cdc.gov/labs/BMBL.html",
+   "pdf_url": "https://www.cdc.gov/labs/BMBL.html",
+   "license": "CDC",
+   "commercial_use": "allowed",
+   "clinical_domain": "cd_control_ipc",
+   "priority": "medium",
+   "sha256": "571c82754e7920fcad44041b23460ca9aac6137ca4ae28744e184cb30f5b319e",
+   "size_bytes": 761,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 761,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Biosafety in Microbiological and Biomedical Laboratories BMBL Sixth Edition Source: CDC Year: 2020 Domain: cd_control_ipc License: CDC Available at: https://www.cdc.gov/labs/BMBL.html This is a citation reference for the CDC guideline 'Biosafety in Microbiological and Biomedical Laboratories BMBL Sixth Edition' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cd_control_ipc. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CDC-TROP-001",
+   "source": "CDC",
+   "title": "Travelers Health Yellow Book",
+   "year": "2024",
+   "page_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/table-of-contents",
+   "pdf_url": "https://wwwnc.cdc.gov/travel/yellowbook/2024/table-of-contents",
+   "license": "US Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "tropical_diseases",
+   "priority": "high",
+   "sha256": "40d8e6e9298ad0b4f17cabd7e0b204fbd076516cf6c47d86f5177b55a2a61901",
+   "size_bytes": 3168,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3142,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Traveling Safely with Infants and Children Children increasingly are traveling and living outside of their home countries. Although data about the incidence of pediatric illnesses associated with international travel are limited, the risks that children face when traveling are, with a few caveats discussed below, largely similar to those faced by their adult travel companions. The most commonly reported health problems among child travelers are: Dermatologic conditions, including animal and arthropod bites, cutaneous larva migrans, and sunburn; Diarrheal illnesses; Respiratory disorders; Systemic febrile illnesses, especially malaria. Motor vehicle and water-related injuries, including drowning, are other major health and safety concerns for child travelers. See Box 6.3.1 for recommendations on assessing and preparing children for planned international travel. Box 6.3.1. ASSESSING AND PREPARING CHILDREN FOR INTERNATIONAL TRAVEL: A CHECKLIST FOR HEALTHCARE PROFESSIONALS ★: □. Review routine childhood vaccinations. The pre-travel visit is an opportunity to ensure that children are up to date on their routine vaccinations. Some routine vaccines, such as measles-mumps-rubella (MMR) or hepatitis A, may need to be given earlier than routinely recommended. □. Review the need for travel-related vaccines. □. Review the need for travel-related medications (malaria chemoprophylaxis, medication to prevent altitude illness, anti-diarrheal medication). □. Assess all anticipated travel-related activities. □. Provide preventive counseling and interventions tailored to specific risks, including special travel preparations and any treatment required for infants and children with underlying health conditions, chronic diseases, or immunocompromising conditions. □. Discuss how to establish a plan of where and how to seek medical care while traveling and discuss the need for travel health insurance. □. Encourage caregivers to carry an adequate supply of medications for children who require medications to manage chronic health conditions. □. Consider providing counseling on the following topics for adolescents traveling in a student group or program: Drug and alcohol use. Management and empiric treatment of common travel-related illnesses. Risks of sexually transmitted infections and sexual assault to include access to emergency contraception. Personal safety and security, to include enrollment in the U.S. State Department STEP program. Anticipating healthcare needs for chronic health conditions, including mental health conditions, particularly during extended periods of travel. □. Give special consideration to travelers visiting friends and relatives in low- and middle-income countries and assess risks for malaria, intestinal parasites, and tuberculosis. □. Consider advising adults traveling with children and older children to take a course in basic first aid before travel. □. Consider advising swimming lessons for non-swimmers planning travel near oceans or other bodies of water. Recognize that lifeguards may not be present. □. Discuss road safety, including helmets and car seats, for infants and children."
+    }
+   ]
+  },
+  {
+   "id": "CDC-MERCURY-001",
+   "source": "CDC",
+   "title": "CDC ATSDR mercury toxicity case studies environmental medicine",
+   "year": "2014",
+   "page_url": "https://www.atsdr.cdc.gov/csem/mercury/",
+   "pdf_url": "https://www.atsdr.cdc.gov/csem/mercury/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "lab_toxicology",
+   "priority": "medium",
+   "sha256": "0ec68e247cef1c4286fe921d8ca6a9d856a659d2d9ba7353371612f456fd2ad8",
+   "size_bytes": 639,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 639,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Medical toxicology case presentations: to chelate or not to chelate, is that the question? Four case studies described in this article were presented to a panel of physicians participating in the ACMT \"Use and Misuse of Metal Chelation Therapy\" Symposium in February 2012. The individuals who participated in the panel are listed in the appendix. These cases highlight some of the practical questions facing medical providers when issues of metal toxicity and its treatment arise. Medical toxicologists are valuable resources for information, public debate, consultation, and treatment of patients with concerns about heavy metal exposure."
+    }
+   ]
+  },
+  {
+   "id": "CDC-CO-001",
+   "source": "CDC",
+   "title": "CDC carbon monoxide poisoning carboxyhemoglobin testing",
+   "year": "2018",
+   "page_url": "https://www.cdc.gov/co/guidelines.htm",
+   "pdf_url": "https://www.cdc.gov/co/guidelines.htm",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "lab_toxicology",
+   "priority": "high",
+   "sha256": "11e39ee0bd2ce95014e33fc2fba71691f27ee67f74e9a2760e8c08ba4506ddc7",
+   "size_bytes": 1624,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1624,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Two episodes of acute illness in a machine shop. Following an explosion in a machine shop and temporary plant closure, on the day the plant returned to full operations a degreaser malfunctioned. Workers in the assembly room were exposed to trichloroethylene levels later estimated to have exceeded 220 ppm (OSHA PEL 100 ppm). The plant was evacuated and the degreaser taken out of operation. Blood testing for carbon monoxide (CO) on five employees found carboxyhemoglobin levels in excess of normal. The plant reopened the following morning. Over the next two weeks, 15 employees were seen by the plant nurses for similar complaints; although all returned to work, their carboxyhemoglobin levels, later found to be inaccurate, were reported by a local medical clinic to range from 13.7 to 20.0 percent. At the end of the second week, another outbreak of illness occurred, but carboxyhemoglobin, trichloroethylene, fluorocarbons, and methylene chloride were not elevated in all 17 persons tested; plant-wide monitoring for CO found no elevated levels. During the first outbreak of illness, cases were 2.26 times as likely to have entered the assembly room as noncases. During the second outbreak, cases were no more likely than noncases to have entered the assembly room. We believe the explosion, earlier toxic exposures and illness, and the misleading blood test results led to plant-wide anxiety which culminated in a collective stress reaction and the second outbreak. An open meeting with all employees, informing them of our findings, provided reassurance and no further episodes of illness occurred in this workforce."
     }
    ]
   }

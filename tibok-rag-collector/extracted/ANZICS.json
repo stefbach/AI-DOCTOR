@@ -1,7 +1,7 @@
 {
  "source": "ANZICS",
  "generated_at": "2026-05-09T14:56:43Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "ANZICS-FAMILY-001",
@@ -174,6 +174,31 @@
     {
      "chunk_index": 7,
      "content": "literature on the Lazarus phenomenon. The most common mechanisms which could lead to spontaneous recovery of vital functions were discussed. Additionally, according to the authors, some important and interesting cases of patients who “returned” to life were also presented. In resuscitation proceedings, especially at the level of advanced activities, in order to avoid mistakes, great emphasis should be placed on the analysis and exclusion/treatment of the so-called reversible causes of cardiac arrest (ERC 2021). The analysis of the literature on the Lazarus phenomenon showed that the presence of a non-shockable rhythm [ , , ] during CPR did not preclude autoresuscitation [ , , ]. M. Grześkowiak showed the presence of 79% of non-shockable rhythms among all cases of the Lazarus phenomenon described so far. A systematic review of case reports of the Lazarus Phenomenon by M. Grześkowiak revealed a significant correlation between the duration of CPR and survival, with the Lazarus Phenomenon occurring more often among patients who were resuscitated for a longer period of time. Such a prolonged resuscitation lasting at least 30 min increases the patient’s chances of autoresuscitation. Based on the data from the literature, it can be assumed that the longer the cardiopulmonary resuscitation, the more often autoresuscitation can occur [ ]. However, Gordon et al. did not provide a criterion for the duration of resuscitation and the subsequent occurrence of the Lazarus phenomenon [ ]. The Lazarus phenomenon may also be caused by a delay in the action of drugs administered intravenously to peripheral vessels; therefore, in a patient with a central venous cannula, drugs should be administered via this route. The intraosseous route has a similar advantage over the supply of drugs to peripheral vessels. All 76 reported cases of Lazarus Syndrome between 1982 and 2022 are summarized in by gender, age, ECG rhythm, CPR time, time to autoresuscitation, and survival. 11. Conclusions (1) Patients who have died after cessation of resuscitation should continue to be monitored (minimum ECG) for at least 10 min. (2) During resuscitation, overventilation of the patient should be avoided due to the high risk of hyperinflation, which is mentioned as one of the causes of the Lazarus phenomenon. (3) Continuing resuscitation without confirmation of myocardial contractility by echocardiography—which is recommended in the ERC 2021 guidelines as well as in the American Heart Association (AHA) 2020 guidelines—should not be abandoned too hastily. (4) After prolonged CPR of at least 30 min, the patient’s chances of autoresuscitation are increased. It is especially common in the presence of non-shockable rhythms. (5) The advanced age of the patient does not preclude the occurrence of the Lazarus phenomenon. (6) To increase the awareness of the medical community, information about the phenomenon of Lazarus should be disseminated. (7) We encourage you to report cases of the Lazarus phenomenon—this will allow you to create your own database and analyze the likely causes, which can be used to create guidelines to avoid premature pronouncement of death. (8) At the current state of knowledge, the reasons for this phenomenon are not fully known, and continued follow-up and research are essential. (9) The current scientific data presenting cases of Lazarus syndrome in given years do not constitute the final number of occurrences of autoresuscitation. Most likely, the presence of this phenomenon is more common. The extent of spontaneous recovery after death, along with the reporting of this phenomenon, still remains unknown."
+    }
+   ]
+  },
+  {
+   "id": "ANZICS-REVERSAL-001",
+   "source": "ANZICS",
+   "title": "ANZICS clinical practice guideline anticoagulant reversal in critical care",
+   "year": "2022",
+   "page_url": "https://www.anzics.com.au/clinical-resources-2/",
+   "pdf_url": "https://www.anzics.com.au/clinical-resources-2/",
+   "license": "ANZICS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_thrombosis",
+   "priority": "medium",
+   "sha256": "1708d59153cbbacbc08bdf7c3835cacd57c553adadb4d8c8bf78f2e7032d212c",
+   "size_bytes": 795,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 795,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ANZICS clinical practice guideline anticoagulant reversal in critical care Source: ANZICS Year: 2022 Domain: hematology_thrombosis License: ANZICS Available at: https://www.anzics.com.au/clinical-resources-2/ This is a citation reference for the ANZICS guideline 'ANZICS clinical practice guideline anticoagulant reversal in critical care' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: hematology_thrombosis. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

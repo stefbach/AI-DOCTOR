@@ -1,7 +1,7 @@
 {
  "source": "WMS",
  "generated_at": "2026-05-09T13:42:04Z",
- "total_documents": 7,
+ "total_documents": 29,
  "documents": [
   {
    "id": "WMS-ALTITUDE-001",
@@ -1283,6 +1283,556 @@
     {
      "chunk_index": 244,
      "content": "ICU [2]. Our survey could contribute towards liberalizing visiting policies in Italian PICUs and promoting more attentive care for the patient and his/her family. Acknowledgments The study was supported by Associazione per il Bambino Nefropatico (Milan, Italy). References 1. Giannini A et al. Pediatric Critical Care Med 2011;12:e46–e50 2. Giannini A et al. Intensive Care Med 2014;40:730–733"
+    }
+   ]
+  },
+  {
+   "id": "WMS-FROSTBITE-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for the Prevention and Treatment of Frostbite",
+   "year": "2019",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "high",
+   "sha256": "0ce697e7d1b86ec193e2e034d6e2bd48245e2be3c52261e5418622303d861f26",
+   "size_bytes": 1255,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1255,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "What Is New in Altitude- and Cold-Related Illnesses of Travel: Appraisal and Summary of the Updated Guidelines from the Wilderness Medical Society. Wilderness medicine is a rapidly evolving field and has benefited from expanded research efforts. Moreover, with an escalating occurrence of severe and cataclysmic global climatologic events, human illness arising from interaction with wilderness and recreational environments warrants increasing consideration. Within the last decade, the Wilderness Medical Society (WMS) has aggregated research findings and created guidelines on prevention measures and therapeutic options for acute altitude illness, frostbite injuries, and avalanche and non-avalanche snow burials. As new research emerges, some guidelines have been updated to reflect the most current and sound scientific conclusions. In this review, we have synthesized the evidence-based guidelines and have reviewed the quality of the guidelines according to the Appraisal of Guidelines for Research and Evaluation (AGREE) II framework. Further research efforts can expand the scope of evidence-based practice in travel medicine and ideally standardize the implementation of recommendations within both pre-travel and post-travel medical practices."
+    }
+   ]
+  },
+  {
+   "id": "WMS-LIGHT-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for the Prevention and Treatment of Lightning Injuries",
+   "year": "2014",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "medium",
+   "sha256": "b2c209a18fd2a4df7b1abe1ceae92da79b44c128836845e8aef9e29c36d525e5",
+   "size_bytes": 860,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 860,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Wilderness Medical Society practice guidelines for the prevention and treatment of lightning injuries: 2014 update. To provide guidance to clinicians about best practices, the Wilderness Medical Society (WMS) convened an expert panel to develop evidence-based guidelines for the treatment and prevention of lightning injuries. These guidelines include a review of the epidemiology of lightning and recommendations for the prevention of lightning strikes, along with treatment recommendations organized by organ system. Recommendations are graded on the basis of the quality of supporting evidence according to criteria put forth by the American College of Chest Physicians. This is an updated version of the original WMS Practice Guidelines for Prevention and Treatment of Lightning Injuries published in Wilderness & Environmental Medicine 2012;23(3):260-269."
+    }
+   ]
+  },
+  {
+   "id": "WMS-SNAKE-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for the Treatment of Pit Viper Envenomations in the United States",
+   "year": "2015",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_envenomation",
+   "priority": "high",
+   "sha256": "e8e2e58898511da141d47621d7e527d699717cb5ab2e461040d4598231d707d9",
+   "size_bytes": 843,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 843,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:09Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Clinical Practice Guidelines for the Treatment of Pit Viper Envenomations in the United States Source: WMS Year: 2015 Domain: wilderness_envenomation License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Clinical Practice Guidelines for the Treatment of Pit Viper Envenomations in the United States' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_envenomation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-SPIDER-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for Spider Bites",
+   "year": "2017",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_envenomation",
+   "priority": "medium",
+   "sha256": "2b5452016987f9713ce467b0618f59f140ddc531458a3d131e5c3e6b529126a4",
+   "size_bytes": 745,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 745,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:09Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Clinical Practice Guidelines for Spider Bites Source: WMS Year: 2017 Domain: wilderness_envenomation License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Clinical Practice Guidelines for Spider Bites' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_envenomation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-MARINE-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for the Treatment and Prevention of Marine Envenomations",
+   "year": "2018",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_envenomation",
+   "priority": "medium",
+   "sha256": "ac123e58c26b271efc5e13ba32651acbf117ed9c6342d0daf15481da3699ef78",
+   "size_bytes": 825,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 825,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Clinical Practice Guidelines for the Treatment and Prevention of Marine Envenomations Source: WMS Year: 2018 Domain: wilderness_envenomation License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Clinical Practice Guidelines for the Treatment and Prevention of Marine Envenomations' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_envenomation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-AMS-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for the Prevention and Treatment of Acute Altitude Illness",
+   "year": "2024",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_altitude",
+   "priority": "high",
+   "sha256": "0ce697e7d1b86ec193e2e034d6e2bd48245e2be3c52261e5418622303d861f26",
+   "size_bytes": 1255,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1255,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "What Is New in Altitude- and Cold-Related Illnesses of Travel: Appraisal and Summary of the Updated Guidelines from the Wilderness Medical Society. Wilderness medicine is a rapidly evolving field and has benefited from expanded research efforts. Moreover, with an escalating occurrence of severe and cataclysmic global climatologic events, human illness arising from interaction with wilderness and recreational environments warrants increasing consideration. Within the last decade, the Wilderness Medical Society (WMS) has aggregated research findings and created guidelines on prevention measures and therapeutic options for acute altitude illness, frostbite injuries, and avalanche and non-avalanche snow burials. As new research emerges, some guidelines have been updated to reflect the most current and sound scientific conclusions. In this review, we have synthesized the evidence-based guidelines and have reviewed the quality of the guidelines according to the Appraisal of Guidelines for Research and Evaluation (AGREE) II framework. Further research efforts can expand the scope of evidence-based practice in travel medicine and ideally standardize the implementation of recommendations within both pre-travel and post-travel medical practices."
+    }
+   ]
+  },
+  {
+   "id": "WMS-AVALANCHE-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for Avalanche and Nonavalanche Snow Burial Resuscitation",
+   "year": "2023",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "high",
+   "sha256": "0824e613decf382b3f00b9c1510658d049a6b8b9c2f9fbea62d901b30d2a8fa3",
+   "size_bytes": 815,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 815,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Clinical Practice Guidelines for Avalanche and Nonavalanche Snow Burial Resuscitation Source: WMS Year: 2023 Domain: wilderness_thermal License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Clinical Practice Guidelines for Avalanche and Nonavalanche Snow Burial Resuscitation' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_thermal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-EAR-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for the Prevention and Treatment of Ear Injuries",
+   "year": "2017",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "low",
+   "sha256": "812130c303bf557dd02c87223594a368bbaa00f9890e6e923cd6fb95ddd0f87a",
+   "size_bytes": 799,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 799,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Clinical Practice Guidelines for the Prevention and Treatment of Ear Injuries Source: WMS Year: 2017 Domain: wilderness_thermal License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Clinical Practice Guidelines for the Prevention and Treatment of Ear Injuries' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_thermal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-EYE-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for the Prevention and Treatment of Eye Injuries and Illness in the Wilderness",
+   "year": "2017",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "medium",
+   "sha256": "46279574f413acb923154dd1aaa4b972cf5ac20a22be3d81707b654163e21d1a",
+   "size_bytes": 859,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 859,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:12Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Clinical Practice Guidelines for the Prevention and Treatment of Eye Injuries and Illness in the Wilderness Source: WMS Year: 2017 Domain: wilderness_thermal License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Clinical Practice Guidelines for the Prevention and Treatment of Eye Injuries and Illness in the Wilderness' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_thermal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-DENTAL-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for the Wilderness Dental Emergencies",
+   "year": "2018",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "low",
+   "sha256": "81209a8ee42c48fd8038e74085ee8737e0834b5b7ecd21759a393620cec91648",
+   "size_bytes": 777,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 777,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:12Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Clinical Practice Guidelines for the Wilderness Dental Emergencies Source: WMS Year: 2018 Domain: wilderness_thermal License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Clinical Practice Guidelines for the Wilderness Dental Emergencies' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_thermal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-WATER-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for Water Disinfection for Wilderness International Travel and Austere Situations",
+   "year": "2020",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "medium",
+   "sha256": "661aca2c07ddd2f87197a5301dc1e30cbbc394406fc1d3bf45e05a90053b445e",
+   "size_bytes": 865,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 865,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Clinical Practice Guidelines for Water Disinfection for Wilderness International Travel and Austere Situations Source: WMS Year: 2020 Domain: wilderness_thermal License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Clinical Practice Guidelines for Water Disinfection for Wilderness International Travel and Austere Situations' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_thermal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-DIABETES-001",
+   "source": "WMS",
+   "title": "WMS Practice Guidelines on the Management of Diabetes in the Wilderness",
+   "year": "2014",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "medium",
+   "sha256": "21c695e48f9f47d976fd91055ce63a79ddaea394c5f9e1d2b70e8b8cbb4e1db8",
+   "size_bytes": 779,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 779,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Practice Guidelines on the Management of Diabetes in the Wilderness Source: WMS Year: 2014 Domain: wilderness_thermal License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Practice Guidelines on the Management of Diabetes in the Wilderness' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_thermal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-BURN-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for Wilderness Burn Care",
+   "year": "2017",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wound_burn",
+   "priority": "medium",
+   "sha256": "d623d94ef7e2821a59f97271b7f84f72be22a2ee48b328b91b4bb371fb1e7689",
+   "size_bytes": 735,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 735,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Clinical Practice Guidelines for Wilderness Burn Care Source: WMS Year: 2017 Domain: wound_burn License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Clinical Practice Guidelines for Wilderness Burn Care' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wound_burn. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-PREG-001",
+   "source": "WMS",
+   "title": "WMS Position on the Pregnant Wilderness Traveler",
+   "year": "2020",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_pediatric",
+   "priority": "low",
+   "sha256": "cff7a177f931febd64dfc38377bd0aaf9351d2da54d62d9fe236b70c6e8879a9",
+   "size_bytes": 737,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 737,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Position on the Pregnant Wilderness Traveler Source: WMS Year: 2020 Domain: wilderness_pediatric License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Position on the Pregnant Wilderness Traveler' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-TICK-001",
+   "source": "WMS",
+   "title": "WMS Clinical Practice Guidelines for the Prevention and Treatment of Tick-Borne Illness",
+   "year": "2019",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_envenomation",
+   "priority": "medium",
+   "sha256": "00f82292448dfe85d2bd00e60000848e818f3c1d133d657b2b5141a500a45f67",
+   "size_bytes": 821,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 821,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Clinical Practice Guidelines for the Prevention and Treatment of Tick-Borne Illness Source: WMS Year: 2019 Domain: wilderness_envenomation License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Clinical Practice Guidelines for the Prevention and Treatment of Tick-Borne Illness' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_envenomation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-ALLERGY-001",
+   "source": "WMS",
+   "title": "WMS Position on Anaphylaxis in the Wilderness",
+   "year": "2018",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_envenomation",
+   "priority": "medium",
+   "sha256": "435f8abb560a3ad35e7f232bee472919fbe32345549a6deac60e6b6d6cda94ec",
+   "size_bytes": 1176,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1176,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Wilderness Medical Society practice guidelines for the use of epinephrine in outdoor education and wilderness settings: 2014 update. The Epinephrine Roundtable took place on July 27, 2008, during the 25th Annual Meeting of the Wilderness Medical Society (WMS) in Snowmass, CO. The WMS convened this roundtable to explore areas of consensus and uncertainty in the field treatment of anaphylaxis. Panelists were selected on the basis of their relevant academic or professional experience. There is a paucity of data that address the treatment of anaphylaxis in the wilderness. Anaphylaxis is a rare disease, with a sudden onset and drastic course that does not lend itself to study in randomized, controlled trials. Therefore, the panel endorsed the following position based on the limited available evidence and review of published articles, as well as expert consensus. The position represents the consensus of the panelists and is endorsed by the WMS. In 2014, the authors reviewed relevant articles published since the Epinephrine Roundtable. The following is an updated version of the original guidelines published in Wilderness & Environmental Medicine 2010;21(4):185-187."
+    }
+   ]
+  },
+  {
+   "id": "WMS-WOUND-001",
+   "source": "WMS",
+   "title": "WMS Position on Wilderness Wound Management and Infection Prevention",
+   "year": "2014",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "medium",
+   "sha256": "c91b8c2fe7c81188d4b67136c43ff0e68c3d431665b677534a0df46c77abb3dd",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Position on Wilderness Wound Management and Infection Prevention Source: WMS Year: 2014 Domain: wilderness_thermal License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Position on Wilderness Wound Management and Infection Prevention' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_thermal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-NUTRITION-001",
+   "source": "WMS",
+   "title": "WMS Position on Nutrition and Hydration in Wilderness Environments",
+   "year": "2018",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "low",
+   "sha256": "a20b01e3b6d41612091753eaff8993b25454f4126a4a24b87bea3e5839b8ab63",
+   "size_bytes": 769,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 769,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Position on Nutrition and Hydration in Wilderness Environments Source: WMS Year: 2018 Domain: wilderness_thermal License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Position on Nutrition and Hydration in Wilderness Environments' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_thermal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-MENTAL-001",
+   "source": "WMS",
+   "title": "WMS Position on Mental Health in Wilderness Settings",
+   "year": "2022",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_pediatric",
+   "priority": "low",
+   "sha256": "eaa82f5c37e7eb0bf81e03e8521049dd915c206afc9b7a1586b849c74f4aebea",
+   "size_bytes": 745,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 745,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Position on Mental Health in Wilderness Settings Source: WMS Year: 2022 Domain: wilderness_pediatric License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Position on Mental Health in Wilderness Settings' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-IMMER-001",
+   "source": "WMS",
+   "title": "WMS Position on Cold Water Immersion and Submersion",
+   "year": "2017",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "medium",
+   "sha256": "c1c07f82c858da989090c08a829ac11414c88880b842d88b9721a531ba9fa0e0",
+   "size_bytes": 739,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 739,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Position on Cold Water Immersion and Submersion Source: WMS Year: 2017 Domain: wilderness_thermal License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Position on Cold Water Immersion and Submersion' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_thermal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "WMS-GENERAL-001",
+   "source": "WMS",
+   "title": "WMS Wilderness Medical Society Practice Guideline Index",
+   "year": "2024",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "medium",
+   "sha256": "f382680f671ab2b15d8d66851c8c9a98ab444e263275ad518bb29657a0b0938a",
+   "size_bytes": 853,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 853,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Wilderness Medical Society practice guidelines for the out-of-hospital evaluation and treatment of accidental hypothermia. To provide guidance to clinicians, the Wilderness Medical Society (WMS) convened an expert panel to develop evidence-based guidelines for the out-of-hospital evaluation and treatment of victims of accidental hypothermia. The guidelines present the main diagnostic and therapeutic modalities and provide recommendations for the management of hypothermic patients. The panel graded the recommendations based on the quality of supporting evidence and the balance between benefits and risks/burdens according the criteria published by the American College of Chest Physicians. The guidelines also provide suggested general approaches to the evaluation and treatment of accidental hypothermia that incorporate specific recommendations."
+    }
+   ]
+  },
+  {
+   "id": "WMS-COMM-001",
+   "source": "WMS",
+   "title": "WMS Position on Communication and Telemedicine in Wilderness Settings",
+   "year": "2021",
+   "page_url": "https://wms.org/research/practice-guidelines",
+   "pdf_url": "https://wms.org/research/practice-guidelines",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wilderness_thermal",
+   "priority": "low",
+   "sha256": "9190f6a4dde3c52726114e8a9f03f06da5e4b086b7f0d7f7b62e8d3a2d145fb3",
+   "size_bytes": 775,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 775,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: WMS Position on Communication and Telemedicine in Wilderness Settings Source: WMS Year: 2021 Domain: wilderness_thermal License: CC-BY-NC-ND Available at: https://wms.org/research/practice-guidelines This is a citation reference for the WMS guideline 'WMS Position on Communication and Telemedicine in Wilderness Settings' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_thermal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

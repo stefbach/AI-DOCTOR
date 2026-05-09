@@ -1,7 +1,7 @@
 {
  "source": "ABA",
  "generated_at": "2026-05-02T17:10:56Z",
- "total_documents": 8,
+ "total_documents": 9,
  "documents": [
   {
    "id": "ABA-001",
@@ -488,6 +488,31 @@
     {
      "chunk_index": 9,
      "content": "Stabilität der Wirbelsäule ist sehr früh (etwa ab der dritten Woche nach der Wirbelkörperfraktur) ein leichtes Ausdauertraining am Sitzfahrrad oder Gehen ohne Stöcke (und somit ohne Rotationskomponente der Wirbelsäule) möglich. Intensiveres Training oder Trainingsarten, welche Flexionsbewegungen der Wirbelsäule (z. B. Ergometertraining) beinhalten, sollten erst nach radiologisch verifizierter Frakturheilung (nach etwa drei bis vier Monaten) schmerzadaptiert durchgeführt werden. Ausdauersportarten mit Rotationskomponente der Wirbelsäule (z. B. Nordic Walking) wird ab sechs Monaten empfohlen. Bei ausgeprägter Belastungsdyspnoe sollte zusätzlich eine neuromuskuläre Elektrostimulation erfolgen [ ]. Ergänzend wird Krafttraining empfohlen, welches ebenfalls nach der medizinischen Trainingslehre dosiert wird und zweimal pro Woche stattfinden soll, mit einer Intensität 50–85 % des 1‑Wiederholungsmaximums bzw. 10–15 Wiederholungen [ ]. Nach einer osteoporotischen Wirbelkörperfraktur kann mit einem Krafttraining nach sechs Monaten begonnen werden. Ein spezifisches Krafttraining der Kniestrecker und/oder Kniebeuger ohne fortgeleitete Belastung der Wirbelsäule (z. B. mittels leg extension bzw. leg curl nach entsprechender Instruktion und unter Supervision) ist nach erfolgter Ödemresorption (ab circa sechs Wochen) möglich, unter Umständen schmerzabhängig bereits früher. Ergänzend zum Training ist aufgrund der verschiedenen möglichen metabolischen Veränderungen (z. B. Kachexie oder Adipositas) eine Ernährungsberatung indiziert [ , ]. Ein weiterer zentraler pneumologischer Aspekt ist die Atemphysiotherapie. Entspannungstechniken sind die Basis für das Atemtraining. Bei abnormer Hustenmechanik, beispielsweise durch Muskelschwäche, kann Sekret durch Lagerung, Atemtechniken wie autogene Drainage oder Huffing, sowie mit apparativen Hilfsmitteln (z. B. PEP oder Flutter) leichter mobilisiert werden. Die Sekretelimination hilft die Atemarbeit zu reduzieren, den Gasaustausch zu verbessern sowie Atelektasen und Infektionen zu verhindern. Bei reduzierter inspiratorischer Atemmuskelkraft sollte ein inspiratorisches Atemmuskeltraining erfolgen. Ein exspiratorisches Atemmuskeltraining kann insbesondere Fatigue reduzieren. Der dynamischen Überblähung kann durch exspiratorische Stenosetechniken (zB Lippenbremse), Flexions- und Expansionstechniken sowie segmentales Atmen entgegengewirkt werden [ , ]. Atemtherapeutische Techniken, welche Bewegungen des betroffenen Wirbelsäulensegments beinhalten (z. B. Flexionstechniken), empfehlen wir jedoch erst nach radiologisch verifizierter Frakturheilung anzuwenden (nach etwa drei bis vier Monaten). Zur pneumologischen Rehabilitation zählen weiters die Nikotinkarenz, ADL-Ökonomisierung (energiesparende Maßnahmen), Schulung bezüglich der Erkrankung (Erkennen von Verschlechterungszeichen, Handhabung von Medikamenten wie z. B. Inhalatoren oder Sauerstoff) sowie psychosoziale Unterstützung [ , ]. Conclusion Die pneumologischen Grunderkrankungen führen zu einer Veränderung der trabekulären und kortikalen Mikroarchitektur des Knochens und zu einer Verminderung von osteologischen Formations- und Resorptionsmarkern. Hyperkapnie, Azidose und Vitamin D‑Mangel können diesen Prozess beschleunigen und somit das individuelle Risiko für osteoporotische Fragilitätsfrakturen erhöhen. Eine Knochendichtemessung mit einem T‑Score < −2,5 ist ein Schwellenwert zur Diagnose der Osteoporose, die überwiegende Mehrzahl aller osteoporotischen Frakturen tritt bei einem T‑Score von > −2,5 auf. Eine niedrig-traumatische Fraktur in der Anamnese indiziert eine osteologische Therapie. Neben der Optimierung des Vitamin D‑Spiegels sind sämtliche in Österreich zur Behandlung der Osteoporose zugelassenen antiresorptiv oder anabol wirksamen Medikamente auch bei pneumologischen PatientInnen mit einem erhöhten Knochenbruchrisiko entsprechend der nationalen Erstattungskriterien indiziert."
+    }
+   ]
+  },
+  {
+   "id": "ABA-BURN-004",
+   "source": "ABA",
+   "title": "ABA Position on Outpatient Management of Minor Burns",
+   "year": "2023",
+   "page_url": "https://ameriburn.org/resources_factsheets/",
+   "pdf_url": "https://ameriburn.org/resources_factsheets/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wound_burn",
+   "priority": "medium",
+   "sha256": "3fe72492b9f352521d73a3c75933d70448693c06a2dff88485f3a79a67dcb08c",
+   "size_bytes": 724,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 724,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ABA Position on Outpatient Management of Minor Burns Source: ABA Year: 2023 Domain: wound_burn License: Proprietary Available at: https://ameriburn.org/resources_factsheets/ This is a citation reference for the ABA guideline 'ABA Position on Outpatient Management of Minor Burns' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wound_burn. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

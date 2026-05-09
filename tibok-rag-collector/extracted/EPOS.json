@@ -1,7 +1,7 @@
 {
  "source": "EPOS",
  "generated_at": "2026-05-09T13:26:07Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "EPOS-CRS-001",
@@ -90,6 +90,31 @@
     {
      "chunk_index": 3,
      "content": "CSO are being followed, get a more detailed view of the prescribing process by looking at barriers to implementing and following the guidelines, and how these barriers can be addressed to improve patient care. Additional topics that we hope to investigate further include how the use of biologic medications has influenced views and prescribing practices of otolaryngologists with respect to oral corticosteroids, and if operating room constraints have influenced biologic prescribing patterns. This study is not without limitations. The small response rate, while within norms in the literature, makes it challenging to generalize biologic prescribing habits to all Canadian rhinologists. The response rate of this survey was approximately 30%, with acceptable response rates for online surveys varying from 25% to 30% in the literature. The low response rate may also be due to the short response time. Given that these practices were evaluated via a survey, response bias may be present and therefore, our analysis may not be truly reflective of the current practices. Furthermore, our survey did not ask about the reasoning behind certain practices. Options for testing or access to different specialists may be limited across regions, which could influence the management strategy of different physicians. Some of these limitations may be addressed in future surveys. Lastly, our survey was focused primarily on rhinologists or those with a strong focus on rhinology in practice, but in the future, we hope to expand it to General Otolaryngologists to evaluate guideline adherence as prescribing of biologics expands. Conclusions The majority of Canadian rhinologists who responded to this survey follow some of the recommendations made by the Canadian guidelines and international guidelines [European Position Paper on Rhinosinusitis and Nasal Polyps (EPOS), European Forum for Research and Education in Allergy and Airway Diseases (EUFOREA)] regarding the initiation of biologic therapy for patients with CRS and the management of these patients. The low number of physicians referring patients with CRS who are on biologics to multidisciplinary clinics could be due to the lack of access to these clinics across the country, which creates a barrier to patient care. This study serves as a baseline for future studies on this topic as guidelines evolve. As our knowledge about biologics and CRSwNP improves, and with updated guidelines recently published, this survey should be expanded and repeated in the future to revaluate biologic prescribing practices in Canada."
+    }
+   ]
+  },
+  {
+   "id": "EPOS-CRS-002",
+   "source": "EPOS",
+   "title": "EPOS pocket guide for primary care management of rhinosinusitis",
+   "year": "2020",
+   "page_url": "https://epos2020.com/pocket-guide",
+   "pdf_url": "https://epos2020.com/pocket-guide",
+   "license": "EPOS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_rhinology",
+   "priority": "high",
+   "sha256": "fb44f0aff0f13de4785674e4b8b9a5494e31610fd24cdce4af038a21c68e00b3",
+   "size_bytes": 1631,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1631,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "EUFOREA summit in Brussels 2023: inspiring the future of allergy & respiratory care . In March 2023, the European Forum for Research and Education in Allergy and Airways diseases (EUFOREA) organized its bi-annual Summit in Brussels with expert panel members of EUFOREA, representatives of the EUFOREA patient advisory board, and the EUFOREA board and management teams. Its aim was to define the research, educational and advocacy initiatives to be developed by EUFOREA over the next 2 years until the 10th anniversary in 2025. EUFOREA is an international non-for-profit organization forming an alliance of all stakeholders dedicated to reducing the prevalence and burden of chronic allergic and respiratory diseases via research, education, and advocacy. Based on its medical scientific core competency, EUFOREA offers an evidence-supported platform to introduce innovation and education in healthcare leading to optimal patient care, bridging the gap between latest scientific evidence and daily practice. Aligned with the mission of improving health care, the expert panels of asthma, allergic rhinitis (AR), chronic rhinosinusitis (CRS) & European Position Paper on Rhinosinusitis and Nasal Polyps (EPOS), allergen immunotherapy (AIT) and paediatrics have proposed and elaborated a variety of activities that correspond to major unmet needs in the allergy and respiratory field. The current report provides a concise overview of the achievements, ambitions, and action plan of EUFOREA for the future, allowing all stakeholders in the allergy and respiratory field to be up-dated and inspired to join forces in Europe and beyond."
     }
    ]
   }

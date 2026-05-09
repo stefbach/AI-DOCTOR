@@ -1,7 +1,7 @@
 {
  "source": "ICH",
  "generated_at": "2026-05-09T13:52:07Z",
- "total_documents": 32,
+ "total_documents": 33,
  "documents": [
   {
    "id": "ICH-E14-001",
@@ -1820,6 +1820,31 @@
     {
      "chunk_index": 9,
      "content": "mechanisms, neuroprotection, neurorestoration, and symptom control ( ). Probably gene therapy is a history in the making and is in the beginning. It may be the case that in 30–50 years, novel, innovative, and highly effective treatment modalities for socially dangerous infections such as hepatitis C and HIV will have been discovered. Early diagnostics, using technologies such as updated lines of tumor markers and IoT monitoring technologies, and mass prevention will be the main strategies in oncology. Technological progress may also affect the treatment of depression, obsessive-compulsive disorder, and schizophrenia-like psychoses, probably along with the introduction of new psychotherapeutic modalities. While prevention is still under development, science may progress to a “magic pill,” like CRISPR technology, to keep us forever young. It is also an undoubtful wish that high-quality healthcare services will no longer be available only to those who can pay for them but to all who are in need ( ). Having said that, one major issue that should be addressed is ensuring a secure and ethical data-sharing culture. As big data brings big challenges, the key point is appropriate data sharing while fully respecting data privacy and, in parallel, maintaining the scientific utility of the data. Patients need to fully understand how their data will be used and by whom. Both legal and ethical considerations appear. For example, secondary use of data for research raises ethical issues that require identification, examination, and guidance. Probably a topic of data ethics is raised that may be defined as “studies and evaluates moral problems related to data (including generation, recording, curation, processing, dissemination, sharing, and use), algorithms (including AI, artificial agents, ML, and robots), and corresponding practices (including responsible innovation, programming, hacking, and professional codes), to formulate and support morally good solutions (e.g., right conduct or right values).” Additional challenges are data “ownership” (especially in a commercialized data world), trust, bias, group-level ethical harms, measures of accountability, the distinction between harm to data subjects resulting from the respective academic and commercial uses of big data, providing feedback to patients on unanticipated incidental findings, and data anonymization as a mechanism to share datasets, which removes the need to request the consent of the data subject. The European Data Protection Act is a starting step, but more needs to be done in terms of interpretation and implementation ( ). 5 Conclusion Nowadays, it is more than obvious that we are living in exciting times of rapid change in the pharma ecosystem. New promising technologies offer more options for better, safer, and more effective treatments, developed faster and with a more solid, data-driven and evidence-concrete approach to be brought to the patient. In challenging areas such as oncology and rare diseases, as well as in other fields such as cardiovascular diseases, therapeutic solutions are even more feasible to seek, moving toward the gap of unmet medical need. The business environment has been constantly undergoing changes, and new ways of doing business have appeared. It seems that with the growing increase in patient awareness and engagement, more than ever, these vast changes are going to conclude in augmenting benefits for the patient. 6 Limitations This study was not based on an exhaustive review of literature, but on literature that was considered important by the author for the current and future situation. Thus, its approach may be considered subjective. A further comprehensive review of the literature could provide a more global overview. Author contributions GA: Writing – original draft, Writing – review & editing."
+    }
+   ]
+  },
+  {
+   "id": "ICH-Q4-001",
+   "source": "ICH",
+   "title": "ICH Q4B Pharmacopoeial Texts Regulatory Acceptance",
+   "year": "2008",
+   "page_url": "https://www.ich.org/page/quality-guidelines",
+   "pdf_url": "https://www.ich.org/page/quality-guidelines",
+   "license": "ICH Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_regulatory_guidance",
+   "priority": "low",
+   "sha256": "b908f015d0f693b070d44275b6bb0e5670b62658c14f8da2cb032f759b8b47d0",
+   "size_bytes": 1847,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1847,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:06Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "International Conference on Harmonisation; guidance on Q4B Evaluation and Recommendation of Pharmacopoeial Texts for use in the International Conference on Harmonisation Regions; Annex 4C on Microbiological Examination of Nonsterile Products: Acceptance Criteria for Pharmaceutical Preparations and Substances for Pharmaceutical Use General Chapter; availability. Notice. The Food and Drug Administration (FDA) is announcing the availability of a guidance entitled \"Q4B Evaluation and Recommendation of Pharmacopoeial Texts for Use in the ICH Regions; Annex 4C: Microbiological Examination of Nonsterile Products: Acceptance Criteria for Pharmaceutical Preparations and Substances for Pharmaceutical Use General Chapter.\" The guidance was prepared under the auspices of the International Conference on Harmonisation of Technical Requirements for Registration of Pharmaceuticals for Human Use (ICH). The guidance provides the results of the ICH Q4B evaluation of the Microbiological Examination of Nonsterile Products: Acceptance Criteria for Pharmaceutical Preparations and Substances for Pharmaceutical Use General Chapter harmonized text from each of the three pharmacopoeias (United States, European, and Japanese) represented by the Pharmacopoeial Discussion Group (PDG). The guidance conveys recognition of the three pharmacopoeial methods by the three ICH regulatory regions and provides specific information regarding the recognition. The guidance is intended to recognize the interchangeability between the local regional pharmacopoeias, thus avoiding redundant testing in favor of a common testing strategy in each regulatory region. In the Federal Register of February 21, 2008 (73 FR 9575), FDA made available a guidance on the Q4B process entitled \"Q4B Evaluation and Recommendation of Pharmacopoeial Texts for Use in the ICH Regions.\""
     }
    ]
   }

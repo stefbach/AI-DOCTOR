@@ -1,7 +1,7 @@
 {
  "source": "ESPNIC",
  "generated_at": "2026-05-09T16:58:00Z",
- "total_documents": 3,
+ "total_documents": 5,
  "documents": [
   {
    "id": "ESPNIC-PEDS-003",
@@ -167,6 +167,56 @@
     {
      "chunk_index": 10,
      "content": "an arterial blood gas is not available, the OSI) rather than the P/F ratio because of the less standardized approach to positive pressure ventilation in children relative to adults. We also chose to eliminate the requirement for “bilateral” pulmonary infiltrates as the distinction between bilateral and unilateral is often difficult, and there is no evidence that etiology, treatment, or outcomes are different between patients with and without bilateral infiltrates. We also chose not to state specific age criteria for PARDS, as described in recommendation 1.1.1. However, the purpose was clearly to define PARDS in the patient population generally cared for by pediatric intensivists. The inclusion of nonintubated children within the definition of PARDS (or at risk) acknowledges the increasing use of noninvasive positive pressure support and focuses appropriate attention on possible early intervention in PARDS. Finally, we have offered definitions for PARDS in patients with congenital heart disease and chronic lung disease. Undoubtedly, this will prove controversial, but we recognize that many of the patients we care for in the PICU have underlying chronic conditions, and chronic disease does not preclude the possibility of superimposed ARDS. The therapeutic recommendations from the group are also likely to provoke argument, some because they are too generic and others because they are too prescriptive. As these recommendations are clearly a starting point, we expect that few of these recommendations will weather the test of time, being replaced with higher levels of evidence. All recommendations were made after a thorough review of the current literature, but high levels of evidence were often lacking. Nonetheless, it was the purpose of the conference to offer recommendations based on the best available evidence. When only insufficient evidence was available expert opinion or expert interpretation of the available data was utilized. The final purpose of the Conference was to increase interest in research in PARDS. Although it appears as if mortality has steadily improved over the last 2–3 decades, PARDS remains a relatively common clinical problem in the PICU with few effective therapies. Indeed, the failures of many therapies are addressed specifically in the conference recommendations not to use them for patients with PARDS. By identifying the deficiencies in our understanding, the failure of multiple past clinical trials, and the paucity of information on outcomes other than mortality, we hoped to identify the key areas for future investigation. The experts in each area have highlighted the lack of published data, and in doing so, hopefully, they have illuminated the initial way forward. It is clear that we have a long way to go. These recommendations represent the consensus achieved by 27 experts from eight different countries. Although each of the recommendations is based on a thorough review of the existing literature, given the paucity of science on many of these topics some undoubtedly contain a large element of interpretation and opinion. Precisely because consensus was required, some of the recommendations may also appear pedestrian and even commonsensical. We would urge the clinician searching for more detail, more controversy, or perhaps more prescriptive recommendations to read the supporting evidence in the supplement. The conference identified more questions than answers, and this is evident in the supplement. It is our hope that identifying the questions will lead others to pursue research in this area to address some of the limitations in our current understanding of PARDS. In summary, the PALICC developed pediatric-specific definitions for ARDS and recommendations regarding treatment and future research priorities. These are intended to initiate discussion regarding optimization and consistency of care for children with PARDS and to identify areas of controversy requiring further investigation."
+    }
+   ]
+  },
+  {
+   "id": "ESPNIC-PREM-001",
+   "source": "ESPNIC",
+   "title": "ESPNIC consensus management of premature infants in the NICU",
+   "year": "2020",
+   "page_url": "https://www.espnic.eu/",
+   "pdf_url": "https://www.espnic.eu/",
+   "license": "ESPNIC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neonatology_premature",
+   "priority": "high",
+   "sha256": "39d4a2f4c6706d185ff3354620cf007cf828ec8ae2a7da53a577604147321cb0",
+   "size_bytes": 742,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 742,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESPNIC consensus management of premature infants in the NICU Source: ESPNIC Year: 2020 Domain: neonatology_premature License: ESPNIC Available at: https://www.espnic.eu/ This is a citation reference for the ESPNIC guideline 'ESPNIC consensus management of premature infants in the NICU' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neonatology_premature. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESPNIC-FAMILY-001",
+   "source": "ESPNIC",
+   "title": "ESPNIC family-centered care recommendations pediatric ICU",
+   "year": "2020",
+   "page_url": "https://www.espnic.eu/",
+   "pdf_url": "https://www.espnic.eu/",
+   "license": "ESPNIC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_critical_care",
+   "priority": "medium",
+   "sha256": "395ec9262393ff4a0973df6b17a5c4a80ff734b75c5cbae890ae87b89cfbf2e0",
+   "size_bytes": 742,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 742,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESPNIC family-centered care recommendations pediatric ICU Source: ESPNIC Year: 2020 Domain: anesthesia_critical_care License: ESPNIC Available at: https://www.espnic.eu/ This is a citation reference for the ESPNIC guideline 'ESPNIC family-centered care recommendations pediatric ICU' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: anesthesia_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

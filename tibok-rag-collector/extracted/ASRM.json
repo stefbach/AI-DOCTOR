@@ -1,7 +1,7 @@
 {
  "source": "ASRM",
  "generated_at": "2026-05-02T16:24:17Z",
- "total_documents": 18,
+ "total_documents": 23,
  "documents": [
   {
    "id": "ASRM-001",
@@ -1030,6 +1030,131 @@
     {
      "chunk_index": 18,
      "content": "microsurgical specialization efforts of programs in the match. dedication to advancing micro- in today’s practice environment. This streamlined approach helped surgical education and shaping Directors shared collective chal- reduce applicant burden and reinforce the next generation of leaders in lenges and explored strategies to fairness across the process. the field. RM strengthen fellowship education. Attendance was excellent, and RECONSTRUCTIVE MICROSURGERY Autumn/Winter 2025 • 29 EDUCATION COMMITTEE Microsurgical Pearls: The Evolving Craft James A. of economy of motion, the art of slightly or radically different Butterworth patient selection, and the reverence technique, often sparks an MBBCh, FACS for precision. Those lessons are the energy and excitement that Education scaffolding on which my surgical drives me to evolve and refine Committee Chair identity was built. But over time, I’ve my own approach. also learned that mastery in micro- surgery doesn’t come from rigidly It’s easy to assume that with A preserving what we were taught, it experience comes finality, we fter thirteen years in practice comes from continually building achieve unconscious compe- since my microsurgery fellow- upon it and questioning convention. tence, and that eventually ship, I often find myself we “know” how to do it best. reflecting on how differently I But the longer I practice, the operate now compared to when more I see that microsurgery I first started. The fundamentals “The greatest virtue of man thrives on adaptation. The remain the same through delicate tools evolve, our understand- handling, meticulous planning, and is perhaps curiosity” ing of physiology deepens, respect for tissue, but my approach, — Anatole France” and our collective creativity mindset, and technique have expands. What worked evolved in ways I could never have perfectly a decade ago might anticipated as a fellow. That evolu- be improved today through tion, I’ve realized, stems from one Curiosity keeps our hands and our a small tweak inspired by a thing: curiosity. minds sharp. Every new partner, colleague’s insight or a new resident, and fellow brings a fresh piece of technology. Microsurgery, by its very nature, perspective that challenges the habits attracts those who love detail and we’ve built. I’ve learned just as much The real pearl, then, is to discipline. During fellowship, we from trainees as I have from mentors, remain open-minded, to all learn from masters; those giants sometimes in subtle ways, sometimes embrace the discomfort of whose philosophies and methods in transformative ones. Watching a change and to find joy in form the backbone of our own resident problem-solve through an iteration. Our field doesn’t practice. I still carry many of their unexpected intraoperative challenge, advance through repetition; teachings with me: the importance or seeing a junior partner apply a it advances through curios- ity. Thirteen years later, the microscope feels both familiar and new each day. That’s the beauty of microsurgery: every anastomosis, every flap, every collaboration offers another opportunity to learn. And if we stay curious, we’ll never stop getting better. RM"
+    }
+   ]
+  },
+  {
+   "id": "ASRM-TUBAL-001",
+   "source": "ASRM",
+   "title": "ASRM Role of Tubal Surgery Reanastomosis Practice Committee Opinion",
+   "year": "2021",
+   "page_url": "https://www.asrm.org/practice-guidance/",
+   "pdf_url": "https://www.asrm.org/practice-guidance/",
+   "license": "ASRM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gynecologic_surgery_reproductive",
+   "priority": "high",
+   "sha256": "342f425536ded9616245eb83296333acd78015677cbf44aa6dd08275141cdf64",
+   "size_bytes": 789,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 789,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASRM Role of Tubal Surgery Reanastomosis Practice Committee Opinion Source: ASRM Year: 2021 Domain: gynecologic_surgery_reproductive License: ASRM Available at: https://www.asrm.org/practice-guidance/ This is a citation reference for the ASRM guideline 'ASRM Role of Tubal Surgery Reanastomosis Practice Committee Opinion' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gynecologic_surgery_reproductive. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASRM-MICRO-001",
+   "source": "ASRM",
+   "title": "American Society for Reconstructive Microsurgery Position Statement on Free Flap Monitoring",
+   "year": "2021",
+   "page_url": "https://www.microsurg.org/clinical-resources/",
+   "pdf_url": "https://www.microsurg.org/clinical-resources/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "plastic_reconstruction",
+   "priority": "high",
+   "sha256": "92485ffe8b81d520367042d90a0d093cb82f3524e9509b05054e454f06a2a351",
+   "size_bytes": 830,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 830,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: American Society for Reconstructive Microsurgery Position Statement on Free Flap Monitoring Source: ASRM Year: 2021 Domain: plastic_reconstruction License: Proprietary Available at: https://www.microsurg.org/clinical-resources/ This is a citation reference for the ASRM guideline 'American Society for Reconstructive Microsurgery Position Statement on Free Flap Monitoring' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: plastic_reconstruction. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASRM-MICRO-002",
+   "source": "ASRM",
+   "title": "ASRM Recommendations on Antithrombotic Therapy in Microsurgery",
+   "year": "2022",
+   "page_url": "https://www.microsurg.org/clinical-resources/",
+   "pdf_url": "https://www.microsurg.org/clinical-resources/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "plastic_reconstruction",
+   "priority": "high",
+   "sha256": "81876458069ce7186bace16bd716781a6dc9206616859c87b7af65f467ddee52",
+   "size_bytes": 772,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 772,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASRM Recommendations on Antithrombotic Therapy in Microsurgery Source: ASRM Year: 2022 Domain: plastic_reconstruction License: Proprietary Available at: https://www.microsurg.org/clinical-resources/ This is a citation reference for the ASRM guideline 'ASRM Recommendations on Antithrombotic Therapy in Microsurgery' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: plastic_reconstruction. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASRM-LYMPH-001",
+   "source": "ASRM",
+   "title": "ASRM Position on Lymphedema Microsurgical Treatment LVA and VLNT",
+   "year": "2023",
+   "page_url": "https://www.microsurg.org/clinical-resources/",
+   "pdf_url": "https://www.microsurg.org/clinical-resources/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "plastic_reconstruction",
+   "priority": "high",
+   "sha256": "3d450b0cbb4fe527eedfe24e9db681fcd0580ac84102aa4a359d2cd02f8aba5e",
+   "size_bytes": 776,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 776,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASRM Position on Lymphedema Microsurgical Treatment LVA and VLNT Source: ASRM Year: 2023 Domain: plastic_reconstruction License: Proprietary Available at: https://www.microsurg.org/clinical-resources/ This is a citation reference for the ASRM guideline 'ASRM Position on Lymphedema Microsurgical Treatment LVA and VLNT' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: plastic_reconstruction. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASRM-REPRO-001",
+   "source": "ASRM",
+   "title": "Ethics Committee Opinions Compendium",
+   "year": "2023",
+   "page_url": "https://www.asrm.org/practice-guidance/ethics-opinions/",
+   "pdf_url": "https://www.asrm.org/practice-guidance/ethics-opinions/",
+   "license": "ASRM",
+   "commercial_use": "restricted",
+   "clinical_domain": "ethics_consent",
+   "priority": "medium",
+   "sha256": "4f5c673235e60c1210a1a07b0b31c4ddc143531cab3cc6be2e83b41cc79e31bc",
+   "size_bytes": 2751,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2751,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Report 59 of the AMA Board of Trustees (A-96). Physician-assisted suicide. Reference Committee on Amendments to Constitution and Bylaws. This Board of Trustees report calls for reaffirmation of the position of the American Medical Association (AMA) in opposition to physicians assisting their patients in committing suicide. The AMA maintains that the appropriate step for physicians is not to assist a patient in death but to provide compassion and palliative care. In providing end-of-life care, the option of allowing physicians to intentionally cause the death of patients is a line that should not be crossed. This position is based on the historical role of physicians as advocates for healing. The report discusses AMA activity to design and implement a comprehensive physician education plan on end-of-life care in response to the House of Delegates' action in adopting Board of Trustees Report 48-I-95, \"Quality Care at the End of Life.\" This plan will further the AMA's commitment that patients should receive high quality care during every stage of life, including the end of life. The goal of this educational campaign is to advance the medical culture by making palliative treatment and care directions based on values-based advance care planning the standard of care for meeting the needs of patients at the end of life. The basis for this activity will be the acknowledgment that physicians, while unable to always provide a cure, should always be able to relieve suffering, address the psychological needs of patients at the end of life, add value to remaining life, and help patients die with dignity. The report presents information on state legislative activities and judicial actions relating to physician-assisted suicide. The report also presents a discussion on the ethical under-pinnings against physician participation in patients' suicides. This report recommends that: the AMA reaffirm current policies 140.952 and 140.966 (AMA Policy Compendium), in accordance with Council on Ethical and Judicial Affairs Opinion 2.211 (opposition to physician-assisted suicide); the AMA initiate an educational campaign to make palliative treatment and care directions based on values-based advance care planning the standard of care for meeting the needs of patients at the end of life; the AMA continue to seek out opportunities to present the views of medicine on physician-assisted suicide and improving the quality of care for patients at the end of life; the AMA disseminate this report throughout the Federation with a request that it be distributed to local physicians; and the Board of Trustees present the House of Delegates with an update on these and related activities at the 1996 Interim Meeting and the 1997 Annual Meeting."
     }
    ]
   }

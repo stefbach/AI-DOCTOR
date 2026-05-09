@@ -1,7 +1,7 @@
 {
  "source": "DAN",
  "generated_at": "2026-05-09T16:46:19Z",
- "total_documents": 7,
+ "total_documents": 9,
  "documents": [
   {
    "id": "DAN-DIVE-001",
@@ -627,6 +627,56 @@
     {
      "chunk_index": 28,
      "content": "of different interstitial cells of cajal networks in diabetic mice. subtypes. Neurogastroenterol Motil 2017;29. Cell Mol Gastroenterol Hepatol. 2016;2:454–67. 130. Moraveji S, Bashashati M, Elhanafi S, et al. Depleted 140. Neiberg RH, Rejeski JJ, Applegate WB, et al. Self- interstitial cells of Cajal and fibrosis in the pylorus: reported gastrointestinal symptoms in Type 2 dia- novel features of gastroparesis. Neurogastroenterol betes improve with an intensive lifestyle interven- Motil. 2016;28:1048–54. tion: results from the action for health in diabetes (Look AHEAD) Clinical Trial. Clin Diabetes. 131. Hibbard ML, Dunst CM, Swanstrom LL. Laparo- 2015;33:181–8. scopic and endoscopic pyloroplasty for gastropare- sis results in sustained symptom improvement. 141. Crandall JP, Knowler WC, Kahn SE, et al. The pre- J Gastrointest Surg. 2011;15:1513–9. vention of type 2 diabetes. Nat Clin Pract Endocri- nol Metab. 2008;4:382–93. 132. Khashab MA, Stein E, Clarke JO, et al. Gastric per- oral endoscopic myotomy for refractory gastro- 142. Knowler WC, Fowler SE, Hamman RF, et al. 10-Year paresis: first human endoscopic pyloromyotomy follow-up of diabetes incidence and weight loss in (with video). Gastrointest Endosc. 2013;78:764–8. the Diabetes Prevention Program Outcomes Study. Lancet. 2009;374:1677–86. 133. Abell T, McCallum R, Hocking M, et al. Gastric electrical stimulation for medically refractory gas- 143. American Diabetes Association. Prevention or delay troparesis. Gastroenterology. 2003;125:421–8. of type 2 diabetes: standards of medical care in diabetes—2018. Diabetes Care 2018;41[Suppl 134. Lin Z, Forster J, Sarosiek I, et al. Treatment of dia- 1]:S51–S54. betic gastroparesis by high-frequency gastric elec- trical stimulation. Diabetes Care. 2004;27:1071–6. 144. Diabetes Control Complications Trial Research Group. Effect of intensive diabetes treatment on 135. Ringel Y. How is drug-refractory gastroparesis trea- nerve conduction in the Diabetes Control and ted?: Medscape;2012. https://www.medscape.com/ Complications Trial. Ann Neurol. 1995;38:869–80. viewarticle/756815. Accessed 7 June 2018. 136. Abell TL, Johnson WD, Kedar A, et al. A double- masked, randomized, placebo-controlled trial of"
+    }
+   ]
+  },
+  {
+   "id": "DAN-DIABETES-001",
+   "source": "DAN",
+   "title": "DAN UHMS Consensus on Diabetes and Recreational Diving",
+   "year": "2005",
+   "page_url": "https://dan.org/health-medicine/",
+   "pdf_url": "https://dan.org/health-medicine/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "diving_fitness",
+   "priority": "medium",
+   "sha256": "4d7a5c2d82b92f6d4d953e04cfdb0ee89f2caa77ed43f0d87d2d4edd43d11180",
+   "size_bytes": 725,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 725,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: DAN UHMS Consensus on Diabetes and Recreational Diving Source: DAN Year: 2005 Domain: diving_fitness License: Proprietary Available at: https://dan.org/health-medicine/ This is a citation reference for the DAN guideline 'DAN UHMS Consensus on Diabetes and Recreational Diving' published in 2005. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: diving_fitness. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "DAN-ASTHMA-001",
+   "source": "DAN",
+   "title": "DAN Position on Asthma and Recreational Diving",
+   "year": "2010",
+   "page_url": "https://dan.org/health-medicine/",
+   "pdf_url": "https://dan.org/health-medicine/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "diving_fitness",
+   "priority": "medium",
+   "sha256": "e81b49861febfcce1ff7a3acce60a8b0731de9ff14f4204c1218e3359c5f1413",
+   "size_bytes": 709,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 709,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: DAN Position on Asthma and Recreational Diving Source: DAN Year: 2010 Domain: diving_fitness License: Proprietary Available at: https://dan.org/health-medicine/ This is a citation reference for the DAN guideline 'DAN Position on Asthma and Recreational Diving' published in 2010. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: diving_fitness. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

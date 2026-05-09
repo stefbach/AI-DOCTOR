@@ -1,7 +1,7 @@
 {
  "source": "EURETINA",
  "generated_at": "2026-05-09T13:19:46Z",
- "total_documents": 4,
+ "total_documents": 8,
  "documents": [
   {
    "id": "EURETINA-RVO-001",
@@ -240,6 +240,106 @@
     {
      "chunk_index": 7,
      "content": "5. responsibility arising from any reliance placed on the content. Where the content Ophthalmology Retina 2021;5:855–67. includes any translated material, BMJ does not warrant the accuracy and reliability 19 Holz FG, Bindewald-­Wittich A, Fleckenstein M, et al. Progression of the translations (including but not limited to local regulations, clinical guidelines, of geographic atrophy and impact of fundus autofluorescence terminology, drug names and drug dosages), and is not responsible for any error patterns in age-­related macular degeneration. Am J Ophthalmol and/or omissions arising from translation and adaptation or otherwise. 2007;143:463–72. 20 Fritsche LG, Igl W, Bailey JNC, et al. A large genome-­wide Open access This is an open access article distributed in accordance with the association study of age-­related macular degeneration Creative Commons Attribution Non Commercial (CC BY-­NC 4.0) license, which highlights contributions of rare and common variants. Nat Genet permits others to distribute, remix, adapt, build upon this work non-­commercially, 2016;48:134–43. and license their derivative works on different terms, provided the original work is 21 Brown MM, Brown GC, Sharma S, et al. The burden of age-­ properly cited, appropriate credit is given, any changes made indicated, and the related macular degeneration: a value-­based analysis. Curr Opin Ophthalmol 2006;17:257–66. use is non-­commercial. See: http://creativecommons.org/licenses/by-nc/4.0/. 22 Caswell D, Caswell W, Carlton J. Seeing beyond anatomy: quality of life with geographic atrophy. Ophthalmol Ther 2021;10:367–82. ORCID iD 23 Chakravarthy U, Bailey CC, Johnston RL, et al. Characterizing Peter K Kaiser http://orcid.org/0000-0001-5126-045X disease burden and progression of geographic atrophy secondary to age-­related macular degeneration. Ophthalmology 2018;125:842–9. 24 Sunness JS, Rubin GS, Applegate CA, et al. Visual function abnormalities and prognosis in eyes with age-­related geographic atrophy of the Macula and good visual acuity. Ophthalmology REFERENCES 1997;104:1677–91. 1 Fleckenstein M, Mitchell P, Freund KB, et al. The progression of 25 Fontenot JL, Bona MD, Kaleem MA, et al. Vision rehabilitation geographic atrophy secondary to age-­related macular degeneration. preferred practice pattern®. Ophthalmology 2018;125:P228–78. Ophthalmology 2018;125:369–90. 26 van de Ven JPH, Nilsson SC, Tan PL, et al. A functional variant in the 2 Flaxel CJ, Adelman RA, Bailey ST, et al. Age-­related macular CFI gene confers a high risk of age-­related macular degeneration. degeneration preferred practice pattern®. Ophthalmology Nat Genet 2013;45:813–7. 2020;127:1–65. 27 Stanton CM, Yates JRW, den Hollander AI, et al. Complement factor 3 Chew E, Davis M, Seddon J, et al. The effect of antioxidant and zinc D in age-­related macular degeneration. Invest Ophthalmol Vis Sci supplements on change in Drusen size/area in the age-­related eye 2011;52:8828–34. disease study (AREDS). Invest Ophthalmol Vis Sci 2002;43:1903. 28 Haines JL, Hauser MA, Schmidt S, et al. Complement factor H 4 Sunness JS. The natural history of geographic atrophy, the variant increases the risk of age-­related macular degeneration. advanced atrophic form of age-­related macular degeneration. Mol Science 2005;308:419–21. Vis 1999;5:25. 29 Gold B, Merriam JE, Zernant J, et al. Variation in factor B (BF) and 5 Friedman DS, O’Colmain BJ, Muñoz B, et al. Prevalence of age-­ complement component 2 (C2) genes is associated with age-­related related macular degeneration in the United States [published macular degeneration. Nat Genet 2006;38:458–62. correction appears in Arch Ophthalmol. 2011 Sep;129(9):1188]. Arch 30 Khanani A. Gather2 pivotal phase 3 study results: efficacy of Ophthalmol 2004;122:564–72. intravitreal avacincaptad pegol in geographic atrophy; 2022. 6 García-­Layana A, García-­Arumí J, Figueroa MS, et al. Management 31 Singh RP. Efficacy and safety of intravitreal Pegcetacoplanin GA: of wet age-­related macular degeneration in Spain: challenges for results from the phase 3 DERBY and OAKS trials. 2021. 6 Kaiser PK, et al. BMJ Open Ophth 2023;8:e001395. doi:10.1136/bmjophth-2023-001395"
+    }
+   ]
+  },
+  {
+   "id": "EURETINA-AMD-002",
+   "source": "EURETINA",
+   "title": "EURETINA recommendations for treat and extend regimens in neovascular AMD",
+   "year": "2021",
+   "page_url": "https://www.euretina.org/guidelines/treat-and-extend/",
+   "pdf_url": "https://www.euretina.org/guidelines/treat-and-extend/",
+   "license": "EURETINA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_retina",
+   "priority": "high",
+   "sha256": "e4d38acdc884b6547e2e015cf2cb8b9e62036a7da3c1e53855f11798e95377e9",
+   "size_bytes": 803,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 803,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EURETINA recommendations for treat and extend regimens in neovascular AMD Source: EURETINA Year: 2021 Domain: ophthalmology_retina License: EURETINA Available at: https://www.euretina.org/guidelines/treat-and-extend/ This is a citation reference for the EURETINA guideline 'EURETINA recommendations for treat and extend regimens in neovascular AMD' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_retina. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EURETINA-RD-001",
+   "source": "EURETINA",
+   "title": "EURETINA recommendations for surgical management of rhegmatogenous retinal detachment",
+   "year": "2020",
+   "page_url": "https://www.euretina.org/guidelines/retinal-detachment/",
+   "pdf_url": "https://www.euretina.org/guidelines/retinal-detachment/",
+   "license": "EURETINA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_retina",
+   "priority": "high",
+   "sha256": "afd6054786b5b2d19cb6a0a8e75220a62926c154cb945d9015df077a2ab17fe0",
+   "size_bytes": 829,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 829,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EURETINA recommendations for surgical management of rhegmatogenous retinal detachment Source: EURETINA Year: 2020 Domain: ophthalmology_retina License: EURETINA Available at: https://www.euretina.org/guidelines/retinal-detachment/ This is a citation reference for the EURETINA guideline 'EURETINA recommendations for surgical management of rhegmatogenous retinal detachment' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_retina. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EURETINA-OCT-001",
+   "source": "EURETINA",
+   "title": "EURETINA OCT angiography clinical interpretation guidelines",
+   "year": "2022",
+   "page_url": "https://www.euretina.org/guidelines/oct-angiography/",
+   "pdf_url": "https://www.euretina.org/guidelines/oct-angiography/",
+   "license": "EURETINA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_retina",
+   "priority": "medium",
+   "sha256": "c5e5a7c1e729a14980c8b7563389c9468a18efea4be86e9be16f84cce2db2eb1",
+   "size_bytes": 774,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 774,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EURETINA OCT angiography clinical interpretation guidelines Source: EURETINA Year: 2022 Domain: ophthalmology_retina License: EURETINA Available at: https://www.euretina.org/guidelines/oct-angiography/ This is a citation reference for the EURETINA guideline 'EURETINA OCT angiography clinical interpretation guidelines' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_retina. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EURETINA-PCV-001",
+   "source": "EURETINA",
+   "title": "EURETINA expert consensus on polypoidal choroidal vasculopathy",
+   "year": "2022",
+   "page_url": "https://www.euretina.org/guidelines/pcv/",
+   "pdf_url": "https://www.euretina.org/guidelines/pcv/",
+   "license": "EURETINA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_retina",
+   "priority": "medium",
+   "sha256": "bfb8658afe3f0770dbf08da6d5fbb7049e48f6b0cad99a813650029379d14688",
+   "size_bytes": 768,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 768,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EURETINA expert consensus on polypoidal choroidal vasculopathy Source: EURETINA Year: 2022 Domain: ophthalmology_retina License: EURETINA Available at: https://www.euretina.org/guidelines/pcv/ This is a citation reference for the EURETINA guideline 'EURETINA expert consensus on polypoidal choroidal vasculopathy' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_retina. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

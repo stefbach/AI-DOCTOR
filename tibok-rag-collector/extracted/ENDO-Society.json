@@ -1,7 +1,7 @@
 {
  "source": "ENDO-Society",
  "generated_at": "2026-05-09T13:19:33Z",
- "total_documents": 32,
+ "total_documents": 37,
  "documents": [
   {
    "id": "ENDO-HYPOGLY-001",
@@ -1848,6 +1848,131 @@
     {
      "chunk_index": 7,
      "content": "be implicated in the previously described better functionality of HDLc induced by phytosterols that may contribute to the cholesterol efflux and therefore for plasma cholesterol reduction (Soltani Saba et al., ). Indeed, our lipidomic results are barely significant and should motivate further research to link the plasma lipidomic profile with the observed biochemical parameters involved in the evaluation of hypercholesterolemia. To the best of our knowledge, no other study has investigated changes in lipid metabolites in humans, either children or adults, with hypercholesterolemia after supplementation with plant phytosterols. One limitation of the present study is the scarce number of children (only 23) who complied with more than 70% of the nutritional treatment. This might be reflected in the Group x Treatment significant effect as several of the participants initially assigned to groups A and B were not included in the final analysis. Furthermore, the initial values of various plasma biomarkers had a bias that made them incomparable between the two groups. Consequently, novel interventions with a large number of subjects and longer intervention time should be considered to study the effects of phytosterol-enriched diet supplementation in individuals with hypercholesterolemia. Supplementary Information Below is the link to the electronic supplementary material. Supplementary file1 (XLSX 11 KB) Supplementary file2 (XLSX 3172 KB)"
+    }
+   ]
+  },
+  {
+   "id": "ENDO-HTG-001",
+   "source": "ENDO-Society",
+   "title": "Endocrine Society evaluation and treatment of hypertriglyceridemia",
+   "year": "2012",
+   "page_url": "https://academic.oup.com/jcem/article/97/9/2969/",
+   "pdf_url": "https://academic.oup.com/jcem/article/97/9/2969/",
+   "license": "ENDO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_obesity",
+   "priority": "high",
+   "sha256": "1daeecb348e594152e65ee8015ee213eb722c656cdf023db2266d5bb1eb768c2",
+   "size_bytes": 790,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 790,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:12Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Endocrine Society evaluation and treatment of hypertriglyceridemia Source: ENDO-Society Year: 2012 Domain: endocrinology_obesity License: ENDO Available at: https://academic.oup.com/jcem/article/97/9/2969/ This is a citation reference for the ENDO-Society guideline 'Endocrine Society evaluation and treatment of hypertriglyceridemia' published in 2012. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_obesity. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ENDO-PED-DM-001",
+   "source": "ENDO-Society",
+   "title": "Endocrine Society inpatient pediatric hyperglycemia consensus",
+   "year": "2022",
+   "page_url": "https://academic.oup.com/jcem",
+   "pdf_url": "https://academic.oup.com/jcem",
+   "license": "ENDO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_pediatric",
+   "priority": "medium",
+   "sha256": "b00269ee404398b909bc82dc9d883604c0a2d5ef580f25836ba6f1bbcc5a480b",
+   "size_bytes": 765,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 765,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Endocrine Society inpatient pediatric hyperglycemia consensus Source: ENDO-Society Year: 2022 Domain: endocrinology_pediatric License: ENDO Available at: https://academic.oup.com/jcem This is a citation reference for the ENDO-Society guideline 'Endocrine Society inpatient pediatric hyperglycemia consensus' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ENDO-T3C-001",
+   "source": "ENDO-Society",
+   "title": "Endocrine Society position on diabetes secondary to pancreatic disease type 3c",
+   "year": "2023",
+   "page_url": "https://academic.oup.com/jcem",
+   "pdf_url": "https://academic.oup.com/jcem",
+   "license": "ENDO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_diabetes",
+   "priority": "medium",
+   "sha256": "5323fe0baebf0d86c0e05e59cd91eaeeca3467bdcdd069c52463bf5b05965ab0",
+   "size_bytes": 797,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 797,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Endocrine Society position on diabetes secondary to pancreatic disease type 3c Source: ENDO-Society Year: 2023 Domain: endocrinology_diabetes License: ENDO Available at: https://academic.oup.com/jcem This is a citation reference for the ENDO-Society guideline 'Endocrine Society position on diabetes secondary to pancreatic disease type 3c' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_diabetes. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ENDO-AAES-MEN2-001",
+   "source": "ENDO-Society",
+   "title": "Endocrine Society MEN2 medical management consensus",
+   "year": "2015",
+   "page_url": "https://academic.oup.com/jcem",
+   "pdf_url": "https://academic.oup.com/jcem",
+   "license": "ENDO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_pituitary",
+   "priority": "medium",
+   "sha256": "41beede09e3cc18f9d501225bd00cd6d7cc82fd2ab1592bb3f4ef09d8359283c",
+   "size_bytes": 745,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 745,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Endocrine Society MEN2 medical management consensus Source: ENDO-Society Year: 2015 Domain: endocrinology_pituitary License: ENDO Available at: https://academic.oup.com/jcem This is a citation reference for the ENDO-Society guideline 'Endocrine Society MEN2 medical management consensus' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_pituitary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ENDO-HHC-001",
+   "source": "ENDO-Society",
+   "title": "Endocrine Society hereditary hemochromatosis evaluation",
+   "year": "2023",
+   "page_url": "https://academic.oup.com/jcem",
+   "pdf_url": "https://academic.oup.com/jcem",
+   "license": "ENDO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_obesity",
+   "priority": "low",
+   "sha256": "69d046a4778b705e41142c1f314cfe5d62d76a672022f7f42c60abaa7d0dd72d",
+   "size_bytes": 749,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 749,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Endocrine Society hereditary hemochromatosis evaluation Source: ENDO-Society Year: 2023 Domain: endocrinology_obesity License: ENDO Available at: https://academic.oup.com/jcem This is a citation reference for the ENDO-Society guideline 'Endocrine Society hereditary hemochromatosis evaluation' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_obesity. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

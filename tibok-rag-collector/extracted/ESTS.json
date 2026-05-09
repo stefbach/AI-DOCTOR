@@ -1,7 +1,7 @@
 {
  "source": "ESTS",
  "generated_at": "2026-05-09T10:17:38Z",
- "total_documents": 4,
+ "total_documents": 7,
  "documents": [
   {
    "id": "ESTS-LUNG-001",
@@ -368,6 +368,81 @@
     {
      "chunk_index": 28,
      "content": "Phys (2015) 92(2):211–3. doi:10.1016/j.ijrobp. ments. Bioinformatics (2004) 20(5):777–85. doi:10.1093/bioinformatics/ 2015.01.038 btg484 225. Mor G, Visintin I, Lai Y, Zhao H, Schwartz P, Rutherford T, et al. Serum Conflict of Interest Statement: The authors declare that the research was con- protein markers for early detection of ovarian cancer. Proc Natl Acad Sci ducted in the absence of any commercial or financial relationships that could be U S A (2005) 102(21):7677–82. doi:10.1073/pnas.0502178102 construed as a potential conflict of interest. 226. Visintin I, Feng Z, Longton G, Ward DC, Alvero AB, Lai Y, et al. Diagnostic markers for early detection of ovarian cancer. Clin Cancer Res (2008) Copyright © 2018 Kang, Rancati, Lee, Oh, Kerns, Scott, Schwartz, Kim and 14(4):1065–72. doi:10.1158/1078-0432.CCR-07-1569 Rosenstein. This is an open-access article distributed under the terms of the Creative 227. Buchen L. Cancer: missing the mark. Nature (2011) 471(7339):428–32. Commons Attribution License (CC BY). The use, distribution or reproduction in doi:10.1038/471428a other forums is permitted, provided the original author(s) and the copyright owner 228. Potti A, Dressman HK, Bild A, Riedel RF, Chan G, Sayer R, et al. Genomic are credited and that the original publication in this journal is cited, in accordance signatures to guide the use of chemotherapeutics. Nat Med (2006) 12(11): with accepted academic practice. No use, distribution or reproduction is permitted 1294–300. doi:10.1038/nm1491 which does not comply with these terms. Frontiers in Oncology | www.frontiersin.org 21 June 2018 | Volume 8 | Article 228"
+    }
+   ]
+  },
+  {
+   "id": "ESTS-LUNG-002",
+   "source": "ESTS",
+   "title": "ESTS guidelines on preoperative lung resection assessment in adults considered for curative-intent surgery",
+   "year": "2009",
+   "page_url": "https://academic.oup.com/ejcts/article/35/1/181/331149",
+   "pdf_url": "https://academic.oup.com/ejcts/article/35/1/181/331149",
+   "license": "ESTS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiothoracic_surgery",
+   "priority": "high",
+   "sha256": "d969378d779472021f303b0d0f003e935e8387715ca1783a116a3566e0bca599",
+   "size_bytes": 862,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 862,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESTS guidelines on preoperative lung resection assessment in adults considered for curative-intent surgery Source: ESTS Year: 2009 Domain: cardiothoracic_surgery License: ESTS Available at: https://academic.oup.com/ejcts/article/35/1/181/331149 This is a citation reference for the ESTS guideline 'ESTS guidelines on preoperative lung resection assessment in adults considered for curative-intent surgery' published in 2009. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiothoracic_surgery. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESTS-MEDIA-001",
+   "source": "ESTS",
+   "title": "ESTS expert consensus on management of mediastinal masses",
+   "year": "2018",
+   "page_url": "https://academic.oup.com/ejcts/article/53/1/1/4669954",
+   "pdf_url": "https://academic.oup.com/ejcts/article/53/1/1/4669954",
+   "license": "ESTS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiothoracic_surgery",
+   "priority": "medium",
+   "sha256": "ce5ca89d9faa052fc56e0edda1bdab701ea76656fda08a868976e91ef79ab1b7",
+   "size_bytes": 763,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 763,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESTS expert consensus on management of mediastinal masses Source: ESTS Year: 2018 Domain: cardiothoracic_surgery License: ESTS Available at: https://academic.oup.com/ejcts/article/53/1/1/4669954 This is a citation reference for the ESTS guideline 'ESTS expert consensus on management of mediastinal masses' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiothoracic_surgery. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESTS-ESOPHAGECTOMY-001",
+   "source": "ESTS",
+   "title": "ESTS Recommendations on Esophagectomy for Cancer",
+   "year": "2019",
+   "page_url": "https://academic.oup.com/ejcts/article/55/3/415/5088506",
+   "pdf_url": "https://academic.oup.com/ejcts/article/55/3/415/5088506",
+   "license": "ESTS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_hpb",
+   "priority": "high",
+   "sha256": "fff5eb62a6f016fd430276df2a170a7c17f01b6c33ebfad4c6ad49f63e7c6597",
+   "size_bytes": 2019,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2019,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Variations in Perioperative Thromboprophylaxis Practices: Do the Guidelines Need a Closer Look? In 2022, the American Association for Thoracic Surgery (AATS) and the European Society of Thoracic Surgeons (ESTS) published joint guidelines regarding the timing, duration, and choice of agent for perioperative venous thromboembolism prophylaxis for thoracic cancer patients. Now, 1 year after their release, we looked to assess practices and general adherence to these recommendations. We conducted a survey among board-certified/board-eligible thoracic surgeons in the United States, between July and October 2023. A total of 103 board-certified thoracic surgeons responded to the survey. Over half of the surgeons reported using preoperative chemical thromboprophylaxis routinely for lobectomy/sublobar resections (56.3%), pneumonectomy/extended lung resections (64.1%), and esophagectomy (67%). Over two thirds of thoracic surgeons limited the duration of postoperative chemical thromboprophylaxis to the patient's length of hospital stay and never administered chemoprophylaxis post-discharge. Among surgeons who always continued chemical thromboprophylaxis post-discharge, low-molecular-weight heparin (LMWH) was the most commonly used agent (>70%), followed by direct oral anticoagulants (13.8%-16.7%). Only 33.3% of surgeons prescribing post-discharge chemical thromboprophylaxis after lobectomy/sublobar resections continued prophylaxis up to 4 weeks postoperatively. Contrary to the 2022 joint AATS/ESTS guidelines, the majority of surveyed thoracic surgeons in the United States do not routinely prescribe postoperative thromboprophylaxis after lung and esophageal cancer resections. The dogma of routine extended thromboprophylaxis must be reevaluated as modern minimally invasive thoracic surgery allows for very earlier ambulation and enhanced recovery. There is a need for randomized controlled trials exploring the utility of extended thromboprophylaxis and newer agents such as direct oral anticoagulants."
     }
    ]
   }

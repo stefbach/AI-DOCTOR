@@ -1,7 +1,7 @@
 {
  "source": "APA",
  "generated_at": "2026-05-02T15:54:12Z",
- "total_documents": 43,
+ "total_documents": 45,
  "documents": [
   {
    "id": "APA-001",
@@ -2319,6 +2319,56 @@
     {
      "chunk_index": 4,
      "content": "likelihood of escalation). Discussion In semi-structured interviews, psychiatrists reported that almost all patients are good candidates for telemedicine visits in the context of hybrid care models. What drove telemedicine vs. in-person care was patient preference as well as situational factors like access to private space instead of any particular diagnosis or patient demographic. Psychiatrists described numerous factors affecting their decision to offer telemedicine, and they were generally driven to try telemedicine and adjust as needed to “meet patients where they are” and improve engagement in care. A 2021 Substance Abuse and Mental Health Services Administration-supported guide on telemedicine for mental health professionals echoed some of the same factors discussed by psychiatrists in our sample.( ) For example, the guide suggested that when assessing whether telemedicine is appropriate it may be necessary to consider the patient’s history of cooperativeness with the provider, substance use, violence, and self-injurious behavior. It also suggested that psychiatrists trial telemedicine before committing to ongoing telemedicine care,( ) suggesting a need to “experiment” with telemedicine to assess appropriateness. We identified additional factors (e.g., possible therapeutic benefit of coming in-person, safety of psychiatrists and staff). Notably, we also found that the offer of telemedicine can be leveraged in “negotiations” to improve engagement, attendance, and adherence. If telemedicine is successfully negotiated in this way, and assuming patients feel more supported and engaged in care, hybrid care models could lead to higher quality care. Further, offering the option of telemedicine, with its added convenience and potential for privacy, could help individuals expressing ambivalence about treatment or behavior change overcome their personal activation barriers to engagement. Our findings have implications for future reimbursement policy. At present, the Centers for Medicare and Medicaid Services is considering how often to require in-person visits in hybrid care models. The current proposal is that behavioral health providers using telemedicine with Medicare beneficiaries should be required to have an in-person visit within six months of initiating telemedicine and then every six months thereafter.( ) Our findings suggest that clinicians offered in-person care because of patient preference, but few felt that any specific scenarios required (only) in-person care from a clinical standpoint. Rather, many felt that telemedicine increased engagement, and decisions about telemedicine use remained fluid. While there may be arguments for requiring periodic in-person visits (e.g., to reduce the potential for fraud, deterring overuse of care and increased spending), it is does not appear that psychiatrists perceive intermittent in-person visits to be essential for high-quality care. The study had some limitations. First, interview responses may be influenced by social desirability bias. Second, we used hypothetical case vignettes, which may not exactly mimic real-life clinical practice, and we presented only a few of many possible case scenarios. Third, we did not ask participants to differentiate between different visit types in their comments (e.g., medication management, psychotherapy sessions) due to time constraints. It is likely that the visit type influences decisions about the appropriateness of telemedicine. To our knowledge, this is the first study exploring how psychiatrists make decisions about the appropriateness of telemedicine. Future research should further explore how hybrid care models with different doses and timing of telemedicine impact care quality. This research is especially important for clinical scenarios described as more challenging for telemedicine (e.g., active suicidal ideation, eating disorders). Supplementary Material supplementary"
+    }
+   ]
+  },
+  {
+   "id": "APA-SCHIZ-001",
+   "source": "APA",
+   "title": "APA Practice Guideline Schizophrenia 3rd Edition",
+   "year": "2020",
+   "page_url": "https://psychiatryonline.org/guidelines",
+   "pdf_url": "https://psychiatryonline.org/guidelines",
+   "license": "APA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "internal_medicine_psychiatric",
+   "priority": "high",
+   "sha256": "baf2a77990ae8125b0235ec7665761f355e21478dc66ac221fad2f438712f450",
+   "size_bytes": 742,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 742,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:45Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: APA Practice Guideline Schizophrenia 3rd Edition Source: APA Year: 2020 Domain: internal_medicine_psychiatric License: APA Available at: https://psychiatryonline.org/guidelines This is a citation reference for the APA guideline 'APA Practice Guideline Schizophrenia 3rd Edition' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: internal_medicine_psychiatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "APA-MALEAN-001",
+   "source": "APA",
+   "title": "APA position statement preanesthetic evaluation core principles",
+   "year": "2018",
+   "page_url": "https://psychiatryonline.org/",
+   "pdf_url": "https://psychiatryonline.org/",
+   "license": "APA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_general",
+   "priority": "low",
+   "sha256": "0c2b4f229394025fe7836496cddce8b3b765b066dd1237f0de7acfb3ec277cd8",
+   "size_bytes": 740,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 740,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: APA position statement preanesthetic evaluation core principles Source: APA Year: 2018 Domain: anesthesia_general License: APA Available at: https://psychiatryonline.org/ This is a citation reference for the APA guideline 'APA position statement preanesthetic evaluation core principles' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: anesthesia_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

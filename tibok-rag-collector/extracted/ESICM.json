@@ -1,7 +1,7 @@
 {
  "source": "ESICM",
  "generated_at": "2026-05-02T15:38:39Z",
- "total_documents": 10,
+ "total_documents": 11,
  "documents": [
   {
    "id": "ESICM-001",
@@ -942,6 +942,31 @@
     {
      "chunk_index": 10,
      "content": "various unique markers that are relevant to TBI patients, such as the units of blood products transfused per hour, severity of TBI, age, GCS, presence of midline shift, craniectomy, and coagulopathy ( , , , ). The attempts to predict futility based on combinations of these reliable markers are efforts to create quantitative futility algorithms. For SBTPs, the first step would be to focus on the identification of sTBI and then to adhere to the parameters promulgated by STOP, FCOPCA, and FoRM. Given the scarcity of literature regarding reliable parameters that predict futility in this specific group of patients, only patients with ptTBI or patients with hiTBI and severe coagulopathy should be gauged as candidates for early futility until universally accepted guidelines with 100% PPV and specificity may be developed ( , , , ). From an ethical standpoint, transparency needs to be guaranteed when adhering to these predictors of certain death for patients who will not receive blood products due to futility. This transparency requires open communication between the blood bankers and other stakeholders, such as emergency physicians and members of an ethics committee, when these FR policies are instituted ( , , ). Such shared decision-making, which is the result of collaboration between many medical and ethical specialties, will allow for the development of coherent, evidence-based criteria that will help to resolve conflicts between clinicians and patients or their surrogates and to positively redefine the process of declaring futility."
+    }
+   ]
+  },
+  {
+   "id": "ESICM-COAG-001",
+   "source": "ESICM",
+   "title": "ESICM clinical practice guideline coagulopathy in critically ill patients",
+   "year": "2023",
+   "page_url": "https://www.esicm.org/resources/guidelines-overview/",
+   "pdf_url": "https://www.esicm.org/resources/guidelines-overview/",
+   "license": "ESICM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_bleeding",
+   "priority": "high",
+   "sha256": "2caba8b096f3347b86786aed3f878ece37d19030fc96d245e3038cd24d0a340f",
+   "size_bytes": 1511,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1511,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Transfusion in critical care: Past, present and future. Anaemia and coagulopathy are common in critically ill patients and are associated with poor outcomes, including increased risk of mortality, myocardial infarction, failure to be liberated from mechanical ventilation and poor physical recovery. Transfusion of blood and blood products remains the corner stone of anaemia and coagulopathy treatment in critical care. However, determining when the benefits of transfusion outweigh the risks of anaemia may be challenging in some critically ill patients. Therefore, the European Society of Intensive Care Medicine prioritised the development of a clinical practice guideline to address anaemia and coagulopathy in non-bleeding critically ill patients. The aims of this article are to: (1) review the evolution of transfusion practice in critical care and the direction for future developments in this important area of transfusion medicine and (2) to provide a brief synopsis of the guideline development process and recommendations in a format designed for busy clinicians and blood bank staff. These clinical practice guidelines provide recommendations to clinicians on how best to manage non-bleeding critically ill patients at the bedside. More research is needed on alternative transfusion targets, use of transfusions in special populations (e.g., acute neurological injury, acute coronary syndromes), use of anaemia prevention strategies and point-of-care interventions to guide transfusion strategies."
     }
    ]
   }

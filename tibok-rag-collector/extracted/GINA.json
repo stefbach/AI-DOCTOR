@@ -1,7 +1,7 @@
 {
  "source": "GINA",
  "generated_at": "2026-05-02T14:08:38Z",
- "total_documents": 9,
+ "total_documents": 12,
  "documents": [
   {
    "id": "GINA-001",
@@ -1513,6 +1513,81 @@
     {
      "chunk_index": 13,
      "content": "following topics: • The definition of mild asthma. • Assessment of symptom control in patients whose reliever is ICS–formoterol. • Subcutaneous and sublingual allergen immunotherapy. • The diagnosis and management of asthma in preschool children. • The use of digital tools and communication in asthma management. • Management of asthma in low- and middle-income countries. GINA also plans to develop a pocket guide for severe asthma in children 6–11 years. COVID-19 advice on the GINA website will be updated as new evidence emerges."
+    }
+   ]
+  },
+  {
+   "id": "GINA-PREG-001",
+   "source": "GINA",
+   "title": "GINA management of asthma in pregnancy section",
+   "year": "2023",
+   "page_url": "https://ginasthma.org/",
+   "pdf_url": "https://ginasthma.org/",
+   "license": "GINA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pulmonology_obstructive",
+   "priority": "medium",
+   "sha256": "338bab76fbe620edee8f793f950edc7c1ecd37c38be7b493d91e8a56d3db384e",
+   "size_bytes": 712,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 712,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:51Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: GINA management of asthma in pregnancy section Source: GINA Year: 2023 Domain: pulmonology_obstructive License: GINA Available at: https://ginasthma.org/ This is a citation reference for the GINA guideline 'GINA management of asthma in pregnancy section' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pulmonology_obstructive. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "GINA-ALL-001",
+   "source": "GINA",
+   "title": "GINA strategy report severe allergic asthma management overlap",
+   "year": "2024",
+   "page_url": "https://ginasthma.org/reports/",
+   "pdf_url": "https://ginasthma.org/reports/",
+   "license": "GINA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_food",
+   "priority": "medium",
+   "sha256": "ae783619e4463079929f2ec693d816ff6b05cf43c80e7bb508ff35d7500ed7be",
+   "size_bytes": 738,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 738,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:51Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: GINA strategy report severe allergic asthma management overlap Source: GINA Year: 2024 Domain: allergology_food License: GINA Available at: https://ginasthma.org/reports/ This is a citation reference for the GINA guideline 'GINA strategy report severe allergic asthma management overlap' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: allergology_food. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "GINA-DRUG-001",
+   "source": "GINA",
+   "title": "GINA Pocket Guide for Asthma drug step therapy",
+   "year": "2024",
+   "page_url": "https://ginasthma.org/pocket-guide-for-asthma-management-and-prevention/",
+   "pdf_url": "https://ginasthma.org/pocket-guide-for-asthma-management-and-prevention/",
+   "license": "GINA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_lipid_htn_diabetes",
+   "priority": "high",
+   "sha256": "677b7b99db4d284fc7b94053ce8cd80f6792afdc5783db539b098e84ce11ae60",
+   "size_bytes": 762,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 762,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: GINA Pocket Guide for Asthma drug step therapy Source: GINA Year: 2024 Domain: drug_lipid_htn_diabetes License: GINA Available at: https://ginasthma.org/pocket-guide-for-asthma-management-and-prevention/ This is a citation reference for the GINA guideline 'GINA Pocket Guide for Asthma drug step therapy' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_lipid_htn_diabetes. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "ATTD",
  "generated_at": "2026-05-09T14:19:18Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "ATTD-CGM-001",
@@ -90,6 +90,31 @@
     {
      "chunk_index": 5,
      "content": "prevent hypoglycemia. Although analysis of the AGP reports provides an opportunity for meaningful discussion, individuals should be counseled to look at patterns throughout the day to see when low glucose events are occurring and make adjustments in their therapy to reduce these events. When applying the CGM metrics in clinical practice, it may be more meaningful and motivating to communicate to people with diabetes the importance of working to reduce the time spent <70 mg/dL (<3.9 mmol/L) to less than 1 h per day and time spent <54 mg/dL (<3.0 mmol/L) to less than 15 min per day, rather than using <4% and <1%, respectively, as the goal. However, as discussed earlier, targets must be personalized to meet the needs and capabilities of each person, focusing on small steps and small successes. Individuals with diabetes should work with their provider and/or educator to develop a SMART goal to reduce TBR. Individualized goals are particularly important for pediatric and young adult populations. The International Society for Pediatric and Adolescent Diabetes recommends that targets for individuals ≤25 years of age aim for the lowest achievable A1C without undue exposure to severe hypoglycemia or negative effects on quality of life and burden of care ( ). An A1C target of 7.0% (53 mmol/mol) can be used in children, adolescents, and adults ≤25 years old who have access to comprehensive care ( ). However, a higher A1C goal (e.g., <7.5% [<58 mmol/mol]) may be more appropriate in the following situations: inability to articulate hypoglycemia symptoms, hypoglycemia unawareness, history of severe hypoglycemia, lack of access to analog insulins and/or advanced insulin delivery technology, or inability to regularly check glucose ( ). This would equate to a TIR target of ∼60% ( ). The consensus group recognized that achieving the targets for the various time in ranges is aspirational in some situations, and many individuals will require ongoing support, both educational and technological, from their health care team. Importantly, as demonstrated by Beck et al. ( ), Vigersky and McMahon ( ), and Feig et al. ( ), even small, incremental improvements yield significant glycemic benefits. Therefore, when advising individuals with diabetes (particularly children, adolescents, and high-risk individuals) about their glycemic goals, it is important to take a stepwise approach, emphasizing that what may appear to be small, incremental successes (e.g., 5% increase in TIR) are, in fact, clinically significant in improving their glycemia ( , , ). However, when counseling women planning pregnancy and pregnant women, greater emphasis should be placed on getting to goal as soon as possible ( , ). Conclusions Use of CGM continues to expand in clinical practice. As a component of diabetes self-management, daily use of CGM provides the ability to obtain immediate feedback on current glucose levels as well as direction and rate of change in glucose levels. This information allows people with diabetes to optimize dietary intake and exercise, make informed therapy decisions regarding mealtime and correction of insulin dosing, and, importantly, react immediately and appropriately to mitigate or prevent acute glycemic events ( – ). Retrospective analysis of CGM data, using standardized data management tools such as the AGP, enables clinicians and people with diabetes to work collaboratively in identifying problem areas and then set achievable goals ( – ). We conclude that, in clinical practice, time in ranges (within target range, below range, above range) are both appropriate and useful as clinical targets and outcome measurements that complement A1C for a wide range of people with diabetes and that the target values specified in this article should be considered an integral component of CGM data analysis and day-to-day treatment decision making. Supplementary Material Supplementary Figure"
+    }
+   ]
+  },
+  {
+   "id": "ATTD-PUMP-001",
+   "source": "ATTD",
+   "title": "ATTD international consensus on insulin pump therapy and AID systems",
+   "year": "2023",
+   "page_url": "https://www.attd.kenes.com/",
+   "pdf_url": "https://www.attd.kenes.com/",
+   "license": "ATTD",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_diabetes",
+   "priority": "high",
+   "sha256": "e09393eed0fc76be95da5e925c4cf84dd6f130b69d27f32244e105a4454f9b90",
+   "size_bytes": 759,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 759,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATTD international consensus on insulin pump therapy and AID systems Source: ATTD Year: 2023 Domain: endocrinology_diabetes License: ATTD Available at: https://www.attd.kenes.com/ This is a citation reference for the ATTD guideline 'ATTD international consensus on insulin pump therapy and AID systems' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_diabetes. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

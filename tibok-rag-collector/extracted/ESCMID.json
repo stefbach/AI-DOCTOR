@@ -1,7 +1,7 @@
 {
  "source": "ESCMID",
  "generated_at": "2026-05-02T17:13:43Z",
- "total_documents": 7,
+ "total_documents": 9,
  "documents": [
   {
    "id": "ECCMID-001",
@@ -363,6 +363,56 @@
     {
      "chunk_index": 6,
      "content": "for all fungi studied except F . verticillioides and F. oxysporum . According to reports, Arabic gum has been found to have inhibitory properties against S. typhi , B. cereus , S. aureus , E. coli , and even C. albicans , and A. niger , . Arabic gum has been successfully employed as a carrier of other antimicrobial herbal preparations (garlic extract or cinnamon) to build an antibacterial coating on foods, even though its antimicrobial activity is rarely observed. Xanthan-oligosaccharide had antibacterial action against S. aureus , whereas the mechanism of action indicated that it not only reduced cell membrane permeability but also prevented biofilm development and Ca 2 + –Mg 2 + -ATPase activity on the S. aureus cytomembrane . The previous study showed that the citrus peel and carotenoids have a high antimicrobial effect against different bacteria and fungi. The susceptibility of gram-positive bacteria to these pigments, nano-formulations, and polymer gums can be attributed to the bacteria’s thick hydrophobic cell wall structure, which facilitates interaction with these compounds , . Also, the pigments carotenoids showed strong effect on S. aureus . Food safety is a major concern in modern food production, as contamination by pathogens and spoilage microorganisms can pose substantial health hazards. This shows that adding carotenoids to food packaging or preservation methods could aid in decreasing microbial contamination and increasing shelf life , . The usage of natural compounds for food preservation is gaining popularity as customers seek alternatives to synthetic additives. Clementine peel carotenoids stabilized with xanthan and Arabic gums increase their bioavailability and efficiency, making them a promising natural preservative. Conclusion Carotenoids nanoform from clementine peels stabilized with xanthan and Arabic gums represent a promising advancement in food safety and pharmaceuticals. Their antioxidants, antimicrobial, and anti-inflammatory properties suggest potential applications such as natural food preservatives or antibiotic formulations. However, the antimicrobial findings are preliminary and require further quantitative evaluation, such as MIC determination and mechanistic studies, to confirm efficacy. The combined use of these gums enhances both stability and bioactivity, offering opportunities in functional foods and natural health products. While this study provides preliminary insights into their therapeutic potential, further research is needed to establish safety and efficacy. Future work will focus on determining cytotoxicity and gastrointestinal stability assessments, and performing synergistic analyses, such as checkerboard and fractional inhibitory concentration index (FICI) tests, to fully evaluate their application in food and pharmaceutical products."
+    }
+   ]
+  },
+  {
+   "id": "ESCMID-CAND-001",
+   "source": "ESCMID",
+   "title": "ESCMID guideline diagnosis and management of Candida diseases mucosal",
+   "year": "2012",
+   "page_url": "https://www.escmid.org/escmid_publications/escmid_guidelines/",
+   "pdf_url": "https://www.escmid.org/escmid_publications/escmid_guidelines/",
+   "license": "ESCMID",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "stomatology_oral_medicine",
+   "priority": "high",
+   "sha256": "8d236f12080d329a659ab9d0d9baaa9ab7a00bd12af1cda5014d0ea282acfc91",
+   "size_bytes": 1149,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1149,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "ESCMID* guideline for the diagnosis and management of Candida diseases 2012: patients with HIV infection or AIDS. Mucosal candidiasis is frequent in immunocompromised HIV-infected highly active antiretroviral (HAART) naive patients or those who have failed therapy. Mucosal candidiasis is a marker of progressive immune deficiency. Because of the frequently marked and prompt immune reconstitution induced by HAART, there is no recommendation for primary antifungal prophylaxis of mucosal candidiasis in the HIV setting in Europe, although it has been evidenced as effective in the pre-HAART era. Fluconazole remains the first line of therapy for both oropharyngeal candidiasis and oesophageal candidiasis and should be preferred to itraconazole oral solution (or capsules when not available) due to fewer side effects. For patients who still present with fluconazole-refractory mucosal candidiasis, oral treatment with any other azole should be preferred based on precise Candida species identification and susceptibility testing results in addition to the optimization of HAART when feasible. For vaginal candidiasis, topical therapy is preferred."
+    }
+   ]
+  },
+  {
+   "id": "ESCMID-MENINGITIS-001",
+   "source": "ESCMID",
+   "title": "ESCMID guideline diagnosis and treatment of acute bacterial meningitis",
+   "year": "2016",
+   "page_url": "https://www.clinicalmicrobiologyandinfection.com/article/S1198-743X(16)00020-0/fulltext",
+   "pdf_url": "https://www.clinicalmicrobiologyandinfection.com/article/S1198-743X(16)00020-0/fulltext",
+   "license": "ESCMID",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_infection",
+   "priority": "high",
+   "sha256": "5f53f4233cc4186e17530cb02256592c1f38971ca1faacddb5696d053ee63c88",
+   "size_bytes": 1946,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1946,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Lumbar Puncture Performed Promptly or After Neuroimaging in Acute Bacterial Meningitis in Adults: A Prospective National Cohort Study Evaluating Different Guidelines. Early treatment is pivotal for favorable outcome in acute bacterial meningitis (ABM). Lumbar puncture (LP) is the diagnostic key. The aim was to evaluate the effect on outcome of adherence to European Society of Clinical Microbiology and Infectious Diseases (ESCMID), Infectious Diseases Society of America (IDSA), and Swedish guidelines regarding neuroimaging before LP. The cohort comprised 815 adult ABM patients in Sweden registered prospectively between 2008 and 2015. Primary endpoint was in-hospital mortality and secondary endpoint was favorable outcome at 2-6 months of follow-up. Indications for neuroimaging before LP existed in 7%, 32%, and 65% according to Swedish, ESCMID, and IDSA guidelines, respectively. The adjusted odds ratio (aOR) was 0.48 (95% confidence interval [CI], .26-.89) for mortality and 1.52 (95% CI, 1.08-2.12) for favorable outcome if Swedish guidelines were followed. ESCMID guideline adherence resulted in aOR of 0.68 (95% CI, .38-1.23) for mortality and 1.05 (95% CI, .75-1.47) for favorable outcome. Following IDSA recommendations resulted in aOR of 1.09 (95% CI, .61-1.95) for mortality and 0.59 (95% CI, .42-.82) for favorable outcome. Performing prompt vs neuroimaging-preceded LP was associated with aOR of 0.38 (95% CI, .18-.77) for mortality and 2.11 (95% CI, 1.47-3.00) for favorable outcome. The beneficial effect of prompt LP was observed regardless of mental status and immunosuppression. Adherence to Swedish guidelines in ABM is associated with decreased mortality and increased favorable outcome in contrast to adherence to ESCMID or IDSA recommendations. Our findings support that impaired mental status and immunocompromised state should not be considered indications for neuroimaging before LP in patients with suspected ABM."
     }
    ]
   }

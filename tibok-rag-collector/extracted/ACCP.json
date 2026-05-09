@@ -1,7 +1,7 @@
 {
  "source": "ACCP",
  "generated_at": "2026-05-09T08:34:45Z",
- "total_documents": 8,
+ "total_documents": 11,
  "documents": [
   {
    "id": "ACCP-ANTITHROMB-001",
@@ -576,6 +576,81 @@
     {
      "chunk_index": 13,
      "content": "improved perioperative outcomes in elderly patients undergoing hip fracture surgery, and regional anesthesia reduces the risks of in-hospital death, acute respiratory failure, prolonged hospital stay, and readmission compared with GA. – Memtsoudis et al analyzed data from 400 hospitals and found that compared with GA, the application of neuraxial anesthesia in primary joint replacement surgery was significantly associated with a reduced 30-day mortality rate, shorter hospital stays, lower costs, and a significantly reduced incidence of in-hospital complications. They concluded that neuraxial anesthesia is associated with the most favorable complication risk profile. The Scottish Intercollegiate Guidelines Network recommends that spinal/epidural anesthesia should be considered for all patients undergoing hip fracture repair unless contraindicated. Further research is needed to determine the optimal anesthesia method for elderly patients undergoing lower extremity fracture surgery. Until clear results are available, the choice of anesthesia method should be based on the hospital's available resources, the anesthesiologist's proficiency in different techniques, and individual patient factors. Nevertheless, when neuraxial anesthesia is technically feasible, contraindication-free, and performed by proficient practitioners, it remains the authors’ recommended priority approach. Despite early and adequate assessment and prophylactic treatment of the risk of DVT in elderly patients with lower extremity fractures, the current incidence of DVT remains high. Refinement in the existing thrombosis risk assessment systems, bleeding risk assessment systems, and pharmacological prevention strategies has remarkable potential. Further research should focus on developing an artificial intelligence (AI)-based risk assessment system for thrombosis and bleeding, incorporating newly identified risk factors and biomarkers. This system should provide safer and more effective prevention recommendations, ultimately enhancing the safety of surgical procedures for elderly patients with lower extremity fractures. Conclusion DVT is a common, high-risk complication in elderly patients with lower extremity fractures during the perioperative period. Early identification, prevention, and management of DVT are crucial for reducing perioperative morbidity and mortality. Anesthesiologists should be well-versed in the pathophysiological mechanisms of thrombogenesis, recognize DVT risk factors, and utilize standardized protocols for routine DVT screening. While maintaining vigilance regarding bleeding risks, the implementation of early, multimodal, and individualized prophylactic or therapeutic measures is essential. Anesthesiologists must carefully weigh the benefits of thromboprophylaxis against the risk of hemorrhage while addressing the inherent conflict between preoperative comorbidity optimization and timely surgical intervention, striving to perform surgery within 48 h post-injury. Key strategies include selecting the appropriate anesthetic technique, ensuring safe and effective intraoperative management, optimizing early mobilization with adequate postoperative analgesia, initiating early anticoagulation, and preventing complications. Multidisciplinary collaboration with surgeons and other specialists should be emphasized. Anesthesiologists, surgeons, and relevant professionals should jointly develop standard protocols for elderly patients with lower extremity fractures in accordance with different risk stratifications, which should be based on evidence-based medicine that is updated in a timely manner. Besides, in case of emergency PE occurring perioperatively, a rescue team that includes interventional physicians, radiologists, anesthesiologists, and surgeons should be established. AI-based risk assessment systems should be developed on the basis of big data models regarding meta-analyses and guidelines from authoritative sources. They can be applied to advise clinical professionals before admission, surgery, and discharge."
+    }
+   ]
+  },
+  {
+   "id": "ACCP-COUGH-001",
+   "source": "ACCP",
+   "title": "CHEST expert panel report unexplained chronic cough in adults",
+   "year": "2018",
+   "page_url": "https://journal.chestnet.org/article/S0012-3692(17)33126-7/fulltext",
+   "pdf_url": "https://journal.chestnet.org/article/S0012-3692(17)33126-7/fulltext",
+   "license": "ACCP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pulmonology_obstructive",
+   "priority": "high",
+   "sha256": "d43760c6ea243118d14f7a9d62b4942c2d5e73c18515ceeea1c52ea0876ef1c7",
+   "size_bytes": 787,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 787,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CHEST expert panel report unexplained chronic cough in adults Source: ACCP Year: 2018 Domain: pulmonology_obstructive License: ACCP Available at: https://journal.chestnet.org/article/S0012-3692(17)33126-7/fulltext This is a citation reference for the ACCP guideline 'CHEST expert panel report unexplained chronic cough in adults' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pulmonology_obstructive. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACCP-BRIDGING-001",
+   "source": "ACCP",
+   "title": "ACCP CHEST perioperative management of antithrombotic therapy bridging",
+   "year": "2022",
+   "page_url": "https://journal.chestnet.org/",
+   "pdf_url": "https://journal.chestnet.org/",
+   "license": "ACCP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_thrombosis",
+   "priority": "high",
+   "sha256": "0ef2a7d179ca2f738149d4df47825878ca1ccac432fd781a2150ff3f141e900c",
+   "size_bytes": 2052,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2052,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Impact of Implementing a Protocol on the Perioperative Management in Patients Treated with Antithrombotics Admitted for Hip Fracture Surgery: an Observational Study. This study aimed to describe the impact of implementing a protocol on the perioperative management of patients admitted for hip fracture treated with antithrombotics. A protocol was designed based on the recommendations from the American College of Chest Physicians (ACCP). After its implementation (May 2012), information on antithrombotic management was collected from admission to 3 months after surgery in retrospective (October 2011-March 2012) and prospective (October 2012-March 2013) cohorts. Patients' thromboembolic risk was classified into high, moderate or low according to the ACCP categories. A total of 113 and 101 cases were included in the retrospective and prospective cohorts, respectively. No differences in age, gender, American Society of Anaesthesiology score or thrombotic risk categories were observed between cohorts. Most patients were treated with aspirin or triflusal (55.1% and 48.1% in each cohort, respectively), clopidogrel (24.5% and 26.6%) or acenocoumarol (16.3% and 20.2%). In moderate to high thromboembolic risk patients, a higher rate of bridging therapy with full doses of enoxaparin (18.5% and 50%, p = 0.04 before and 9.1% and 43.7%, p = 0.02 after surgery) and a lower rate of aspirin discontinuation (76% and 55.3%, p = 0.03) were observed in the prospective cohort. Both cohorts had a similar percentage of cases with bleeding (68.1% and 68.3%) and thrombotic events (11.5% and 13%). No differences in the timing between surgery and the discontinuation or resumption of antithrombotics were noted. After the protocol implementation, aspirin was less often stopped and bridging therapy with therapeutic doses of enoxaparin was used more often. However, interruption and resumption times of antithrombotics remained almost unchanged. In order to achieve these goals, more efforts should be made to implement the protocol in clinical practice."
+    }
+   ]
+  },
+  {
+   "id": "ACCP-PAL-001",
+   "source": "ACCP",
+   "title": "ACCP Cough in the Adult Palliative Setting",
+   "year": "2018",
+   "page_url": "https://journal.chestnet.org/cough-guidelines",
+   "pdf_url": "https://journal.chestnet.org/cough-guidelines",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_general",
+   "priority": "medium",
+   "sha256": "0353d2cfd0266c26e474459f540dba4d48b6a3a9749e06dd2e2fe8976ec17d36",
+   "size_bytes": 723,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 723,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACCP Cough in the Adult Palliative Setting Source: ACCP Year: 2018 Domain: palliative_general License: Restricted Available at: https://journal.chestnet.org/cough-guidelines This is a citation reference for the ACCP guideline 'ACCP Cough in the Adult Palliative Setting' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: palliative_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

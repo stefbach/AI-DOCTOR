@@ -1,7 +1,7 @@
 {
  "source": "NaTHNaC",
  "generated_at": "2026-05-09T18:23:25Z",
- "total_documents": 4,
+ "total_documents": 6,
  "documents": [
   {
    "id": "NATHNAC-MALARIA-001",
@@ -200,6 +200,56 @@
     {
      "chunk_index": 6,
      "content": "Wiley - Monash University agreement via the Council of to allow time for adequate immunity to develop and to monitor Australian University Librarians. 1479828x, 2023, 5, Downloaded from https://obgyn.onlinelibrary.wiley.com/doi/10.1111/ajo.13704, Wiley Online Library on [09/05/2026]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License 650 Vaccination recommendations REFERENCES vaccine and live attenuated influenza vaccine in the vaccine ad- verse event reporting system, 1990–­2009. Am J Obstet Gynecol 1. Hezelgrave NL, Whitty CJ, Shennan AH, Chappell LC. Advising on 2011; 204(2): 146 e1–­146 e7. travel during pregnancy. BMJ 2011; 342: d2506. 11. Fernando M, Giles ML, Krishnaswamy S, Cole S. The pregnant 2. Kharbanda EO, Vazquez-­Benitez G, Lipkind HS et al. Evaluation of traveller: an overview of general travel advice. Aust N Z J Obstet the association of maternal pertussis vaccination with obstetric Gynaecol 2023. events and birth outcomes. JAMA 2014; 312(18): 1897–­1904. 12. O'Kelly B, Lambert JS. Vector-­borne diseases in pregnancy. Ther 3. Hills SL, Griggs AC, Fischer M. Japanese encephalitis in travel- Adv Infect Dis 2020; 7: 2049936120941725. ers from non-­endemic countries, 1973–­2008. Am J Trop Med Hyg 13. Hutchinson D, Kunasekaran M, Chen X, Moa A. Japanese enceph- 2010; 82(5): 930–­936. alitis outbreak in south-­eastern Australia, 2022. Global Biosecurity 4. Endy TP, Keiser PB, Cibula D et al. Effect of antimalarial drugs on 2022; 4(1). the immune response to intramuscular rabies vaccination using 14. Cavalcanti DP, Salomao MA, Lopez-­ Camelo J, Pessoto MA. a postexposure prophylaxis regimen. J Infect Dis 2020; 221(6): Campinas Group of Yellow Fever Immunization during P. early 927–­933. exposure to yellow fever vaccine during pregnancy. Trop Med Int 5. Chu SHS, Krishnaswamy S, Cole S, Giles ML. Travel patterns and Health 2007; 12(7): 833–­837. advice-­seeking behaviour of pregnant women in the Australian 15. Suzano CE, Amaral E, Sato HK et al. The effects of yellow fever im- context: a multicentre cross-­sectional analysis. Aust N Z J Obstet munization (17DD) inadvertently used in early pregnancy during Gynaecol 2022; 62: 688–­694. a mass campaign in Brazil. Vaccine 2006; 24(9): 1421–­1426. 6. Paudel P, Raina C, Zwar N et al. Risk activities and pre-­travel health seeking practices of notified cases of imported infectious 16. Clinton H, Khodr ZG, Chang RN et al. Safety of yellow fever vac- diseases in Australia. J Travel Med 2017; 24(5). cination in pregnancy: Findings from a cohort of active duty US 7. Heywood AE, Watkins RE, Iamsirithaworn S et al. A cross-­sectional military women. J Travel Med 2020; 27(6): taaa138. study of pre-­travel health-­seeking practices among travelers de- 17. Tsai TF, Paul R, Lynberg MC, Letson GW. Congenital yellow fever parting Sydney and Bangkok airports. BMC Public Health 2012; virus infection after immunization in pregnancy. J Infect Dis 1993; 12(1): 1–­9. 168(6): 1520–­1523. 8. Australian Technical Advisory Group on Immunisation (ATAGI). 18. Centers for Disease Control and Prevention (CDC). Transmission Australian Immunisation Handbook AGDoHaAC, Canberra, 2022. of yellow fever vaccine virus through breast-­feeding-­Brazil, 2009. Available from URL immun​isati​onhan​dbook.health.gov.au MMWR Morb Mortal Wkly Rep 2010; 59(5): 133–­135. 9. Amirthalingam G, Andrews N, Campbell H et al. Effectiveness 19. World Health Organisation. Global advisory committee on vaccine of maternal pertussis vaccination in England: an observational safety. Weekly Epidemiological Record, No 29 2013; 29: 301–­312. study. The Lancet 2014; 384(9953): 1521–­1528. 20. Sudarshan MK, Giri MS, Mahendra BJ et al. Assessing the safety 10. Moro PL, Broder K, Zheteyeva Y et al. Adverse events in pregnant of post-­exposure rabies immunization in pregnancy. Hum Vaccin women following administration of trivalent inactivated influenza 2007; 3(3): 87–­89."
+    }
+   ]
+  },
+  {
+   "id": "NATHNAC-COUNTRY-001",
+   "source": "NaTHNaC",
+   "title": "NaTHNaC Country Information Database TravelHealthPro",
+   "year": "2024",
+   "page_url": "https://travelhealthpro.org.uk/countries",
+   "pdf_url": "https://travelhealthpro.org.uk/countries",
+   "license": "Crown Copyright",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "travel_pretravel",
+   "priority": "high",
+   "sha256": "eaa7140534498dcd15854f19cf6863bdbc760f00e7f5095f682484b8b6487c59",
+   "size_bytes": 745,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 745,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NaTHNaC Country Information Database TravelHealthPro Source: NaTHNaC Year: 2024 Domain: travel_pretravel License: Crown Copyright Available at: https://travelhealthpro.org.uk/countries This is a citation reference for the NaTHNaC guideline 'NaTHNaC Country Information Database TravelHealthPro' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: travel_pretravel. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "NATHNAC-PEDS-001",
+   "source": "NaTHNaC",
+   "title": "NaTHNaC Children Travelling Factsheet",
+   "year": "2023",
+   "page_url": "https://travelhealthpro.org.uk/factsheet/",
+   "pdf_url": "https://travelhealthpro.org.uk/factsheet/",
+   "license": "Crown Copyright",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "travel_special_pop",
+   "priority": "medium",
+   "sha256": "2d04a3e02c141994bb6d595958a3501237e0dc533013a68cd904e4fd73264cd3",
+   "size_bytes": 720,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 720,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NaTHNaC Children Travelling Factsheet Source: NaTHNaC Year: 2023 Domain: travel_special_pop License: Crown Copyright Available at: https://travelhealthpro.org.uk/factsheet/ This is a citation reference for the NaTHNaC guideline 'NaTHNaC Children Travelling Factsheet' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: travel_special_pop. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

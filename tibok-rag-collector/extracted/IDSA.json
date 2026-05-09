@@ -1,7 +1,7 @@
 {
  "source": "IDSA",
  "generated_at": "2026-05-02T14:21:46Z",
- "total_documents": 56,
+ "total_documents": 79,
  "documents": [
   {
    "id": "IDSA-001",
@@ -4236,6 +4236,581 @@
     {
      "chunk_index": 6,
      "content": "diagnostic procedures, increase the quality and quantity of national reporting systems, and develop a digital health infrastructure. Jordan's Economic Modernization Vision prioritizes improved health governance and digital transformation ( ), thus meeting these requirements, and has the possibility of improving epidemiological surveillance and early outbreak identification in both countries."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-SAB-001",
+   "source": "IDSA",
+   "title": "IDSA guidelines for native joint septic arthritis and osteomyelitis",
+   "year": "2019",
+   "page_url": "https://www.idsociety.org/practice-guideline/",
+   "pdf_url": "https://www.idsociety.org/practice-guideline/",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_infection",
+   "priority": "high",
+   "sha256": "df891cc9768c4a927a9a83781120a502cef12761c23599ea5005406661930123",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA guidelines for native joint septic arthritis and osteomyelitis Source: IDSA Year: 2019 Domain: orthopedics_infection License: IDSA Available at: https://www.idsociety.org/practice-guideline/ This is a citation reference for the IDSA guideline 'IDSA guidelines for native joint septic arthritis and osteomyelitis' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_infection. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-IE-001",
+   "source": "IDSA",
+   "title": "IDSA endocarditis treatment guidelines",
+   "year": "2023",
+   "page_url": "https://academic.oup.com/cid/article/76/12/2118",
+   "pdf_url": "https://academic.oup.com/cid/article/76/12/2118",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_valve",
+   "priority": "high",
+   "sha256": "7c38023b47a1a92207d1709efbed9e407f833b55ca4a6f350cdf8ac6c1ad3ff0",
+   "size_bytes": 1021,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1021,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Sign of the Times: Updating Infective Endocarditis Diagnostic Criteria to Recognize Enterococcus faecalis as a Typical Endocarditis Bacterium. The modified Duke criteria requires that Enterococcus faecalis bacteremia must be both community-acquired and without known focus in order to be considered a microbiological \"Major\" diagnostic criterion in the diagnosis of infective endocarditis. We believe that the microbiological diagnostic criteria should be updated to regard E. faecalis as a \"typical\" endocarditis bacterium as is currently the case, for example, viridans group streptococci and Staphylococcus aureus. Using data from a prospective study of 344 patients with E. faecalis bacteremia evaluated with echocardiography, we demonstrate that designating E. faecalis as a \"typical\" endocarditis pathogen, regardless the place of acquisition or the portal of entry, improved the sensitivity to correctly identify definite endocarditis from 70% (modified Duke criteria) to 96% (enterococcal adjusted Duke criteria)."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-CAP-001",
+   "source": "IDSA",
+   "title": "IDSA/ATS clinical practice guidelines on community-acquired pneumonia in adults",
+   "year": "2019",
+   "page_url": "https://www.atsjournals.org/doi/10.1164/rccm.201908-1581ST",
+   "pdf_url": "https://www.atsjournals.org/doi/10.1164/rccm.201908-1581ST",
+   "license": "IDSA ATS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pulmonology_infection",
+   "priority": "high",
+   "sha256": "a78b1958c367e8283b782f6cd11fb22e78a6d87c819af24d7e830f682b507cf6",
+   "size_bytes": 1851,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1851,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Potential Implications of Using Locally Validated Risk Factors for Drug-Resistant Pathogens in Patients With Community-Acquired Pneumonia in US Hospitals: A Cross-Sectional Study. The 2019 American Thoracic Society/Infectious Diseases Society of America (ATS/IDSA) community-acquired pneumonia (CAP) guidelines recommend that clinicians prescribe empiric antibiotics for methicillin-resistant Staphylococcus aureus or Pseudomonas aeruginosa only if locally validated risk factors (or 2 generic risk factors if local validation is not feasible) are present. In this cross-sectional study that included adults hospitalized for CAP across 50 hospitals in the Premier Healthcare Database from 2010 to 2015, we sought to describe how the use of extended-spectrum antibiotics (ESAs) and the coverage for patients with CAP due to restraint organisms would change under the 2 approaches described in the 2019 ATS/IDSA guidelines. The proportion of ESA use in patients with CAP and the proportion of ESA coverage among patients with infections resistant to recommended CAP therapy were measured. In the 50 hospitals, 19%-75% of patients received ESAs, and 42%-100% of patients with resistant organisms received ESAs. The median number of risk factors identified per hospital was 9 (interquartile range, 6-12). Overall, treatment according to local risk factors reduced the number of patients receiving ESAs by 38.8 percentage points and by 47.5 percentage points when using generic risk factors. However, the effect varied by hospital. The use of generic risk factors always resulted in less ESA use and less coverage for resistant organisms. Using locally validated risk factors resulted in a similar outcome in all but 1 hospital. Future guidelines should explicitly define the optimal trade-off between adequate coverage for resistant organisms and ESA use."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-HAP-001",
+   "source": "IDSA",
+   "title": "IDSA/ATS clinical practice guidelines for hospital-acquired and ventilator-associated pneumonia",
+   "year": "2016",
+   "page_url": "https://academic.oup.com/cid/article/63/5/e61/2237650",
+   "pdf_url": "https://academic.oup.com/cid/article/63/5/e61/2237650",
+   "license": "IDSA ATS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pulmonology_infection",
+   "priority": "high",
+   "sha256": "48e016588235b7ee66d3eb80e96462512a519786520ca515f0b652e2e5eebd36",
+   "size_bytes": 841,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 841,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA/ATS clinical practice guidelines for hospital-acquired and ventilator-associated pneumonia Source: IDSA Year: 2016 Domain: pulmonology_infection License: IDSA ATS Available at: https://academic.oup.com/cid/article/63/5/e61/2237650 This is a citation reference for the IDSA guideline 'IDSA/ATS clinical practice guidelines for hospital-acquired and ventilator-associated pneumonia' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pulmonology_infection. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-CHOLANGITIS-001",
+   "source": "IDSA",
+   "title": "IDSA Guidelines on Antibiotic Therapy for Biliary Tract Infection",
+   "year": "2010",
+   "page_url": "https://academic.oup.com/cid/article/50/2/133/305822",
+   "pdf_url": "https://academic.oup.com/cid/article/50/2/133/305822",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gastro_biliary",
+   "priority": "medium",
+   "sha256": "f56fd436d08376f76d68cf8a135843af70879c6521628d332204921787638d85",
+   "size_bytes": 762,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 762,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA Guidelines on Antibiotic Therapy for Biliary Tract Infection Source: IDSA Year: 2010 Domain: gastro_biliary License: IDSA Available at: https://academic.oup.com/cid/article/50/2/133/305822 This is a citation reference for the IDSA guideline 'IDSA Guidelines on Antibiotic Therapy for Biliary Tract Infection' published in 2010. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gastro_biliary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-OE-001",
+   "source": "IDSA",
+   "title": "IDSA practice guidelines for diagnosis and management of skin and soft tissue infections including otitis externa",
+   "year": "2014",
+   "page_url": "https://www.idsociety.org/practice-guideline/skin-and-soft-tissue-infections/",
+   "pdf_url": "https://www.idsociety.org/practice-guideline/skin-and-soft-tissue-infections/",
+   "license": "IDSA",
+   "commercial_use": "allowed",
+   "clinical_domain": "ent_otology",
+   "priority": "medium",
+   "sha256": "1893e2b73069b68db8bbebbbeaee1aeeef7c4fe14713d24a22cb22b7b45da580",
+   "size_bytes": 877,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 877,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA practice guidelines for diagnosis and management of skin and soft tissue infections including otitis externa Source: IDSA Year: 2014 Domain: ent_otology License: IDSA Available at: https://www.idsociety.org/practice-guideline/skin-and-soft-tissue-infections/ This is a citation reference for the IDSA guideline 'IDSA practice guidelines for diagnosis and management of skin and soft tissue infections including otitis externa' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_otology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-PHAR-001",
+   "source": "IDSA",
+   "title": "IDSA clinical practice guideline group A streptococcal pharyngitis",
+   "year": "2012",
+   "page_url": "https://www.idsociety.org/practice-guideline/strep-throat/",
+   "pdf_url": "https://www.idsociety.org/practice-guideline/strep-throat/",
+   "license": "IDSA",
+   "commercial_use": "allowed",
+   "clinical_domain": "ent_laryngology",
+   "priority": "high",
+   "sha256": "f04abb7c0f31c9c6f0de5c8a553f356ea86519371a7cc6957652ff061e98b41e",
+   "size_bytes": 772,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 772,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA clinical practice guideline group A streptococcal pharyngitis Source: IDSA Year: 2012 Domain: ent_laryngology License: IDSA Available at: https://www.idsociety.org/practice-guideline/strep-throat/ This is a citation reference for the IDSA guideline 'IDSA clinical practice guideline group A streptococcal pharyngitis' published in 2012. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_laryngology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-SSTI-001",
+   "source": "IDSA",
+   "title": "IDSA practice guidelines for the diagnosis and management of skin and soft tissue infections",
+   "year": "2014",
+   "page_url": "https://academic.oup.com/cid/article/59/2/e10/2895845",
+   "pdf_url": "https://academic.oup.com/cid/article/59/2/e10/2895845",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "dermatology_infectious",
+   "priority": "high",
+   "sha256": "5c8512972eb62067b1bdf274e7217633b2f626cbd3324540d95ad837d1e942a5",
+   "size_bytes": 1791,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1790,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Frequency and yield of blood cultures for observation patients with skin and soft tissue infections. 1) To measure frequency and yield of blood cultures obtained for observation status adult patients with skin and soft tissue infection (SSTI), 2) describe how often blood cultures were performed according to Infectious Diseases Society of America (IDSA) SSTI guideline indications, 3) identify proportion of patients meeting Center for Medicare Services (CMS) sepsis criteria. Retrospective cohort. Tertiary academic center. Consecutive adult observation status patients hospitalized with SSTI between July 2017 and July 2018. We measured the proportion and results of blood cultures obtained among the study cohort and proportion of obtained cultures that satisfied IDSA indications. We identified 132 observation status patients with SSTI during the study period; 67 (50.8%) had blood cultures drawn. Only 14 (10.6%) patients met IDSA indications for culture; 51 (38.%) met Center for Medicare Services definition for sepsis. We identified two (3.0%) cases of bacteremia and two (3.0%) cases of skin bacteria contamination. In multivariable analysis, only temperature > 38 °C (OR 3.84, 95%CI 1.09-13.60) and white race (OR 2.71, 95%CI 1.21-6.20) were associated with blood culture obtainment; neither meeting IDSA SSTI guideline indications nor meeting CMS sepsis criteria was associated with culture. Among observation status patients with SSTI, over half had blood cultures drawn, though 10% satisfied guideline indications for culture. The proportion of cultures with bacterial growth was low and yielded as many skin contaminants as cases of bacteremia. Our study highlights the need for further quality improvement efforts to reduce unnecessary blood cultures in routine SSTI cases."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-IMPETIGO-001",
+   "source": "IDSA",
+   "title": "IDSA guidelines impetigo management",
+   "year": "2014",
+   "page_url": "https://academic.oup.com/cid/article/59/2/e10/2895845",
+   "pdf_url": "https://academic.oup.com/cid/article/59/2/e10/2895845",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "dermatology_infectious",
+   "priority": "high",
+   "sha256": "ef92ccf83dd0e2b335bd5614dbd3a5c17ee0bc31d64d4114417a57c6fc8c6801",
+   "size_bytes": 719,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 719,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA guidelines impetigo management Source: IDSA Year: 2014 Domain: dermatology_infectious License: IDSA Available at: https://academic.oup.com/cid/article/59/2/e10/2895845 This is a citation reference for the IDSA guideline 'IDSA guidelines impetigo management' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: dermatology_infectious. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-SCABIES-001",
+   "source": "IDSA",
+   "title": "IDSA recommendations on scabies management",
+   "year": "2014",
+   "page_url": "https://academic.oup.com/cid/",
+   "pdf_url": "https://academic.oup.com/cid/",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "dermatology_infectious",
+   "priority": "medium",
+   "sha256": "1fbf1b2741d5d080a8eeafe0daed9ffbae531e43f447a847205608d521ac41f4",
+   "size_bytes": 3407,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3404,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Treatment of skin and soft tissue infections in the elderly: A review. Skin and soft tissue infections (SSTIs) have become the second most common type of infection among persons residing in long-term care facilities. The purpose of this article was to review the latest information on SSTIs among the elderly, including age-related changes, challenges, and treatment strategies in the era of emerging bacterial resistance. Relevant information was identified through a search of MEDLINE (1970-April 2010), International Pharmaceutical Abstracts (1970-April 2010), and Google Scholar using the terms skin and soft tissue infection, skin and skin structure infection, cellulitis, treatment guidelines, and elderly. Additional publications were found by searching the reference lists of the identified articles. Trials published since 1970 were selected for this review if they prospectively evaluated mostly adults (≥18 years of age), included >50 patients, and reported diagnostic criteria as well as clinical outcomes in patients treated for simple or complicated SSTIs. Fifty-eight of 664 identified studies were selected and included in this review. A search of the literature did not identify any prospective clinical trials that were conducted exclusively in the elderly. Information on the treatment of SSTIs in the elderly was based solely on clinical studies that were conducted in adults in general. As recommended by the Infectious Diseases Society of America (IDSA) 2008 update, SSTIs should be suspected in elderly patients who have skin lesions and present with a decline in functional status, with or without fever. Patients who present with symptoms of systemic toxicity should be hospitalized for further evaluation. Current challenges in the management of SSTIs include the rapid emergence of community-acquired, methicillin-resistant Staphylococcus aureus (CA-MRSA), the emergence of macrolide-resistant streptococci within the past decade, and the lack of a reliable algorithm to differentiate potentially life-threatening SSTIs that require aggressive interventions and prompt hospitalization from those that can be managed in an outpatient setting. S aureus was the most common cause of SSTIs, being isolated in 42.8% (5015/11,723) of wounds, followed by streptococci. Common SSTIs in the elderly such as shingles, diabetic foot infections, infected pressure ulcers, and scabies, and their treatment were also discussed. Based on reviews of published trials, treatment of simple SSTIs generally consisted of administration of agents with activity against S aureus and Streptococcus species such as a penicillinase-resistant β-lactam, a first-generation cephalosporin, or clindamycin. Broadening of the antimicrobial spectrum to include gram-negative and anaerobic organisms should be implemented for complicated SSTIs such as diabetic foot infections and infected pressure ulcers. Local rates of MRSA, CA-MRSA, and macrolide-resistant streptococci should be considered when selecting empiric therapy. A search of the literature did not identify any prospective clinical trials on the treatment of SSTIs in the elderly; therefore, it is recommended to follow treatment based on the current IDSA guidelines. More research and publications are needed to establish proper selection of antimicrobial agents, treatment strategies, and duration of therapy of SSTIs in the elderly population."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-ZOSTER-001",
+   "source": "IDSA",
+   "title": "IDSA practice guidelines varicella zoster",
+   "year": "2007",
+   "page_url": "https://www.idsociety.org/",
+   "pdf_url": "https://www.idsociety.org/",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "dermatology_infectious",
+   "priority": "medium",
+   "sha256": "f29512f28635674e2dfd5cc25400def5d9b84460187eced99cddd46056341565",
+   "size_bytes": 2143,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2143,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Immunization programs for infants, children, adolescents, and adults: clinical practice guidelines by the Infectious Diseases Society of America. Evidence-based guidelines for immunization of infants, children, adolescents, and adults have been prepared by an Expert Panel of the Infectious Diseases Society of America (IDSA). These updated guidelines replace the previous immunization guidelines published in 2002. These guidelines are prepared for health care professionals who care for either immunocompetent or immunocompromised people of all ages. Since 2002, the capacity to prevent more infectious diseases has increased markedly for several reasons: new vaccines have been licensed (human papillomavirus vaccine; live, attenuated influenza vaccine; meningococcal conjugate vaccine; rotavirus vaccine; tetanus toxoid, reduced diphtheria toxoid, and acellular pertussis [Tdap] vaccine; and zoster vaccine), new combination vaccines have become available (measles, mumps, rubella and varicella vaccine; tetanus, diphtheria, and pertussis and inactivated polio vaccine; and tetanus, diphtheria, and pertussis and inactivated polio/Haemophilus influenzae type b vaccine), hepatitis A vaccines are now recommended universally for young children, influenza vaccines are recommended annually for all children aged 6 months through 18 years and for adults aged > or = 50 years, and a second dose of varicella vaccine has been added to the routine childhood and adolescent immunization schedule. Many of these changes have resulted in expansion of the adolescent and adult immunization schedules. In addition, increased emphasis has been placed on removing barriers to immunization, eliminating racial/ethnic disparities, addressing vaccine safety issues, financing recommended vaccines, and immunizing specific groups, including health care providers, immunocompromised people, pregnant women, international travelers, and internationally adopted children. This document includes 46 standards that, if followed, should lead to optimal disease prevention through vaccination in multiple population groups while maintaining high levels of safety."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-PHARYNG-001",
+   "source": "IDSA",
+   "title": "IDSA practice guideline for the diagnosis and management of group A streptococcal pharyngitis",
+   "year": "2012",
+   "page_url": "https://academic.oup.com/cid/article/55/10/e86/321183",
+   "pdf_url": "https://academic.oup.com/cid/article/55/10/e86/321183",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pediatrics_infectious",
+   "priority": "high",
+   "sha256": "265935a9514166fa244dc84db4b8127268dedcee03e811a77473995df24c301d",
+   "size_bytes": 833,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 833,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA practice guideline for the diagnosis and management of group A streptococcal pharyngitis Source: IDSA Year: 2012 Domain: pediatrics_infectious License: IDSA Available at: https://academic.oup.com/cid/article/55/10/e86/321183 This is a citation reference for the IDSA guideline 'IDSA practice guideline for the diagnosis and management of group A streptococcal pharyngitis' published in 2012. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pediatrics_infectious. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-PEDCAP-001",
+   "source": "IDSA",
+   "title": "IDSA practice guidelines pneumonia in pediatric patients",
+   "year": "2011",
+   "page_url": "https://academic.oup.com/cid/",
+   "pdf_url": "https://academic.oup.com/cid/",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pediatrics_infectious",
+   "priority": "high",
+   "sha256": "b3c93b3f4a7c88d3a3f0c1ceb61b0db1b130863129058a3c7d8524e682c66f37",
+   "size_bytes": 735,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 735,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA practice guidelines pneumonia in pediatric patients Source: IDSA Year: 2011 Domain: pediatrics_infectious License: IDSA Available at: https://academic.oup.com/cid/ This is a citation reference for the IDSA guideline 'IDSA practice guidelines pneumonia in pediatric patients' published in 2011. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pediatrics_infectious. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-MENINGITIS-001",
+   "source": "IDSA",
+   "title": "IDSA practice guidelines for the management of bacterial meningitis",
+   "year": "2017",
+   "page_url": "https://academic.oup.com/cid/",
+   "pdf_url": "https://academic.oup.com/cid/",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "emergency_neuro",
+   "priority": "high",
+   "sha256": "ebeb25e8bd2c589e2b674a5a0da8366cd6a4027146107fa2215e61dd744db351",
+   "size_bytes": 745,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 745,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA practice guidelines for the management of bacterial meningitis Source: IDSA Year: 2017 Domain: emergency_neuro License: IDSA Available at: https://academic.oup.com/cid/ This is a citation reference for the IDSA guideline 'IDSA practice guidelines for the management of bacterial meningitis' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: emergency_neuro. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-NSTI-002",
+   "source": "IDSA",
+   "title": "IDSA guidance necrotizing fasciitis surgical and antimicrobial management",
+   "year": "2014",
+   "page_url": "https://academic.oup.com/cid/",
+   "pdf_url": "https://academic.oup.com/cid/",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "dermatology_infectious",
+   "priority": "high",
+   "sha256": "412d1832494a7bbc3bbf395cbecf4d020e323732d879d7acf8deee6a66519188",
+   "size_bytes": 771,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 771,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA guidance necrotizing fasciitis surgical and antimicrobial management Source: IDSA Year: 2014 Domain: dermatology_infectious License: IDSA Available at: https://academic.oup.com/cid/ This is a citation reference for the IDSA guideline 'IDSA guidance necrotizing fasciitis surgical and antimicrobial management' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: dermatology_infectious. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-DFU-001",
+   "source": "IDSA",
+   "title": "IDSA Clinical Practice Guideline for the Diagnosis and Treatment of Diabetic Foot Infections",
+   "year": "2023",
+   "page_url": "https://www.idsociety.org/practice-guideline/diabetic-foot-infections/",
+   "pdf_url": "https://www.idsociety.org/practice-guideline/diabetic-foot-infections/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wound_infection",
+   "priority": "high",
+   "sha256": "1965d68f44ff0fd3e8d2461627481306e3f171d27295a7bb6ad2ab013237e2b6",
+   "size_bytes": 2384,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2384,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Integrating clinical data into evidence-based practice: institutional guideline development for diabetic foot infections. Diabetic foot infections (DFIs) are a major cause of morbidity in low- and middle-income countries such as Pakistan, where antimicrobial resistance (AMR) and the absence of localized guidelines complicate their management. This study aimed to analyze the microbiological profile of DFIs and develop evidence-based, context-specific empirical treatment recommendations. We conducted a retrospective study at a tertiary care hospital in Pakistan, reviewing all diabetic foot related admissions between January 2022 and December 2023. Patients with clinically suspected infections had wound cultures taken and were classified by infection severity using IDSA/IWGDF criteria. Wound specimens from 400 DFI patients were subjected to culture and CLSI-standard antimicrobial susceptibility testing. Pathogen patterns were analyzed across severity groups. A multidisciplinary stewardship team used these findings, together with international guidelines, to develop severity-specific institutional-based empiric treatment recommendations. A total of 118 culture-positive samples from 400 admissions were analyzed. Gram-negative organisms predominated (62%), followed by Escherichia coli (25%), Proteus mirabilis (14%), and Pseudomonas aeruginosa (10%). Methicillin-resistant Staphylococcus aureus ( MRSA) accounted for 23% and methicillin-sensitive Staphylococcus aureus ( MSSA) 10%. E. coli was highly susceptible to tigecycline (86%) and amikacin (83%), while Proteus mirabilis was highly susceptible to carbapenems and piperacillin-tazobactam. MRSA/MSSA remain universally susceptible to vancomycin and linezolid. Based on these patterns, severity-stratified empiric regimens were recommended. Evidence grading supported strong recommendations for moderate to severe infections (SoR: Strong; QoE: Moderate). This study highlights the limited role of Access antibiotics in DFIs, with Watch agents serving as the main empiric therapy and Reserve drugs reserved for multidrug-resistant cases. Using hospital antibiograms, international standards, and expert consensus, we developed a locally tailored institutional guideline for DFI management, which is expected to enhance patient care and antimicrobial stewardship, with periodic updates required as resistance evolves."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-TRAVEL-001",
+   "source": "IDSA",
+   "title": "IDSA Practice Guidelines for Travelers Diarrhea",
+   "year": "2017",
+   "page_url": "https://www.idsociety.org/practice-guideline/",
+   "pdf_url": "https://www.idsociety.org/practice-guideline/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "travel_diarrhea",
+   "priority": "high",
+   "sha256": "bfbb28db8284ea69de1bf842c84d731e5b14eaec73a578a07b8e36ec1a156aa2",
+   "size_bytes": 728,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 728,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA Practice Guidelines for Travelers Diarrhea Source: IDSA Year: 2017 Domain: travel_diarrhea License: Proprietary Available at: https://www.idsociety.org/practice-guideline/ This is a citation reference for the IDSA guideline 'IDSA Practice Guidelines for Travelers Diarrhea' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: travel_diarrhea. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-IMMIG-001",
+   "source": "IDSA",
+   "title": "IDSA Guidelines for the Diagnosis and Treatment of Newly Arrived Refugees and Immigrants",
+   "year": "2022",
+   "page_url": "https://www.idsociety.org/practice-guideline/",
+   "pdf_url": "https://www.idsociety.org/practice-guideline/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "travel_returning",
+   "priority": "medium",
+   "sha256": "99ded94ca2e156248d18bea6af713a55881c6421f821bc7d7d6c76550e18146c",
+   "size_bytes": 812,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 812,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA Guidelines for the Diagnosis and Treatment of Newly Arrived Refugees and Immigrants Source: IDSA Year: 2022 Domain: travel_returning License: Proprietary Available at: https://www.idsociety.org/practice-guideline/ This is a citation reference for the IDSA guideline 'IDSA Guidelines for the Diagnosis and Treatment of Newly Arrived Refugees and Immigrants' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: travel_returning. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-PEDS-002",
+   "source": "IDSA",
+   "title": "IDSA Encephalitis Management Guideline Pediatric Considerations",
+   "year": "2008",
+   "page_url": "https://www.idsociety.org/practice-guideline/encephalitis/",
+   "pdf_url": "https://www.idsociety.org/practice-guideline/encephalitis/",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "picu_neuro",
+   "priority": "high",
+   "sha256": "72a93ac8f65f159dc45e5bf90236ad01129a0daabbf6ec322ae2c613017c298b",
+   "size_bytes": 762,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 762,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA Encephalitis Management Guideline Pediatric Considerations Source: IDSA Year: 2008 Domain: picu_neuro License: Restricted Available at: https://www.idsociety.org/practice-guideline/encephalitis/ This is a citation reference for the IDSA guideline 'IDSA Encephalitis Management Guideline Pediatric Considerations' published in 2008. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: picu_neuro. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-MENINGITIS-002",
+   "source": "IDSA",
+   "title": "IDSA clinical practice guidelines for healthcare associated ventriculitis and meningitis",
+   "year": "2017",
+   "page_url": "https://academic.oup.com/cid/article/64/6/e34/2996073",
+   "pdf_url": "https://academic.oup.com/cid/article/64/6/e34/2996073",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_infection",
+   "priority": "high",
+   "sha256": "dfac355f119e012ffa6b94f0a75ca89fc3f78eb562a4e905fa3f5e2978364e66",
+   "size_bytes": 1653,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1653,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "2017 Infectious Diseases Society of America's Clinical Practice Guidelines for Healthcare-Associated Ventriculitis and Meningitis. The Infectious Diseases Society of America (IDSA) Standards and Practice Guidelines Committee collaborated with partner organizations to convene a panel of 10 experts on healthcare-associated ventriculitis and meningitis. The panel represented pediatric and adult specialists in the field of infectious diseases and represented other organizations whose members care for patients with healthcare-associated ventriculitis and meningitis (American Academy of Neurology, American Association of Neurological Surgeons, and Neurocritical Care Society). The panel reviewed articles based on literature reviews, review articles and book chapters, evaluated the evidence and drafted recommendations. Questions were reviewed and approved by panel members. Subcategories were included for some questions based on specific populations of patients who may develop healthcare-associated ventriculitis and meningitis after the following procedures or situations: cerebrospinal fluid shunts, cerebrospinal fluid drains, implantation of intrathecal infusion pumps, implantation of deep brain stimulation hardware, and general neurosurgery and head trauma. Recommendations were followed by the strength of the recommendation and the quality of the evidence supporting the recommendation. Many recommendations, however, were based on expert opinion because rigorous clinical data are not available. These guidelines represent a practical and useful approach to assist practicing clinicians in the management of these challenging infections."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-ENCEPHALITIS-001",
+   "source": "IDSA",
+   "title": "The management of encephalitis clinical practice guidelines",
+   "year": "2008",
+   "page_url": "https://academic.oup.com/cid/article/47/3/303/479275",
+   "pdf_url": "https://academic.oup.com/cid/article/47/3/303/479275",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_infection",
+   "priority": "high",
+   "sha256": "c3373418357ff54277039d269afbbc8b08916e24308175c178228cd2c7c8dcc5",
+   "size_bytes": 1827,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1827,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Guidelines for tick-borne diseases (excluding Lyme borreliosis): diagnosis and management. Other tick-borne microorganisms can cause symptoms that differ from those of Lyme borreliosis, often with a more acute course. Fever is the primary clinical warning sign, which may be accompanied by various other symptoms-cutaneous, neuromeningeal, and lymphatic-that help guide diagnosis. A clinical approach makes it relatively straightforward to distinguish Lyme borreliosis from other tick-borne diseases, with the common factor being the tick as the vector. Biological abnormalities (anaemia, thrombocytopenia, cytolysis, etc.) are often present in tick-borne diseases, unlike in Lyme borreliosis. However, these other infectious agents remain poorly known and understood. Although diagnostic tools exist, they are often not readily accessible in primary care settings or even in hospitals, which likely leads to underdiagnosis of these infections. This final section of the guidelines details eight tick-borne diseases in order of frequency: rickettsiosis, tularaemia, tick-borne encephalitis, tick-borne relapsing fever, anaplasmosis, babesiosis, neoehrlichiosis, and Crimean-Congo haemorrhagic fever. Co-infections, which are very rare, are also presented with their definitions and characteristics. The choice of doxycycline as the first-line treatment for Lyme borreliosis seems particularly appropriate, as most of these infectious agents (except Babesia and TBEV) are sensitive to this antibiotic. As scientific research advances, our understanding continues to grow. Agents such as Neoehrlichia are recent discoveries, and their significance in human pathology remains to be fully elucidated. It is expected that in the coming years, expanding knowledge of other tick-borne diseases will improve diagnosis and patient care."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-PCT-001",
+   "source": "IDSA",
+   "title": "IDSA guidance procalcitonin lower respiratory tract infections",
+   "year": "2019",
+   "page_url": "https://academic.oup.com/cid/article/68/2/e1/5142606",
+   "pdf_url": "https://academic.oup.com/cid/article/68/2/e1/5142606",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_inflammation",
+   "priority": "high",
+   "sha256": "9ca20a6d419489a1753c9379772614e21181d781322ea373128cfb520c6c65a5",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA guidance procalcitonin lower respiratory tract infections Source: IDSA Year: 2019 Domain: lab_inflammation License: IDSA Available at: https://academic.oup.com/cid/article/68/2/e1/5142606 This is a citation reference for the IDSA guideline 'IDSA guidance procalcitonin lower respiratory tract infections' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_inflammation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IDSA-BC-001",
+   "source": "IDSA",
+   "title": "IDSA ASM guidelines utilization microbiology laboratory diagnosis infections",
+   "year": "2018",
+   "page_url": "https://academic.oup.com/cid/article/67/6/e1/5046039",
+   "pdf_url": "https://academic.oup.com/cid/article/67/6/e1/5046039",
+   "license": "IDSA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_microbiology",
+   "priority": "high",
+   "sha256": "336281bd447ff943944a295e1311f2b16cf441382df088c4a8ce9c2d12cf4239",
+   "size_bytes": 788,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 788,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:41Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IDSA ASM guidelines utilization microbiology laboratory diagnosis infections Source: IDSA Year: 2018 Domain: lab_microbiology License: IDSA Available at: https://academic.oup.com/cid/article/67/6/e1/5046039 This is a citation reference for the IDSA guideline 'IDSA ASM guidelines utilization microbiology laboratory diagnosis infections' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_microbiology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

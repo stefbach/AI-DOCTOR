@@ -1,7 +1,7 @@
 {
  "source": "SCAI",
  "generated_at": "2026-05-02T17:11:06Z",
- "total_documents": 12,
+ "total_documents": 14,
  "documents": [
   {
    "id": "SCAI-001",
@@ -816,6 +816,56 @@
     {
      "chunk_index": 5,
      "content": "reports. Due to the lack of echocardiographic and imaging data within the HCUP NIS database, a detailed classification of mitral regurgitation etiology (i.e., primary vs. secondary MR) and further subclassification of secondary MR into atrial or ventricular forms was not feasible. Given the retrospective design, selection bias or confounding by indication could not be ruled out, although the analyses were adjusted for multiple a priori defined patient- and hospital-specific confounders. State-level analyses were not performed as the NIS is not considered to be representative of each individual US state; analyses on US hospital regions (comprised of multiple states) were performed instead. Additionally, the analyses were restricted to short‐term in-hospital outcomes following mitral TEER. Nonetheless, this study enabled to analyze risk factors on healthcare resource utilization and safety outcomes in a large nationwide cohort of patients undergoing mitral TEER in a real-world setting and the results were based on as‐treated analyses. 5 Conclusions In conclusion, TEER with the Mitraclip® system has become a more efficient and safer procedure. Importantly, patients with multiple comorbidities had worse outcomes, wherefore caution is warranted in these patients. Further studies are required to investigate differences in long‐term safety and healthcare resource utilization after mitral TEER. Funding sources This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors. Data availability statement The data underlying this article are available at the Healthcare Cost and Utilization Project National Inpatient Sample from https://hcup-us.ahrq.gov/nisoverview.jsp. CRediT authorship contribution statement Tharusan Thevathasan: Writing – review & editing, Writing – original draft, Visualization, Validation, Supervision, Resources, Project administration, Methodology, Investigation, Formal analysis, Data curation, Conceptualization. Sophie Berlinghof: Writing – review & editing, Visualization, Validation, Methodology, Investigation, Formal analysis, Data curation. Daniel Elschenbroich: Writing – review & editing, Visualization, Validation, Methodology, Investigation, Formal analysis. Julia M. Wiedenhofer: Writing – review & editing, Validation, Methodology, Investigation, Formal analysis. Sêhnou Degbeon: Writing – review & editing, Validation, Methodology, Investigation, Formal analysis. Luise Holzhauser: Writing – review & editing, Validation, Resources, Investigation, Data curation. Fabian Barbieri: Writing – review & editing, Validation, Investigation, Data curation. Mario Kasner: Writing – review & editing, Validation, Investigation. Anna Brand: Writing – review & editing, Validation, Investigation, Data curation. Henryk Dreger: Writing – review & editing, Validation, Investigation, Data curation. Steffen Desch: Writing – review & editing, Validation, Investigation, Data curation. Ulf Landmesser: Writing – review & editing, Validation, Project administration, Investigation, Data curation, Conceptualization. Markus Reinthaler: Writing – review & editing, Validation, Resources, Investigation, Data curation, Conceptualization. Carsten Skurk: Writing – review & editing, Validation, Project administration, Investigation, Data curation, Conceptualization. Declaration of competing interest The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper."
+    }
+   ]
+  },
+  {
+   "id": "SCAI-COMPLICATION-001",
+   "source": "SCAI",
+   "title": "SCAI position paper on management of vascular access complications",
+   "year": "2020",
+   "page_url": "https://www.jscai.org/article/S2772-9303(20)00029-6/fulltext",
+   "pdf_url": "https://www.jscai.org/article/S2772-9303(20)00029-6/fulltext",
+   "license": "SCAI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_coronary",
+   "priority": "medium",
+   "sha256": "b59c865b9a5c823899f33473d28b34188eb1ba42cb0a764589cc31545aefa471",
+   "size_bytes": 782,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 782,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:57Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCAI position paper on management of vascular access complications Source: SCAI Year: 2020 Domain: cardiology_coronary License: SCAI Available at: https://www.jscai.org/article/S2772-9303(20)00029-6/fulltext This is a citation reference for the SCAI guideline 'SCAI position paper on management of vascular access complications' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_coronary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SCAI-CARDARR-001",
+   "source": "SCAI",
+   "title": "SCAI guidelines on temporary mechanical circulatory support during high-risk PCI",
+   "year": "2022",
+   "page_url": "https://www.jscai.org/article/S2772-9303(22)00280-5/fulltext",
+   "pdf_url": "https://www.jscai.org/article/S2772-9303(22)00280-5/fulltext",
+   "license": "SCAI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_coronary",
+   "priority": "medium",
+   "sha256": "225e68bea16700b387923c9fe302d10a7d5a54cc7a762a77c810adac08b47f31",
+   "size_bytes": 810,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 810,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCAI guidelines on temporary mechanical circulatory support during high-risk PCI Source: SCAI Year: 2022 Domain: cardiology_coronary License: SCAI Available at: https://www.jscai.org/article/S2772-9303(22)00280-5/fulltext This is a citation reference for the SCAI guideline 'SCAI guidelines on temporary mechanical circulatory support during high-risk PCI' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_coronary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

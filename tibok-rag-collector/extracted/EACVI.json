@@ -1,7 +1,7 @@
 {
  "source": "EACVI",
  "generated_at": "2026-05-09T10:56:57Z",
- "total_documents": 3,
+ "total_documents": 6,
  "documents": [
   {
    "id": "EACVI-ECHO-001",
@@ -119,6 +119,81 @@
     {
      "chunk_index": 4,
      "content": "strong European Health Union, which aims to improve the health of all citizens, no matter where they live, no matter their disease or complex condition. The accumulated experience and the cross-border dimension of the ERNs place them as a flagship initiative in the European Health Union."
+    }
+   ]
+  },
+  {
+   "id": "EACVI-CMR-001",
+   "source": "EACVI",
+   "title": "EACVI/SCMR recommendations clinical CMR protocols",
+   "year": "2020",
+   "page_url": "https://academic.oup.com/ehjcimaging/article/21/9/952",
+   "pdf_url": "https://academic.oup.com/ehjcimaging/article/21/9/952",
+   "license": "EACVI SCMR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_imaging",
+   "priority": "medium",
+   "sha256": "d0e0759863d5a58936ee78e05ce0a01c5d41bc165298142c5732cf718d674d52",
+   "size_bytes": 747,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 747,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EACVI/SCMR recommendations clinical CMR protocols Source: EACVI Year: 2020 Domain: cardiology_imaging License: EACVI SCMR Available at: https://academic.oup.com/ehjcimaging/article/21/9/952 This is a citation reference for the EACVI guideline 'EACVI/SCMR recommendations clinical CMR protocols' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_imaging. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EACVI-NUC-001",
+   "source": "EACVI",
+   "title": "EACVI/ASNC procedural recommendations for cardiac PET imaging",
+   "year": "2017",
+   "page_url": "https://academic.oup.com/ehjcimaging/article/18/12/1334",
+   "pdf_url": "https://academic.oup.com/ehjcimaging/article/18/12/1334",
+   "license": "EACVI ASNC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_imaging",
+   "priority": "medium",
+   "sha256": "adf7445625809e93be48f56e4fc2012f14654b6dec4766ddfb0738cd372ab436",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EACVI/ASNC procedural recommendations for cardiac PET imaging Source: EACVI Year: 2017 Domain: cardiology_imaging License: EACVI ASNC Available at: https://academic.oup.com/ehjcimaging/article/18/12/1334 This is a citation reference for the EACVI guideline 'EACVI/ASNC procedural recommendations for cardiac PET imaging' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_imaging. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EACVI-PERIOP-001",
+   "source": "EACVI",
+   "title": "EACVI clinical recommendations preoperative cardiac imaging assessment",
+   "year": "2022",
+   "page_url": "https://academic.oup.com/ehjcimaging/article/22/8/843",
+   "pdf_url": "https://academic.oup.com/ehjcimaging/article/22/8/843",
+   "license": "EACVI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_imaging",
+   "priority": "medium",
+   "sha256": "bf04c4cc1efb946b9688c278fe884eeeb7ef81d65d45a96eadd894a21fac877a",
+   "size_bytes": 1865,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1865,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "EACVI survey on the evaluation of infective endocarditis. To evaluate the diagnosis and imaging of patients with suspected endocarditis and the management in routine clinical practice across Europe, the EACVI Scientific Initiatives Committee performed a survey across European centres. In particular, the routine use of echocardiography, advanced imaging modalities and multidisciplinary team was explored. A total of 100 European Echocardiography Laboratories from 29 different countries responded to the survey, which consisted of 20 questions. For most of the use of echocardiography and advanced imaging, answers from the centres were relatively homogeneous and demonstrated good adherence to current recommendations. In particular, two-thirds of centres report the use of a specific endocarditis team for decision-making. Echocardiography plays a key role in the diagnosis and management of endocarditis. Nuclear imaging modalities are broadly available among the centres and are mainly used in prosthetic valve endocarditis and cardiac device-related infective endocarditis. Computed tomography (CT) is widely available and used to assess for structural valve abnormalities, neurological complications, and to preoperative assessment of the coronary arteries. Most institutions provide structured patients follow-up following hospital discharge. In Europe, a relatively homogenous adherence to current recommendation was observed for most diagnostic and management including the follow-up of patients with endocarditis. Decision-making is most commonly performed by a multidisciplinary team. Echocardiography remains the first line and central imaging modality for patient diagnosis and assessment, but 60% of centres also commonly use CT, whilst positron emission tomography imaging is used in patients with prosthetic valve endocarditis or device infection."
     }
    ]
   }

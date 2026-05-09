@@ -1,7 +1,7 @@
 {
  "source": "EAN",
  "generated_at": "2026-05-09T08:23:45Z",
- "total_documents": 20,
+ "total_documents": 21,
  "documents": [
   {
    "id": "EAN-DEMENTIA-003",
@@ -1252,6 +1252,31 @@
     {
      "chunk_index": 3,
      "content": "muscle nerve fibers by anti-GT1a Ab. The mechanism of this dyspnea without bulbar paralysis is unclear. Its precise pathogenesis requires further experimental validation. In addition, since the patient was unable to cooperate with pulmonary function tests, this study cannot accurately assess the degree of respiratory dysfunction. This is one of the main limitations of the study. Still, arterial blood gas analysis showed a PaO 2 of 72 mmHg, a PaCO 2 of 43 mmHg, and an SaO 2 of 95%. At that time, the patient had not yet developed CO 2 retention or required ventilatory support. Combined with clinical manifestations, these findings suggest early impaired respiratory function. Future studies should include this test to accurately assess the specific type and degree of pulmonary function impairment. 3.2.4 Pain The patient presented with right shoulder and back pain as his initial symptom. Similar to our case, the control case also has radicular pain at first. Biologically, Moulin et al.’s prospective study links early back pain in GBS to neuroinflammation, with the Lasegue sign exacerbating pain and suggesting radicular pain ( ). Molecularly, Fewou et al. attribute this pain to radicular inflammation impairing endocytic clearance capacity ( ). Dorsal root ganglion neurons may rapidly clear anti-ganglioside antibodies from cell membranes via cholesterol-dependent endocytic protective pathway. This process reduces complement mediated membrane attack complex formation and the subsequent cell lysis cascade, delaying the microstructural damage of neuronal cells ( ). Notably, radicular pain is a common manifestation of GBS. Approximately two-thirds of GBS patients experience this symptom ( ). It has no clear association with antibody subtypes. From a clinical perspective, this case shows radicular pain preceding motor symptoms, which may aid early suspicion of GBS. 3.3 Treatment and outcome Following treatment with IVIG, the symptoms of this patient gradually improved. In typical GBS, recovery is relatively slower than in localized variants, and some patients are left with severe sequelae. One study reported that only 62% of patients achieved full recovery one year after onset, while approximately 20% died or had severe disability ( ). By contrast, our patient recovered substantially within six months, showing a better outcome. Previous studies also indicate that GBS subtypes with focal onset typically have a favorable prognosis. A large-scale study showed a 98% recovery rate in paraplegic GBS patients within six months, versus 81% in quadriplegic patients ( ). Similarly, most ophthalmoparalytic GBS patients achieve substantial functional recovery within weeks to months ( ). The favorable outcome of this case may be attributed to unilateral confined immune attack and early IVIG therapy halting disease progression. Thus, for atypical GBS with unilateral onset, early recognition and timely immunotherapy may lead to good prognosis. 4 Conclusion We report a rare GBS variant presenting with persistent unilateral limb weakness and facial palsy as the predominant symptoms, associated with anti-GT1a antibody positivity. Heightened awareness of such atypical variants is essential for prompt recognition and avoiding misdiagnosis. Larger case series are needed to confirm this phenotype in the future."
+    }
+   ]
+  },
+  {
+   "id": "EAN-LYME-001",
+   "source": "EAN",
+   "title": "EFNS guidelines on the diagnosis and management of European Lyme neuroborreliosis",
+   "year": "2010",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1468-1331.2009.02862.x",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1468-1331.2009.02862.x",
+   "license": "EAN",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_infection",
+   "priority": "medium",
+   "sha256": "f21aeb79157645cbda700e90b3f48bfa0e09ea5e20568172d9428ccef905ed7c",
+   "size_bytes": 1772,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1772,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "EFNS guidelines on the diagnosis and management of European Lyme neuroborreliosis. Lyme neuroborreliosis (LNB) is a nervous system infection caused by Borrelia burgdorferi sensu lato (Bb). To present evidence-based recommendations for diagnosis and treatment. Data were analysed according to levels of evidence as suggested by EFNS. The following three criteria should be fulfilled for definite LNB, and two of them for possible LNB: (i) neurological symptoms; (ii) cerebrospinal fluid (CSF) pleocytosis; (iii) Bb-specific antibodies produced intrathecally. PCR and CSF culture may be corroborative if symptom duration is <6 weeks, when Bb antibodies may be absent. PCR is otherwise not recommended. There is also not enough evidence to recommend the following tests for diagnostic purposes: microscope-based assays, chemokine CXCL13, antigen detection, immune complexes, lymphocyte transformation test, cyst formation, lymphocyte markers. Adult patients with definite or possible acute LNB (symptom duration <6 months) should be offered a single 14-day course of antibiotic treatment. Oral doxycycline (200 mg daily) and intravenous (IV) ceftriaxone (2 g daily) are equally effective in patients with symptoms confined to the peripheral nervous system, including meningitis (level A). Patients with CNS manifestations should be treated with IV ceftriaxone (2 g daily) for 14 days and late LNB (symptom duration >6 months) for 3 weeks (good practice points). Children should be treated as adults, except that doxycycline is contraindicated under 8 years of age (nine in some countries). If symptoms persist for more than 6 months after standard treatment, the condition is often termed post-Lyme disease syndrome (PLDS). Antibiotic therapy has no impact on PLDS (level A)."
     }
    ]
   }

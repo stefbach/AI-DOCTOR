@@ -1,7 +1,7 @@
 {
  "source": "ESCP",
  "generated_at": "2026-05-09T10:24:41Z",
- "total_documents": 5,
+ "total_documents": 6,
  "documents": [
   {
    "id": "ESCP-EMERGENCY-001",
@@ -285,6 +285,31 @@
     {
      "chunk_index": 26,
      "content": "a grant from UEG (‘UEG Activity Grant 2019’) which was supplemented by the ESCP. UEG makes no warranty, express or implied, in respect of these guidelines and cannot be held liable for any damages resulting from the application of these guidelines, in particular for any loss or damage (whether direct or indirect) resulting from a treatment based on the guidance given herein. UEG shall not be held liable to the utmost extent permissible according to the applicable laws for any content available on such external websites, which can be accessed by using the links included herein. Supporting information Supporting Information S1 Click here for additional data file. Supporting Information S2 Click here for additional data file. Supporting Information S3 Click here for additional data file. Supporting Information S4 Click here for additional data file. Supporting Information S5 Click here for additional data file. Supporting Information S6 Click here for additional data file. Supporting Information S7 Click here for additional data file. Supporting Information S8 Click here for additional data file."
+    }
+   ]
+  },
+  {
+   "id": "ESCP-FISTULA-001",
+   "source": "ESCP",
+   "title": "ESCP Consensus on Treatment of Cryptoglandular Anal Fistula",
+   "year": "2020",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/codi.15008",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/codi.15008",
+   "license": "ESCP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_colorectal",
+   "priority": "high",
+   "sha256": "6850db9e04cda4fc551e442821251d18c2f08a6940d1ea9f556938301da427ec",
+   "size_bytes": 780,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 780,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESCP Consensus on Treatment of Cryptoglandular Anal Fistula Source: ESCP Year: 2020 Domain: digestive_surgery_colorectal License: ESCP Available at: https://onlinelibrary.wiley.com/doi/10.1111/codi.15008 This is a citation reference for the ESCP guideline 'ESCP Consensus on Treatment of Cryptoglandular Anal Fistula' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: digestive_surgery_colorectal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

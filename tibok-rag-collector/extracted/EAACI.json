@@ -1,7 +1,7 @@
 {
  "source": "EAACI",
  "generated_at": "2026-05-02T16:20:49Z",
- "total_documents": 18,
+ "total_documents": 32,
  "documents": [
   {
    "id": "EAACI-001",
@@ -1066,6 +1066,356 @@
     {
      "chunk_index": 9,
      "content": "version. Eric Martínez Infante: Participated in discussions on content, Assisted 2 face-to-face meetings, Reviewed the draft, Are member of the group that suggested adjustments to the text, Gave their consent to the final version. Miguel Alejandro Medina-Ávalos: Participated in discussions on content, Assisted 2 face-to-face meetings, Reviewed the draft, Are member of the group that suggested adjustments to the text, Gave their consent to the final version. Ethical approval and IRB board submission As there are no patients involved: does not apply. Funding The development and submission of this article received no funding and shall be supported by the co-authors. The GUIMIT project received funding from Diemsa , Inmunotek México , Alerquim , Mylan Mexico , Abalat , Senosiain , Pisa and Glenmark and the final part of participating colleagues. Consent for publication All co-authors gave consent for publication. Availability of data and materials We translated the complete Mexican Guidelines on Immunotherapy, GUIMIT, into English. This is submitted as online repository file. In the Addendum of this online file -last 2 pages- the reader can find DOI's that link to the original GUIMIT tables (most English version) in which source data for GUIMIT and the article's discussions can be found: clinical questions per chapter and the replies found in Main Reference Guidelines (EAACI, German, US, Japanese, depending on the subject). All these data are freely available and we managed to translate almost all into English. Supporting information legends eFILE: Full text, English version of GUIMIT 2019, Mexican Guideline on Immunotherapy. Guideline on the diagnosis of IgE-mediated allergic disease and immunotherapy following the ADAPTE approach. Declaration of Competing Interest All authors declared or they have no potential conflicts of interest. The following authors, indicated relations with the pharmaceutical industry: Dr. Larenas Linnemann reports personal fees from Allakos , Amstrong , 10.13039/100004325 Astrazeneca , 10.13039/100001003 Boehringer Ingelheim , 10.13039/100007560 Chiesi , DBV Technologies , Grunenthal , 10.13039/100004330 GSK , MEDA , Menarini , 10.13039/100007054 MSD , 10.13039/100004336 Novartis , 10.13039/100004319 Pfizer , 10.13039/100004336 Novartis , 10.13039/100004339 Sanofi , Siegfried , 10.13039/100011110 UCB , Gossamer , grants from 10.13039/100004319 Sanofi , 10.13039/100004325 Astrazeneca , Novartis , 10.13039/100011110 UCB , GSK , 10.13039/100006259 TEVA , 10.13039/100001003 Boehringer Ingelheim , 10.13039/100007560 Chiesi , Purina institute ., outside the submitted work; Dr. Moncayo Coello reports personal fees from 10.13039/100004325 AstraZeneca , personal fees from 10.13039/100004339 Sanofi , personal fees from 10.13039/100004330 Grünenthal , personal fees from 10.13039/100011218 Sandoz , outside the submitted work; Dr. Partida-Gaytan reports personal fees from 10.13039/100012690 Nestlé Nutrition Institute , personal fees from 10.13039/100004330 GlaxoSmithKline Mexico, personal fees from Instituto Nacional de Pediatria , personal fees from Healthy Kids Polanco S.C. , outside the submitted work."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-AR-001",
+   "source": "EAACI",
+   "title": "EAACI guideline on allergen immunotherapy for allergic rhinoconjunctivitis",
+   "year": "2018",
+   "page_url": "https://www.eaaci.org/resources/guidelines/",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines/",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_rhinology",
+   "priority": "high",
+   "sha256": "cec66739e2ac2af3413c4d43d64adf4dd29c7627fb7aa57c1ad11517d1533257",
+   "size_bytes": 1873,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1873,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "TAPAS-A Prospective, Multicentre, Long-Term Cohort Study in Children, Adolescents and Adults with Seasonal Allergic Rhinitis-Design and Early Results. Background/Objectives : The guideline on allergen-specific immunotherapy of the European Academy of Allergy and Clinical Immunology recommends subcutaneous allergen-specific immunotherapy for the treatment of allergic rhinitis in children and adults with moderate to severe symptoms. The five years cohort study described below was designed in 2020 to demonstrate non-inferiority in terms of safety, tolerability and efficacy in a paediatric population compared with adult patients treated with microcrystalline tyrosine-adsorbed allergoids for their tree and grass pollen allergy in a perennial setting. Here, we present the preliminary findings from the first year. Methods : The Combined Symptom and Medication Score was chosen as the primary endpoint of this therapy. Secondary endpoints include the Rhinoconjunctivitis Quality of Life Questionnaire, the retrospective Rhinoconjunctivitis score, the Asthma Control Test and the Rhinitis Control Test, as well as an analysis of adverse drug reactions. Results : A total number of 320 patients were enrolled into this study, with 129 of these patients in the age group between 5 and 17 years and 191 patients in the adult age group. Mean Combined Symptom and Medication Score values did not differ significantly between minors and adults in the first pollen season after treatment induction. The retrospective score showed a strong and significant reduction in rhinoconjunctivitis and asthma symptoms. Treatment was well tolerated, with more than 80% of patients reporting no adverse drug reactions. Conclusions : The validity of this study approach of a cohort study has been confirmed by this first interim analysis for the initial course of therapy in the first year."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-EGG-001",
+   "source": "EAACI",
+   "title": "EAACI position paper egg allergy",
+   "year": "2020",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_food",
+   "priority": "medium",
+   "sha256": "7a3dd687fed74e6fb8ad1588f9bb3b2d4dfe40fe776d165be09c1d0d1dd00d8e",
+   "size_bytes": 1397,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1397,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Diagnosis and management of Non-IgE gastrointestinal allergies in breastfed infants-An EAACI Position Paper. It is well-established that food proteins, such as egg, soya, cow's milk and wheat, are detectable in breastmilk for many hours or days after ingestion. Exposure to these proteins is important to the process of developing tolerance but can also sometimes elicit IgE-mediated and non-IgE-mediated allergic symptoms in breastfed infants. Non-IgE-mediated allergy, outside of food protein-induced allergic proctocolitis and eosinophilic oesophagitis, is not well understood, leading to variations in the diagnosis and management thereof. A primary objective of the European Academy for Allergy and Clinical Immunology is to support breastfeeding in all infants, including those with food allergies. A Task Force was established, to explore the clinical spectrum of non-IgE-mediated allergies, and part of its objectives was to establish diagnosis and management of non-IgE-mediated allergies in breastfed infants. Eight questions were formulated using the Patient, Intervention, Comparison, Outcome (PICO) system and Scottish Intercollegiate Guideline Network (SIGN) criteria for data inclusion, and consensus was achieved on practice points through the Delphi method. This publication aims to provide a comprehensive overview on this topic with practice points for healthcare professionals."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-PEANUT-001",
+   "source": "EAACI",
+   "title": "EAACI peanut allergy diagnosis and management",
+   "year": "2022",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_food",
+   "priority": "high",
+   "sha256": "5042676b171e582a566e689848dca24e802368ffaa585f1970ea4c656bbaa2cd",
+   "size_bytes": 724,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 724,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EAACI peanut allergy diagnosis and management Source: EAACI Year: 2022 Domain: allergology_food License: EAACI Available at: https://www.eaaci.org/resources/guidelines.html This is a citation reference for the EAACI guideline 'EAACI peanut allergy diagnosis and management' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: allergology_food. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-AIT-001",
+   "source": "EAACI",
+   "title": "EAACI guidelines on allergen immunotherapy general principles",
+   "year": "2022",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_immunotherapy",
+   "priority": "high",
+   "sha256": "e13e664fedcdf28905f7e583f015cde7ef9bba191ce91214d6a83bd65981dbee",
+   "size_bytes": 774,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 774,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EAACI guidelines on allergen immunotherapy general principles Source: EAACI Year: 2022 Domain: allergology_immunotherapy License: EAACI Available at: https://www.eaaci.org/resources/guidelines.html This is a citation reference for the EAACI guideline 'EAACI guidelines on allergen immunotherapy general principles' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: allergology_immunotherapy. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-BLAC-001",
+   "source": "EAACI",
+   "title": "EAACI position paper diagnosis and management of beta-lactam hypersensitivity",
+   "year": "2020",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_drug",
+   "priority": "high",
+   "sha256": "9cbcfb64fe222381d9500f62360578d4f26680c55354317cf1f5fa179bcefc46",
+   "size_bytes": 788,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 788,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EAACI position paper diagnosis and management of beta-lactam hypersensitivity Source: EAACI Year: 2020 Domain: allergology_drug License: EAACI Available at: https://www.eaaci.org/resources/guidelines.html This is a citation reference for the EAACI guideline 'EAACI position paper diagnosis and management of beta-lactam hypersensitivity' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: allergology_drug. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-DPT-001",
+   "source": "EAACI",
+   "title": "EAACI guideline drug provocation testing general considerations",
+   "year": "2019",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_drug",
+   "priority": "medium",
+   "sha256": "1540547bd9754bdaa30df9eaf756efcaffa141e2189c1c56fba4811cb72c7368",
+   "size_bytes": 1512,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1512,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Diagnosis of nonimmediate reactions to beta-lactam antibiotics. Nonimmediate manifestations (i.e. occurring more than 1 h after drug administration), particularly maculopapular and urticarial eruptions, are common during beta-lactam treatment. The mechanisms involved in most nonimmediate reactions seem to be heterogeneous and are not yet completely understood. However, clinical and immunohistological studies, as well as analysis of drug-specific T-cell clones obtained from the circulating blood and the skin, suggest that a type-IV (cell-mediated) pathogenic mechanism may be involved in some nonimmediate reactions such as maculopapular or bullous rashes and acute generalized exanthematous pustulosis. In the diagnostic work-up, the patient's history is fundamental; patch testing is useful, together with delayed-reading intradermal testing. The latter appears to be somewhat more sensitive than patch testing, but also less specific. In case of negative allergologic tests, consideration should be given to provocation tests, and the careful administration of the suspect agents. With regard to in vitro tests, the lymphocyte transformation test may contribute to the identification of the responsible drug. Under the aegis of the European Academy of Allergology and Clinical Immunology (EAACI) interest group on drug hypersensitivity and the European Network for Drug Allergy (ENDA), in this review we describe the general guidelines for evaluating subjects with nonimmediate reactions to beta-lactams."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-URTI-001",
+   "source": "EAACI",
+   "title": "EAACI GA2LEN EDF WAO guideline for definition classification and diagnosis of urticaria",
+   "year": "2021",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_dermatologic",
+   "priority": "high",
+   "sha256": "b106db7aeef04cfc7dc74ee983ed37ffe84482fe4ef4a83169f59821ab901ac1",
+   "size_bytes": 1095,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1095,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:41Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Chronic Urticaria: Comparisons of US, European, and Asian Guidelines. Chronic urticaria is a common dermatological condition that has significant impact on quality of life. Multiple international societies have published guidelines, and although these guidelines generally agree on the definition of urticaria, as well as approach to diagnosis and management, there have been notable differences to date. These differences have been reconciled by the recent publication of the 2017 revision and update published by the EAACI/GA2LEN/EDF/WAO. The 2017 revision and update to the guidelines for chronic urticaria are the most comprehensive consensus document to date, and reconcile previously existing differences between the US, European, and Asian guidelines. The purpose of our review is to present basic background on urticaria and discuss classification, diagnosis, and most importantly, management. We present differences from previous US, European, and Asian guidelines and reconcile the previous differences by summarizing the 2017 revision and update published by the EAACI/GA2LEN/EDF/WAO."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-EOE-001",
+   "source": "EAACI",
+   "title": "EAACI clinical practice guidelines for eosinophilic esophagitis",
+   "year": "2024",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_food",
+   "priority": "high",
+   "sha256": "98dce58141eeec18549b31427964ba54ea8dfbce2cd92da914d7a6ebce4041b4",
+   "size_bytes": 1019,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1019,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Oral desensitization in IgE-mediated food allergy: Effectiveness and safety. The avoidance of allergenic foods and emergency medications on accidental exposure are the only currently approved treatments in food allergy. EAACI guideline on allergen immunotherapy recommends oral immunotherapy as a therapeutic option to increase the threshold of the reaction during treatment in children with persistent IgE-mediated cow's milk, hen's egg, and peanut allergy from around 4-5 years of age, but the same recommendation cannot currently be made to achieve post-discontinuation effectiveness. Both systemic and local reactions during OIT have been frequently reported. For this reason, EAACI guideline suggests several recommendations on safety, including carefully monitoring patients for allergic reactions, especially during the up-dosing phase of OIT, and monitoring for symptoms of new-onset eosinophilic esophagitis. New approaches are certainly necessary to give priority not only to effectiveness but also to safety."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-DRESS-001",
+   "source": "EAACI",
+   "title": "EAACI position paper severe cutaneous adverse reactions DRESS SJS TEN",
+   "year": "2022",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_drug",
+   "priority": "high",
+   "sha256": "0abe32844a1f3cb4eb1880031cbe5d6ab3e8a23e861339a267f6e87711c21e01",
+   "size_bytes": 3218,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3216,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Pediatric Severe Cutaneous Adverse Drug Reactions (SCARs) clinical characteristics and comparison of causality assesment tools and severity scoring systems in relation to clinical outcomes from a single center experience. Severe cutaneous adverse reactions (SCARs) such as drug reaction with eosinophilia and systemic symptoms (DRESS), Stevens-Johnson syndrome (SJS), and toxic epidermal necrolysis (TEN) are rare but life-threatening in children. Pediatric data on causative drugs, immunologic features, and outcomes remain limited. To compare clinical, laboratory, and immunologic findings, causality tools, and severity scoring systems in pediatric DRESS and SJS/TEN. We retrospectively analyzed 23 children (<18 years) with SCAR at a tertiary center (December 2022-April 2025). DRESS and SJS/TEN were diagnosed using RegiSCAR and consensus criteria, respectively. Causality was evaluated by the World Health Organization-Uppsala Monitoring Centre (WHO-UMC) and Naranjo algorithms for DRESS, and the Algorithm of Drug Causality in Epidermal Necrolysis (ALDEN) for SJS/TEN. Disease severity in DRESS was evaluated using both the Mizukawa severity score and the EAACI 2025 Pediatric Position Paper (PP) severity grading, while SJS/TEN severity was assessed using Severity-of-Illness Score for Toxic Epidermal Necrolysis (SCORTEN). Clinical features, laboratory findings, treatment strategies, and outcomes were compared. DRESS constituted 69.6% of cases. Antibiotics predominated in DRESS (68.7%), and antiepileptics in SJS/TEN (57.1%). Causality assessment yielded predominantly Probable classifications in DRESS (69.2%), while aromatic anticonvulsants scored Very probable in SJS/TEN by ALDEN and severity grading aligned with clinical outcomes. In DRESS patients, severity stratification by the Mizukawa score predominantly classified cases as moderate, guiding systemic corticosteroid use. When reclassified according to the EAACI 2025 PP grading, several patients with limited extra-hepatic involvement were upgraded to higher severity categories, despite favorable clinical response to corticosteroid monotherapy. In SJS/TEN, SCORTEN scores aligned with overall clinical severity but did not correlate with ocular involvement. Intravenous immunoglobulin was administered more frequently in SJS/TEN than in DRESS (85.7% vs 12.5%, p=0.001). No mortality occurred. During follow-up, immune-mediated complications were observed exclusively in the DRESS group, including autoimmune thyroiditis in one patient, autoimmune thyroiditis with concurrent autoimmune neutropenia in another, and chronic urticaria in one patient, whereas no immune-mediated sequelae were detected in the SJS/TEN group. Pediatric DRESS and SJS/TEN display distinct clinical, immunologic, and severity profiles. Early CD19⁺ B-cell lymphopenia appears characteristic of DRESS and may support severity stratification and long-term autoimmune surveillance. Comparative application of the Mizukawa score and EAACI 2025 PP grading highlights potential differences in severity classification that may influence treatment decisions. Integrating standardized causality and severity tools may improve phenotype-specific management of pediatric SCARs."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-LATEX-001",
+   "source": "EAACI",
+   "title": "EAACI position paper natural rubber latex allergy",
+   "year": "2022",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_drug",
+   "priority": "low",
+   "sha256": "e6550f73747202446ef81ee1c09388b0876f795a719bb85400f6f0a1250fbfac",
+   "size_bytes": 1956,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1956,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Occupational anaphylaxis: A Position Paper of the German Society of Allergology and Clinical Immunology (DGAKI). Anaphylaxis is a systemic allergic reaction that is potentially life-threatening. Occupational anaphylaxis is an anaphylaxis that occurs in an occupational context. In this position paper, we propose diagnostic criteria for occupational anaphylaxis and provide an overview of the current state of knowledge in terms of prevalence, triggers, prevention, and management. The most common triggers of occupational anaphylaxis include Hymenoptera venoms, followed by food and drugs. Chemicals, bites or contact with animals (mammals/snakes/insects) and natural rubber latex are far less common. Occupations at risk for occupational anaphylaxis are therefore beekeepers, outdoor workers, or those who handle food as well as healthcare workers. The route of contact, intensity, and frequency of exposure, type of allergen, and the simultaneous occurrence of co-factors determine the clinical manifestation. A detailed medical history is required to confirm the diagnosis of anaphylaxis and to identify the trigger. Both skin tests and the determination of specific IgE are recommended, but only very few commercially available and quality-tested allergens are available that can be examined using both test methods. Preventive measures are based on avoiding further exposure or, if necessary, replacing a working substance. A written emergency plan and the prescription of an adrenaline autoinjector as well as instructions for its use are mandatory. Allergen immunotherapy is recommended for systemic Hymenoptera venom allergy. Depending on the national healthcare systems, patients with occupational anaphylaxis must be reported to the accident insurance. Occupational anaphylaxis is very rare. We recommend educational measures and generally standardized recording of occupational anaphylaxis for occupations with an increased risk of anaphylaxis."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-COW-001",
+   "source": "EAACI",
+   "title": "EAACI guideline diagnosis and management of cow milk allergy",
+   "year": "2023",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_food",
+   "priority": "high",
+   "sha256": "8f39ff2d9f8f56138c512cfc894c40ba35b38cf9e6050f7d87a0d3e8da9949fc",
+   "size_bytes": 1435,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1435,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "EAACI guidelines on the management of IgE-mediated food allergy. This European Academy of Allergy and Clinical Immunology (EAACI) guideline provides recommendations for the management of IgE-mediated food allergy and was developed using the Grading of Recommendations, Assessment, Development and Evaluations (GRADE) approach. Following the confirmation of IgE-mediated food allergy diagnosis, allergen avoidance and dietary advice (with support of a specialised dietitian, if possible) together with the provision of a written treatment plan, education on the recognition of allergic symptoms and prescription of medication including adrenaline using an auto-injector are essential. Patients with significant anxiety and requirement for coping strategies may benefit from support from a clinical psychologist. As immunomodulatory interventions, omalizumab is suggested for treatment of IgE-mediated food allergy in children from the age of 1 and adults; and oral allergen-specific immunotherapy is recommended for children and adolescents with peanut allergy and suggested for milk and egg allergies (generally after 4 years of age for milk and egg). Sublingual and epicutaneous immunotherapy are suggested for peanut allergy but are not yet available at the point of care. Future research into disease modifying treatments for IgE-mediated food allergy are highly needed, with standardised and patient-focused protocols and outcomes."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-OAS-001",
+   "source": "EAACI",
+   "title": "EAACI position paper oral allergy syndrome diagnosis and management",
+   "year": "2023",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_food",
+   "priority": "medium",
+   "sha256": "158298dba41fc4b9a3f0fbc6bd2b84ab0da221b4da69fecc3a6f9991c9bbb931",
+   "size_bytes": 1772,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1772,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "COVID-19 pandemic: Practical considerations on the organization of an allergy clinic-An EAACI/ARIA Position Paper. The coronavirus disease 2019 (COVID-19) has evolved into a pandemic infectious disease transmitted by the severe acute respiratory syndrome coronavirus (SARS-CoV-2). Allergists and other healthcare providers (HCPs) in the field of allergies and associated airway diseases are on the front line, taking care of patients potentially infected with SARS-CoV-2. Hence, strategies and practices to minimize risks of infection for both HCPs and treated patients have to be developed and followed by allergy clinics. The scientific information on COVID-19 was analysed by a literature search in MEDLINE, PubMed, the National and International Guidelines from the European Academy of Allergy and Clinical Immunology (EAACI), the Cochrane Library, and the internet. Based on the diagnostic and treatment standards developed by EAACI, on international information regarding COVID-19, on guidelines of the World Health Organization (WHO) and other international organizations, and on previous experience, a panel of experts including clinicians, psychologists, IT experts, and basic scientists along with EAACI and the \"Allergic Rhinitis and its Impact on Asthma (ARIA)\" initiative have developed recommendations for the optimal management of allergy clinics during the current COVID-19 pandemic. These recommendations are grouped into nine sections on different relevant aspects for the care of patients with allergies. This international Position Paper provides recommendations on operational plans and procedures to maintain high standards in the daily clinical care of allergic patients while ensuring the necessary safety measures in the current COVID-19 pandemic."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-IDIO-001",
+   "source": "EAACI",
+   "title": "EAACI position paper idiopathic anaphylaxis evaluation",
+   "year": "2022",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_anaphylaxis",
+   "priority": "medium",
+   "sha256": "165fee04651a92f6f8a0f52d2d9c2033ab62b7ee11c5b794249735b87c405c3c",
+   "size_bytes": 756,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 756,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:45Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EAACI position paper idiopathic anaphylaxis evaluation Source: EAACI Year: 2022 Domain: allergology_anaphylaxis License: EAACI Available at: https://www.eaaci.org/resources/guidelines.html This is a citation reference for the EAACI guideline 'EAACI position paper idiopathic anaphylaxis evaluation' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: allergology_anaphylaxis. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EAACI-INFECT-DRUG-001",
+   "source": "EAACI",
+   "title": "EAACI position paper drug allergy in infectious diseases",
+   "year": "2024",
+   "page_url": "https://www.eaaci.org/resources/guidelines.html",
+   "pdf_url": "https://www.eaaci.org/resources/guidelines.html",
+   "license": "EAACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_drug",
+   "priority": "medium",
+   "sha256": "649cc7499b0430fe0f2525930ef6cdcdbdc527b4a8a099e349ecc02b7c7e023a",
+   "size_bytes": 1923,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1923,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:45Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Allergic Rhinitis and Its Impact on Asthma (ARIA)-EAACI Guidelines-2024-2025 Revision: Part I-Guidelines on Intranasal Treatments. Allergic rhinitis (AR) impacts quality of life, work and school productivity. Over the last years, an important body of evidence resulting from mHealth data has led to a better understanding of AR. Such advances have motivated an EAACI-endorsed update of the Allergic Rhinitis and its Impact on Asthma (ARIA) guidelines (ARIA 2024-2025). This manuscript presents the ARIA 2024-2025 recommendations for intranasal treatments, one of the mainstays for AR management. The ARIA 2024-2025 guideline panel issued recommendations following the Grading of Recommendations, Assessment, Development, and Evaluation (GRADE) evidence-to-decision framework. Several sources of evidence were used to inform panel judgments and recommendations, including systematic reviews, evaluation of mHealth and pharmacovigilance data, as well as a survey of experts on costs. Eleven guideline questions concerning intranasal treatments for AR were prioritized, leading to recommendations. Overall, these questions concern the choice between different classes of intranasal medications-most notably, intranasal corticosteroids (INCS), antihistamines (INAH), fixed combinations of INAH+INCS and decongestants-or between different individual medications within each class. Four questions had not been evaluated in previous ARIA guidelines, while for the other three there was a change in the strength or directionality of recommendations. Overall, recommendations point to the suggested use of INAH+INCS over INAH or INCS and INCS over INAH. This ARIA 2024-2025 article supports patients, their caregivers, and healthcare professionals in choosing an intranasal treatment. However, decisions on AR treatment should consider the clinical variability of the disease, patients' values, and the affordability of medications."
     }
    ]
   }

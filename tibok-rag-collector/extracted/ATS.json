@@ -1,7 +1,7 @@
 {
  "source": "ATS",
  "generated_at": "2026-05-02T15:54:50Z",
- "total_documents": 77,
+ "total_documents": 88,
  "documents": [
   {
    "id": "ATS-001",
@@ -5485,6 +5485,281 @@
     {
      "chunk_index": 4,
      "content": "non‐OSA control group, which restricts generalizability. The absence of a control group prevents clear differentiation between OSA‐related PSG changes and normal age‐related sleep development. Additionally, because all patients were referred for surgery, this cohort may overrepresent children with more severe oSDB. Unequal age group distribution, particularly the small number of patients in the youngest group, may have affected statistical analyses. We also observed significant differences in ADI across age groups, with higher values in the 6–11‐year group. This may reflect disparities in timing of referral or access to care, while the lower ADI in the oldest group could reflect a shift in indication driven by obesity and more severe AHI. However, these findings may not reflect the general pediatric population with OSA. The study period of January–July 2021 coincided with the COVID‐19 era, which may have affected case mix, access to PSG, and surgical indications; delays in referral during the preceding year may have resulted in a shift toward more severe presentations due to deferred care. GERD diagnoses were based on clinical documentation and may not have been confirmed by objective testing such as pH probe or impedance monitoring, which could overestimate GERD prevalence in our cohort. The duration of OSA prior to diagnosis is unknown and may differ across age groups; it is plausible that older patients had a longer duration of untreated disease, which could independently affect sleep architecture and treatment response. The inclusion of patients with syndromic conditions (Down syndrome, craniofacial disorders) may introduce heterogeneity in OSA phenotype, as these patients may have a higher likelihood of mixed or central apnea events. Only 133 of 303 patients (43.9%) completed follow‐up PSG, representing a selected subgroup that overrepresents patients with more severe preoperative disease (mean preoperative AHI 24.6 vs. 9.3 events/h, p < 0.001) and higher BMI; the results of this comparison are detailed in the Results section. Additionally, the median interval from surgery to follow‐up PSG was 104 days (IQR 73–147; range 41–820 days), and this variability in follow‐up timing may influence postoperative sleep parameters, particularly in younger children where sleep architecture changes rapidly with development. While some postoperative findings were significant, only a subset of patients had post‐op PSG data, with only a few in the youngest group, limiting longitudinal conclusions and accurate comparisons with preoperative parameters. Future studies should include patients with both pre operation and multiple post operation PSGs, and ideally a control group, to better characterize persistence and clinical significance of age‐related PSG differences and investigate whether addressing sleep architecture could improve long‐term cognitive and metabolic health in pediatric oSDB patients. 5 Conclusion This study highlights age‐related differences in PSG parameters in children with oSDB. We observed a U‐shaped pattern in AHI and an inverse U‐shaped pattern in N3 sleep. Obesity appears to be associated with increased OSA severity in older children, as well as residual OSA after tonsillectomy. In contrast, OSA may be associated with greater changes in N3 sleep in younger pediatric patients, though this relationship warrants further investigation given the limited postoperative sample size. These findings emphasize the need for age‐specific approaches to the diagnosis and treatment of oSDB and support further research into the long‐term effects of obesity, age, and sleep architecture on pediatric OSA outcomes. Funding The authors have nothing to report. Conflicts of Interest Romaine F. Johnson is editor‐in‐chief of Laryngoscope Investigative Otolaryngology . He was not involved in the editorial evaluation of or decision to accept this article for publication. Stephen Chorney is a consult for Smith & Nephew. The other authors declare no conflicts of interest."
+    }
+   ]
+  },
+  {
+   "id": "ATS-BRONCH-001",
+   "source": "ATS",
+   "title": "ATS/ERS/JRS/ALAT guidelines on management of NTM-pulmonary disease in adults",
+   "year": "2020",
+   "page_url": "https://www.atsjournals.org/doi/10.1164/rccm.202005-1894OF",
+   "pdf_url": "https://www.atsjournals.org/doi/10.1164/rccm.202005-1894OF",
+   "license": "ATS ERS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pulmonology_infection",
+   "priority": "high",
+   "sha256": "db832a80f53d0fa8a3b9c54e0ab4480462ccefd8410944631109672eb62a2dbb",
+   "size_bytes": 805,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 805,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:02Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATS/ERS/JRS/ALAT guidelines on management of NTM-pulmonary disease in adults Source: ATS Year: 2020 Domain: pulmonology_infection License: ATS ERS Available at: https://www.atsjournals.org/doi/10.1164/rccm.202005-1894OF This is a citation reference for the ATS guideline 'ATS/ERS/JRS/ALAT guidelines on management of NTM-pulmonary disease in adults' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pulmonology_infection. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATS-VENT-001",
+   "source": "ATS",
+   "title": "ATS/ACCP statement on liberation from mechanical ventilation in critically ill adults",
+   "year": "2017",
+   "page_url": "https://journal.chestnet.org/article/S0012-3692(16)62574-0/fulltext",
+   "pdf_url": "https://journal.chestnet.org/article/S0012-3692(16)62574-0/fulltext",
+   "license": "ATS ACCP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pulmonology_critical",
+   "priority": "high",
+   "sha256": "25baaf4b50f21ff7c38cd9e173fd6c2f0a05b16be2c87ae702c4b33b6b65d87e",
+   "size_bytes": 831,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 831,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATS/ACCP statement on liberation from mechanical ventilation in critically ill adults Source: ATS Year: 2017 Domain: pulmonology_critical License: ATS ACCP Available at: https://journal.chestnet.org/article/S0012-3692(16)62574-0/fulltext This is a citation reference for the ATS guideline 'ATS/ACCP statement on liberation from mechanical ventilation in critically ill adults' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pulmonology_critical. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATS-WEAN-001",
+   "source": "ATS",
+   "title": "ATS ACCP Liberation from Mechanical Ventilation in Critically Ill Adults",
+   "year": "2017",
+   "page_url": "https://www.thoracic.org/statements/",
+   "pdf_url": "https://www.thoracic.org/statements/",
+   "license": "ATS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "internal_medicine_critical_care",
+   "priority": "high",
+   "sha256": "1b13ddec75f818a86b81d00875a95a7080f6e9538a82e2b6cc8ab593a74ab63b",
+   "size_bytes": 791,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 791,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:06Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATS ACCP Liberation from Mechanical Ventilation in Critically Ill Adults Source: ATS Year: 2017 Domain: internal_medicine_critical_care License: ATS Available at: https://www.thoracic.org/statements/ This is a citation reference for the ATS guideline 'ATS ACCP Liberation from Mechanical Ventilation in Critically Ill Adults' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: internal_medicine_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATS-FBAW-001",
+   "source": "ATS",
+   "title": "ATS guidelines on bronchoscopy for foreign body removal",
+   "year": "2020",
+   "page_url": "https://www.thoracic.org/statements/",
+   "pdf_url": "https://www.thoracic.org/statements/",
+   "license": "ATS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_laryngology",
+   "priority": "medium",
+   "sha256": "fd0abc2f496d70921ca3c1a4fad5cb75def080e1503de2eb81b5dfea5d3d4b6a",
+   "size_bytes": 725,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 725,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATS guidelines on bronchoscopy for foreign body removal Source: ATS Year: 2020 Domain: ent_laryngology License: ATS Available at: https://www.thoracic.org/statements/ This is a citation reference for the ATS guideline 'ATS guidelines on bronchoscopy for foreign body removal' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_laryngology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATS-CRIT-DM-001",
+   "source": "ATS",
+   "title": "ATS critical care society management of hyperglycemia in critically ill patients",
+   "year": "2022",
+   "page_url": "https://www.thoracic.org/statements/",
+   "pdf_url": "https://www.thoracic.org/statements/",
+   "license": "ATS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_diabetes",
+   "priority": "medium",
+   "sha256": "c3e3112ebfc23cababeab6f8c8632111808eb468faed5393c7ccf7d82c93f1fc",
+   "size_bytes": 789,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 789,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATS critical care society management of hyperglycemia in critically ill patients Source: ATS Year: 2022 Domain: endocrinology_diabetes License: ATS Available at: https://www.thoracic.org/statements/ This is a citation reference for the ATS guideline 'ATS critical care society management of hyperglycemia in critically ill patients' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_diabetes. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATS-PULMRH-001",
+   "source": "ATS",
+   "title": "ATS-ERS official statement key concepts and advances in pulmonary rehabilitation",
+   "year": "2013",
+   "page_url": "https://www.atsjournals.org/doi/10.1164/rccm.201309-1634ST",
+   "pdf_url": "https://www.atsjournals.org/doi/10.1164/rccm.201309-1634ST",
+   "license": "ATS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_pulmonary",
+   "priority": "high",
+   "sha256": "ef650883691a8d0de95a0a104d599d1e717441bf449de144008a92ba0e79fd5d",
+   "size_bytes": 1767,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1767,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "An official American Thoracic Society/European Respiratory Society statement: key concepts and advances in pulmonary rehabilitation. Pulmonary rehabilitation is recognized as a core component of the management of individuals with chronic respiratory disease. Since the 2006 American Thoracic Society (ATS)/European Respiratory Society (ERS) Statement on Pulmonary Rehabilitation, there has been considerable growth in our knowledge of its efficacy and scope. The purpose of this Statement is to update the 2006 document, including a new definition of pulmonary rehabilitation and highlighting key concepts and major advances in the field. A multidisciplinary committee of experts representing the ATS Pulmonary Rehabilitation Assembly and the ERS Scientific Group 01.02, \"Rehabilitation and Chronic Care,\" determined the overall scope of this update through group consensus. Focused literature reviews in key topic areas were conducted by committee members with relevant clinical and scientific expertise. The final content of this Statement was agreed on by all members. An updated definition of pulmonary rehabilitation is proposed. New data are presented on the science and application of pulmonary rehabilitation, including its effectiveness in acutely ill individuals with chronic obstructive pulmonary disease, and in individuals with other chronic respiratory diseases. The important role of pulmonary rehabilitation in chronic disease management is highlighted. In addition, the role of health behavior change in optimizing and maintaining benefits is discussed. The considerable growth in the science and application of pulmonary rehabilitation since 2006 adds further support for its efficacy in a wide range of individuals with chronic respiratory disease."
+    }
+   ]
+  },
+  {
+   "id": "ATS-SMOKING-001",
+   "source": "ATS",
+   "title": "ATS Initiating Pharmacologic Treatment in Tobacco-Dependent Adults",
+   "year": "2020",
+   "page_url": "https://www.thoracic.org/statements/",
+   "pdf_url": "https://www.thoracic.org/statements/",
+   "license": "ATS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_pain",
+   "priority": "high",
+   "sha256": "b2607c350ea04dabb63b15c9c8cf68881dafa8ec2fca94740a774cb08603d0d2",
+   "size_bytes": 735,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 735,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:12Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATS Initiating Pharmacologic Treatment in Tobacco-Dependent Adults Source: ATS Year: 2020 Domain: drug_pain License: ATS Available at: https://www.thoracic.org/statements/ This is a citation reference for the ATS guideline 'ATS Initiating Pharmacologic Treatment in Tobacco-Dependent Adults' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATS-OSA-PEDS-001",
+   "source": "ATS",
+   "title": "ATS Statement on Pediatric Obesity Hypoventilation Syndrome",
+   "year": "2020",
+   "page_url": "https://www.thoracic.org/statements/",
+   "pdf_url": "https://www.thoracic.org/statements/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sleep_pediatric",
+   "priority": "medium",
+   "sha256": "f012881f806af446e755da39ab21a03e2cdaeab22bb6873dc4a728abefa36a3e",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATS Statement on Pediatric Obesity Hypoventilation Syndrome Source: ATS Year: 2020 Domain: sleep_pediatric License: Proprietary Available at: https://www.thoracic.org/statements/ This is a citation reference for the ATS guideline 'ATS Statement on Pediatric Obesity Hypoventilation Syndrome' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sleep_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATS-PAL-002",
+   "source": "ATS",
+   "title": "ATS Official Statement Dyspnea Mechanisms Assessment and Management",
+   "year": "2012",
+   "page_url": "https://www.atsjournals.org/doi/10.1164/rccm.201111-2042ST",
+   "pdf_url": "https://www.atsjournals.org/doi/10.1164/rccm.201111-2042ST",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_general",
+   "priority": "high",
+   "sha256": "4f1ade22c871e8a9dae7674995570795e106f9067f5e0e7b1eb703225127a9e8",
+   "size_bytes": 1748,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1748,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "An official American Thoracic Society statement: update on the mechanisms, assessment, and management of dyspnea. Dyspnea is a common, distressing symptom of cardiopulmonary and neuromuscular diseases. Since the ATS published a consensus statement on dyspnea in 1999, there has been enormous growth in knowledge about the neurophysiology of dyspnea and increasing interest in dyspnea as a patient-reported outcome. The purpose of this document is to update the 1999 ATS Consensus Statement on dyspnea. An interdisciplinary committee of experts representing ATS assemblies on Nursing, Clinical Problems, Sleep and Respiratory Neurobiology, Pulmonary Rehabilitation, and Behavioral Science determined the overall scope of this update through group consensus. Focused literature reviews in key topic areas were conducted by committee members with relevant expertise. The final content of this statement was agreed upon by all members. Progress has been made in clarifying mechanisms underlying several qualitatively and mechanistically distinct breathing sensations. Brain imaging studies have consistently shown dyspnea stimuli to be correlated with activation of cortico-limbic areas involved with interoception and nociception. Endogenous and exogenous opioids may modulate perception of dyspnea. Instruments for measuring dyspnea are often poorly characterized; a framework is proposed for more consistent identification of measurement domains. Progress in treatment of dyspnea has not matched progress in elucidating underlying mechanisms. There is a critical need for interdisciplinary translational research to connect dyspnea mechanisms with clinical treatment and to validate dyspnea measures as patient-reported outcomes for clinical trials."
+    }
+   ]
+  },
+  {
+   "id": "ATS-PAL-003",
+   "source": "ATS",
+   "title": "ATS Policy Statement Withholding Withdrawing Mechanical Ventilation",
+   "year": "2008",
+   "page_url": "https://www.atsjournals.org/journal/ajrccm",
+   "pdf_url": "https://www.atsjournals.org/journal/ajrccm",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_eol",
+   "priority": "high",
+   "sha256": "8c56857db432869e8891023f9783a4b371c2354ab33f324a5b09bae88a586de6",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATS Policy Statement Withholding Withdrawing Mechanical Ventilation Source: ATS Year: 2008 Domain: palliative_eol License: Restricted Available at: https://www.atsjournals.org/journal/ajrccm This is a citation reference for the ATS guideline 'ATS Policy Statement Withholding Withdrawing Mechanical Ventilation' published in 2008. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: palliative_eol. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ATS-PAL-004",
+   "source": "ATS",
+   "title": "ATS Policy Statement Resolving Disputes About Treatment Decisions ICU",
+   "year": "2015",
+   "page_url": "https://www.atsjournals.org/journal/ajrccm",
+   "pdf_url": "https://www.atsjournals.org/journal/ajrccm",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_eol",
+   "priority": "medium",
+   "sha256": "f6aafea51f7c9803168710620e028c0c3dbd7d94ae14d658b2ca2c8d4b5e6e5d",
+   "size_bytes": 764,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 764,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ATS Policy Statement Resolving Disputes About Treatment Decisions ICU Source: ATS Year: 2015 Domain: palliative_eol License: Restricted Available at: https://www.atsjournals.org/journal/ajrccm This is a citation reference for the ATS guideline 'ATS Policy Statement Resolving Disputes About Treatment Decisions ICU' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: palliative_eol. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "EWMA",
  "generated_at": "2026-05-02T17:08:12Z",
- "total_documents": 13,
+ "total_documents": 17,
  "documents": [
   {
    "id": "EWMA-001",
@@ -945,6 +945,106 @@
     {
      "chunk_index": 10,
      "content": "Meda AB, outside the submitted work. P. Devillier reports personal fees from ALK‐Abello, personal fees and non‐financial support from Stallergenes, personal fees and non‐financial support from AstraZeneca, personal fees from Chiesi, personal fees from GlaxoSmithKline, personal fees from Menarini, personal fees from Viatris, personal fees from Procter & Gamble Health, outside the submitted work. L. Cecchi reports personal fees from Menarini, personal fees from Chiesi, personal fees from AstraZeneca, personal fees from GSK, personal fees from Novartis, personal fees from Thermofisher, personal fees from Sanofi, outside the submitted work. G. Roberts reports grants from the National Institute of Health Research, grants from the National Institutes of Health, grants from Action Medical Research, grants from EU IMI2, other support from ALK‐Abello, non‐financial support and other support from ThermoFisher, other support from AstraZeneca, other support from Viatris, outside the submitted work. E. Compalati reports personal fees from Lofarma spa during the conduct of the study. D. Choudhury reports personal fees from Athaneum, others from ESPGHAN, others from the British Society of Allergy and Clinical Immunology (BSACI) ‐ Standards of Care Committee, others from Respiratory Allergy, International Primary Care Respiratory Group, outside the submitted work. R. Buhl reports personal fees from AstraZeneca, Berlin‐Chemie, Celltrion, Chiesi, Cipla, Sanofi and Teva, as well as grants to Mainz University Hospital and personal fees from Boehringer Ingelheim, GlaxoSmithKline, Novartis and Roche, outside the submitted work. L. de las Vecillas reports fees for Lectures/Advisory Boards from AstraZeneca, GSK, LETI labs and Allergy Therapeutics, outside the submitted work. She has received a Research grant from the Spanish Society of Allergy and Clinical Immunology Foundation and from the ISCIII, outside the submitted work. L. Taborda‐Barata reports personal fees from LETI, personal fees from Sanofi and personal fees from Diater, outside the submitted work. J. Bernstein reports personal fees from Pfizer, personal fees from Lilly and personal fees from Sanofi. S. Del Giacco reports grants and personal fees from AstraZeneca, grants and personal fees from GSK, grants and personal fees from Sanofi, personal fees from Chiesi, personal fees from Menarini, outside the submitted work. M. Giovannini reports personal fees from Sanofi, from Thermo Fisher Scientific, outside the submitted work. N. Miculinic reports personal fees from Salvus d.o.o. Pharma Industry, personal fees from Viatris Ltd., outside the submitted work. J. da Silva reports grants, personal fees and others from Novartis, grants and personal fees from Takeda, outside the submitted work. G. Paoletti reports other from LoFarma, other from GSK and other from Astrazeneca, outside the submitted work. H. Schünemann reports and develops guidelines on Allergic Rhinitis in Asthma (ARIA), and his academic institution received research funding for it. The other authors declare no conflicts of interest, outside the submitted work. Supporting information Appendix S1: all70100‐sup‐0001‐AppendixS1.docx."
+    }
+   ]
+  },
+  {
+   "id": "EWMA-WOUND-001",
+   "source": "EWMA",
+   "title": "EWMA European Wound Management Association position document chronic wounds",
+   "year": "2019",
+   "page_url": "https://ewma.org/",
+   "pdf_url": "https://ewma.org/",
+   "license": "EWMA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "dermatology_pruritus",
+   "priority": "medium",
+   "sha256": "72c66f1f207431bffc058da5c0dadcbb14bdc4e1835233f282a003e2f4fb025d",
+   "size_bytes": 759,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 759,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:45Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EWMA European Wound Management Association position document chronic wounds Source: EWMA Year: 2019 Domain: dermatology_pruritus License: EWMA Available at: https://ewma.org/ This is a citation reference for the EWMA guideline 'EWMA European Wound Management Association position document chronic wounds' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: dermatology_pruritus. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EWMA-DEBRIDE-001",
+   "source": "EWMA",
+   "title": "Debridement Document Updated Position on Wound Bed Preparation",
+   "year": "2022",
+   "page_url": "https://ewma.org/what-we-do/projects-and-publications/",
+   "pdf_url": "https://ewma.org/what-we-do/projects-and-publications/",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wound_pressure",
+   "priority": "high",
+   "sha256": "0f1a9f15b993b585e41dd11cf471482a9f2e143fbaeb7a688a054bb81d82b1c1",
+   "size_bytes": 765,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 765,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:45Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Debridement Document Updated Position on Wound Bed Preparation Source: EWMA Year: 2022 Domain: wound_pressure License: CC-BY-NC-ND Available at: https://ewma.org/what-we-do/projects-and-publications/ This is a citation reference for the EWMA guideline 'Debridement Document Updated Position on Wound Bed Preparation' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wound_pressure. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EWMA-BIOFILM-001",
+   "source": "EWMA",
+   "title": "Position Document Biofilms Made Easy",
+   "year": "2017",
+   "page_url": "https://ewma.org/what-we-do/projects-and-publications/",
+   "pdf_url": "https://ewma.org/what-we-do/projects-and-publications/",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wound_infection",
+   "priority": "medium",
+   "sha256": "20b2f128c13cb3b0fa5303cf20d2faf4493f25c67b3ea3f88f059b5bf19fc918",
+   "size_bytes": 715,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 715,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Position Document Biofilms Made Easy Source: EWMA Year: 2017 Domain: wound_infection License: CC-BY-NC-ND Available at: https://ewma.org/what-we-do/projects-and-publications/ This is a citation reference for the EWMA guideline 'Position Document Biofilms Made Easy' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wound_infection. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EWMA-VAC-001",
+   "source": "EWMA",
+   "title": "EWMA Document on Wound Care in the Older Person",
+   "year": "2019",
+   "page_url": "https://ewma.org/what-we-do/projects-and-publications/",
+   "pdf_url": "https://ewma.org/what-we-do/projects-and-publications/",
+   "license": "CC-BY-NC-ND",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "wound_palliative",
+   "priority": "medium",
+   "sha256": "93452da3cdcf4811c9ffda41694a5ac92d3b63132f633a10da743306e9581abf",
+   "size_bytes": 739,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 739,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EWMA Document on Wound Care in the Older Person Source: EWMA Year: 2019 Domain: wound_palliative License: CC-BY-NC-ND Available at: https://ewma.org/what-we-do/projects-and-publications/ This is a citation reference for the EWMA guideline 'EWMA Document on Wound Care in the Older Person' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wound_palliative. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

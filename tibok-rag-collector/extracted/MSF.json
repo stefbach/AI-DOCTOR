@@ -1,7 +1,7 @@
 {
  "source": "MSF",
  "generated_at": "2026-05-03T07:31:27Z",
- "total_documents": 9,
+ "total_documents": 11,
  "documents": [
   {
    "id": "MSF-001",
@@ -465,6 +465,56 @@
     {
      "chunk_index": 7,
      "content": "situations, genetic testing may help clarify diagnoses, identify syndromic causes, and guide personalized treatment. Careful consideration of clinical utility, patient autonomy, and access to genetic counseling are essential to provide informed and supportive care. Acknowledgements Conflicts of interest There are no conflicts of interest. Supplementary Material"
+    }
+   ]
+  },
+  {
+   "id": "MSF-DRUG-003",
+   "source": "MSF",
+   "title": "MSF Tuberculosis Practical Guide for clinicians nurses laboratory technicians and medical auxiliaries",
+   "year": "2024",
+   "page_url": "https://medicalguidelines.msf.org/viewport/TUB/english/tuberculosis-practical-guide-23444673.html",
+   "pdf_url": "https://medicalguidelines.msf.org/viewport/TUB/english/tuberculosis-practical-guide-23444673.html",
+   "license": "MSF Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_specialty_hiv_hcv_tb",
+   "priority": "high",
+   "sha256": "54e53d102b2aab6a7f40be0f4854c80cb9474fce0c619d8828efb1dd7ccfa205",
+   "size_bytes": 903,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 903,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: MSF Tuberculosis Practical Guide for clinicians nurses laboratory technicians and medical auxiliaries Source: MSF Year: 2024 Domain: drug_specialty_hiv_hcv_tb License: MSF Open Available at: https://medicalguidelines.msf.org/viewport/TUB/english/tuberculosis-practical-guide-23444673.html This is a citation reference for the MSF guideline 'MSF Tuberculosis Practical Guide for clinicians nurses laboratory technicians and medical auxiliaries' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_specialty_hiv_hcv_tb. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "MSF-004",
+   "source": "MSF",
+   "title": "Cholera Outbreak Management Field Guide",
+   "year": "2023",
+   "page_url": "https://medicalguidelines.msf.org/en/cholera",
+   "pdf_url": "https://medicalguidelines.msf.org/en/cholera",
+   "license": "MSF Open Access",
+   "commercial_use": "allowed",
+   "clinical_domain": "tropical_diseases",
+   "priority": "high",
+   "sha256": "c28db55e1407f406a29d903aaeebf8029de7839f1fd0004ef4dd57039525aa29",
+   "size_bytes": 1997,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1997,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Strengthening healthcare worker knowledge for outbreak preparedness and response via mobile technology in Nigeria and Uganda. Healthcare worker (HCW) training on epidemic preparedness is vital for effective outbreak detection, reporting and response, especially in resource-limited settings. However, traditional training methods often fail to address the specific needs of frontline HCWs, causing significant delays in disease surveillance and response.This paper explores the Clinical Integrated Disease Surveillance and Response (cIDSR) training model, designed to supplement existing IDSR efforts and address key barriers in epidemic detection and notification. Piloted in Nigeria and Uganda, cIDSR provides HCWs with free, user-friendly, mobile-optimised, self-paced learning material, accessible even in low-bandwidth environments. Unlike most traditional training methodologies, cIDSR modules present priority diseases as interactive patient journeys, guiding HCWs through the detection, reporting, infection prevention and case management at the primary healthcare level.Over 18 000 HCWs have enrolled in the full cIDSR course, with high completion rates and positive feedback, highlighting its relevance. Its modular structure enables governments to deploy targeted, just-in-time training when risks increase or outbreaks occur. For instance, a cholera response module was released within 48 hours of outbreak declaration in Nigeria (June 2024); over 8000 HCWs completed the module within 5 weeks. Similarly, an Ebola response module was released within 36 hours of an outbreak in Uganda (January 2025), with over 2000 HCWs completing the module within 4 weeks.In both countries, the full course and just-in-time training modules resulted in statistically significant learning gains (p<0.001, paired t-test), underscoring the model's effectiveness in improving outbreak preparedness and its potential to rapidly build frontline capacity through scalable, context-adapted digital training."
     }
    ]
   }

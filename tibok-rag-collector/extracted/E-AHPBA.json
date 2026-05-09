@@ -1,7 +1,7 @@
 {
  "source": "E-AHPBA",
  "generated_at": "2026-05-09T11:23:43Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "EAHPBA-PANCREAS-001",
@@ -93,6 +93,31 @@
     {
      "chunk_index": 17,
      "content": "Gemcitabine-based Chemoradiation for Resectable Phys. 2010;78:735–42. Adenocarcinoma of the pancreatic head. J Clin Oncol. 2008;26:3487–95. 116. Mattiucci GC, Morganti AG, Valentini V, Ippolito E, Alfieri S, Antinori A, 133. Neoptolemos JP, Stocken DD, Friess H, Bassi C, Dunn JA, Hickey H, Beger H, Crucitti A, D'Agostino GR, Di Lullo L, Luzi S, et al. External beam Fernandez-Cruz L, Dervenis C, Lacaine F, et al. A randomized trial of radiotherapy plus 24-hour continuous infusion of gemcitabine in Chemoradiotherapy and chemotherapy after resection of pancreatic cancer. unresectable pancreatic carcinoma: long-term results of a phase II study. Int N Engl J Med. 2004;350:1200–10. J Radiat Oncol Biol Phys. 2010;76:831–8. 134. Oettle H, Neuhaus P, Hochhaus A, et al. Adjuvant chemotherapy with gemcitabine and long-term outcomes among patients with resected 117. McClaine RJ, Lowy AM, Sussman JJ, Schmulewitz N, Grisell DL, Ahmad SA. pancreatic cancer: the conko-001 randomized trial. JAMA. 2013;310:1473–81. Neoadjuvant therapy may lead to successful surgical resection and 135. Neoptolemos JP, Palmer DH, Ghaneh P, Psarelli EE, Valle JW, Halloran CM, improved survival in patients with borderline resectable pancreatic cancer. Faluyi O, O'Reilly DA, Cunningham D, Wadsley J, et al. Comparison of HPB (Oxford). 2010;12:73–9. adjuvant gemcitabine and capecitabine with gemcitabine monotherapy in 118. Polistina F, Costantin G, Casamassima F, Francescon P, Guglielmi R, patients with resected pancreatic cancer (ESPAC-4): a multicentre, open- Panizzoni G, Febbraro A, Ambrosino G. Unresectable locally advanced label, randomised, phase 3 trial. Lancet. 389:1011–24. pancreatic cancer: a multimodal treatment using neoadjuvant 136. Sohal D, McDonough SL, Ahmad SA, Gandhi N, Beg MS, Wang-Gillam A, chemoradiotherapy (gemcitabine plus stereotactic radiosurgery) and Guthrie KA, Lowy AM, Philip PA, Hochster HS. SWOG S1505: a randomized phase subsequent surgical exploration. Ann Surg Oncol. 2010;17:2092–101. II study of perioperative mFOLFIRINOX vs. gemcitabine/nab-paclitaxel as therapy 119. Turrini O, Ychou M, Moureau-Zabotto L, Rouanet P, Giovannini M, for resectable pancreatic adenocarcinom. J Clin Oncol. 2017;35:–TPS508. Moutardier V, Azria D, Delpero JR, Viret F. Neoadjuvant docetaxel-based 137. Suker M, Beumer BR, Sadot E, Marthey L, Faris JE, Mellon EA, El-Rayes BF, chemoradiation for resectable adenocarcinoma of the pancreas: new Wang-Gillam A, Lacy J, Hosein PJ, et al. FOLFIRINOX for locally advanced neoadjuvant regimen was safe and provided an interesting pathologic pancreatic cancer: a systematic review and patient-level meta-analysis. response. Eur J Surg Oncol. 2010;36:987–92. Lancet Oncol. 2016;17:801–10. 120. Bjerregaard JK, Mortensen MB, Jensen HA, Fristrup C, Svolgaard B, 138. Evans DB, Rich TA, Byrd DR, et al. Preoperative chemoradiation and Schonnemann KR, Hansen TP, Nielsen M, Johansen J, Pfeiffer P. Long-term pancreaticoduodenectomy for adenocarcinoma of the pancreas. Arch Surg. results of concurrent radiotherapy and UFT in patients with locally 1992;127:1335–9. advanced pancreatic cancer. Radiother Oncol. 2009;92:226–30. 139. Hartman DJ, Krasinskas AM. Assessing treatment effect in pancreatic cancer. 121. Le Scodan R, Mornex F, Girard N, Mercier C, Valette PJ, Ychou M, Bibeau F, Arch Pathol Lab Med. 2012;136:100–9. Roy P, Scoazec JY, Partensky C. Preoperative chemoradiation in potentially resectable pancreatic adenocarcinoma: feasibility, treatment effect evaluation and prognostic factors, analysis of the SFRO-FFCD 9704 trial and literature review. Ann Oncol. 2009;20:1387–96."
+    }
+   ]
+  },
+  {
+   "id": "EAHPBA-WHIPPLE-001",
+   "source": "E-AHPBA",
+   "title": "European AHPBA Consensus on Pancreatoduodenectomy Standards",
+   "year": "2019",
+   "page_url": "https://www.hpbonline.org/article/S1365-182X(19)30473-0/fulltext",
+   "pdf_url": "https://www.hpbonline.org/article/S1365-182X(19)30473-0/fulltext",
+   "license": "E-AHPBA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_hpb",
+   "priority": "high",
+   "sha256": "15b00e0cf6f2e101ca0b446c0f69b5add418cef0bb787f6aebcb4c98ef81bcc1",
+   "size_bytes": 785,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 785,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: European AHPBA Consensus on Pancreatoduodenectomy Standards Source: E-AHPBA Year: 2019 Domain: digestive_surgery_hpb License: E-AHPBA Available at: https://www.hpbonline.org/article/S1365-182X(19)30473-0/fulltext This is a citation reference for the E-AHPBA guideline 'European AHPBA Consensus on Pancreatoduodenectomy Standards' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: digestive_surgery_hpb. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

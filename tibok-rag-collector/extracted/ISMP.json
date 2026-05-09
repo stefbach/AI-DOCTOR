@@ -1,7 +1,7 @@
 {
  "source": "ISMP",
  "generated_at": "2026-05-09T13:54:52Z",
- "total_documents": 9,
+ "total_documents": 14,
  "documents": [
   {
    "id": "ISMP-007",
@@ -541,6 +541,131 @@
     {
      "chunk_index": 5,
      "content": "the new guidelines prioritize prevention through the appropriate use of oral anticoagulation based on locally validated risk scores or the CHA 2 DS 2 -VA score (using the same treatment cut-off regardless of gender). In addition, guidance is provided on trigger-induced AF, device-detected sub-clinical AF, and approaches to reduce the residual risk of stroke despite anticoagulation. The role of left atrial appendage occlusion needs further study, but is now indicated in all endoscopic, hybrid, or concomitant cardiac surgery procedures as an adjunct to oral anticoagulation. Substantial evidence updates have enabled more targeted approaches to [R] Reduce symptoms by rate and rhythm control, necessitating a shared decision-making approach between patients and their multidisciplinary healthcare professionals. Catheter ablation of AF has been upgraded to a first-line rhythm control option in patients with paroxysmal AF in addition to those failing anti-arrhythmic drug therapy. The 2024 ESC/EACTS Guidelines on AF also provide guidance to improve prognosis with rhythm control in selected patients and more detailed information on how to safely perform cardioversion of AF. Finally, the addition of [E] Evaluation and dynamic reassessment is an important and constructive step to ensure better provision of lifelong, optimal AF management, including identification and timely treatment of changing individual risk factors to prevent progression and adverse outcomes related to AF. The 2024 ESC/EACTS Guidelines on AF have introduced patient flow charts that cover the major aspects of AF-CARE, using a consistent writing style for all recommendations (the intervention proposed, the population it is applied to, and the potential value to the patient, followed by any exceptions). Making the 2024 ESC/EACTS Guidelines on AF easier to read and more simple to follow will hopefully lead to better implementation. As evidenced by the ESC’s first randomized trial (STEEER-AF), delivering guideline-adherent management is critical if we are to reduce patient, health care, and societal burdens of AF, with a key role for the education of patients, carers, and healthcare professionals. , All recommendations in the 2024 ESC/EACTS Guidelines on AF were supported by detailed supplementary evidence tables to provide a clear insight into all available evidence, limitations, and research gaps. The patient representatives of the 2024 ESC/EACTS Guidelines on AF also designed a patient version of the guidelines, to inform and empower patients with AF about their specific management options, with the goal to improve engagement and self-management of AF, and to facilitate optimal shared decision making. , Supplementary Material euae298_Supplementary_Data"
+    }
+   ]
+  },
+  {
+   "id": "ISMP-002",
+   "source": "ISMP",
+   "title": "ISMP List of High-Alert Medications in Long-Term Care",
+   "year": "2024",
+   "page_url": "https://www.ismp.org/recommendations/high-alert-medications-long-term-care-list",
+   "pdf_url": "https://www.ismp.org/recommendations/high-alert-medications-long-term-care-list",
+   "license": "ISMP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_safety_practice",
+   "priority": "high",
+   "sha256": "394b104b3a5c1b362f66c516cdf424fab3237597968c5c86737fa642bc21a1f1",
+   "size_bytes": 777,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 777,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:01Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISMP List of High-Alert Medications in Long-Term Care Source: ISMP Year: 2024 Domain: drug_safety_practice License: ISMP Available at: https://www.ismp.org/recommendations/high-alert-medications-long-term-care-list This is a citation reference for the ISMP guideline 'ISMP List of High-Alert Medications in Long-Term Care' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_safety_practice. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ISMP-003",
+   "source": "ISMP",
+   "title": "ISMP List of High-Alert Medications in Community Ambulatory Settings",
+   "year": "2024",
+   "page_url": "https://www.ismp.org/recommendations/high-alert-medications-community-ambulatory-list",
+   "pdf_url": "https://www.ismp.org/recommendations/high-alert-medications-community-ambulatory-list",
+   "license": "ISMP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_safety_practice",
+   "priority": "high",
+   "sha256": "a8a7ecf37499007ee8ccac545a33629f3e7039e31ccc1a9b7ecccca1a3e791bb",
+   "size_bytes": 813,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 813,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:02Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISMP List of High-Alert Medications in Community Ambulatory Settings Source: ISMP Year: 2024 Domain: drug_safety_practice License: ISMP Available at: https://www.ismp.org/recommendations/high-alert-medications-community-ambulatory-list This is a citation reference for the ISMP guideline 'ISMP List of High-Alert Medications in Community Ambulatory Settings' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_safety_practice. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ISMP-009",
+   "source": "ISMP",
+   "title": "ISMP Guidelines for Standard Order Sets",
+   "year": "2010",
+   "page_url": "https://www.ismp.org/guidelines/standard-order-sets",
+   "pdf_url": "https://www.ismp.org/guidelines/standard-order-sets",
+   "license": "ISMP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_safety_practice",
+   "priority": "medium",
+   "sha256": "f62624de15aa6b3056edef84b84c1d09e9596aa8b8e0020f9027e2d94c6add64",
+   "size_bytes": 721,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 721,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:02Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISMP Guidelines for Standard Order Sets Source: ISMP Year: 2010 Domain: drug_safety_practice License: ISMP Available at: https://www.ismp.org/guidelines/standard-order-sets This is a citation reference for the ISMP guideline 'ISMP Guidelines for Standard Order Sets' published in 2010. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_safety_practice. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ISMP-010",
+   "source": "ISMP",
+   "title": "ISMP Guidelines for Optimizing Safe Implementation and Use of Smart Infusion Pumps",
+   "year": "2020",
+   "page_url": "https://www.ismp.org/guidelines/safe-implementation-and-use-smart-pumps",
+   "pdf_url": "https://www.ismp.org/guidelines/safe-implementation-and-use-smart-pumps",
+   "license": "ISMP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_safety_practice",
+   "priority": "medium",
+   "sha256": "d1fe0af5b8fcc93663fb7d62aad7d3b41b58312a27e89565e45d55777a64c907",
+   "size_bytes": 827,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 827,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:03Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISMP Guidelines for Optimizing Safe Implementation and Use of Smart Infusion Pumps Source: ISMP Year: 2020 Domain: drug_safety_practice License: ISMP Available at: https://www.ismp.org/guidelines/safe-implementation-and-use-smart-pumps This is a citation reference for the ISMP guideline 'ISMP Guidelines for Optimizing Safe Implementation and Use of Smart Infusion Pumps' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_safety_practice. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ISMP-MED-003",
+   "source": "ISMP",
+   "title": "Confused Drug Names List Look-Alike Sound-Alike",
+   "year": "2023",
+   "page_url": "https://www.ismp.org/recommendations/confused-drug-names-list",
+   "pdf_url": "https://www.ismp.org/recommendations/confused-drug-names-list",
+   "license": "ISMP",
+   "commercial_use": "restricted",
+   "clinical_domain": "quality_safety_medication",
+   "priority": "medium",
+   "sha256": "a6c4dd16226261dc387528c2937e1c4fcca2963ef4de2b4d4702cd98002f9c73",
+   "size_bytes": 1919,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1919,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Sound-Alike Look-Alike Confusion and Matching Medication Product Attributes: Simulated Case-Control Studies. Background: Sound-alike look-alike (SALA) medication confusions harm as many as 250 000 Americans annually. Most preventive strategies focus on medication name similarities. Objectives: To evaluate the association between matching medication product attributes and SALA confusion. Methods: We simulated 20 000 case-control studies using the Institute for Safe Medication Practices' List of Confused Drug Names as case pairs and 4 randomly selected control pairs per case pair from the First DataBank MedKnowledge (FDBM) database. We extracted 7 product attributes for each medication from the FDBM database. We used logistic regression models to estimate the associations between matching product attributes and SALA confusion. The models included a series of univariate (unadjusted) models, a model that adjusted for all product attributes, and a model that further adjusted for medication name similarity measures. Results: Medications with a matching product attribute had increased odds of SALA confusion in the univariate analyses (odds ratio [OR] = 4.2 to 55.5). When we simultaneously adjusted for all attributes, the associations of matching package unit, package unit size, formulation, strength, therapeutic class, and manufacturer with SALA confusion were attenuated but remained elevated (OR = 1.5 to 26.5), whereas the direction of association between matching route and SALA confusion reversed (OR = 0.8). These associations persisted on adjustment for medication name similarity measures. Conclusions and Relevance: This study is the first to evaluate the association between matching medication product attributes and SALA confusion with a control group. Having matching product attributes increased the odds of SALA confusion. SALA risk reduction strategies should consider product attributes."
     }
    ]
   }

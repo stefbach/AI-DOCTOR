@@ -1,7 +1,7 @@
 {
  "source": "BAD",
  "generated_at": "2026-05-09T13:19:41Z",
- "total_documents": 18,
+ "total_documents": 19,
  "documents": [
   {
    "id": "BAD-AD-001",
@@ -882,6 +882,31 @@
     {
      "chunk_index": 2,
      "content": "dietary concerns affecting healing and overall nutritional status. Along with other factors of sepsis and weakness, we predict the patient to have a score of 12, placing the patient in the high-risk category for pressure ulcers. The lack of perfusion compounded the risk of tissue breakdown, emphasizing the importance of early intervention and pressure offloading strategies. In future practice, incorporating Braden scale assessments in similar cases can help predict and mitigate pressure-related complications. Ischemia Oxygen is an essential factor in tissue repair and infection control. Hypoxia is often seen in infected tissues and can impair neutrophil function, therefore reducing effective bacterial clearance and delaying wound healing [ ]. A combination of compromised oxygenation due to a loss of local blood flow from mechanical pressure and infection-based inflammation likely reflects the lack of perfusion in this patient’s presentation. Evidence suggests that hyperbaric oxygen therapy (HBOT) is an innovative approach to enhance wound healing in the case of severe infection management. HBOT is a technique that increases oxygen solubility in plasma, thereby promoting collagen synthesis, angiogenesis, and bacterial killing by neutrophils [ ]. In terms of microbial infections, evidence suggests that HBOT can be considered for non-healing wounds in an attempt to break bacterial biofilms [ ]. Yet, the most important application of antimicrobial activity for HBOT can be applied to necrotizing soft tissue infections. Anaerobic bacteria are killed at a much higher rate when HBOT is used, which can decrease levels of inflammatory factors, TNF-α, IL-6, and IL-10 [ ]. This can lead to improved oxygen flow and prevent the need for amputation. HBOT has also been shown to play a role in angiogenesis and revascularization with the production of vascular endothelial growth factor (VEGF), platelet-derived growth factor (PDGF), and fibroblast growth factor (FGF) [ ]. Studies show that HBOT, which is used as adjunct therapy for diabetic foot ulcers, can provide faster healing and better outcomes than patients not treated with HBOT [ ]. As wound hypoxia remains a strong risk factor for patients with non-healing wounds, increasing oxygen on a cellular level is a tactic to help upregulate growth factors, reduce inflammation, increase collagen and blood vessel synthesis, and eliminate bacteria. Studies continue to depict lower major amputation rates for diabetic foot ulcers with the use of adjunctive HBOT [ ]. Ischemia played a central role in this case, as the prolonged constriction from the ring led to necrosis. The inability to perfuse the digit after ring removal confirmed irreversible tissue damage. This highlights the need for early recognition of ischemic changes in similar cases, where prolonged vascular compromise can lead to necrotic progression. Clinically, practitioners should prioritize prompt assessment of circulation and tissue viability in patients with constrictive injuries to improve outcomes and minimize amputation risk. Vascular reperfusion injuries Post amputation, the revascularization of ischemic tissue can trigger oxidative stress and inflammatory processes, which can exacerbate cellular damage. Such reperfusion injury involves the formation of reactive oxygen species (ROS), microvascular vasoconstriction, and activation of neutrophils to release proinflammatory cytokines, which further damage tissue [ ]. Management of reperfusion injuries involves adequate hydration pre- and postoperatively to help maintain flow and reduce renal damage from toxic metabolites. Additionally, the use of bicarbonate or other agents can reduce acidosis that occurs during reperfusion [ ]. The prevention of vascular reperfusion injury includes ischemic pre- or post-conditioning, which involves organ exposure to small durations of ischemia and limited reperfusion of the organ in order to prevent ROS formation [ ]. Reperfusion injury was a major concern in this case, influencing the decision not to cut the ring in the emergency setting. Sudden restoration of blood flow to ischemic tissues can lead to significant oxidative stress and inflammation, exacerbating tissue damage. This case illustrates the delicate balance between timely intervention and the potential harms of reperfusion injury. Future clinical guidelines should consider risk stratification for reperfusion injury, especially in patients with chronic ischemic insults, to optimize both surgical timing and patient outcomes. Conclusions This rare case of ring-induced NC necessitating amputation underscores the need for prompt recognition of ischemic injuries. Risk assessment tools like the Braden scale may aid prevention, though HBOT's role requires further study. Clinicians should maintain a high suspicion for vascular compromise in constrictive ring injuries to avert irreversible damage."
+    }
+   ]
+  },
+  {
+   "id": "BAD-URTI-001",
+   "source": "BAD",
+   "title": "BAD guidelines for management of chronic urticaria",
+   "year": "2022",
+   "page_url": "https://www.bad.org.uk/clinical-services/guidelines",
+   "pdf_url": "https://www.bad.org.uk/clinical-services/guidelines",
+   "license": "BAD",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_dermatologic",
+   "priority": "medium",
+   "sha256": "d62954bb2a40d94443577a227d5f04c46ac5cd2b02dd08357c1af0d8a25ba9d3",
+   "size_bytes": 1496,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1496,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Real life management of chronic urticaria: Multicenter and cross sectional study on patients and dermatologists in Iran. Recently, advances in understanding the etiology of urticaria and updates of diagnostic and therapeutic management guidelines have drawn attention to chronic urticaria (CU) morbidity. The present study aimed to evaluate Iranian dermatologists' practice and real life management of CU patients. A total of 35 dermatologists and 443 patients were included in the study. Number of female patients was 321 (72.5%). Mean (standard deviation) age of the study patients was 38 (13) years and the median (inter quartile range) of disease duration was 12 (6-48) months. Severity of patients' symptoms was mild for 32.1%, moderate for 38.7%, severe for 18.8%, and 10.4% of them had no evident signs or symptoms. The most common diagnostic methods were physical examination (96.6%), differential blood count (83.5%), erythrocyte sedimentation rate (77.4%), and C-reactive protein (62.8%). The number of dermatologists prescribed nonsedating antihistamines (nsAH) in regular dose and high dose mono therapy were 26 (74%) and 6 (17%), respectively. About 66% of dermatologists were familiar with British Association of Dermatologists (BAD) guideline. The most common first-line treatment for CU by Iranian dermatologists was nonsedating antihistamines in regular or high doses. The real-life management of patients with CU in Iran was in accordance with the available practice guidelines."
     }
    ]
   }

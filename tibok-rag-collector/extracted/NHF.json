@@ -1,7 +1,7 @@
 {
  "source": "NHF",
  "generated_at": "2026-05-09T09:37:36Z",
- "total_documents": 5,
+ "total_documents": 6,
  "documents": [
   {
    "id": "NHF-VWD-001",
@@ -205,6 +205,31 @@
     {
      "chunk_index": 0,
      "content": "Blood Adv Blood Adv 3318 bloodadv Blood Advances Blood Advances 2473-9529 2473-9537 The American Society of Hematology PMC7805326 PMC7805326.1 7805326 7805326 33570647 10.1182/bloodadvances.2020003264 2020/ADV2020003264C 1 8 29 Clinical Guidelines ASH ISTH NHF WFH 2021 guidelines on the management of von Willebrand disease https://orcid.org/0000-0003-4100-7826 Connell Nathan T. https://orcid.org/0000-0001-8998-6838 Flood Veronica H. https://orcid.org/0000-0002-6010-9900 Brignardello-Petersen Romina https://orcid.org/0000-0002-2684-1006 Abdul-Kadir Rezan Arapshian Alice Couper Susie Grow Jean M. https://orcid.org/0000-0002-3857-8313 Kouides Peter https://orcid.org/0000-0002-8268-3268 Laffan Michael https://orcid.org/0000-0003-2999-4216 Lavin Michelle https://orcid.org/0000-0001-5677-1371 Leebeek Frank W. G. https://orcid.org/0000-0001-8855-9746 O’Brien Sarah H. https://orcid.org/0000-0001-5938-0675 Ozelo Margareth C. https://orcid.org/0000-0002-0119-5204 Tosetto Alberto https://orcid.org/0000-0003-2595-8541 Weyand Angela C. https://orcid.org/0000-0003-4649-9014 James Paula D. https://orcid.org/0000-0002-6581-4561 Kalot Mohamad A. https://orcid.org/0000-0002-9638-2992 Husainat Nedaa https://orcid.org/0000-0002-2091-0875 Mustafa Reem A. 1 Hematology Division, Department of Medicine, Brigham and Women’s Hospital, Harvard Medical School, Boston, MA; 2 Versiti Blood Research Institute, Medical College of Wisconsin, Milwaukee, WI; 3 Department of Health Research Methods, Evidence, and Impact, McMaster University, Hamilton, ON, Canada; 4 Department of Obstetrics and Gynaecology and Katharine Dormandy Haemophilia and Thrombosis Centre, Royal Free Foundation Hospital and Institute for Women's Health, University College London, London, United Kingdom; 5 Middle Village, NY; 6 Maylands, WA, Australia; 7 Department of Strategic Communication, Marquette University, Milwaukee, WI; 8 Mary M. Gooley Hemophilia Treatment Center, University of Rochester, Rochester, NY; 9 Centre for Haematology, Imperial College London, London, United Kingdom; 10 Irish Centre for Vascular Biology, Royal College of Surgeons in Ireland and National Coagulation Centre, St James's Hospital, Dublin, Ireland; 11 Department of Hematology, Erasmus University Medical Center, Rotterdam, The Netherlands; 12 Division of Hematology/Oncology, Department of Pediatrics, Nationwide Children's Hospital, The Ohio State University College of Medicine, Columbus, OH; 13 Hemocentro UNICAMP, University of Campinas, Campinas, Brazil; 14 Hemophilia and Thrombosis Center, Hematology Department, S. Bortolo Hospital, Vicenza, Italy; 15 Department of Pediatrics, University of Michigan Medical School, Ann Arbor, MI; 16 Department of Medicine, Queen’s University, Kingston, ON, Canada; and 17 Outcomes and Implementation Research Unit, Division of Nephrology and Hypertension, Department of Internal Medicine, University of Kansas Medical Center, Kansas City, KS * N.T.C. and V.H.F. contributed equally to this study as first authors. Data for the Evidence-to-Decision frameworks will be publicly available via Web links from the online version of the document. 12 1 2021 12 1 2021 5 1 372909 301 325 03 9 2020 27 10 2020 12 01 2021 13 01 2021 09 11 2023 © 2021 by The American Society of Hematology 2021 ASH ISTH NHF WFH 2021 guidelines on the diagnosis of von Willebrand disease 5 1 12 1 2021 280 300 Blood Advances 10.1182/bloodadvances.2020003265 PMC7805340 33570651 Background: von Willebrand disease (VWD) is a common inherited bleeding disorder. Significant variability exists in management options offered to patients. Objective: These evidence-based guidelines from the American Society of Hematology (ASH), the International Society on Thrombosis and Haemostasis (ISTH), the National Hemophilia Foundation (NHF), and the World Federation of Hemophilia (WFH) are intended to support patients, clinicians, and health care professionals in their decisions about management of VWD. Methods: ASH, ISTH, NHF, and WFH formed a multidisciplinary guideline panel. Three patient representatives were included. The panel was balanced to minimize potential bias from conflicts of interest. The University of Kansas Outcomes and Implementation Research Unit and the McMaster Grading of Recommendations Assessment, Development and Evaluation (GRADE) Centre supported the guideline development process, including performing and updating systematic evidence reviews (through November 2019). The panel prioritized clinical questions and outcomes according to their importance to clinicians and patients. The panel used the GRADE approach, including GRADE Evidence-to-Decision frameworks, to assess evidence and make recommendations, which were subject to public comment. Results: The panel agreed on 12 recommendations and outlined future research priorities. Conclusions: These guidelines make key recommendations regarding prophylaxis for frequent recurrent bleeding, desmopressin trials to determine therapy, use of antiplatelet agents and anticoagulant therapy, target VWF and factor VIII activity levels for major surgery, strategies to reduce bleeding during minor surgery or invasive procedures, management options for heavy menstrual bleeding, management of VWD in the context of neuraxial anesthesia during labor and delivery, and management in the postpartum setting. pmc-status-qastatus 0 pmc-status-live yes pmc-status-embargo no pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf yes pmc-prop-has-supplement yes pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc yes access free"
+    }
+   ]
+  },
+  {
+   "id": "NHF-MASAC-001",
+   "source": "NHF",
+   "title": "NHF MASAC recommendations on care models and standards for hemophilia",
+   "year": "2024",
+   "page_url": "https://www.hemophilia.org/healthcare-professionals/guidelines-on-care/",
+   "pdf_url": "https://www.hemophilia.org/healthcare-professionals/guidelines-on-care/",
+   "license": "NHF",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_bleeding",
+   "priority": "high",
+   "sha256": "524c6dccca7171452f2e36866be27e1d8a35f8ab67d26d48c58f3fff08ca61e9",
+   "size_bytes": 796,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 796,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NHF MASAC recommendations on care models and standards for hemophilia Source: NHF Year: 2024 Domain: hematology_bleeding License: NHF Available at: https://www.hemophilia.org/healthcare-professionals/guidelines-on-care/ This is a citation reference for the NHF guideline 'NHF MASAC recommendations on care models and standards for hemophilia' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: hematology_bleeding. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

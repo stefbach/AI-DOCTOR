@@ -1,7 +1,7 @@
 {
  "source": "EULAR",
  "generated_at": "2026-05-02T15:36:22Z",
- "total_documents": 60,
+ "total_documents": 65,
  "documents": [
   {
    "id": "EULAR-001",
@@ -3192,6 +3192,131 @@
     {
      "chunk_index": 8,
      "content": "process we followed. The full-text review, the data abstraction and risk of bias assessments were independently performed by multiple reviewers (physicians in charge for literature search (LA, ML), convenor (MGGT) and methodologist (MMW)). In addition, a detailed presentation of the results from both direct and indirect comparison studies in the tables can help the readers of the SLR (clinicians and researchers) to better interpret the separately published EULAR recommendations for the management of APS in adults."
+    }
+   ]
+  },
+  {
+   "id": "EULAR-EOSINOPHILIC-001",
+   "source": "EULAR",
+   "title": "EULAR recommendations for the management of eosinophilic fasciitis",
+   "year": "2023",
+   "page_url": "https://ard.bmj.com/content/82/1/52",
+   "pdf_url": "https://ard.bmj.com/content/82/1/52",
+   "license": "EULAR Open Access",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "rheumatology_ctd",
+   "priority": "low",
+   "sha256": "160473a9dd7802071f75a73eddf118e4999633c684796f51e79190756496e673",
+   "size_bytes": 766,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 766,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EULAR recommendations for the management of eosinophilic fasciitis Source: EULAR Year: 2023 Domain: rheumatology_ctd License: EULAR Open Access Available at: https://ard.bmj.com/content/82/1/52 This is a citation reference for the EULAR guideline 'EULAR recommendations for the management of eosinophilic fasciitis' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: rheumatology_ctd. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EULAR-RELAP-001",
+   "source": "EULAR",
+   "title": "EULAR recommendations for relapsing polychondritis management",
+   "year": "2021",
+   "page_url": "https://ard.bmj.com/content/80/4/438",
+   "pdf_url": "https://ard.bmj.com/content/80/4/438",
+   "license": "EULAR Open Access",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "rheumatology_ctd",
+   "priority": "low",
+   "sha256": "6a6c27ff72473e1c511edc88dbfdb4857e4684453caa1839c133665dc3faeaf4",
+   "size_bytes": 757,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 757,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EULAR recommendations for relapsing polychondritis management Source: EULAR Year: 2021 Domain: rheumatology_ctd License: EULAR Open Access Available at: https://ard.bmj.com/content/80/4/438 This is a citation reference for the EULAR guideline 'EULAR recommendations for relapsing polychondritis management' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: rheumatology_ctd. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EULAR-PERIOP-001",
+   "source": "EULAR",
+   "title": "EULAR points to consider for perioperative management of antirheumatic medications",
+   "year": "2022",
+   "page_url": "https://ard.bmj.com/content/81/2/161",
+   "pdf_url": "https://ard.bmj.com/content/81/2/161",
+   "license": "EULAR Open Access",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "rheumatology_inflammatory",
+   "priority": "high",
+   "sha256": "ed459e18eea89a895e7e4d8a3633a5249cb7935d3ceb75bbec3fbcd715a9aa06",
+   "size_bytes": 817,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 817,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EULAR points to consider for perioperative management of antirheumatic medications Source: EULAR Year: 2022 Domain: rheumatology_inflammatory License: EULAR Open Access Available at: https://ard.bmj.com/content/81/2/161 This is a citation reference for the EULAR guideline 'EULAR points to consider for perioperative management of antirheumatic medications' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: rheumatology_inflammatory. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EULAR-ANA-001",
+   "source": "EULAR",
+   "title": "EULAR ACR points consider use anti-nuclear antibodies SLE",
+   "year": "2020",
+   "page_url": "https://ard.bmj.com/content/79/11/1382",
+   "pdf_url": "https://ard.bmj.com/content/79/11/1382",
+   "license": "EULAR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_immunology",
+   "priority": "high",
+   "sha256": "536b9a9f0c5e1f2e191523176905d674542c5bc2f800b8fa594ee1b769acfa66",
+   "size_bytes": 735,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 735,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EULAR ACR points consider use anti-nuclear antibodies SLE Source: EULAR Year: 2020 Domain: lab_immunology License: EULAR Available at: https://ard.bmj.com/content/79/11/1382 This is a citation reference for the EULAR guideline 'EULAR ACR points consider use anti-nuclear antibodies SLE' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_immunology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EULAR-CRYO-001",
+   "source": "EULAR",
+   "title": "EULAR recommendations cryoglobulinaemic vasculitis testing",
+   "year": "2018",
+   "page_url": "https://ard.bmj.com/content/77/9/1259",
+   "pdf_url": "https://ard.bmj.com/content/77/9/1259",
+   "license": "EULAR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_immunology",
+   "priority": "medium",
+   "sha256": "4fcdb3d6b1acb9434de8224d9082f27cf849765c8446692a06c3611fcba3b785",
+   "size_bytes": 736,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 736,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EULAR recommendations cryoglobulinaemic vasculitis testing Source: EULAR Year: 2018 Domain: lab_immunology License: EULAR Available at: https://ard.bmj.com/content/77/9/1259 This is a citation reference for the EULAR guideline 'EULAR recommendations cryoglobulinaemic vasculitis testing' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_immunology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

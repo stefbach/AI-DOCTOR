@@ -1,7 +1,7 @@
 {
  "source": "RCOG",
  "generated_at": "2026-05-09T12:49:31Z",
- "total_documents": 28,
+ "total_documents": 38,
  "documents": [
   {
    "id": "RCOG-HYST-001",
@@ -2588,6 +2588,256 @@
     {
      "chunk_index": 14,
      "content": "drug works against coro- information/search-fda-guidance-documents/postapproval- navirus. https://abcnews.go.com/Health/wireStory/company-drug- pregnancy-safety-studies-guidance-industry. Published May proved-effective-virus-us-study-70405458. Accessed April 29, 2019. 2020. 117. Gomes MF, de la Fuente-Núñez V, Saxena A, Kuesel AC. Pro- 101. Anakinra. Drugs.com website, https://www.drugs.com/ppa/ tected to death: systematic exclusion of pregnant women anakinra.html#moreResources. Accessed July 8, 2020. from Ebola virus disease trials. Reprod Health. 2017;14(suppl 102. Gritti G, Raimondi F, Ripamonti D, et al. Use of siltuximab in 3):172. patients with COVID-19 pneumonia requiring ventilatory sup- 118. ACOG Committee Opinion No. 649: racial and ethnic dispar- port [published online May 22, 2020]. medRxiv, https://doi.org/ ities in obstetrics and gynecology. Obstet Gynecol. 2015;126(6): 10.1101/2020.04.01.20048561. e130-e134. 103. National Institutes of Health. Table 3b. Host modiﬁers and 119. Narang K, Ibirogba ER, Elrefaei A, Trad ATA, Theiler R, immune-based therapy under evaluation for treatment Nomura R, et al. SARS-CoV-2 in pregnancy: a comprehensive of COVID-19. https://covid19treatmentguidelines.nih.gov/ summary of current guidelines. J Clin Med. 2020;9(5):1521. Mayo Clin Proc. n August 2020;95(8):1750-1765 n https://doi.org/10.1016/j.mayocp.2020.05.011 1765 www.mayoclinicproceedings.org"
+    }
+   ]
+  },
+  {
+   "id": "RCOG-TOP-001",
+   "source": "RCOG",
+   "title": "RCOG Best Practice in Comprehensive Abortion Care",
+   "year": "2022",
+   "page_url": "https://www.rcog.org.uk/guidance/",
+   "pdf_url": "https://www.rcog.org.uk/guidance/",
+   "license": "RCOG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gynecologic_surgery_obstetric",
+   "priority": "high",
+   "sha256": "fee3b5a64e5ceec6b400a1d6dcedccac95e5ab02d7d8c2d3348afc210c3a50a5",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCOG Best Practice in Comprehensive Abortion Care Source: RCOG Year: 2022 Domain: gynecologic_surgery_obstetric License: RCOG Available at: https://www.rcog.org.uk/guidance/ This is a citation reference for the RCOG guideline 'RCOG Best Practice in Comprehensive Abortion Care' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gynecologic_surgery_obstetric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCOG-STER-001",
+   "source": "RCOG",
+   "title": "RCOG Male and Female Sterilisation Evidence-Based Clinical Guideline",
+   "year": "2016",
+   "page_url": "https://www.rcog.org.uk/guidance/",
+   "pdf_url": "https://www.rcog.org.uk/guidance/",
+   "license": "RCOG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gynecologic_surgery_reproductive",
+   "priority": "high",
+   "sha256": "670a563212eda75f94497179c7a76cd4653da44b6ee2cca41a20f12936952cdc",
+   "size_bytes": 1148,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1148,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Sterilisation counselling: a role for the gynaecology nurse-practitioner. A recent publication of an evidence-based clinical guideline for male and female sterilisation by the Royal College of Obstetrics and Gynaecology (RCOG) created a stimulus for a review of our female sterilisation service. We arranged for a gynaecology nurse-practitioner (A.O.) with extensive experience in general gynaecology and contraception to undergo additional training in counselling female sterilisation. She then took over the daily running of the sterilisation clinic using a care pathway and pre-printed letters. She had open access to a consultant (R.F.) for advice. A review of 100 consecutive referrals showed that the nurse followed the guidelines extremely closely both in terms of referral to the medical team for advice and/or further counselling and quality of documentation. A total of 59% of the women attending the clinic were cared for by the nurse-practitioner alone. Only four had to see a consultant. All women questioned expressed very positive comments about the style and content of counselling and just one stated she preferred to see a doctor."
+    }
+   ]
+  },
+  {
+   "id": "RCOG-VTE-PREG-002",
+   "source": "RCOG",
+   "title": "RCOG green-top guideline 37b thrombosis in pregnancy reducing risk",
+   "year": "2015",
+   "page_url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/",
+   "pdf_url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/",
+   "license": "RCOG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_thrombosis",
+   "priority": "high",
+   "sha256": "478ebd9b9ca4bff890ca0f8eff23ca53974452a4b5ff065669eedccabc8adce3",
+   "size_bytes": 800,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 800,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCOG green-top guideline 37b thrombosis in pregnancy reducing risk Source: RCOG Year: 2015 Domain: hematology_thrombosis License: RCOG Available at: https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/ This is a citation reference for the RCOG guideline 'RCOG green-top guideline 37b thrombosis in pregnancy reducing risk' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: hematology_thrombosis. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCOG-ECLAMPSIA-001",
+   "source": "RCOG",
+   "title": "RCOG Green-top guideline severe pre-eclampsia and eclampsia management",
+   "year": "2010",
+   "page_url": "https://www.rcog.org.uk/",
+   "pdf_url": "https://www.rcog.org.uk/",
+   "license": "RCOG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "emergency_obstetric",
+   "priority": "high",
+   "sha256": "48dea301827f0c54bb5b1fc4f0e79db85e00c43717136365d0169120ca53da16",
+   "size_bytes": 754,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 754,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCOG Green-top guideline severe pre-eclampsia and eclampsia management Source: RCOG Year: 2010 Domain: emergency_obstetric License: RCOG Available at: https://www.rcog.org.uk/ This is a citation reference for the RCOG guideline 'RCOG Green-top guideline severe pre-eclampsia and eclampsia management' published in 2010. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: emergency_obstetric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCOG-MFM-003",
+   "source": "RCOG",
+   "title": "RCOG Green-top Guideline 37b Acute Management of VTE in Pregnancy",
+   "year": "2015",
+   "page_url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/thromboembolic-disease-in-pregnancy-and-the-puerperium-acute-management-green-top-guideline-no-37b/",
+   "pdf_url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/thromboembolic-disease-in-pregnancy-and-the-puerperium-acute-management-green-top-guideline-no-37b/",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_chronic_disease",
+   "priority": "high",
+   "sha256": "f38170902ae2b0e15c572bcc10ce8dcc5f1bf92781bb036d1633c54ab5d53165",
+   "size_bytes": 899,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 899,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCOG Green-top Guideline 37b Acute Management of VTE in Pregnancy Source: RCOG Year: 2015 Domain: mfm_chronic_disease License: Restricted Available at: https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/thromboembolic-disease-in-pregnancy-and-the-puerperium-acute-management-green-top-guideline-no-37b/ This is a citation reference for the RCOG guideline 'RCOG Green-top Guideline 37b Acute Management of VTE in Pregnancy' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_chronic_disease. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCOG-MFM-005",
+   "source": "RCOG",
+   "title": "RCOG Green-top Guideline 55 Late Intrauterine Fetal Death and Stillbirth",
+   "year": "2010",
+   "page_url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/late-intrauterine-fetal-death-and-stillbirth-green-top-guideline-no-55/",
+   "pdf_url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/late-intrauterine-fetal-death-and-stillbirth-green-top-guideline-no-55/",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_fetal_growth",
+   "priority": "high",
+   "sha256": "0c8f8394adf65780c3bed9792f3bb053dc6aeac860588102f686f4db6f2ae618",
+   "size_bytes": 1291,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1291,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "An audit of healthcare professionals' knowledge regarding perinatal autopsy. Perinatal autopsy is one the most valuable investigations to ascertain the cause of death (Nijkamp et al., Seminars in Fetal & Neonatal Medicine. 22:167-175, 2017; Korteweg et al., AJOG 53, e1-12, 2012; Late Interuterine Death and Stillbirth' RCOG Green-top Guideline No.55, 2015). Discussions about perinatal autopsy can be difficult for parents and healthcare professionals. Perinatal staff need a good level of knowledge and understanding regarding perinatal autopsy in order to discuss the procedure with parents. This study aims to investigate healthcare professionals' knowledge regarding perinatal autopsy. An audit conducted in a large teaching hospital using a questionnaire was developed and distributed to healthcare professionals in the hospital. Seventy healthcare professionals participated in the audit. Of those surveyed, 64% (n = 45) have discussed perinatal autopsy with a mother and the majority of healthcare professionals (67%) found this difficult. Self-reported levels of understanding were found to be low with just 10% reporting 'excellent understanding'. The results of this audit highlight the need for further education among all healthcare professionals working with bereaved families."
+    }
+   ]
+  },
+  {
+   "id": "RCOG-MFM-006",
+   "source": "RCOG",
+   "title": "RCOG Green-top Guideline 47 Blood Transfusion in Obstetrics",
+   "year": "2015",
+   "page_url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/blood-transfusion-in-obstetrics-green-top-guideline-no-47/",
+   "pdf_url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/blood-transfusion-in-obstetrics-green-top-guideline-no-47/",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_labor",
+   "priority": "medium",
+   "sha256": "0c0ef32296be0dbc7823d69e3bf08e18a9170a7ec95c659cf5f592402a58c146",
+   "size_bytes": 826,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 826,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCOG Green-top Guideline 47 Blood Transfusion in Obstetrics Source: RCOG Year: 2015 Domain: mfm_labor License: Restricted Available at: https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/blood-transfusion-in-obstetrics-green-top-guideline-no-47/ This is a citation reference for the RCOG guideline 'RCOG Green-top Guideline 47 Blood Transfusion in Obstetrics' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_labor. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCOG-MFM-008",
+   "source": "RCOG",
+   "title": "RCOG Green-top Guideline 64a Bacterial Sepsis in Pregnancy",
+   "year": "2012",
+   "page_url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/bacterial-sepsis-in-pregnancy-green-top-guideline-no-64a/",
+   "pdf_url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/bacterial-sepsis-in-pregnancy-green-top-guideline-no-64a/",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_labor",
+   "priority": "high",
+   "sha256": "6d000ec5d9ebbf919ae58aeee7fb68ea519ebda276aa703a0ea9fb3e53658c6c",
+   "size_bytes": 823,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 823,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCOG Green-top Guideline 64a Bacterial Sepsis in Pregnancy Source: RCOG Year: 2012 Domain: mfm_labor License: Restricted Available at: https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/bacterial-sepsis-in-pregnancy-green-top-guideline-no-64a/ This is a citation reference for the RCOG guideline 'RCOG Green-top Guideline 64a Bacterial Sepsis in Pregnancy' published in 2012. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_labor. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCOG-MFM-009",
+   "source": "RCOG",
+   "title": "RCOG Green-top Guideline 64b Bacterial Sepsis Following Pregnancy",
+   "year": "2012",
+   "page_url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/bacterial-sepsis-following-pregnancy-green-top-guideline-no-64b/",
+   "pdf_url": "https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/bacterial-sepsis-following-pregnancy-green-top-guideline-no-64b/",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_postpartum",
+   "priority": "high",
+   "sha256": "adcaf3e058e48f08cc1408c0c1cd542f13166685eb366fd48e15330a1d064460",
+   "size_bytes": 854,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 854,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: RCOG Green-top Guideline 64b Bacterial Sepsis Following Pregnancy Source: RCOG Year: 2012 Domain: mfm_postpartum License: Restricted Available at: https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/bacterial-sepsis-following-pregnancy-green-top-guideline-no-64b/ This is a citation reference for the RCOG guideline 'RCOG Green-top Guideline 64b Bacterial Sepsis Following Pregnancy' published in 2012. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: mfm_postpartum. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "RCOG-MFM-014",
+   "source": "RCOG",
+   "title": "RCOG Maternal Cardiac Arrest Guidance",
+   "year": "2011",
+   "page_url": "https://www.rcog.org.uk/guidance",
+   "pdf_url": "https://www.rcog.org.uk/guidance",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "mfm_labor",
+   "priority": "high",
+   "sha256": "139cce2cd5bf528c8b30a99859a1231ba3d8906767603c4aafabdf6963cf74a5",
+   "size_bytes": 1600,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1600,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Conditions triggering local incident reviews in UK hospital maternity units: A national survey. In countries, such as the UK, where maternal deaths are rare, reviews of other severe complications of pregnancy and the puerperium can provide an additional perspective to help learn lessons to improve future care. The objective of this survey was to identify the types of incidents which triggered local reviews in the UK, in order to inform national safety reporting guidance. A national descriptive survey. UK. Consultant-led maternity units. Seventy-one per cent of maternity units provided an incident review trigger list. The conditions included were classified by two assessors. Incidents that were listed by at least 5% of maternity units were reported and compared with incidents recommended for review by the Royal College of Obstetricians and Gynaecologists (RCOG). The conditions covered were highly variable, although those recommended by the RCOG were most highly represented. The most commonly listed conditions that had not been recommended for review by the RCOG included inadequate staffing levels (70%), cardiac arrest (69%) and maternal sepsis (64%). Substantial variation exists in the types of incident listed for review by maternity units in the UK. Importantly, some units are not reviewing cases of severe infective complications even though this is a current major concern. Future guidance concerning local serious incident review processes should include how the list of conditions triggering a review should be managed in the light of changing clinical and safety priorities."
     }
    ]
   }

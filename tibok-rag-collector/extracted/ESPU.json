@@ -1,7 +1,7 @@
 {
  "source": "ESPU",
  "generated_at": "2026-05-09T12:19:42Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "ESPU-VUR-001",
@@ -130,6 +130,31 @@
     {
      "chunk_index": 9,
      "content": "researchers, and patient representatives, presents a comprehensive and evidence-based synthesis of current knowledge regarding the diagnosis, management, and long-term follow-up of individuals with these conditions. This revision reflects the latest advances in clinical practice and research, underscoring the importance of an integrated, patient-centered, and developmentally informed approach to care tailored to the unique medical and developmental needs of this population. A total of 20 guideline recommendations ( ) were formulated, each accompanied by a graded strength of recommendation based on the quality and consistency of the available evidence, representing a consensus of the full guideline panel to support best practices in clinical decision-making and optimize patient outcomes. Author contributions: All authors had full access to all the data in the study and take responsibility for the integrity of the data and the accuracy of the data analysis. Study concept and design: Radmayr, Nijman. Acquisition of data: all authors. Analysis and interpretation of data: all authors. Critical revision of the manuscript for important intellectual content: all authors. Statistical analysis: None. Obtaining funding: The European Reference Networks ERN eUROGEN, ERN ITHACA, and ERN ERKNet are funded by the European Union. Expert consensus meetings to progress these guidelines were funded with support from the ERN Exchange Programme (funded by the EC via HaDEA, facilitated by Ecorys) and the European Joint Programme on Rare Diseases (EJP RD) research workshop programme. Administrative, technical or material support: EAU Guidelines Office, ERN eUrogen. Supervision: Radmayr, Nijman. Other: None. Financial disclosures: Christian Radmayr certifies that all conflicts of interest, including specific financial interests and relationships and affiliations relevant to the subject matter or materials discussed in the manuscript (eg, employment/affiliation, grants or funding, consultancies, honoraria, stock ownership or options, expert testimony, royalties, or patents filed, received, or pending), are the following: None. Funding/Support and role of the sponsor: None. Acknowledgements: The authors acknowledge Yuhong Yan for help with the literature search and Julie Darraugh and Emma Jane Smith from the EAU Guideline Office as well as Michelle Battye and Jennifer Tidman from ERN eUrogen for administrative support."
+    }
+   ]
+  },
+  {
+   "id": "ESPU-PED-001",
+   "source": "ESPU",
+   "title": "ESPU Consensus Statement on Pediatric Urology Management",
+   "year": "2022",
+   "page_url": "https://www.espu.org/",
+   "pdf_url": "https://www.espu.org/",
+   "license": "ESPU",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "urology_pediatric",
+   "priority": "medium",
+   "sha256": "9d2c030f4dc9104bcd8ed2a4945d5471f4324df8a2be364565f7582a095e50fa",
+   "size_bytes": 719,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 719,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESPU Consensus Statement on Pediatric Urology Management Source: ESPU Year: 2022 Domain: urology_pediatric License: ESPU Available at: https://www.espu.org/ This is a citation reference for the ESPU guideline 'ESPU Consensus Statement on Pediatric Urology Management' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: urology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

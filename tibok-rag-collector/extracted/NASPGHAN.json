@@ -1,7 +1,7 @@
 {
  "source": "NASPGHAN",
  "generated_at": "2026-05-09T10:07:34Z",
- "total_documents": 7,
+ "total_documents": 8,
  "documents": [
   {
    "id": "NASPGHAN-PEDLIVER-001",
@@ -475,6 +475,31 @@
     {
      "chunk_index": 6,
      "content": "from the use of FODMAPs, for the treatment of FC. This may indicate that the diagnosis of FC can be well differentiated at the time of the inclusion criteria or that the lower dose of FODMAPs used in these studies was not enough to trigger the detrimental symptoms. Only three randomized clinical trials with a total of a hundred and ninety-six children were published in English, in the last thirty-three years, for the treatment of IBS. All of them used a placebo arm and showed positive results, although the study design and type of fiber differed. Romano et al. studied the effect of PHGG in children with IBS and chronic abdominal pain. Shulman et al. studied the effect of psyllium in IBS and Feldman studied the effect of corn diet in children with RAP. The differences in inclusion criteria, design, and endpoints did not allow us to arrive at a firm conclusion on the effect of fiber, in children with IBS. One objective of the 2010 Dietary Guidelines [ ] was to increase the dietary fiber (DF) intake. None of the studies investigated the effects of increasing fiber from whole foods rich in fiber that could be a more “natural” way of increasing the fiber intake. Fiber from whole foods may yield different results than that of supplemental fiber therapy. Thus, studies that evaluate the impact of increasing fiber, from whole foods, in children with FC and IBS, should be encouraged. To improve adherence and therapeutic success, recommendations for treatment need to be simple and easy to understand. Three studies [ , , ] utilized a combination of multiple fiber types in their treatment, which may be difficult to replicate naturally, in daily practice. Although the studies found their treatments to be comparable to PEG and lactulose, it is well established that parents’ adherence to physician recommendations is low [ ], and advising multiple fiber types may be impracticable. There are limitations to this review. Our review only included studies in English. Some positive trials in other languages may have not been considered. We cannot exclude that our review would have arrived at a different conclusion if studies in other languages had been included. One of the studies used fiber in low doses [ ]. It is unknown whether fiber used at a larger dose could have resulted in better outcomes. However, the use of high doses of fiber may not always be beneficial. Bulkier stools may be uncomfortable for some children and a diet rich of some types of fibers (FODMAPs) may be detrimental. 5. Conclusions Most studies on the use of fiber for the treatment of FC and IBS have shown its benefit. However, due to differences in design, such as the use of multiple types of fibers, dosing and length of treatment and small sample sizes and risk of bias, we are unable to make a definitive recommendation supporting the use of fiber for the treatment of FC and IBS. The conclusions of our review are, thus, in agreement with NASPHGAN/ESPGHAN recommendations that a normal fiber intake should be encouraged in children with and without FC. The small number of clinical trials on the use of fiber in children with IBS do not allow for arriving at a definitive conclusion. Practitioners should be cautious at the time of selecting the type and dose of fibers in children with IBS to avoid worsening symptoms."
+    }
+   ]
+  },
+  {
+   "id": "NASPGHAN-SBS-001",
+   "source": "NASPGHAN",
+   "title": "NASPGHAN Position Paper Pediatric Intestinal Failure and Short Bowel Syndrome",
+   "year": "2017",
+   "page_url": "https://journals.lww.com/jpgn/fulltext/2017/02000/intestinal_rehabilitation_for_children_with_short.20.aspx",
+   "pdf_url": "https://journals.lww.com/jpgn/fulltext/2017/02000/intestinal_rehabilitation_for_children_with_short.20.aspx",
+   "license": "NASPGHAN",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gastro_nutrition",
+   "priority": "high",
+   "sha256": "c4734ec8282eb602dca5f57aa1fbdd17b4633c21f5d6fdfe09d199e0a57bb1e9",
+   "size_bytes": 857,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 857,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NASPGHAN Position Paper Pediatric Intestinal Failure and Short Bowel Syndrome Source: NASPGHAN Year: 2017 Domain: gastro_nutrition License: NASPGHAN Available at: https://journals.lww.com/jpgn/fulltext/2017/02000/intestinal_rehabilitation_for_children_with_short.20.aspx This is a citation reference for the NASPGHAN guideline 'NASPGHAN Position Paper Pediatric Intestinal Failure and Short Bowel Syndrome' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gastro_nutrition. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

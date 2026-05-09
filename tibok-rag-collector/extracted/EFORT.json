@@ -1,7 +1,7 @@
 {
  "source": "EFORT",
  "generated_at": "2026-05-09T10:16:16Z",
- "total_documents": 3,
+ "total_documents": 5,
  "documents": [
   {
    "id": "EFORT-THA-001",
@@ -191,6 +191,56 @@
     {
      "chunk_index": 17,
      "content": "and the stem taper should match each other precisely. Trebše et al reported data from their institutional registry that showed that when the head and stem were from different manufacturers, the clinical results were inferior. On the basis of their findings, they recommended that the regulating bodies should introduce a standard taper, with defined tolerances, that would be adopted universally and its use by manufacturers should be compulsory. Thus contemporary research has confirmed what Cales and Stefani advocated over 20 years ago. They cited several very important advantages of the standardization of bores and cones: Reduction in the risk of a mistake during surgery Smaller hospital inventories resulting in a direct and significant economic benefit The main obvious advantage would be for the surgeon and for the patient as it would allow a well-fitting taper connection during revision surgery in cases where stem retention was desirable and a replica head (with the original matched taper) was not available. Whilst recognizing the independence and competitiveness of the manufacturers, it has been demonstrated that there is a strong argument for implant manufacturers to come to an agreement with the regulatory bodies for there to be a standard design for all stem/head combinations. Eventually this could become mandatory. Furthermore, standardization of the articular bearing interface might be a solution to reduce the clinical risks of mix & match. In fact, some dimensional aspects are already standardized. For example, ISO 7206-2 specifies the bearing dimensions and requires that the spherical polyethylene liner shall have a diameter slightly larger (+0.1 to 0.3 mm) than the nominal bearing diameter. Consequently, pinching of the bearing is not expected even if a head and a polyethylene liner from different manufacturers are combined, although this is not the intention under the ISO standard. If further interfaces were standardized, generalized pre-clinical tests may help to identify safe combinations which might then be approved. If both interfaces are standardized it should be expected that the failure risk of mixing and matching can be reduced. Nevertheless, the CE approval process lies in the hands of the implant manufactures and they would need to assume responsibility if they approved mix & match for clinical application, which is a challenge for the manufactures. Research may help to bridge the gap. Conclusions Up until now manufacturers and regulators have instituted their own policies around the issues of ‘off-label’ and ‘mix & match’ and apparently applied them without always taking into account the needs of some patients. Surgeons have sometimes disregarded the instructions of manufacturers and taken it upon themselves to go off-label or to mix & match components from more than one manufacturer. Our first conclusion is that the status quo is not satisfactory in terms of contemporary practice, for any of the parties involved, and that each party must take into account the views and concerns of the other parties. We have concluded that by providing a forum for each of these groups to share their views and concerns there is scope for agreement about the major issues involved. Evidently it is possible to improve their understanding of the challenges that these issues bring, in the safe and effective management of patients requiring joint replacement. We found that the consensus voting was a very effective method of focusing the thoughts of all the participants (see ). Our final conclusion is that patients should always be at the centre of any discussion regarding these issues, if it involves them, and this cannot be overemphasized. We look forward to these conclusions being acted upon."
+    }
+   ]
+  },
+  {
+   "id": "EFORT-TKA-001",
+   "source": "EFORT",
+   "title": "EFORT consensus statements on primary total knee arthroplasty",
+   "year": "2022",
+   "page_url": "https://www.efort.org/clinical-guidelines/",
+   "pdf_url": "https://www.efort.org/clinical-guidelines/",
+   "license": "EFORT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_arthroplasty",
+   "priority": "high",
+   "sha256": "dfec2b4d93a59f876d80ef1c298f18502841230f826dd8ff00b4aeeba651ddc7",
+   "size_bytes": 767,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 767,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:06Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EFORT consensus statements on primary total knee arthroplasty Source: EFORT Year: 2022 Domain: orthopedics_arthroplasty License: EFORT Available at: https://www.efort.org/clinical-guidelines/ This is a citation reference for the EFORT guideline 'EFORT consensus statements on primary total knee arthroplasty' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_arthroplasty. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EFORT-DEFORM-001",
+   "source": "EFORT",
+   "title": "EFORT consensus on management of bone defects in revision arthroplasty",
+   "year": "2021",
+   "page_url": "https://www.efort.org/clinical-guidelines/",
+   "pdf_url": "https://www.efort.org/clinical-guidelines/",
+   "license": "EFORT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_arthroplasty",
+   "priority": "medium",
+   "sha256": "8800e11141cdf049735e94b6f25c31e9e90dbfe911880d81828410e377946ab2",
+   "size_bytes": 1507,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1507,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Femoral bone defect classifications in revision total hip arthroplasty: a comprehensive review and proposal of a new algorithm of management. The number of primary total hip arthroplasties (THAs) and revisions is expected to steadily grow in the future. The femoral revision surgery can be technically demanding whether severe bone defects need to be addressed. The femoral revision aims to obtain a proper primary stability of the stem with a more proximal fixation as possible. Several authors previously proposed classification systems to describe the morphology of the bony femoral defect and to drive accordingly the surgeon in the revision procedure. The previous classifications mainly considered cortical and medullary bone at the level of the defect of poor quality by definition. Therefore, the surgical strategies aimed to achieve a distal fixation bypassing the defect or to fill the defect with bone impaction grafting or structured bone grafts up to the replacement of the proximal femur with megaprosthesis. The consensus on a comprehensive and reliable classification system and management algorithm is still lacking. A new classification system should be developed taking into account the bone quality. The rationale of a new classification is that 'functional' residual bone stock could be present at the level of the defect. Therefore, it can be used to achieve a primary (mechanical) and secondary (biological) stability of the implants with a femoral fixation more proximal as possible."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "Drugs-com",
  "generated_at": "2026-05-09T13:50:49Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "DRUGSCOM-002",
@@ -41,6 +41,31 @@
     {
      "chunk_index": 4,
      "content": "ATC code C10BA06 which is comprehensive of all the available doses: ROS/EZE 5 mg/10 mg, ROS/EZE 10 mg/10 mg, and ROS/EZE 20 mg/10 mg, so we were not able to evaluate the possible role of ROS dose in adherence. Lastly, the present analysis did not assess the effect of adherence to lipid-lowering therapy on LDL-C blood levels and the rate of lipid target achievement. Conclusion This analysis carried out in the setting of Italian clinical practice provides real-world evidence on the adherence of patients to ROS/EZE in free or in single-pill combination, suggesting that switching from separate pills to single-pill combination could positively impact the level of adherence to lipid-lowering medications. This strategy may have positive implications for ASCVD prevention."
+    }
+   ]
+  },
+  {
+   "id": "DRUGSCOM-001",
+   "source": "Drugs-com",
+   "title": "Drugs.com Drug Interactions Checker consumer reference",
+   "year": "2024",
+   "page_url": "https://www.drugs.com/drug_interactions.html",
+   "pdf_url": "https://www.drugs.com/drug_interactions.html",
+   "license": "Drugs.com",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_interactions",
+   "priority": "medium",
+   "sha256": "30dcc07a63bf3e362a47be0c23ef794cd1d7e97b4dd62a11bf52e19c6db44495",
+   "size_bytes": 753,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 753,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Drugs.com Drug Interactions Checker consumer reference Source: Drugs-com Year: 2024 Domain: drug_interactions License: Drugs.com Available at: https://www.drugs.com/drug_interactions.html This is a citation reference for the Drugs-com guideline 'Drugs.com Drug Interactions Checker consumer reference' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_interactions. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

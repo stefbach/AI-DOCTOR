@@ -1,7 +1,7 @@
 {
  "source": "AAO-HNS",
  "generated_at": "2026-05-02T16:23:48Z",
- "total_documents": 56,
+ "total_documents": 63,
  "documents": [
   {
    "id": "AAO-HNS-001",
@@ -3268,6 +3268,181 @@
     {
      "chunk_index": 0,
      "content": "Title: AAO-HNS clinical guidance on adult subglottic and tracheal stenosis Source: AAO-HNS Year: 2021 Domain: ent_laryngology License: AAO-HNS Available at: https://www.entnet.org/resource/subglottic-stenosis This is a citation reference for the AAO-HNS guideline 'AAO-HNS clinical guidance on adult subglottic and tracheal stenosis' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_laryngology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-HNS-OSA-002",
+   "source": "AAO-HNS",
+   "title": "AAO-HNS position statement on upper airway stimulation hypoglossal nerve",
+   "year": "2021",
+   "page_url": "https://www.entnet.org/resource/upper-airway-stimulation",
+   "pdf_url": "https://www.entnet.org/resource/upper-airway-stimulation",
+   "license": "AAO-HNS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_sleep",
+   "priority": "high",
+   "sha256": "8420373f31ac65d6d75444c5d72336178c8d352c63c424f0b7e6be3ffcb68f41",
+   "size_bytes": 779,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 779,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO-HNS position statement on upper airway stimulation hypoglossal nerve Source: AAO-HNS Year: 2021 Domain: ent_sleep License: AAO-HNS Available at: https://www.entnet.org/resource/upper-airway-stimulation This is a citation reference for the AAO-HNS guideline 'AAO-HNS position statement on upper airway stimulation hypoglossal nerve' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_sleep. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-HNS-SUBHEMA-001",
+   "source": "AAO-HNS",
+   "title": "AAO-HNS clinical guidance on subglottic hemangioma in infants",
+   "year": "2021",
+   "page_url": "https://www.entnet.org/resource/subglottic-hemangioma",
+   "pdf_url": "https://www.entnet.org/resource/subglottic-hemangioma",
+   "license": "AAO-HNS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_pediatric",
+   "priority": "medium",
+   "sha256": "0f77448e70f2899080bdf21300b18ecabee1f1633ab204b95eb7b46d2856760f",
+   "size_bytes": 762,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 762,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO-HNS clinical guidance on subglottic hemangioma in infants Source: AAO-HNS Year: 2021 Domain: ent_pediatric License: AAO-HNS Available at: https://www.entnet.org/resource/subglottic-hemangioma This is a citation reference for the AAO-HNS guideline 'AAO-HNS clinical guidance on subglottic hemangioma in infants' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-HNS-LARMAL-001",
+   "source": "AAO-HNS",
+   "title": "AAO-HNS clinical guidance on laryngomalacia management",
+   "year": "2021",
+   "page_url": "https://www.entnet.org/resource/laryngomalacia",
+   "pdf_url": "https://www.entnet.org/resource/laryngomalacia",
+   "license": "AAO-HNS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_pediatric",
+   "priority": "medium",
+   "sha256": "09a420a42881e7883047a22fff7b71ac6eb9a93ce1b270d890da562ba8b59418",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO-HNS clinical guidance on laryngomalacia management Source: AAO-HNS Year: 2021 Domain: ent_pediatric License: AAO-HNS Available at: https://www.entnet.org/resource/laryngomalacia This is a citation reference for the AAO-HNS guideline 'AAO-HNS clinical guidance on laryngomalacia management' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-HNS-LARTRAUM-001",
+   "source": "AAO-HNS",
+   "title": "AAO-HNS clinical consensus on acute laryngeal trauma",
+   "year": "2021",
+   "page_url": "https://www.entnet.org/resource/laryngeal-trauma",
+   "pdf_url": "https://www.entnet.org/resource/laryngeal-trauma",
+   "license": "AAO-HNS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_trauma",
+   "priority": "medium",
+   "sha256": "54dbd62cb662e19edc12690c1fd0522e183da06b1367b66fa197d4a755321151",
+   "size_bytes": 733,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 733,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO-HNS clinical consensus on acute laryngeal trauma Source: AAO-HNS Year: 2021 Domain: ent_trauma License: AAO-HNS Available at: https://www.entnet.org/resource/laryngeal-trauma This is a citation reference for the AAO-HNS guideline 'AAO-HNS clinical consensus on acute laryngeal trauma' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_trauma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-HNS-EUSTACH-001",
+   "source": "AAO-HNS",
+   "title": "AAO-HNS clinical consensus on eustachian tube dysfunction",
+   "year": "2022",
+   "page_url": "https://www.entnet.org/resource/eustachian-tube",
+   "pdf_url": "https://www.entnet.org/resource/eustachian-tube",
+   "license": "AAO-HNS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_otology",
+   "priority": "medium",
+   "sha256": "faef0ed10df849fb5334af3d784b941b6413d6387be073effc3ddbd105885c2e",
+   "size_bytes": 744,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 744,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO-HNS clinical consensus on eustachian tube dysfunction Source: AAO-HNS Year: 2022 Domain: ent_otology License: AAO-HNS Available at: https://www.entnet.org/resource/eustachian-tube This is a citation reference for the AAO-HNS guideline 'AAO-HNS clinical consensus on eustachian tube dysfunction' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_otology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-HNS-FACIALPAIN-001",
+   "source": "AAO-HNS",
+   "title": "AAO-HNS clinical guidance on rhinogenic facial pain evaluation",
+   "year": "2020",
+   "page_url": "https://www.entnet.org/resource/facial-pain",
+   "pdf_url": "https://www.entnet.org/resource/facial-pain",
+   "license": "AAO-HNS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_rhinology",
+   "priority": "low",
+   "sha256": "6827ca8efd6ffe2c431e37b1039c781fc5efbc69437fd6849bbad7254214a5d5",
+   "size_bytes": 754,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 754,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO-HNS clinical guidance on rhinogenic facial pain evaluation Source: AAO-HNS Year: 2020 Domain: ent_rhinology License: AAO-HNS Available at: https://www.entnet.org/resource/facial-pain This is a citation reference for the AAO-HNS guideline 'AAO-HNS clinical guidance on rhinogenic facial pain evaluation' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_rhinology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-HNS-THYROID-001",
+   "source": "AAO-HNS",
+   "title": "AAO-HNS clinical guidance on thyroid nodule and surgery indications",
+   "year": "2021",
+   "page_url": "https://www.entnet.org/resource/thyroid-surgery",
+   "pdf_url": "https://www.entnet.org/resource/thyroid-surgery",
+   "license": "AAO-HNS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_oncology",
+   "priority": "medium",
+   "sha256": "677711efacd97dcbbb2ff84f11ca22fe5bcaf24216831567bff312954e8b5811",
+   "size_bytes": 766,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 766,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO-HNS clinical guidance on thyroid nodule and surgery indications Source: AAO-HNS Year: 2021 Domain: ent_oncology License: AAO-HNS Available at: https://www.entnet.org/resource/thyroid-surgery This is a citation reference for the AAO-HNS guideline 'AAO-HNS clinical guidance on thyroid nodule and surgery indications' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_oncology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

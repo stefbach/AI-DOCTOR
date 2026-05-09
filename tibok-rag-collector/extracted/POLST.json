@@ -1,7 +1,7 @@
 {
  "source": "POLST",
  "generated_at": "2026-05-09T18:36:10Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "POLST-PAL-001",
@@ -49,6 +49,31 @@
     {
      "chunk_index": 6,
      "content": "Med. 381 (2019) 1603–6. https://doi.org/10.1056/NEJMp1908153. [33] J.J. Sanders, J.R. Curtis, J.A. Tulsky, Achieving goal-concordant care: a conceptual model and approach to measuring serious illness communication and its impact, J. Palliat. Med. 21 (2018) S17–S27. https://doi.org/10.1089/jpm.2017.0459. [34] K.T. Unroe, S.E. Hickman, A.M. Torke, Care consistency with documented care preferences: methodologic considerations for implementing the \"measuring what matters\" quality indicator, J. Pain Symptom Manage. 52 (2016) 453–8. https://doi.org/10.1016/j.jpainsymman.2016.04.015."
+    }
+   ]
+  },
+  {
+   "id": "POLST-PAL-002",
+   "source": "POLST",
+   "title": "POLST Program Designation Criteria and Quality Standards",
+   "year": "2022",
+   "page_url": "https://polst.org/program-standards/",
+   "pdf_url": "https://polst.org/program-standards/",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_eol",
+   "priority": "medium",
+   "sha256": "5fa18fcd8046c9079148fdebf00307106e89e1f888530260c15ebdf672888d1c",
+   "size_bytes": 730,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 730,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: POLST Program Designation Criteria and Quality Standards Source: POLST Year: 2022 Domain: palliative_eol License: Open Available at: https://polst.org/program-standards/ This is a citation reference for the POLST guideline 'POLST Program Designation Criteria and Quality Standards' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: palliative_eol. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

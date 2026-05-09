@@ -1,7 +1,7 @@
 {
  "source": "SOFT",
  "generated_at": "2026-05-09T18:52:28Z",
- "total_documents": 1,
+ "total_documents": 3,
  "documents": [
   {
    "id": "SOFT-FOR-002",
@@ -53,6 +53,56 @@
     {
      "chunk_index": 7,
      "content": "internal standards met the accuracy and precision guidelines set forth by the FDA ( ). 3-Methylfentanyl, α-methylfentanyl, and 2-furanylfentanyl were outside of those guidelines. For this method, whole spot analysis was selected to more accurately quantitate results and address spot spread caused by varying hematocrit ( ). Hematocrit can also impact analyte desorption from the card resulting in bias and increased variability ( ). However, further work was required to fully investigate differing analyte desorption at the extreme hematocrit values that are sometimes observed in clinical samples. To assess any effect atypical hematocrit may have on extraction, spikes at 7.50 and 75.0 ng/mL were made in 17%, 25%, 58%, and 65% hematocrit pooled blood. Percent error was under 15% for all analytes at both levels with the exception to 3-methylfentanyl, alfentanil, α-methylfentanyl, and furanylfentanyl. 3-methylfentanyl and α-methylfentanyl biased low across all hematocrit levels where alfentanil and furanylfentanyl biased high. When examining reproducibility, all analytes at both levels had a value of <15 %CV with exception to 3-methylfentanyl, α-methylfentanyl, and lofentanil. Based on the results observed, a matched internal standard may be necessary when examining a population where large variations in hematocrit are expected. All other analytes did not demonstrate any significant deleterious effect by analyzing samples with vastly different hematocrit to the calibrators. Method model for expansion Given that new fentanyls are identified in the opioid overdose epidemic regularly, a model which permits the rapid incorporation of additional compounds to this method is desired. Preparation of materials, including calibrators and controls, into groups of compounds can accommodate this method expansion. As new fentanyls are identified, a third or even fourth group of compounds can easily be prepared, evaluated using the current analytical parameters, and applied to exposure samples for surveillance. Conclusion An analytical method was developed to identify human exposure to fentanyl analogues in clinical samples. The LC-MS/MS method quantitated fentanyl compounds over a concentration range of 1.00 to 100 ng/mL extracted from a 5 μL dried blood spot. The use of dried blood spots eliminates the need for additional expensive sample clean-up steps. The method demonstrated versatility by readily incorporating six diverse fentanyl analogues with no change to sample preparation. The assay met FDA accuracy and precision guidelines for the evaluated QC samples and for the individual samples with matched stable isotope labeled internal standard. Identification and quantitation of fentanyl compounds in nonfatal overdose victims will improve awareness of emerging synthetic opioid threats during the current opioid epidemic. The method’s construction allows the rapid incorporation of new fentanyls without revalidation of the entire method and the use of DBS facilitates future surveillance and response efforts. Supplementary Material Supplementary Data"
+    }
+   ]
+  },
+  {
+   "id": "SOFT-FOR-001",
+   "source": "SOFT",
+   "title": "SOFT AAFS Forensic Toxicology Laboratory Guidelines",
+   "year": "2006",
+   "page_url": "https://www.soft-tox.org/lab_guidelines",
+   "pdf_url": "https://www.soft-tox.org/lab_guidelines",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_toxicology",
+   "priority": "high",
+   "sha256": "ab95b03a6e45dc6dde1ca99a31801aeec04977f443311d8edec8e15281f9a80c",
+   "size_bytes": 731,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 731,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SOFT AAFS Forensic Toxicology Laboratory Guidelines Source: SOFT Year: 2006 Domain: forensic_toxicology License: Open Available at: https://www.soft-tox.org/lab_guidelines This is a citation reference for the SOFT guideline 'SOFT AAFS Forensic Toxicology Laboratory Guidelines' published in 2006. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_toxicology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SOFT-FOR-003",
+   "source": "SOFT",
+   "title": "SOFT Recommendations Postmortem Forensic Toxicology Specimen Collection",
+   "year": "2019",
+   "page_url": "https://www.soft-tox.org/lab_guidelines",
+   "pdf_url": "https://www.soft-tox.org/lab_guidelines",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_toxicology",
+   "priority": "medium",
+   "sha256": "2031276aaac842652e5f19f94db8683284e04c6d16fb71a36db87b489869c813",
+   "size_bytes": 771,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 771,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SOFT Recommendations Postmortem Forensic Toxicology Specimen Collection Source: SOFT Year: 2019 Domain: forensic_toxicology License: Open Available at: https://www.soft-tox.org/lab_guidelines This is a citation reference for the SOFT guideline 'SOFT Recommendations Postmortem Forensic Toxicology Specimen Collection' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_toxicology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

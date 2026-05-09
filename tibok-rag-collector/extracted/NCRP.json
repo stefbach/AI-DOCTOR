@@ -1,7 +1,7 @@
 {
  "source": "NCRP",
  "generated_at": "2026-05-09T12:10:59Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "NCRP-RAD-002",
@@ -190,6 +190,31 @@
     {
      "chunk_index": 8,
      "content": "controlled at 1%. Identified peptides lacking pre-cursor ion (MS1) intensity quantification were excluded. Only peptides uniquely mapped to a single protein were included in the analysis. The analysed peptide data were normalised abundances, which were used for MS1 intensity quantification mapping in PLF analysis. Protein abundances were compared using total peptide spectrum matches (PSMs) as a proxy. All data were exported to an excel file for post-processing using Python 3.10.9. 4.9. Peptide Location Fingerprinting Analysis The peptide location fingerprinting (PLF) analysis of LC-MS/MS data was used to identify regions in proteins with significant differences in localised trypsin-mediated cleavage and hence peptide yields [ , ]. Such differences may be due to radiation-induced structural changes, which in turn, may affect function. A custom python program ( https://github.com/RJTuieng/MS1_PLF.git (accessed on 9 June 2025) was developed to enhance PLF analysis, as previously described [ , ]. In brief, peptide sequences, their respective MS1 intensities, and master protein accession were obtained from the Proteome Discoverer exported data. Peptides were grouped by their master protein, and the peptide’s MS1 intensity is mapped onto the amino acids in their respective protein’s sequence. After mapping, each protein sequence was divided into 20 amino acid bins, with any residual amino acid combined into the last bin. The MS1 intensities of the amino acids in each bin were averaged to determine the bin’s MS1 intensity. Subsequently, the MS1 intensities of all bins across the entire protein sequence were then normalised by multiplying with a normalisation factor. This factor is derived by taking the sum of all peptide MS1 intensities of the protein in that sample group and dividing it from the sum of all peptide MS1 intensity of the sample with the highest total MS1 intensity of that protein. This forms the peptide location fingerprint of the protein. For each protein, PLF data were exported from python to GraphPad Prism 9.0 (GraphPad Software, Boston, MA, USA). Two-way repeated-measures ANOVA with Geisser–Greenhouse correction and Bonferroni-corrected multiple comparisons was used for testing statistical significance. All sample groups were analysed in replicates of five. 4.10. Solid Phase Enzyme-Linked Immunosorbent Assay for Collagen–pFN Binding This assay was conducted to test for protein–protein binding between purified human collagen I and human pFN and is adapted from a previously published protocol [ ]. In brief, human collagen I (ab7533, Abcam, Cambridge, UK) was diluted to 2.5 μg/mL using PBS− (Sigma-Aldrich, UK) and added to 96-well plates at 50 μL/well for overnight coating at 4 °C. Plates were washed three times (with 0 min, 2 min, 3 min incubations) with 25 mM Tris, 2.7 mM KCl, 137 mM NaCl, 0.05% Tween-20, pH 7.4 (prepared from 20X TBS (ThermoFisher, UK) and Tween-20 (Sigma-Aldrich, UK)) (TBST), then blocked with 200 μL/well of 5% skim milk (SERVA Electrophoresis GmbH, Germany) in TBST at room temperature (RT) for 1.5 h. Following the same wash procedure, plasma FN (ab80021, Abcam), which was diluted to a range of 20–0.05 μg/mL in 20 mM HEPES, 150 mM NaCl, was added at 50 μL/well and incubated overnight at 4 °C. Subsequently, the plasma FN solution was removed from the plates by washing with TBST, before the addition of FN mouse monoclonal 1° antibody (66042-1-Ig, Proteintech Europe, UK) at 1:2000 with 100 μL/well for overnight incubation at 4 °C. The primary antibody was washed out with a stricter wash procedure (5× wash: 0 min, 2 min, 2 min, 3 min, 3 min incubations), before the addition of the 2° antibody (HRP-conjugated Affinipure Goat anti-rabbit IgG(H + L), SA00001-2, Proteintech Europe, UK) at 1:2000, 100 μL/well, for 1.5 h incubation at RT. Finally, following a strict 5× wash with TBST, 100 μL of 3,3′,5,5′-tetramethylbenzidine (TMB) ELISA substrate (Highest sensitivity) (ab171522, Abcam, Cambridge, UK) was added per well and incubated for 40 min. The reaction was stopped by adding equal volume (100 μL) of 1 M HCl to the wells. The absorbance was recorded at 450 nm with Multiskan FC (ThermoFisher, UK). 4.11. Statistical Analyses A Student’s t -test was applied for statistical testing for band/regional intensities in SDS-PAGE. For PLF analysis, two-way repeated measures ANOVA with Geisser–Greenhouse correction and Bonferroni-corrected multiple comparisons test was used. p value for significance was set at 0.05 for all statistical tests."
+    }
+   ]
+  },
+  {
+   "id": "NCRP-RAD-001",
+   "source": "NCRP",
+   "title": "NCRP Report 168 radiation dose management in fluoroscopically-guided interventional procedures",
+   "year": "2010",
+   "page_url": "https://ncrponline.org/publications/reports/ncrp-report-168/",
+   "pdf_url": "https://ncrponline.org/publications/reports/ncrp-report-168/",
+   "license": "NCRP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_safety",
+   "priority": "high",
+   "sha256": "067ec410ae87b3dbb1d522755f857e3b487545c1eaf9cb020d0fca4eaf194149",
+   "size_bytes": 1902,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1899,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Effective Dose Assessment for Patients Undergoing Contemporary Fluoroscopically Guided Interventional Procedures. OBJECTIVE. The purpose of this study was to establish procedure-specific air kerma-area product (KAP) and effective dose for a large number of fluoroscopically guided interventional (FGI) procedures. MATERIALS AND METHODS. This retrospective study collected dose data for consecutive adult cases from 12 examination rooms between May 2016 and October 2018. A total of 24,911 cases (50.9% men) were categorized by procedure. Effective dose was calculated using KAP and procedure-specific KAP to effective dose conversion coefficients, mostly from National Council on Radiation Protection and Measurements (NCRP) Report 160. Data analysis was conducted with statistical software to determine mean value and five percentiles (10th, 25th, 50th, 75th, 95th). RESULTS. KAP and effective dose were presented for 101 procedures; a national benchmark is not available from NCRP Reports 168 and 172 for the KAP value of 89 procedures and for the effective dose of all 101 procedures. Twelve procedures that comprised at least 50% of patient cases had median KAP values less than 3.26 Gy · cm 2 and a median effective dose of less than 0.70 mSv. However, some infrequent procedures might be associated with a higher dose. The 95th percentile of KAP was greater than or equal to 500 Gy · cm 2 for 16 procedures and 985 Gy · cm 2 for portography; for effective dose it was greater than or equal to 100 mSv for 21 procedures and 256 mSv for portography. CONCLUSION. The values for KAP and effective dose provided in this article can aid in design and review of clinical research protocols and dose management programs and in assessing compliance with the Joint Commission's standards for organizations providing fluoroscopy services in the absence of national benchmarks for more than 89 procedures."
     }
    ]
   }

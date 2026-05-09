@@ -1,0 +1,32 @@
+{
+ "source": "BCSH",
+ "generated_at": "2026-05-09T19:07:24Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "BCSH-THROMBOPHILIA-001",
+   "source": "BCSH",
+   "title": "BCSH guidelines investigation heritable thrombophilia",
+   "year": "2010",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1365-2141.2009.08022.x",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1365-2141.2009.08022.x",
+   "license": "Society",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_coagulation",
+   "priority": "high",
+   "sha256": "975081707d117b16cafac40aa332f8bc26adff40137578449e3efd1b98c94165",
+   "size_bytes": 1558,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1558,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "An audit of thrombophilia screens: results from the National Pathology Alliance benchmarking review. The National Pathology Alliance benchmarking review has completed six years of data collection and analysis of the workload and organisation of haematology laboratories in the UK. This study audits national practice of routine thrombophilia screening against the current standards, as set out in the British committee for standards in haematology (BCSH) guidelines on investigation of heritable thrombophilia. Each laboratory completed a standard data collection questionnaire about the number of routine thrombophilia assays performed each year. Information was collected on which thrombophilia tests were performed as part of a routine thrombophilia screen. These results were then compared against the BCSH guidelines on investigation of heritable thrombophilia. Of the 57 National Health Service trusts that submitted data for review in 2002/2003, 47 performed a routine thrombophilia screen. Ten laboratories complied with the guidelines but 37 laboratories did not. There was variation in practice in the tests used in routine thrombophilia screens. There is evidence that some laboratories deviate from what may be regarded as \"evidence based practice\". The lack of compliance with the guidelines was in general associated with the performance of additional tests not recommended in the guideline. In a minority of laboratories, a clinically significant diagnosis would be missed by the failure to include one or more tests in a thrombophilia screen."
+    }
+   ]
+  }
+ ]
+}

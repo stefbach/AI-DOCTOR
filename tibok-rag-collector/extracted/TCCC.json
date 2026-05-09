@@ -1,7 +1,7 @@
 {
  "source": "TCCC",
  "generated_at": "2026-05-09T16:09:06Z",
- "total_documents": 3,
+ "total_documents": 4,
  "documents": [
   {
    "id": "TCCC-001",
@@ -359,6 +359,31 @@
     {
      "chunk_index": 55,
      "content": "guidelines. J Neurotrauma. Ready to submit your research ? Choose BMC and benefit from: 2016;33(16):1554–60. 384. Harwayne-Gidansky I, Askin G, Fein DM, McNamara C, Duncan E, • fast, convenient online submission Delaney K, Greenberg J, Mojica M, Clapper T, Ching K. Effectiveness of a simulation curriculum on clinical application: a randomised educational • thorough peer review by experienced researchers in your field trial. Simul Healthc. 2022;17(2):71–7. • rapid publication on acceptance 385. Kaserer A, Rössler J, Braun J, Farokhzad F, Pape HC, Dutkowski P, Plass • support for research data, including large and complex data types A, Horisberger T, Volbracht J, Manz MG, et al. Impact of a patient blood management monitoring and feedback programme on allogeneic • gold Open Access which fosters wider collaboration and increased citations blood transfusions and related costs. Anaesthesia. 2019;74(12):1534–41. • maximum visibility for your research: over 100M website views per year 386. Coggins A, Zaklama R, Szabo RA, Diaz-Navarro C, Scalese RJ, Krogh K, Eppich W. Twelve tips for facilitating and implementing clinical debrief‑ At BMC, research is always in progress. ing programmes. Med Teach. 2021;43(5):509–17. Learn more biomedcentral.com/submissions"
+    }
+   ]
+  },
+  {
+   "id": "TCCC-MARCH-001",
+   "source": "TCCC",
+   "title": "TCCC MARCH PAWS Algorithm for Combat Trauma",
+   "year": "2024",
+   "page_url": "https://deployedmedicine.com/",
+   "pdf_url": "https://deployedmedicine.com/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "wilderness_tactical",
+   "priority": "high",
+   "sha256": "9ac6ca087fbc4c231c32c9d791118b7859426ece0f52ab4eba904df652fc962b",
+   "size_bytes": 714,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 714,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: TCCC MARCH PAWS Algorithm for Combat Trauma Source: TCCC Year: 2024 Domain: wilderness_tactical License: Public Domain Available at: https://deployedmedicine.com/ This is a citation reference for the TCCC guideline 'TCCC MARCH PAWS Algorithm for Combat Trauma' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: wilderness_tactical. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

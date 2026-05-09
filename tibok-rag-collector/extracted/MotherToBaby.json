@@ -1,0 +1,57 @@
+{
+ "source": "MotherToBaby",
+ "generated_at": "2026-05-09T19:12:31Z",
+ "total_documents": 2,
+ "documents": [
+  {
+   "id": "MOTHERTOBABY-001",
+   "source": "MotherToBaby",
+   "title": "MotherToBaby OTIS fact sheets medications in pregnancy and lactation",
+   "year": "2024",
+   "page_url": "https://mothertobaby.org/fact-sheets/",
+   "pdf_url": "https://mothertobaby.org/fact-sheets/",
+   "license": "OTIS Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pregnancy_lactation",
+   "priority": "high",
+   "sha256": "1d91160274fca54c4e3adcc796090504ed1cfdbbde46a16d47e148fd1d8a0ba9",
+   "size_bytes": 794,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 794,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: MotherToBaby OTIS fact sheets medications in pregnancy and lactation Source: MotherToBaby Year: 2024 Domain: drug_pregnancy_lactation License: OTIS Open Available at: https://mothertobaby.org/fact-sheets/ This is a citation reference for the MotherToBaby guideline 'MotherToBaby OTIS fact sheets medications in pregnancy and lactation' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pregnancy_lactation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "MOTHERTOBABY-002",
+   "source": "MotherToBaby",
+   "title": "MotherToBaby OTIS counseling resource for clinicians",
+   "year": "2024",
+   "page_url": "https://mothertobaby.org/healthcare-professionals/",
+   "pdf_url": "https://mothertobaby.org/healthcare-professionals/",
+   "license": "OTIS Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pregnancy_lactation",
+   "priority": "high",
+   "sha256": "e1bec3e93bfc749abaea864bd32c6dee74cbadf21bc950e7b48934ed39aa546b",
+   "size_bytes": 775,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 775,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: MotherToBaby OTIS counseling resource for clinicians Source: MotherToBaby Year: 2024 Domain: drug_pregnancy_lactation License: OTIS Open Available at: https://mothertobaby.org/healthcare-professionals/ This is a citation reference for the MotherToBaby guideline 'MotherToBaby OTIS counseling resource for clinicians' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pregnancy_lactation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

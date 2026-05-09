@@ -1,7 +1,7 @@
 {
  "source": "SCCM",
  "generated_at": "2026-05-02T15:37:55Z",
- "total_documents": 36,
+ "total_documents": 54,
  "documents": [
   {
    "id": "SCCM-001",
@@ -2824,6 +2824,456 @@
     {
      "chunk_index": 9,
      "content": "and around the world. Yet it is important to remember that IHCA remains an understudied medical condition with significant knowledge gaps, and future research will be needed to improve quality of resuscitation care and outcomes after IHCA even further. In conclusion, the Ten Steps documented here reflect current knowledge of best practices within resuscitation systems and serve as a foundation for improving IHCA quality of care and outcomes across different settings. ARTICLE INFORMATION Acknowledgments The authors would like to acknowledge as collaborators the following members of the Improving In-Hospital Cardiac Arrest Advisory Group: Jason Acworth, Hanan Fahad Alharbi, Dianne L. Atkins, Bernd W. Böttiger, Andrea Cortegiani, Keith Couper, Vihara Dassanayake, Jimena del Castillo, Maya Dewan, Rakesh Garg, Jan-Thorsten Gräsner, Takanari Ikeyama, Mukul Kapoor, Hiroshi Kurosawa, Candace N. Mannarino, Abel Martínez-Mejias, Tasuku Matsuyama, Namala Mkopi, Margaret Nicholson, Tatsuya Norii, Shinichiro Ohshimo, Gene Ong, Tia T. Raymond, Joseph Rossano, Georg M. Schmölzer, Federico Semeraro, Lokesh Tiwari, and Carolyn Zelop. The authors would also like to thank Amber Hoover and Chalan King for their administrative support throughout this project. Sources of Funding This work received grant support from the Laerdal Foundation. Disclosures Dr Chan has received research funding from the American Heart Association (AHA) and the National Heart, Lung, and Blood Institute (NHLBI). Dr Djärv is the chair of Swedish Resuscitation Council and the International Liaison Committee on Resuscitation (ILCOR) First Aid Task Force. A. Doll is employed by the Resuscitation Academy. Dr Edelson has equity interest and employment in AgileMD. Dr Girotra receives funding from the National Institutes of Health (R01HL160734, R56HL158803, and R01HL166305). He also receives a stipend from AHA for editorial work. Dr Greif is chair of ILCOR Education, Implementation and Team Task Force and the European Resuscitation Council board birector of guidelines. Dr Lauridsen serves as an ERC Science and Education Committee member and member of the ILCOR EIT Task Force. Dr Moskowitz receives funding from NHLBI (R33HL162980). M.C. Myburgh serves on the ILCOR Pediatric Task Force. Dr Neumar is the ILCOR cochair. J.P. Nolan is the editor in chief of Resuscitation and receives National Institute for Health and Care Research (NIHR) grant funding. Dr Olasveengen is a board member of the Laerdal Foundation. Dr Perkins receives grant funding from the NIHR Applied Research Collaboration West Midlands, Resuscitation Council United Kingdom, Laerdal Foundation, and the British Heart Foundation and serves on the boards for the European Resuscitation Council, Resuscitation Council UK, ILCOR, and University Hospitals Coventry and Warwickshire. He also serves as an editor for Resuscitation and Resuscitation Plus. J.K. Previdi serves as the AHA Emergency Cardiovascular Care Committee chair and is an AHA product consultant. Dr Vaillancourt is a member of the Heart and Stroke Foundation of Canada Resuscitation Advisory Committee and receives funding from The Ottawa Hospital Academic Medical Organization. Dr Montgomery serves as the ILCOR consultant. Dr Sasson is employed by AHA. Dr Nallamothu has been a principal investigator or coinvestigator on research grants from the NIH, AHA, Janssen, and Apple, Inc. He also receives compensation as an editor in chief of Circulation: Cardiovascular Quality and Outcomes . Finally, he is a coinventor on the US Utility Patent Number US15/356012 (US20170148158A1) entitled “Automated Analysis of Vasculature in Coronary Angiograms” that uses software technology with signal processing and machine learning to automate the reading of coronary angiograms, held by the University of Michigan. The patent is licensed to AngioInsight, Inc, in which he holds ownership shares and receives consultancy fees. Dr Nadkarni receives research funding to his institution from the National Institutes of Health, Agency for Healthcare Research and Quality, US Department of Defense, American Heart Association, Zoll Medical, RQI Partners, and Laerdal Foundation; he also serves as the President of the Society of Critical Care Medicine (SCCM) 2023-2024. The views expressed in the manuscript are his, and not intended to represent the views of the SCCM. The other authors report no conflicts."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-ARDS-001",
+   "source": "SCCM",
+   "title": "SCCM/ESICM/ATS guidelines on prone positioning in ARDS",
+   "year": "2020",
+   "page_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "pdf_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pulmonology_critical",
+   "priority": "high",
+   "sha256": "5dd219b89cfe47dabf2ff956c3b8d98a01a4e66b464f9709f0044ad538f6a15b",
+   "size_bytes": 750,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 750,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCCM/ESICM/ATS guidelines on prone positioning in ARDS Source: SCCM Year: 2020 Domain: pulmonology_critical License: SCCM Available at: https://www.sccm.org/Clinical-Resources/Guidelines This is a citation reference for the SCCM guideline 'SCCM/ESICM/ATS guidelines on prone positioning in ARDS' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pulmonology_critical. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-PADIS-001",
+   "source": "SCCM",
+   "title": "SCCM clinical practice guidelines for prevention and management of pain agitation/sedation delirium immobility and sleep disruption in adult patients in the ICU",
+   "year": "2018",
+   "page_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "pdf_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pulmonology_critical",
+   "priority": "high",
+   "sha256": "b4a2bd74016770e083c342e82999dcfdef077b427761178679c56dfe5308a766",
+   "size_bytes": 2459,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2459,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:59Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "A Focused Update to the Clinical Practice Guidelines for the Prevention and Management of Pain, Anxiety, Agitation/Sedation, Delirium, Immobility, and Sleep Disruption in Adult Patients in the ICU. Critically ill adults are at risk for a variety of distressing and consequential symptoms both during and after an ICU stay. Management of these symptoms can directly influence outcomes. The objective was to update and expand the Society of Critical Care Medicine's 2018 Clinical Practice Guidelines for the Prevention and Management of Pain, Agitation/Sedation, Delirium, Immobility, and Sleep Disruption in Adult Patients in the ICU. The interprofessional inclusive guidelines task force was composed of 24 individuals including nurses, physicians, pharmacists, physiotherapists, psychologists, and ICU survivors. The task force developed evidence-based recommendations using the Grading of Recommendations, Assessment, Development, and Evaluation (GRADE) approach. Conflict-of-interest policies were strictly followed in all phases of the guidelines, including task force selection and voting. The task force focused on five main content areas as they pertain to adult ICU patients: anxiety (new topic), agitation/sedation, delirium, immobility, and sleep disruption. Using the GRADE approach, we conducted a rigorous systematic review for each population, intervention, control, and outcome question to identify the best available evidence, statistically summarized the evidence, assessed the quality of evidence, and then performed the evidence-to-decision framework to formulate recommendations. The task force issued five statements related to the management of anxiety, agitation/sedation, delirium, immobility, and sleep disruption in adults admitted to the ICU. In adult patients admitted to the ICU, the task force issued conditional recommendations to use dexmedetomidine over propofol for sedation, provide enhanced mobilization/rehabilitation over usual mobilization/rehabilitation, and administer melatonin. The task force was unable to issue recommendations on the administration of benzodiazepines to treat anxiety, and the use of antipsychotics to treat delirium. The guidelines task force provided recommendations for pharmacologic management of agitation/sedation and sleep, and nonpharmacologic management of immobility in critically ill adults. These recommendations are intended for consideration along with the patient's clinical status."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-DELIRIUM-001",
+   "source": "SCCM",
+   "title": "SCCM ICU delirium prevention and management",
+   "year": "2018",
+   "page_url": "https://www.sccm.org/",
+   "pdf_url": "https://www.sccm.org/",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_critical_care",
+   "priority": "high",
+   "sha256": "ca4d773313c30844d693db55bfc0304ff59ba01a4aa443bb8721f5f8b8937c21",
+   "size_bytes": 2178,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2176,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:00Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Effect of Enhanced Versus Usual Mobilization Activities in Critically Ill Adults: A Systematic Review and Meta-Analysis of Randomized Controlled Trials. To conduct a systematic review and meta-analysis to capture updated evidence regarding the benefits and harms of enhanced mobilization activities and explore whether specific approaches may be more beneficial than others. This study was prospectively registered PROSPERO: CRD42024550360. Parallel group randomized controlled trials (RCTs) that included adult patients (≥ 18 yr old) admitted to the ICU were included. The intervention group was required to receive enhanced mobilization activities above usual care while in the ICU, while the control group received usual care, which was required to include some degree of mobilization. Four databases and two trial registries were searched until May 2024. Review and data extraction of all potentially eligible articles was performed independently and in duplicate. The Grading of Recommendations Assessment, Development, and Evaluation approach was used to assess the quality of evidence for each outcome. Fifty-nine RCTs ( n = 8462) met eligibility criteria. Enhanced mobilization activities may reduce the incidence of ICU-acquired weakness (risk ratio, 0.79; 95% CI, 0.66-0.95; moderate certainty), duration of delirium (mean difference [MD], -1.34 d; 95% CI, -1.85 to -0.83; low certainty), and duration of invasive mechanical ventilation (MD, -1.07 d; 95% CI, -1.64 to -0.50 d; moderate certainty). ICU and hospital length of stay may also be slightly reduced by enhanced mobilization (low certainty). Enhanced mobilization may result in little to no difference in adverse events (low certainty). This review demonstrates that enhanced mobilization likely reduces the incidence of ICU-acquired weakness and may reduce duration of delirium, while supporting prior findings that there is little to no difference in risk of adverse events. Early mobilization may be the most promising avenue for optimizing mobilization activities and raise the question of whether the key to improving outcomes lies in early exposure to these activities rather than increased intensity."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-SEDATION-001",
+   "source": "SCCM",
+   "title": "SCCM ICU pain agitation sedation update",
+   "year": "2018",
+   "page_url": "https://journals.lww.com/ccmjournal/",
+   "pdf_url": "https://journals.lww.com/ccmjournal/",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_critical_care",
+   "priority": "high",
+   "sha256": "370cd24a49760477ade01f49b07ae0a3b28fc251a273e40759a4598526d0d89b",
+   "size_bytes": 714,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 714,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:00Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCCM ICU pain agitation sedation update Source: SCCM Year: 2018 Domain: anesthesia_critical_care License: SCCM Available at: https://journals.lww.com/ccmjournal/ This is a citation reference for the SCCM guideline 'SCCM ICU pain agitation sedation update' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: anesthesia_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-SEPSIS-001",
+   "source": "SCCM",
+   "title": "SCCM Surviving Sepsis Campaign international guidelines for management of sepsis and septic shock",
+   "year": "2021",
+   "page_url": "https://www.sccm.org/SurvivingSepsisCampaign/Guidelines",
+   "pdf_url": "https://www.sccm.org/SurvivingSepsisCampaign/Guidelines",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_critical_care",
+   "priority": "high",
+   "sha256": "2cda0a21e97ed4d4923cea482070477dc783e50bfc5eca53063dce4066001834",
+   "size_bytes": 2459,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2459,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:01Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "[Comparison between the 2020 international guidelines for the management of sepsis and septic shock and the Japanese guidelines for the management of sepsis]. In 2021, the Society of Critical Care Medicine (SCCM) and the European Society of Intensive Care Medicine (ESICM) jointly released the Surviving Sepsis Campaign: international guidelines for management of sepsis and septic shock 2020 with 93 recommendations. In the same year, the Japanese Society of Intensive Care Medicine (JSICM) and the Japanese Association for Acute Medicine (JAAM) also cooperated to publish the Japanese clinical practice guidelines for management of sepsis and septic shock 2020, covering 118 clinical issues in 22 areas. In this paper, 50 items in the contents of the two guidelines are compared in accordance with the order of international guidelines, including screening, initial resuscitation, mean arterial pressure, transfer to intensive care unit (ICU), diagnosis of infection, timing of antimicrobial administration, biomarkers for initiation of antimicrobial therapy, selection of antibiotic, antifungal therapy, antiviral therapy, infusion of antibiotic, pharmacokinetics and pharmacodynamics, source of infection control, antimicrobial de-escalation strategy, course of antimicrobial administration, biomarkers for discontinuation of antibiotic, fluid management, vasoactive agents, positive inotropic agents, monitoring and intravenous access, fluid balance, oxygenation targets, high-flow nasal cannula oxygen therapy, noninvasive ventilation, protective ventilation in acute respiratory distress syndrome (ARDS), low tidal volume in respiratory failure patients with non-ARDS, lung recruitment maneuvers, prone position ventilation, muscle relaxants, extracorporeal membrane oxygenation (ECMO), glucocorticoids, blood purification, red blood cell (RBC) transfusion, immunoglobulin, stress ulcer prevention, prevention of venous thromboembolism (VTE), renal replacement therapy, glycemic management, vitamin C, sodium bicarbonate therapy, nutrition, treatment goals, palliative care, peer support groups, transition of care, screening economic and social support, education for the knowledge about sepsis to the patients and their families, common decision-making, discharge planning, cognitive therapy and follow-up after discharge. It is convenient for everyone to understand some views in the field of sepsis and septic shock, and deepen their understanding."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-DRUG-001",
+   "source": "SCCM",
+   "title": "SCCM ICU Liberation Bundle pain agitation delirium drug guidance",
+   "year": "2018",
+   "page_url": "https://www.sccm.org/Clinical-Resources/ICULiberation-Home",
+   "pdf_url": "https://www.sccm.org/Clinical-Resources/ICULiberation-Home",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "f60bcf0c6cb00e51f16b9535f092f94dcccd02b11ba9d1e764a0725511b3aaff",
+   "size_bytes": 774,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 774,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:01Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCCM ICU Liberation Bundle pain agitation delirium drug guidance Source: SCCM Year: 2018 Domain: drug_critical_care License: SCCM Available at: https://www.sccm.org/Clinical-Resources/ICULiberation-Home This is a citation reference for the SCCM guideline 'SCCM ICU Liberation Bundle pain agitation delirium drug guidance' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-DRUG-002",
+   "source": "SCCM",
+   "title": "SCCM Surviving Sepsis Campaign drug recommendations vasopressors antibiotics",
+   "year": "2021",
+   "page_url": "https://www.sccm.org/SurvivingSepsisCampaign",
+   "pdf_url": "https://www.sccm.org/SurvivingSepsisCampaign",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "86fc2977ada6dfef88676dd9d9890001d9c7e898ff32f7b9eb627679206823d8",
+   "size_bytes": 784,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 784,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:02Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCCM Surviving Sepsis Campaign drug recommendations vasopressors antibiotics Source: SCCM Year: 2021 Domain: drug_critical_care License: SCCM Available at: https://www.sccm.org/SurvivingSepsisCampaign This is a citation reference for the SCCM guideline 'SCCM Surviving Sepsis Campaign drug recommendations vasopressors antibiotics' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-DRUG-003",
+   "source": "SCCM",
+   "title": "SCCM Pediatric Surviving Sepsis Campaign drug recommendations",
+   "year": "2020",
+   "page_url": "https://www.sccm.org/SurvivingSepsisCampaign/Guidelines",
+   "pdf_url": "https://www.sccm.org/SurvivingSepsisCampaign/Guidelines",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "fed2b85db6b43a5b2a5a4e562d774cab39342aee6fb42c3a18fe2db90e3721f5",
+   "size_bytes": 765,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 765,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:03Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCCM Pediatric Surviving Sepsis Campaign drug recommendations Source: SCCM Year: 2020 Domain: drug_critical_care License: SCCM Available at: https://www.sccm.org/SurvivingSepsisCampaign/Guidelines This is a citation reference for the SCCM guideline 'SCCM Pediatric Surviving Sepsis Campaign drug recommendations' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-DRUG-004",
+   "source": "SCCM",
+   "title": "SCCM Stress Ulcer Prophylaxis in critically ill adults",
+   "year": "2024",
+   "page_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "pdf_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "medium",
+   "sha256": "9ffb736781e6ebdf1826ceaea6d24d7630c5f9dc67daee1f41a5af4852d10d52",
+   "size_bytes": 3417,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3417,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Recommendations for Stress Ulcer Prophylaxis in Critically Ill Adults: A Contextualized Clinical Practice Guideline From the Saudi Critical Care Society and the Scandinavian Society of Anaesthesiology and Intensive Care Medicine, Endorsed by the Kuwait Anesthesia and Critical Care Society. Critically ill adults are at risk for stress-related upper gastrointestinal bleeding (UGIB). Regional variations in gastrointestinal bleeding incidence, infection epidemiology, formulary access, and the relative value placed on bleeding versus infection outcomes by patients and clinicians necessitate contextualized recommendations. This guideline provides regionally adapted, evidence-based recommendations for the use of stress ulcer prophylaxis (SUP) in Saudi Arabia, Kuwait, and the Nordic countries using the GRADE-ADOLOPMENT methodology. A multidisciplinary panel from both regions prioritized PICO questions and ranked outcomes by patient importance. The 2024 Society of Critical Care Medicine (SCCM) and American Society of Health-System Pharmacists (ASHP) guideline served as the source guideline and was evaluated for credibility; contextual fit in Saudi Arabia, Kuwait, and the Nordic countries; and alignment with the GRADE methodology. Evidence profiles and Evidence-to-Decision frameworks were adapted or developed, incorporating updated data, local epidemiology, drug access, and health system variables such as equity, cost, and feasibility. The panel adopted the following five recommendations. In critically ill adults with coagulopathy, shock, or chronic liver disease, the panel suggests using SUP over no SUP (conditional recommendation; moderate certainty). In enterally fed patients at high risk of UGIB, the panel suggests using SUP over no SUP (conditional recommendation; very low certainty); in those at low risk, the panel suggests not using SUP (conditional recommendation; very low certainty). For patients receiving SUP, the panel suggests using a proton pump inhibitor (PPI) or a histamine-2 receptor antagonist (H2RA) rather than sucralfate (conditional recommendation; low to moderate certainty) and suggests enteral or intravenous administration based on clinical feasibility (conditional recommendation; very low to low certainty). In critically ill adults receiving SUP, low-dose PPI or H2RA therapy should be used rather than high-dose regimens (best practice statement; not GRADEd). Regarding SUP discontinuation, the panel suggests discontinuing SUP in critically ill adults with resolved risk factors for UGIB (conditional recommendations; very low certainty) and in critically ill adults without UGIB risk factors but receiving SUP prior to intensive care unit (ICU) admission in the absence of an active indication (conditional recommendations; very low certainty). Differences in drug availability, ICU discharge practices, and health equity considerations shaped the panel's judgments and highlighted key implementation challenges. This guideline offers five context-specific, evidence-informed recommendations for SUP in critically ill adults in Saudi Arabia, Kuwait, and the Nordic countries. While grounded in the health system realities of these regions, the recommendations may inform practice in other settings with similar ICU structures and resource contexts. The panel also identified key research priorities to address remaining evidence gaps and support future updates."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-DRUG-005",
+   "source": "SCCM",
+   "title": "SCCM Glycemic Control in Critically Ill Patients",
+   "year": "2012",
+   "page_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "pdf_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "medium",
+   "sha256": "fff509326035df7372618ffbc1cc2c61d3d703f8cd0727993e1e60f1a895b6f2",
+   "size_bytes": 1696,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1696,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Evaluating the significance of delaying intravenous lipid therapy during the first week of hospitalization in the intensive care unit. The American Society for Parenteral and Enteral Nutrition (A.S.P.E.N.) and the Society of Critical Care Medicine (SCCM) published guidelines in 2009 recommending against the use of intravenous lipids for parenteral nutrition (PN) within the first week of hospitalization in critically ill patients. This grade D recommendation is controversial as it is based on the results of 2 studies that evaluated approximately 100 patients and did not evaluate glycemic control. The purpose of this study was to evaluate outcomes associated with the receipt of lipids within the first week in the intensive care unit (ICU) compared with withholding lipids. This retrospective study included critically ill adult patients who received PN at a large, academic medical center. This study examined the incidence of new infections with receipt of early lipids (n = 66) compared with withholding lipids in the first 7 days (n = 29). Secondary outcomes included mortality, hyperglycemia, ICU length of stay (LOS), and total LOS. There was no difference between the early lipids and late lipids groups in the incidence of new infections after the initiation of PN (40.9% vs 55.2%, P = .264). Additionally, there was no difference between groups for any of the secondary outcomes. Withholding lipids within the first 7 days of hospitalization in the ICU was not associated with a significant reduction in infections, ICU or total LOS, or mortality. A multicenter, randomized, controlled trial is needed to further evaluate the effects of lipid administration in the critically ill."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-DRUG-006",
+   "source": "SCCM",
+   "title": "SCCM PADIS guidelines pain agitation delirium immobility sleep ICU",
+   "year": "2018",
+   "page_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "pdf_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "ca4d773313c30844d693db55bfc0304ff59ba01a4aa443bb8721f5f8b8937c21",
+   "size_bytes": 2178,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2176,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:05Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Effect of Enhanced Versus Usual Mobilization Activities in Critically Ill Adults: A Systematic Review and Meta-Analysis of Randomized Controlled Trials. To conduct a systematic review and meta-analysis to capture updated evidence regarding the benefits and harms of enhanced mobilization activities and explore whether specific approaches may be more beneficial than others. This study was prospectively registered PROSPERO: CRD42024550360. Parallel group randomized controlled trials (RCTs) that included adult patients (≥ 18 yr old) admitted to the ICU were included. The intervention group was required to receive enhanced mobilization activities above usual care while in the ICU, while the control group received usual care, which was required to include some degree of mobilization. Four databases and two trial registries were searched until May 2024. Review and data extraction of all potentially eligible articles was performed independently and in duplicate. The Grading of Recommendations Assessment, Development, and Evaluation approach was used to assess the quality of evidence for each outcome. Fifty-nine RCTs ( n = 8462) met eligibility criteria. Enhanced mobilization activities may reduce the incidence of ICU-acquired weakness (risk ratio, 0.79; 95% CI, 0.66-0.95; moderate certainty), duration of delirium (mean difference [MD], -1.34 d; 95% CI, -1.85 to -0.83; low certainty), and duration of invasive mechanical ventilation (MD, -1.07 d; 95% CI, -1.64 to -0.50 d; moderate certainty). ICU and hospital length of stay may also be slightly reduced by enhanced mobilization (low certainty). Enhanced mobilization may result in little to no difference in adverse events (low certainty). This review demonstrates that enhanced mobilization likely reduces the incidence of ICU-acquired weakness and may reduce duration of delirium, while supporting prior findings that there is little to no difference in risk of adverse events. Early mobilization may be the most promising avenue for optimizing mobilization activities and raise the question of whether the key to improving outcomes lies in early exposure to these activities rather than increased intensity."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-VTE-001",
+   "source": "SCCM",
+   "title": "SCCM ASHP ACCP Society of Critical Care Medicine VTE prophylaxis ICU",
+   "year": "2018",
+   "page_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "pdf_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "medium",
+   "sha256": "cd4304e3ebf57e013cb445ee6e01c60fa85ddc1d9b4699826f911211409494f0",
+   "size_bytes": 774,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 774,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:05Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCCM ASHP ACCP Society of Critical Care Medicine VTE prophylaxis ICU Source: SCCM Year: 2018 Domain: drug_critical_care License: SCCM Available at: https://www.sccm.org/Clinical-Resources/Guidelines This is a citation reference for the SCCM guideline 'SCCM ASHP ACCP Society of Critical Care Medicine VTE prophylaxis ICU' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-NUT-DRUG-001",
+   "source": "SCCM",
+   "title": "SCCM ASPEN Critical Care Nutrition drug-nutrient interactions",
+   "year": "2022",
+   "page_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "pdf_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "license": "SCCM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "medium",
+   "sha256": "f14dad2ddd4e6099e8c7b9407c83f31597b9ebae7e10906ab685416393412847",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:06Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCCM ASPEN Critical Care Nutrition drug-nutrient interactions Source: SCCM Year: 2022 Domain: drug_critical_care License: SCCM Available at: https://www.sccm.org/Clinical-Resources/Guidelines This is a citation reference for the SCCM guideline 'SCCM ASPEN Critical Care Nutrition drug-nutrient interactions' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-PAL-001",
+   "source": "SCCM",
+   "title": "SCCM ESICM Consensus Comfort Care for Adults Withdrawing Life Support",
+   "year": "2008",
+   "page_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "pdf_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_eol",
+   "priority": "high",
+   "sha256": "f6018d64e451e35f023fafcaf022e88e49a91171629343302a06ab5cee95b4ee",
+   "size_bytes": 774,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 774,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:06Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCCM ESICM Consensus Comfort Care for Adults Withdrawing Life Support Source: SCCM Year: 2008 Domain: palliative_eol License: Restricted Available at: https://www.sccm.org/Clinical-Resources/Guidelines This is a citation reference for the SCCM guideline 'SCCM ESICM Consensus Comfort Care for Adults Withdrawing Life Support' published in 2008. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: palliative_eol. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-PEDS-005",
+   "source": "SCCM",
+   "title": "SCCM Pediatric Acute Liver Failure Management",
+   "year": "2022",
+   "page_url": "https://journals.lww.com/pccmjournal",
+   "pdf_url": "https://journals.lww.com/pccmjournal",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "picu_neuro",
+   "priority": "high",
+   "sha256": "173db15428d3673052fc6c75c436345a8d80b650476bef49b5b87f7b5d8f9a5d",
+   "size_bytes": 704,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 704,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCCM Pediatric Acute Liver Failure Management Source: SCCM Year: 2022 Domain: picu_neuro License: Restricted Available at: https://journals.lww.com/pccmjournal This is a citation reference for the SCCM guideline 'SCCM Pediatric Acute Liver Failure Management' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: picu_neuro. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-PEDS-008",
+   "source": "SCCM",
+   "title": "SCCM Long-Stay PICU Outcomes Recommendations",
+   "year": "2021",
+   "page_url": "https://journals.lww.com/pccmjournal",
+   "pdf_url": "https://journals.lww.com/pccmjournal",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "picu_neuro",
+   "priority": "low",
+   "sha256": "77217276400581a3ba11f89b4ab1447feddb97a3338c058a53c016dbe98c5082",
+   "size_bytes": 702,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 702,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCCM Long-Stay PICU Outcomes Recommendations Source: SCCM Year: 2021 Domain: picu_neuro License: Restricted Available at: https://journals.lww.com/pccmjournal This is a citation reference for the SCCM guideline 'SCCM Long-Stay PICU Outcomes Recommendations' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: picu_neuro. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-PEDS-011",
+   "source": "SCCM",
+   "title": "SCCM Hemodynamic Monitoring Pediatric Cardiac Patient",
+   "year": "2020",
+   "page_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "pdf_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "picu_cardiac",
+   "priority": "medium",
+   "sha256": "8a9ded63e56e32cdd9d5dae66ba109268729df6fc65abc47932ae7caf3669673",
+   "size_bytes": 2217,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2217,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Risk Factors for Critical Coronavirus Disease 2019 and Mortality in Hospitalized Young Adults: An Analysis of the Society of Critical Care Medicine Discovery Viral Infection and Respiratory Illness Universal Study (VIRUS) Coronavirus Disease 2019 Registry. Even with its proclivity for older age, coronavirus disease 2019 has been shown to affect all age groups. However, there remains a lack of research focused primarily on the young adult population. To describe the epidemiology and outcomes of coronavirus disease 2019 and identify the risk factors associated with critical illness and mortality in hospitalized young adults. A retrospective cohort study of the Society of Critical Care Medicine's Viral Infection and Respiratory Illness Universal Study registry. Patients 18-40 years old, hospitalized from coronavirus disease 2019 from March 2020 to April 2021, were included in the analysis. Critical illness was defined as a composite of mortality and 21 predefined interventions and complications. Multivariable logistic regression was used to assess associations with critical illness and mortality. Data from 4,005 patients (152 centers, 19 countries, 18.6% non-U.S. patients) were analyzed. The median age was 32 years (interquartile range, 27-37 yr); 51% were female, 29.4% Hispanic, and 42.9% had obesity. Most patients (63.2%) had comorbidities, the most common being hypertension (14.5%) and diabetes (13.7%). Hospital and ICU mortality were 3.2% (129/4,005) and 8.3% (109/1,313), respectively. Critical illness occurred in 25% ( n = 996), and 34.3% ( n = 1,376) were admitted to the ICU. Older age ( p = 0.03), male sex (adjusted odds ratio, 1.83 [95% CI, 1.2-2.6]), and obesity (adjusted odds ratio, 1.6 [95% CI, 1.1-2.4]) were associated with hospital mortality. In addition to the above factors, the presence of any comorbidity was associated with critical illness from coronavirus disease 2019. Multiple sensitivity analyses, including analysis with U.S. patients only and patients admitted to high-volume sites, showed similar risk factors. Among hospitalized young adults, obese males with comorbidities are at higher risk of developing critical illness or dying from coronavirus disease 2019."
+    }
+   ]
+  },
+  {
+   "id": "SCCM-PAL-004",
+   "source": "SCCM",
+   "title": "SCCM Statement Limitation Life-Sustaining Therapies ICU",
+   "year": "2015",
+   "page_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "pdf_url": "https://www.sccm.org/Clinical-Resources/Guidelines",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_eol",
+   "priority": "high",
+   "sha256": "d5621c57c6721d0654b0c340697d4b4cd40ff91dee8a9db1fa9f09a7a3d2ed28",
+   "size_bytes": 746,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 746,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SCCM Statement Limitation Life-Sustaining Therapies ICU Source: SCCM Year: 2015 Domain: palliative_eol License: Restricted Available at: https://www.sccm.org/Clinical-Resources/Guidelines This is a citation reference for the SCCM guideline 'SCCM Statement Limitation Life-Sustaining Therapies ICU' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: palliative_eol. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

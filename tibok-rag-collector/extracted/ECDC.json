@@ -1,7 +1,7 @@
 {
  "source": "ECDC",
  "generated_at": "2026-05-02T14:09:02Z",
- "total_documents": 19,
+ "total_documents": 20,
  "documents": [
   {
    "id": "ECDC-001",
@@ -2051,6 +2051,31 @@
     {
      "chunk_index": 9,
      "content": "this patient have VAP? Intensive Care Med. 2016. https://​doi.​org/​10.​1007/​s00134-​016-​4239-1. 35. Wałaszek M, Różańska A, Wałaszek MZ, Wójkowska-Mach J, Polish Society of Hospital Infections Team. Epidemiology of ventilator-associated pneumonia, microbiological diagnostics and the length of antimicrobial treatment in the Polish intensive care units in the years 2013–2015. BMC Infect Dis. 2018. https://​doi.​org/​10.​1186/​s12879-​018-​3212-8. 36. Rawson TM, Moore LSP, Zhu N, Ranganathan N, Skolimowska K, Gilchrist M, et al. Bacterial and fungal coinfection in individuals with coronavirus: a rapid review to support COVID-19 antimicrobial prescribing. Clin Infect Dis. 2020. https://​doi.​org/​10.​1093/​cid/​ciaa5​30. 37. Duszynska W, Rosenthal VD, Szczesny A, Zajaczkowska K, Fulek M, Tomaszewski J. Device associated -health care associated Infections monitoring, prevention and cost assessment at intensive care unit of University Hospital in Poland (2015–2017). BMC Infect Dis. 2020. https://​ doi.​org/​10.​1186/​s12879-​020-​05482-w. Publisher’s Note Springer Nature remains neutral with regard to jurisdictional claims in pub‑ lished maps and institutional affiliations. Ready to submit your research ? Choose BMC and benefit from: • fast, convenient online submission • thorough peer review by experienced researchers in your field • rapid publication on acceptance • support for research data, including large and complex data types • gold Open Access which fosters wider collaboration and increased citations • maximum visibility for your research: over 100M website views per year At BMC, research is always in progress. Learn more biomedcentral.com/submissions"
+    }
+   ]
+  },
+  {
+   "id": "ECDC-IGRA-001",
+   "source": "ECDC",
+   "title": "ECDC guidance use IGRA support diagnosis tuberculosis",
+   "year": "2018",
+   "page_url": "https://www.ecdc.europa.eu/en/publications-data/use-interferon-gamma-release-assays-support-tb-diagnosis",
+   "pdf_url": "https://www.ecdc.europa.eu/en/publications-data/use-interferon-gamma-release-assays-support-tb-diagnosis",
+   "license": "ECDC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_microbiology",
+   "priority": "high",
+   "sha256": "8be279f769a78b4fedf4215cf65e69d5fa036c80aa4e1a0e4fdb060e41a8abbd",
+   "size_bytes": 794,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 794,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:03Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ECDC guidance use IGRA support diagnosis tuberculosis Source: ECDC Year: 2018 Domain: lab_microbiology License: ECDC Available at: https://www.ecdc.europa.eu/en/publications-data/use-interferon-gamma-release-assays-support-tb-diagnosis This is a citation reference for the ECDC guideline 'ECDC guidance use IGRA support diagnosis tuberculosis' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_microbiology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,0 +1,32 @@
+{
+ "source": "NAP4",
+ "generated_at": "2026-05-09T19:12:35Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "NAP4-AIRWAY-001",
+   "source": "NAP4",
+   "title": "NAP4 Royal College of Anaesthetists 4th National Audit Project major complications of airway management in the UK",
+   "year": "2011",
+   "page_url": "https://www.rcoa.ac.uk/research/research-projects/national-audit-projects-naps/nap4",
+   "pdf_url": "https://www.rcoa.ac.uk/research/research-projects/national-audit-projects-naps/nap4",
+   "license": "NAP4",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_general",
+   "priority": "high",
+   "sha256": "44ec6b1cb6aff7f21c43dc14d21371510fa61d805b5630179d6a17277e646a63",
+   "size_bytes": 897,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 897,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NAP4 Royal College of Anaesthetists 4th National Audit Project major complications of airway management in the UK Source: NAP4 Year: 2011 Domain: anesthesia_general License: NAP4 Available at: https://www.rcoa.ac.uk/research/research-projects/national-audit-projects-naps/nap4 This is a citation reference for the NAP4 guideline 'NAP4 Royal College of Anaesthetists 4th National Audit Project major complications of airway management in the UK' published in 2011. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: anesthesia_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

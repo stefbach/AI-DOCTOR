@@ -1,7 +1,7 @@
 {
  "source": "ICAO",
  "generated_at": "2026-05-09T18:03:38Z",
- "total_documents": 1,
+ "total_documents": 3,
  "documents": [
   {
    "id": "ICAO-FATIGUE-001",
@@ -41,6 +41,56 @@
     {
      "chunk_index": 4,
      "content": "2018 opment of Fatigue-Stress Measurement Technique and DB, 3. Craig PA. The killing zone: How and Why Pilots Die, New KAIST. 1998. York, NY McGraw-Hill. 2001. 21. Kim HS. The effect of Different Types of Shift Work on the 4. ICAO. Fatigue Risk Management System (FRMS), ICAO An- Sleep and Body Temperature of Circadian Rhythm, Seoul nex 6 part 1. 2010. University. 1992. 5. EASA. Draft Opinion of the European Aviation Safety 22. Kim DS. Optimal Application of Pilot Biometric Signals to Agency for a Commission Regulation Establishing the Im- Field, ROKAF Report of Combat Experiment Task. 2013. plementing Rules on Flight and Duty Time Limitations and 23. ICAO. Doc 9966, Manual for the Oversight of Fatigue Man- Rest Requirements for Commercial Air Transport(CAT) with agement Approaches. 2016. Aeroplanes, Technical Report EASA NPA 2010-14. 2010. 24. IATA. Fatigue Management Guide for Airline Operators. 6. IATA. Flight &Duty Time Limitations Fatigue Risk Manage- 2015. ment. 2009. 25. FAA. Fatigue Risk Management Systems for Aviation Safety. 7. KCA. Aviation Statistics. 2017. FAA AC 120-103A. 2013. 60"
+    }
+   ]
+  },
+  {
+   "id": "ICAO-MED-001",
+   "source": "ICAO",
+   "title": "ICAO Manual of Civil Aviation Medicine 3rd Edition",
+   "year": "2012",
+   "page_url": "https://www.icao.int/publications/Documents/8984_cons_en.pdf",
+   "pdf_url": "https://www.icao.int/publications/Documents/8984_cons_en.pdf",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "aviation_certification",
+   "priority": "high",
+   "sha256": "fc70d2901cfa034213b4ce2038a3b48ac870ebf45d97bc21589f33522f5e67d3",
+   "size_bytes": 763,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 763,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ICAO Manual of Civil Aviation Medicine 3rd Edition Source: ICAO Year: 2012 Domain: aviation_certification License: Proprietary Available at: https://www.icao.int/publications/Documents/8984_cons_en.pdf This is a citation reference for the ICAO guideline 'ICAO Manual of Civil Aviation Medicine 3rd Edition' published in 2012. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: aviation_certification. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ICAO-INFLIGHT-001",
+   "source": "ICAO",
+   "title": "ICAO Annex 1 Personnel Licensing Medical Provisions",
+   "year": "2018",
+   "page_url": "https://www.icao.int/Pages/default.aspx",
+   "pdf_url": "https://www.icao.int/Pages/default.aspx",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "aviation_certification",
+   "priority": "medium",
+   "sha256": "bfc7ca1fe34dfa9c3816b45648121f9373598dee618a99407fc39b3168d59c98",
+   "size_bytes": 744,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 744,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ICAO Annex 1 Personnel Licensing Medical Provisions Source: ICAO Year: 2018 Domain: aviation_certification License: Proprietary Available at: https://www.icao.int/Pages/default.aspx This is a citation reference for the ICAO guideline 'ICAO Annex 1 Personnel Licensing Medical Provisions' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: aviation_certification. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "BNFc",
  "generated_at": "2026-05-09T14:48:37Z",
- "total_documents": 3,
+ "total_documents": 4,
  "documents": [
   {
    "id": "BNFc-001",
@@ -127,6 +127,31 @@
     {
      "chunk_index": 10,
      "content": "2005;17(2):95–105. cation errors in health-care settings. Expert Opin Drug Saf. 17. Kastner M, Bhattacharyya O, Hayden L, Makarski J, Estey E, Durocher L, et al. Guideline uptake is influenced by six imple- mentability domains for creating and communicating guidelines: 400 M. D. Jones et al. a realist review. J Clin Epidemiol. 2015;68(5):498–509. https://​ 26. NHS England. National patient safety incident reports. 2022. doi.​org/​10.​1016/j.​jclin​epi.​2014.​12.​013. Available at: https://​www.​engla​nd.​nhs.​uk/​patie​nt-​safety/​natio​ 18. Raynor DK, Knapp P, Silcock J, Parkinson B, Feeney K. “User- nal-​patie​nt-​safety-​incid​ent-​repor​ts/ testing” as a method for testing the fitness-for-purpose of written 27. Jones MD, Franklin BD, Watson MC, Raynor DK. User testing to medicine information. Patient Educ Couns. 2011;83(3):404–10. improve retrieval and comprehension of information in guidelines https://​doi.​org/​10.​1016/j.​pec.​2011.​03.​016. to improve medicines safety. J Patient Saf. 2020;18(1):e172–9. 19. Raynor DK, Veene PD, Bryant D. The effectiveness of the Sum- https://​doi.​org/​10.​1097/​PTS.​00000​00000​000723. mary of Product Characteristics (SmPC) and recommendations for 28. Wang W, Choi D, Yu CH. Effective web-based clinical practice improvement. Ther Innov Regul Sci. 2013;48(2):255–65. https://​ guidelines resources: recommendations from a mixed methods doi.​org/​10.​1177/​21684​79013​501311. usability study. BMC Prim Care. 2023;24(1):29. https://​doi.​org/​ 20. Verhoeven F, Steehouder MF, Hendrix RMG, Van Gemert- 10.​1186/​s12875-​023-​01974-1. Pijnen JEWC. From expert-driven to user-oriented communi- 29. Wong E, Taylor Z, Thompson J, Tuthill D. A simplified gen- cation of infection control guidelines. Int J Hum-Comput St. tamicin dosing chart is quicker and more accurate for nurse verifi- 2010;68(6):328–43. https://​doi.​org/​10.​1016/j.​ijhcs.​2009.​07.​003. cation than the BNFc. Arch Dis Child. 2009;94(7):542–5. https://​ 21. Jones MD, Franklin BD, Watson MC, Raynor DK. User testing to doi.​org/​10.​1136/​adc.​2007.​137026. improve retrieval and comprehension of information in guidelines 30. Franklin BD, Birch S, Savage I, Wong I, Woloshynowych M, to improve medicines safety. J Patient Saf. 2022;18(1):e172–9. Jacklin A, et al. Methodological variability in detecting prescrib- https://​doi.​org/​10.​1097/​PTS.​00000​00000​000723. ing errors and consequences for the evaluation of interventions. 22. Jones MD, McGrogan A, Raynor DKT, Watson MW, Franklin Pharmacoepidemiol Drug Saf. 2009;18(11):992–9. https://d​ oi.o​ rg/​ BD. User-testing guidelines to improve the safety of intrave- 10.​1002/​pds.​1811. nous medicines administration: a randomised in-situ simulation 31. Westbrook JI, Li L, Lehnbom EC, Baysari MT, Braithwaite J, study. BMJ Qual Saf. 2020;30:17–26. https://​doi.​org/​10.​1136/​ Burke R, et al. What are incident reports telling us? A comparative bmjqs-​2020-​010884. study at two Australian hospitals of medication errors identified 23. Jones MD, Franklin BD, Raynor DK, Thom H, Watson MC, at audit, detected by staff and reported to an incident system. Int J Kandiyali R. Costs and cost-effectiveness of user-testing of health Qual Health Care. 2015;27(1):1–9. https://d​ oi.o​ rg/1​ 0.1​ 093/i​ ntqhc/​ professionals’ guidelines to reduce the frequency of intravenous mzu098. medicines administration errors by nurses in the United King- 32. Sari AB, Sheldon TA, Cracknell A, Turnbull A. Sensitiv- dom: a probabilistic model based on voriconazole administration. ity of routine system for reporting patient safety incidents in Appl Health Econ. 2022;20(1):91–104. https://​doi.​org/​10.​1007/​ an NHS hospital: retrospective patient case note review. BMJ. s40258-​021-​00675-z. 2007;334(7584):79. https://​doi.​org/​10.​1136/​bmj.​39031.​507153.​ 24. Privitera MB, editor. Applied human factors in medical device AE. design. Academic Press; 2019. 25. Lane R, Stanton NA, Harrison D. Applying hierarchical task analysis to medication administration errors. Appl Ergon. 2006;37(5):669–79. https://d​ oi.o​ rg/1​ 0.1​ 016/j.a​ pergo.2​ 005.0​ 8.0​ 01."
+    }
+   ]
+  },
+  {
+   "id": "BNFc-002",
+   "source": "BNFc",
+   "title": "BNFc Pediatric drug monographs and dosing",
+   "year": "2024",
+   "page_url": "https://bnfc.nice.org.uk/drug/",
+   "pdf_url": "https://bnfc.nice.org.uk/drug/",
+   "license": "Crown Copyright",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_pediatric",
+   "priority": "high",
+   "sha256": "47f75cd7c7da71af69f949a195659dbd327c143d86cf78a8ca82ab603f83d0c9",
+   "size_bytes": 703,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 703,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BNFc Pediatric drug monographs and dosing Source: BNFc Year: 2024 Domain: drug_pediatric License: Crown Copyright Available at: https://bnfc.nice.org.uk/drug/ This is a citation reference for the BNFc guideline 'BNFc Pediatric drug monographs and dosing' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

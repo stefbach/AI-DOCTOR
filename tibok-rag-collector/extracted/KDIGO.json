@@ -1,7 +1,7 @@
 {
  "source": "KDIGO",
  "generated_at": "2026-05-02T14:08:07Z",
- "total_documents": 70,
+ "total_documents": 72,
  "documents": [
   {
    "id": "KDIGO-001",
@@ -9054,6 +9054,56 @@
     {
      "chunk_index": 1,
      "content": "was 4.9%. Conclusions TraceOrg, a publicly available web-based tool, automatically measured kidney, liver, and cyst volumes from abdominal MRI in ADPKD with high accuracy compared with manual segmentations. Podcast This article contains a podcast at https://dts.podtrac.com/redirect.mp3/www.asn-online.org/media/podcast/JASN/2026_02_03_ASN0000000904.mp3 ADPKD cystic kidney kidney kidney disease kidney volume liver cysts polycystic kidney disease cystic kidney disease National Institute of Diabetes and Digestive and Kidney Diseases 1U54DK144866-01 Martin R. Prince Italian Ministry of University and Research 2022B23JT5 Not Applicable PRIN (PROGETTI DI RICERCA DI RILEVANTE INTERESSE NAZIONALE) 2022 Not Applicable European Union − Next generation EU PNRR M4.C2.1.1 Not Applicable pmc-exception-type EMBARGO pmc-status-qastatus 4 pmc-status-live no pmc-status-embargo yes pmc-status-released yes pmc-prop-open-access yes pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf yes pmc-prop-has-supplement no pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc no pmc-license-ref CC BY-NC-ND OPEN-ACCESS TRUE SDC T Read-along YES"
+    }
+   ]
+  },
+  {
+   "id": "KDIGO-TX-BKV-001",
+   "source": "KDIGO",
+   "title": "KDIGO Recommendations on BK Polyomavirus in Transplant",
+   "year": "2024",
+   "page_url": "https://kdigo.org/guidelines/",
+   "pdf_url": "https://kdigo.org/guidelines/",
+   "license": "KDIGO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "nephrology_transplant",
+   "priority": "medium",
+   "sha256": "d72cecf83a5a2d4f770c40542ceaef50e124fb25b9b69109e2fc536284e27c55",
+   "size_bytes": 734,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 734,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: KDIGO Recommendations on BK Polyomavirus in Transplant Source: KDIGO Year: 2024 Domain: nephrology_transplant License: KDIGO Available at: https://kdigo.org/guidelines/ This is a citation reference for the KDIGO guideline 'KDIGO Recommendations on BK Polyomavirus in Transplant' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: nephrology_transplant. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "KDIGO-RRT-001",
+   "source": "KDIGO",
+   "title": "KDIGO clinical practice guideline acute kidney injury and renal replacement therapy ICU",
+   "year": "2012",
+   "page_url": "https://kdigo.org/guidelines/acute-kidney-injury/",
+   "pdf_url": "https://kdigo.org/guidelines/acute-kidney-injury/",
+   "license": "KDIGO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_critical_care",
+   "priority": "high",
+   "sha256": "8453876044767f1745a8cb044beaa9e2dd291686b64a966159753e14f6271548",
+   "size_bytes": 2210,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2206,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Comparative Analysis of Fixed Versus Variable Rates of Regional Citrate Anticoagulation in Critically Ill Adult Patients on Continuous Kidney Replacement Therapy. The Kidney Disease Improving Global Outcomes (KDIGO) Clinical Practice Guideline recommends regional citrate anticoagulation during continuous kidney replacement therapy (CKRT) to prolong circuit lifespan. Limited data directly compare citrate dosing strategies. Evaluate effectiveness and safety of fixed (FIX) versus variable (VAR) citrate rates in CKRT. This single-center, retrospective study evaluated adult ICU patients (≥18 years) receiving CKRT with regional citrate anticoagulation for ≥24 hours between July 2018 and June 2024. Patients with COVID-19 or whose citrate rate was inconsistent with the prescribed order were excluded. FIX versus VAR groups were case-matched based on ICU service, citrate duration, and age. The primary outcome was time from citrate initiation to first filter change. Secondary outcomes included hyper- and hypocalcemia, citrate toxicity, bleeding, and thrombosis. Of 534 patients screened, 48 (24 FIX, 24 VAR) met inclusion criteria and matched closely in ICU service, citrate duration, and age. Time to first CKRT filter change was similar, 1.5 [0.7, 3.0] FIX versus 1.9 [0.5, 3.1] VAR, days, P = 0.89. Fewer hypocalcemia episodes were associated with FIX (72 vs 141 VAR, episodes, P < 0.0001), as was less calcium supplementation (36 FIX vs 142 VAR, grams, P = 0.0113). Bleeding and thrombosis events were similar between groups, 33% FIX vs 50% VAR ( P = 0.19) and 25% FIX vs 13% VAR ( P = 0.46), respectively. Fixed and variable citrate rates showed similar effectiveness in CKRT. However, the fixed rate was associated with less hypocalcemia and calcium supplementation without a significant increase in bleeding or thrombosis. These findings contribute new comparative data to help guide citrate anticoagulation strategies and suggest that a fixed rate may help minimize electrolyte disturbances and simplify supplementation needs. Given that the study was potentially underpowered, further studies are needed to validate these findings and guide the development of optimal citrate rate guidelines."
     }
    ]
   }

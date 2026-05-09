@@ -1,7 +1,7 @@
 {
  "source": "UHMS",
  "generated_at": "2026-05-09T15:10:20Z",
- "total_documents": 12,
+ "total_documents": 14,
  "documents": [
   {
    "id": "UHMS-CO-001",
@@ -792,6 +792,56 @@
     {
      "chunk_index": 2,
      "content": "action, while also highlighting the potential value of multimodal escalation in delayed cases. Conclusions This case highlights how prompt recognition of vascular compromise and the coordinated use of a multimodal rescue strategy can significantly alter the course of an otherwise severe complication following nonsurgical rhinoplasty. Even with a delayed presentation, the combination of repeated high-dose hyaluronidase, thermal vasodilation, low-level laser therapy, hyperbaric oxygen, and PDT contributed to full tissue recovery and prevented lasting deformity. The favorable outcome reinforces the importance of practitioner preparedness, patient education, and clear emergency protocols to ensure timely intervention. Ultimately, this report underscores that, while vascular events remain a serious risk, structured and comprehensive management can restore tissue viability and preserve both function and aesthetic integrity. Prospective studies and complication registries will be essential to better define optimal treatment algorithms and evaluate the reproducibility of these outcomes."
+    }
+   ]
+  },
+  {
+   "id": "UHMS-DCI-001",
+   "source": "UHMS",
+   "title": "UHMS Undersea and Hyperbaric Medical Society indications for hyperbaric oxygen therapy decompression illness",
+   "year": "2019",
+   "page_url": "https://www.uhms.org/resources/hbo-indications.html",
+   "pdf_url": "https://www.uhms.org/resources/hbo-indications.html",
+   "license": "UHMS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "emergency_environmental",
+   "priority": "medium",
+   "sha256": "844ee5cd980e7cbbb8a7a557c1e9a3ce8157162533b33133a21503816c2fb265",
+   "size_bytes": 865,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 865,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: UHMS Undersea and Hyperbaric Medical Society indications for hyperbaric oxygen therapy decompression illness Source: UHMS Year: 2019 Domain: emergency_environmental License: UHMS Available at: https://www.uhms.org/resources/hbo-indications.html This is a citation reference for the UHMS guideline 'UHMS Undersea and Hyperbaric Medical Society indications for hyperbaric oxygen therapy decompression illness' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: emergency_environmental. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "UHMS-HBO-001",
+   "source": "UHMS",
+   "title": "UHMS Hyperbaric Oxygen Therapy Indications 14th Edition",
+   "year": "2019",
+   "page_url": "https://www.uhms.org/resources/hbo-indications.html",
+   "pdf_url": "https://www.uhms.org/resources/hbo-indications.html",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "diving_hbo",
+   "priority": "high",
+   "sha256": "9b2bd41087b8e80d0a72557d629f253dc2a63d70752625add998d083ae525554",
+   "size_bytes": 740,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 740,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: UHMS Hyperbaric Oxygen Therapy Indications 14th Edition Source: UHMS Year: 2019 Domain: diving_hbo License: Proprietary Available at: https://www.uhms.org/resources/hbo-indications.html This is a citation reference for the UHMS guideline 'UHMS Hyperbaric Oxygen Therapy Indications 14th Edition' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: diving_hbo. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

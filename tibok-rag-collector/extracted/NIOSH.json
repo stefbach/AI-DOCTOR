@@ -1,7 +1,7 @@
 {
  "source": "NIOSH",
  "generated_at": "2026-05-09T16:05:53Z",
- "total_documents": 6,
+ "total_documents": 7,
  "documents": [
   {
    "id": "NIOSH-OCC-005",
@@ -330,6 +330,31 @@
     {
      "chunk_index": 4,
      "content": "actions and expectations of others. Specifically, the high score on the Interpersonal Modeling subscale (see Additional File 4) suggests that nurses are more likely to use PPE when coworkers demonstrate correct practices. In contrast, Interpersonal Norms were moderate, indicating that perceived social expectations had a lesser impact than direct modeling. This agrees with findings by Polovich and Clark [ ] and Callahan et al. [ ], who reported higher PPE use when coworkers consistently adhered to recommended precautions. A low perceived conflict between PPE use and patient care was reported, suggesting that nurses were able to deliver care without compromising their safety, likely due to adequate staffing levels. No significant associations were found between compliance and demographic characteristics, except for oncology certification and receipt of on-the-job training. In contrast, Chen et al. [ ] found higher compliance among more experienced nurses and those working in cancer departments. Furthermore, Abu Sharour et al. [ ] reported higher compliance among younger nurses, who may be more eager to apply best practices. Although the study was conducted in the West Bank of Palestine, the findings may be transferable to other low- and middle-income countries with similar healthcare systems and resource constraints. Limitations The study had several limitations. First, it focused exclusively on registered nurses who handle chemotherapy, excluding other healthcare and non-healthcare workers who may also be at risk. Second, the study settings were anonymized, limiting comparisons across hospitals. Third, data were not collected from the Gaza Strip, which restricts the generalizability of the findings to all regions of Palestine. Fourth, administering the questionnaire in English among an Arabic-speaking population may have influenced participant responses. Finally, the study used bivariate correlation. Although multivariable models could have provided an understanding of the independent effects of each variable while controlling for confounding factors, such analyses were beyond the scope of this study. Recommendations Nursing programs in Palestine should allocate additional instructional hours to oncology and chemotherapy safety to better prepare graduates for clinical practice. Hospital managers are encouraged to conduct compliance audits, assign experienced nurses to work with less experienced one, and provide individualized performance feedback. Currently, no registry tracks nurses’ chemotherapy exposure or links exposure to negative outcomes, which limits the ability to detect related health effects. Longitudinal and epidemiological studies are recommended to evaluate potential toxicities. Further investigation should incorporate broader and more varied samples to improve generalizability. Additionally, future studies could extend the analysis of this study by using multivariable approaches to examine the combined and independent effects of multiple factors on PPE compliance and related outcomes. Conclusion Occupational exposure to chemotherapy poses a significant risk to healthcare staff, particularly nurses. Proper use of PPE is essential to reduce the risk. This study found that oncology nurses in Palestine demonstrated moderate PPE compliance, indicating ongoing vulnerability to toxic exposure. Key influencing factors included insufficient knowledge, perceived barriers, low self-efficacy for using PPE, moderate perceived risk, and a moderate workplace safety climate. Improving compliance requires continuing education, participation in available training programs, and developing a supportive workplace culture through routine monitoring and supervision. The findings provide a foundation for future research and can guide policymakers and healthcare leaders in strengthening chemotherapy safety standards and monitoring compliance across Palestinian healthcare settings. Electronic supplementary material Below is the link to the electronic supplementary material. Supplementary Material 1"
+    }
+   ]
+  },
+  {
+   "id": "NIOSH-OCC-007",
+   "source": "NIOSH",
+   "title": "NIOSH Latex Allergy A Prevention Guide",
+   "year": "2015",
+   "page_url": "https://www.cdc.gov/niosh/docs/98-113/",
+   "pdf_url": "https://www.cdc.gov/niosh/docs/98-113/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "occupational_specific_disease",
+   "priority": "medium",
+   "sha256": "82ff6526527eb9f560b5301275fbadac7b1b0a47f736a05a00379243cff25dc7",
+   "size_bytes": 1072,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1072,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:12Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "[Latex gloves dermatitis in health care workers]. With regard to health care workers the irritative contact dermatitis represents about the 80% of all the dermopathies in sanitary staff whereas the allergic contact dermatitis covers approximately the 20% of the professional dermatoses. In our study 4 cases of allergy to latex in hospital nurses are presented; the clinical history is described for each of them as well as the resulting judgment of suitability to the specific work. In general population the allergy to latex is estimated to be approximately 1-6%; in sanitary staff it rises to 5-12%. We have to observe that not all the sensitive subjects show symptoms of allergy. Actually the 4 cases described represent less than 1% of the surveyed group. The sensitization is likely to be so reduced also thanks to the application of preventive guide-lines such as the one proposed by NIOSH. In Italy the criteria in preventing allergic reactions to latex are illustrated in a consensus document issued by a study-team from Italian Association of the Health Workers."
     }
    ]
   }

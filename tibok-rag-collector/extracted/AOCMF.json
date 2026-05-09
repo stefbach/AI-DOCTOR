@@ -1,7 +1,7 @@
 {
  "source": "AOCMF",
  "generated_at": "2026-05-09T14:33:22Z",
- "total_documents": 3,
+ "total_documents": 6,
  "documents": [
   {
    "id": "AOCMF-MAND-001",
@@ -299,6 +299,81 @@
     {
      "chunk_index": 45,
      "content": "* Dr. Karina Vel E. Dizon1 Dr. Mark Gil A. Magboo1 Dr. Louie Aldwin D. Roque8 Dr. Fery Mai J. Rafanan1 Dr. Bianca Denise E. Edora8 Dr. Laurice Ann C. Canta1 Dr. Jesusa Santos-Perez8 *Original GWG; the rest contributed after 2017 1 East Avenue Medical Center, 2University of Santo Tomas Hospital, 3University of the Philippines – Philippine General Hospital, 4Quezon City General Hospital, 5Manila Central University – Filemon D. Tanchuco Medical Foundation Hospital, 6Rizal Medical Center, 7Univsersity of the East Ramon Magsaysay Memorial Medical Center Inc. 8Jose R. Reyes Memorial Medical Center 42 Philippine Journal Of Otolaryngology-Head And Neck Surgery Philippine Journal Of Otolaryngology-Head And Neck Surgery Supplement Issue November 2021 APPENDIX C: DELPHI PROCESS INSTRUMENT C. Nasotracheal intubation is the preferred route of anesthesia in patients diagnosed with isolated mandibular body fracture. For each item, please encircle the whole number (between 1-9) that is closest to your In the presence of contraindications to nasotracheal intubation, submental opinion. intubation or tracheostomy may be performed. 1. HISTORY, CLINICAL PRESENTATION AND DIAGNOSIS Clinicians should consider a presumptive diagnosis of mandibular fracture in adults presenting with a history of traumatic injury to the jaw plus a positive tongue blade test, and any of the following physical findings: malocclusion, trismus, tenderness on jaw closure, broken tooth and step deformity. 4. TREATMENT (SURGICAL) A. Observation with a soft diet may serve as management for patients diagnosed with favorable isolated nondisplaced and nonmobile mandibular body fracture with unchanged pre - traumatic occlusion. 2. IMAGING A. Clinicians may request for panoramic x-ray as the initial imaging tool in evaluating patients with a presumptive clinical diagnosis of mandibular fractures. A. Closed reduction with immobilization by maxillomandibular fixation for 4-6 weeks may be considered in patients with minimally displaced favorable isolated mandibular body fracture with stable dentition, good nutrition and who are willing to comply with post-procedure care that may affect oral A. In a setting where panoramic radiography is not available, clinicians may hygiene, diet modifications, appearance, oral health and functional concerns recommend plain mandibular radiography among patients with presumptive (eating, swallowing and speech). clinical diagnosis of mandibular fracture. B. If available, non-contrast Facial CT Scan may be obtained for the assessment B. a. Open reduction and internal fixation using Titanium plates and screws of mandibular fractures. should be performed in isolated displaced unfavorable and unstable mandibular body fracture. 3. TREATMENT (MEDICAL) A. Isolated mandibular body fractures should be temporarily immobilized/ splinted with a figure-of-eight bandage until definitive surgical management b. In patients with isolated displaced unfavorable and unstable mandibular can be performed or while initiating transport during emergency situations. body fracture who cannot afford or avail of titanium plates, transosseous wiring with maxillomandibular fixation is an option. A. Clinicians should routinely evaluate pain in patients with isolated mandibular body fractures using a numerical rating pain scale or visual pain analog scale; c. Intraoperative MMF may not be routinely needed prior to reduction and analgesics should be routinely offered to patients with a numerical rating pain internal fixation of isolated displaced unfavorable and unstable mandibular scale score or VAS of at least 4/10. body fracture. Patients may be initially managed with Paracetamol and a mild opioid with or without an adjuvant analgesic. Reassessment should be done and adequate analgesia should be given until the numerical rating pain scale score or VAS is 3/10 at most. 5. PREVENTION AND PROMOTION A. Clinicians should advocate for compliance with road traffic safety laws (speed limit, anti-drunk driving, seatbelt and helmet use) for the prevention of motor vehicle, cycling and pedestrian accidents and maxillofacial injuries. B. Prophylactic antibiotics should be given to adult patients with isolated mandibular body fractures with concomitant mucosal or skin opening with or without direct visualization of bone fragments. In patients without mucosal or skin lacerations, prophylactic antibiotics can be given 1 hour prior to surgery and up to 24 hours post op. A. Clinicians should play a positive role in the prevention of interpersonal and Penicillin is the drug of choice while Clindamycin may be used as an alternative collective violence as well as the settings in which violence occurs in order to for patients in whom Penicillin is contraindicated. avoid injuries in general and mandibular fractures in particular. Philippine Journal Of Otolaryngology-Head And Neck Surgery 43 Philippine Journal Of Otolaryngology-Head And Neck Surgery Supplement Issue November 2021 44 Philippine Journal Of Otolaryngology-Head And Neck Surgery"
+    }
+   ]
+  },
+  {
+   "id": "AOCMF-MAXI-001",
+   "source": "AOCMF",
+   "title": "AOCMF clinical practice guideline maxillary and Le Fort fractures",
+   "year": "2020",
+   "page_url": "https://www.aofoundation.org/cmf/maxilla",
+   "pdf_url": "https://www.aofoundation.org/cmf/maxilla",
+   "license": "AOCMF",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "maxillofacial_trauma",
+   "priority": "high",
+   "sha256": "0b518ba1d2e68f274f4ba333e18437c4eeef0806d14914320f208fd5d9d3293c",
+   "size_bytes": 765,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 765,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AOCMF clinical practice guideline maxillary and Le Fort fractures Source: AOCMF Year: 2020 Domain: maxillofacial_trauma License: AOCMF Available at: https://www.aofoundation.org/cmf/maxilla This is a citation reference for the AOCMF guideline 'AOCMF clinical practice guideline maxillary and Le Fort fractures' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: maxillofacial_trauma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AOCMF-ZYG-001",
+   "source": "AOCMF",
+   "title": "AOCMF clinical practice guideline zygomaticomaxillary complex fractures",
+   "year": "2020",
+   "page_url": "https://www.aofoundation.org/cmf/zygoma",
+   "pdf_url": "https://www.aofoundation.org/cmf/zygoma",
+   "license": "AOCMF",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "maxillofacial_trauma",
+   "priority": "high",
+   "sha256": "08e6ceaf50e57882c6a45d9ccd7d3bcc3a545a5f6cf91634184c885d52340cfb",
+   "size_bytes": 776,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 776,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AOCMF clinical practice guideline zygomaticomaxillary complex fractures Source: AOCMF Year: 2020 Domain: maxillofacial_trauma License: AOCMF Available at: https://www.aofoundation.org/cmf/zygoma This is a citation reference for the AOCMF guideline 'AOCMF clinical practice guideline zygomaticomaxillary complex fractures' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: maxillofacial_trauma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AOCMF-ORBFLOOR-001",
+   "source": "AOCMF",
+   "title": "AOCMF clinical practice guideline orbital floor reconstruction",
+   "year": "2020",
+   "page_url": "https://www.aofoundation.org/cmf/orbit",
+   "pdf_url": "https://www.aofoundation.org/cmf/orbit",
+   "license": "AOCMF",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "maxillofacial_trauma",
+   "priority": "high",
+   "sha256": "88eb005f14d32c8be2bf6d4465f0aedbf3ccd977f9a2cd744a4c7446be3bd648",
+   "size_bytes": 757,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 757,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AOCMF clinical practice guideline orbital floor reconstruction Source: AOCMF Year: 2020 Domain: maxillofacial_trauma License: AOCMF Available at: https://www.aofoundation.org/cmf/orbit This is a citation reference for the AOCMF guideline 'AOCMF clinical practice guideline orbital floor reconstruction' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: maxillofacial_trauma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

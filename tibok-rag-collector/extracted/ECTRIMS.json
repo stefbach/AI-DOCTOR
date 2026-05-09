@@ -1,7 +1,7 @@
 {
  "source": "ECTRIMS",
  "generated_at": "2026-05-09T08:27:42Z",
- "total_documents": 3,
+ "total_documents": 4,
  "documents": [
   {
    "id": "ECTRIMS-MS-001",
@@ -151,6 +151,31 @@
     {
      "chunk_index": 6,
      "content": "None. Conflicts of interest Fabian Föttinger has participated in meetings sponsored by, received speaker honoraria or travel funding from Novartis, Biogen, Merck and Neuraxpharm. Nik Krajnc has participated in meetings sponsored by, received speaker honoraria or travel funding from Alexion, BMS/Celgene, Janssen-Cilag, Merck, Neuraxpharm, Novartis, Roche and Sanofi-Genzyme and held a grant for a Multiple Sclerosis Clinical Training Fellowship Programme from the European Committee for Treatment and Research in Multiple Sclerosis (ECTRIMS). Gabriel Bsteh has participated in meetings sponsored by, received speaker honoraria or travel funding from Biogen, BMS, Heidelberg Engineering, Janssen, Lilly, Medwhizz, Merck, Neuraxpharm, Novartis, Roche, Sanofi, Teva and Zeiss, and received honoraria for consulting Adivo Associates, Biogen, BMS, Janssen, Merck, Novartis, Roche, Sanofi and Teva. He has received unrestricted research grants from BMS and Novartis. He serves on the Executive Committee of the European Committee for Treatment and Research in Multiple Sclerosis (ECTRIMS) and the Board of Directors of the International Multiple Sclerosis VisualSystem Consortium (IMSVISUAL)."
+    }
+   ]
+  },
+  {
+   "id": "ECTRIMS-MS-004",
+   "source": "ECTRIMS",
+   "title": "MAGNIMS ECTRIMS EAN guideline on use of MRI in monitoring of MS",
+   "year": "2021",
+   "page_url": "https://www.thelancet.com/journals/laneur/article/PIIS1474-4422(21)00270-2",
+   "pdf_url": "https://www.thelancet.com/journals/laneur/article/PIIS1474-4422(21)00270-2",
+   "license": "ECTRIMS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_ms",
+   "priority": "high",
+   "sha256": "092a7dd05ddb43ff90bec1f4a542da663e59e761e1fe3e559b3bb71f7a4121ce",
+   "size_bytes": 785,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 785,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:05Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: MAGNIMS ECTRIMS EAN guideline on use of MRI in monitoring of MS Source: ECTRIMS Year: 2021 Domain: neurology_ms License: ECTRIMS Available at: https://www.thelancet.com/journals/laneur/article/PIIS1474-4422(21)00270-2 This is a citation reference for the ECTRIMS guideline 'MAGNIMS ECTRIMS EAN guideline on use of MRI in monitoring of MS' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_ms. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

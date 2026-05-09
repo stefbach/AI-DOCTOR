@@ -1,7 +1,7 @@
 {
  "source": "Health-Canada",
  "generated_at": "2026-05-09T13:44:03Z",
- "total_documents": 5,
+ "total_documents": 6,
  "documents": [
   {
    "id": "HC-DRUG-005",
@@ -249,6 +249,31 @@
     {
      "chunk_index": 8,
      "content": "health ministries, regulators, and community organisations. Moreover, reporting platforms and materials require simplification using user-centered design, plain language, local translations, and visual aids to improve accessibility. Furthermore, integration of ADR reporting into routine healthcare interactions, supported by trained frontline providers and embedded electronic prompts, is essential. Robust feedback mechanisms acknowledging patient contributions should be established within reporting systems. Governments must also play a role in promoting digital inclusion by expanding infrastructure and adapting successful mobile reporting applications such as the SFDA-ADR App (Saudi Arabia), the PVPI App (India), and the Yellow Card App (UK) for equitable access. Finally, further research is needed to evaluate culturally adapted interventions, digital literacy programmes, provider-patient communication models, and the specific needs of vulnerable subpopulations, especially the elderly, rural communities, and chronic disease patients, to develop the best pharmacovigilance strategies. Supplementary Material Supplementary Material Quality Appraisal Tool.docx"
+    }
+   ]
+  },
+  {
+   "id": "HC-DRUG-004",
+   "source": "Health-Canada",
+   "title": "Health Canada Recalls and Safety Alerts database",
+   "year": "2024",
+   "page_url": "https://recalls-rappels.canada.ca/en",
+   "pdf_url": "https://recalls-rappels.canada.ca/en",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_shortage_recall",
+   "priority": "high",
+   "sha256": "1960b975d714fe2d2ebe896022195e9a3858fbb86eb0801aef3301de65b727e5",
+   "size_bytes": 1750,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1750,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:59Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Anaesthesia equipment safety in Canada: the role of government regulation. Medical device problems as detected by the Health Protection Branch (HPB) of Health and Welfare Canada were studied in order to examine the frequency and safety priority of problems in the subgroup of anaesthesia devices. Data pertaining to the time period from April 1, 1987 to November 30, 1992 were gathered from the Medical Devices Notification Database and the DAFFY Reporting System. The Medical Devices Notification Database contains all notifications for newly marketed medical devices in Canada and the DAFFY Reporting System keeps record of all submitted problem reports and manufacturer recalls along with their designated safety priority status. When an important safety hazard is associated with a medical device as determined from information submitted to HPB, an Alert-Medical Devices may be issued to inform hospitals and health care professionals of the problem. During the studied time period, the percentages of problem reports and recalls as well as Alerts were compared with the percentage of newly marketed anaesthesia devices. It was found that although only 2.3% of the newly marketed medical devices were classified as anaesthesia devices, 8.6% of all problem reports/recalls and 37.5% of all Alerts originated from the field of anaesthesia devices. Comparison of the percentages of problem reports/recalls (8.6%) and Alerts (37.5%) with the percentage of marketed devices for anaesthesia (2.3%) showed differences (P < 0.05). As well, the percentage of class I priority (the highest safety priority) problem reports/recalls for anaesthesia devices was 10.2% compared with 4.9% for non-anaesthesia devices (P < 0.05).(ABSTRACT TRUNCATED AT 250 WORDS)"
     }
    ]
   }

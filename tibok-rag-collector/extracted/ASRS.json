@@ -1,7 +1,7 @@
 {
  "source": "ASRS",
  "generated_at": "2026-05-09T14:36:12Z",
- "total_documents": 3,
+ "total_documents": 5,
  "documents": [
   {
    "id": "ASRS-MH-001",
@@ -223,6 +223,56 @@
     {
      "chunk_index": 4,
      "content": "million (95%UI: 5.04 to 7.58) presented with MSVI globally. From 2000 to 2020, there was a reduction in the crude prevalence of age-related macular degeneration (AMD)-related blindness globally and an increase in AMD-related moderate and severe vision impairment. Supplementary information Supplemental Figure 1 Supplemental Figure 2 Supplemental Table 1 Supplementary material Supplementary Appendix"
+    }
+   ]
+  },
+  {
+   "id": "ASRS-RD-001",
+   "source": "ASRS",
+   "title": "ASRS clinical update on rhegmatogenous retinal detachment",
+   "year": "2022",
+   "page_url": "https://www.asrs.org/clinical/clinical-updates",
+   "pdf_url": "https://www.asrs.org/clinical/clinical-updates",
+   "license": "ASRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_retina",
+   "priority": "high",
+   "sha256": "7bb8514a0962810b067708c5c76c02b0a21f563e1b45130e45367222f2878bce",
+   "size_bytes": 752,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 752,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASRS clinical update on rhegmatogenous retinal detachment Source: ASRS Year: 2022 Domain: ophthalmology_retina License: ASRS Available at: https://www.asrs.org/clinical/clinical-updates This is a citation reference for the ASRS guideline 'ASRS clinical update on rhegmatogenous retinal detachment' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_retina. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASRS-RD-002",
+   "source": "ASRS",
+   "title": "ASRS preferences and trends survey on retinal detachment surgery",
+   "year": "2023",
+   "page_url": "https://www.asrs.org/clinical/pat-survey",
+   "pdf_url": "https://www.asrs.org/clinical/pat-survey",
+   "license": "ASRS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_retina",
+   "priority": "medium",
+   "sha256": "0c401fac41dd956673db1daba9f0adf5e3133060cd9ef8ec54fa9f53297ebafb",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASRS preferences and trends survey on retinal detachment surgery Source: ASRS Year: 2023 Domain: ophthalmology_retina License: ASRS Available at: https://www.asrs.org/clinical/pat-survey This is a citation reference for the ASRS guideline 'ASRS preferences and trends survey on retinal detachment surgery' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_retina. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "BSACI",
  "generated_at": "2026-05-09T14:22:52Z",
- "total_documents": 4,
+ "total_documents": 6,
  "documents": [
   {
    "id": "BSACI-ANA-001",
@@ -248,6 +248,56 @@
     {
      "chunk_index": 10,
      "content": "partly extrapolated from other chronic inflammatory and dermatologic conditions. Remote models facilitate structured symptom tracking, enable timely follow-up during treatment escalation, and improve access to specialist expertise. Experience gained in dermatology and allergy/immunology—accelerated by the COVID-19 pandemic—has demonstrated the feasibility and acceptability of telemedicine for chronic inflammatory and allergic conditions, offering a transferable framework for urticaria management. Robust data on clinical outcomes, safety, and cost-effectiveness specifically in chronic urticaria are still lacking. Consequently, its role should be interpreted with caution, particularly when considering broader implementation in routine clinical practice. Telemonitoring appears promising, particularly for patients receiving advanced therapies, where continuous assessment of disease control and treatment response is crucial, although further disease-specific validation is required. Nevertheless, telemedicine cannot fully replace face-to-face evaluation in urticaria in key clinical scenarios, including initial diagnosis or atypical presentations. Diagnostic accuracy still relies heavily on direct clinical inspection, and remote care carries inherent risks, including misclassification, technological variability, privacy concerns, and inequities related to digital literacy and access. Many innovative digital approaches remain experimental and lack validation through large, disease-specific clinical trials. Furthermore, regulatory, medico-legal, and infrastructural challenges continue to limit widespread implementation. Taken together, telemedicine should currently be regarded not as an alternative but as an integrated extension of conventional urticaria care. Hybrid models that combine remote monitoring with targeted in-person visits appear to offer the most balanced and effective strategy. Future research should prioritize high-quality randomized studies, standardized digital outcome measures, and robust economic evaluations specifically focused on urticaria. Parallel efforts in health policy, digital education, and platform certification will be essential to ensure safe, equitable, and sustainable integration of telemedicine into routine urticaria management. These considerations highlight the need for cautious, evidence-informed implementation of telemedicine in urticaria care. Importantly, much of the current evidence is not urticaria-specific and should therefore be interpreted with caution when applied to this condition."
+    }
+   ]
+  },
+  {
+   "id": "BSACI-PERI-001",
+   "source": "BSACI",
+   "title": "BSACI suspected perioperative anaphylaxis investigation and management",
+   "year": "2017",
+   "page_url": "https://www.bsaci.org/guidelines/",
+   "pdf_url": "https://www.bsaci.org/guidelines/",
+   "license": "BSACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_drug",
+   "priority": "high",
+   "sha256": "56f0b4697f63631d9dcbd31f3e211dfe2c2b9869a29132287a238490164012d4",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BSACI suspected perioperative anaphylaxis investigation and management Source: BSACI Year: 2017 Domain: allergology_drug License: BSACI Available at: https://www.bsaci.org/guidelines/ This is a citation reference for the BSACI guideline 'BSACI suspected perioperative anaphylaxis investigation and management' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: allergology_drug. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "BSACI-IG-001",
+   "source": "BSACI",
+   "title": "BSACI guideline investigation hypogammaglobulinaemia immunoglobulin testing",
+   "year": "2017",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/cea.13007",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/cea.13007",
+   "license": "BSACI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_immunology",
+   "priority": "high",
+   "sha256": "928d969e4748ca62fb6c83c88f7a296a19be6cff1cc74c1dc22448106d54166e",
+   "size_bytes": 786,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 786,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BSACI guideline investigation hypogammaglobulinaemia immunoglobulin testing Source: BSACI Year: 2017 Domain: lab_immunology License: BSACI Available at: https://onlinelibrary.wiley.com/doi/10.1111/cea.13007 This is a citation reference for the BSACI guideline 'BSACI guideline investigation hypogammaglobulinaemia immunoglobulin testing' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_immunology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

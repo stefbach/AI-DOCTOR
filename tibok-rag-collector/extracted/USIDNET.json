@@ -1,7 +1,7 @@
 {
  "source": "USIDNET",
  "generated_at": "2026-05-09T12:54:43Z",
- "total_documents": 2,
+ "total_documents": 8,
  "documents": [
   {
    "id": "USIDNET-PID-001",
@@ -158,6 +158,156 @@
     {
      "chunk_index": 13,
      "content": "Asthma Clin Immunol. 2016 May 17;12:23. https://doi.org/10. 38. Ghaini M, Jamee M, Mahdaviani SA, Mesdaghi M, 1186/s13223-016-0132-2. Eskandarzadeh S, Rae W, et al. The prevalence of atopic manifestations in 313 Iranian patients with inborn errors of 52. Kuijpers TW, Tool ATJ, van der Bijl I, de Boer M, van Houdt M, immunity. Int Arch Allergy Immunol. 2021;182(11):1122–1126. de Cuyper IM, et al. Combined immunodeﬁciency with severe https://doi.org/10.1159/000516596. inﬂammation and allergy caused by ARPC1B deﬁciency. J Allergy Clin Immunol. 2017 Jul;140(1):273–277. https://doi. 39. Lawrence MG, Barber JS, Sokolic RA, Garabedian EK, Desai AN, org/10.1016/j.jaci.2016.09.061. e10. O’Brien M, et al. Elevated IgE and atopy in patients treated for early-onset ADA-SCID. J Allergy Clin Immunol. 2013;132:1444– 53. Milner JD. PLAID: a Syndrome of complex patterns of disease 1446. https://doi.org/10.1016/j.jaci.2013.05.040. and unique phenotypes. J Clin Immunol. 2015;35:527–530. https://doi.org/10.1007/s10875-015-0177-x. 40. Hagl B, Heinz V, Schlesinger A, Spielberger BD, Sawalle- Belohradsky J, Senn-Rauh M, et al. Key ﬁndings to expedite the 54. Barzaghi F, Hernandez LC, Neven B, Ricci S, Kucuk ZY, diagnosis of hyper-IgE syndromes in infants and young Bleesing JJ, et al. Long-term follow-up of IPEX syndrome children. Pediatr Allergy Immunol. 2016;27:177–184. https:// patients after different therapeutic strategies: an international doi.org/10.1111/pai.12512. multicenter retrospective study. J Allergy Clin Immunol. 2018;141:1036–1049. https://doi.org/10.1016/j.jaci.2017.10. 41. Siegel AM, Stone KD, Cruse G, Lawrence MG, Olivera A, 041. Jung M, et al. Diminished allergic disease in patients with STAT3 mutations reveals a role for STAT3 signaling in mast cell 55. Bard S, Paravisini A, Aviles-Izquierdo JA, Fernandez-Cruz E, degranulation. J Allergy Clin Immunol. 2013;132:1388–1396. Sanchez Ramon S. Eczematous dermatitis in the setting of https://doi.org/10.1016/j.jaci.2013.08.045. hyper-IgE syndrome successfully treated with omalizumab. Arch Dermatol. 2008;144:1662–1663. https://doi.org/10.1001/ 42. Hox V, O’Connell MP, Lyons JJ, Sackstein P, Dimaggio T, archdermatol.2008.510. Jones N, et al. Diminution of signal transducer and activator of"
+    }
+   ]
+  },
+  {
+   "id": "USIDNET-CVID-001",
+   "source": "USIDNET",
+   "title": "USIDNET consensus on diagnosis and management of CVID",
+   "year": "2020",
+   "page_url": "https://usidnet.org/clinical-resources/",
+   "pdf_url": "https://usidnet.org/clinical-resources/",
+   "license": "USIDNET",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_pid",
+   "priority": "high",
+   "sha256": "346fc4b96619dac1d9d707c34f92dcacdd200be6e3576fc86039b3aa53991624",
+   "size_bytes": 736,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 736,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: USIDNET consensus on diagnosis and management of CVID Source: USIDNET Year: 2020 Domain: allergology_pid License: USIDNET Available at: https://usidnet.org/clinical-resources/ This is a citation reference for the USIDNET guideline 'USIDNET consensus on diagnosis and management of CVID' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: allergology_pid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "USIDNET-XLA-001",
+   "source": "USIDNET",
+   "title": "USIDNET consensus on management of X-linked agammaglobulinemia",
+   "year": "2019",
+   "page_url": "https://usidnet.org/clinical-resources/",
+   "pdf_url": "https://usidnet.org/clinical-resources/",
+   "license": "USIDNET",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_pid",
+   "priority": "medium",
+   "sha256": "e569bb18b43b7c8cda644902eb774a1bbfac041530efa93a8814dc3c976b47fd",
+   "size_bytes": 754,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 754,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: USIDNET consensus on management of X-linked agammaglobulinemia Source: USIDNET Year: 2019 Domain: allergology_pid License: USIDNET Available at: https://usidnet.org/clinical-resources/ This is a citation reference for the USIDNET guideline 'USIDNET consensus on management of X-linked agammaglobulinemia' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: allergology_pid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "USIDNET-CGD-001",
+   "source": "USIDNET",
+   "title": "USIDNET consensus on chronic granulomatous disease management",
+   "year": "2018",
+   "page_url": "https://usidnet.org/clinical-resources/",
+   "pdf_url": "https://usidnet.org/clinical-resources/",
+   "license": "USIDNET",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_pid",
+   "priority": "medium",
+   "sha256": "c047bc4a999ea119e45fe456efb8a5a4fae76a96fc30a4737e95ef7d71cfdedd",
+   "size_bytes": 752,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 752,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: USIDNET consensus on chronic granulomatous disease management Source: USIDNET Year: 2018 Domain: allergology_pid License: USIDNET Available at: https://usidnet.org/clinical-resources/ This is a citation reference for the USIDNET guideline 'USIDNET consensus on chronic granulomatous disease management' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: allergology_pid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "USIDNET-HIES-001",
+   "source": "USIDNET",
+   "title": "USIDNET consensus on hyper-IgE syndrome",
+   "year": "2018",
+   "page_url": "https://usidnet.org/clinical-resources/",
+   "pdf_url": "https://usidnet.org/clinical-resources/",
+   "license": "USIDNET",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_pid",
+   "priority": "low",
+   "sha256": "9e8f555281d8e386a0dc09d7049ca21f20deb6071d69dbcdc9f0698976f972f7",
+   "size_bytes": 708,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 708,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: USIDNET consensus on hyper-IgE syndrome Source: USIDNET Year: 2018 Domain: allergology_pid License: USIDNET Available at: https://usidnet.org/clinical-resources/ This is a citation reference for the USIDNET guideline 'USIDNET consensus on hyper-IgE syndrome' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: allergology_pid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "USIDNET-SAD-001",
+   "source": "USIDNET",
+   "title": "USIDNET consensus on specific antibody deficiency diagnosis",
+   "year": "2020",
+   "page_url": "https://usidnet.org/clinical-resources/",
+   "pdf_url": "https://usidnet.org/clinical-resources/",
+   "license": "USIDNET",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_pid",
+   "priority": "medium",
+   "sha256": "a7bd217ebf7d34f67882f1a5ac72ffbeb45ae35df030aec6969a45cfaac7db8d",
+   "size_bytes": 748,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 748,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: USIDNET consensus on specific antibody deficiency diagnosis Source: USIDNET Year: 2020 Domain: allergology_pid License: USIDNET Available at: https://usidnet.org/clinical-resources/ This is a citation reference for the USIDNET guideline 'USIDNET consensus on specific antibody deficiency diagnosis' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: allergology_pid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "USIDNET-COMP-001",
+   "source": "USIDNET",
+   "title": "USIDNET consensus complement deficiencies diagnosis and management",
+   "year": "2018",
+   "page_url": "https://usidnet.org/clinical-resources/",
+   "pdf_url": "https://usidnet.org/clinical-resources/",
+   "license": "USIDNET",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_pid",
+   "priority": "medium",
+   "sha256": "df38cb47f4e7c712ffcbc1283a31fe66900386b88fd365b2a4e3f46ec12735f2",
+   "size_bytes": 762,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 762,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: USIDNET consensus complement deficiencies diagnosis and management Source: USIDNET Year: 2018 Domain: allergology_pid License: USIDNET Available at: https://usidnet.org/clinical-resources/ This is a citation reference for the USIDNET guideline 'USIDNET consensus complement deficiencies diagnosis and management' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: allergology_pid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

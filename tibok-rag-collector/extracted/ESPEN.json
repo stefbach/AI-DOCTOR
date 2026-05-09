@@ -1,7 +1,7 @@
 {
  "source": "ESPEN",
  "generated_at": "2026-05-02T15:55:32Z",
- "total_documents": 27,
+ "total_documents": 28,
  "documents": [
   {
    "id": "ESPEN-001",
@@ -1483,6 +1483,31 @@
     {
      "chunk_index": 1,
      "content": "la compatibilité des médicaments administrés par voie intraveineuse avec la NPT en adoptant une approche fondée sur des données probantes, en s’appuyant sur des informations provenant de sources spécialisées et la littérature scientifique. Chaque association NPT–médicament a été classée comme compatible, incompatible, contradictoire ou inconnue, et les recommandations des pharmaciens ont été documentées dans le système de prescription électronique. Résultats Au total, 37 patients (représentant 40 épisodes de NPT) ont été inclus. Leur âge médian était de 11 ans (intervalle interquartile 2,9–12,8) et la majorité recevait des soins oncologiques. Les pharmaciens ont réalisé 604 interventions : 311 (51,5 %) concernaient des combinaisons compatibles, 100 (16,6 %) des combinaisons incompatibles, 150 (24,8 %) des combinaisons pour lesquelles il manquait des données, et des informations contradictoires étaient impliquées dans 43 interventions (7,1 %). Parmi les 75 médicaments examinés, 25 (33,3 %) étaient compatibles avec la NPT, 15 (20,0 %) ne l’étaient pas, 32 (42,7 %) étaient dépourvus de données, et les rapports étaient contradictoires dans 3 cas (4,0 %). Conclusions L’évaluation dirigée par les pharmaciens de la compatibilité de l’administration des médicaments en dérivé (en Y) chez les patients pédiatriques ayant une NPT est essentielle pour l’innocuité des médicaments et de bons résultats cliniques. La part élevée de médicaments dont les informations sur la compatibilité sont inconnues ou contradictoires souligne la nécessité de poursuivre les recherches afin de soutenir la prise de décision clinique. parenteral nutrition Y-site compatibility hemato-oncology pediatrics pharmaceutical care medication safety Mots-clés: nutrition parentérale compatibilité en Y hémato-oncologie pédiatrie soins pharmaceutiques innocuité des médicaments pmc-exception-type EMBARGO pmc-status-qastatus 4 pmc-status-live no pmc-status-embargo yes pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf yes pmc-prop-has-supplement no pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc no"
+    }
+   ]
+  },
+  {
+   "id": "ESPEN-REFEEDING-001",
+   "source": "ESPEN",
+   "title": "ESPEN Guidelines Refeeding Syndrome Prevention and Management",
+   "year": "2021",
+   "page_url": "https://www.clinicalnutritionjournal.com/article/S0261-5614(21)00164-X/fulltext",
+   "pdf_url": "https://www.clinicalnutritionjournal.com/article/S0261-5614(21)00164-X/fulltext",
+   "license": "ESPEN",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gastro_nutrition",
+   "priority": "high",
+   "sha256": "f4d8cfc5445b21de238869b798ed0779e9da1416f28453dc258967d5fcef192e",
+   "size_bytes": 788,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 788,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESPEN Guidelines Refeeding Syndrome Prevention and Management Source: ESPEN Year: 2021 Domain: gastro_nutrition License: ESPEN Available at: https://www.clinicalnutritionjournal.com/article/S0261-5614(21)00164-X/fulltext This is a citation reference for the ESPEN guideline 'ESPEN Guidelines Refeeding Syndrome Prevention and Management' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gastro_nutrition. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "EACTS",
  "generated_at": "2026-05-02T16:23:17Z",
- "total_documents": 18,
+ "total_documents": 22,
  "documents": [
   {
    "id": "EACTS-001",
@@ -1118,6 +1118,106 @@
     {
      "chunk_index": 5,
      "content": "the British Intervention Cardiovascular Society; and is a Leader of the Quality of Care group of the European Society of Cardiology. A.A.A. has received payment/honoraria fees from Abbott Medical Pty Ltd and Corcym Pty Ltd. H.H.B. has received consulting fees for being a proctor for Intuitive Surgical; has received lecture honoraria from Medtronic and Edwards Lifesciences; has served on a data safety monitoring board for Edwards Lifesciences; and has served in leadership positions for ISMICS, SRS, STS, and ACS. P.B.J., via ICHOM, received funding from Adetec Coeur and Edwards Lifesciences for this project. Z.D-S., via ICHOM, received funding from Adetec Coeur and Edwards Lifesciences for this project. D.E. has received research and advisory collaboration with GE Healthcare and Abbott Vascular. G.E. has received speaker honoraria (payments to the institution) from Edwards Lifesciences, Medela, and AstraZeneca. R.T.H. has received honoraria for lectures from Boston Scientific, Edwards Lifesciences, and Philips Healthcare; and Institutional Consulting Contracts (no direct compensation) from Abbott, Anteris, Boston Scientific, and Novartis. A.J. has been a senior project leader for the development of the standard set for heart valve disease, which entails development of study materials, leading the working group through the process, and quality assurance of all materials. E.L. has received a patent for extra aortic ring from Coroneo Inc; and has received royalties/licenses for a patent extra aortic ring from Coroneo Inc. B.M. has received consulting fees from Corcym, Edwards Lifesciences, and Novostia; and has received honoraria for lectures/presentations from Medtronic. P.P. has received institutional funding with no direct compensation from Novartis, Edwards Lifesciences, Medtronic, Pi-Cardia, and Cardiac Success; has received honoraria for lectures/presentations from Edwards Lifesciences; and has participated on an advisory board for Medtronic. O.P. has been co-chair of ACC/AHA guidelines on aortic disease (2022); has served as a member of the EACTS/STS guidelines on aortic disease (2024); and has been a consultant (no fees) for W.L. Gore and Associates, Terumo Aortic, Intressa Vasc, and AbioMed. V.R. has participated on an advisory board for Rednvia Co, Ltd (Adaptive Phase 2/3 Multicenter, Double-Blind, Placebo-Controlled, Randomized, Parallel, 3 Arm Study to Evaluate the Efficacy and Safety of DA-1229 (Evogliptin) in Patient’s Calcific Aortic Valve Disease with Mild to Moderate Aortic Stenosis [EVOID-AS]); has received stock from Amgen, Edwards Lifesciences, Intuitive Surgical, Inc, Bristol Myers Squibb, Merck-Schering Plough, Viatris, Organon, Regeneron, and AstraZeneca. F.J.S. has received consulting fees as a paid consultant and SAB member for Xeltis; and has received support for meetings/travel as a paid consultant and SAB member Xeltis. P.S. has received support (payments to institution) from Edwards Lifesciences and support (InstitutionEd) from Medtronic; has received honoraria for lectures/presentations from Edwards; has served on a data safety monitoring board for Anteris; and has received stock/stock options from Xenter. M. Sitges has received consulting fees from Edwards Lifesciences and Abbott; has received honoraria for lectures/presentations from Edwards Lifesciences, Abbott, Medtronic, General Electric, and Siemens Healthineers; has received payment for expert testimony from Abbott and General Electric; has received meeting/travel support from Abbott and Edwards Lifesciences; has served as past president of the Heart Valve Society; has been elected president of the Societat Catalana de Cardiologia; and has served with the Tricuspid Focus Group PCR. M. Szerlip has received honoraria for lectures/presentations from Edwards Lifesciences, CVI, SCAI, and Boston Scientific; has served on a data safety monitoring board for Abbott Vascular; and is a member of the Baylor Scott and White Heart Hospital Board, the SCAI Board of Trustees, and the IAGS Board. W.Y.S. has received honoraria for lectures/presentations from Edwards Lifesciences, Medtronic, Abbott, Terumo Aortic, and Artivion. J.J.M.T. is past president and senior advisor to Heart Valve Society Board. V.H.T. has received consulting fees from Abbott Vascular, Artivion, Boston Scientific, CroíValve, Edwards Lifesciences, Articure, and Egnite Medical; and has received equity from Dasi Simulations and Trisol. F.B., D.C., G.D., H.J., J.K., S.M., R.M., R.S., F.S., J.S., K.V., W.W., and A.Z. have reported that they have no relationships relevant to the contents of this paper to disclose. Acknowledgments We would like to thank Katie Pelton and Aurelie Alger from PRRI and Fredreric Mattei from Medd Consultants for their support. We would like to thank Edwards Lifesciences and Adetec Coeur for funding this project."
+    }
+   ]
+  },
+  {
+   "id": "EACTS-AORTA-003",
+   "source": "EACTS",
+   "title": "EACTS expert consensus on the management of acute type A aortic dissection",
+   "year": "2024",
+   "page_url": "https://academic.oup.com/ejcts/article/65/2/ezae010",
+   "pdf_url": "https://academic.oup.com/ejcts/article/65/2/ezae010",
+   "license": "EACTS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiothoracic_surgery",
+   "priority": "high",
+   "sha256": "d99f65affd2d4f16fd83bcfb20f6ab4ff33b0675c82e7ef07d57027726abcccf",
+   "size_bytes": 798,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 798,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EACTS expert consensus on the management of acute type A aortic dissection Source: EACTS Year: 2024 Domain: cardiothoracic_surgery License: EACTS Available at: https://academic.oup.com/ejcts/article/65/2/ezae010 This is a citation reference for the EACTS guideline 'EACTS expert consensus on the management of acute type A aortic dissection' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiothoracic_surgery. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EACTS-FRAILTY-001",
+   "source": "EACTS",
+   "title": "EACTS expert consensus on frailty assessment in cardiac surgery",
+   "year": "2020",
+   "page_url": "https://academic.oup.com/ejcts/article/57/2/210/5610290",
+   "pdf_url": "https://academic.oup.com/ejcts/article/57/2/210/5610290",
+   "license": "EACTS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiothoracic_surgery",
+   "priority": "medium",
+   "sha256": "8c6cac2972f3b54dee3f002c96358b20d25dc14213f2c0b44cd5ac45546aaa66",
+   "size_bytes": 780,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 780,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EACTS expert consensus on frailty assessment in cardiac surgery Source: EACTS Year: 2020 Domain: cardiothoracic_surgery License: EACTS Available at: https://academic.oup.com/ejcts/article/57/2/210/5610290 This is a citation reference for the EACTS guideline 'EACTS expert consensus on frailty assessment in cardiac surgery' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiothoracic_surgery. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EACTS-AORTA-004",
+   "source": "EACTS",
+   "title": "EACTS/STS clinical practice guideline acute type B aortic dissection",
+   "year": "2024",
+   "page_url": "https://academic.oup.com/ejcts/article/65/2/ezae010",
+   "pdf_url": "https://academic.oup.com/ejcts/article/65/2/ezae010",
+   "license": "EACTS STS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_aorta",
+   "priority": "high",
+   "sha256": "e79e8ff8fbc7cc944a8b9cebb8f67d9174be581528b19d5387e4aa91fb172bb8",
+   "size_bytes": 774,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 774,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EACTS/STS clinical practice guideline acute type B aortic dissection Source: EACTS Year: 2024 Domain: vascular_aorta License: EACTS STS Available at: https://academic.oup.com/ejcts/article/65/2/ezae010 This is a citation reference for the EACTS guideline 'EACTS/STS clinical practice guideline acute type B aortic dissection' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_aorta. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EACTS-VAD-003",
+   "source": "EACTS",
+   "title": "EACTS expert consensus on durable mechanical circulatory support patient selection",
+   "year": "2019",
+   "page_url": "https://academic.oup.com/ejcts/article/56/2/230/5489349",
+   "pdf_url": "https://academic.oup.com/ejcts/article/56/2/230/5489349",
+   "license": "EACTS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiothoracic_surgery",
+   "priority": "medium",
+   "sha256": "3fe35b32e019bd1d1f5ac8f86a4d6c2a38ec063494b7d1587b227a2029a27a88",
+   "size_bytes": 818,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 818,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EACTS expert consensus on durable mechanical circulatory support patient selection Source: EACTS Year: 2019 Domain: cardiothoracic_surgery License: EACTS Available at: https://academic.oup.com/ejcts/article/56/2/230/5489349 This is a citation reference for the EACTS guideline 'EACTS expert consensus on durable mechanical circulatory support patient selection' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiothoracic_surgery. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

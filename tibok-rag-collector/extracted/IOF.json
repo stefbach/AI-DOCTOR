@@ -1,7 +1,7 @@
 {
  "source": "IOF",
  "generated_at": "2026-05-09T08:03:43Z",
- "total_documents": 7,
+ "total_documents": 8,
  "documents": [
   {
    "id": "IOF-BTM-001",
@@ -855,6 +855,31 @@
     {
      "chunk_index": 27,
      "content": "19:906–913 137. Ismail AA, Cooper C, Felsenberg D, Varlow J, Kanis JA, Silman AJ, O’Neill TW (1999) Number and type of vertebral deformities: 147. Johansson H, Kanis JA, Odén A, Leslie WD, Fujiwara S, Glüer epidemiological characteristics and relation to back pain and CC, Kroger H, LaCroix AZ, Lau E, Melton LJ 3rd, Eisman JA, height loss. European Vertebral Osteoporosis Study Group. O’Neill TW, Goltzman D, Reid DM, McCloskey E (2014) Impact Osteoporos Int 9:206–213 of femoral neck and lumbar spine BMD discordances on FRAX 138. US Surgeon General. Bone Health and Osteoporosis (2004) A probabilities in women: a meta-analysis of international cohorts. report of the US Surgeon General. US Department of Health and Calcif Tissue Int 95:428–435 Human Services, Washington, DC 148. McCloskey EV, Odén A, Harvey NC, Leslie WD, Hans D, 139. Kanis JA, Harvey NC, Cooper C, Johansson H, Odén A, Johansson H, Barkmann R, Boutroy S, Brown J, Chapurlat R, McCloskey EV, the Advisory Board of the National Elders PJ, Fujita Y, Glüer CC, Goltzman D, Iki M, Karlsson M, Osteoporosis Guideline Group (2016) A systematic review of Kindmark A, Kotowicz M, Kurumatani N, Kwok T, Lamy O, intervention thresholds based on FRAX. A report prepared for Leung J, Lippuner K, Ljunggren Ö, Lorentzon M, Mellström D, the National Osteoporosis Guideline Group and the international Merlijn T, Oei L, Ohlsson C, Pasco JA, Rivadeneira F, Rosengren Osteoporosis Foundation. Arch Osteoporos 11:–25 B, Sornay-Rendu E, Szulc P, Tamaki J, Kanis JA (2016) A meta- 140. Kanis JA, McCloskey EV, Johansson H, Strom O, Borgstrom F, analysis of trabecular bone score in fracture risk prediction and its Oden A, the National Osteoporosis Guideline Group (2008) Case relationship to FRAX. J Bone Miner Res 31:940–948 finding for the management of osteoporosis with FRAX®—as- 149. Leslie WD, Lix LM, Morin SN, Johansson H, Odén A, sessment and intervention thresholds for the UK. Osteoporos Int McCloskey EV, Kanis JA (2016) Adjusting hip fracture probabil- 19:1395–1408 ity in men and women using hip axis length: the Manitoba bone 141. McCloskey E, Kanis JA, Johansson H, Harvey N, Odén A, density database. J Clin Densitom 19:326–331 Cooper A, Cooper C, Francis RM, Reid DM, Marsh D, Selby P,"
+    }
+   ]
+  },
+  {
+   "id": "IOF-OSTEO-001",
+   "source": "IOF",
+   "title": "IOF ESCEO European guidance for diagnosis and management of osteoporosis in postmenopausal women",
+   "year": "2019",
+   "page_url": "https://www.osteoporosis.foundation/health-professionals/about-osteoporosis",
+   "pdf_url": "https://www.osteoporosis.foundation/health-professionals/about-osteoporosis",
+   "license": "IOF",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_bone",
+   "priority": "high",
+   "sha256": "b9e31b564f6e935c8c37decd11c6c03fcb98852ea199d77c1565f4bb62fabb9d",
+   "size_bytes": 852,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 852,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IOF ESCEO European guidance for diagnosis and management of osteoporosis in postmenopausal women Source: IOF Year: 2019 Domain: endocrinology_bone License: IOF Available at: https://www.osteoporosis.foundation/health-professionals/about-osteoporosis This is a citation reference for the IOF guideline 'IOF ESCEO European guidance for diagnosis and management of osteoporosis in postmenopausal women' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_bone. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

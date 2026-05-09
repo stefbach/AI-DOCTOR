@@ -1,7 +1,7 @@
 {
  "source": "AOFAS",
  "generated_at": "2026-05-09T09:50:59Z",
- "total_documents": 3,
+ "total_documents": 4,
  "documents": [
   {
    "id": "AOFAS-ANKLEFX-001",
@@ -211,6 +211,31 @@
     {
      "chunk_index": 15,
      "content": "nm for Treatment of Chronic Plantar Fasciitis: A Placebo-­ Surgery 2018;26:56–61. Controlled, Randomized Study. J Foot Ankle Surg 2015;54:768–72. 83 Lögdberg-­Andersson M, Mützell S, Hazel Åke. LOW LEVEL LASER 68 Stergioulas A, Stergioula M, Aarskog R, et al. Effects of low-­level THERAPY (LLLT) OF TENDINITIS AND MYOFASCIAL PAINS - A laser therapy and eccentric exercises in the treatment of recreational RANDOMIZED, DOUBLE-­BLIND, CONTROLLED STUDY. Laser athletes with chronic Achilles tendinopathy. Am J Sports Med Therapy 1997;9:79–85. 2008;36:881–7. 84 Ashok N, Raghul S, Sivakumar VPR. Compare The Effects of Low-­ 69 Liu X-­G, Cheng L, Song J-­M. Effects of low-­level laser therapy Level Laser and Ultrasonic Therapy in Subjects with Jumper’s Knee. and eccentric exercises in the treatment of Patellar tendinopathy. International Journal of Research and Scientific Innovation 2018;5. International Journal of Photoenergy 2014;2014:1–6. 85 Meier JK, Kerkour K. Traitement laser de la tendinite. Médecine et 70 Cinar E, Saxena S, Uygur F. Low-­Level laser therapy in the hygiène 1988;46:907–11. management of plantar fasciitis: a randomized controlled trial. Lasers 86 Millar NL, Dean BJ, Dakin SG. Inflammation and the continuum Med Sci 2018;33:949–58. model: time to acknowledge the molecular era of tendinopathy. Br J 71 Cinar E, Saxena S, Uygur F. Combination therapy versus exercise Sports Med 2016;50:1486. and orthotic support in the management of pain in plantar fasciitis: a 87 Dean BJF, Gettings P, Dakin SG, et al. Are inflammatory cells randomized controlled trial. Foot Ankle Int 2018;39:406–14. increased in painful human tendinopathy? A systematic review. Br J 72 ELsehrawy G, Nasef S, Ibrahim M, et al. Extracorporeal shock Sports Med 2016;50:216–20. wave therapy versus low-­level laser therapy in the management 88 Mosca MJ, Rashid MS, Snelling SJ, et al. Trends in the theory that of chronic plantar fasciitis. Suez Canal University Medical Journal inflammation plays a causal role in tendinopathy: a systematic review 2018;21:71–81. and quantitative analysis of published reviews. BMJ Open Sport 73 Yinilmez Sanmak Ömür Damla, Geler Külcü D, Mesci N, et al. Exerc Med 2018;4:e000332. Comparison of effects of low-­level laser therapy and extracorporeal 89 Bergqvist F, Carr AJ, Wheway K, et al. Divergent roles of prostacyclin shock wave therapy in plantar fasciitis treatment: a randomized, and PGE 2 in human tendinopathy. Arthritis Res Ther 2019;21:74. prospective, single-­blind clinical study. Turk J Phys Med Rehabil 90 Bjordal JM, Lopes-­Martins RAB, Iversen VV. A randomised, 2019;65:184–90. placebo controlled trial of low level laser therapy for activated 74 Ulusoy A, Cerrahoglu L, Orguc S. Magnetic resonance imaging Achilles tendinitis with microdialysis measurement of peritendinous and clinical outcomes of laser therapy, ultrasound therapy, and prostaglandin E2 concentrations. Br J Sports Med 2006;40:76–80. Naterstad IF, et al. BMJ Open 2022;12:e059479. doi:10.1136/bmjopen-2021-059479 15"
+    }
+   ]
+  },
+  {
+   "id": "AOFAS-HALLUX-001",
+   "source": "AOFAS",
+   "title": "AOFAS hallux valgus position statement and clinical practice recommendations",
+   "year": "2021",
+   "page_url": "https://www.aofas.org/medical-community/clinical-practice-statements",
+   "pdf_url": "https://www.aofas.org/medical-community/clinical-practice-statements",
+   "license": "AOFAS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_foot_ankle",
+   "priority": "high",
+   "sha256": "b34de63aca9b7c90d201f8f18fdb7b2a456aaf2e99c954afffdaccc7c5253263",
+   "size_bytes": 819,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 819,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:45Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AOFAS hallux valgus position statement and clinical practice recommendations Source: AOFAS Year: 2021 Domain: orthopedics_foot_ankle License: AOFAS Available at: https://www.aofas.org/medical-community/clinical-practice-statements This is a citation reference for the AOFAS guideline 'AOFAS hallux valgus position statement and clinical practice recommendations' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_foot_ankle. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

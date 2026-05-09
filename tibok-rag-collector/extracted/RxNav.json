@@ -1,0 +1,32 @@
+{
+ "source": "RxNav",
+ "generated_at": "2026-05-09T19:15:50Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "RXNAV-001",
+   "source": "RxNav",
+   "title": "RxNav RxNorm Drug Vocabulary NIH NLM",
+   "year": "2024",
+   "page_url": "https://lhncbc.nlm.nih.gov/RxNav/",
+   "pdf_url": "https://lhncbc.nlm.nih.gov/RxNav/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_formulary",
+   "priority": "medium",
+   "sha256": "66f80c0c3b89c785eefd9cc1f4900d652ede7de2a3f3f8942e65b0d7c94c3af5",
+   "size_bytes": 903,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 903,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Approaches to Supporting the Analysis of Historical Medication Datasets with RxNorm. To investigate approaches to supporting the analysis of historical medication datasets with RxNorm. We created two sets of National Drug Codes (NDCs). One is based on historical NDCs harvested from versions of RxNorm from 2007 to present. The other comprises all sources of NDCs in the current release of RxNorm, including proprietary sources. We evaluated these two resources against four sets of NDCs obtained from various sources. In two historical medication datasets, 14-19% of the NDCs were obsolete, but 91-96% of these obsolete NDCs could be recovered and mapped to active drug concepts. Adding historical data significantly increases NDC mapping to active RxNorm drugs. A service for mapping historical NDC datasets leveraging RxNorm was added to the RxNorm API and is available at https://rxnav.nlm.nih.gov/."
+    }
+   ]
+  }
+ ]
+}

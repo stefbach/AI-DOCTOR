@@ -1,7 +1,7 @@
 {
  "source": "ENS",
  "generated_at": "2026-05-09T09:13:46Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "ENS-PRION-001",
@@ -45,6 +45,31 @@
     {
      "chunk_index": 5,
      "content": "build upon these insights, using prospective designs linking adherence indices to patient outcomes, and incorporating economic evaluations to optimize biomarker‐based diagnostic strategies in neurodegenerative disorders and evaluate whether guideline implementation directly improves prognosis and quality of life. CONFLICT OF INTEREST STATEMENT C.F. reports institutional funding from the Italian Ministry of Health (Ricerca Corrente) and the Alzheimer's Association (AACSF‐22‐924470), and personal honoraria from Roche. L.B. reports grants from the Italian Ministry of Health, the Italian Ministry of Education, and Eli Lilly; consulting fees from Eli Lilly; honoraria for lectures from GE Healthcare and Eli Lilly; and support for meeting attendance from scientific societies. A.C. reports honoraria for lectures from Eli Lilly, Biogen, Eisai, GE Healthcare, Novo Nordisk, Neopharmed Gentili, and others, as well as travel support from Eli Lilly. M.P. reports institutional funding from the Italian Ministry of Health and the Alzheimer's Association and serves as reviewing editor for Neurobiology of Aging and associate editor for the Journal of Alzheimer's Disease . G.B.F. reports institutional funding from multiple public and private organizations and industry (including Roche, Biogen, Eisai, Novo Nordisk, and GE Healthcare), as well as consulting fees and honoraria for lectures from Biogen, Roche, Diadem, and Novo Nordisk. F.M. reports speaker honoraria from Eli Lilly. All other authors declare no conflicts of interest. Author disclosures are available in the . CONSENT STATEMENT Informed consent specific to this study was not required, as this was a retrospective observational study based on the review of routinely collected clinical data. At all participating centers, patients had previously provided written informed consent for the use of their clinical data for research purposes at the institutional level. The study protocol was approved by the competent ethics committee and conducted in accordance with the Declaration of Helsinki and applicable national and institutional regulations on research involving human subjects. Supporting information Supporting Information . Supporting Information"
+    }
+   ]
+  },
+  {
+   "id": "ENS-ENCEPHALITIS-001",
+   "source": "ENS",
+   "title": "European consensus statement on management of viral encephalitis",
+   "year": "2010",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1468-1331.2010.03028.x",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1468-1331.2010.03028.x",
+   "license": "ENS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_infection",
+   "priority": "high",
+   "sha256": "5458f229e967a951c1c2fd15245ffab7ddfd6ed7f6626a6300fda8e1b3b22fad",
+   "size_bytes": 783,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 783,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: European consensus statement on management of viral encephalitis Source: ENS Year: 2010 Domain: neurology_infection License: ENS Available at: https://onlinelibrary.wiley.com/doi/10.1111/j.1468-1331.2010.03028.x This is a citation reference for the ENS guideline 'European consensus statement on management of viral encephalitis' published in 2010. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_infection. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

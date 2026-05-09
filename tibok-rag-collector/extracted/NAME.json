@@ -1,7 +1,7 @@
 {
  "source": "NAME",
  "generated_at": "2026-05-09T18:17:40Z",
- "total_documents": 4,
+ "total_documents": 7,
  "documents": [
   {
    "id": "NAME-FOR-001",
@@ -244,6 +244,81 @@
     {
      "chunk_index": 12,
      "content": "in Finland. Inj Prev 2007; 13(4): 282–284. https://doi.org/10.1136/ip.2006.012922 PMID: 17686941 60. Ylijoki-Sørensen S, Boldsen JL, Boel LW, Bøggild H, Lalu K, Sajantila A. Autopsy rate in suicide is low among elderly in Denmark compared with Finland. Forensic Sci Int 2014; 244: 158–165. https://doi.org/ 10.1016/j.forsciint.2014.08.035 PMID: 25244292 61. Ylijoki-Sørensen S, Sajantila A, Lalu K, Bøggild H, Boldsen JL, Boel LW. Coding ill-defined and unknown cause of death is 13 times more frequent in Denmark than in Finland. Forensic Sci Int 2014; 244: 289–294. https://doi.org/10.1016/j.forsciint.2014.09.016 PMID: 25300069 62. Kapusta ND, Tran US, Rockett IRH, De Leo D, Naylor CP, Niederkrotenthaler T, et al. Declining autopsy rates and suicide misclassification: a cross-national analysis of 35 countries. Arch Gen Psychiatry 2011; 68(10): 1050–1057. http://archpsyc.jamanetwork.com/article.aspx?articleid=1107298 https:// doi.org/10.1001/archgenpsychiatry.2011.66 PMID: 21646567 63. Shojania KG, Burton EC, McDonald KM, Goldman L. Changes in rates of autopsy-detected diagnostic errors over time: a systematic review. JAMA 2003; 289(21): 2849–2856. https://doi.org/10.1001/jama. 289.21.2849 PMID: 12783916 64. Centers for Disease Control and Prevention. National Center for Injury Prevention and Control. National Violent Death Reporting System. www.cdc.gov/violenceprevention/nvdrs/. 65. Logan JR, Karch DL, Crosby AE. Reducing “unknown” data in violent death surveillance: study of death certificates, coroner/medical examiner and police reports from the National Violent Death Reporting System, 2003–2004. Homicide Stud 2009; 13(4): 385–397. 66. Parks SE, Johnson LL, McDaniel DD, Gladden M; Centers for Disease Control and Prevention (CDC). Surveillance for violent deaths—National Violent Death Reporting System, 16 states, 2010. MMWR Surveill Summ 2014; 63(1): 1–33. PMID: 24430165 67. Kaplan MS, Caetano R, Giesbrecht N, Huguet N, Kerr WC, McFarland BH, et al. The National Violent Death Reporting System: Use of the Restricted Access Database and recommendations for the sys- tem’s improvement. Am J Prev Med 2017; 52(4): 130–133. PLOS ONE | https://doi.org/10.1371/journal.pone.0197805 May 22, 2018 16 / 16"
+    }
+   ]
+  },
+  {
+   "id": "NAME-FOR-002",
+   "source": "NAME",
+   "title": "NAME Position Paper Investigation of Sudden Unexpected Infant Death",
+   "year": "2014",
+   "page_url": "https://name.memberclicks.net/position-papers",
+   "pdf_url": "https://name.memberclicks.net/position-papers",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_pediatric",
+   "priority": "high",
+   "sha256": "5365b84c085c2f005f6350ce38b395e1f9f52017e693cb0b93d701334d29e196",
+   "size_bytes": 767,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 767,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NAME Position Paper Investigation of Sudden Unexpected Infant Death Source: NAME Year: 2014 Domain: forensic_pediatric License: Open Available at: https://name.memberclicks.net/position-papers This is a citation reference for the NAME guideline 'NAME Position Paper Investigation of Sudden Unexpected Infant Death' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "NAME-FOR-005",
+   "source": "NAME",
+   "title": "NAME Forensic Pathology Guideline Time of Death Estimation",
+   "year": "2015",
+   "page_url": "https://name.memberclicks.net/position-papers",
+   "pdf_url": "https://name.memberclicks.net/position-papers",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_death",
+   "priority": "medium",
+   "sha256": "6091e3f66824f11eec7dbf6e4a532fb58e126c4b65bea7bdd835531015649ff0",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NAME Forensic Pathology Guideline Time of Death Estimation Source: NAME Year: 2015 Domain: forensic_death License: Open Available at: https://name.memberclicks.net/position-papers This is a citation reference for the NAME guideline 'NAME Forensic Pathology Guideline Time of Death Estimation' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_death. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "NAME-FOR-006",
+   "source": "NAME",
+   "title": "NAME Position Paper Asphyxial Deaths Investigation",
+   "year": "2018",
+   "page_url": "https://name.memberclicks.net/position-papers",
+   "pdf_url": "https://name.memberclicks.net/position-papers",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_death",
+   "priority": "medium",
+   "sha256": "969ebe4a65c740dae8df649554002bf2efd6d8e88ab9fe604b7cfe7c231eb2dd",
+   "size_bytes": 725,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 725,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NAME Position Paper Asphyxial Deaths Investigation Source: NAME Year: 2018 Domain: forensic_death License: Open Available at: https://name.memberclicks.net/position-papers This is a citation reference for the NAME guideline 'NAME Position Paper Asphyxial Deaths Investigation' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_death. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

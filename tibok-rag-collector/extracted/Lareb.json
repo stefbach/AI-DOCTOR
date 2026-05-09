@@ -1,7 +1,7 @@
 {
  "source": "Lareb",
  "generated_at": "2026-05-09T13:51:38Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "LAREB-001",
@@ -77,6 +77,31 @@
     {
      "chunk_index": 13,
      "content": "of the adverse reaction, or being the only suspected product amongst other concomitant medications; Reports where other products were concomitantly used with a multi-herb product and were also suspected of causing the adverse reaction. 5. Conclusions In conclusion, the adverse reactions associated with the use of Crataegus -containing products appearing from the reports in the ICSR databases (VigiBase and Lareb) matched with those revealed from clinical trials covered by the scoping review. Crataegus -containing products are generally considered to be safe, without specific undesirable effects or interactions. However, while most observed adverse reactions were limited to mild gastrointestinal and skin reactions (as occurring with many medications), some more serious adverse reactions (to be specifically attributed to Crataegus ) were also retrieved from the pharmacovigilance study, which had not been reported in the literature so far. Crataegus -containing products appear useful and safe in people who do not have serious health problems. Although Crataegus extracts are generally contained in commercial products that can be used without medical supervision, the target organ is the heart, requiring extra caution and alertness. Therefore, as a general consideration, people who are using drugs or who have conditions predisposing to the development of undesirable effects (serious congestive heart failure, serious vascular disease, etc.) should pay particular attention when choosing the use of hawthorn. Based on the results, we recommend mentioning (for instance, in a revised EMA monograph) more explicitly the possible occurrence of adverse reactions like nausea, palpitations and dizziness, which were the three most reported PTs in our VigiBase analysis. These adverse reactions may have a cardiovascular background, given the mechanisms of action of Crataegus . In addition, based on knowledge of the multi-target mode of action of Crataegus- containing products, restraint from combining them with conventional cardiovascular medicines seems appropriate, as theoretically, interactions may occur, especially with digoxin and vasodilators. On the other hand, pharmacotherapeutic benefits may be obtained from such combinations, but only under the strict guidance of a general practitioner. Performing a risk–benefit analysis by the medical doctor in collaboration with a pharmacist is highly recommended."
+    }
+   ]
+  },
+  {
+   "id": "LAREB-002",
+   "source": "Lareb",
+   "title": "Lareb Pregnancy Register teratovigilance Netherlands",
+   "year": "2024",
+   "page_url": "https://www.lareb.nl/teratology",
+   "pdf_url": "https://www.lareb.nl/teratology",
+   "license": "Lareb Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pregnancy_lactation",
+   "priority": "medium",
+   "sha256": "1df598d09e9607e36865759b6ee183902da17269bab59863494ebf5b7109d835",
+   "size_bytes": 743,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 743,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Lareb Pregnancy Register teratovigilance Netherlands Source: Lareb Year: 2024 Domain: drug_pregnancy_lactation License: Lareb Open Available at: https://www.lareb.nl/teratology This is a citation reference for the Lareb guideline 'Lareb Pregnancy Register teratovigilance Netherlands' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pregnancy_lactation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "PES",
  "generated_at": "2026-05-09T16:03:56Z",
- "total_documents": 1,
+ "total_documents": 6,
  "documents": [
   {
    "id": "PES-HYPO-001",
@@ -49,6 +49,131 @@
     {
      "chunk_index": 6,
      "content": "should be close to the mean for healthy newborns on the first day of life and above the threshold for neuroglycopenic symptoms (>50 mg/dL [2.8 mmol/L]). The committee recommended raising the glucose target after 48 hours of age (>60 mg/dL [3.3 mmol/L]) to above the threshold for neurogenic symptoms and close to the target for older infants and children, because of the increased concern for an underlying hypoglycemia disorder. The suggested target glucose concentrations were considered adequate while assessing whether hypoglycemia will resolve over time. Because at-risk neonates who require interventions beyond normal feedings, such as IV dextrose, to treat hypoglycemia in the first 48 hours of life are likely to have more severe and prolonged hypoglycemia, the initial treatment target should be above the thresholds for both neurogenic and neuroglycopenic symptoms (>60 mg/dL [3.3 mmol/L]). For neonates who require dextrose infusion, transitioning to normal feedings alone can be attempted once PG concentration is stabilized at >60 mg/dL (>3.3 mmol/L). The committee’s consensus to accept a lower PG target in high-risk neonates without a suspected congenital hypoglycemia disorder (Section 3.2) than in those with a suspected congenital hypoglycemia disorder (Section 3.1) was based on balancing the risks of intervention compared with a brief period of undertreatment in this group. Higher treatment targets (Section 3.1) should be considered for those with a suspected genetic hypoglycemia disorder and for symptomatic neonates, because the risks of undertreatment outweigh those of overtreatment in these patients."
+    }
+   ]
+  },
+  {
+   "id": "PES-CHILD-THY-001",
+   "source": "PES",
+   "title": "Pediatric Endocrine Society guidelines for evaluation and management of pediatric thyroid disease",
+   "year": "2020",
+   "page_url": "https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/",
+   "pdf_url": "https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/",
+   "license": "PES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_pediatric",
+   "priority": "medium",
+   "sha256": "71c1b3e9bbcd083491c729ff5d3eb5b07c11f8a2320b232c19265b28f557a73b",
+   "size_bytes": 4597,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 4581,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Association of gestational thyroid function and thyroid autoimmunity with gestational diabetes: a systematic review and individual participant meta-analysis. Pregnancy is a state of increased metabolic demand that necessitates major changes in endocrine physiology. Gestational thyroid dysfunction and gestational diabetes are common endocrine conditions of pregnancy that frequently coincide. Although the effects of thyroid hormones on glucose metabolism are well documented, important knowledge gaps remain in terms of the extent and clinical relevance of these effects during pregnancy. The aim of this meta-analysis is to assess the association of thyroid function test results with gestational diabetes and markers of glucose metabolism. In this systematic review and individual participant data meta-analysis, we searched Ovid MEDLINE, EMBASE, and Web of Science from database inception to Dec 12, 2024, for prospective population-based cohort studies with individual patient data on thyroid function, gestational diabetes, and measures of glucose homoeostasis during pregnancy. Furthermore, open invitations to join the Consortium on Thyroid and Pregnancy were issued to identify unpublished datasets. We excluded participants with multiple pregnancies; pre-existing thyroid disease or diabetes; current use of medications that could affect thyroid or glucose levels; or a history of infertility treatment, miscarriage, or stillbirth. Exposures were maternal gestational concentrations of thyroid-stimulating hormone (TSH), free T 4 (FT 4 ), free T 3 (FT 3 ), and total T 3 ; thyroperoxidase antibody positivity; thyroglobulin antibody positivity; and thyroid disease entities (ie, subclinical hypothyroidism, overt and subclinical hyperthyroidism, and isolated hypothyroxinaemia), which were defined according to current guidelines. The primary outcome was presence of gestational diabetes as defined in individual cohorts. Individual participant data were analysed using generalised linear mixed-effects regression models adjusting for maternal age, BMI, smoking status, parity, ethnicity, fetal sex, and gestational age at blood sampling. We preregistered our study protocol with PROSPERO (CRD42022371927). We identified 638 published studies with our systematic search, of which 21 studies based on 17 cohorts met inclusion criteria; 11 of these prospective cohort studies provided individual participant data, and data from an additional 14 cohorts were added via personal contacts and open invitations, resulting in a study population of 63 548 participants from 25 cohorts after exclusions. Of the 52 632 participants in 17 cohorts with TPOAb measurements available to define thyroid disease entities, 1687 (3·2%) of these participants had subclinical hypothyroidism, 1153 (2·2%) had isolated hypothyroxinaemia, and 2958 (4·7%) had gestational diabetes. Compared with euthyroidism, isolated hypothyroxinaemia was associated with a higher risk of gestational diabetes (absolute risk 6·5% [72 of 1113] for isolated hypothyroxinaemia vs 3·5% [1555 of 44 787] for euthyroidism; adjusted odds ratio [aOR] 1·52 [95% CI 1·17-1·98], p=0·0017; 45 900 participants). A lower FT 4 concentration was associated with a higher risk of gestational diabetes (non-linear, p<0·0001). A higher risk of gestational diabetes was found both with a higher FT 3 concentration (aOR 1·18 [95%CI 1·10-1·28], p<0·0001) and with a higher FT 3 -to-FT 4 ratio (non-linear; p<0·0001). No evidence was found of associations of TSH, thyroid antibodies, or other thyroid function test abnormalities with gestational diabetes. I 2 statistics for the primary analyses ranged from 0-43%, indicating low to moderate heterogeneity. The funnel plot for overt hyperthyroidism indicated a possibility for publication bias (p=0·049), but funnel plots for all other variables did not. A lower FT 4 concentration and isolated hypothyroxinaemia during pregnancy are associated with a higher risk of gestational diabetes. Our results challenge the long-standing notion that subclinical hypothyroidism or thyroid autoimmunity are risk factors for gestational diabetes and support both the risk profile for gestational thyroid dysfunction and ongoing efforts on optimisation of treatment targets for pregnant people taking levothyroxine. Follow-up studies are required to establish to what extent levothyroxine initiation or dose adjustments can affect insulin resistance and antihyperglycaemic therapies during pregnancy. The Netherlands Organization for Scientific Research, ZonMw, and the EU Horizon 2020 Program."
+    }
+   ]
+  },
+  {
+   "id": "PES-CAH-001",
+   "source": "PES",
+   "title": "Pediatric Endocrine Society CAH consensus newborn screening and management",
+   "year": "2018",
+   "page_url": "https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/",
+   "pdf_url": "https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/",
+   "license": "PES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_pediatric",
+   "priority": "high",
+   "sha256": "bb9c5f59a3d2df5c8b4dc512f7803b6e1fd34c56bc46d28b2412c890294560fd",
+   "size_bytes": 816,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 816,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Pediatric Endocrine Society CAH consensus newborn screening and management Source: PES Year: 2018 Domain: endocrinology_pediatric License: PES Available at: https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/ This is a citation reference for the PES guideline 'Pediatric Endocrine Society CAH consensus newborn screening and management' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "PES-GHD-001",
+   "source": "PES",
+   "title": "Pediatric Endocrine Society GH research society GH deficiency in childhood",
+   "year": "2019",
+   "page_url": "https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/",
+   "pdf_url": "https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/",
+   "license": "PES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_pediatric",
+   "priority": "high",
+   "sha256": "692bb43135f5587a13099b652d62c1b79d873b688f9c73bff6277a4fa52bd7a5",
+   "size_bytes": 2062,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2062,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Safety of growth hormone replacement in survivors of cancer and intracranial and pituitary tumours: a consensus statement. Growth hormone (GH) has been used for over 35 years, and its safety and efficacy has been studied extensively. Experimental studies showing the permissive role of GH/insulin-like growth factor 1 (IGF-I) in carcinogenesis have raised concerns regarding the safety of GH replacement in children and adults who have received treatment for cancer and those with intracranial and pituitary tumours. A consensus statement was produced to guide decision-making on GH replacement in children and adult survivors of cancer, in those treated for intracranial and pituitary tumours and in patients with increased cancer risk. With the support of the European Society of Endocrinology, the Growth Hormone Research Society convened a Workshop, where 55 international key opinion leaders representing 10 professional societies were invited to participate. This consensus statement utilized: (1) a critical review paper produced before the Workshop, (2) five plenary talks, (3) evidence-based comments from four breakout groups, and (4) discussions during report-back sessions. Current evidence reviewed from the proceedings from the Workshop does not support an association between GH replacement and primary tumour or cancer recurrence. The effect of GH replacement on secondary neoplasia risk is minor compared to host- and tumour treatment-related factors. There is no evidence for an association between GH replacement and increased mortality from cancer amongst GH-deficient childhood cancer survivors. Patients with pituitary tumour or craniopharyngioma remnants receiving GH replacement do not need to be treated or monitored differently than those not receiving GH. GH replacement might be considered in GH-deficient adult cancer survivors in remission after careful individual risk/benefit analysis. In children with cancer predisposition syndromes, GH treatment is generally contraindicated but may be considered cautiously in select patients."
+    }
+   ]
+  },
+  {
+   "id": "PES-TURNER-001",
+   "source": "PES",
+   "title": "PES turner syndrome international clinical practice guidelines",
+   "year": "2017",
+   "page_url": "https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/",
+   "pdf_url": "https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/",
+   "license": "PES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_pediatric",
+   "priority": "medium",
+   "sha256": "ba10cb4dfd7b97290cf125a0201a6e4a099d4222b8de2e451f32513128859b09",
+   "size_bytes": 792,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 792,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: PES turner syndrome international clinical practice guidelines Source: PES Year: 2017 Domain: endocrinology_pediatric License: PES Available at: https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/ This is a citation reference for the PES guideline 'PES turner syndrome international clinical practice guidelines' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "PES-PUB-001",
+   "source": "PES",
+   "title": "Pediatric Endocrine Society evaluation and management of pubertal disorders",
+   "year": "2021",
+   "page_url": "https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/",
+   "pdf_url": "https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/",
+   "license": "PES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_pediatric",
+   "priority": "medium",
+   "sha256": "0c8943e9242c1f0ddb88393b3700cda0aaee6817b4f6b5eb6fa2a73f83d70058",
+   "size_bytes": 1920,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1920,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "\"Management of andrological disorders from childhood and adolescence to transition age: guidelines from the Italian Society of Andrology and Sexual Medicine (SIAMS) in collaboration with the Italian Society for Pediatric Endocrinology and Diabetology (SIEDP)-Part-1\". Andrological pathologies in the adulthood are often the results of conditions that originate during childhood and adolescence and sometimes even during gestation and neonatal period. Unfortunately, the reports in the literature concerning pediatric andrological diseases are scares and mainly concerning single issues. Furthermore, no shared position statement are so far available. The Italian Society of Andrology and Sexual Medicine (SIAMS) commissioned an expert task force involving the Italian Society of Pediatric Endocrinology and Diabetology (SIEDP) to provide an updated guideline on the diagnosis and management of andrological disorders from childhood and adolescence to transition age. Derived recommendations were based on the grading of recommendations, assessment, development, and evaluation (GRADE) system. A literature search of articles in English for the term \"varicoceles\", \"gynecomastia\", \"fertility preservation\", \"macroorchidism\", \"precocious puberty\" and \"pubertal delay\" has been performed. Three major aspects for each considered disorder were assessed including diagnosis, clinical management, and treatment. Recommendations and suggestions have been provided for each of the mentioned andrological disorders. These are the first guidelines based on a multidisciplinary approach that involves important societies related to the field of andrological medicine from pediatric to transition and adult ages. This fruitful discussion allowed for a general agreement on several recommendations and suggestions to be reached, which can support all stakeholders in improving andrological and general health of the transitional age."
     }
    ]
   }

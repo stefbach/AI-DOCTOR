@@ -1,7 +1,7 @@
 {
  "source": "ESUR",
  "generated_at": "2026-05-09T11:07:11Z",
- "total_documents": 4,
+ "total_documents": 14,
  "documents": [
   {
    "id": "ESUR-AKI-001",
@@ -184,6 +184,256 @@
     {
      "chunk_index": 5,
      "content": "H1-antihistamines and intramuscular adrenaline, with limited indications for SABA. As these reactions occur infrequently, these situations often create stress and confusion. Therefore, detailed documentation of such reactions by personnel with experience in handling contrast media and regular hands-on training for all personnel involved in managing these reactions is mandatory. The CMSC recommendations for the management of IHR and NIHR, using the ACR classification [ ], are summarized in Fig. and Table . For prevention of recurrent HR to contrast media, see Part 2 of this guideline [ ]. Supplementary information ELECTRONIC SUPPLEMENTARY MATERIAL"
+    }
+   ]
+  },
+  {
+   "id": "ESUR-CONTRAST-002",
+   "source": "ESUR",
+   "title": "ESUR guidelines on contrast-induced nephropathy contrast media safety",
+   "year": "2023",
+   "page_url": "https://www.esur.org/guidelines/",
+   "pdf_url": "https://www.esur.org/guidelines/",
+   "license": "ESUR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_contrast",
+   "priority": "high",
+   "sha256": "ceab627f651829bc92ff295570aa5f4b7bb9b7bfbc2232ab6fa63d1425415087",
+   "size_bytes": 1589,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1583,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Long-term safety of withholding standard prophylaxis in patients with moderate chronic kidney disease. In the latest ESUR contrast media guidelines, standard prophylaxis is no longer recommended for patients with moderate chronic kidney disease (CKD). In the absence of solid evidence, guideline updates are often based on indirect evidence and expert opinion. Likewise, evidence supporting the withdrawal of standard prophylaxis in moderate CKD patients was scarce and mostly indirect, but did include one randomised controlled trial evaluating guideline-recommended standard prophylactic intravenous hydration against a group receiving no prophylaxis (A MAastricht Contrast-Induced Nephropathy Guideline (AMACING) trial). Since then, benefits of the updated guideline recommendation for patient and hospital burden have been numerated and were shown to be substantial. The current special report provides data on long-term safety from the AMACING randomised controlled trial. KEY POINTS: • In the latest version of ESUR clinical practice guidelines for safe use of contrast media, standard prophylaxis is no longer recommended for patients with moderate chronic kidney disease. • Benefits of this change in recommendations for patient and hospital burden have been numerated. The current report provides data on long-term safety from the AMACING randomised controlled trial. • No disadvantage of withholding prophylaxis could be discerned. Results suggest that, in this population, underlying disease is more relevant for survival and prognosis than contrast administration itself."
+    }
+   ]
+  },
+  {
+   "id": "ESUR-CONTRAST-003",
+   "source": "ESUR",
+   "title": "ESUR ESPR statement on use of gadolinium-based contrast agents",
+   "year": "2019",
+   "page_url": "https://www.esur.org/guidelines/",
+   "pdf_url": "https://www.esur.org/guidelines/",
+   "license": "ESUR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_contrast",
+   "priority": "high",
+   "sha256": "1893ea227eeed2010ec3013a63a56784dd39f3677cbebbdaae64eeafaf937559",
+   "size_bytes": 744,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 744,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESUR ESPR statement on use of gadolinium-based contrast agents Source: ESUR Year: 2019 Domain: radiology_contrast License: ESUR Available at: https://www.esur.org/guidelines/ This is a citation reference for the ESUR guideline 'ESUR ESPR statement on use of gadolinium-based contrast agents' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_contrast. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESUR-CONTRAST-004",
+   "source": "ESUR",
+   "title": "ESUR contrast agent safety committee statement on NSF",
+   "year": "2018",
+   "page_url": "https://www.esur.org/guidelines/",
+   "pdf_url": "https://www.esur.org/guidelines/",
+   "license": "ESUR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_contrast",
+   "priority": "medium",
+   "sha256": "9334b68ac712c21aab811a7c20bb41b462df6441b7c876ccb40d6801d87fdc19",
+   "size_bytes": 726,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 726,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESUR contrast agent safety committee statement on NSF Source: ESUR Year: 2018 Domain: radiology_contrast License: ESUR Available at: https://www.esur.org/guidelines/ This is a citation reference for the ESUR guideline 'ESUR contrast agent safety committee statement on NSF' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_contrast. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESUR-CONTRAST-005",
+   "source": "ESUR",
+   "title": "ESUR guidelines for hypersensitivity reactions to contrast",
+   "year": "2018",
+   "page_url": "https://www.esur.org/guidelines/",
+   "pdf_url": "https://www.esur.org/guidelines/",
+   "license": "ESUR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_contrast",
+   "priority": "high",
+   "sha256": "168d25c678b76af57b20eca964fb4931f76a4c911d0c049d2428f5bb3474db39",
+   "size_bytes": 2262,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2262,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Safety of positive gastrointestinal contrast media. Updated guidelines by the ESUR Contrast Media Safety Committee. Many reports on adverse effects related to positive gastrointestinal (GI) contrast media (CM) predate 2000; therefore, a literature review on their current safety profile was warranted. This article reviews the literature and updates the Contrast Media Safety Committee guidelines of the European Society of Urogenital Radiology on the safety of positive GI iodine-based and barium sulphate-based CM. A systematic literature search (2000-2025) identified 2 randomised controlled trials, 2 comparative studies, 17 reviews, and 29 case reports on the adverse effects of positive GI CM. Enteric non-ionic iodine-based low- and iso-osmolar CM are more palatable than ionic hyperosmolar agents (HOCM) and are preferred for oral use. The most frequent adverse effects of enteric ionic iodine-based HOCM are nausea, diarrhoea, vomiting, abdominal pain, and unpleasant taste, while pulmonary complications following aspiration are extremely rare. Hypersensitivity reactions due to limited (1-2%) systemic absorption of iodine-based CM are very uncommon; however, patients with a history of such reactions should be managed as for intravascular iodine-based CM administration. For barium sulphate CM, nausea, vomiting, and constipation are the most reported adverse effects. Minor leakage into the mediastinum or aspiration of small amounts into the lungs is rarely life-threatening. In contrast, intraperitoneal leakage can trigger inflammatory reactions, granuloma formation, and intestinal adhesions. If bowel perforation is suspected, fluoroscopic examination with iodine-based CM should precede barium administration. Hypersensitivity may occur due to excipients within barium preparations rather than barium itself. KEY POINTS: Question What are the current safety issues associated with positive GI radiological CM? Finding Nausea and vomiting are the most commonly reported adverse effects of positive enteric CM. Many reports of other adverse effects date back to before 2000. Clinical relevance The use of positive GI CM has diminished in recent decades. However, these CM have excellent safety profiles and are safer than traditionally assumed."
+    }
+   ]
+  },
+  {
+   "id": "ESUR-CONTRAST-006",
+   "source": "ESUR",
+   "title": "ESUR guidelines for contrast media in pregnancy and lactation",
+   "year": "2018",
+   "page_url": "https://www.esur.org/guidelines/",
+   "pdf_url": "https://www.esur.org/guidelines/",
+   "license": "ESUR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_contrast",
+   "priority": "medium",
+   "sha256": "4467cb089c6a37b20ad1ceeb06a22fb70bc6f678a06757c04788eeb3760ba03d",
+   "size_bytes": 1642,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1642,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "The use of iodinated and gadolinium contrast media during pregnancy and lactation. The use of iodinated or gadolinium-based contrast media in pregnant or lactating women often causes concerns in the radiology department because of the principle of not exposing a fetus or neonate to any drugs. Because of the uncertainty about the use of contrast media during pregnancy and lactation, the Contrast Media Safety Committee of the European Society of Urogenital Radiology decided to review the literature and draw up guidelines. An extensive literature search was carried out and summarized in a report. Based on the limited information available, simple guidelines have been drawn up. The report and guidelines were discussed at the 11th European Symposium on Urogenital Radiology in Santiago de Compostela, Spain. Mutagenic and teratogenic effects have not been described after administration of gadolinium or iodinated contrast media. Free iodide in radiographic contrast medium given to the mother has the potential to depress fetal/neonatal thyroid function. Neonatal thyroid function should be checked during the 1st week if iodinated contrast media have been given during pregnancy. No effect on the fetus has been seen after gadolinium contrast media. Only tiny amounts of iodinated or gadolinium-based contrast medium given to a lactating mother reach the milk, and only a minute proportion entering the baby's gut is absorbed. The very small potential risk associated with absorption of contrast medium may be considered insufficient to warrant stopping breast-feeding for 24 h following either iodinated or gadolinium contrast agents."
+    }
+   ]
+  },
+  {
+   "id": "ESUR-PELV-001",
+   "source": "ESUR",
+   "title": "ESUR guidelines on staging endometrial cancer with MRI update",
+   "year": "2020",
+   "page_url": "https://link.springer.com/article/10.1007/s00330-020-07220-x",
+   "pdf_url": "https://link.springer.com/article/10.1007/s00330-020-07220-x",
+   "license": "ESUR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_abdomen",
+   "priority": "medium",
+   "sha256": "747a389f9c9843e8f51ec9e94261f020f3409dc7f9267c650b8455b4e916a7e4",
+   "size_bytes": 2090,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2090,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Updated ESUR Guidelines for Endometrial Cancer: integrating MRI with the 2023 FIGO Staging Revolution. To summarize the key updates introduced in the 2023 International Federation of Gynecology and Obstetrics (FIGO) classification for endometrial cancer (EC), and to highlight the role of MRI in aligning with these changes for improved staging and patient management. A review of the updated 2023 FIGO classification, which integrates molecular profiling and histopathological criteria, was conducted. Additionally, the revised European Society of Urogenital Radiology (ESUR) MRI recommendations were analyzed to assess their alignment with the new FIGO framework, focusing on their role in evaluating myometrial invasion (MI) and cervical stromal involvement. The updated FIGO classification incorporates molecular data to refine risk stratification and staging accuracy. MRI continues to play a pivotal role in distinguishing between stages, mapping disease extent, and guiding surgical planning. The updated ESUR recommendations emphasize standardized MRI protocols, particularly the use of multiphase contrast-enhanced imaging, to improve diagnostic confidence in assessing MI. The integration of molecular classification into FIGO staging, supported by standardized and advanced MRI protocols as recommended by ESUR, enhances the management of endometrial cancer. Question The 2023 FIGO update integrates molecular profiling into endometrial cancer staging, requiring MRI adaptations to improve accuracy in assessing disease extent, including myometrial invasion. Findings Updated ESUR MRI guidelines emphasize multiphase contrast-enhanced imaging, structured reporting, and integration with FIGO 2023 classification, enhancing diagnostic precision for staging and treatment planning. Clinical relevance Standardized MRI protocols aligned with FIGO 2023 system improve endometrial cancer staging, guiding optimal surgical and therapeutic strategies, reducing diagnostic variability, and enhancing patient outcomes through individualized risk stratification and personalized treatment."
+    }
+   ]
+  },
+  {
+   "id": "ESUR-PIRADS-001",
+   "source": "ESUR",
+   "title": "ESUR ACR PI-RADS v2.1 prostate imaging reporting and data system",
+   "year": "2019",
+   "page_url": "https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/PI-RADS",
+   "pdf_url": "https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/PI-RADS",
+   "license": "ESUR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_abdomen",
+   "priority": "high",
+   "sha256": "bb9becde9e33476dfb6978460e88e2a388044ee9e987ba189613d000ae3714ef",
+   "size_bytes": 1047,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1045,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "PI-RADS Prostate Imaging - Reporting and Data System: 2015, Version 2. The Prostate Imaging - Reporting and Data System Version 2 (PI-RADS™ v2) is the product of an international collaboration of the American College of Radiology (ACR), European Society of Uroradiology (ESUR), and AdMetech Foundation. It is designed to promote global standardization and diminish variation in the acquisition, interpretation, and reporting of prostate multiparametric magnetic resonance imaging (mpMRI) examination, and it is based on the best available evidence and expert consensus opinion. It establishes minimum acceptable technical parameters for prostate mpMRI, simplifies and standardizes terminology and content of reports, and provides assessment categories that summarize levels of suspicion or risk of clinically significant prostate cancer that can be used to assist selection of patients for biopsies and management. It is intended to be used in routine clinical practice and also to facilitate data collection and outcome monitoring for research."
+    }
+   ]
+  },
+  {
+   "id": "ESUR-PIRADS-002",
+   "source": "ESUR",
+   "title": "ESUR consensus on quality requirements for prostate MRI",
+   "year": "2019",
+   "page_url": "https://link.springer.com/article/10.1007/s00330-019-06576-z",
+   "pdf_url": "https://link.springer.com/article/10.1007/s00330-019-06576-z",
+   "license": "ESUR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_abdomen",
+   "priority": "high",
+   "sha256": "07b0bca572da6b32fa9f8f6bc62bacc9fb0f75a2de5c7ba740f57a436ad3ad8f",
+   "size_bytes": 1465,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1465,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Imaging quality and prostate MR: it is time to improve. The Prostate Imaging Reporting and Data System (PI-RADS) guidelines set out the minimal technical requirements for the acquisition of multiparametric MRI (mpMRI) of the prostate. However, the rapid diffusion of this technique has inevitably led to variability in scan quality among centres across the UK and the world. Suboptimal image acquisition reduces the sensitivity and specificity of this technique for the detection of clinically significant prostate cancer and results in clinicians losing confidence in the technique.Two expert panels, one from the UK and one from the European Society of Urogenital Radiology (ESUR)/EAU Section of Urologic Imaging (ESUI), have stressed the importance to establish quality criteria for the acquisition of mpMRI of the prostate. A first attempt to address this issue has been the publication of the Prostate Imaging Quality (PI-QUAL) score, which assesses the mpMRI quality against a set of objective criteria (PI-RADS guidelines) together with criteria obtained from the image.PI-QUAL represents the first step towards the standardisation of a scoring system to assess the quality of prostate mpMRI prior to reporting and allows clinicians to have more confidence in using the scan to determine patient care. Further refinements after robust consensus among experts at an international level need to be agreed before its widespread adoption in the clinical setting."
+    }
+   ]
+  },
+  {
+   "id": "ESUR-PROST-001",
+   "source": "ESUR",
+   "title": "ESUR statement on appropriate role of MRI biparametric vs multiparametric",
+   "year": "2019",
+   "page_url": "https://www.esur.org/guidelines/",
+   "pdf_url": "https://www.esur.org/guidelines/",
+   "license": "ESUR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_abdomen",
+   "priority": "medium",
+   "sha256": "c8bcc558cf2f8651b43b55bc1410eb4dee38f0dbfacb64d4277244260daac152",
+   "size_bytes": 772,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 772,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESUR statement on appropriate role of MRI biparametric vs multiparametric Source: ESUR Year: 2019 Domain: radiology_mri_abdomen License: ESUR Available at: https://www.esur.org/guidelines/ This is a citation reference for the ESUR guideline 'ESUR statement on appropriate role of MRI biparametric vs multiparametric' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_mri_abdomen. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESUR-RECTAL-001",
+   "source": "ESUR",
+   "title": "ESUR ESGAR consensus update on rectal cancer MRI staging",
+   "year": "2024",
+   "page_url": "https://link.springer.com/article/10.1007/s00330-023-10081-9",
+   "pdf_url": "https://link.springer.com/article/10.1007/s00330-023-10081-9",
+   "license": "ESUR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_mri_abdomen",
+   "priority": "high",
+   "sha256": "eb5e1b525b79369d001ce1a35e75319fb57786b168f1ffec5df11b1f03fa89f2",
+   "size_bytes": 766,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 766,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESUR ESGAR consensus update on rectal cancer MRI staging Source: ESUR Year: 2024 Domain: radiology_mri_abdomen License: ESUR Available at: https://link.springer.com/article/10.1007/s00330-023-10081-9 This is a citation reference for the ESUR guideline 'ESUR ESGAR consensus update on rectal cancer MRI staging' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_mri_abdomen. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

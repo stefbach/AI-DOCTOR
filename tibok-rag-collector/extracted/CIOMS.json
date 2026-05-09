@@ -1,7 +1,7 @@
 {
  "source": "CIOMS",
  "generated_at": "2026-05-09T13:52:48Z",
- "total_documents": 4,
+ "total_documents": 7,
  "documents": [
   {
    "id": "CIOMS-006",
@@ -204,6 +204,81 @@
     {
      "chunk_index": 6,
      "content": "with non-convulsive epilepsies. Most clinical cohorts overrepresented people with severe forms of epilepsy, such as one Brazilian study with 72% of enrollees who reported daily seizures and another that enrolled people with refractory epilepsy awaiting or having undergone epilepsy surgery. The diagnosis of epilepsy in many studies was not made by clinicians with training in the diagnosis of epilepsy, thus the accuracy of the estimates and causes of death in epilepsy in some studies should be viewed with caution. Most of the causes of death were ascertained by review of clinical records or verbal autopsy. The accuracy of verbal autopsies varies depending on the other common causes of death in the population, the tool used, and the experience of the person administering the tool. As for postmortem examinations, in HICs the proportion of deaths autopsied in general populations and in people with epilepsy can be low , ; however, in comparison, none of the LMIC studies in this review included autopsy data. More epidemiologic studies, involving more LMIC localities, are needed. As with future studies in HICs, studies in LMICs should be performed in conformity with current guidelines for epidemiologic studies. , Representative population samples and incident cohorts should be studied, where acute symptomatic seizures are distinguished from single unprovoked seizures and from epilepsy, and where convulsive and nonconvulsive forms of epilepsy are also distinguished. Finally, epileptogenic conditions and all risk factors implicated in the mortality of epilepsy should be clearly described. The collection of such higher quality information will enable us to identify many measures necessary to prevent much of the premature mortality in LMICs. Supplementary Material Supplementary tables Supplementary figure 1 Supplementary figure 2 Supplementary figure 3"
+    }
+   ]
+  },
+  {
+   "id": "CIOMS-001",
+   "source": "CIOMS",
+   "title": "CIOMS Working Group VI Management of Safety Information from Clinical Trials",
+   "year": "2005",
+   "page_url": "https://cioms.ch/publications/",
+   "pdf_url": "https://cioms.ch/publications/",
+   "license": "CIOMS Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacovigilance",
+   "priority": "medium",
+   "sha256": "ad2a1d698e624b6dbb9244e1b0d143f9b835245ee0f930cfda8aec783ff483f7",
+   "size_bytes": 786,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 786,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CIOMS Working Group VI Management of Safety Information from Clinical Trials Source: CIOMS Year: 2005 Domain: drug_pharmacovigilance License: CIOMS Open Available at: https://cioms.ch/publications/ This is a citation reference for the CIOMS guideline 'CIOMS Working Group VI Management of Safety Information from Clinical Trials' published in 2005. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pharmacovigilance. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CIOMS-002",
+   "source": "CIOMS",
+   "title": "CIOMS Working Group VIII Practical Aspects of Signal Detection in Pharmacovigilance",
+   "year": "2010",
+   "page_url": "https://cioms.ch/publications/",
+   "pdf_url": "https://cioms.ch/publications/",
+   "license": "CIOMS Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacovigilance",
+   "priority": "high",
+   "sha256": "1d17355e185523a56799b655c55390572629fcbdd672305bf683a54974bf2766",
+   "size_bytes": 800,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 800,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CIOMS Working Group VIII Practical Aspects of Signal Detection in Pharmacovigilance Source: CIOMS Year: 2010 Domain: drug_pharmacovigilance License: CIOMS Open Available at: https://cioms.ch/publications/ This is a citation reference for the CIOMS guideline 'CIOMS Working Group VIII Practical Aspects of Signal Detection in Pharmacovigilance' published in 2010. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pharmacovigilance. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CIOMS-004",
+   "source": "CIOMS",
+   "title": "CIOMS Working Group X Evidence Synthesis and Meta-Analysis for Drug Safety",
+   "year": "2016",
+   "page_url": "https://cioms.ch/publications/",
+   "pdf_url": "https://cioms.ch/publications/",
+   "license": "CIOMS Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacovigilance",
+   "priority": "medium",
+   "sha256": "620cf2f897a46c989f4b893c5cee4c00cc1d3fadfa50ad798ad4bd8045cb3cfe",
+   "size_bytes": 782,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 782,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CIOMS Working Group X Evidence Synthesis and Meta-Analysis for Drug Safety Source: CIOMS Year: 2016 Domain: drug_pharmacovigilance License: CIOMS Open Available at: https://cioms.ch/publications/ This is a citation reference for the CIOMS guideline 'CIOMS Working Group X Evidence Synthesis and Meta-Analysis for Drug Safety' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pharmacovigilance. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

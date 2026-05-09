@@ -1,7 +1,7 @@
 {
  "source": "ISPAD",
  "generated_at": "2026-05-09T09:28:08Z",
- "total_documents": 9,
+ "total_documents": 10,
  "documents": [
   {
    "id": "ISPAD-DIABETES-001",
@@ -557,6 +557,31 @@
     {
      "chunk_index": 5,
      "content": "enable systematic follow-up and to ensure that patients are educated on the warning signs that should prompt them to seek evaluation or medical review. Our study has numerous limitations, such as its retrospective design. Due to its nature, it was not possible to collect information on potential factors that may have contributed to the progression to stage 3 T1D, such as pubertal development or weight gain. We therefore believe that prospective studies are needed to take these additional variables into account. Once again, due to the retrospective nature of the study, it was not possible to collect more detailed information on the number of patients in Stages 1 and 2 at the start of the follow-up period. Another limitation is the lack of information about HLA locus, which was not available for all patients. In addition, ZnT8 antibodies were not measured at baseline or at T1 in 51 patients, as the National Health Service did not offer this test free of charge. One limitation of the study is certainly the small sample size compared to other studies. However, as this study only involved subjects at risk of developing type 1 diabetes mellitus, it could not achieve the numbers expected from a study screening the general population. Finally, no markers of β-cell disfunction (C-peptide or proinsulin) were considered, despite the fact that Sims et al demonstrated an increased proinsulin to C-peptide ratio 12 months prior to onset of T1D [ ]. In conclusion our study indicates that persistent autoantibody positivity, particularly for GAD and IA2, is strongly associated with an increased risk of progression to T1D. By following children and adolescence with presymptomatic T1D, the clinical presentation at stage 3 is milder and DKA is less frequent: this makes screening of at-risk individuals and the general population cost-effective."
+    }
+   ]
+  },
+  {
+   "id": "ISPAD-ADOL-001",
+   "source": "ISPAD",
+   "title": "ISPAD 2022 adolescent transition from pediatric to adult diabetes care",
+   "year": "2022",
+   "page_url": "https://onlinelibrary.wiley.com/journal/13995448",
+   "pdf_url": "https://onlinelibrary.wiley.com/journal/13995448",
+   "license": "ISPAD",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_pediatric",
+   "priority": "medium",
+   "sha256": "bd18907267780f54f0a802f82d00832e9108066d3ac6e11a507a9e4284b88f70",
+   "size_bytes": 789,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 789,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:05Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISPAD 2022 adolescent transition from pediatric to adult diabetes care Source: ISPAD Year: 2022 Domain: endocrinology_pediatric License: ISPAD Available at: https://onlinelibrary.wiley.com/journal/13995448 This is a citation reference for the ISPAD guideline 'ISPAD 2022 adolescent transition from pediatric to adult diabetes care' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

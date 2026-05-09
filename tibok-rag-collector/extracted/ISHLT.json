@@ -1,7 +1,7 @@
 {
  "source": "ISHLT",
  "generated_at": "2026-05-09T10:16:38Z",
- "total_documents": 21,
+ "total_documents": 22,
  "documents": [
   {
    "id": "ISHLT-HTX-002",
@@ -1097,6 +1097,31 @@
     {
      "chunk_index": 4,
      "content": "therapeutic option for stable heart transplant recipients with post-transplant diabetes mellitus, obesity, or inadequate glycemic control on conventional therapies. Given the observed metabolic benefits and the absence of a consistent short-term harm signal in limited observational data, GLP-1 RAs may be considered in selected stable heart transplant recipients with careful clinical and immunosuppressant monitoring. Patients most likely to benefit may include those who are more than one-year post-transplant with stable graft function, established diabetes or obesity, and preserved renal function. Agent selection should be individualized based on indication, tolerability, dosing frequency, and insurance coverage. Knowledge gaps and future directions Prospective randomized controlled trials are needed to confirm the metabolic benefits of GLP-1 RAs in heart transplant recipients and to evaluate effects on cardiovascular events, cardiac allograft vasculopathy, graft survival, and mortality. Longer-term follow-up studies are essential to assess the durability of benefit and late safety signals. Prospective pharmacokinetic studies evaluating interactions between GLP-1 RAs and immunosuppressive agents would provide mechanistic insight and inform optimal dosing strategies. Future studies should also explore whether treatment effects vary by GLP-1 RA agent, time since transplant, baseline renal function, or degree of metabolic disease. Finally, real-world implementation studies examining adherence, cost-effectiveness, and patient-reported outcomes will be critical to guide widespread adoption in transplant care. Limitations All included studies were observational, with inherent susceptibility to selection bias, confounding by indication, and co-intervention bias. Pre-post designs lacked control groups, and residual confounding cannot be excluded. Two studies included mixed solid-organ transplant populations, and our review relied on heart-transplant subgroup data only when these were explicitly reported; incomplete subgroup reporting may have limited certainty for some endpoints. One study included concomitant exposure to an SGLT2 inhibitor, which may have contributed to the observed metabolic changes. Sample sizes were small, follow-up was limited, and outcome reporting was heterogeneous. Publication bias assessment was underpowered. Certainty of evidence was moderate for BMI and HbA1c. Safety outcomes were sparsely reported and not suitable for pooling. Data regarding weight rebound after discontinuation of GLP-1 RA therapy were not systematically reported. Sex-specific analyses were not feasible. Conclusion In this systematic review and meta-analysis, GLP-1 receptor agonist therapy was associated with improved weight and glycemic control in adult heart transplant recipients. Renal function appeared stable in the limited available reports. Current observational data did not identify a consistent short-term signal of harm related to immunosuppression management or graft outcomes, but the evidence is insufficient to establish safety with confidence. These findings suggest that GLP-1 RAs may represent a potentially useful adjunctive therapy for cardiometabolic management after heart transplantation. Prospective, adequately powered trials are needed before GLP-1 RAs can be definitively recommended as standard-of-care therapy in this population. Ethics and transplant declaration This study is a systematic review and meta-analysis of previously published data. All included studies were conducted in accordance with institutional and national ethical standards and complied with the Declaration of Helsinki. The authors affirm that no organs or tissues were procured from executed prisoners or prisoners of conscience, and that donor consent and organ procurement procedures adhered to internationally accepted ethical guidelines, including the Declaration of Istanbul and ISHLT transplant ethics policies. Financial disclosure / Conflict of interest statement None. Declaration of Generative AI and AI-assisted technologies in the writing process AI-assisted tools were used solely for language editing and grammatical refinement. No AI tools were used for data analysis, result interpretation, or the generation of scientific content. All authors reviewed and approved the final manuscript and take full responsibility for its accuracy and integrity. Declaration of Competing Interest The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper."
+    }
+   ]
+  },
+  {
+   "id": "ISHLT-INFECTION-001",
+   "source": "ISHLT",
+   "title": "ISHLT consensus document on infectious complications in MCS",
+   "year": "2017",
+   "page_url": "https://www.jhltonline.org/article/S1053-2498(17)31571-1/fulltext",
+   "pdf_url": "https://www.jhltonline.org/article/S1053-2498(17)31571-1/fulltext",
+   "license": "ISHLT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiothoracic_surgery",
+   "priority": "medium",
+   "sha256": "7a6932cb50b2689e26a79dbc3218721c226574abca69925c83e2889abf8e3e98",
+   "size_bytes": 782,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 782,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:00Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISHLT consensus document on infectious complications in MCS Source: ISHLT Year: 2017 Domain: cardiothoracic_surgery License: ISHLT Available at: https://www.jhltonline.org/article/S1053-2498(17)31571-1/fulltext This is a citation reference for the ISHLT guideline 'ISHLT consensus document on infectious complications in MCS' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiothoracic_surgery. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

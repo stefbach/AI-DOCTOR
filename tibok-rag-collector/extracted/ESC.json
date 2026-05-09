@@ -1,7 +1,7 @@
 {
  "source": "ESC",
  "generated_at": "2026-05-02T14:18:37Z",
- "total_documents": 99,
+ "total_documents": 108,
  "documents": [
   {
    "id": "ESC-001",
@@ -6275,6 +6275,231 @@
     {
      "chunk_index": 5,
      "content": "Association recommends knowing your cholesterol and glucose values. A lipid panel plus glucose was obtained from each participant to assess the contribution of blood markers to CVD risk. The results indicate that the mean participant samples were within the reference range of the lipid profile and glucose blood markers for cohorts 1 and 2 (see ). However, the minimum and maximum results were concerning and indicated that these participants were at high risk for CVD and diabetes. This study involved the development and pilot testing of a CVD risk-factor prevention program using an evidence-based curriculum and a combination of didactic and technology tools to enhance physical activity and healthy eating. Its strengths support its translation to other settings with populations at high risk for CVD and its complications; its potential for generalizability and impact is high. Students improved their health behaviors and gained the tools necessary to improve their own chronic disease risk profiles and to identify chronic disease symptoms and risk factors in others. Additionally, they may be able to use their ability to record and to assess these blood markers and anthropometrics as a solid baseline for their ongoing healthcare. The study had two limitations. First, data were collected at different timepoints for each cohort. Cohort 1 data collection occurred at baseline, 6, and 12 months, which did not coincide with the timing of course delivery and contributed to a loss of follow-up data on students who did not return to school after winter or summer recess. Secondly, retention of college students to the post assessment was limited because they were reluctant to continue using the mobile app after the 15-week course ended. However, in a systematic review and meta-analysis study by ( ) investigating the impact of lifestyle interventions targeting improvement of health outcomes (specifically physical activity, diet, or weight) for college students found positive health outcomes despite retention challenges in some of the studies used. Every effort was made to enhance cohort 2’s collection of follow-up data and to learn from experience through process evaluation. Upon our request, the National Institutes of Health (NIH) granted approval to conduct the CVD assessments during the academic year, while students were still enrolled in the course, thereby avoiding the summer months when they were not in school and did not input data into the mobile app. The new timepoints implemented at the beginning of the fall semester (August 2017) for cohort 2 allowed data collection while they were enrolled in the course. Instructors accompanied them to the baseline and post-intervention screenings during their regular class period. Continuing data entry and returning for the final follow-up assessment at the end of the academic year was at the students’ discretion. To mediate data-entry reluctance and maintain retention for the follow-up collection, research assistants assigned to a specific group of students delivered bi-weekly motivational text messages and email reminders. Monthly incentives of $20 gift cards were offered to the three participants who entered the most data in the Rams Have Heart mobile app. In spite of these efforts, some students were unwilling to continue entering the data after completing the course, citing course load, studying, after-school jobs, and extracurricular activities as impediments. However, many more cohort 2 students returned for the final follow-up assessment (cohort 1, n = 18; cohort 2, n = 51). CONCLUSION AA adults are disproportionately vulnerable to chronic CVD disease, and the need for interventions to help young AA adults understand the importance of CVD risk factors for their future health profile is great. They must learn how to assess a family history of CVD, obesity, health behaviors, and lifestyle choices and develop the requisite self-efficacy to adopt behavioral changes that will improve their life-long health. AA college students are an ideal target population for risk factor-reduction programs, especially since more than half of the study population had one or more CVD risk factors. The pilot study showed evidence that the Rams Have HEART assessment, prevention, and health-promotion intervention was achievable and acceptable to participants. Further, university administrators recognized the need for such a program and allowed the course EXS1301 Lifestyle Behaviors for a Healthy Heart to remain a part of the General Education Curriculum (GEC) for all students. The investigative team intends to develop a full-scale intervention using the NIH R01 mechanism and potentially partnering with other HBCUs to implement it."
+    }
+   ]
+  },
+  {
+   "id": "ESC-MINOCA-001",
+   "source": "ESC",
+   "title": "ESC working group position paper on MINOCA",
+   "year": "2020",
+   "page_url": "https://academic.oup.com/eurheartj/article/41/37/3504/5901512",
+   "pdf_url": "https://academic.oup.com/eurheartj/article/41/37/3504/5901512",
+   "license": "ESC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_coronary",
+   "priority": "medium",
+   "sha256": "5aa375c7ccefa2f10d13685968e6e7cfe680baf4af887fcdad1cfd2aa07fb62a",
+   "size_bytes": 732,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 732,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESC working group position paper on MINOCA Source: ESC Year: 2020 Domain: cardiology_coronary License: ESC Available at: https://academic.oup.com/eurheartj/article/41/37/3504/5901512 This is a citation reference for the ESC guideline 'ESC working group position paper on MINOCA' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_coronary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESC-DVT-001",
+   "source": "ESC",
+   "title": "ESC working group thrombosis guidelines on deep vein thrombosis treatment",
+   "year": "2018",
+   "page_url": "https://academic.oup.com/eurheartj/article/39/47/4208/5067645",
+   "pdf_url": "https://academic.oup.com/eurheartj/article/39/47/4208/5067645",
+   "license": "ESC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_venous",
+   "priority": "medium",
+   "sha256": "cd03e6894a3c60eaf7e0d877d1fe5dcb13107dccfb69eabc5de434c11e158fac",
+   "size_bytes": 802,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 802,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESC working group thrombosis guidelines on deep vein thrombosis treatment Source: ESC Year: 2018 Domain: vascular_surgery_venous License: ESC Available at: https://academic.oup.com/eurheartj/article/39/47/4208/5067645 This is a citation reference for the ESC guideline 'ESC working group thrombosis guidelines on deep vein thrombosis treatment' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_surgery_venous. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESC-ANTIPLAT-001",
+   "source": "ESC",
+   "title": "ESC working group thrombosis recommendations on antiplatelet management around interventions",
+   "year": "2018",
+   "page_url": "https://academic.oup.com/eurheartj/article/39/14/1162/4823620",
+   "pdf_url": "https://academic.oup.com/eurheartj/article/39/14/1162/4823620",
+   "license": "ESC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_coronary",
+   "priority": "medium",
+   "sha256": "0eed81cf3612f6061b14561ed2c3fd6e0419c576bfed5daabb1b0ac51caaec97",
+   "size_bytes": 832,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 832,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESC working group thrombosis recommendations on antiplatelet management around interventions Source: ESC Year: 2018 Domain: cardiology_coronary License: ESC Available at: https://academic.oup.com/eurheartj/article/39/14/1162/4823620 This is a citation reference for the ESC guideline 'ESC working group thrombosis recommendations on antiplatelet management around interventions' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_coronary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESC-CSARCOID-001",
+   "source": "ESC",
+   "title": "ESC working group expert consensus cardiac sarcoidosis",
+   "year": "2020",
+   "page_url": "https://academic.oup.com/eurheartj/article/41/41/4229/5825473",
+   "pdf_url": "https://academic.oup.com/eurheartj/article/41/41/4229/5825473",
+   "license": "ESC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_hf",
+   "priority": "medium",
+   "sha256": "304166f12e6f0e4e85db8ab69603472c14a0c12c64add24fd67ff03a0afd6f73",
+   "size_bytes": 744,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 744,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESC working group expert consensus cardiac sarcoidosis Source: ESC Year: 2020 Domain: cardiology_hf License: ESC Available at: https://academic.oup.com/eurheartj/article/41/41/4229/5825473 This is a citation reference for the ESC guideline 'ESC working group expert consensus cardiac sarcoidosis' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_hf. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESC-ENDOC-001",
+   "source": "ESC",
+   "title": "ESC Guidelines for the Management of Endocarditis",
+   "year": "2023",
+   "page_url": "https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines",
+   "pdf_url": "https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines",
+   "license": "ESC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "internal_medicine_id",
+   "priority": "high",
+   "sha256": "44c9aeb25332d572f18a54f1eb2a288ae9ffbbc5176586f38d0f54994c13de5a",
+   "size_bytes": 2115,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2115,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Prosthetic-Valve Endocarditis with Discordant Isolates: A Case Report and a Review of the Literature. Prosthetic-valve endocarditis (PVE) represents one of the most serious forms of infective endocarditis, marked by high mortality and considerable management complexity. The 2023 European Society of Cardiology (ESC) Guidelines emphasise the diagnostic centrality of repeatedly positive blood cultures. Nonetheless, a significant area of uncertainty remains regarding the diagnostic and prognostic value of cultures from explanted prosthetic valves-particularly in centres lacking access to molecular diagnostics. We report a case of prosthetic-valve endocarditis on a bioprosthesis, in which repeated blood-culture sets yielded Streptococcus acidominimus , whereas culture of the explanted valve revealed Staphylococcus warnerii . The patient received six weeks of intravenous vancomycin, with treatment tailored according to the patient's clinical and laboratory parameters and in alignment with international endocarditis guidelines, obtaining a clear clinical and laboratory improvement. The literature reports that discordance between blood-culture and valve-culture results in infective endocarditis may range from approximately 10% to 29%, attributable to contamination, biofilm formation or polymicrobial infection. In our case, management guided by the microorganism repeatedly isolated from blood cultures proved effective and aligned with the 2023 European Society of Cardiology (ESC) guidelines. The case underlines the importance of a multidisciplinary team and an integrated interpretation of microbiological, clinical and surgical data. Infective endocarditis with discordant isolates presents a complex diagnostic challenge. The etiological diagnosis must rely primarily on the results of blood cultures, whereas valve culture plays a complementary role-useful more for prognostic stratification than for initial diagnostic purposes. A multidisciplinary approach and a critical interpretation of microbiological findings are essential to optimise therapeutic management and improve patient outcomes."
+    }
+   ]
+  },
+  {
+   "id": "ESC-DIG-001",
+   "source": "ESC",
+   "title": "ESC heart failure guidelines digoxin therapy and toxicity",
+   "year": "2021",
+   "page_url": "https://academic.oup.com/eurheartj",
+   "pdf_url": "https://academic.oup.com/eurheartj",
+   "license": "ESC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "medium",
+   "sha256": "c70e70952171b83bca238388d2b3a4bc7b200337da62865f176d63aa4e79f4ec",
+   "size_bytes": 735,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 735,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESC heart failure guidelines digoxin therapy and toxicity Source: ESC Year: 2021 Domain: toxicology_specific License: ESC Available at: https://academic.oup.com/eurheartj This is a citation reference for the ESC guideline 'ESC heart failure guidelines digoxin therapy and toxicity' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_specific. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESC-DOAC-001",
+   "source": "ESC",
+   "title": "ESC EHRA practical guide on use of NOACs in atrial fibrillation",
+   "year": "2021",
+   "page_url": "https://academic.oup.com/europace",
+   "pdf_url": "https://academic.oup.com/europace",
+   "license": "ESC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_thrombosis",
+   "priority": "high",
+   "sha256": "33ffe5591e543a3416e183564e55d1ef5146e3440edae58e199e2799fe9a0661",
+   "size_bytes": 1962,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1956,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Anticoagulant selection in relation to the SAMe-TT 2 R 2 score in patients with atrial fibrillation: The GLORIA-AF registry. The SAMe-TT 2 R 2 score helps identify patients with atrial fibrillation (AF) likely to have poor anticoagulation control during anticoagulation with vitamin K antagonists (VKA) and those with scores >2 might be better managed with a target-specific oral anticoagulant (NOAC). We hypothesized that in clinical practice, VKAs may be prescribed less frequently to patients with AF and SAMe-TT 2 R 2 scores >2 than to patients with lower scores. We analyzed the Phase III dataset of the Global Registry on Long-Term Oral Antithrombotic Treatment in Patients with Atrial Fibrillation (GLORIA-AF), a large, global, prospective global registry of patients with newly diagnosed AF and ≥1 stroke risk factor. We compared baseline clinical characteristics and antithrombotic prescriptions to determine the probability of the VKA prescription among anticoagulated patients with the baseline SAMe-TT 2 R 2 score >2 and ≤ 2. Among 17,465 anticoagulated patients with AF, 4,828 (27.6%) patients were prescribed VKA and 12,637 (72.4%) patients an NOAC: 11,884 (68.0%) patients had SAMe-TT 2 R 2 scores 0-2 and 5,581 (32.0%) patients had scores >2. The proportion of patients prescribed VKA was 28.0% among patients with SAMe-TT 2 R 2 scores >2 and 27.5% in those with scores ≤2. The lack of a clear association between the SAMe-TT 2 R 2 score and anticoagulant selection may be attributed to the relative efficacy and safety profiles between NOACs and VKAs as well as to the absence of trial evidence that an SAMe-TT 2 R 2 -guided strategy for the selection of the type of anticoagulation in NVAF patients has an impact on clinical outcomes of efficacy and safety. The latter hypothesis is currently being tested in a randomized controlled trial. URL: https://www.clinicaltrials.gov//Unique identifier: NCT01937377, NCT01468701, and NCT01671007."
+    }
+   ]
+  },
+  {
+   "id": "ESC-CARDIAC-REHAB-001",
+   "source": "ESC",
+   "title": "ESC secondary prevention and rehabilitation guidelines",
+   "year": "2021",
+   "page_url": "https://www.escardio.org/Guidelines",
+   "pdf_url": "https://www.escardio.org/Guidelines",
+   "license": "ESC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_cardiac",
+   "priority": "high",
+   "sha256": "d0cf5ee90e5b5d88a830c736e1f9d5deefeddac1d8824daf027bef6d60c3bdfc",
+   "size_bytes": 2105,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2105,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Acute Coronary Syndromes: State-of-the-Art Diagnosis, Management, and Secondary Prevention. Background: Acute coronary syndromes (ACSs) remain a leading cause of death and disability. Since the publication of the 2023 ESC ACS guidelines, multiple studies and an ESC/EAS dyslipidaemia update have refined how clinicians diagnose, revascularize, and treat ACS across the care continuum. Content: This state-of-the-art review synthesizes advances from 2023 to 2025 across five domains. Diagnosis: High-sensitivity troponin-based accelerated pathways remain foundational; GRACE 3.0 improves calibration for early vs. delayed angiography, while selective use of CCTA and routine use of intracoronary imaging/physiology help define the mechanism and optimize PCI. Revascularization: complete revascularization continues to underpin care in multivessel disease, with recent data favouring culprit-only PCI acutely and staged non-culprit treatment during the index stay in most STEMI presentations, particularly with heart-failure physiology. Antithrombotic therapy: Aspirin remains critical early after ACS-PCI; emerging evidence supports shorter DAPT and aspirin withdrawal after 1 month in carefully selected, low-ischaemic-risk patients, whereas day-0 aspirin-free strategies in unselected ACS are not non-inferior. Secondary prevention: A \"strike early and strong\" approach to LDL-cholesterol-often with combination therapy in hospital-is emphasized, alongside nuanced roles for SGLT2 inhibitors and GLP-1 receptor agonists. Special populations and implementation: Sex- and age-aware tailoring (including MINOCA/SCAD evaluation), pragmatic bleeding-risk mitigation, digitally enabled cardiac rehabilitation, and registry-driven quality improvement translate evidence into practice. Summary: Contemporary ACS care is moving from uniform protocols toward risk-stratified, mechanism-informed pathways. We offer practical algorithms and checklists to align interventional timing, antithrombotic intensity/duration, and secondary prevention with individual patient risk-bridging new evidence to bedside decisions."
+    }
+   ]
+  },
+  {
+   "id": "ESC-ACS-001",
+   "source": "ESC",
+   "title": "ESC guidelines for the management of acute coronary syndromes",
+   "year": "2023",
+   "page_url": "https://www.escardio.org/Guidelines",
+   "pdf_url": "https://www.escardio.org/Guidelines",
+   "license": "ESC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "emergency_cardiopulm",
+   "priority": "high",
+   "sha256": "54fe2626396352f5401ba1168da99b7d3174f94722aaaa3026661cb884712c78",
+   "size_bytes": 1672,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1672,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Optimal lifelong roadmap post-ACS. A Clinical Consensus Statement of the European Association of Preventive Cardiology of the ESC. Acute coronary syndromes (ACS) remain a major cause of mortality and morbidity across Europe, with long-term outcomes still suboptimal despite advances in acute care. Current clinical guidelines primarily focus on the immediate post-event phase, providing limited direction on extended follow-up and integrated care strategies. Furthermore, there is considerable heterogeneity across European healthcare systems regarding the implementation of post-ACS services, resulting in disparities in patient outcomes and access to preventive care. The aim of this clinical consensus statement, developed by the European Association of Preventive Cardiology (EAPC) of the European Society of Cardiology (ESC), is to define an optimal, lifelong roadmap for patients following an ACS. It proposes a structured, phased model of care that supports evidence-informed, equitable, and patient-centred management strategies adaptable to national and local contexts. The roadmap targets multiple patient phenotypes, promoting continuity of care, collaboration among healthcare professionals, and integration of technological solutions. The methodology employed involved a multidisciplinary expert group nominated by the EAPC. Through structured literature review, expert consensus, and iterative discussions, the panel defined key components of post-ACS care across different phases of recovery. The final roadmap integrates best available evidence, clinical expertise, and practical considerations to support implementation across diverse healthcare settings."
     }
    ]
   }

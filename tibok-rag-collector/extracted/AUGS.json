@@ -1,7 +1,7 @@
 {
  "source": "AUGS",
  "generated_at": "2026-05-09T12:05:11Z",
- "total_documents": 4,
+ "total_documents": 6,
  "documents": [
   {
    "id": "AUGS-SUI-001",
@@ -516,6 +516,56 @@
     {
      "chunk_index": 45,
      "content": "243. Mantis C, Kandela I, Aird F, Reproducibility Project: Cancer B. Replication study: coadministration of a tumor-penetrating peptide enhances the efficacy of cancer drugs. eLife. 2017; 6:e17584. https://doi. org/10.7554/eLife.17584 PMID: 28100395 244. Jeronimo S, Khadraoui M, Wang DP, Martin K, Lesku JA, Robert KA, et al. Plumage color manipulation has no effect on social dominance or fitness in zebra finches. Behav Ecol. 2018; 29(2):459–67. https:// doi.org/10.1093/beheco/arx195 245. Sheldon EL, Griffith SC. Embryonic heart rate predicts prenatal development rate, but is not related to post-natal growth rate or activity level in the zebra finch (Taeniopygia guttata). Ethology. 2018; 124 (11):829–37. https://doi.org/10.1111/eth.12817 246. Kafkafi N, Mayo CL, Elmer GI. Mining mouse behavior for patterns predicting psychiatric drug classifi- cation. Psychopharmacology (Berl). 2014; 231(1):231–42. Epub 2013/08/21. https://doi.org/10.1007/ s00213-013-3230-6 PMID: 23958942 PLOS Biology | https://doi.org/10.1371/journal.pbio.3000411 July 14, 2020 64 / 65 PLOS BIOLOGY Reporting animal research: Explanation and Elaboration for the ARRIVE guidelines 2.0 247. Stodden V, Guo P, Ma Z. Toward reproducible computational research: an empirical analysis of data and code policy adoption by journals. PLoS ONE. 2013; 8(6):e67111. https://doi.org/10.1371/journal. pone.0067111 PMID: 23805293 248. Piwowar HA, Day RS, Fridsma DB. Sharing detailed research data is associated with increased cita- tion rate. PLoS ONE. 2007; 2(3):e308. https://doi.org/10.1371/journal.pone.0000308 PMID: 17375194 249. McKiernan EC, Bourne PE, Brown CT, Buck S, Kenall A, Lin J, et al. How open science helps researchers succeed. Elife. 2016; 5. Epub 2016/07/09. https://doi.org/10.7554/eLife.16800 PMID: 27387362 250. Data Citation Synthesis Group. Joint declaration of data citation principles. Martone M, editor. San Diego, CA: FORCE11; 2014. 251. Wilkinson MD, Dumontier M, Aalbersberg IJ, Appleton G, Axton M, Baak A, et al. The FAIR Guiding Principles for scientific data management and stewardship. Scientific Data. 2016; 3:160018. https:// doi.org/10.1038/sdata.2016.18 PMID: 26978244 252. Federer LM, Lu Y-L, Joubert DJ, Welsh J, Brandys B. Biomedical data sharing and reuse: attitudes and practices of clinical and scientific research staff. PLoS ONE. 2015; 10(6):e0129506. https://doi. org/10.1371/journal.pone.0129506 PMID: 26107811 253. Mamrot J, Legaie R, Ellery SJ, Wilson T, Seemann T, Powell DR, et al. De novo transcriptome assem- bly for the spiny mouse (Acomys cahirinus). Sci Rep. 2017; 7(1):8996. https://doi.org/10.1038/s41598- 017-09334-7 PMID: 28827620 254. Bero L, Anglemyer A, Vesterinen H, Krauth D. The relationship between study sponsorship, risks of bias, and research outcomes in atrazine exposure studies conducted in non-human animals: System- atic review and meta-analysis. Environ Int. 2016; 92–93:597–604. https://doi.org/10.1016/j.envint. 2015.10.011 PMID: 26694022 255. Dalbøge LS, Pedersen PJ, Hansen G, Fabricius K, Hansen HB, Jelsing J, et al. A hamster model of diet-induced obesity for preclinical evaluation of anti-obesity, anti-diabetic and lipid modulating agents. PLoS ONE. 2015; 10(8):e0135634. https://doi.org/10.1371/journal.pone.0135634 PMID: 26266945 256. Garcia de la serrana D, Vieira VLA, Andree KB, Darias M, Estévez A, Gisbert E, et al. Development temperature has persistent effects on muscle growth responses in gilthead sea bream. PLoS ONE. 2012; 7(12):e51884. https://doi.org/10.1371/journal.pone.0051884 PMID: 23284803 257. Lundh A, Sismondo S, Lexchin J, Busuioc OA, Bero L. Industry sponsorship and research outcome. Cochrane Database Syst Rev. 2012;(12). https://doi.org/10.1002/14651858.ED000049 PMID: 23361645 258. Popelut A, Valet F, Fromentin O, Thomas A, Bouchard P. Relationship between sponsorship and fail- ure rate of dental implants: a systematic approach. PLoS ONE. 2010; 5(4):e10274. https://doi.org/10. 1371/journal.pone.0010274 PMID: 20422000 259. Lexchin J, Bero LA, Djulbegovic B, Clark O. Pharmaceutical industry sponsorship and research out- come and quality: systematic review. BMJ. 2003; 326(7400):1167–70. Epub 2003/05/31. https://doi. org/10.1136/bmj.326.7400.1167 PMID: 12775614 260. Krauth D, Anglemyer A, Philipps R, Bero L. Nonindustry-Sponsored Preclinical Studies on Statins Yield Greater Efficacy Estimates Than Industry-Sponsored Studies: A Meta-Analysis. PLoS Biol. 2014; 12(1):e1001770. https://doi.org/10.1371/journal.pbio.1001770 PMID: 24465178 261. Genchi M, Prati P, Vicari N, Manfredini A, Sacchi L, Clementi E, et al. Francisella tularensis: no evi- dence for transovarial transmission in the tularemia tick vectors Dermacentor reticulatus and Ixodes ricinus. PLoS ONE. 2015; 10(8):e0133593. https://doi.org/10.1371/journal.pone.0133593 PMID: 26244842 262. Kolahian S, Sadri H, Shahbazfar AA, Amani M, Mazadeh A, Mirani M. The Effects of leucine, zinc, and chromium supplements on inflammatory events of the respiratory system in type 2 diabetic rats. PLoS ONE. 2015; 10(7):e0133374. https://doi.org/10.1371/journal.pone.0133374 PMID: 26185997 263. Eyre-Walker A, Stoletzki N. The assessment of science: the relative merits of post-publication review, the impact factor, and the number of citations. PLoS Biol. 2013; 11(10):e1001675. doi: 10.1371/ journal.pbio.1001675. PMID: 24115908 PLOS Biology | https://doi.org/10.1371/journal.pbio.3000411 July 14, 2020 65 / 65"
+    }
+   ]
+  },
+  {
+   "id": "AUGS-FECAL-001",
+   "source": "AUGS",
+   "title": "AUGS Position Statement Fecal Incontinence Female",
+   "year": "2021",
+   "page_url": "https://www.augs.org/clinical-resources/",
+   "pdf_url": "https://www.augs.org/clinical-resources/",
+   "license": "AUGS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "urology_female",
+   "priority": "medium",
+   "sha256": "601ea92743b27ec02245dfb12ebb2023c5ad1162dc98c892464124aa406d87ae",
+   "size_bytes": 718,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 718,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AUGS Position Statement Fecal Incontinence Female Source: AUGS Year: 2021 Domain: urology_female License: AUGS Available at: https://www.augs.org/clinical-resources/ This is a citation reference for the AUGS guideline 'AUGS Position Statement Fecal Incontinence Female' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: urology_female. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AUGS-PROLAPSE-001",
+   "source": "AUGS",
+   "title": "AUGS Position on Sexual Function in Pelvic Floor Disorders",
+   "year": "2019",
+   "page_url": "https://www.augs.org/clinical-resources/",
+   "pdf_url": "https://www.augs.org/clinical-resources/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sexual_female",
+   "priority": "medium",
+   "sha256": "ffb0e61c2aa294e64aa9855dc66ac0bab2722ad1db6ee5e126cefde404ac3051",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:20Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AUGS Position on Sexual Function in Pelvic Floor Disorders Source: AUGS Year: 2019 Domain: sexual_female License: Proprietary Available at: https://www.augs.org/clinical-resources/ This is a citation reference for the AUGS guideline 'AUGS Position on Sexual Function in Pelvic Floor Disorders' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sexual_female. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

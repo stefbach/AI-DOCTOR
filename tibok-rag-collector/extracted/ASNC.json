@@ -1,7 +1,7 @@
 {
  "source": "ASNC",
  "generated_at": "2026-05-09T11:37:13Z",
- "total_documents": 2,
+ "total_documents": 5,
  "documents": [
   {
    "id": "ASNC-NUCLEAR-001",
@@ -138,6 +138,81 @@
     {
      "chunk_index": 13,
      "content": "if initial echocardiographic findings are normal and clinical suspicion is low, routine follow-up with periodic echocardiography may be sufficient. 11.3. Longitudinal Monitoring Because myocardial involvement in SSc may evolve gradually over time, periodic imaging surveillance is recommended. Echocardiography remains the primary modality for routine follow-up due to its availability and ability to assess ventricular function, myocardial mechanics, and pulmonary pressures [ ]. Serial evaluation of parameters such as ventricular function, myocardial strain, and right ventricular performance may help identify disease progression or the development of cardiopulmonary complications. Repeat CMR may be considered in patients with previously detected myocardial abnormalities or in those with worsening symptoms or functional decline. Quantitative parameters such as native T1 values and ECV fraction may serve as useful markers for monitoring diffuse myocardial fibrosis and assessing disease progression [ , ]. 11.4. Integrated Multimodality Strategy In clinical practice, the optimal imaging strategy for SSc involves integration of different imaging modalities according to the clinical scenario. Echocardiography is generally used for initial screening and routine monitoring, while CMR provides detailed tissue characterization and confirmation of myocardial involvement. Nuclear imaging and cardiac CT may be employed in selected patients to evaluate microvascular ischemia, inflammatory activity, or CAD [ , ]. Such a structured multimodality imaging protocol may facilitate earlier detection of myocardial disease, improve risk stratification, and support individualized management strategies for patients with SSc. As imaging technologies continue to evolve, the integration of advanced quantitative imaging techniques may further enhance the diagnostic and prognostic value of cardiovascular imaging in specialized SSc clinics. 12. Conclusions Myocardial involvement represents an important yet frequently underrecognized manifestation of SSc. The complex interplay of coronary microvascular dysfunction, immune-mediated inflammation, and progressive myocardial fibrosis contributes to the development of SSc cardiomyopathy and may ultimately lead to ventricular dysfunction, arrhythmias, heart failure, and increased risk of sudden cardiac death [ , ]. Importantly, myocardial abnormalities may develop long before clinical symptoms become apparent, underscoring the need for sensitive diagnostic approaches capable of identifying subclinical disease. Advances in cardiovascular imaging have substantially improved the detection and characterization of myocardial involvement in SSc [ ]. Echocardiography remains the cornerstone of initial cardiac evaluation and longitudinal monitoring, enabling assessment of ventricular function, myocardial mechanics, and pulmonary pressures [ , ]. Techniques such as speckle-tracking strain imaging have further enhanced the ability to detect subtle impairments in myocardial function that may precede overt systolic dysfunction [ ]. CMR has emerged as the reference imaging modality for comprehensive myocardial tissue characterization. Techniques including LGE and parametric mapping allow for noninvasive detection of myocardial fibrosis and inflammation, providing valuable insights into the underlying pathophysiological processes of SSc cardiomyopathy [ , ]. In addition, nuclear imaging techniques such as PET and SPECT can assess coronary microvascular dysfunction, inflammatory activity, and emerging molecular targets related to fibrotic remodeling [ , ]. Cardiac CT may serve as a complementary modality for excluding obstructive CAD and evaluating thoracic structural abnormalities [ ]. The integration of these imaging modalities into structured multimodality algorithms enables more accurate detection of subclinical myocardial disease, facilitates monitoring of disease progression and therapeutic response, and improves risk stratification for adverse cardiovascular outcomes [ , ]. Imaging biomarkers such as myocardial strain abnormalities, diffuse myocardial fibrosis detected by CMR, and impaired CFR have demonstrated potential prognostic value and may help identify patients at increased risk of cardiac complications [ , ]. Future developments in cardiovascular imaging, including AI–assisted analysis, radiomics, and novel molecular imaging tracers, may further enhance the ability to detect early myocardial involvement and quantify disease activity. These advances may also facilitate the use of imaging biomarkers as surrogate endpoints in clinical trials evaluating emerging therapies for SSc [ , ]. In conclusion, myocardial involvement in SSc represents a multifaceted and clinically significant complication that requires a comprehensive diagnostic approach. Multimodality cardiovascular imaging plays a central role in the detection, characterization, and monitoring of cardiac disease in SSc and is increasingly recognized as an essential component of contemporary patient management. Continued research integrating advanced imaging techniques with clinical and molecular data will be crucial for improving early diagnosis, refining risk stratification, and ultimately enhancing outcomes for patients with SSc."
+    }
+   ]
+  },
+  {
+   "id": "ASNC-NUC-001",
+   "source": "ASNC",
+   "title": "ASNC imaging guidelines for nuclear cardiology procedures SPECT MPI",
+   "year": "2018",
+   "page_url": "https://www.asnc.org/imagingguidelines",
+   "pdf_url": "https://www.asnc.org/imagingguidelines",
+   "license": "ASNC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_imaging",
+   "priority": "high",
+   "sha256": "aa78f2c00d31f5089a9403dfaf389300bd0786870d1fa71466cb3208bf047b85",
+   "size_bytes": 1952,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1952,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "[Nuclear cardiology: the present functions and future perspectives]. For the past decade, the diagnosis and treatment of coronary artery disease (CAD) has shifted from the traditional model by evaluating coronary artery stenosis with morphological imaging methods to a novel model by focusing on the detection of ischemia for risk stratification. The myocardial perfusion imaging (MPI) using stress single photon emission computed tomography (SPECT) has become the most commonly used stress imaging technique for the diagnosis and treatment of patients with suspected or known CAD. It has got strong supports, including those of the American College of Cardiology, American Heart Association, American Society of Nuclear Cardiology (ACC/AHA/ASNC) and other numerous clinical guidelines. They all stressed that the SPECT MPI is recommended to be used as the \"gate keeper\" to coronary angiography in order to prevent unnecessary intervention test and save the cost. However, in China the introduction and application of nuclear cardiology was late and highly unbalanced. This leads to the lack of understanding of nuclear cardiology in some clinicians, and there often is misunderstanding on correct selection of coronary angiography, cardiac CT, CT coronary angiography and others for diagnosis and treatment of CAD which results in a trend of over-application of these traditional techniques. In this article, we will focus on the status of nuclear cardiology, including SPECT, positron emission tomography (PET) MPI in the patients with CAD for the diagnosis of ischemia, risk stratification and management decision-making, and also compare it with the traditional morphological imaging techniques. In addition, we will briefly introduce the recent advances in cardiac hybrid imaging and molecular imaging. The aim of this paper is to popularize the knowledge of nuclear cardiology, and promote the rational application of nuclear cardiology in China."
+    }
+   ]
+  },
+  {
+   "id": "ASNC-PET-001",
+   "source": "ASNC",
+   "title": "ASNC SNMMI joint position statement on the clinical indications for myocardial perfusion PET",
+   "year": "2016",
+   "page_url": "https://www.asnc.org/imagingguidelines",
+   "pdf_url": "https://www.asnc.org/imagingguidelines",
+   "license": "ASNC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_imaging",
+   "priority": "medium",
+   "sha256": "2ac35e2776ab1e98f073a2d378fc3178c883d95bd465715e2e5f2f9a66a21488",
+   "size_bytes": 810,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 810,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASNC SNMMI joint position statement on the clinical indications for myocardial perfusion PET Source: ASNC Year: 2016 Domain: cardiology_imaging License: ASNC Available at: https://www.asnc.org/imagingguidelines This is a citation reference for the ASNC guideline 'ASNC SNMMI joint position statement on the clinical indications for myocardial perfusion PET' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_imaging. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASNC-CARDONC-001",
+   "source": "ASNC",
+   "title": "ASNC procedure standards cardio-oncology imaging",
+   "year": "2019",
+   "page_url": "https://www.asnc.org/imagingguidelines",
+   "pdf_url": "https://www.asnc.org/imagingguidelines",
+   "license": "ASNC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "cardiology_imaging",
+   "priority": "medium",
+   "sha256": "4f2a2228ebc3316fee394bb54a29b89ff13ae3e025628ff6bf8d7d2f1d059302",
+   "size_bytes": 722,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 722,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASNC procedure standards cardio-oncology imaging Source: ASNC Year: 2019 Domain: cardiology_imaging License: ASNC Available at: https://www.asnc.org/imagingguidelines This is a citation reference for the ASNC guideline 'ASNC procedure standards cardio-oncology imaging' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: cardiology_imaging. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

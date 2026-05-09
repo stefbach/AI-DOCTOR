@@ -1,7 +1,7 @@
 {
  "source": "ASTS",
  "generated_at": "2026-05-09T10:17:36Z",
- "total_documents": 5,
+ "total_documents": 6,
  "documents": [
   {
    "id": "ASTS-KT-001",
@@ -361,6 +361,31 @@
     {
      "chunk_index": 43,
      "content": "Foundation, Linkou Department of Gastroenterology, GB Pant Hospital, Chang Gung Memorial Hospital, Taoyuan, Taiwan New Delhi, India 46 63 Department of Liver Transplant Surgery, Dr. Rela Institute Department of Gastroenterology, Hepatology and Liver and Medical Centre, Chennai, India Transplant, Apollo Hospital, New Delhi, India 47 64 Department of Microbiology, Institute of Liver and Biliary Department of Hepatology, Sir H N Reliance Hospital Sciences, New Delhi, Delhi, India and Research Centre, Mumbai, India 48 65 Department of Pathology, Institute of Liver and Biliary Department of Gastroenterology and Hepatology, Narayana Sciences, New Delhi, Delhi, India Hospital, Gurugram, India 49 66 Department of Immunohematology and Transfusion Department of Hepatology, Parimal Multi-Speciality Medicine, Institute of Liver and Biliary Sciences, New Delhi, Hospital, Ahmedabad, India Delhi, India 67 Department of Nephrology, Institute of Liver and Biliary 50 Department of Gatroenterology, SMS Med College, Jaipur, Sciences, New Delhi, India India 68 Department of Statistics and Clinical Research, Institute 51 Division of Liver Transplantation and Hepatology, Manipal of Liver and Biliary Sciences, New Delhi, India Hospitals, Bangalore, India 69 Department of Hepatology and Gastroenterology, Kalinga 52 The Liver Unit, Cochin Gastroenterology Group, Ernakulam Institute of Med Sciences, KIIT University, Bhubaneswar, Medical Centre, Kochi, India India 53 70 Department of Pediatric Gastroenterology, SGPGIMS, Department of Hepatology, Institute of Post Graduate Lucknow, India Medical Education and Research, Kolkata, India 54 71 Noora Hospital in Srinagar, Shrinagar, India Department of Internal Medicine, College of Medicine, The 55 Catholic University of Korea, Seoul, South Korea Department of Gastroenterology and Pediatric 72 Gastroenterology, PGIMER, Chandigarh, India Department Of Internal Medicine, Inje University College 56 of Medicine, Busan, South Korea Department of Gastroenterology and Human Nutrition, AIIMS, New Delhi, India 57 Department of Gastroenterology, Hepatology and Liver Transplant, B L K Hospital, New Delhi, India 13"
+    }
+   ]
+  },
+  {
+   "id": "ASTS-TX-002",
+   "source": "ASTS",
+   "title": "ASTS Recommendations Allocation Donor Quality Liver",
+   "year": "2019",
+   "page_url": "https://asts.org/practice-resources",
+   "pdf_url": "https://asts.org/practice-resources",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "transplant_liver",
+   "priority": "medium",
+   "sha256": "3e203007fb86873fd345f1f06cf2acaeed8ba873009cadcf00cf72114dc6dec6",
+   "size_bytes": 727,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 727,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASTS Recommendations Allocation Donor Quality Liver Source: ASTS Year: 2019 Domain: transplant_liver License: Restricted Available at: https://asts.org/practice-resources This is a citation reference for the ASTS guideline 'ASTS Recommendations Allocation Donor Quality Liver' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: transplant_liver. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

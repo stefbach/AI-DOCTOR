@@ -1,7 +1,7 @@
 {
  "source": "WHO-IMCI",
  "generated_at": "2026-05-03T07:33:06Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "WHO-IMCI-003",
@@ -106,6 +106,31 @@
     {
      "chunk_index": 9,
      "content": "pregnant women. In light of these, we have taken measures to achieve the predetermined sample size based on a power analysis for the primary outcome so that the integrity of the study is preserved and the results are able to properly test the stated hypothesis and provide the needed new knowledge. To expand recruitment at McMaster University a new local study site was set up in a nearby city, Burlington, Ontario, with the collaboration of midwifery and obstetric clinics, as well as the local hospital. This partnership is very successful thus helping to achieve the recruitment goal. To date, retention after randomization to the study visit at 36–38 week of gestation when we assessed our primary outcome is 87%. To maximize retention of participants, we implemented a number of procedures such as study visit times at the convenience of the participants, including home visits. We also offered in-person, over the phone, and email correspondence to keep participants engaged. For participants in the intervention group, providing them with the dairy products (which are an integral part of the intervention) increases the likelihood of consuming the recommended amount. For the exercise component, participants receive a free pedometer as a self-motivation tool to reach their step count goals. Lastly, for both groups, participants are compensated on three occasions with $25 gift cards that they can redeem at a local grocery store. If effective, this RCT will generate high-quality evidence to refine the nutrition guidelines during pregnancy to improve health of women during pregnancy and their offspring in early life, including acquisition of a strong skeleton. Trial status Active recruitment continues since a no-cost extension of one year from CIHR was obtained in December 2016, to allow the BHP study to achieve the target sample size. Additional file Additional file 1: SPIRIT checklist. (DOCX 76 kb) Additional file 2: WHO Trial registration data set. (DOCX 18 kb)"
+    }
+   ]
+  },
+  {
+   "id": "WHO-IMCI-004",
+   "source": "WHO-IMCI",
+   "title": "IMCI for Sick Newborns and Young Infants",
+   "year": "2019",
+   "page_url": "https://www.who.int/publications/i/item/imci-young-infants",
+   "pdf_url": "https://www.who.int/publications/i/item/imci-young-infants",
+   "license": "CC BY-NC-SA 3.0 IGO",
+   "commercial_use": "restricted",
+   "clinical_domain": "pediatrics",
+   "priority": "high",
+   "sha256": "e5be8032521ee1c1cd4d2a11be51030d2911f2884f47f724a538a0a03fe8e3d8",
+   "size_bytes": 733,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 733,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:38:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IMCI for Sick Newborns and Young Infants Source: WHO-IMCI Year: 2019 Domain: pediatrics License: CC BY-NC-SA 3.0 IGO Available at: https://www.who.int/publications/i/item/imci-young-infants This is a citation reference for the WHO-IMCI guideline 'IMCI for Sick Newborns and Young Infants' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pediatrics. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

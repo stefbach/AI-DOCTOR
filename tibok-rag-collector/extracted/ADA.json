@@ -1,7 +1,7 @@
 {
  "source": "ADA",
  "generated_at": "2026-05-02T14:22:12Z",
- "total_documents": 26,
+ "total_documents": 27,
  "documents": [
   {
    "id": "ADA-001",
@@ -3762,6 +3762,31 @@
     {
      "chunk_index": 17,
      "content": "response to standardized meals that could be predicted by clinical and microbiome profiles ( ). At this point, however, no clear conclusions can be drawn regarding their utility owing to wide variations in the markers used for predicting outcomes, in the populations and nutrients studied, and in the associations found. Further, overall findings tend to support evidence from existing clinical trials and observational studies showing that people with markers indicating higher risk for diabetes, prediabetes, or insulin resistance have lower risk when they reduce calorie, carbohydrate, or saturated fat intake and/or increase fiber or protein intake compared with their peers ( – ). Conclusions Ideally, an eating plan should be developed in collaboration with the person with prediabetes or diabetes and an RDN through participation in diabetes self-management education when the diagnosis of prediabetes or diabetes is made. Nutrition therapy recommendations need to be adjusted regularly based on changes in an individual’s life circumstances, preferences, and disease course ( ). Regular follow-up with a diabetes health care provider is also critical to adjust other aspects of the treatment plan as indicated. One of the most commonly asked questions upon receiving a diagnosis of diabetes is “What can I eat?” Despite widespread interest in evidence-based diabetes nutrition therapy interventions, large, well-conducted nutrition trials continue to lag far behind other areas of diabetes research. Unfortunately, national data indicate that most people with diabetes do not receive any nutrition therapy or formal diabetes education ( , , , ). Strategies to improve access, clinical outcomes, and cost effectiveness include the following reducing barriers to referrals and allowing self-referrals to MNT and DSMES; providing in-person or technology-enabled diabetes nutrition therapy and education integrated with medical management ( , , , , , , , – , – ); engineering solutions that include two-way communication between the individual and his or her health care team to provide individualized feedback and tailored education based on the analyzed patient-generated health data ( , , ); increasing the use of community health workers and peer coaches to provide culturally appropriate, ongoing support and clinically linked care coordination and improve the reach of MNT and DSMES ( , , , , , ). Evaluating nutrition evidence is complex given that multiple dietary factors influence glycemic management and CVD risk factors, and the influence of a combination of factors can be substantial. Based on a review of the evidence, it is clear that knowledge gaps continue to exist and further research on nutrition and eating patterns is needed in individuals with type 1 diabetes, type 2 diabetes, and prediabetes. Future studies should address the impact of different eating patterns compared with one another, controlling for supplementary advice (such as stress reduction, physical activity, or smoking cessation); the impact of weight loss on other outcomes (which eating plans are beneficial only with weight loss, which can show benefit regardless of weight loss); how cultural or personal preferences, psychological supports, co-occurring conditions, socioeconomic status, food insecurity, and other factors impact being consistent with an eating plan and its effectiveness; the need for increased length and size of studies, to better understand long-term impacts on clinically relevant outcomes; tailoring MNT and DSMES to different racial/ethnic groups and socioeconomic groups; comparisons of different delivery methods aided by technology (e.g., mobile technology, apps, social media, technology-enabled and internet-based tools); and ongoing cost-effectiveness studies that will further support coverage by third-party payers or bundling services into evolving value-based care and payment models. Supplementary Material Supplementary Data"
+    }
+   ]
+  },
+  {
+   "id": "ADA-CPEPTIDE-001",
+   "source": "ADA",
+   "title": "ADA position statement C-peptide insulin antibody testing",
+   "year": "2018",
+   "page_url": "https://diabetesjournals.org/care/article/41/Supplement_1/S13/30097",
+   "pdf_url": "https://diabetesjournals.org/care/article/41/Supplement_1/S13/30097",
+   "license": "ADA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_endocrinology",
+   "priority": "medium",
+   "sha256": "d800b07af547803ec96b15a9d10add532164ce32345c36ea5641e88f88f66bc1",
+   "size_bytes": 764,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 764,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ADA position statement C-peptide insulin antibody testing Source: ADA Year: 2018 Domain: lab_endocrinology License: ADA Available at: https://diabetesjournals.org/care/article/41/Supplement_1/S13/30097 This is a citation reference for the ADA guideline 'ADA position statement C-peptide insulin antibody testing' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_endocrinology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

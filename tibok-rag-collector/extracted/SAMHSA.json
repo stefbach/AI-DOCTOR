@@ -1,7 +1,7 @@
 {
  "source": "SAMHSA",
  "generated_at": "2026-05-09T09:38:36Z",
- "total_documents": 4,
+ "total_documents": 14,
  "documents": [
   {
    "id": "SAMHSA-DOA-001",
@@ -192,6 +192,260 @@
     {
      "chunk_index": 7,
      "content": "of services and policies is similar to that observed in other Southern CBO spaces. A recent quantitative study in the region showed a high rate of personnel reported working in systems in which patients are invited to share their thoughts, ideas, and experiences; our findings suggest future TIC research should assess whether feedback is systematic or informal, and whether feedback results are utilized to improve services. Overall, the limited systematic efforts to elicit and integrate patient experiences present a barrier to providing patient-centered care. A paucity of research focuses on how to best engage patients and other community members in HIV research, – and future research should explore methods for increasing community-engagement as part of HIV research. Empirical findings showing cultural responsiveness as a critical part of TIHC, mark the first of its kind. However, strategies raised during the summit (e.g., diversifying leadership and practitioners, screening during hiring procedures, providing consistent personnel trainings) are similar to many of those presented in recent literature on the role of antiracism in TIC. Further, the applied participatory approach and analysis of network-wide resources and strengths represents a strong mechanism for promoting culturally responsive research, given the raised sentiment that the success of a single institution undergoing cultural responsiveness initiatives would be potentially tempered if the whole metro system did not fully participate. This finding aligns with a conceptual article depicting the importance of cultural responsiveness as part of a city-wide effort to implement TIC within public health. This study has limitations. First, we employed purposive sampling that could have led to biases (e.g., perceptions about readiness for TIC). However, recruitment strategies were designed in unison with workgroup members and institutional leadership, which enhanced the collaborative nature of the approach. Second, while some thematic differences existed between organizations, this paper concentrates more broadly on city-wide themes due to the interdependent nature of shared clients and resources. Thus, some unique features of individual institutions may not appear thoroughly here. Finally, our findings cannot be generalized outside of the current sample because metro areas across the U.S. may face different barriers to TIC implementation. However, our theoretically-driven process, underpinned by implementation science and participatory methods, could be replicated by other TIC champions seeking to develop community- and data- driven implementation in large networks. Conclusions Participatory methods were employed to develop a community-created and data-driven implementation plan to guide culturally responsive TIC throughout a network of HIV care in Nashville, TN. Current TIC standards were explored, as were personnel-perceived determinants of TIC implementation. A dissemination summit was convened to validate findings and generate a collaborative plan for future implementation. Findings contribute meaningfully to the growing body of TIC-HIV knowledge by showing the need to scale up trauma trainings, services, personnel wellness initiatives, and cultural responsiveness. Moreover, results suggest high levels of need for and compatibility with TIC across the Southern HIV care network. Future research will focus on maintaining community engagement to collectively guide TIC implementation. Researchers interested in co-produced TIC research may consider following similar methods to promote collaborative efforts aligned with TIC principles."
+    }
+   ]
+  },
+  {
+   "id": "SAMHSA-OUD-001",
+   "source": "SAMHSA",
+   "title": "SAMHSA TIP 63 medications for opioid use disorder",
+   "year": "2021",
+   "page_url": "https://store.samhsa.gov/product/TIP-63-Medications-for-Opioid-Use-Disorder-Full-Document/PEP21-02-01-002",
+   "pdf_url": "https://store.samhsa.gov/product/TIP-63-Medications-for-Opioid-Use-Disorder-Full-Document/PEP21-02-01-002",
+   "license": "SAMHSA",
+   "commercial_use": "allowed",
+   "clinical_domain": "psychiatry_substance",
+   "priority": "high",
+   "sha256": "32d8f0b9cee38972470ba09c2adaf8fa62d194fe2777167bcc54d1f30b2b0676",
+   "size_bytes": 801,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 801,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:51Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SAMHSA TIP 63 medications for opioid use disorder Source: SAMHSA Year: 2021 Domain: psychiatry_substance License: SAMHSA Available at: https://store.samhsa.gov/product/TIP-63-Medications-for-Opioid-Use-Disorder-Full-Document/PEP21-02-01-002 This is a citation reference for the SAMHSA guideline 'SAMHSA TIP 63 medications for opioid use disorder' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: psychiatry_substance. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SAMHSA-METHADONE-001",
+   "source": "SAMHSA",
+   "title": "SAMHSA federal guidelines for opioid treatment programs",
+   "year": "2023",
+   "page_url": "https://store.samhsa.gov/",
+   "pdf_url": "https://store.samhsa.gov/",
+   "license": "SAMHSA",
+   "commercial_use": "allowed",
+   "clinical_domain": "psychiatry_substance",
+   "priority": "high",
+   "sha256": "6de48deb1575e1831621802a154d5f7e475057bac14112fc36e49fb1c1a59c8a",
+   "size_bytes": 7799,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 7710,
+   "chunk_count": 2,
+   "extracted_at": "2026-05-09T19:15:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Burden of 375 diseases and injuries, risk-attributable burden of 88 risk factors, and healthy life expectancy in 204 countries and territories, including 660 subnational locations, 1990-2023: a systematic analysis for the Global Burden of Disease Study 2023. For more than three decades, the Global Burden of Diseases, Injuries, and Risk Factors Study (GBD) has provided a framework to quantify health loss due to diseases, injuries, and associated risk factors. This paper presents GBD 2023 findings on disease and injury burden and risk-attributable health loss, offering a global audit of the state of world health to inform public health priorities. This work captures the evolving landscape of health metrics across age groups, sexes, and locations, while reflecting on the remaining post-COVID-19 challenges to achieving our collective global health ambitions. The GBD 2023 combined analysis estimated years lived with disability (YLDs), years of life lost (YLLs), and disability-adjusted life-years (DALYs) for 375 diseases and injuries, and risk-attributable burden associated with 88 modifiable risk factors. Of the more than 310 000 total data sources used for all GBD 2023 (about 30% of which were new to this estimation round), more than 120 000 sources were used for estimation of disease and injury burden and 59 000 for risk factor estimation, and included vital registration systems, surveys, disease registries, and published scientific literature. Data were analysed using previously established modelling approaches, such as disease modelling meta-regression version 2.1 (DisMod-MR 2.1) and comparative risk assessment methods. Diseases and injuries were categorised into four levels on the basis of the established GBD cause hierarchy, as were risk factors using the GBD risk hierarchy. Estimates stratified by age, sex, location, and year from 1990 to 2023 were focused on disease-specific time trends over the 2010-23 period and presented as counts (to three significant figures) and age-standardised rates per 100 000 person-years (to one decimal place). For each measure, 95% uncertainty intervals [UIs] were calculated with the 2·5th and 97·5th percentile ordered values from a 250-draw distribution. Total numbers of global DALYs grew 6·1% (95% UI 4·0-8·1), from 2·64 billion (2·46-2·86) in 2010 to 2·80 billion (2·57-3·08) in 2023, but age-standardised DALY rates, which account for population growth and ageing, decreased by 12·6% (11·0-14·1), revealing large long-term health improvements. Non-communicable diseases (NCDs) contributed 1·45 billion (1·31-1·61) global DALYs in 2010, increasing to 1·80 billion (1·63-2·03) in 2023, alongside a concurrent 4·1% (1·9-6·3) reduction in age-standardised rates. Based on DALY counts, the leading level 3 NCDs in 2023 were ischaemic heart disease (193 million [176-209] DALYs), stroke (157 million [141-172]), and diabetes (90·2 million [75·2-107]), with the largest increases in age-standardised rates since 2010 occurring for anxiety disorders (62·8% [34·0-107·5]), depressive disorders (26·3% [11·6-42·9]), and diabetes (14·9% [7·5-25·6]). Remarkable health gains were made for communicable, maternal, neonatal, and nutritional (CMNN) diseases, with DALYs falling from 874 million (837-917) in 2010 to 681 million (642-736) in 2023, and a 25·8% (22·6-28·7) reduction in age-standardised DALY rates. During the COVID-19 pandemic, DALYs due to CMNN diseases rose but returned to pre-pandemic levels by 2023. From 2010 to 2023, decreases in age-standardised rates for CMNN diseases were led by rate decreases of 49·1% (32·7-61·0) for diarrhoeal diseases, 42·9% (38·0-48·0) for HIV/AIDS, and 42·2% (23·6-56·6) for tuberculosis. Neonatal disorders and lower respiratory infections remained the leading level 3 CMNN causes globally in 2023, although both showed notable rate decreases from 2010, declining by 16·5% (10·6-22·0) and 24·8% (7·4-36·7), respectively. Injury-related age-standardised DALY rates decreased by 15·6% (10·7-19·8) over the same period. Differences in burden due to NCDs, CMNN diseases, and injuries persisted across age, sex, time, and location. Based on our risk analysis, nearly 50% (1·27 billion [1·18-1·38]) of the roughly 2·80 billion total global DALYs in 2023 were attributable to the 88 risk factors analysed in GBD. Globally, the five level 3 risk factors contributing the highest proportion of risk-attributable DALYs were high systolic blood pressure (SBP), particulate matter pollution, high fasting plasma glucose (FPG), smoking, and low birthweight and short gestation-with high SBP accounting for 8·4% (6·9-10·0) of total DALYs. Of the three overarching level 1 GBD risk factor categories-behavioural, metabolic, and environmental and occupational-risk-attributable DALYs rose between 2010 and 2023 only for metabolic risks, increasing by 30·7% (24·8-37·3); however, age-standardised DALY rates attributable to metabolic risks decreased by 6·7% (2·0-11·0) over the same period. For all but three of the 25 leading level 3 risk factors, age-standardised rates dropped between 2010 and 2023-eg, declining by 54·4% (38·7-65·3) for unsafe sanitation, 50·5% (33·3-63·1) for unsafe water source, and 45·2% (25·6-72·0) for no access to handwashing facility, and by 44·9% (37·3-53·5) for child growth failure. The three leading level 3 risk factors for which age-standardised attributable DALY rates rose were high BMI (10·5% [0·1 to 20·9]), drug use (8·4% [2·6 to 15·3]), and high FPG (6·2% [-2·7 to 15·6]; non-significant). Our findings"
+    },
+    {
+     "chunk_index": 1,
+     "content": "DALY rates attributable to metabolic risks decreased by 6·7% (2·0-11·0) over the same period. For all but three of the 25 leading level 3 risk factors, age-standardised rates dropped between 2010 and 2023-eg, declining by 54·4% (38·7-65·3) for unsafe sanitation, 50·5% (33·3-63·1) for unsafe water source, and 45·2% (25·6-72·0) for no access to handwashing facility, and by 44·9% (37·3-53·5) for child growth failure. The three leading level 3 risk factors for which age-standardised attributable DALY rates rose were high BMI (10·5% [0·1 to 20·9]), drug use (8·4% [2·6 to 15·3]), and high FPG (6·2% [-2·7 to 15·6]; non-significant). Our findings underscore the complex and dynamic nature of global health challenges. Since 2010, there have been large decreases in burden due to CMNN diseases and many environmental and behavioural risk factors, juxtaposed with sizeable increases in DALYs attributable to metabolic risk factors and NCDs in growing and ageing populations. This long-observed consequence of the global epidemiological transition was only temporarily interrupted by the COVID-19 pandemic. The substantially decreasing CMNN disease burden, despite the 2008 global financial crisis and pandemic-related disruptions, is one of the greatest collective public health successes known. However, these achievements are at risk of being reversed due to major cuts to development assistance for health globally, the effects of which will hit low-income countries with high burden the hardest. Without sustained investment in evidence-based interventions and policies, progress could stall or reverse, leading to widespread human costs and geopolitical instability. Moreover, the rising NCD burden necessitates intensified efforts to mitigate exposure to leading risk factors-eg, air pollution, smoking, and metabolic risks, such as high SBP, BMI, and FPG-including policies that promote food security, healthier diets, physical activity, and equitable and expanded access to potential treatments, such as GLP-1 receptor agonists. Decisive, coordinated action is needed to address long-standing yet growing health challenges, including depressive and anxiety disorders. Yet this can be only part of the solution. Our response to the NCD syndemic-the complex interaction of multiple health risks, social determinants, and systemic challenges-will define the future landscape of global health. To ensure human wellbeing, economic stability, and social equity, global action to sustain and advance health gains must prioritise reducing disparities by addressing socioeconomic and demographic determinants, ensuring equitable health-care access, tackling malnutrition, strengthening health systems, and improving vaccination coverage. We live in times of great opportunity. Gates Foundation and Bloomberg Philanthropies."
+    }
+   ]
+  },
+  {
+   "id": "SAMHSA-BUP-001",
+   "source": "SAMHSA",
+   "title": "SAMHSA TIP 40 clinical guidelines for the use of buprenorphine in the treatment of opioid addiction",
+   "year": "2021",
+   "page_url": "https://store.samhsa.gov/",
+   "pdf_url": "https://store.samhsa.gov/",
+   "license": "SAMHSA",
+   "commercial_use": "allowed",
+   "clinical_domain": "psychiatry_substance",
+   "priority": "high",
+   "sha256": "a63eb24d82c0ca91b924f2e5c94e70b76e6f6fed7f7c2f959caa265978dbea72",
+   "size_bytes": 1808,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1808,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Buprenorphine for office-based treatment of patients with opioid addiction. The Drug Addiction Treatment Act of 2000 (DATA 2000) was established to create a new paradigm for medication-assisted treatment of opiate addiction in the United States. Before enactment of DATA 2000, the use of opioid medications to treat opioid addiction was permissible only in federally approved treatment programs, ie, methadone clinics. The only medications permitted were Schedule II drugs (eg, methadone and l-a-acetylmethadol [LAAM]), which could only be dispensed, not prescribed. Under provisions of DATA 2000, qualified physicians in a medical office and other appropriate settings outside the opioid treatment program system may prescribe or dispense (or both), Schedule III, IV, and V opioid medications for treatment of opioid addiction if such medications have been specifically approved by the the US Food and Drug Administration for that indication. Opioid addiction treatment programs were commonly known as methadone clinics. They now may also dispense buprenorphine hydrochloride and the buprenorphine hydrochloride-naloxone combination. The information in this article is extracted (with revision) from: Center for Substance Abuse Treatment. Clinical Guidelines for the Use of Buprenorphine in the Treatment of Opioid Addiction. Treatment Improvement Protocol (TIP) Series 40. DHS Publication No. (SMA) 04-3939. Rockville, Md: Substance Abuse and Mental Health Services Administration; 2004. The Clinical Guidelines document is in the public domain except for material indicated as reprinted from a copyrighted source. The author served on both the Expert Panel and the Consensus Panel that produced the guidelines, available in portable document format at http://buprenorphine.samhsa.gov/Bup%20Guidelines.pdf."
+    }
+   ]
+  },
+  {
+   "id": "SAMHSA-001",
+   "source": "SAMHSA",
+   "title": "SAMHSA TIP 63 Medications for Opioid Use Disorder MOUD",
+   "year": "2021",
+   "page_url": "https://store.samhsa.gov/product/tip-63-medications-opioid-use-disorder/pep21-02-01-002",
+   "pdf_url": "https://store.samhsa.gov/product/tip-63-medications-opioid-use-disorder/pep21-02-01-002",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pain",
+   "priority": "high",
+   "sha256": "1e1565fa25742b710f774f0e4281ae033f7974f20a77225da1339d2a8357576c",
+   "size_bytes": 778,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 778,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:54Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SAMHSA TIP 63 Medications for Opioid Use Disorder MOUD Source: SAMHSA Year: 2021 Domain: drug_pain License: Public Domain Available at: https://store.samhsa.gov/product/tip-63-medications-opioid-use-disorder/pep21-02-01-002 This is a citation reference for the SAMHSA guideline 'SAMHSA TIP 63 Medications for Opioid Use Disorder MOUD' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SAMHSA-002",
+   "source": "SAMHSA",
+   "title": "SAMHSA Buprenorphine Quick Start Guide office-based",
+   "year": "2021",
+   "page_url": "https://www.samhsa.gov/medications-substance-use-disorders",
+   "pdf_url": "https://www.samhsa.gov/medications-substance-use-disorders",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pain",
+   "priority": "high",
+   "sha256": "8f9a88b41eb844712a1d080be841b0054a7bf3e4282de044b67d3bcb5c8802ed",
+   "size_bytes": 743,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 743,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:54Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SAMHSA Buprenorphine Quick Start Guide office-based Source: SAMHSA Year: 2021 Domain: drug_pain License: Public Domain Available at: https://www.samhsa.gov/medications-substance-use-disorders This is a citation reference for the SAMHSA guideline 'SAMHSA Buprenorphine Quick Start Guide office-based' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SAMHSA-003",
+   "source": "SAMHSA",
+   "title": "SAMHSA Methadone Treatment for Opioid Use Disorder OTP",
+   "year": "2023",
+   "page_url": "https://www.samhsa.gov/medications-substance-use-disorders/medications-counseling-related-conditions/methadone",
+   "pdf_url": "https://www.samhsa.gov/medications-substance-use-disorders/medications-counseling-related-conditions/methadone",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pain",
+   "priority": "high",
+   "sha256": "3bd29b6de4cd5d13cf569071eff18d7ed0fa5fa5b86ecd8480cbef28a0bf9137",
+   "size_bytes": 2255,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2255,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "U.S. substance use harm reduction efforts: a review of the current state of policy, policy barriers, and recommendations. A wealth of research demonstrates that harm reduction interventions for substance use (SU) save lives and reduce risk for serious infectious diseases such as HIV, hepatitis C, and other SU-related health conditions. The U.S. has adopted several harm reduction interventions at federal and state levels to combat SU-related harm. While several policy changes on the federal and state levels decriminalized interventions and further support their use, other policies limit the reach of these interventions by delaying or restricting care, leaving access to life-saving interventions inconsistent across the U.S. Federal and state policies in the U.S. that restrict access to medications for opioid use disorder (MOUD), criminalize possession of drug paraphernalia, prevent syringe service programs and overdose prevention centers from operating, and limit prescribing of pre-exposure prophylaxis (PrEP) pose significant barriers to harm reduction access and implementation. This paper aims to bridge publications and reports on current state and federal harm reduction intervention policies and discuss policy recommendations. Federally, the DEA and SAMHSA should expand certification for methadone dispensing to settings beyond dedicated opioid treatment programs and non-OTP prescribers. Congress can decriminalize items currently categorized as paraphernalia, permit purchasing of syringes and all drug checking equipment using federal funds, amend the Controlled Substances Act to allow for expansion of overdose prevention centers, protect Medicaid coverage of PrEP, and expand Medicaid to cover residential SU treatment. At the state level, states can reduce regulations for prescribing MOUD and PrEP, decriminalize drug paraphernalia, codify Good Samaritan laws, and remove restrictions for syringe service program and overdose prevention center implementation. Lastly, states should expand Medicaid to allow broader access to treatment for SU and oppose Medicaid lock-outs based on current SU. These changes are needed as overdose deaths and serious infectious disease rates from SU continue to climb and impact American lives."
+    }
+   ]
+  },
+  {
+   "id": "SAMHSA-004",
+   "source": "SAMHSA",
+   "title": "SAMHSA Naltrexone Medication for Alcohol and Opioid Use Disorder",
+   "year": "2023",
+   "page_url": "https://www.samhsa.gov/medications-substance-use-disorders/medications-counseling-related-conditions/naltrexone",
+   "pdf_url": "https://www.samhsa.gov/medications-substance-use-disorders/medications-counseling-related-conditions/naltrexone",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pain",
+   "priority": "high",
+   "sha256": "f6c899321342ab29a62a450172de8c1428151b54484c8970e1399ad0751beaf3",
+   "size_bytes": 822,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 822,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SAMHSA Naltrexone Medication for Alcohol and Opioid Use Disorder Source: SAMHSA Year: 2023 Domain: drug_pain License: Public Domain Available at: https://www.samhsa.gov/medications-substance-use-disorders/medications-counseling-related-conditions/naltrexone This is a citation reference for the SAMHSA guideline 'SAMHSA Naltrexone Medication for Alcohol and Opioid Use Disorder' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SAMHSA-PREG-001",
+   "source": "SAMHSA",
+   "title": "SAMHSA Clinical Guidance for Treating Pregnant and Parenting Women with Opioid Use",
+   "year": "2018",
+   "page_url": "https://store.samhsa.gov/product/Clinical-Guidance-for-Treating-Pregnant-and-Parenting-Women-With-Opioid-Use-Disorder/SMA18-5054",
+   "pdf_url": "https://store.samhsa.gov/product/Clinical-Guidance-for-Treating-Pregnant-and-Parenting-Women-With-Opioid-Use-Disorder/SMA18-5054",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pregnancy_lactation",
+   "priority": "high",
+   "sha256": "3fabb3f11f91d1a9d8539d54c4d09daf566a2284a57ae67ba38fa422d79deef6",
+   "size_bytes": 2423,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2423,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:56Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Treating Women Who Are Pregnant and Parenting for Opioid Use Disorder and the Concurrent Care of Their Infants and Children: Literature Review to Support National Guidance. The prevalence of opioid use disorder (OUD) during pregnancy is increasing. Practical recommendations will help providers treat pregnant women with OUD and reduce potentially negative health consequences for mother, fetus, and child. This article summarizes the literature review conducted using the RAND/University of California, Los Angeles Appropriateness Method project completed by the US Department of Health and Human Services Substance Abuse and Mental Health Services Administration to obtain current evidence on treatment approaches for pregnant and parenting women with OUD and their infants and children. Three separate search methods were employed to identify peer-reviewed journal articles providing evidence on treatment methods for women with OUD who are pregnant or parenting, and for their children. Identified articles were reviewed for inclusion per study guidelines and relevant information was abstracted and summarized. Of the 1697 articles identified, 75 were included in the literature review. The perinatal use of medication for addiction treatment (MAT, also known as medication-assisted treatment), either methadone or buprenorphine, within comprehensive treatment is the most accepted clinical practice, as withdrawal or detoxification risks relapse and treatment dropout. Medication increases may be needed with advancing pregnancy, and are not associated with more severe neonatal abstinence syndrome (NAS). Switching medication prenatally is usually not recommended as it can destabilize opioid abstinence. Postnatally, breastfeeding is seen as beneficial for the infant for women who are maintained on a stable dose of opioid agonist medication. Less is known about ideal pain management and postpartum dosing regimens. NAS appears generally less severe following prenatal exposure to buprenorphine versus methadone. Frontline NAS medication treatments include protocol-driven methadone and morphine dosing in the context of nonpharmacological supports. Women with OUD can be treated with methadone or buprenorphine during pregnancy. NAS is an expected and manageable condition. Although research has substantially advanced, opportunities to guide future research to improve maternal and infant outcomes are provided."
+    }
+   ]
+  },
+  {
+   "id": "SAMHSA-MAT-PREG-001",
+   "source": "SAMHSA",
+   "title": "SAMHSA TIP 43 Medication-Assisted Treatment for Opioid Addiction in Pregnancy",
+   "year": "2018",
+   "page_url": "https://store.samhsa.gov/",
+   "pdf_url": "https://store.samhsa.gov/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pregnancy_lactation",
+   "priority": "medium",
+   "sha256": "134ef3e69bf810c0c458a77ae81d22958680379eda5074de2a15db90eaa4c07b",
+   "size_bytes": 792,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 792,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:56Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SAMHSA TIP 43 Medication-Assisted Treatment for Opioid Addiction in Pregnancy Source: SAMHSA Year: 2018 Domain: drug_pregnancy_lactation License: Public Domain Available at: https://store.samhsa.gov/ This is a citation reference for the SAMHSA guideline 'SAMHSA TIP 43 Medication-Assisted Treatment for Opioid Addiction in Pregnancy' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pregnancy_lactation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SAMHSA-NALOX-001",
+   "source": "SAMHSA",
+   "title": "SAMHSA Naloxone for Opioid Safety Evidence-Based community distribution toolkit",
+   "year": "2023",
+   "page_url": "https://store.samhsa.gov/",
+   "pdf_url": "https://store.samhsa.gov/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pain",
+   "priority": "high",
+   "sha256": "ecf97d50b6ccc30ce04448aacc57f730a8307ced14d170700348b38007565f57",
+   "size_bytes": 766,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 766,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:57Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SAMHSA Naloxone for Opioid Safety Evidence-Based community distribution toolkit Source: SAMHSA Year: 2023 Domain: drug_pain License: Public Domain Available at: https://store.samhsa.gov/ This is a citation reference for the SAMHSA guideline 'SAMHSA Naloxone for Opioid Safety Evidence-Based community distribution toolkit' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

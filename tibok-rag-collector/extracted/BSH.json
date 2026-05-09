@@ -1,7 +1,7 @@
 {
  "source": "BSH",
  "generated_at": "2026-05-09T07:34:40Z",
- "total_documents": 31,
+ "total_documents": 34,
  "documents": [
   {
    "id": "BSH-HODGKIN-001",
@@ -1495,6 +1495,81 @@
     {
      "chunk_index": 6,
      "content": "twin is recommended. Weekly ultrasound monitoring is recommended for the first month. Fetal brain imaging with diagnostic ultrasound and MRI is recommended at least 4 weeks after diagnosis of a twin fetal death, depending on GA (expert opinion). It is not recommended to induce labor immediately. GA at delivery can be discussed on a case‐by‐case basis. AUTHOR CONTRIBUTIONS All authors contributed to the conception of the guidelines, draft of the work or reviewed it critically for important intellectual content. They have approved the final the version to be published; and agree to be accountable for all aspects of the work. FUNDING INFORMATION The autNone. CONFLICT OF INTEREST STATEMENT Olivia Anselem has attended board meetings and symposia for Sanofi and Pfizer and has attended symposia in the last 3 years. Julie Blanc has attended board meetings for Organon and Effik in the last three years. Matthieu Dap has attended a symposium for Exeltis in the last three years. Charles Garabedian has attended board meetings for Organon and symposia for Ferring and General Electrics in the last three years. Paul Guerby has attended board meetings for Norgine and Alexion and symposia for Organon, Theramex and General Electrics in the last three years. Alexandre Vivanti has attended a board meeting for Norgine in the last three years. The other authors declare no conflicts of interest. Supporting information Data S1."
+    }
+   ]
+  },
+  {
+   "id": "BSH-THROMBOPHIL-001",
+   "source": "BSH",
+   "title": "BSH guideline on investigation and management of heritable thrombophilia",
+   "year": "2010",
+   "page_url": "https://b-s-h.org.uk/guidelines/",
+   "pdf_url": "https://b-s-h.org.uk/guidelines/",
+   "license": "BSH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_thrombosis",
+   "priority": "medium",
+   "sha256": "56d9074dc66e6de25d06a5c6b3c546da7dab3ed4aa6ff066c230170b86bcd6cb",
+   "size_bytes": 767,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 767,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BSH guideline on investigation and management of heritable thrombophilia Source: BSH Year: 2010 Domain: hematology_thrombosis License: BSH Available at: https://b-s-h.org.uk/guidelines/ This is a citation reference for the BSH guideline 'BSH guideline on investigation and management of heritable thrombophilia' published in 2010. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: hematology_thrombosis. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "BSH-PED-COAG-001",
+   "source": "BSH",
+   "title": "BSH guideline on use of recombinant FVIIa and prothrombin complex in pediatrics",
+   "year": "2018",
+   "page_url": "https://b-s-h.org.uk/guidelines/",
+   "pdf_url": "https://b-s-h.org.uk/guidelines/",
+   "license": "BSH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_pediatric",
+   "priority": "medium",
+   "sha256": "9e08e3d421acd2aed7c1d6e9a3c874acfa7843517710eb24c002e8274ad6dc86",
+   "size_bytes": 779,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 779,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BSH guideline on use of recombinant FVIIa and prothrombin complex in pediatrics Source: BSH Year: 2018 Domain: hematology_pediatric License: BSH Available at: https://b-s-h.org.uk/guidelines/ This is a citation reference for the BSH guideline 'BSH guideline on use of recombinant FVIIa and prothrombin complex in pediatrics' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: hematology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "BSH-DLBCL-001",
+   "source": "BSH",
+   "title": "BSH guideline diagnosis management DLBCL",
+   "year": "2022",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/bjh.18259",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/bjh.18259",
+   "license": "BSH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "oncology_lymphoma_nh",
+   "priority": "high",
+   "sha256": "ee42b06062568a607b404cc3aa8ed74332da7f153edd17b5b8bfefae8cfaf65c",
+   "size_bytes": 722,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 722,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BSH guideline diagnosis management DLBCL Source: BSH Year: 2022 Domain: oncology_lymphoma_nh License: BSH Available at: https://onlinelibrary.wiley.com/doi/10.1111/bjh.18259 This is a citation reference for the BSH guideline 'BSH guideline diagnosis management DLBCL' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: oncology_lymphoma_nh. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

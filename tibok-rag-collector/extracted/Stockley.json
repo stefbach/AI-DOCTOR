@@ -1,7 +1,7 @@
 {
  "source": "Stockley",
  "generated_at": "2026-05-09T16:14:35Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "STOCKLEY-002",
@@ -33,6 +33,31 @@
     {
      "chunk_index": 2,
      "content": "and application. Pediatric Injectable Drugs Pediatric Injectable Drugs Essential, evidence-based information on dosing and administering of injectable drugs for children. Injectable Drugs Guide Injectable Drugs Guide Essential guidance to safely prescribe, administer and monitor injectable medicines. Electronic Medicines Compendium (emc) Electronic Medicines Compendium (emc) Up-to-date product information for medicines licensed in the UK, directly from manufacturers. Drug Administration via Enteral Feeding Tubes Drug Administration via Enteral Feeding Tubes Recognised and trusted worldwide as the only source of guidance on this high-risk area of practice. The MHRA Orange Guide The MHRA Orange Guide The essential reference source for manufacturers and distributors of medicines in Europe and the UK. The MHRA Green Guide The MHRA Green Guide The essential reference source for distributors of medicines in Europe and the UK. Dale and Appelbe's Pharmacy and Medicines Law Dale and Appelbe's Pharmacy and Medicines Law The definitive guide to law and ethics for pharmacy practice in Great Britain. Kucers' the Use of Antibiotics Kucers' the Use of Antibiotics Supporting a better understanding of drug therapies and use of antimicrobials. See More Martindale's ADR Checker Martindale's ADR Checker The authoritative source in managing adverse drug reactions. Drug Compatibility Checker Drug Compatibility Checker Essential compatibility knowledge to support the administration of injectable drugs combining published data and clinical practice reports. Stockley's Interactions Checker Stockley's Interactions Checker Safely manage the selection of drugs at the point of care. Drug Monitoring Checker Drug Monitoring Checker Quick and easy access to evidence-based, actionable drug monitoring information to optimise drug treatment. Clinical Calculators Clinical Calculators Includes basic measurement calculations and calculators for biochemical parameters such as creatinine clearance, to support your practice 25+ Knowledge products 7000+ Drugs 244 Product updates a year 600,000+ Pages of drug information"
+    }
+   ]
+  },
+  {
+   "id": "STOCKLEY-001",
+   "source": "Stockley",
+   "title": "Stockley Drug Interactions reference Pharmaceutical Press",
+   "year": "2024",
+   "page_url": "https://www.medicinescomplete.com/mc/stockley/current/",
+   "pdf_url": "https://www.medicinescomplete.com/mc/stockley/current/",
+   "license": "Pharm Press",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_interactions",
+   "priority": "high",
+   "sha256": "844c2049d701baa9fbeee4550d98bfb96dbfad9a5f36c7812627d7addf770752",
+   "size_bytes": 769,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 769,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Stockley Drug Interactions reference Pharmaceutical Press Source: Stockley Year: 2024 Domain: drug_interactions License: Pharm Press Available at: https://www.medicinescomplete.com/mc/stockley/current/ This is a citation reference for the Stockley guideline 'Stockley Drug Interactions reference Pharmaceutical Press' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_interactions. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

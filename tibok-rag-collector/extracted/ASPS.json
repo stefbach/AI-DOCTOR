@@ -1,7 +1,7 @@
 {
  "source": "ASPS",
  "generated_at": "2026-05-02T17:07:24Z",
- "total_documents": 21,
+ "total_documents": 24,
  "documents": [
   {
    "id": "ESPS-001",
@@ -1577,6 +1577,81 @@
     {
      "chunk_index": 11,
      "content": "Tait AR. Can neonates receiving noninvasive ventilation via a specialized nasal we improve the assessment of discharge readiness?: A compara- cannula: a retrospective comparison cohort study. J Wound tive study of observational and objective measures of depth of Ostomy Continence Nurs 2020;47(02):111–116 sedation in children [abstract]Anesthesiology 2004;100(02): 66 Imbulana DI, Owen LS, Dawson JA, Bailey JL, Davis PG, Manley BJ. A 218–224 randomized controlled trial of a barrier dressing to reduce nasal 43 Barash PG, Cullen BF, Stoelting RK, et al. Clinical Anesthesia. 8th injury in preterm infants receiving binasal noninvasive respira- edition Philadelphia: Wolters Kluwer; 2017 tory support. J Pediatr 2018;201:34–39.e3 Facial Plastic Surgery Vol. 37 No. 4/2021 © 2021. Thieme. All rights reserved. Facial Soft Tissue Injuries in Pediatric Patients Schild et al. 527 67 Dai T, Lv L, Liu X, Chen J, Ye Y, Xu L. Nasal pressure injuries due to 71 Karen M, Chang E, Keen MS. Auricular composite grafting to repair nasal continuous positive airway pressure treatment in new- nasal vestibular stenosis. Otolaryngol Head Neck Surg 2000;122 borns: a prospective observational study. J Wound Ostomy Con- (04):529–532 tinence Nurs 2020;47(01):26–31 72 Smith LP, Roy S. Treatment strategy for iatrogenic nasal vestibular 68 Li Y, Sepulveda A, Buchanan EP. Late presenting nasal deformi- stenosis in young children. Int J Pediatr Otorhinolaryngol 2006;70 ties after nasal continuous positive airway pressure injury: 33- (08):1369–1373 year experience. J Plast Reconstr Aesthet Surg 2015;68(03): 73 Daya M. Nostril stenosis corrected by release and serial stenting. J 339–343 Plast Reconstr Aesthet Surg 2009;62(08):1012–1019 69 Daines SM, Hamilton GS III, Mobley SR. A graded approach to 74 Butts SC, Brown D, Discolo C, et al. Otolaryngology. In: Shah B, ed. repairing the stenotic nasal vestibule. Arch Facial Plast Surg 2010; Atlas of Pediatric Emergency Medicine. 3rd ed. New York, NY: 12(05):332–338 McGraw-Hill; 2019:439 70 Kotzur A, Gubisch W, Meyer R. Stenosis of the nasal 75 Timashpolsky A, Butts SC. Nasal continuous positive airway vestibule and its treatment. Aesthetic Plast Surg 1999;23 pressure injuries: a clinical challenge. JAMA Facial Plastic Surg (02):86–92 2019;21(02):165–166 This document was downloaded for personal use only. Unauthorized distribution is strictly prohibited. Facial Plastic Surgery Vol. 37 No. 4/2021 © 2021. Thieme. All rights reserved."
+    }
+   ]
+  },
+  {
+   "id": "ASPS-AESTHETIC-002",
+   "source": "ASPS",
+   "title": "Patient Safety Practice Advisory on Abdominoplasty",
+   "year": "2021",
+   "page_url": "https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy",
+   "pdf_url": "https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "plastic_aesthetic",
+   "priority": "high",
+   "sha256": "343db17610e09d69dbb443fde78f9c341b3630ba84f90d80f176d1e7c3436fd8",
+   "size_bytes": 775,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 775,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Patient Safety Practice Advisory on Abdominoplasty Source: ASPS Year: 2021 Domain: plastic_aesthetic License: Proprietary Available at: https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy This is a citation reference for the ASPS guideline 'Patient Safety Practice Advisory on Abdominoplasty' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: plastic_aesthetic. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASPS-AESTHETIC-006",
+   "source": "ASPS",
+   "title": "Practice Advisory on Rhytidectomy Facelift",
+   "year": "2021",
+   "page_url": "https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy",
+   "pdf_url": "https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "plastic_aesthetic",
+   "priority": "medium",
+   "sha256": "397898be6db4e293f1cda3be96c8a7de0e9278a1e95a9df45dd25986088f9114",
+   "size_bytes": 759,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 759,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Practice Advisory on Rhytidectomy Facelift Source: ASPS Year: 2021 Domain: plastic_aesthetic License: Proprietary Available at: https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy This is a citation reference for the ASPS guideline 'Practice Advisory on Rhytidectomy Facelift' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: plastic_aesthetic. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASPS-AESTHETIC-007",
+   "source": "ASPS",
+   "title": "Practice Advisory on Blepharoplasty",
+   "year": "2020",
+   "page_url": "https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy",
+   "pdf_url": "https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "plastic_aesthetic",
+   "priority": "medium",
+   "sha256": "054374217c069232108953327d03f5f88181498330b18068f98b2b8ce8db1cab",
+   "size_bytes": 745,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 745,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Practice Advisory on Blepharoplasty Source: ASPS Year: 2020 Domain: plastic_aesthetic License: Proprietary Available at: https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy This is a citation reference for the ASPS guideline 'Practice Advisory on Blepharoplasty' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: plastic_aesthetic. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

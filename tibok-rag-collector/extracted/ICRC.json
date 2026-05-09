@@ -1,7 +1,7 @@
 {
  "source": "ICRC",
  "generated_at": "2026-05-03T07:32:13Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "ICRC-002",
@@ -94,6 +94,31 @@
     {
      "chunk_index": 6,
      "content": "prisoners. Inside prisons, while steps like hygiene measures, and the use of masks and sanitisers were taken to prevent the outbreak of the virus, it is interesting to note that prison authorities were more than willing to release prisoners, especially those arrested or convicted in less serious offences. Similarly, the High Powered Committees set up by the Supreme Court issued guidelines to release prisoners arrested in less serious offences. The HPCs excluded prisoners arrested or convicted in offences such as economic or organised crimes, sexual offences, persons under terror related or national security laws and foreign nationals. Despite these guidelines, the trial courts were hesitant to release prisoners in the eligible category and released only those who, in their opinion, were a lower risk on a comparative scale. It emerges from this analysis that prison authorities and courts were willing to release low risk categories of prisoners from the point of view of their offence background and not from the point of view of risks to their health. Also, while prison authorities were more willing to ‘let out’ the prisoners, courts were more inclined to ‘keep them in’. The major concern of the prison and judicial authorities was to somehow manage the situation without disturbing the ‘dangerousness’ and risk to ‘law and order’ narrative regarding prisoners. While on the surface, it may appear that the actions taken by the prison authorities and the courts were borne out of concern for the prisoners, and to some extent that may be the case, a deeper analysis shows that their health vulnerabilities were not the primary concern of the authorities. This is demonstrated by the fact that prisoners arrested under serious offences, despite having serious health problems or comorbidities, were not considered eligible for release. Even in the case of those eligible for release, the courts exercised due diligence parameters while considering their bail applications, as if these were ‘normal times’. In deciding the categories of prisoners who could be released, the HPCs created categories of those who could be released based on their purported dangerousness rather than their vulnerability to getting infected. Surveillance was maintained in prison through isolation wards and quarantine facilities and outside prison, this was achieved through court orders which required those released on bail to report to the police station on a regular basis. The pandemic provided an opportunity to the policy makers to undergo a paradigm shift with regard to viewing prisoners as human beings with individual needs, but one finds that they continued to be treated as categories that needed to be segmented and watched over, based on their perceived risk to society."
+    }
+   ]
+  },
+  {
+   "id": "ICRC-001",
+   "source": "ICRC",
+   "title": "War Surgery Working Surgeon Conflict",
+   "year": "2009",
+   "page_url": "https://www.icrc.org/en/publication/0973-war-surgery-working-surgeon-armed-conflict",
+   "pdf_url": "https://www.icrc.org/en/publication/0973-war-surgery-working-surgeon-armed-conflict",
+   "license": "ICRC ©",
+   "commercial_use": "restricted",
+   "clinical_domain": "humanitarian",
+   "priority": "high",
+   "sha256": "32812b8138aaa6fa039769821162c6c98d3c8141adef372c43fd5813c8775188",
+   "size_bytes": 1658,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1658,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:06Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "War against superbugs, stopping them before they stop us: a biological warfare approach to safeguard European biosecurity. Russia's full-scale invasion of Ukraine has transformed both the modern battlefield and the microbial environment surrounding the war-wounded. Explosive injuries, prolonged evacuation, and limited opportunities for early decontamination have contributed to an unprecedented rise in multidrug-resistant organism (MDRO) infections. This paper describes how routine infection prevention and control (IPC) and antimicrobial stewardship (AMS) systems have become inadequate under conflict conditions and how contamination evolves into colonization and then systemic infection as casualties move through the evacuation pathway. Building on the national IPC and AMS strengthening, we outline a complementary crisis intervention: the application of chemical, biological, radiological, and nuclear-inspired decontamination principles to routine trauma care. These measures incorporate structured early irrigation and debridement, antiseptic cleansing, removal of contaminated materials, and the use of dedicated decontamination spaces at hospital entry. They are designed to reinforce existing programs by reducing microbial burden at the earliest point of contact. Implementing this approach aims to disrupt MDRO acquisition and transmission, protect fragile healthcare infrastructure, and mitigate escalating biosecurity risks. Ukraine's conflict experience has informed the development of this proposed concept, with formal implementation and impact evaluation planned as the next phase of work. LEVEL OF EVIDENCE: Level V (Current Opinion)."
     }
    ]
   }

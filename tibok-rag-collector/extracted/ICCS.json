@@ -1,7 +1,7 @@
 {
  "source": "ICCS",
  "generated_at": "2026-05-09T09:20:54Z",
- "total_documents": 4,
+ "total_documents": 5,
  "documents": [
   {
    "id": "ICCS-FLOW-001",
@@ -172,6 +172,31 @@
     {
      "chunk_index": 4,
      "content": "control group was included, because withholding bowel management for 12 weeks would have been unethical. Consequently, observed effects may partly reflect placebo, the natural history of DUI (which generally shows lower responses in comparable age groups ), or regression to the mean. Primary analyses were conducted in the mITT population, excluding participants without follow-up data; however, attrition was low and balanced between groups, and baseline characteristics of the ITT and mITT populations were similar, suggesting minimal impact on the results. Absence of an SU-only arm limits interpretation of whether lower efficacy reflects the inherent complexity of BBD or the added burden of dual interventions. Future studies should evaluate SU both before and after effective bowel management to clarify the temporal sequence of bladder-bowel interactions. Incorporating functional imaging may further elucidate underlying mechanisms and inform more targeted interventions. Conclusions This RCT found that bowel management significantly reduced DUI in children with BBD and that adding SU at treatment initiation provided no additional benefit. This finding highlights that bowel management alone was an effective first-line intervention and may be a prerequisite for successful SU."
+    }
+   ]
+  },
+  {
+   "id": "ICCS-MRD-001",
+   "source": "ICCS",
+   "title": "ICCS guidelines flow cytometry minimal residual disease detection",
+   "year": "2018",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1002/cyto.b.21617",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1002/cyto.b.21617",
+   "license": "ICCS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_hematology",
+   "priority": "high",
+   "sha256": "8a35233358ef750f32057476bb7eca98085d6e355ac472562bda2461421edfad",
+   "size_bytes": 766,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 766,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:05Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ICCS guidelines flow cytometry minimal residual disease detection Source: ICCS Year: 2018 Domain: lab_hematology License: ICCS Available at: https://onlinelibrary.wiley.com/doi/10.1002/cyto.b.21617 This is a citation reference for the ICCS guideline 'ICCS guidelines flow cytometry minimal residual disease detection' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_hematology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

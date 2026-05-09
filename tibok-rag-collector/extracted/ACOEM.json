@@ -1,7 +1,7 @@
 {
  "source": "ACOEM",
  "generated_at": "2026-05-02T16:31:44Z",
- "total_documents": 9,
+ "total_documents": 16,
  "documents": [
   {
    "id": "ACOEM-001",
@@ -701,6 +701,181 @@
     {
      "chunk_index": 3,
      "content": "creatinine, commonly used by including urinary creatinine as an inde- The growth of AKI: half empty pendent variable (in addition to other or half full, it’s the size of the variables in the confounding adjustment set) in regression analyses in which kid- glass that matters ney outcomes such as the eGFR are modeled as a function of a urinary ana- Raymond K. Hsu1 and Edward D. Siew2,3 lyte.7 Although exposure status would be best assessed by the measurement of the Previous data suggest rapid growth in the population incidence of analyte in a properly collected 24-hour acute kidney injury (AKI). In this study, Kashani et al. report data from sample (Figure 1),7 the feasibility of this the Mayo Clinic Hospital indicating slowing to stabilization of AKI rates method is limited in epidemiologic in Olmsted County, Minnesota, from 2006 through 2014. More studies studies. Because Tsai et al. had data from are needed to conﬁrm this trend, and if this trend exists, reasons spot urine collections and did not have data on urinary creatinine in their anal- behind it. Further, strategies to optimally care for vulnerable ysis, they used Araki’s approach instead to populations in which AKI rates remain high, including the elderly, are express urinary levels of heavy metals per warranted. urine volume. Although this alternative Kidney International (2017) 92, 550–553; http://dx.doi.org/10.1016/j.kint.2017.04.047 approach is valid for adjusting urinary Published by Elsevier, Inc., on behalf of the International Society of Nephrology. analyte concentrations obtained from spot urine samples,8 it might have inad- see clinical investigation on page 721 vertently inﬂuenced adjustments of other I confounding variables in their regression mproving understanding of the warehouses and the increasing adoption models. As such, to advance our under- population impact of acute kidney of electronic health records. This in- standing of potential environmental injury (AKI) has been aided in recent formation has provided insight into etiologic mechanisms for CKD, future years by the housing of vast clinical the role that AKI plays in the “natural studies should validate and recommend information in accessible data history” of chronic kidney disease pro- standardized measurements of potential gression, uncovered novel associations exposure factors to facilitate comparative 1 Division of Nephrology, Department of Medicine, between AKI and cardiovascular dis- assessments of potential etiologies of University of California, San Francisco. San Fran- ease, raised questions about the impact CKD across studies, particularly those cisco, California, USA; 2Tennessee Valley Health- of milder forms of AKI, and provided from different global settings. care System, Veterans Administration Medical evidence that the frequency of AKI is Center, Veteran’s Health Administration, Nashville VA, Nashville, Tennessee, USA; and 3Division of underestimated. Notably, several of DISCLOSURE Nephrology and Hypertension, Vanderbilt Center these studies have pointed to an All the authors declared no competing for Kidney Disease (VCKD) and Integrated Pro- alarming rate of growth in the incidence interests. gram for AKI Research (VIP-AKI), Department of of AKI,1,2 prompting calls for greater Medicine, Vanderbilt University Medical Center, attention and resources for improving Nashville, Tennessee, USA REFERENCES care and raising fundamental questions 1. Kobayashi E, Okubo Y, Suwazono Y, et al. Correspondence: Raymond Hsu, Division of about the reasons behind this growth Nephrology, Department of Medicine, University Dose-response relationship between total of California, San Francisco, 533 Parnassus curve and when, if ever, it will ﬂatten? cadmium intake calculated from the cadmium concentration in rice collected from each Avenue, U404. San Francisco, California 94143- In this issue of the journal, Kashani household of farmers and renal dysfunction in 0532, USA. E-mail: Raymond.Hsu@ucsf.edu and colleagues3 (2017) leverage data 550 Kidney International (2017) 92, 540–555"
+    }
+   ]
+  },
+  {
+   "id": "ACOEM-OCC-004",
+   "source": "ACOEM",
+   "title": "ACOEM Guidance on Workplace Hearing Conservation",
+   "year": "2018",
+   "page_url": "https://acoem.org/Practice-Resources",
+   "pdf_url": "https://acoem.org/Practice-Resources",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "occupational_specific_disease",
+   "priority": "high",
+   "sha256": "ff73203bfc8e1d768e0b0562189b961c12eefebc1cbe05f91f5e7151b3b54bb3",
+   "size_bytes": 750,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 750,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACOEM Guidance on Workplace Hearing Conservation Source: ACOEM Year: 2018 Domain: occupational_specific_disease License: Restricted Available at: https://acoem.org/Practice-Resources This is a citation reference for the ACOEM guideline 'ACOEM Guidance on Workplace Hearing Conservation' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: occupational_specific_disease. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACOEM-OCC-005",
+   "source": "ACOEM",
+   "title": "ACOEM Guidance Occupational Asthma Diagnosis Management",
+   "year": "2020",
+   "page_url": "https://acoem.org/Practice-Resources",
+   "pdf_url": "https://acoem.org/Practice-Resources",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "occupational_specific_disease",
+   "priority": "high",
+   "sha256": "f953a154df76d51727a193389dc697910f94b0ea0d6232bae3d5153c96e54329",
+   "size_bytes": 764,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 764,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACOEM Guidance Occupational Asthma Diagnosis Management Source: ACOEM Year: 2020 Domain: occupational_specific_disease License: Restricted Available at: https://acoem.org/Practice-Resources This is a citation reference for the ACOEM guideline 'ACOEM Guidance Occupational Asthma Diagnosis Management' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: occupational_specific_disease. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACOEM-OCC-007",
+   "source": "ACOEM",
+   "title": "ACOEM Guidance on Workplace Drug Testing",
+   "year": "2019",
+   "page_url": "https://acoem.org/Practice-Resources",
+   "pdf_url": "https://acoem.org/Practice-Resources",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "occupational_general",
+   "priority": "medium",
+   "sha256": "580217172b39ddb219a49712228d7ee5a716862f101e0593531a348507883dc6",
+   "size_bytes": 716,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 716,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACOEM Guidance on Workplace Drug Testing Source: ACOEM Year: 2019 Domain: occupational_general License: Restricted Available at: https://acoem.org/Practice-Resources This is a citation reference for the ACOEM guideline 'ACOEM Guidance on Workplace Drug Testing' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: occupational_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACOEM-OCC-010",
+   "source": "ACOEM",
+   "title": "ACOEM Position Statement Healthcare Worker Vaccination",
+   "year": "2019",
+   "page_url": "https://acoem.org/Position-Statements",
+   "pdf_url": "https://acoem.org/Position-Statements",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "occupational_safety",
+   "priority": "high",
+   "sha256": "a042c2a89131f8f358dbf4505bc657579d6bfd7d06157655a4120e260d440e30",
+   "size_bytes": 743,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 743,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACOEM Position Statement Healthcare Worker Vaccination Source: ACOEM Year: 2019 Domain: occupational_safety License: Restricted Available at: https://acoem.org/Position-Statements This is a citation reference for the ACOEM guideline 'ACOEM Position Statement Healthcare Worker Vaccination' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: occupational_safety. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACOEM-OCC-012",
+   "source": "ACOEM",
+   "title": "ACOEM Position Pregnancy and Reproductive Hazards in the Workplace",
+   "year": "2019",
+   "page_url": "https://acoem.org/Position-Statements",
+   "pdf_url": "https://acoem.org/Position-Statements",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "occupational_safety",
+   "priority": "high",
+   "sha256": "1c28b134d01781ad621915117e76ba107c9f1c240a3e3f91f0a82879e9eeecdd",
+   "size_bytes": 767,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 767,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACOEM Position Pregnancy and Reproductive Hazards in the Workplace Source: ACOEM Year: 2019 Domain: occupational_safety License: Restricted Available at: https://acoem.org/Position-Statements This is a citation reference for the ACOEM guideline 'ACOEM Position Pregnancy and Reproductive Hazards in the Workplace' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: occupational_safety. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACOEM-OCC-013",
+   "source": "ACOEM",
+   "title": "ACOEM Practice Guideline Travel Medicine for Business Travelers",
+   "year": "2018",
+   "page_url": "https://acoem.org/Practice-Resources",
+   "pdf_url": "https://acoem.org/Practice-Resources",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "occupational_general",
+   "priority": "medium",
+   "sha256": "73cb9f98e019cb9f992b5d21aa042a391d3645321a53fcbf8502e530d83dbf7f",
+   "size_bytes": 762,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 762,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:39Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACOEM Practice Guideline Travel Medicine for Business Travelers Source: ACOEM Year: 2018 Domain: occupational_general License: Restricted Available at: https://acoem.org/Practice-Resources This is a citation reference for the ACOEM guideline 'ACOEM Practice Guideline Travel Medicine for Business Travelers' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: occupational_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACOEM-OCC-014",
+   "source": "ACOEM",
+   "title": "ACOEM Position Statement Expatriate Health Programs",
+   "year": "2020",
+   "page_url": "https://acoem.org/Position-Statements",
+   "pdf_url": "https://acoem.org/Position-Statements",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "occupational_general",
+   "priority": "medium",
+   "sha256": "017ee44f58733f517a0bbe083b6348252635c1f2456ba3c2c7271ecb72c6e21a",
+   "size_bytes": 739,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 739,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACOEM Position Statement Expatriate Health Programs Source: ACOEM Year: 2020 Domain: occupational_general License: Restricted Available at: https://acoem.org/Position-Statements This is a citation reference for the ACOEM guideline 'ACOEM Position Statement Expatriate Health Programs' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: occupational_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

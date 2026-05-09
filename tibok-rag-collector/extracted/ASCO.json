@@ -1,7 +1,7 @@
 {
  "source": "ASCO",
  "generated_at": "2026-05-02T15:34:35Z",
- "total_documents": 46,
+ "total_documents": 60,
  "documents": [
   {
    "id": "ASCO-001",
@@ -2522,6 +2522,356 @@
     {
      "chunk_index": 4,
      "content": "may be challenging to be reported/documented. This can be due to (1) underreporting by the older person for a variety of reasons (e.g., poor health literacy, physical or mental impairments, self-ageism), (2) inadequate training and possible ageist attitude of the staff (e.g., potentially referring to part of “normal ageing”), and/or (3) the difficulties to disentangle new manifestations from other concurrent conditions. Our study presents several limitations worth mentioning. Despite a comprehensive approach to retrieving the literature of interest, we prioritised recommendations from guidelines, task forces, and consensus papers published in English. Our approach assumed that these publications could effectively include the most relevant and robust evidence of interest. However, our strategy may have overlooked some related information. For example, as mentioned in the Methods section, we did not consider recommendations included in reports from CTs. Besides being counterintuitive, given that this review aims to improve quality standards for this specific type of study, including CTs’ reports would have required preliminary in-depth evaluations to ensure an adequate level of their quality to inform our recommendation list. This would have been challenging due to the risk of incomplete (and sometimes biased) reporting. Almost half of the evidence we finally analysed was focused on subgroups of older persons characterised by specific clinical conditions. For this reason, some recommendations may be more specific and relevant in specific diseases or settings. However, only 5 of the 120 recommendations were exclusively based on articles focusing on specific conditions, implicitly confirming the general validity and board applicability of the list. Finally, it is possible that a broader consultation with researchers operating in LMICs could have provided additional input to our work. Notwithstanding these limitations, the study results provide recommendations to improve the methodology of CTs on ageing and older persons, regardless of the available resources. Rapid population ageing calls for careful reappraisal of established approaches and standards since these do not do enough to acknowledge the specific needs of older people or the complexities of including them in CTs. Developing responses that are feasible, scientifically robust and inclusive will not be an easy task. Still, it is incumbent on both public and privately funded clinical trialists to find an acceptable solution. It is critical to adopt innovative and better-calibrated methodologies for the generation of scientific evidence that can pragmatically inform clinical practice without diverting from scientific rigour. CRediT authorship contribution statement MCe, MCa, WZ, and VS were in charge of the conceptualisation. MCe, MCa, WZ, and VS were in charge of the methodology. MCe, MCa, DA, AC, SG, and FQ conducted the scoping review of the literature. JC, AD, EF, CG, SK, PLS, and RM constituted the expert group that revised and improved the results of the scoping review. MCe and MCa supervised the work. MCe and MCa wrote the original draft. All authors reviewed and edited the draft, and agreed to its final version. Disclaimer We alone are responsible for the views expressed in this article, and our views do not necessarily represent the views, decisions, or policies of the institutions with which we are affiliated. Funding This work was funded as part of the EDCTP2 programme supported by the EU (grant number CSA2023WHO-3454-WHORCT ) with funds from the UK National Institute for Health and Care Research with the use of UK aid from the UK Government to support global health research. Consultations contributed to this work was enabled by funding from the UK Department of Health and Social Care (project ID: DHSC WHO_ClinicalTrials), and Bill & Melinda Gates Foundation (grant number INV-064296 ). Declaration of competing interest No conflict of interest was declared by the authors."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-DRUG-001",
+   "source": "ASCO",
+   "title": "ASCO Antiemetics for Antineoplastic Agents Clinical Practice Guideline",
+   "year": "2020",
+   "page_url": "https://ascopubs.org/doi/10.1200/JCO.20.01296",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/JCO.20.01296",
+   "license": "ASCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_oncology",
+   "priority": "high",
+   "sha256": "3e6e450840338dd678b7e9beb8f0e2c4ad5a4673ea8574b8ecf9ad709a419380",
+   "size_bytes": 1721,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1721,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:54Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Going beyond the 2023 MASCC and ESMO guideline update for the prevention of chemotherapy- and radiotherapy-induced nausea and vomiting. The MASCC/ESMO guidelines for the prevention of chemotherapy- and radiotherapy-induced nausea and vomiting were updated in 2023 by a Consensus Committee of 34 multidisciplinary international healthcare professionals and three patient advocates. Guideline-recommended prophylactic anti-emetic strategies can control chemotherapy-induced nausea and vomiting (CINV) in many patients, but unaddressed issues remain. Across a series of meetings, we evaluated these guidelines to identify possible evidence gaps which warrant further exploration. Key topics identified and discussed included the use of dexamethasone-sparing regimens with cisplatin (and other non-anthracycline and cyclophosphamide)-based highly emetogenic chemotherapy regimens, the importance of individual patient risk factors for CINV, the use of a second agent in patients receiving low emetogenic chemotherapy, how to manage CINV with certain new antibody-drug conjugates, the most appropriate approach for managing breakthrough CINV, the options for patients with CINV even after following best guidance, the use of lower than standard doses of olanzapine (<10 mg/day), and the management of long-delayed CINV and CINV in patients receiving oral therapies. Through identifying the current gaps in the updated MASCC/ESMO guidelines and discussing the available evidence, we aim to address these issues and support oncologists who may encounter them in clinical practice. These and other questions need to be considered to help ensure choice of anti-emetic treatments provide optimal effectiveness in clinical practice."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-DRUG-002",
+   "source": "ASCO",
+   "title": "ASCO Use of Granulocyte Colony-Stimulating Factors Update",
+   "year": "2020",
+   "page_url": "https://ascopubs.org/doi/10.1200/JCO.19.03265",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/JCO.19.03265",
+   "license": "ASCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_oncology",
+   "priority": "high",
+   "sha256": "aa888e3db772afd34343ac6184e9a7a512f96da0047c51af3f32d6519130bf5d",
+   "size_bytes": 1583,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1583,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Chemoradiation and granulocyte-colony or granulocyte macrophage-colony stimulating factors (G-CSF or GM-CSF): time to think out of the box? Concerns have been raised about potential toxic interactions when colony-stimulating factors (CSFs) and chemoradiation are concurrently performed. In 2006, the ASCO guidelines advised against their concomitant use. Nevertheless, with the development of modern radiotherapy techniques and supportive care, the therapeutic index of combined chemotherapy, radiotherapy, and CSFs is worth reassessing. Recent clinical trials testing chemoradiation in lung cancer let investigators free to decide the use of concomitant CSFs or not. No abnormal infield event was reported after the use of modern radiotherapy techniques and concomitant chemotherapy regimens. These elements call for further investigation to set new recommendations in favour of the association of chemoradiation and CSFs. Moreover, radiotherapy could induce anticancer systemic effects mediated by the immune system in vitro and in vivo . With combined CSFs, this effect was reinforced in preclinical and clinical trials introducing innovative radioimmunotherapy models. So far, the association of radiation with CSFs has not been combined with immunotherapy. However, it might play a major role in triggering an immune response against cancer cells, leading to abscopal effects. The present article reassesses the therapeutic index of the combination CSFs-chemoradiation through an updated review on its safety and efficacy. It also provides a special focus on radioimmunotherapy."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-DRUG-004",
+   "source": "ASCO",
+   "title": "ASCO Standards for Safe Handling of Hazardous Drugs",
+   "year": "2022",
+   "page_url": "https://ascopubs.org/doi/10.1200/OP.21.00833",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/OP.21.00833",
+   "license": "ASCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_compounding",
+   "priority": "high",
+   "sha256": "59b000b9f6bbb1fed0998caa698dfbd3c6f6b99c7b7622ef9d143f8bb95772c8",
+   "size_bytes": 730,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 730,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:57Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASCO Standards for Safe Handling of Hazardous Drugs Source: ASCO Year: 2022 Domain: drug_compounding License: ASCO Available at: https://ascopubs.org/doi/10.1200/OP.21.00833 This is a citation reference for the ASCO guideline 'ASCO Standards for Safe Handling of Hazardous Drugs' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_compounding. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-SAFETY-001",
+   "source": "ASCO",
+   "title": "ASCO Safe Handling of Hazardous Drugs in Oncology Practice",
+   "year": "2022",
+   "page_url": "https://ascopubs.org/doi/10.1200/OP.21.00833",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/OP.21.00833",
+   "license": "ASCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_compounding",
+   "priority": "high",
+   "sha256": "a518450915a7bb82d04310e1b8c1b5b6b30be9b5c35f20e6f440d4a4c89144d9",
+   "size_bytes": 744,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 744,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASCO Safe Handling of Hazardous Drugs in Oncology Practice Source: ASCO Year: 2022 Domain: drug_compounding License: ASCO Available at: https://ascopubs.org/doi/10.1200/OP.21.00833 This is a citation reference for the ASCO guideline 'ASCO Safe Handling of Hazardous Drugs in Oncology Practice' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_compounding. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-EVID-001",
+   "source": "ASCO",
+   "title": "ASCO Value Framework drug benefit assessment",
+   "year": "2016",
+   "page_url": "https://ascopubs.org/doi/10.1200/JCO.2016.68.2518",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/JCO.2016.68.2518",
+   "license": "ASCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_oncology",
+   "priority": "low",
+   "sha256": "00d142233313723a53b768040d65aaa9e08d6aab6ee70bc5e8654fd16b29c266",
+   "size_bytes": 2270,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2270,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:00Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "What determines value? Exploring value characteristics of novel therapies for digestive system cancers. Despite the growing arsenal of novel anti-tumor drugs for digestive system cancers, concerns persist regarding their true clinical value, as approvals often rely on surrogate endpoints with limited overall survival or quality of life data. This study systematically evaluates the clinical benefit of these drugs in China using standardized value assessment frameworks and identify factors associated with high-value treatments. This cross-sectional study analyzed 65 indications from 33 novel anti-tumor drugs included in the Guidelines for the Clinical Application of Novel Anti-tumor Drugs for advanced digestive system cancers. Two researchers independently extracted data from drug approval documents and PubMed literature. Value assessment was performed using ASCO Value Framework v2.0 (advanced disease) and ESMO-Magnitude of Clinical Benefit Scale v2.0 (non-curative). For ASCO-VF, the net health benefit score was calculated based on clinical benefit, toxicity adjustments, and bonus points. ESMO-MCBS grading incorporated clinical benefit magnitude with adjustments for toxicity and quality of life. Statistical analyses included descriptive statistics and association testing with odds ratios for categorical variables. Among 65 indications, only 12 (18.5%) achieved value thresholds in both frameworks. Immune combinations showed superior value, particularly atezolizumab-bevacizumab in hepatocellular carcinoma (ASCO-VF: 53.4; ESMO-MCBS: grade 5) and toripalimab in esophageal squamous cell carcinoma. Quality of life improvement strongly correlated with value attainment in both frameworks (ASCO-VF OR: 28.00; ESMO-MCBS OR: 27.87). Molecular target detection requirement inversely associated with OS benefit (OR: 0.16). Value heterogeneity was observed across cancer types and treatment lines. Few novel digestive system cancer drugs demonstrate substantial clinical benefit in both value frameworks. Quality of life documentation is crucial for value assessment. Stakeholders should integrate these value dimensions-survival benefit, toxicity, and quality of life-into clinical and policy decisions to guide treatment selection and resource allocation."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-SEX-001",
+   "source": "ASCO",
+   "title": "ASCO Guideline on Interventions to Address Sexual Problems in People with Cancer",
+   "year": "2018",
+   "page_url": "https://ascopubs.org/doi/10.1200/JCO.2017.75.8995",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/JCO.2017.75.8995",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sexual_oncology",
+   "priority": "high",
+   "sha256": "a60511525208340af5f450dc99709ec0f88444868af98d4127190c9e10a975c0",
+   "size_bytes": 2216,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2216,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:01Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Interventions to Address Sexual Problems in People With Cancer: American Society of Clinical Oncology Clinical Practice Guideline Adaptation of Cancer Care Ontario Guideline. Purpose The adaptation of the Cancer Care Ontario (CCO) guideline Interventions to Address Sexual Problems in People With Cancer provides recommendations to manage sexual function adverse effects that occur as a result of cancer diagnosis and/or treatment. Methods ASCO staff reviewed the guideline for developmental rigor and updated the literature search. An ASCO Expert Panel ( Table A1 ) was assembled to review the guideline content and recommendations. Results The ASCO Expert Panel determined that the recommendations from the 2016 CCO guideline are clear, thorough, and based upon the most relevant scientific evidence. ASCO statements and modifications were added to adapt the CCO guideline for a broader audience. Recommendations It is recommended that there be a discussion with the patient, initiated by a member of the health care team, regarding sexual health and dysfunction resulting from cancer or its treatment. Psychosocial and/or psychosexual counseling should be offered to all patients with cancer, aiming to improve sexual response, body image, intimacy and relationship issues, and overall sexual functioning and satisfaction. Medical and treatable contributing factors should be identified and addressed first. In women with symptoms of vaginal and/or vulvar atrophy, lubricants in addition to vaginal moisturizers may be tried as a first option. Low-dose vaginal estrogen, lidocaine, and dehydroepiandrosterone may also be considered in some cases. In men, medication such as phosphodiesterase type 5 inhibitors may be beneficial, and surgery remains an option for those with symptoms or treatment complications refractory to medical management. Both women and men experiencing vasomotor symptoms should be offered interventions for symptomatic improvement, including behavioral options such as cognitive behavioral therapy, slow breathing and hypnosis, and medications such as venlafaxine and gabapentin.Additional information is available at: www.asco.org/survivorship-guidelines and www.asco.org/guidelineswiki ."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-SURVIV-001",
+   "source": "ASCO",
+   "title": "ASCO Survivorship Guidelines on Sexual Function After Cancer Treatment",
+   "year": "2021",
+   "page_url": "https://www.asco.org/guidelines",
+   "pdf_url": "https://www.asco.org/guidelines",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sexual_oncology",
+   "priority": "high",
+   "sha256": "f38c13b3bdbd3995f137312a271d715914a5c99f7b2b05e612ce14321848ebf3",
+   "size_bytes": 1971,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1971,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:03Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Systematic review of clinical practice guidelines for colorectal and anal cancer: the extent of recommendations for managing long-term symptoms and functional impairments. Due to increasing numbers of colorectal and anal cancer survivors, more individuals are living with long-term symptoms after treatment. A systematic review was undertaken to assess the extent to which practice guidelines for colorectal and anal cancer provide recommendations for managing long-term symptoms and functioning impairments. Four electronic databases and websites of 30 international cancer societies were searched for clinical practice guidelines, consensus statements, or best practice recommendations for colorectal or anal cancer. Quality of included guidelines was evaluated with the Appraisal of Guidelines for Research & Evaluation II tool. Results were narratively summarized. We included 51 guidelines or consensus statements. Recommendations for managing long-term symptoms or functioning impairments were reported in 13 guidelines (25.4%). All 13 recommend a healthy lifestyle, diet, body weight, and physical activity. The ASCO Colorectal Cancer Survivorship Care Guideline is the most comprehensive, including interventions targeting sexual and bowel function to pain and cognitive issues, and also highlights limited evidence for informing management strategies. Other guidelines recommend treating incontinence, chronic diarrhea, and distress, and stress the need for greater awareness for sexual dysfunction, survivorship clinics, and referrals to specific supportive care interventions. Few clinical practice guidelines include recommendations for managing long-term symptoms and functioning impairments. It is unclear if this is due to limited evidence or absence of management strategies and interventions. Clear recommendations for managing long-term symptoms and functioning to help health professionals in supporting colorectal and anal cancer survivors are needed."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-LUNG-001",
+   "source": "ASCO",
+   "title": "Therapy stage IV NSCLC without driver alterations ASCO living",
+   "year": "2024",
+   "page_url": "https://ascopubs.org/doi/10.1200/JCO.23.02744",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/JCO.23.02744",
+   "license": "ASCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "oncology_lung",
+   "priority": "high",
+   "sha256": "9f0ac0c5cb43f7f3236682b2766255d8f093975baf9d25348c73c0e3288e7502",
+   "size_bytes": 1231,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1231,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Therapy for Stage IV Non-Small Cell Lung Cancer Without Driver Alterations: ASCO Living Guideline, 2026.3.0. To provide evidence-based recommendations for patients with stage IV non-small cell lung cancer (NSCLC) without driver alterations. This ASCO living guideline offers continually updated recommendations based on an ongoing systematic review of randomized controlled trials (RCTs), with the latest time frame spanning March-October 2025. An Expert Panel of medical oncology, pulmonary, community oncology, research methodology, and advocacy experts was convened. The literature search included systematic reviews, meta-analyses, and RCTs. Outcomes of interest include efficacy and safety. Expert Panel members used available evidence and informal consensus to develop evidence-based guideline recommendations. This guideline consolidates all previous updates and reflects the body of evidence informing this guideline topic. Six new RCTs were identified in the latest search of the literature to date. Evidence-based recommendations were updated to address first, second, and subsequent treatment options for patients without driver alterations.Additional information is available at www.asco.org/thoracic-cancer-guidelines."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-LUNG-002",
+   "source": "ASCO",
+   "title": "Therapy stage IV NSCLC driver alterations ASCO living",
+   "year": "2023",
+   "page_url": "https://ascopubs.org/doi/10.1200/JCO.22.02524",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/JCO.22.02524",
+   "license": "ASCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "oncology_lung",
+   "priority": "high",
+   "sha256": "9f0ac0c5cb43f7f3236682b2766255d8f093975baf9d25348c73c0e3288e7502",
+   "size_bytes": 1231,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1231,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:06Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Therapy for Stage IV Non-Small Cell Lung Cancer Without Driver Alterations: ASCO Living Guideline, 2026.3.0. To provide evidence-based recommendations for patients with stage IV non-small cell lung cancer (NSCLC) without driver alterations. This ASCO living guideline offers continually updated recommendations based on an ongoing systematic review of randomized controlled trials (RCTs), with the latest time frame spanning March-October 2025. An Expert Panel of medical oncology, pulmonary, community oncology, research methodology, and advocacy experts was convened. The literature search included systematic reviews, meta-analyses, and RCTs. Outcomes of interest include efficacy and safety. Expert Panel members used available evidence and informal consensus to develop evidence-based guideline recommendations. This guideline consolidates all previous updates and reflects the body of evidence informing this guideline topic. Six new RCTs were identified in the latest search of the literature to date. Evidence-based recommendations were updated to address first, second, and subsequent treatment options for patients without driver alterations.Additional information is available at www.asco.org/thoracic-cancer-guidelines."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-LUNG-003",
+   "source": "ASCO",
+   "title": "Stage III NSCLC management",
+   "year": "2022",
+   "page_url": "https://ascopubs.org/doi/10.1200/JCO.21.02528",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/JCO.21.02528",
+   "license": "ASCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "oncology_lung",
+   "priority": "high",
+   "sha256": "82897b7ad7f5f6f724b141742bd230b657f48f6433dc9c43e5288e90b19346a3",
+   "size_bytes": 1594,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1594,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "The 2026 American Association for Thoracic Surgery (AATS) Expert Consensus Document: Evaluation and Management of N2+ Non-Small Cell Lung Cancer. Multimodal therapy is recommended for the optimal treatment of N2 positive non-small cell lung cancer (NSCLC). Recent advancements in the use of immune checkpoint inhibitors and targeted therapy have dramatically changed the landscape of treatment. We reviewed recent trials and literature to develop consensus statements concerning the evaluation and treatment of potentially resectable NSCLC with N2 involvement. The American Association for Thoracic Surgery Clinical Practice Standards Committee assembled an international panel of medical oncologists, radiation oncologists, radiologists, and thoracic surgeons. A focused literature review was performed with the assistance of a medical librarian. The panel used a modified Delphi method to develop expert consensus statements with class of recommendation and level of evidence on issues related to the treatment of potentially resectable N2 positive NSCLC. Consensus was reached on 13 statements on topics related to staging, determinants of unresectable disease, use of chemoimmunotherapy or targeted therapies, proper use of neoadjuvant and/or adjuvant therapy, restaging, and the safety of resection after chemoimmunotherapy. NSCLC with N2 disease remains a challenging, heterogeneous disease. These expert consensus recommendations are meant to provide guidance to identify appropriate surgical patients and to formulate the best multimodality treatment of patients with N2 positive NSCLC."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-PANCREAS-001",
+   "source": "ASCO",
+   "title": "Metastatic pancreatic cancer ASCO clinical practice guideline update",
+   "year": "2020",
+   "page_url": "https://ascopubs.org/doi/10.1200/JCO.20.01364",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/JCO.20.01364",
+   "license": "ASCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "oncology_pancreas",
+   "priority": "high",
+   "sha256": "a170490a78fc03c060608324f2b09df64823f5c78b63e57cb331c9868915d5cf",
+   "size_bytes": 1707,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1707,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:09Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "An imaging-based review of systemic therapies and associated toxicities in metastatic pancreatic cancer as per the 2018 ASCO guidelines: what every radiologist should know. To provide an overview of what radiologists should know about systemic agents utilized in the modern treatment of metastatic pancreatic cancer and their associated toxicities. The clinical landscape of metastatic pancreatic cancer has significantly evolved in recent years, with the advent of new first- and second-line systemic therapies. As these systemic treatment options continue to expand, knowledge of their clinically relevant features is becoming critical for radiologists. While the issues of surgical resectability and tumor response evaluation of advanced stages of pancreatic cancer have been thoroughly discussed in the radiology literature, the diagnostic importance of systemic therapies has tended to be less well appreciated. In this review, we provide a primer for radiologists outlining the radiologically pertinent features of modern systemic therapies used in the treatment of metastatic pancreatic ductal adenocarcinoma. These systemic agents are discussed from the standpoint of the newly updated 2018 ( https://doi.org/10.1007/s00261-019-01954-z ) guidelines for the treatment of metastatic pancreatic cancer from the American Society of Clinical Oncology (ASCO). Understanding the radiology relevance of these modern therapeutic agents is critical, especially with regard to treatment response and toxicity assessment. Knowledge of the modern systemic therapies utilized in the treatment of metastatic pancreatic cancer and their associated toxicity profiles is critical in diagnostic imaging interpretation."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-PANCREAS-003",
+   "source": "ASCO",
+   "title": "Potentially curable pancreatic cancer ASCO",
+   "year": "2019",
+   "page_url": "https://ascopubs.org/doi/10.1200/JCO.19.00946",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/JCO.19.00946",
+   "license": "ASCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "oncology_pancreas",
+   "priority": "high",
+   "sha256": "74d05181ad3ba8aa9ae746cac63e6332f1ede8bf877a15edcfa931243cf8e53a",
+   "size_bytes": 1553,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1553,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Potentially Curable Pancreatic Adenocarcinoma: ASCO Clinical Practice Guideline Update. The purpose of this guideline update is to incorporate recently reported practice-changing evidence into ASCO's recommendations on potentially curable pancreatic adenocarcinoma. ASCO convened an Expert Panel to evaluate data from PRODIGE 24/CCTG PA.6, a phase III, multicenter, randomized clinical trial of postoperative leucovorin calcium, fluorouracil, irinotecan hydrochloride, and oxaliplatin (FOLFIRINOX) versus gemcitabine alone, presented at the 2018 ASCO Annual Meeting. In addition, PubMed was searched for additional papers that may influence the existing recommendations. The Expert Panel only updated Recommendation 4.1 as a result of the practice-changing data. Recommendation 4.1 states that all patients with resected pancreatic adenocarcinoma who did not receive preoperative therapy should be offered 6 months of adjuvant chemotherapy in the absence of medical or surgical contraindications. The modified combination regimen of 5-fluorouracil, oxaliplatin, and irinotecan (mFOLFIRINOX; oxaliplatin 85 mg/m 2 , leucovorin 400 mg/m 2 , irinotecan 150 mg/m 2 D1, and 5-fluorouracil 2.4 g/m 2 over 46 hours every 14 days for 12 cycles) is now preferred in the absence of concerns for toxicity or tolerance; alternatively, doublet therapy with gemcitabine and capecitabine or monotherapy with gemcitabine alone or fluorouracil plus folinic acid alone can be offered.Additional information can be found at www.asco.org/gastrointestinal-cancer-guidelines."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-COLON-002",
+   "source": "ASCO",
+   "title": "Stage IV colorectal cancer ASCO guideline",
+   "year": "2023",
+   "page_url": "https://ascopubs.org/doi/10.1200/JCO.22.01690",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/JCO.22.01690",
+   "license": "ASCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "oncology_colorectal",
+   "priority": "high",
+   "sha256": "5ba9c66885f3e267e51ccf45c856f153800a005c9ec141d58b15bc0c2311c41c",
+   "size_bytes": 717,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 717,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Stage IV colorectal cancer ASCO guideline Source: ASCO Year: 2023 Domain: oncology_colorectal License: ASCO Available at: https://ascopubs.org/doi/10.1200/JCO.22.01690 This is a citation reference for the ASCO guideline 'Stage IV colorectal cancer ASCO guideline' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: oncology_colorectal. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASCO-RECTUM-001",
+   "source": "ASCO",
+   "title": "Locally advanced rectal cancer ASCO",
+   "year": "2020",
+   "page_url": "https://ascopubs.org/doi/10.1200/JCO.19.03114",
+   "pdf_url": "https://ascopubs.org/doi/10.1200/JCO.19.03114",
+   "license": "ASCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "oncology_colorectal",
+   "priority": "high",
+   "sha256": "dd7223ace6b84cb9dec8d0f57831f149c6c80aa860e0b6d83958ca65ab33bb4f",
+   "size_bytes": 1865,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1863,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Utility of Circulating Tumor DNA to Assess Tumor Response in Patients with Locally Advanced Rectal Cancer Undergoing Neoadjuvant Therapy. Circulating tumor (ct)DNA is a prognostic biomarker in gastrointestinal malignancies. In rectal cancer, its utility to inform perioperative management and predict recurrence, particularly in patients undergoing non-operative management (NOM), remains unclear. Studies are needed to clarify how post-neoadjuvant therapy (NAT) and post-surgical ctDNA status correlate with clinical outcomes in localized rectal cancer. We retrospectively analyzed ctDNA data from 220 patients with rectal cancer using a personalized tumor-informed assay (Signatera™, Natera, Inc., Austin, TX, USA). Of these, 148 (67.3%) underwent NAT followed by surgery, and 72 (32.7%) underwent NAT followed by NOM. We assessed associations between post-NAT ctDNA status and survival outcomes. In the surgical cohort, we examined associations between post-operative ctDNA status and clinical response, pathological response, survival outcomes, and NAR scores. In the surgical cohort, ctDNA positivity at the post-operative MRD timepoint was a strong predictor of recurrence, with an 88.3% relapse rate compared to 11.5% in ctDNA-negative patients ( p < 0.001). Among the 64 NOM patients with post-NAT ctDNA, 21.9% (14/64) were ctDNA-positive, of whom 100% (14/14) relapsed (92.9% local-only), 13 relapsed by the time of data cut-off, and one relapsed 8 months after the cut-off. Only 10% (5/50) of the ctDNA-negative NOM patients experienced local recurrence ( p < 0.0001). ctDNA positivity post-NAT was associated with inferior DFS ( p = 0.003). ctDNA was a strong predictor of recurrence in rectal cancer, including in NOM settings. In NOM patients, ctDNA detected local recurrences, highlighting its potential to guide post-NAT surveillance and treatment."
     }
    ]
   }

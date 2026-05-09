@@ -1,7 +1,7 @@
 {
  "source": "UNICEF",
  "generated_at": "2026-05-03T07:34:55Z",
- "total_documents": 4,
+ "total_documents": 5,
  "documents": [
   {
    "id": "HUMAN-NUTR-001",
@@ -240,6 +240,31 @@
     {
      "chunk_index": 7,
      "content": "Foundation during the conduct of the study. BFA reports grants from National Institutes of Health, and grants and non-financial support from Bill & Melinda Gates Foundation, outside the submitted work. MCF reports personal fees from Reckitt, outside the submitted work. AM has received funding as a statistical consultant on The Lancet Commission on water, sanitation and hygiene, and health to analyse the associations between water, sanitation, hygiene, and handwashing and child health using Multiple Indicator Cluster Survey data and to complete an individual-participant data meta-analysis of WASH trials on pathogen contamination in the environment and child health. All other authors declare no competing interests."
+    }
+   ]
+  },
+  {
+   "id": "UNICEF-DRUG-001",
+   "source": "UNICEF",
+   "title": "UNICEF Supply Catalogue essential medicines for children",
+   "year": "2024",
+   "page_url": "https://supply.unicef.org/medicines.html",
+   "pdf_url": "https://supply.unicef.org/medicines.html",
+   "license": "UNICEF Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pediatric",
+   "priority": "medium",
+   "sha256": "ec6efc4adfcb63e86579a51844907a93a30b887b9631fb58fcc6b718cf866ca0",
+   "size_bytes": 743,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 743,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: UNICEF Supply Catalogue essential medicines for children Source: UNICEF Year: 2024 Domain: drug_pediatric License: UNICEF Open Available at: https://supply.unicef.org/medicines.html This is a citation reference for the UNICEF guideline 'UNICEF Supply Catalogue essential medicines for children' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

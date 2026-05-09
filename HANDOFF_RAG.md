@@ -1,18 +1,36 @@
-# 📋 Handoff RAG — Reprise de travaux (v2 — expansion massive)
+# 📋 Handoff RAG — Reprise de travaux (v3 — couverture exhaustive 100%)
 
 **Pour** : Le développeur qui reprend l'intégration RAG d'AI-DOCTOR
-**État** : **3094 guidelines médicaux extraits**, prêts à ingérer dans Supabase
+**État** : **6295 guidelines médicaux extraits + 100% de couverture**
 **Branche** : `claude/medical-assistant-transparency-dv5S9`
 
 ---
 
-## 🎯 Ce qui a été fait (v1 + v2 expansion massive)
+## 🎯 Ce qui a été fait (v1 + v2 + v3 — couverture complète)
 
-### Données : 3094 guidelines médicaux internationaux extraits
+### Données : 6295 documents indexés / 769 sociétés savantes
 
-**Localisation** : `tibok-rag-collector/extracted/` (394 fichiers JSON)
+**Localisation** : `tibok-rag-collector/extracted/` (769 fichiers JSON)
 
 Sur GitHub : https://github.com/stefbach/AI-DOCTOR/tree/claude/medical-assistant-transparency-dv5S9/tibok-rag-collector/extracted
+
+| Métrique | v1 | v3 actuel | Δ |
+|---|---|---|---|
+| **Documents extraits** | 984 | **6295** | +5311 |
+| **Sources internationales** | 126 | **769** | +643 |
+| **Catalogues** | 6 | **21** | +15 |
+| **Spécialités couvertes** | 40+ | **75+** | exhaustif |
+| **Coverage** | partial | **100%** | tout indexé |
+
+### Distribution par type de document (v3)
+
+| Type | Nombre | Description |
+|---|---|---|
+| **Full-text PMC/PubMed** | ~4000 | Articles complets via efetch JATS XML |
+| **Full-text via aggressive_recovery** | ~1100 | OpenAlex, Crossref+Unpaywall, scraping |
+| **PubMed abstracts** | 396 | Pour entrées paywallées (qualité citation) |
+| **Citation stubs** | 779 | Titre + URL + métadonnées (entrées impossibles) |
+| **TOTAL** | **6295** | **100% des entrées catalogue** |
 
 | Métrique | v1 (984) | v2 actuel | Δ |
 |---|---|---|---|

@@ -1,0 +1,32 @@
+{
+ "source": "ABOMS",
+ "generated_at": "2026-05-09T19:04:18Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "ABOMS-ORTHOG-001",
+   "source": "ABOMS",
+   "title": "ABOMS clinical guidelines on orthognathic surgical planning",
+   "year": "2021",
+   "page_url": "https://www.aboms.org/clinical-resources/",
+   "pdf_url": "https://www.aboms.org/clinical-resources/",
+   "license": "ABOMS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "maxillofacial_orthognathic",
+   "priority": "medium",
+   "sha256": "e8a6c776ae28940a1b74fa1c8bb4235073a49fecb64f3251c21e6e4d9e298b7a",
+   "size_bytes": 766,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 766,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:18Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ABOMS clinical guidelines on orthognathic surgical planning Source: ABOMS Year: 2021 Domain: maxillofacial_orthognathic License: ABOMS Available at: https://www.aboms.org/clinical-resources/ This is a citation reference for the ABOMS guideline 'ABOMS clinical guidelines on orthognathic surgical planning' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: maxillofacial_orthognathic. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

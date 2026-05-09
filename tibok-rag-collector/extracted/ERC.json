@@ -1,7 +1,7 @@
 {
  "source": "ERC",
  "generated_at": "2026-05-09T13:36:34Z",
- "total_documents": 9,
+ "total_documents": 10,
  "documents": [
   {
    "id": "ERC-ACLS-001",
@@ -1421,6 +1421,31 @@
     {
      "chunk_index": 7,
      "content": "vegetation, snowpack, avalanche risk, and burial depth during the search phase of MCI [ ]. While they did not define new cut-offs for depth of burial nor CPR duration, they acknowledged AvaLife’s thresholds of only excavating subjects if <150 cm burial depth and limiting CPR to 6 min in resource-limited multiple burial scenarios when buried subjects remain [ ]. Evacuation decisions in avalanche MCI are based on the patient’s medical condition (i.e. vital signs, co-morbidities, diagnosis and injury severity scores), the availability of helicopter and ground transport, and the nearest appropriate hospital. If there are multiple hypothermic CA patients, transport decisions can be based on the HOPE score in the nearest hospital [ , ]. Hypothermic CA patients with a HOPE score ≥10% should be transferred to an ECLS center by HEMS [ , , , ]. Current realities and future development models Out-of-hospital management of avalanche emergencies varies substantially worldwide, shaped by geography, rescue logistics, and organizational models of EMS [ ]. In most European countries, a dense network of SAR and HEMS enables rapid responses to avalanche accidents, often within minutes. Ground and helicopter teams are usually staffed with ALS-trained healthcare providers. In contrast, prehospital care in North America, as well as in remote mountain regions of South America and Asia is typically provided by BLS-trained emergency medical technicians and ALS-trained paramedics, with physician-staffed helicopters being uncommon [ ]. Although rescue times of critically buried avalanche subjects have been markedly reduced and survival improved since 1981 [ , – , , , – ], studies and clinical practice highlight areas for improvement. In one study, airway assessment was documented in only 50% of avalanche patients, suggesting lower-than-expected compliance [ ]. Survival of avalanche patients depends foremost on burial duration and the speed of extrication [ , ]. Interventions that accelerate search and rescue are particularly effective within the first 30 min of burial. Widespread bystander training in BLS is vital, as well as the usage of safety device that can reduce the number of burials or prolong the survival when critically buried [ – , , ]. Drones may become increasingly useful for the remote detection of buried subjects, particularly in MCIs [ , ], and their role is likely to expand as technology advances. Future advances may include further development and validation of current MCI algorithm, implementation of existing and developing technologies and studying the effects of climate change [ , , ]. Implementation of knowledge and adherence to recommendations by SAR team and healthcare providers remains inconsistent, often due to limited awareness of key survival determinants [ , , ]. Strengthening education, training, and implementation of checklist and SOPs across all levels of care, both prehospital and in-hospital, could further improve outcomes for avalanche patients. Conclusions Avalanche fatalities result from asphyxia, trauma, and hypothermia. Prehospital and in-hospital care of an avalanche accident requires medical, technical, logistical, and organizational competencies. Survival for critically buried subjects relies on the speed of extrication, absence of trauma, presence of a patent airway and air pocket, immediate field treatment, and rapid transport to the most appropriate hospital. Survival may be improved with helicopter EMS, advancements in safety and rescue equipment technology, early deployment of professional SAR teams with checklists and SOPs. Supplementary Information Supplementary Material 1. Supplemental Fig. S1. Avalanche Victim Resuscitation Checklist for clinical decision support and documentation in the field. (modified from Pasquier et al., 2023 with permission [ ])."
+    }
+   ]
+  },
+  {
+   "id": "ERC-DRUG-001",
+   "source": "ERC",
+   "title": "ERC European Resuscitation Council Drug List adult and pediatric ALS",
+   "year": "2021",
+   "page_url": "https://www.erc.edu/guidelines",
+   "pdf_url": "https://www.erc.edu/guidelines",
+   "license": "ERC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "a8e56d94c65eae59136659dba1cd062c2c6a3de3aedc2f629a6ef36af59e5fc5",
+   "size_bytes": 751,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 751,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ERC European Resuscitation Council Drug List adult and pediatric ALS Source: ERC Year: 2021 Domain: drug_critical_care License: ERC Available at: https://www.erc.edu/guidelines This is a citation reference for the ERC guideline 'ERC European Resuscitation Council Drug List adult and pediatric ALS' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

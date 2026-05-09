@@ -1,7 +1,7 @@
 {
  "source": "OAA",
  "generated_at": "2026-05-09T16:03:34Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "OAA-LABOR-001",
@@ -29,6 +29,31 @@
     {
      "chunk_index": 1,
      "content": "how many people are using our site or which pages are popular to help us improve customer experience. Switching off these cookies will reduce our ability to gather information to improve the experience. Functional These cookies are related to features that make your experience better. They enable basic functions such as social media sharing. Switching off these cookies will mean that areas of our website can't work properly. Save preferences"
+    }
+   ]
+  },
+  {
+   "id": "OAA-OBS-001",
+   "source": "OAA",
+   "title": "OAA Obstetric Anaesthetists Association guidelines anaesthetic management labour and delivery",
+   "year": "2020",
+   "page_url": "https://www.oaa-anaes.ac.uk/",
+   "pdf_url": "https://www.oaa-anaes.ac.uk/",
+   "license": "OAA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_obstetric",
+   "priority": "high",
+   "sha256": "d6c9fb6c333275f35a3d0950fe6bd08c30a9106277c1214b80e2bb3c8feb2df6",
+   "size_bytes": 803,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 803,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: OAA Obstetric Anaesthetists Association guidelines anaesthetic management labour and delivery Source: OAA Year: 2020 Domain: anesthesia_obstetric License: OAA Available at: https://www.oaa-anaes.ac.uk/ This is a citation reference for the OAA guideline 'OAA Obstetric Anaesthetists Association guidelines anaesthetic management labour and delivery' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: anesthesia_obstetric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

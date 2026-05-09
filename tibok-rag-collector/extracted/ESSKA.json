@@ -1,7 +1,7 @@
 {
  "source": "ESSKA",
  "generated_at": "2026-05-09T10:17:38Z",
- "total_documents": 7,
+ "total_documents": 8,
  "documents": [
   {
    "id": "ESSKA-ACL-001",
@@ -431,6 +431,31 @@
     {
      "chunk_index": 14,
      "content": "of strength, flexibility, and running mechanics in 94. Hamill J, Miller R, Noehren B, Davis I. A prospective study of men with iliotibial band syndrome. J Orthop Sports Phys Ther. iliotibial band strain in runners. Clin Biomech. 2008;23:1018–25. 2014;44:217–22. 95. Baggaley M, Noehren B, Clasey JL, Shapiro R, Pohl MB. Frontal 78. Mucha MD, Caldwell W, Schlueter EL, Walters C, Hassen plane kinematics of the hip during running: are they related to A. Hip abductor strength and lower extremity running related hip anatomy and strength? Gait Posture. 2015;42:505–10. injury in distance runners: a systematic review. J Sci Med Sport. 96. Brindle RA, Ebaugh DD, Willson JD, Finley MA, Shewokis PA, 2017;20:349–55. Milner CE. Relationships of hip abductor strength, neuromuscu- 79. Brown MJ, Hutchinson LA, Rainbow MJ, Deluzio KJ, De Asha lar control, and hip width to femoral length ratio with peak hip AR. A comparison of self-selected walking speeds and walk- adduction angle in healthy female runners. J Sports Sci Rout- ing speed variability when data are collected during repeated ledge. 2020;38:2291–7. discrete trials and during continuous walking. J Appl Biomech. 97. Willy RW, Davis IS. The effect of a hip-strengthening program 2017;33:384–7. on mechanics during running and during a single-leg squat. J 80. McNicol K, Taunton JE, Clement DB. Iliotibial tract friction Orthop Sports Phys Ther. 2011;41:625–32. syndrome in athletes. Can J Appl Sport Sci J Can Sci Appl Au 98. Khan KM, Scott A. Mechanotherapy: how physical therapists’ Sport. 1981;6:76–80. prescription of exercise promotes tissue repair. Br J Sports Med. 81. Baker RL, Souza RB, Fredericson M. Iliotibial band syndrome: 2009;43:247–52. soft tissue and biomechanical factors in evaluation and treatment. 99. Smith BE, Hendrick P, Bateman M, Holden S, Littlewood C, PM&R. 2011;3:550–61. Smith TO, et al. Musculoskeletal pain and exercise—challeng- 82. Ekman EF, Pope T, Martin DF, Curl WW. Magnetic reso- ing existing paradigms and introducing new. Br J Sports Med. nance imaging of iliotibial band syndrome. Am J Sports Med. 2019;53:907–12. 1994;22:851–4. 100. Meardon SA, Campbell S, Derrick TR. Step width alters iliotibial 83. Reiman MP, Thorborg K. Clinical examination and physical band strain during running. Sports Biomech. 2012;11:464–72. assessment of hip joint-related pain in athletes. Int J Sports Phys 101. Boyer ER, Derrick TR. Select injury-related variables are Ther. 2014;9:737–55. affected by stride length and foot strike style during running. 84. Warden SJ, Davis IS, Fredericson M. Management and preven- Am J Sports Med. 2015;43:2310–7. tion of bone stress injuries in long-distance runners. J Orthop 102. Willy RW, Buchenic L, Rogacki K, Ackerman J, Schmidt A, Sports Phys Ther. 2014;44:749–65. Willson JD. In-field gait retraining and mobile monitoring to 85. Lee PYF, Nixion A, Chandratreya A, Murray JM. Synovial plica address running biomechanics associated with tibial stress frac- syndrome of the knee: a commonly overlooked cause of anterior ture. Scand J Med Sci Sports. 2016;26:197–205. knee pain. Surg J. 2017;3:e9-16. 86. Grimaldi A, Fearon A. Gluteal tendinopathy: integrating patho- mechanics and clinical features in its management. J Orthop Sports Phys Ther. 2015;45:910–22."
+    }
+   ]
+  },
+  {
+   "id": "ESSKA-ACL-002",
+   "source": "ESSKA",
+   "title": "ESSKA consensus on graft choice in primary ACL reconstruction",
+   "year": "2019",
+   "page_url": "https://www.esska.org/page/Consensus",
+   "pdf_url": "https://www.esska.org/page/Consensus",
+   "license": "ESSKA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_sports",
+   "priority": "high",
+   "sha256": "ad003aeeee66ec87dff55807a38167ac9440f008afa49587e5e2aeac5ea552cb",
+   "size_bytes": 749,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 749,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:15Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESSKA consensus on graft choice in primary ACL reconstruction Source: ESSKA Year: 2019 Domain: orthopedics_sports License: ESSKA Available at: https://www.esska.org/page/Consensus This is a citation reference for the ESSKA guideline 'ESSKA consensus on graft choice in primary ACL reconstruction' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_sports. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

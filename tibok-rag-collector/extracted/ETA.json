@@ -1,7 +1,7 @@
 {
  "source": "ETA",
  "generated_at": "2026-05-09T09:11:56Z",
- "total_documents": 5,
+ "total_documents": 7,
  "documents": [
   {
    "id": "ETA-THYROID-001",
@@ -201,6 +201,56 @@
     {
      "chunk_index": 1,
      "content": "without concomitant intake of drugs or supplements that could interfere with gastrointestinal uptake or metabolism of L-T4. Apalutamide is believed to induce hepatic glucuronidation of thyroid hormone by increasing the UDP glucuronyltransferase ( ). However, more research is needed to confirm this hypothesis as well as to exclude other possible modes of actions such as, for example, increase in thyroid-binding globulin, effects on other metabolizing enzymes such as deiodinases, or thyroid auto-immunity. In normal circumstances, decreased fT4 leads to increased TSH secretion, resulting in increased thyroid hormone production. Here, failure of thyroidal compensation results in consumptive hypothyroidism as is also observed with other drugs such as the anti-epileptic drug valproic acid and multikinase inhibitors. In all three cases, a severely increased serum TSH (>30 mIU/L) was observed already after 1 to 2 months under apalutamide treatment, thus much earlier than the median time to first TSH rise in SPARTAN of 113 days ( ), with a need to double the L-T4 dosage. Vice versa, the L-T4 needs to return to baseline after stopping apalutamide, as observed in patient 1, underlining the importance of anticipation with a swift reduction to the pre-apalutamide L-T4 dosage when apalutamide is temporarily or definitively stopped. Based on the available data from the trials and case reports ( , ) and in view of the increasing use of apalutamide worldwide ( ), in , we provide practice recommendations for thyroid management prior to and during apalutamide, as well as after the interruption of apalutamide. These practice recommendations are based on our own clinical experience and are compatible with current recommendations for the management of hypothyroidism ( , ). Close collaboration with the general practitioner, uro-oncologist, and endocrinologist is mandatory in cases of known thyroid disease (hypothyroidism, hyperthyroidism, and thyroid cancer), pituitary disease, severe gastrointestinal malabsorption (e.g. post-bariatric surgery), or concomitant treatment with anti-cancer therapies or other drugs known to interfere with thyroid hormone homeostasis (e.g. immune checkpoint inhibitors and multikinase inhibitors). Thyroid dysfunction does not represent a contraindication to start or continue apalutamide. When L-T4 is started or increased in PCa patients with poor prognosis, age ≥80 years, or high comorbidity, a serum TSH between 1 and 10 mIU/L should be targeted rather than a TSH within the laboratory reference range, as suggested by the guidelines ( , ). Awaiting long-term data from the pivotal trials, real-world data are needed regarding the impact of apalutamide and other potent androgen receptor pathway inhibitors on thyroid hormone homeostasis. More insight is needed into the hormonal and possible anti-tumoral effects of thyroid hormonal changes induced by apalutamide in PCa patients. In the meantime, awareness of the risk of and clinical guidance on apalutamide-induced thyroid dysfunction is of utmost importance in the highly vulnerable patient population with advanced PCa. Declaration of interest The authors declare that there is no conflict of interest that could be perceived as prejudicing the impartiality of these case series and practice recommendations. Funding This work did not receive any specific grant from any funding agency in the public, commercial, or not-for-profit sector. Statement of ethics This study was approved by the Ethics Committee of the University Hospitals Leuven. Patient consent Written informed consent for publication of their clinical details was obtained from the patients. Author contribution statement KD and BD drafted the manuscript, and PVC, AMVdB, FD, FC, AG, and SJ reviewed it critically."
+    }
+   ]
+  },
+  {
+   "id": "EU-TIRADS-001",
+   "source": "ETA",
+   "title": "European Thyroid Association EU-TIRADS classification thyroid nodules",
+   "year": "2017",
+   "page_url": "https://www.eurothyroid.com/guidelines/eta-guidelines.html",
+   "pdf_url": "https://www.eurothyroid.com/guidelines/eta-guidelines.html",
+   "license": "ETA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_us_thyroid",
+   "priority": "high",
+   "sha256": "e0b5c89c785182a9bbd8c689d2c87e90ad334298345f0758e637d6352f22c3e0",
+   "size_bytes": 2567,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2564,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Diagnostic Performance of Five Societies' Ultrasound Risk Stratification Systems for Thyroid Malignancy According to Nodule Size: A Comparison Using a Standardized Ultrasound Lexicon. Accurate understanding of the reasons for the differing performance of current ultrasound (US) risk stratification systems (RSSs) is essential for developing a unified RSS. We aimed to compare the diagnostic performance of five RSSs according to nodule size, using standardized US lexicon proposed by international expert consensus. From March 2017 to February 2024, 3774 thyroid nodules (>1 cm) with final diagnoses (3053 benign and 721 malignant) were retrospectively analyzed. The US features of nodules were assessed during real-time examinations, and the nodules were retrospectively classified according to the US criteria of each RSS using standardized lexicon. We compared the distribution, malignancy risk, and inter-system agreement of nodule categories, along with the distribution of malignant tumors across these categories, among the American Thyroid Association (ATA) system and the European (EU-), Korean (K-), American College of Radiology (ACR-), and Chinese (C-) Thyroid Imaging Reporting and Data Systems (TIRADSs). Diagnostic performance based on biopsy criteria was compared among the five RSSs according to nodule size (small ≤ 2 cm and large > 2 cm). Significant differences were observed in the distribution of classified nodules, malignant tumor distribution across categories, and malignancy risk of most categories (all p < 0.001), with widely varying inter-system agreement (κ = 0.05-0.85). The ATA system and EU-TIRADS demonstrated higher sensitivity and unnecessary biopsy rate (UBR) in both small and large nodule groups, whereas ACR TI-RADS showed lower sensitivity and UBR across both sizes. K-TIRADS exhibited the lowest sensitivity and UBR for small nodules (all p < 0.001) but showed high sensitivity and UBR for large nodules. C-TIRADS showed a similarly low sensitivity but exhibited a higher UBR (all p < 0.001) in both size groups compared with ACR TI-RADS. The five RSSs differed considerably in nodule classification, malignancy risk across categories, and diagnostic performance according to nodule size. The differences in diagnostic performance stem primarily from variations in biopsy size thresholds and US criteria for small nodules, and disparate US criteria for no-biopsy-indicated large nodules. Optimizing risk stratification and biopsy thresholds, particularly for large nodules, is required for establishing a unified TIRADS."
+    }
+   ]
+  },
+  {
+   "id": "ETA-AMIO-001",
+   "source": "ETA",
+   "title": "ETA 2018 guidelines for management of amiodarone-associated thyroid dysfunction",
+   "year": "2018",
+   "page_url": "https://www.eurothyroid.com/guidelines/eta-guidelines.html",
+   "pdf_url": "https://www.eurothyroid.com/guidelines/eta-guidelines.html",
+   "license": "ETA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_thyroid",
+   "priority": "medium",
+   "sha256": "850775bc783b549818f8bb7338edf099a59d3210e533c74c4fcf39c9238f9aac",
+   "size_bytes": 1802,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1802,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "2018 European Thyroid Association (ETA) Guidelines for the Management of Amiodarone-Associated Thyroid Dysfunction. Treatment with amiodarone is associated with changes in thyroid function tests, but also with thyroid dysfunction (amiodarone-induced hypothyroidism, AIH, and amiodarone-induced thyrotoxicosis, AIT). Both AIH and AIT may develop in apparently normal thyroid glands or in the presence of underlying thyroid abnormalities. AIH does not require amiodarone withdrawal, and is treated with levothyroxine replacement if overt, whereas subclinical forms may be followed without treatment. Two main types of AIT are recognized: type 1 AIT (AIT 1), a form of iodine-induced hyperthyroidism occurring in nodular goitres or latent Graves disease, and type 2 AIT (AIT 2), resulting from destructive thyroiditis in a normal thyroid gland. Mixed/indefinite forms exist due to both pathogenic mechanisms. AIT 1 is best treated with thionamides that may be combined for a few weeks with sodium perchlorate to make the thyroid gland more sensitive to thionamides. AIT 2 is treated with oral glucocorticoids. Once euthyroidism has been restored, AIT 2 patients are followed up without treatment, whereas AIT 1 patients should be treated with thyroidectomy or radioiodine. Mixed/indefinite forms of AIT are treated with thionamides. Oral glucocorticoids can be added from the beginning if a precise diagnosis is uncertain, or after a few weeks if response to thionamides alone is poor. The decision to continue or to stop amiodarone in AIT should be individualized in relation to cardiovascular risk stratification and taken jointly by specialist cardiologists and endocrinologists. In the presence of rapidly deteriorating cardiac conditions, emergency thyroidectomy may be required for all forms of AIT."
     }
    ]
   }

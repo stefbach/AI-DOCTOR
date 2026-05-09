@@ -1,7 +1,7 @@
 {
  "source": "AAOS",
  "generated_at": "2026-05-02T15:50:27Z",
- "total_documents": 29,
+ "total_documents": 38,
  "documents": [
   {
    "id": "AAOS-001",
@@ -1357,6 +1357,231 @@
     {
      "chunk_index": 5,
      "content": "routine care. Third, individualised feedback to surgeons, comparing their performance with departmental averages, appears to be a powerful motivator for behaviour change, consistent with audit and feedback literature. For institutions seeking to implement similar quality improvement initiatives, our experience suggests a phased approach: (1) establish baseline performance and identify specific barriers through surveys and focus groups; (2) implement education and develop consensus protocols to address knowledge gaps; (3) provide sustained reinforcement through visual aids, regular case-based learning and departmental presentations; (4) implement individualised audit feedback to clinicians with regular reporting and (5) establish ongoing monitoring and case review processes to sustain improvements. Adaptation to local context is critical for successful implementation. Institutions must first ensure that clinicians have access to the AAOS AUC web-based decision tool (available at www.orthoguidelines.org/auc ) and are trained in its use, as this tool provides real-time guidance for clinical decision-making. In resource-constrained settings, we recommend prioritising low-cost interventions that integrate into the existing workflows, such as laminated pocket cards, visual flowcharts in clinical areas and incorporation of guideline training into routine educational activities rather than creating separate dedicated sessions. Leadership support for protected training time and establishment of formal governance structures with clearly defined roles enhance sustainability. Starting with small-scale pilot testing before broader implementation allows for iterative refinement based on local barriers and facilitators. Regular data collection with visual display methods (such as run charts) maintains team engagement and provides objective evidence of improvement. Future directions Based on our PDSA findings, future quality improvement efforts should focus on several areas. First, we plan to expand the educational interventions and visual decision aids to include other common paediatric fractures (such as forearm fractures and ankle fractures) where AAOS or other professional society guidelines exist. Second, we aim to link AUC adherence data with clinical outcomes to determine whether higher adherence rates are associated with improved patient outcomes, reduced complications or decreased healthcare costs. Third, we plan to conduct a multicentre implementation study to assess the generalisability of our approach to other institutions in Egypt and the broader Middle East and North Africa region. Finally, we will explore opportunities to develop institution-specific adaptations of the AUC that account for local resource availability while maintaining evidence-based principles. Conclusion This quality improvement project successfully implemented the AAOS AUC for paediatric SCHFs into routine clinical practice at a high-volume tertiary centre in Egypt. Through a structured, three-cycle PDSA approach, we demonstrated that combining education, departmental protocols, sustained reinforcement training and audit feedback can lead to significant and sustainable improvements in evidence-based care. The proportion of cases managed appropriately increased from 62.1% to 87.9%, while rarely appropriate management decreased from 19.0% to 3.4%. The key lessons from this project are that organisational factors—particularly lack of awareness, absence of standardised protocols and insufficient reinforcement mechanisms—represent the primary modifiable barriers to guideline adherence. Sustained educational interventions with visual reminders, regular case-based discussions and individualised audit feedback are powerful strategies for bridging the gap between evidence and practice. This approach is feasible and effective even in resource-limited settings, provided that there is institutional support, multidisciplinary collaboration and a commitment to iterative learning through PDSA methodology."
+    }
+   ]
+  },
+  {
+   "id": "AAOS-SCOL-001",
+   "source": "AAOS",
+   "title": "AAOS appropriate use criteria for adolescent idiopathic scoliosis",
+   "year": "2015",
+   "page_url": "https://www.aaos.org/quality/quality-programs/pediatric-programs/",
+   "pdf_url": "https://www.aaos.org/quality/quality-programs/pediatric-programs/",
+   "license": "AAOS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_pediatric",
+   "priority": "medium",
+   "sha256": "244ab1e871cff09d5a57e88f249fc7e838c1e43070f0cc9ec7a705f74557e653",
+   "size_bytes": 789,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 789,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAOS appropriate use criteria for adolescent idiopathic scoliosis Source: AAOS Year: 2015 Domain: orthopedics_pediatric License: AAOS Available at: https://www.aaos.org/quality/quality-programs/pediatric-programs/ This is a citation reference for the AAOS guideline 'AAOS appropriate use criteria for adolescent idiopathic scoliosis' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAOS-MEN-001",
+   "source": "AAOS",
+   "title": "AAOS appropriate use criteria for meniscus injury",
+   "year": "2018",
+   "page_url": "https://www.aaos.org/quality/quality-programs/lower-extremity-programs/",
+   "pdf_url": "https://www.aaos.org/quality/quality-programs/lower-extremity-programs/",
+   "license": "AAOS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_sports",
+   "priority": "medium",
+   "sha256": "4dfd78ed0dafcf5110d612049919e26877e2b5f228eda7c9b6a28059bea41ce1",
+   "size_bytes": 757,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 757,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAOS appropriate use criteria for meniscus injury Source: AAOS Year: 2018 Domain: orthopedics_sports License: AAOS Available at: https://www.aaos.org/quality/quality-programs/lower-extremity-programs/ This is a citation reference for the AAOS guideline 'AAOS appropriate use criteria for meniscus injury' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_sports. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAOS-BENIGN-001",
+   "source": "AAOS",
+   "title": "AAOS appropriate use criteria for benign bone tumors",
+   "year": "2019",
+   "page_url": "https://www.aaos.org/quality/quality-programs/musculoskeletal-tumor-programs/",
+   "pdf_url": "https://www.aaos.org/quality/quality-programs/musculoskeletal-tumor-programs/",
+   "license": "AAOS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_trauma",
+   "priority": "medium",
+   "sha256": "44dc7c8de5e88843f2bb4704f44f0c808fa98b71f8707fcfc594e211dbb39ce1",
+   "size_bytes": 769,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 769,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAOS appropriate use criteria for benign bone tumors Source: AAOS Year: 2019 Domain: orthopedics_trauma License: AAOS Available at: https://www.aaos.org/quality/quality-programs/musculoskeletal-tumor-programs/ This is a citation reference for the AAOS guideline 'AAOS appropriate use criteria for benign bone tumors' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_trauma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAOS-PATHFX-001",
+   "source": "AAOS",
+   "title": "AAOS clinical practice guideline pathological fractures of the femur",
+   "year": "2017",
+   "page_url": "https://www.aaos.org/pmuhcpg",
+   "pdf_url": "https://www.aaos.org/pmuhcpg",
+   "license": "AAOS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_trauma",
+   "priority": "high",
+   "sha256": "1e941c92bab0dcc8c0182a18e8bef83a1d99b6f673b0e7b65d9a9668f8bbb38e",
+   "size_bytes": 752,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 752,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAOS clinical practice guideline pathological fractures of the femur Source: AAOS Year: 2017 Domain: orthopedics_trauma License: AAOS Available at: https://www.aaos.org/pmuhcpg This is a citation reference for the AAOS guideline 'AAOS clinical practice guideline pathological fractures of the femur' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_trauma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAOS-CUBITAL-001",
+   "source": "AAOS",
+   "title": "AAOS clinical practice guideline management of cubital tunnel syndrome",
+   "year": "2024",
+   "page_url": "https://www.aaos.org/cucpg",
+   "pdf_url": "https://www.aaos.org/cucpg",
+   "license": "AAOS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_hand",
+   "priority": "high",
+   "sha256": "a30197ae4f3fcad6237d0886052ed9f4b35c03c6edd06ac19aafe6198e100246",
+   "size_bytes": 750,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 750,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAOS clinical practice guideline management of cubital tunnel syndrome Source: AAOS Year: 2024 Domain: orthopedics_hand License: AAOS Available at: https://www.aaos.org/cucpg This is a citation reference for the AAOS guideline 'AAOS clinical practice guideline management of cubital tunnel syndrome' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_hand. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAOS-ANKLEFX-001",
+   "source": "AAOS",
+   "title": "AAOS appropriate use criteria for ankle fractures",
+   "year": "2017",
+   "page_url": "https://www.aaos.org/quality/quality-programs/lower-extremity-programs/",
+   "pdf_url": "https://www.aaos.org/quality/quality-programs/lower-extremity-programs/",
+   "license": "AAOS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_foot_ankle",
+   "priority": "medium",
+   "sha256": "384b58fe6abec181200c09cda7e114e933558662763dd2621ee81e4a3c3262d4",
+   "size_bytes": 765,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 765,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAOS appropriate use criteria for ankle fractures Source: AAOS Year: 2017 Domain: orthopedics_foot_ankle License: AAOS Available at: https://www.aaos.org/quality/quality-programs/lower-extremity-programs/ This is a citation reference for the AAOS guideline 'AAOS appropriate use criteria for ankle fractures' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_foot_ankle. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAOS-FROZEN-001",
+   "source": "AAOS",
+   "title": "AAOS appropriate use criteria adhesive capsulitis frozen shoulder",
+   "year": "2018",
+   "page_url": "https://www.aaos.org/quality/quality-programs/upper-extremity-programs/",
+   "pdf_url": "https://www.aaos.org/quality/quality-programs/upper-extremity-programs/",
+   "license": "AAOS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_sports",
+   "priority": "medium",
+   "sha256": "ea08af8b2dd32b8ecb2990889d0d90ba815bc3504e7fc45af45529e03c7af350",
+   "size_bytes": 789,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 789,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAOS appropriate use criteria adhesive capsulitis frozen shoulder Source: AAOS Year: 2018 Domain: orthopedics_sports License: AAOS Available at: https://www.aaos.org/quality/quality-programs/upper-extremity-programs/ This is a citation reference for the AAOS guideline 'AAOS appropriate use criteria adhesive capsulitis frozen shoulder' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_sports. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAOS-PEDIATRIC-FX-002",
+   "source": "AAOS",
+   "title": "AAOS clinical practice guideline pediatric diaphyseal femur fracture",
+   "year": "2020",
+   "page_url": "https://www.aaos.org/pdffcpg",
+   "pdf_url": "https://www.aaos.org/pdffcpg",
+   "license": "AAOS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_pediatric",
+   "priority": "medium",
+   "sha256": "6c398dd918ad0ae951e07c7cebd585e399c493ab684d0e5c86822f2eb1c617f1",
+   "size_bytes": 2740,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2737,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Pediatric Supracondylar Humerus and Diaphyseal Femur Fractures: A Comparative Analysis of Chat Generative Pretrained Transformer and Google Gemini Recommendations Versus American Academy of Orthopaedic Surgeons Clinical Practice Guidelines. Artificial intelligence (AI) chatbots, including chat generative pretrained transformer (ChatGPT) and Google Gemini, have significantly increased access to medical information. However, in pediatric orthopaedics, no study has evaluated the accuracy of AI chatbots compared with evidence-based recommendations, including the American Academy of Orthopaedic Surgeons clinical practice guidelines (AAOS CPGs). The aims of this study were to compare responses by ChatGPT-4.0, ChatGPT-3.5, and Google Gemini with AAOS CPG recommendations on pediatric supracondylar humerus and diaphyseal femur fractures regarding accuracy, supplementary and incomplete response patterns, and readability. ChatGPT-4.0, ChatGPT-3.5, and Google Gemini were prompted by questions created from 13 evidence-based recommendations (6 from the 2011 AAOS CPG on pediatric supracondylar humerus fractures; 7 from the 2020 AAOS CPG on pediatric diaphyseal femur fractures). Responses were anonymized and independently evaluated by 2 pediatric orthopaedic attending surgeons. Supplementary responses were, in addition, evaluated on whether no, some, or many modifications were necessary. Readability metrics (response length, Flesch-Kincaid reading level, Flesch Reading Ease, Gunning Fog Index) were compared. Cohen Kappa interrater reliability (κ) was calculated. χ 2 analyses and single-factor analysis of variance were utilized to compare categorical and continuous variables, respectively. Statistical significance was set with P <0.05. ChatGPT-4.0, ChatGPT-3.5, and Google Gemini were accurate in 11/13, 9/13, and 11/13, supplementary in 13/13, 11/13, and 13/13, and incomplete in 3/13, 4/13, and 4/13 recommendations, respectively. Of 37 supplementary responses, 17 (45.9%), 19 (51.4%), and 1 (2.7%) required no, some, and many modifications, respectively. There were no significant differences in accuracy ( P = 0.533), supplementary responses ( P = 0.121), necessary modifications ( P = 0.580), and incomplete responses ( P = 0.881). Overall κ was moderate at 0.55. ChatGPT-3.5 provided shorter responses ( P = 0.002), but Google Gemini was more readable in terms of Flesch-Kincaid Grade Level ( P = 0.002), Flesch Reading Ease ( P < 0.001), and Gunning Fog Index ( P = 0.021). While AI chatbots provided responses with reasonable accuracy, most supplemental information required modification and had complex readability. Improvements are necessary before AI chatbots can be reliably used for patient education. Level IV."
+    }
+   ]
+  },
+  {
+   "id": "AAOS-SCI-001",
+   "source": "AAOS",
+   "title": "AAOS clinical practice guideline acute spinal cord injury orthopedic management",
+   "year": "2020",
+   "page_url": "https://www.aaos.org/quality/quality-programs/spine-programs/",
+   "pdf_url": "https://www.aaos.org/quality/quality-programs/spine-programs/",
+   "license": "AAOS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_spine",
+   "priority": "high",
+   "sha256": "1e4b62684c94f95b3e76ee0df122c12de96d1d0b49df94b36e07664b98ca2c5d",
+   "size_bytes": 805,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 805,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAOS clinical practice guideline acute spinal cord injury orthopedic management Source: AAOS Year: 2020 Domain: orthopedics_spine License: AAOS Available at: https://www.aaos.org/quality/quality-programs/spine-programs/ This is a citation reference for the AAOS guideline 'AAOS clinical practice guideline acute spinal cord injury orthopedic management' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_spine. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

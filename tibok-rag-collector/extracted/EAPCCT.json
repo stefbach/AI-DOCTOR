@@ -1,0 +1,57 @@
+{
+ "source": "EAPCCT",
+ "generated_at": "2026-05-09T19:08:53Z",
+ "total_documents": 2,
+ "documents": [
+  {
+   "id": "EAPCCT-CONS-001",
+   "source": "EAPCCT",
+   "title": "EAPCCT consensus on poisons centre operating standards",
+   "year": "2019",
+   "page_url": "https://www.eapcct.org/",
+   "pdf_url": "https://www.eapcct.org/",
+   "license": "EAPCCT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_acute",
+   "priority": "medium",
+   "sha256": "1e677a53a2eb636842b5e5f470f9ce0b2a2e12e036acc49b8b3040147b3c67f7",
+   "size_bytes": 721,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 721,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EAPCCT consensus on poisons centre operating standards Source: EAPCCT Year: 2019 Domain: toxicology_acute License: EAPCCT Available at: https://www.eapcct.org/ This is a citation reference for the EAPCCT guideline 'EAPCCT consensus on poisons centre operating standards' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_acute. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ANTIDOTE-002",
+   "source": "EAPCCT",
+   "title": "EAPCCT European Association of Poisons Centres Antidote position papers",
+   "year": "2023",
+   "page_url": "https://www.eapcct.org/index.php?page=position",
+   "pdf_url": "https://www.eapcct.org/index.php?page=position",
+   "license": "EAPCCT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "medium",
+   "sha256": "84fc252b459b6be0ec78b6eafae6b4dd88a50fccbf66086bc31d53eb9e016086",
+   "size_bytes": 2351,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2351,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:54Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Position paper update: whole bowel irrigation for gastrointestinal decontamination of overdose patients. A position paper on the use of whole bowel irrigation (WBI) was first published in 1997 by the American Academy of Clinical Toxicology (AACT) and the European Association of Poisons Centres and Clinical Toxicologists (EAPCCT) and updated in 2004. The aims of this paper are to briefly summarize the content of the 2004 Position Paper and to present any new data and recommendations. A systematic review of the literature from January 2003 to February 28, 2013 was conducted using multiple online databases for articles concerning WBI for gastrointestinal decontamination. An evidence table was created for applicable articles. The authors produced the initial draft that was reviewed by AACT and EAPCCT. The literature search produced 60 articles with the possibility of applicable human data. Based mainly on volunteer studies, WBI can be considered for potentially toxic ingestions of sustained-release or enteric-coated drugs particularly for those patients presenting later than 2 h after drug ingestion when activated charcoal is less effective. WBI can be considered for patients who have ingested substantial amounts of iron, lithium, or potassium as the morbidity is high and there is a lack of other potentially effective options for gastrointestinal decontamination. WBI can be considered for removal of ingested packets of illicit drugs in \"body packers.\" However, controlled data documenting improvement in clinical outcome after WBI are lacking. WBI is contraindicated in patients with bowel obstruction, perforation, or ileus, and in patients with hemodynamic instability or compromised unprotected airways. WBI should be used cautiously in debilitated patients and in patients with medical conditions that might be further compromised by its use. The concurrent administration of activated charcoal and WBI might decrease the effectiveness of the charcoal. The clinical relevance of this interaction is uncertain. WBI can facilitate removal of select toxicants from the gastrointestinal tract in some patients, but there is no convincing evidence from clinical studies that it improves the outcome of poisoned patients. There is no new evidence that would require a major revision of the conclusions of the 2004 position statement."
+    }
+   ]
+  }
+ ]
+}

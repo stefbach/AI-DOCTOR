@@ -1,0 +1,32 @@
+{
+ "source": "RDH",
+ "generated_at": "2026-05-09T19:15:49Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "RDH-001",
+   "source": "RDH",
+   "title": "The Renal Drug Handbook Ashley Currie 5th edition reference",
+   "year": "2018",
+   "page_url": "https://www.crcpress.com/The-Renal-Drug-Handbook-The-Ultimate-Prescribing-Guide-for-Renal-Practitioners/Ashley-Dunleavy/p/book/9781138624511",
+   "pdf_url": "https://www.crcpress.com/The-Renal-Drug-Handbook-The-Ultimate-Prescribing-Guide-for-Renal-Practitioners/Ashley-Dunleavy/p/book/9781138624511",
+   "license": "RDH",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_renal_hepatic_dosing",
+   "priority": "high",
+   "sha256": "62c6807b706c3b00f2066209bfa1a6a898a821252bb5420b6ff3096bdefdc5ad",
+   "size_bytes": 857,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 857,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:15:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: The Renal Drug Handbook Ashley Currie 5th edition reference Source: RDH Year: 2018 Domain: drug_renal_hepatic_dosing License: RDH Available at: https://www.crcpress.com/The-Renal-Drug-Handbook-The-Ultimate-Prescribing-Guide-for-Renal-Practitioners/Ashley-Dunleavy/p/book/9781138624511 This is a citation reference for the RDH guideline 'The Renal Drug Handbook Ashley Currie 5th edition reference' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_renal_hepatic_dosing. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

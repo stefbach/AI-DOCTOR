@@ -1,7 +1,7 @@
 {
  "source": "Sanford",
  "generated_at": "2026-05-09T16:13:25Z",
- "total_documents": 1,
+ "total_documents": 3,
  "documents": [
   {
    "id": "SANFORD-003",
@@ -93,6 +93,56 @@
     {
      "chunk_index": 17,
      "content": "Division of 110. Huttner BD, de Lastours V, Wassenberg M, et al. A ﬁve- Gastroenterology, Hepatology, and Endoscopy, Brigham and Women’s Hospital, Harvard Medical School, 75 Francis Street, Boston, Massachusetts day course of oral antibiotics followed by faecal trans- 02115. e-mail: jallegretti@bwh.harvard.edu. plantation to eradicate carriage of multidrug-resistant Acknowledgments Enterobacteriaceae: a randomized clinical trial. Clin The Division of Digestive Diseases at Imperial College London receives Microbiol Infect 2019;25:830–838. ﬁnancial and infrastructure support from the National Institute of Health 111. Woodworth MH, Conrad RE, Haldopoulos M, et al. Fecal Research Imperial Biomedical Research Centre, based at Imperial College Healthcare National Health Service Trust and Imperial College London. microbiota transplantation promotes reduction of anti- Benjamin H. Mullish is the recipient of a Medical Research Council (MRC) microbial resistance by strain replacement. Sci Transl Clinician Scientist Fellowship. Med 2023;15:eabo2750. Conﬂicts of interest 112. Bilsen MP, Lambregts MMC, van Prehn J, et al. Faecal The authors disclose the following: Jessica R. Allegretti declares Scientiﬁc microbiota replacement to eradicate antimicrobial Advisory Board participation for Iterative Scopes and Finch Therapeutics; consulting for Pandion, Merck Servatus, Janssen, AbbVie, Pﬁzer, Bristol resistant bacteria in the intestinal tract - a systematic Myers Squibb, Summit Therapeutics, Seres Therapeutics, and Ferring; and review. Curr Opin Gastroenterol 2022;38:15–25. grant support from Merck, Janssen, and Pﬁzer. Sahil Khanna receives research support from Rebioitx/Ferring, Vedanta, Finch, Seres, and Pﬁzer; 113. Qiao X, Bilinski J, Wang L, et al. Safety and efﬁcacy of fecal and serves as a consultant for ProbioTech, Takeda, and Rise. Benjamin H. microbiota transplantation in the treatment of graft-versus- Mullish has received consultancy fees from Finch Therapeutics Group. Paul host disease. Bone Marrow Transplant 2023;58:10–19. Feuerstadt is a consultant for Merck and Co; on the speakers bureau of Seres Therapeutics and Ferring Pharmaceuticals; and advisory boards for 114. Rashidi A, Ebadi M, Rehman TU, et al. Randomized double- Probiotech, Seres Therapeutics, Ferring Pharmaceuticals, Sanoﬁ, and blind phase II trial of fecal microbiota transplantation versus Takeda Pharmaceuticals."
+    }
+   ]
+  },
+  {
+   "id": "SANFORD-001",
+   "source": "Sanford",
+   "title": "Sanford Guide to Antimicrobial Therapy 54th edition",
+   "year": "2024",
+   "page_url": "https://www.sanfordguide.com/",
+   "pdf_url": "https://www.sanfordguide.com/",
+   "license": "Sanford",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_antimicrobial_stewardship",
+   "priority": "high",
+   "sha256": "134c098ce01cb85248ba089e4c376b040def6c7dbb5733f68e7ebb588a38a546",
+   "size_bytes": 752,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 752,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Sanford Guide to Antimicrobial Therapy 54th edition Source: Sanford Year: 2024 Domain: drug_antimicrobial_stewardship License: Sanford Available at: https://www.sanfordguide.com/ This is a citation reference for the Sanford guideline 'Sanford Guide to Antimicrobial Therapy 54th edition' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_antimicrobial_stewardship. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "SANFORD-002",
+   "source": "Sanford",
+   "title": "Sanford Guide HIV ARV antiretroviral therapy reference",
+   "year": "2024",
+   "page_url": "https://www.sanfordguide.com/products/hiv-aids",
+   "pdf_url": "https://www.sanfordguide.com/products/hiv-aids",
+   "license": "Sanford",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_specialty_hiv_hcv_tb",
+   "priority": "high",
+   "sha256": "3f8f5c8c886e1d0c335c108f836197e1675aa98d7924d901a55cfa906aaffcf3",
+   "size_bytes": 765,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 765,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Sanford Guide HIV ARV antiretroviral therapy reference Source: Sanford Year: 2024 Domain: drug_specialty_hiv_hcv_tb License: Sanford Available at: https://www.sanfordguide.com/products/hiv-aids This is a citation reference for the Sanford guideline 'Sanford Guide HIV ARV antiretroviral therapy reference' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_specialty_hiv_hcv_tb. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

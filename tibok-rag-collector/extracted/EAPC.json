@@ -1,7 +1,7 @@
 {
  "source": "EAPC",
  "generated_at": "2026-05-02T17:08:27Z",
- "total_documents": 16,
+ "total_documents": 18,
  "documents": [
   {
    "id": "EAPC-001",
@@ -836,6 +836,56 @@
     {
      "chunk_index": 14,
      "content": "care goals. BMC Palliat Care 2014;13:9. https://doi.org/10.1186/1472-684X-13-9. 51. Ghoshal A, Talawadekar P, Palleri A, Marston J, Mucka- den M. Impact of educational training in improving skills, 66. Morrison WE, Gauvin F, Johnson E, Hwang J. Integrating practice, attitude, and knowledge of healthcare workers in palliative care Into the ICU: from core competency to pediatric palliative care: Children's Palliative Care Project in consultative expertise. Pediatr Crit Care Med 2018;19(8S Suppl the Indian State of Maharashtra. Indian J Palliat Care 2):S86–S91. https://doi.org/10.1097/PCC.0000000000001465. 2018;24:411–425. https://doi.org/10.4103/IJPC.IJPC_43_18. 67. Antonelli RC, Turchi RM. Care management for chil- 52. Connor JA, LaGrasta C, Porter C, et al. The measure- dren with medical complexity: integration is essential. Pediat- ment of pediatric inpatient nursing using the complexity rics 2017;140:e20172860. https://doi.org/10.1542/ assessment and monitoring to ensure optimal outcomes peds.2017-2860. PMID: 29192007. (CAMEOÓ) tool. J Pediatr Nurs 2020;51:42–48. https://doi. 68. Kuo DZ, McAllister JW, Rossignol L, et al. Care coordina- org/10.1016/j.pedn.2019.12.005. tion for children with medical complexity: whose care is it, 53. Krivec U, Caggiano S. Noninvasive ventilation in pallia- anyway? Pediatrics 2018;141(Suppl 3):S224–S232. https:// tive care and ethical dilemma. Front Pediatr 2020;8:483. doi.org/10.1542/peds.2017-1284G. 54. Mitchell W, Clarke S, Sloper P. Care and support needs 69. Simon TD, Whitlock KB, Haaland W, et al. Effectiveness of children and young people with cancer and their parents. of a comprehensive case management service for children Psyco-Oncology 2006;15:805–816. with medical complexity. Pediatrics 2017;140:e20171641. https://doi.org/10.1542/peds.2017-1641. 55. Liben S, Papadatou D, Wolfe J. Paediatric palliative care: challenges and emerging ideas. Lancet 2008;371:852–864. 70. Mosquera RA, Avritscher EB, Samuels CL, et al. Effect of an enhanced medical home on serious illness and cost of 56. Koch KD, Jones BL. Supporting parent caregivers of chil- care among high-risk children with chronic illness: a random- dren with life-limiting illness. Children 2018;5:85. ized clinical trial. JAMA 2014;312:2640–2648. https://doi. 57. Barlow JH, Ellard DR. The psychosocial well-being of org/10.1001/jama.2014.16419. children with chronic disease, their parents and siblings: an 71. Cady RG, Belew JL. Parent perspective on care coordina- overview of the research evidence base. Child Care Health tion services for their child with medical complexity. Dev 2006;32:19–31. Children (Basel) 2017;4:45. https://doi.org/10.3390/chil- 58. Lazzarin P, Schiavon B, Brugnaro L, Benini F. Parents dren4060045. spend an average of nine hours a day providing palliative 72. Turchi RM, Berhane Z, Bethell C, et al. Care coordina- care for children at home and need to maintain an average tion for CSHCN: associations with family-provider relations of ﬁve life-saving devices. Acta Paediatr 2018;107:289–293. and family/child outcomes. Pediatrics 2009;124(Suppl 4): https://doi.org/10.1111/apa.14098. Ep. S428–S434. https://doi.org/10.1542/peds.2009-1255O. Vol. 63 No. 5 May 2022 International standards for PPC e543 73. Akard TF, Hendricks-Ferguson VL, Gilmer MJ. Pediatric consolidated appeal to support people affected by disaster palliative care nursing. Ann Palliat Med 2019;8(Suppl 1):S39– and conﬂict. 2017. Available at: http://www.unocha.org/ S48. https://doi.org/10.21037/apm.2018.06.01. stateofaid/. Accessed January 14, 2022. 74. Westcott AM. Non-physician hospice and palliative staff: 77. Downing J, Namisango E, Harding R. Outcome measure- how do they describe their role in medical education? 2017. ment in paediatric palliative care: lessons from the past and future Thesis Available at: https://hdl.handle.net/10027/22012. developments. Ann Palliat Med 2018;7(Suppl 3):S151–S163. Accessed January 14, 2022. 78. Friedel M, Aujoulat I, Dubois AC, Degryse JM. Instru- 75. Nouvet E, Sivaram M, Bezanson K, et al. Palliative care in ments to measure outcomes in pediatric palliative care: a sys- humanitarian crises: a review of the literature. Int J Humani- tematic review. Pediatrics 2019;143:e20182379. https://doi. tarian Action 2018;3(5). https://doi.org/10.1186/s41018- org/10.1542/peds.2018-2379. 018-0033-8. 79. Protus BM, Winters JP, Parker DC. Pediatric palliative 76. United Nations Ofﬁce for the Coordination of Humani- care consultant: guidelines for effective management of tarian Affairs. Global humanitarian overview 2017: a symptoms. Montgomery, AL: HospiScript; 2014."
+    }
+   ]
+  },
+  {
+   "id": "EAPC-PAL-001",
+   "source": "EAPC",
+   "title": "EAPC White Paper on Standards and Norms for Hospice and Palliative Care in Europe",
+   "year": "2010",
+   "page_url": "https://www.eapcnet.eu/publications/white-papers/",
+   "pdf_url": "https://www.eapcnet.eu/publications/white-papers/",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_general",
+   "priority": "high",
+   "sha256": "f97cc89045fb52e65fc8ee011cf3c596ee4fae069597801f74c8e29708613c5d",
+   "size_bytes": 799,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 799,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EAPC White Paper on Standards and Norms for Hospice and Palliative Care in Europe Source: EAPC Year: 2010 Domain: palliative_general License: Open Available at: https://www.eapcnet.eu/publications/white-papers/ This is a citation reference for the EAPC guideline 'EAPC White Paper on Standards and Norms for Hospice and Palliative Care in Europe' published in 2010. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: palliative_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "EAPC-PAL-005",
+   "source": "EAPC",
+   "title": "EAPC Recommendations Last Days of Life and Care of the Dying Adult",
+   "year": "2017",
+   "page_url": "https://www.eapcnet.eu/publications/clinical-recommendations/",
+   "pdf_url": "https://www.eapcnet.eu/publications/clinical-recommendations/",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_eol",
+   "priority": "high",
+   "sha256": "269691f6f31990aee80bd47a9fe4a2000d52a48a7501b7bd4077401553b6fc8b",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EAPC Recommendations Last Days of Life and Care of the Dying Adult Source: EAPC Year: 2017 Domain: palliative_eol License: Open Available at: https://www.eapcnet.eu/publications/clinical-recommendations/ This is a citation reference for the EAPC guideline 'EAPC Recommendations Last Days of Life and Care of the Dying Adult' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: palliative_eol. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "LactMed",
  "generated_at": "2026-05-09T15:40:24Z",
- "total_documents": 18,
+ "total_documents": 19,
  "documents": [
   {
    "id": "LACTMED-001",
@@ -878,6 +878,31 @@
     {
      "chunk_index": 6,
      "content": "] 30. Marín Gabriel, MA, Malalana Martínez, AM, Olza Fernández, I. Lithium while breastfeeding: Case report. Arch Argent Pediatr 2018;116:e319–e21. [ PubMed : 29557625 ] 31. Gehrmann A, Fiedler K, Leutritz AL, et al. Lithium medication in pregnancy and breastfeeding-a case series. Medicina (Kaunas) 2021;57:634. [ PMC free article : PMC8234397 ] [ PubMed : 34207460 ] 32. Imaz ML, Soy D, Torra M, et al. Case report: Clinical and pharmacokinetic profile of lithium monotherapy in exclusive breastfeeding. A follow-up case series. Front Pharmacol 2021;12:647414. [ PMC free article : PMC8264295 ] [ PubMed : 34248617 ] 33. Kummerlowe MN, Leung JG, Kummer LA, et al. Retrospective review of postpartum lithium use including during lactation. Breastfeed Med 2024;19:796–800. [ PubMed : 39109411 ] 34. Schou M. Lithium treatment during pregnancy, delivery, and lactation: An update. J Clin Psychiatry 1990;51:410–3. [ PubMed : 2211538 ] 35. Baştürk M, Karaaslan F, Esel E, et al. Effects of short and long-term lithium treatment on serum prolactin levels in patients with bipolar affective disorder. Prog Neuropsychopharmacol Biol Psychiatry 2001;25:315–22. [ PubMed : 11294478 ] 36. Cowen PJ, Cohen PR, McCance SL, et al. 5-HT neuroendocrine responses during psychotropic drug treatment: an investigation of the effects of lithium. J Neurosci Methods 1990;34:201–5. [ PubMed : 2259242 ] 37. Ohishi K, Higashimura T. A case of manic state in which lactation occurred after Li2CO3 administration. Folia Psychiatr Neurol Jpn 1983;37:33–6. [ PubMed : 6411540 ] Substance Identification Substance Name Lithium CAS Registry Number 554-13-2 Drug Class Breast Feeding Lactation Milk, Human Lithium Disclaimer: Information presented in this database is not meant as a substitute for professional judgment. You should consult your healthcare provider for breastfeeding advice related to your particular situation. The U.S. government does not warrant or assume any liability or responsibility for the accuracy or completeness of the information on this Site."
+    }
+   ]
+  },
+  {
+   "id": "LACTMED-HEPARIN-001",
+   "source": "LactMed",
+   "title": "LactMed Heparin in lactation",
+   "year": "2024",
+   "page_url": "https://www.ncbi.nlm.nih.gov/books/NBK501112/",
+   "pdf_url": "https://www.ncbi.nlm.nih.gov/books/NBK501112/",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pregnancy_lactation",
+   "priority": "low",
+   "sha256": "38ca22fdfde38f837c1f584fcbfa998b496509e1f689eb4f747ba88ac5054f19",
+   "size_bytes": 716,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 716,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: LactMed Heparin in lactation Source: LactMed Year: 2024 Domain: drug_pregnancy_lactation License: Public Domain Available at: https://www.ncbi.nlm.nih.gov/books/NBK501112/ This is a citation reference for the LactMed guideline 'LactMed Heparin in lactation' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pregnancy_lactation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

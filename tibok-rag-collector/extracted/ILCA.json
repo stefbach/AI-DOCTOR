@@ -1,7 +1,7 @@
 {
  "source": "ILCA",
  "generated_at": "2026-05-09T07:28:21Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "ILCA-HCC-001",
@@ -74,6 +74,31 @@
     {
      "chunk_index": 2,
      "content": "cirrhosis stage was stage II found in 32.2% each. Stage II cirrhosis emerged as the most common stage, suggesting a significant proportion of patients with moderate liver damage. This finding underscores the importance of early detection and intervention to prevent disease progression and associated complications. The coexistence of HCC in 15.4% of patients within our study population underscores the clinical complexity inherent in managing CLD, especially when malignancy coincides with cirrhosis. The presence of HCC poses significant challenges in treatment planning and prognosis assessment, as it necessitates a multidisciplinary approach to address both the underlying liver disease and the associated cancer. The mean duration of liver cirrhosis among our study participants was 18.22±11.7 months, reflecting the chronic nature of the disease and its progressive course over time. This duration highlights the importance of early diagnosis and intervention in CLD management to mitigate disease progression and reduce the risk of complications such as decompensation, portal hypertension, and hepatocellular carcinoma development. Additionally, the relatively short mean duration of cirrhosis observed in our study population underscores the need for timely and comprehensive medical care to optimize patient outcomes and prevent disease-related morbidity and mortality. In our study, CLD presented with diverse etiologies, yet a notable majority of patients were afflicted with hepatitis C. This observation aligns with global epidemiological trends, where hepatitis C remains a predominant cause of CLD, particularly in certain regions and demographic groups. The predominance of hepatitis C-related CLD underscores the ongoing burden of this viral infection on liver health and highlights the need for targeted prevention, screening, and treatment efforts to curb its impact. Our study findings are in line with research conducted by Syed et al., which emphasizes that hepatitis C virus remains the predominant cause of chronic liver disease necessitating liver transplantation [ ]. However, the frequency of waiting list/eligible patients for liver transplant varies among different populations depending upon the stage of liver cirrhosis at the time of presentation in the hospital, MELD score, and available resources. Vugts et al. concluded in their study seeking eligibility for liver transplantation that among a total of 732 patients with chronic liver failure, only 5% were eligible for liver transplantation [ ]. In another study, it was found that nonbiliary cirrhosis, particularly alcohol- and hepatitis C virus-related cirrhosis (60%), and tumors, mainly hepatocellular carcinoma (19%), are the most common indications for LT in Spain. Unusual causes of LT include metabolic diseases like Wilson's disease, familial amyloid polyneuropathy and hyperoxaluria type I, polycystic kidney and liver disease, and some tumors (epithelioid hemangioendothelioma and neuroendocrine tumors) [ ]. Evaluating eligibility for liver transplantation using MELD scores indicated that 25.5% of patients fulfilled the criteria for transplantation. A study conducted in the USA revealed a noteworthy increase in liver transplant candidates among adult patients, rising from 9% between 2002 and 2005 to 23% between 2018 and 2020 (trend, p < 0.0001) [ ]. This underscores a substantial rise in eligibility criteria over a decade-long timeframe. The study's reliance on data from a single center may limit the generalizability of its findings to broader populations or regions due to potential variations in patient demographics, healthcare practices, and access to transplantation services. Additionally, a larger sample size would have strengthened the study's reliability and yielded more robust results. Recruitment from a specific healthcare facility may have introduced selection bias, as patients at this center may not fully represent the diverse population of chronic liver disease patients, especially those lacking access to specialized care. Additionally, the study's omission of certain potential confounding variables concerning transplant eligibility might result in biased estimates of association. Specifically, focusing solely on MELD scores as a determinant of transplant candidacy overlooks other relevant factors such as socioeconomic status, patient preferences, and organ availability, thus limiting the study's comprehensiveness. Conclusions A significant number of patients in Pakistan meet the criteria for liver transplantation, which highlights how critical it is to address the organ shortage. As reputable community members, doctors can shape public perceptions and actions around organ donation. Furthermore, structural improvements that facilitate organ donation and transplantation processes must be implemented in concert with legislators, community stakeholders, and healthcare professionals."
+    }
+   ]
+  },
+  {
+   "id": "ILCA-HCC-SURG-001",
+   "source": "ILCA",
+   "title": "ILCA Position Statement on Surgical Management of Hepatocellular Carcinoma",
+   "year": "2020",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1002/lci2.34",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1002/lci2.34",
+   "license": "ILCA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_hpb",
+   "priority": "high",
+   "sha256": "45cd4a8dbd20b7f5eb37a268cd34457e8cc13ef049df45bbcc7fa186db5bc6e9",
+   "size_bytes": 793,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 793,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ILCA Position Statement on Surgical Management of Hepatocellular Carcinoma Source: ILCA Year: 2020 Domain: digestive_surgery_hpb License: ILCA Available at: https://onlinelibrary.wiley.com/doi/10.1002/lci2.34 This is a citation reference for the ILCA guideline 'ILCA Position Statement on Surgical Management of Hepatocellular Carcinoma' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: digestive_surgery_hpb. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

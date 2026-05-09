@@ -1,7 +1,7 @@
 {
  "source": "IPTA",
  "generated_at": "2026-05-09T11:40:55Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "IPTA-PEDLT-001",
@@ -41,6 +41,31 @@
     {
      "chunk_index": 4,
      "content": "and Space Science, 8, e2020EA001619. https://doi.org/10.1029/2020EA001619 How to cite text copied to clipboard! COPY TEXT Download Citation If you have the appropriate software installed, you can download article citation data to the citation manager of your choice. Simply select your manager software from the list below and click on download. Select format Plain text RIS (ProCite, Reference Manager) EndNote BibTeX Medlars RefWorks METADATA EXPAND Citation metadata copied to clipboard! COPY TEXT DOWNLOAD Submit to RefWorks Tips on downloading citation This feature enables you to download the bibliographic information (also called citation data, header data, or metadata) for the articles on our site. Citation manager file format Use the dropdown list to choose how to format the bibliographic data you're harvesting. Several citation manager formats are available, including EndNote and BibTex. You can then copy the formatted citation (as displayed) or download it as file, to your device. If the RefWorks format is chosen, the 'Download' button will be replaced with an option to directly export to RefWorks Close Figure Viewer Previous Figure Next Figure Caption Download PDF"
+    }
+   ]
+  },
+  {
+   "id": "IPTA-TX-001",
+   "source": "IPTA",
+   "title": "IPTA Indications and Patient Selection Intestinal Transplantation",
+   "year": "2018",
+   "page_url": "https://www.intestinaltransplant.org/",
+   "pdf_url": "https://www.intestinaltransplant.org/",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "transplant_kidney",
+   "priority": "medium",
+   "sha256": "fc3ddbc8999db62c82ec827100a7315d9181f508b6d9b2a692936c5e993c3b24",
+   "size_bytes": 759,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 759,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IPTA Indications and Patient Selection Intestinal Transplantation Source: IPTA Year: 2018 Domain: transplant_kidney License: Restricted Available at: https://www.intestinaltransplant.org/ This is a citation reference for the IPTA guideline 'IPTA Indications and Patient Selection Intestinal Transplantation' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: transplant_kidney. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

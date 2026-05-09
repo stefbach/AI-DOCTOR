@@ -1,7 +1,7 @@
 {
  "source": "ASRA",
  "generated_at": "2026-05-09T10:11:45Z",
- "total_documents": 8,
+ "total_documents": 9,
  "documents": [
   {
    "id": "ASRA-ARTHRO-001",
@@ -368,6 +368,31 @@
     {
      "chunk_index": 3,
      "content": "of their US-guided nerve block teaching (brachial, lumbar, and sacral plexus) in 12 optimized embalmed cadavers. The authors mentioned that all the desired nerves and the adjacent structures were visible as clearly as in the living, and therefore, suggested using cadavers for teaching purposes. Cadaveric studies comparing anterior, lateral, and posterior quadratus lumborum block revealed approach-dependent interfacial and cranio-caudal spread, which contributes to the explanation of variable clinical dermatomal coverage.[ ] Several cadaveric studies described a possible mechanism of action of the erector spinae plane block. These mechanistic results highlight the distinct significance of cadaveric research.[ ] The purpose was not only to demonstrate effectiveness but also to assess anatomical plausibility and pinpoint areas where clinical results could differ due to the injectate pathway’s lack of reliability. Around the knee, various cadaveric studies unraveled the distinct properties and spectrum of fascia iliaca compartment block, adductor canal block, pericapsular nerve group (PENG) block, and iPACK techniques. Studies showed how the injectate spread and also helped in understanding the mechanism of action of these blocks.[ ] While cadaveric dissection offers unrivaled three-dimensional anatomical fidelity, a multimodal approach to anesthesia training enhances skill acquisition, retention, and patient safety. Key complementary methods include ultrasound phantoms and gel models, high-fidelity manikins and simulators, animal tissue models, virtual and augmented reality platforms, and 3D-printed models. This bibliometric analysis has several limitations. We searched only the Scopus database. The Web of Science, PubMed, Lens, and Dimensions databases are additional resources that can be utilized for bibliometric analysis. The software does, however, allow analysis of the output produced by a single database. As a result, the analysis could have overlooked some articles. Because new articles were continually added to the literature after this analysis was submitted for review, those published after the date of our data collection were not included. We did not analyze the studies based on the type of cadavers used (Thiel, fresh) or the type of dye used (methylene blue, latex), or the use of radiography in studying the cadavers. Conclusions This bibliometric analysis analyzes the research trends, most cited authors and articles, and also the relationship between authors and their cited work. It appears that the literature remains concentrated in a few high-income academic centers, with limited representation from resource-limited settings. Enhanced collaboration between anatomists, anaesthesiologists, and imaging specialists will be essential to translate cadaveric findings into safer, more effective regional anesthesia protocols. Future research could prioritize multicenter cadaveric studies, especially in less-explored anatomical regions and populations. Conflicts of interest There are no conflicts of interest. Supplementary Figure 1 Co-occurrence and all keywords Supplementary Figure 2 Bibliographic coupling and documents"
+    }
+   ]
+  },
+  {
+   "id": "ASRA-PAIN-001",
+   "source": "ASRA",
+   "title": "ASRA Pain Medicine Acute Pain Management in Patients on Opioid Use Disorder Therapy",
+   "year": "2021",
+   "page_url": "https://www.asra.com/practice-resources/asra-news/asra-news-issues",
+   "pdf_url": "https://www.asra.com/practice-resources/asra-news/asra-news-issues",
+   "license": "ASRA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_pain",
+   "priority": "high",
+   "sha256": "a838deaaa340e4004287085a56b771f06320e6b54b8f70c095048f2da1247d36",
+   "size_bytes": 1496,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1494,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:06:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "ASRA Pain Medicine consensus guidelines on the management of the perioperative patient on cannabis and cannabinoids. The past two decades have seen an increase in cannabis use due to both regulatory changes and an interest in potential therapeutic effects of the substance, yet many aspects of the substance and their health implications remain controversial or unclear. In November 2020, the American Society of Regional Anesthesia and Pain Medicine charged the Cannabis Working Group to develop guidelines for the perioperative use of cannabis. The Perioperative Use of Cannabis and Cannabinoids Guidelines Committee was charged with drafting responses to the nine key questions using a modified Delphi method with the overall goal of producing a document focused on the safe management of surgical patients using cannabinoids. A consensus recommendation required ≥75% agreement. Nine questions were selected, with 100% consensus achieved on third-round voting. Topics addressed included perioperative screening, postponement of elective surgery, concomitant use of opioid and cannabis perioperatively, implications for parturients, adjustment in anesthetic and analgesics intraoperatively, postoperative monitoring, cannabis use disorder, and postoperative concerns. Surgical patients using cannabinoids are at potential increased risk for negative perioperative outcomes. Specific clinical recommendations for perioperative management of cannabis and cannabinoids were successfully created."
     }
    ]
   }

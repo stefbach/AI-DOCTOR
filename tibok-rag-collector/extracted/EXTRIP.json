@@ -1,7 +1,7 @@
 {
  "source": "EXTRIP",
  "generated_at": "2026-05-09T09:14:42Z",
- "total_documents": 8,
+ "total_documents": 9,
  "documents": [
   {
    "id": "EXTRIP-SALICYLATE-001",
@@ -324,6 +324,31 @@
     {
      "chunk_index": 4,
      "content": "the risk of venous thromboembolism was considered decreased, and preventive measures were implemented, including patient education, regular physical activity, and venous function-protective medications (such as Aescuven forte or Diosmin tablets). In contrast, patients with persistent thrombi or elevated D-dimer concentration remained at risk of venous thromboembolism. Anticoagulation therapy in this study cohort was limited to LMWH or a combination of LMWH and rivaroxaban, with no serious treatment-related complications observed. All patients had no contraindications to rivaroxaban, which has demonstrated advantages over warfarin in certain aspects of venous thromboembolism management. [ ] However, the safety and efficacy of standalone anticoagulation therapy for CRT in poisoned patients require further investigation, particularly considering the potential need for toxin-specific analyses. Although some studies propose using anticoagulants to stabilize thrombi before catheter removal, [ , , ] this approach lacks empirical validation in the existing literature. The duration of anticoagulation in this study was intentionally shortened, taking into account factors such as the unclear long-term benefit-risk profile of such therapy in poisoned patients and the resolution of acute poisoning and ECTR-related risks. No patients discontinued anticoagulation therapy due to adverse drug reactions. Whether the anticoagulation duration for this patient population should align with the guidelines for deep vein thrombosis remains undefined and requires additional research. In addition, 14.8% (4/27) patients did not receive anticoagulants, and the thrombus morphology did not change. They were not diagnosed with PE. For poisoned patients with CRT, not receiving anticoagulants may also be safe. However, anticoagulant therapy was not the aim of this study. Due to the retrospective nature, small sample size, and doctor preferences in this study, additional analyses on anticoagulation therapy in these patients were not possible. Prospective studies are expected to address these issues in the future. This study has limitations. As a retrospective study, there is a selection bias. The sample size is small, which may affect the reliability of statistical analysis results. Many eligible patients were excluded due to the lack of DUS or laboratory test results. In the clinical evaluation and treatment of CRT, different doctors may have different opinions. In addition, this study only included patients who underwent ECTRs through the femoral vein in a single center. 5. Conclusion In this small cohort of poisoned patients with short-term ECTRs, CRT does not pose immediate life-threatening risks for femoral venous catheter removal, justifying safe and timely removal. Elevated fibrinogen, positive D-dimer, and local puncture-site symptoms indicate increased thrombosis risk. Prospective studies are needed to validate these findings and refine management strategies. Acknowledgments We are grateful for the assistance of the Department of Poisoning Medicine and the Critical Care Department in the First Affiliated Hospital of Chongqing Medical and Pharmaceutical College. Author contributions Conceptualization: Yao Zhang, Yuxian He, Ruihao Li, Kai Deng, Yikuan Chen, Shixiong Yu. Data curation: Yao Zhang, Yuxian He, Kai Deng, Shixiong Yu. Formal analysis: Yao Zhang, Ruihao Li, Qianquan Gu, Shixiong Yu. Funding acquisition: Yao Zhang, Yikuan Chen, Shixiong Yu. Investigation: Yao Zhang, Yuxian He, Qianquan Gu, Chengsong Du, Xuegang An, Kai Deng, Yikuan Chen, Shixiong Yu. Methodology: Yao Zhang, Ruihao Li, Kai Deng, Shixiong Yu. Project administration: Yuxian He, Chengsong Du, Xuegang An, Yikuan Chen, Shixiong Yu. Resources: Yikuan Chen, Shixiong Yu. Software: Qianquan Gu. Supervision: Ruihao Li, Shixiong Yu. Validation: Yao Zhang, Ruihao Li, Xuegang An, Yikuan Chen. Visualization: Chengsong Du, Xuegang An, Kai Deng, Yikuan Chen. Writing – original draft: Yao Zhang, Yuxian He, Shixiong Yu. Writing – review & editing: Yao Zhang, Ruihao Li, Yikuan Chen, Shixiong Yu."
+    }
+   ]
+  },
+  {
+   "id": "EXTRIP-METFORMIN-001",
+   "source": "EXTRIP",
+   "title": "EXTRIP recommendations for extracorporeal treatment of metformin poisoning",
+   "year": "2015",
+   "page_url": "https://www.extrip-workgroup.org/",
+   "pdf_url": "https://www.extrip-workgroup.org/",
+   "license": "EXTRIP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "high",
+   "sha256": "555eba027f416951f226ab6e5653759229e62225ec2e5c4743e8db2789d90ada",
+   "size_bytes": 2980,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2980,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Expanding the evidence for managing metformin poisoning to support decision-making. Metformin-associated lactic acidosis is a well-described and commonly encountered condition associated with significant morbidity and mortality. Patients with metformin-associated lactic acidosis are frequently managed in the intensive care unit with supportive care, including volume resuscitation and consideration of an extracorporeal treatment to correct metabolic acidemia and remove metformin and lactate. The Extracorporeal Treatments in Poisoning Workgroup published evidence-based consensus recommendations in 2015 regarding the use of extracorporeal treatment in metformin toxicity. These recommendations list both clinical and biochemical indications, and they outline the rationale and evidence supporting each recommendation. Subsequent publications have provided new information regarding metformin-associated lactic acidosis and its treatment. A retrospective study showed that patients who did not meet the Extracorporeal Treatments in Poisoning Workgroup criteria for initiation of an extracorporeal treatment had a 100% survival. In patients who met the criteria, survival was approximately 75%; only 66% of these patients received an extracorporeal treatment, and this treatment did not appear to impact survival. Two other retrospective studies in patients diagnosed with metformin-associated lactic acidosis noted that extracorporeal treatments did not improve survival. However, those who received an extracorporeal treatment were more severely ill, potentially supporting a benefit from this intervention. A systematic review of patients receiving continuous kidney replacement therapy identified an overall survival that was higher than the overall survival in patients included in the Workgroup publication. This led the authors to suggest that intermittent hemodialysis may not be the preferred treatment for metformin toxicity. However, a closer look at the Workgroup data identified improved survival with each decade since the initial reports in the 1970s. Furthermore, there are multiple reports of persistent metformin-associated lactic acidosis that did not improve with standard continuous kidney replacement therapy, prompting an increase in the dosage of the extracorporeal treatment. The data supporting these observations are largely derived from retrospective studies, which have inherent biases, so prospective studies are required. Case-based decision-making is always necessary, but in general, we continue to follow the Extracorporeal Treatments in Poisoning Workgroup criteria because a convincing reason for changing these has not yet been presented. This includes the use of intermittent hemodialysis where possible, particularly in cases of severe poisoning. For patients with less severe poisoning or when intermittent hemodialysis is not readily available, it is reasonable to trial continuous modalities with careful observation for deterioration."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "IMWG",
  "generated_at": "2026-05-09T09:27:08Z",
- "total_documents": 2,
+ "total_documents": 5,
  "documents": [
   {
    "id": "IMWG-MGUS-001",
@@ -90,6 +90,81 @@
     {
      "chunk_index": 5,
      "content": "the standard of care and therapeutic landscape have evolved substantially in the timespan between study start and time of manuscript publication. Furthermore, enrollment criteria for various studies in MM have changed with new technology such as testing for high-risk cytogenetics with FISH. Finally, patients treated with one cycle of bortezomib or CyBorD were not included, potentially excluding some patients who had moderate to severe renal dysfunction. Only patients with NDMM who received RVd were included in this analysis to ensure patient groups were as balanced as possible. Despite these limitations, robust, validated data from the Connect MM Registry has resulted in extensive addition to the literature and has been the basis of several real-world analyses and findings for patients with MM. These results from the Connect MM Registry of NDMM patients with RI who received RVd as first-line treatment showed that early improvement in renal function is indeed important for improving long-term outcomes and that appropriate treatment of renal impairment can lead to outcomes similar to those seen in prospective clinical trial settings. These prospective data provide real-world evidence that can be utilized in patient care, and the results presented here show the benefit of evidence-based regimens in real-world patients even with comorbidities like RI. Further prospective research is warranted on RVd induction and other contemporary efficacious combinations in patients with advanced renal disease, including the exploration of newer small-molecule agents, such as novel CELMoD agents (iberdomide and mezigdomide), that are not primarily excreted by the kidneys. Supplementary information Supplement"
+    }
+   ]
+  },
+  {
+   "id": "IMWG-MYELOMA-001",
+   "source": "IMWG",
+   "title": "International Myeloma Working Group consensus diagnosis",
+   "year": "2022",
+   "page_url": "https://www.thelancet.com/journals/lanhae/article/PIIS2352-3026(22)00006-7/fulltext",
+   "pdf_url": "https://www.thelancet.com/journals/lanhae/article/PIIS2352-3026(22)00006-7/fulltext",
+   "license": "IMWG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "oncology_myeloma",
+   "priority": "high",
+   "sha256": "786902d7a1e295c881637e0b3a05a5dcea54e1d73b9ae80c21de15e9ee6af808",
+   "size_bytes": 777,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 777,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: International Myeloma Working Group consensus diagnosis Source: IMWG Year: 2022 Domain: oncology_myeloma License: IMWG Available at: https://www.thelancet.com/journals/lanhae/article/PIIS2352-3026(22)00006-7/fulltext This is a citation reference for the IMWG guideline 'International Myeloma Working Group consensus diagnosis' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: oncology_myeloma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IMWG-MYELOMA-002",
+   "source": "IMWG",
+   "title": "IMWG consensus minimal residual disease",
+   "year": "2021",
+   "page_url": "https://www.thelancet.com/journals/lanhae/article/PIIS2352-3026(21)00021-X/fulltext",
+   "pdf_url": "https://www.thelancet.com/journals/lanhae/article/PIIS2352-3026(21)00021-X/fulltext",
+   "license": "IMWG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "oncology_myeloma",
+   "priority": "high",
+   "sha256": "2bfe5761bcb01499bb9d04fee2c1538e789994705372d2dd48e502808cdfddef",
+   "size_bytes": 1790,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1790,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:54Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "IMS-IMWG 2025 consensus genomic staging predicts outcomes with daratumumab-based quadruplet regimens for NDMM. The International Myeloma Society (IMS) and the International Myeloma Working Group (IMWG) recently published a new consensus genomic staging (CGS) for defining high-risk (HR) newly diagnosed multiple myeloma (NDMM), intended to provide consistency in clinical trial reporting and for use in designing enrichment clinical trials focused on the HR subset. The HR definition is the first to include TP53 mutations and considers the co-occurrence of immunoglobulin H translocations with chromosome 1 aberrations. Given that limited data from the anti-CD38 monoclonal antibody-based quadruplet induction regimens were available for consensus consideration, here, we demonstrate that the new HR definition also predicts clinical outcomes in this setting. The patient population comprised 503 patients with NDMM treated with daratumumab-based quadruplet induction therapy at Memorial Sloan Kettering Cancer Center, with a median follow-up time of 2.2 years (maximum, 7.9 years). The CGS criteria defined 31% of NDMM cases as HR, better delineating patients at intermediate risk by preexisting prognostic scores. The CGS did not predict early minimal residual disease (MRD) status, with MRD negativity occurring at the same rate in patients with HR and standard-risk (SR) NDMM. However, the CGS did predict progression-free survival (PFS), with a median of 2.6 years in HR compared with not reached in SR (P< .0001). CGS risk remained predictive of PFS even in the setting of MRD negativity after autologous stem cell transplantation. We conclude that although the IMS-IMWG CGS is ideal for standardizing NDMM trial design, any MRD-guided trial design should also consider genomic risk."
+    }
+   ]
+  },
+  {
+   "id": "IMWG-AMYLOID",
+   "source": "IMWG",
+   "title": "IMWG consensus AL amyloidosis",
+   "year": "2021",
+   "page_url": "https://www.thelancet.com/journals/lanhae/article/PIIS2352-3026(20)30368-9/fulltext",
+   "pdf_url": "https://www.thelancet.com/journals/lanhae/article/PIIS2352-3026(20)30368-9/fulltext",
+   "license": "IMWG",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "oncology_myeloma",
+   "priority": "medium",
+   "sha256": "2506a48a5e093ee2dede30594248d4c8655b693df998f5769b5debbb7de4828c",
+   "size_bytes": 2096,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2096,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Soluble B-cell maturation antigen as a monitoring marker for multiple myeloma. Objective: Response to treatment in multiple myeloma (MM) is routinely measured by serum and urine M-protein and free light chain (FLC), as described by the International Myeloma Working Group (IMWG) consensus statement. A non-negligible subgroup of patients however present without measurable biomarkers, others become oligo or non-secretory during recurrent relapses. The aim of our research was to evaluate soluble B-cell maturation antigen (sBCMA) as a monitoring marker measured concurrent with the standard monitoring in MM patients at diagnosis, at relapse and during follow up, in order to establish its potential usefulness in oligo and non-secretory disease. Method: sBCMA levels were measured in 149 patients treated for plasma cell dyscrasia (3 monoclonal gammopathy of unknown significance, 5 smoldering myeloma, 7 plasmacytoma, 8 AL amyloidosis and 126 MM) and 16 control subjects using a commercial ELISA kit. In 43 newly diagnosed patients sBCMA levels were measured at multiple timepoints during treatment, and compared to conventional IMWG response and progression free survival (PFS). Results: sBCMA levels among control subjects were significantly lower than among newly diagnosed or relapsed MM patients [20.8 (14.7-38.7) ng/mL vs. 676 (89.5-1,650) and 264 (20.7-1,603) ng/mL, respectively]. Significant correlations were found between sBCMA and the degree of bone marrow plasma cell infiltration. Out of the 37 newly diagnosed patients who have reached partial response or better per IMWG criteria, 33 (89%) have had at least a 50% drop in sBCMA level by therapy week 4. Cohorts made similarly to IMWG response criteria-achieving a 50% or 90% drop in sBCMA levels compared to level at diagnosis-had statistically significant differences in PFS. Conclusion: Our results confirmed that sBCMA levels are prognostic at important decision points in myeloma, and the percentage of BCMA change is predictive for PFS. This highlights the great potential use of sBCMA in oligo- and non-secretory myeloma."
     }
    ]
   }

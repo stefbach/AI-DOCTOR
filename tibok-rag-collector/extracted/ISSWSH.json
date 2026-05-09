@@ -1,7 +1,7 @@
 {
  "source": "ISSWSH",
  "generated_at": "2026-05-09T16:00:38Z",
- "total_documents": 3,
+ "total_documents": 5,
  "documents": [
   {
    "id": "ISSWSH-TESTO-001",
@@ -223,6 +223,56 @@
     {
      "chunk_index": 13,
      "content": "past 2 years, RN had a financial due to good health: evidence from two US population based cross sectional relationship (lecturer, member of advisory boards and/or consultant) with Bayer surveys of ageing. BMJ. (2010) 340:c810. doi: 10.1136/bmj.c810 HealthCare, Endoceutics, Exceltis, Gedeon Richter, MSD, Novo Nordisk, Palatin, 119. Corona G, Rastrelli G, Maseroli E, Forti G, Maggi M. Pfizer, Shionogi, Teva, and Theramex. These companies have no involvement with Sexual function of the ageing male. Best Pract Res Clin the study. Endocrinol Metab. (2013) 27:581–601. doi: 10.1016/j.beem.201 3.05.007 The remaining authors declare that the research was conducted in the absence of 120. Miner M, Esposito K, Guay A, Montorsi P, Goldstein I. Cardiometabolic any commercial or financial relationships that could be construed as a potential risk and female sexual health: the Princeton III summary. J Sex conflict of interest. Med. (2012) 9:641–51; quiz 652. doi: 10.1111/j.1743-6109.2012. 02649.x Copyright © 2019 Nappi, Martini, Cucinella, Martella, Tiranini, Inzoli, Brambilla, 121. Basson R, Schultz WW. Sexual sequelae of general medical disorders. Lancet. Bosoni, Cassani and Gardella. This is an open-access article distributed under the (2007) 369:409–24. doi: 10.1016/S0140-6736(07)60197-4 terms of the Creative Commons Attribution License (CC BY). The use, distribution 122. Constantine GD, Bruyniks N, Princic N, Huse D, Palmer L, Lenhart or reproduction in other forums is permitted, provided the original author(s) and G, et al. Incidence of genitourinary conditions in women with a the copyright owner(s) are credited and that the original publication in this journal diagnosis of vulvar/vaginal atrophy. Curr Med Res Opin. (2014) 30:143–8. is cited, in accordance with accepted academic practice. No use, distribution or doi: 10.1185/03007995.2013.850068 reproduction is permitted which does not comply with these terms. Frontiers in Endocrinology | www.frontiersin.org 11 August 2019 | Volume 10 | Article 561"
+    }
+   ]
+  },
+  {
+   "id": "ISSWSH-FSD-002",
+   "source": "ISSWSH",
+   "title": "ISSWSH Clinical Pathway for Female Sexual Interest Arousal Disorder",
+   "year": "2017",
+   "page_url": "https://www.isswsh.org/resources",
+   "pdf_url": "https://www.isswsh.org/resources",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sexual_female",
+   "priority": "high",
+   "sha256": "a23881a5470d855b2a1d626b8a5ea40a7b11c061d83670a58091f462b4223863",
+   "size_bytes": 755,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 755,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISSWSH Clinical Pathway for Female Sexual Interest Arousal Disorder Source: ISSWSH Year: 2017 Domain: sexual_female License: Proprietary Available at: https://www.isswsh.org/resources This is a citation reference for the ISSWSH guideline 'ISSWSH Clinical Pathway for Female Sexual Interest Arousal Disorder' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sexual_female. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ISSWSH-GPPPD-001",
+   "source": "ISSWSH",
+   "title": "ISSWSH Process of Care for Genitopelvic Pain Penetration Disorder",
+   "year": "2020",
+   "page_url": "https://www.isswsh.org/resources",
+   "pdf_url": "https://www.isswsh.org/resources",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sexual_female",
+   "priority": "high",
+   "sha256": "10c9b0ebb2584746fb65abf6cdcdc078db9c34aa7914e2c9c22f4787b4d41055",
+   "size_bytes": 751,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 751,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:09Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISSWSH Process of Care for Genitopelvic Pain Penetration Disorder Source: ISSWSH Year: 2020 Domain: sexual_female License: Proprietary Available at: https://www.isswsh.org/resources This is a citation reference for the ISSWSH guideline 'ISSWSH Process of Care for Genitopelvic Pain Penetration Disorder' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sexual_female. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

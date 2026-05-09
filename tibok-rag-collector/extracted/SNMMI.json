@@ -1,7 +1,7 @@
 {
  "source": "SNMMI",
  "generated_at": "2026-05-09T11:12:39Z",
- "total_documents": 6,
+ "total_documents": 8,
  "documents": [
   {
    "id": "SNMMI-BONE-001",
@@ -382,6 +382,56 @@
     {
      "chunk_index": 8,
      "content": "the perspective that 177 Lu-PSMA-RLT moves into earlier treatment lines. The clinical relevance and potential consequences of the tumor-sink-effect, i.e., (in)variance of normal organ dosimetry at very high tumor load [ , ], are still unclear and need to be studied. Several drug interventions (e.g., oral glutamate, atropine injections, pre-dosing with unlabeled PSMA ligands) to reduce off-target uptake of PSMA ligands in salivary glands or kidneys have been suggested [ ]. Due to the limited evidence available, at this point, no general recommendation can be given. Please pay attention as such interventions may also affect tumor-to-organ ratios that are used for patient selection. It is not clear whether it is needed (and if yes, how) to take prior doses by external-beam radiotherapy (EBRT) or bone-seeking radiopharmaceuticals into account, or conversely, in the case of EBRT after 177 Lu-PSMA-RLT (e.g., palliative therapy of painful bone lesions). The prognostic or predictive potential of several molecular biomarkers (e.g., genomic instability, index mutations in DNA or RNA (including splicing variants), tumor stroma or immune related factors) have not sufficiently been evaluated. It remains unclear whether response to previous EBRT has prognostic or predictive impact. However, previous treatment with [ 223 Ra]RaCl 2 had no relevant effect on safety and efficacy of a succeeding 177 Lu-PSMA-RLT [ ]. Liability statement This guideline summarizes the views of the EANM and SNMMI Committees/Councils for Oncology, Dosimetry, Therapy/Theranostics, PET, Radiation protection, Radiopharmaceutical Sciences and Technologists. It reflects recommendations for which the EANM cannot be held responsible. The recommendations should be taken into context of good practice of nuclear medicine and do not substitute for national and international legal or regulatory provisions. Supplementary Information Below is the link to the electronic supplementary material. Supplementary file1 (XLSX 15.4 KB) Annex-Table 1: Safety and Efficacy of 177Lu-PSMA-617 Supplementary file2 (XLSX 10.2 KB) Annex-Table 2: Randomized Clinical Trials of 177Lu-PSMA-617 Supplementary file3 (XLSX 11.1 KB) Annex-Table 3: Safety and Efficacy of 177Lu-PSMA-I&T Supplementary file4 (XLSX 11.4 KB) Annex-Table 4: Ongoing Clinical Trials with 177Lu-PSMA-617 and 177Lu-PSMA-I&T (registered at https://clinicaltrials.gov/ ) Supplementary file5 (XLSX 11.5 KB) Annex-Table 5: Dosimetry studies of 177Lu-PSMA-617 and 177Lu-PSMA-I&T"
+    }
+   ]
+  },
+  {
+   "id": "SNMMI-DAT-001",
+   "source": "SNMMI",
+   "title": "SNMMI procedure guideline for brain dopamine transporter imaging",
+   "year": "2017",
+   "page_url": "https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414",
+   "pdf_url": "https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414",
+   "license": "SNMMI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_nuclear_pet",
+   "priority": "medium",
+   "sha256": "e6b4df618aabaf5ca226abee28015eb6544ba8a6101d7a70aeb2fe6d11d320d6",
+   "size_bytes": 1676,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1676,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "EANM practice guideline/SNMMI procedure standard for dopaminergic imaging in Parkinsonian syndromes 1.0. This joint practice guideline or procedure standard was developed collaboratively by the European Association of Nuclear Medicine (EANM) and the Society of Nuclear Medicine and Molecular Imaging (SNMMI). The goal of this guideline is to assist nuclear medicine practitioners in recommending, performing, interpreting, and reporting the results of dopaminergic imaging in parkinsonian syndromes. Currently nuclear medicine investigations can assess both presynaptic and postsynaptic function of dopaminergic synapses. To date both EANM and SNMMI have published procedural guidelines for dopamine transporter imaging with single photon emission computed tomography (SPECT) (in 2009 and 2011, respectively). An EANM guideline for D2 SPECT imaging is also available (2009). Since the publication of these previous guidelines, new lines of evidence have been made available on semiquantification, harmonization, comparison with normal datasets, and longitudinal analyses of dopamine transporter imaging with SPECT. Similarly, details on acquisition protocols and simplified quantification methods are now available for dopamine transporter imaging with PET, including recently developed fluorinated tracers. Finally, [ 18 F]fluorodopa PET is now used in some centers for the differential diagnosis of parkinsonism, although procedural guidelines aiming to define standard procedures for [ 18 F]fluorodopa imaging in this setting are still lacking. All these emerging issues are addressed in the present procedural guidelines for dopaminergic imaging in parkinsonian syndromes."
+    }
+   ]
+  },
+  {
+   "id": "SNMMI-VQ-001",
+   "source": "SNMMI",
+   "title": "SNMMI procedure standard for ventilation perfusion scintigraphy V/Q",
+   "year": "2019",
+   "page_url": "https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414",
+   "pdf_url": "https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414",
+   "license": "SNMMI",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_nuclear_pet",
+   "priority": "medium",
+   "sha256": "0a50c879f8a4ee5a25bc6a9710c06146b7276771fd7d1816e7b14db99c962aee",
+   "size_bytes": 798,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 798,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:19Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: SNMMI procedure standard for ventilation perfusion scintigraphy V/Q Source: SNMMI Year: 2019 Domain: radiology_nuclear_pet License: SNMMI Available at: https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414 This is a citation reference for the SNMMI guideline 'SNMMI procedure standard for ventilation perfusion scintigraphy V/Q' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_nuclear_pet. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

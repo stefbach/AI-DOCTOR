@@ -1,7 +1,7 @@
 {
  "source": "BSRM",
  "generated_at": "2026-05-09T15:17:18Z",
- "total_documents": 2,
+ "total_documents": 5,
  "documents": [
   {
    "id": "BSRM-SPAS-001",
@@ -82,6 +82,81 @@
     {
      "chunk_index": 4,
      "content": "was made through radiography; however, 2D US emerged as a prevalent technology with the potential to improve our diagnostic capabilities. Prenatal 3D US, fetal MRI, and low-dose 3D CT are newly emerging modalities that could also potentially improve diagnosis; however, are not routinely employed in diagnosis. To date, there are no standardized international guidelines regarding the pre-natal radiographic evaluation of congenital limb deficiencies. A systematic method would allow for enhanced interdisciplinary communication, early diagnosis, and integration of family values into treatment plans. Management with prosthesis is commonly pursued, especially in the upper extremity, with highly variable use rates. Surgical treatment is less commonly sought out. Though some studies demonstrate good radiographic and clinical outcomes for hand/wrist surgical options, these are limited by the number of patients and quality of evidence. Further long-term studies are needed for both the conservative and operative treatment options to assist in clinical decision-making. ARTICLE HIGHLIGHTS Research background Congenital transverse deficiencies are horizontal deficiencies of the long bones that occur with a reported incidence as high 0.38%. Research motivation There has been much advancement regarding prenatal imaging modalities to allow for early diagnosis and appropriate treatment. Research objectives The purpose of this scoping review article is to summarize the current state of knowledge on congenital transverse limb deficiencies and to provide an update regarding the radiographic evaluation of congenital transverse limb deficiencies. Research methods This IRB-exempt scoping review followed the PRISMA-ScR checklist for scoping reviews strictly. Five search engines were searched for a total of 265 publications. Research results Of these, 51 studies were included in our article. Research conclusions Prenatal magnetic resonance imaging (MRI), 3D Ultrasound, and multidetector computed tomography (CT) exist are emerging modalities that have the potential to improve diagnosis. Use of the appropriate classification system, three-dimensional ultrasonography with a maximum intensity projection, and appropriate use of prenatal MRI and prenatal CT can improve diagnosis and inter-provider communication. Research perspectives Further scholarly efforts are required to develop improve standardized guidelines regarding the pre-natal radiographic evaluation of congenital limb deficiencies."
+    }
+   ]
+  },
+  {
+   "id": "BSRM-CP-001",
+   "source": "BSRM",
+   "title": "BSRM clinical guidelines for the management of children with cerebral palsy",
+   "year": "2018",
+   "page_url": "https://www.bsrm.org.uk/",
+   "pdf_url": "https://www.bsrm.org.uk/",
+   "license": "BSRM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_pediatric",
+   "priority": "medium",
+   "sha256": "a6a1e86f871de8c0802e750caf1650db4ebf039c85926d3831b94848bc0c7bef",
+   "size_bytes": 752,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 752,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BSRM clinical guidelines for the management of children with cerebral palsy Source: BSRM Year: 2018 Domain: pmr_pediatric License: BSRM Available at: https://www.bsrm.org.uk/ This is a citation reference for the BSRM guideline 'BSRM clinical guidelines for the management of children with cerebral palsy' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pmr_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "BSRM-VEST-001",
+   "source": "BSRM",
+   "title": "BSRM consensus statement vestibular rehabilitation",
+   "year": "2020",
+   "page_url": "https://www.bsrm.org.uk/",
+   "pdf_url": "https://www.bsrm.org.uk/",
+   "license": "BSRM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_msk",
+   "priority": "medium",
+   "sha256": "3ac54956153b77fea6e62ffb56024cb72c44075f47f97bad52349912294b98c1",
+   "size_bytes": 690,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 690,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BSRM consensus statement vestibular rehabilitation Source: BSRM Year: 2020 Domain: pmr_msk License: BSRM Available at: https://www.bsrm.org.uk/ This is a citation reference for the BSRM guideline 'BSRM consensus statement vestibular rehabilitation' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pmr_msk. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "BSRM-BOWEL-001",
+   "source": "BSRM",
+   "title": "BSRM clinical guidelines bowel and bladder rehabilitation",
+   "year": "2018",
+   "page_url": "https://www.bsrm.org.uk/",
+   "pdf_url": "https://www.bsrm.org.uk/",
+   "license": "BSRM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_msk",
+   "priority": "medium",
+   "sha256": "d8bdf4d381c4357a14d006fdf68ce0900b11a5ce406a979f9fa85f732865d040",
+   "size_bytes": 704,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 704,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BSRM clinical guidelines bowel and bladder rehabilitation Source: BSRM Year: 2018 Domain: pmr_msk License: BSRM Available at: https://www.bsrm.org.uk/ This is a citation reference for the BSRM guideline 'BSRM clinical guidelines bowel and bladder rehabilitation' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pmr_msk. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

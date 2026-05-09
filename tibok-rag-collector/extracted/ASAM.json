@@ -1,7 +1,7 @@
 {
  "source": "ASAM",
  "generated_at": "2026-05-09T13:41:08Z",
- "total_documents": 4,
+ "total_documents": 12,
  "documents": [
   {
    "id": "ASAM-OUD-001",
@@ -496,6 +496,206 @@
     {
      "chunk_index": 34,
      "content": "BZD tapering on patient quality of life, functionality, physical health outcomes, and mental health outcomes, including suicidality? If BZD tapers are managed poorly there is a real risk of patient harm. Efforts to reduce BZD prescribing must remain focused on improving patient outcomes, considering the whole of their experiences. Expert Consultation Some patients will experience more challenges with tapering than others and would benefit from expert consultation. Specialists in addiction medicine, addiction psychiatry, and medical toxicology have the requisite expertise. For older adults, geriatric psychiatry or geriatric medicine specialists may be appropriate. However, workforce shortages limit access to these specialists in many areas of the country. Clinician Education Patients have reported difficulty finding knowledgeable providers for BZD tapering. , Patients have also reported that their withdrawal symptoms were often ignored, misattributed to recurrence of the conditions for which the BZD was initially prescribed, or misdiagnosed as another condition. , Clinician training is needed on the appropriate use of BZDs, their adverse effects, risks of dependence, withdrawal symptoms, tapering methods, and protracted withdrawal. Education on BZD prescribing and tapering, with monthly feedback on their BZD prescribing rate compared to other local clinicians, has been shown to lead to a reduction in BZD prescriptions and fewer patients taking BZDs long-term. Technological Innovations Existing technologies can help support implementation of this Guideline. Automated or smart pill dispensers may support adherence among patients who have memory or cognitive concerns or are at risk of medication misuse. , In addition, multiple mobile applications support tracking and management of symptoms common during BZD tapering (e.g., sleep impairment, anxiety, depression). – Clinicians can consider whether these technologies may support an individual patient’s needs. FINAL THOUGHTS Many of the topics discussed in this Guideline lacked controlled studies. Our systematic review found no trials comparing BZD tapering strategies or other important aspects of managing patients who are taking prescribed BZDs and likely to have developed physical dependence. Further research into best practices for BZD tapering strategies that support patient safety and optimal outcomes is urgently needed. Supplementary Information Below is the link to the electronic supplementary material. Supplementary file1 (DOCX 96.6 KB) Supplementary file2 (DOCX 760 KB)"
+    }
+   ]
+  },
+  {
+   "id": "ASAM-AWS-001",
+   "source": "ASAM",
+   "title": "ASAM clinical practice guideline on alcohol withdrawal management",
+   "year": "2020",
+   "page_url": "https://www.asam.org/quality-care/clinical-guidelines",
+   "pdf_url": "https://www.asam.org/quality-care/clinical-guidelines",
+   "license": "ASAM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_substance_use",
+   "priority": "high",
+   "sha256": "f47b8f200ecad2dd85e1ede90ec13553bc3e0d6c5c17610f19e54dfae64f3c18",
+   "size_bytes": 783,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 783,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASAM clinical practice guideline on alcohol withdrawal management Source: ASAM Year: 2020 Domain: toxicology_substance_use License: ASAM Available at: https://www.asam.org/quality-care/clinical-guidelines This is a citation reference for the ASAM guideline 'ASAM clinical practice guideline on alcohol withdrawal management' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_substance_use. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASAM-BUP-001",
+   "source": "ASAM",
+   "title": "ASAM buprenorphine clinical practice guideline",
+   "year": "2024",
+   "page_url": "https://www.asam.org/quality-care/clinical-guidelines",
+   "pdf_url": "https://www.asam.org/quality-care/clinical-guidelines",
+   "license": "ASAM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_substance_use",
+   "priority": "high",
+   "sha256": "966fd8c3a9b9a99607c83ed033fcedc1d3a4bf60f1c52c7ea5c328f6c5a50ce4",
+   "size_bytes": 2446,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2446,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "American Society of Addiction Medicine (ASAM) National Practice Guideline for the Use of Medications in the Treatment of Addiction Involving Opioid Use. The Centers for Disease Control have recently described opioid use and resultant deaths as an epidemic. At this point in time, treating this disease well with medication requires skill and time that are not generally available to primary care doctors in most practice models. Suboptimal treatment has likely contributed to expansion of the epidemic and concerns for unethical practices. At the same time, access to competent treatment is profoundly restricted because few physicians are willing and able to provide it. This \"Practice Guideline\" was developed to assist in the evaluation and treatment of opioid use disorder, and in the hope that, using this tool, more physicians will be able to provide effective treatment. Although there are existing guidelines for the treatment of opioid use disorder, none have included all of the medications used at present for its treatment. Moreover, few of the existing guidelines address the needs of special populations such as pregnant women, individuals with co-occurring psychiatric disorders, individuals with pain, adolescents, or individuals involved in the criminal justice system. This Practice Guideline was developed using the RAND Corporation (RAND)/University of California, Los Angeles (UCLA) Appropriateness Method (RAM) - a process that combines scientific evidence and clinical knowledge to determine the appropriateness of a set of clinical procedures. The RAM is a deliberate approach encompassing review of existing guidelines, literature reviews, appropriateness ratings, necessity reviews, and document development. For this project, American Society of Addiction Medicine selected an independent committee to oversee guideline development and to assist in writing. American Society of Addiction Medicine's Quality Improvement Council oversaw the selection process for the independent development committee. Recommendations included in the guideline encompass a broad range of topics, starting with the initial evaluation of the patient, the selection of medications, the use of all the approved medications for opioid use disorder, combining psychosocial treatment with medications, the treatment of special populations, and the use of naloxone for the treatment of opioid overdose. Topics needing further research were noted."
+    }
+   ]
+  },
+  {
+   "id": "ASAM-METH-001",
+   "source": "ASAM",
+   "title": "ASAM methadone induction and dosing clinical recommendations",
+   "year": "2024",
+   "page_url": "https://www.asam.org/quality-care/clinical-guidelines",
+   "pdf_url": "https://www.asam.org/quality-care/clinical-guidelines",
+   "license": "ASAM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_substance_use",
+   "priority": "high",
+   "sha256": "6620a792a408b8bb46e6ad05170a23a9016234e2006c9a44e986b2d37849019a",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASAM methadone induction and dosing clinical recommendations Source: ASAM Year: 2024 Domain: toxicology_substance_use License: ASAM Available at: https://www.asam.org/quality-care/clinical-guidelines This is a citation reference for the ASAM guideline 'ASAM methadone induction and dosing clinical recommendations' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_substance_use. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASAM-AUDC-001",
+   "source": "ASAM",
+   "title": "ASAM clinical practice guideline alcohol use disorder pharmacotherapy",
+   "year": "2024",
+   "page_url": "https://www.asam.org/quality-care/clinical-guidelines",
+   "pdf_url": "https://www.asam.org/quality-care/clinical-guidelines",
+   "license": "ASAM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_substance_use",
+   "priority": "high",
+   "sha256": "2a9b118f71aeea44b85799b3a8d75e37ff8f6d3339be4b98bff29258a376559d",
+   "size_bytes": 656,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 656,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Clinical progress note: Phenobarbital in the treatment of alcohol withdrawal syndrome. Alcohol withdrawal syndrome (AWS) is a common condition experienced by hospitalized patients. Practice patterns have evolved over time to include the use of phenobarbital, a barbiturate, as an adjunct to benzodiazepines or as an alternative monotherapy. The American Society of Addiction Medicine (ASAM) has recommended the use of phenobarbital in the management of AWS in certain clinical contexts. The current evidence base for the use of phenobarbital in AWS remains limited, though sufficient to demonstrate safety and efficacy as an alternative to benzodiazepines."
+    }
+   ]
+  },
+  {
+   "id": "ASAM-NALTREXONE-001",
+   "source": "ASAM",
+   "title": "ASAM clinical guidance extended-release naltrexone",
+   "year": "2020",
+   "page_url": "https://www.asam.org/",
+   "pdf_url": "https://www.asam.org/",
+   "license": "ASAM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "psychiatry_substance",
+   "priority": "medium",
+   "sha256": "4a842e0f3b7fdd79e79772cb7e2648b65843a4151c49dbc56ebdb57bda71e855",
+   "size_bytes": 713,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 713,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:51Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASAM clinical guidance extended-release naltrexone Source: ASAM Year: 2020 Domain: psychiatry_substance License: ASAM Available at: https://www.asam.org/ This is a citation reference for the ASAM guideline 'ASAM clinical guidance extended-release naltrexone' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: psychiatry_substance. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASAM-001",
+   "source": "ASAM",
+   "title": "ASAM National Practice Guideline for the Treatment of Opioid Use Disorder",
+   "year": "2020",
+   "page_url": "https://www.asam.org/quality-care/clinical-guidelines/national-practice-guideline",
+   "pdf_url": "https://www.asam.org/quality-care/clinical-guidelines/national-practice-guideline",
+   "license": "ASAM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_pain",
+   "priority": "high",
+   "sha256": "d31b65b5e2a0fab68e16eaebe32e50311a0989e4172e12b3a416f40004095ee9",
+   "size_bytes": 797,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 797,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:51Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASAM National Practice Guideline for the Treatment of Opioid Use Disorder Source: ASAM Year: 2020 Domain: drug_pain License: ASAM Available at: https://www.asam.org/quality-care/clinical-guidelines/national-practice-guideline This is a citation reference for the ASAM guideline 'ASAM National Practice Guideline for the Treatment of Opioid Use Disorder' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ASAM-002",
+   "source": "ASAM",
+   "title": "ASAM Clinical Practice Guideline on Alcohol Withdrawal Management",
+   "year": "2020",
+   "page_url": "https://www.asam.org/quality-care/clinical-guidelines",
+   "pdf_url": "https://www.asam.org/quality-care/clinical-guidelines",
+   "license": "ASAM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_pain",
+   "priority": "high",
+   "sha256": "2a9b118f71aeea44b85799b3a8d75e37ff8f6d3339be4b98bff29258a376559d",
+   "size_bytes": 656,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 656,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Clinical progress note: Phenobarbital in the treatment of alcohol withdrawal syndrome. Alcohol withdrawal syndrome (AWS) is a common condition experienced by hospitalized patients. Practice patterns have evolved over time to include the use of phenobarbital, a barbiturate, as an adjunct to benzodiazepines or as an alternative monotherapy. The American Society of Addiction Medicine (ASAM) has recommended the use of phenobarbital in the management of AWS in certain clinical contexts. The current evidence base for the use of phenobarbital in AWS remains limited, though sufficient to demonstrate safety and efficacy as an alternative to benzodiazepines."
+    }
+   ]
+  },
+  {
+   "id": "ASAM-003",
+   "source": "ASAM",
+   "title": "ASAM Public Policy Statement on Use of Naloxone for Opioid Overdose",
+   "year": "2024",
+   "page_url": "https://www.asam.org/advocacy/public-policy-statements",
+   "pdf_url": "https://www.asam.org/advocacy/public-policy-statements",
+   "license": "ASAM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_pain",
+   "priority": "high",
+   "sha256": "9a0f8e1f9986fcc4659800c0a563fd5a48d7592a7491b37a4368f2491d162e6c",
+   "size_bytes": 758,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 758,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ASAM Public Policy Statement on Use of Naloxone for Opioid Overdose Source: ASAM Year: 2024 Domain: drug_pain License: ASAM Available at: https://www.asam.org/advocacy/public-policy-statements This is a citation reference for the ASAM guideline 'ASAM Public Policy Statement on Use of Naloxone for Opioid Overdose' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

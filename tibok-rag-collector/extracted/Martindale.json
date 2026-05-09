@@ -1,0 +1,57 @@
+{
+ "source": "Martindale",
+ "generated_at": "2026-05-09T19:12:29Z",
+ "total_documents": 2,
+ "documents": [
+  {
+   "id": "MARTINDALE-001",
+   "source": "Martindale",
+   "title": "Martindale The Complete Drug Reference 40th edition",
+   "year": "2024",
+   "page_url": "https://www.medicinescomplete.com/mc/martindale/current/",
+   "pdf_url": "https://www.medicinescomplete.com/mc/martindale/current/",
+   "license": "Pharm Press",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_formulary",
+   "priority": "high",
+   "sha256": "b06bcc18d2e944b4f7310f573ac445c23e375af8ec66db7cb14713a3e05d2c97",
+   "size_bytes": 757,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 757,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Martindale The Complete Drug Reference 40th edition Source: Martindale Year: 2024 Domain: drug_formulary License: Pharm Press Available at: https://www.medicinescomplete.com/mc/martindale/current/ This is a citation reference for the Martindale guideline 'Martindale The Complete Drug Reference 40th edition' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_formulary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "MARTINDALE-002",
+   "source": "Martindale",
+   "title": "Martindale international drug nomenclature and synonyms",
+   "year": "2024",
+   "page_url": "https://www.medicinescomplete.com/",
+   "pdf_url": "https://www.medicinescomplete.com/",
+   "license": "Pharm Press",
+   "commercial_use": "restricted",
+   "clinical_domain": "drug_formulary",
+   "priority": "medium",
+   "sha256": "bde2d1f4dba630a3b635bb85a5c1b83c2777b5954238680c266b443db6f31c90",
+   "size_bytes": 743,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 743,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Martindale international drug nomenclature and synonyms Source: Martindale Year: 2024 Domain: drug_formulary License: Pharm Press Available at: https://www.medicinescomplete.com/ This is a citation reference for the Martindale guideline 'Martindale international drug nomenclature and synonyms' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_formulary. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

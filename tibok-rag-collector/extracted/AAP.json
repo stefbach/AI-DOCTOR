@@ -1,7 +1,7 @@
 {
  "source": "AAP",
  "generated_at": "2026-05-02T15:39:06Z",
- "total_documents": 85,
+ "total_documents": 108,
  "documents": [
   {
    "id": "AAP-001",
@@ -5213,6 +5213,581 @@
     {
      "chunk_index": 3,
      "content": "lower (see “values and preferences”). Elaborating on these considerations, an Italian company decided in 2012 to decrease the cost of their AAF by 30%, so that the cost of AAF dropped from 2.4 to 2 times that of eHF. This did modify the balance of recommendations for a substitute formula. AAF were proposed to children with even less severe forms of CMA, such as CM protein-induced atopic dermatitis. This example illustrates how DRACMA guidelines did influence the formula market, making appropriate treatments affordable to larger layers of population. Naturally, this is only one of the factors for an appropriate care. In some countries, patients are reimbursed for AAF if “allergy” to eHF has been demonstrated, in others there are no reimbursement policies. This can expose to over-or under-use of special formulas. Conclusions DRACMA promoted a cultural debate among researchers and clinicians, improving the quality of diagnosis and clinical care. The accruing evidence on diagnosis and treatment supports the need for an update. Ideally, the new DRACMA guidelines should include non IgE-mediated CMA, particularly mild-moderate forms of CMA and chronic FPIES, as this part of the discipline has never been subjected to the strictest criteria for EBM, using the GRADE approach. We envisage the updated DRACMA will answer more clinical questions, serving the patients’ and the pediatricians’ needs in the various contexts."
+    }
+   ]
+  },
+  {
+   "id": "AAP-CHILD-ABUSE-001",
+   "source": "AAP",
+   "title": "AAP clinical report diagnostic imaging of child abuse",
+   "year": "2015",
+   "page_url": "https://publications.aap.org/pediatrics/article/135/5/e1337/33808/",
+   "pdf_url": "https://publications.aap.org/pediatrics/article/135/5/e1337/33808/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_pediatric",
+   "priority": "high",
+   "sha256": "70f4ae07d9db63c3208f4cdee3ed9ea78fb07f9d9fa63bf16245b6ea02d43075",
+   "size_bytes": 759,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 759,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP clinical report diagnostic imaging of child abuse Source: AAP Year: 2015 Domain: radiology_pediatric License: AAP Available at: https://publications.aap.org/pediatrics/article/135/5/e1337/33808/ This is a citation reference for the AAP guideline 'AAP clinical report diagnostic imaging of child abuse' published in 2015. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-ROP-001",
+   "source": "AAP",
+   "title": "AAP screening examination of premature infants for retinopathy of prematurity",
+   "year": "2018",
+   "page_url": "https://publications.aap.org/pediatrics/article/142/6/e20183061/37425/",
+   "pdf_url": "https://publications.aap.org/pediatrics/article/142/6/e20183061/37425/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_pediatric",
+   "priority": "high",
+   "sha256": "d89889d58c1692bcfb8e1131664b39e0e8bd290ccffbeb2c64c43e79ebadca43",
+   "size_bytes": 1689,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1689,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Evaluating the G-ROP criteria sensitivity for type 1 ROP in a North American cohort. Current screening criteria for retinopathy of prematurity (ROP) follow the American Academy of Pediatrics (AAP) guidelines. However, the Postnatal Growth and Retinopathy (G-ROP) study has proposed newer criteria, showing 100% sensitivity for detecting type 1 ROP while reducing the number of infants requiring dilated retinal examinations by 30%. The purpose of this study was to validate the G-ROP criteria in a midsized Midwestern children's hospital. We conducted a retrospective cohort study of infants screened for ROP between January 2018 and December 2022 under AAP guidelines. We then applied the G-ROP criteria to the same cohort and evaluated the sensitivity and specificity of these guidelines for detecting type 1 ROP requiring treatment. A total of 687 infants were included. The average gestational age 28 weeks; the average birthweight, 1022.5 g. Of the 687 infants screened by standard of care (SOC) criteria, 448 (65.2%) met G-ROP criteria. Using SOC criteria, 34 infants (4.9%) developed type 1 ROP necessitating treatment. However, when using G-ROP screening criteria, 33 of 448 (7.4%) with type 1 ROP were identified. The sensitivity of G-ROP for detecting type 1 ROP was 97.1%, but 1 infant who required treatment was missed. G-ROP criteria demonstrated high sensitivity but did not match the 100% sensitivity from earlier studies. The single infant with type 1 ROP missed by G-ROP screening had a medical history of twin-to-twin transfusion syndrome. The physiologic factors of twin-to-twin transfusion syndrome could be important to explore when considering ROP screening criteria."
+    }
+   ]
+  },
+  {
+   "id": "AAP-VISION-001",
+   "source": "AAP",
+   "title": "AAP visual system assessment in infants children and young adults",
+   "year": "2016",
+   "page_url": "https://publications.aap.org/pediatrics/article/137/1/e20153596/",
+   "pdf_url": "https://publications.aap.org/pediatrics/article/137/1/e20153596/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_pediatric",
+   "priority": "high",
+   "sha256": "f419edcefc6d95840d109045d8f3012ead0c506f783ff98e67daf51ea33794b6",
+   "size_bytes": 789,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 789,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP visual system assessment in infants children and young adults Source: AAP Year: 2016 Domain: ophthalmology_pediatric License: AAP Available at: https://publications.aap.org/pediatrics/article/137/1/e20153596/ This is a citation reference for the AAP guideline 'AAP visual system assessment in infants children and young adults' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-AOM-001",
+   "source": "AAP",
+   "title": "AAP clinical practice guideline diagnosis and management of acute otitis media",
+   "year": "2013",
+   "page_url": "https://publications.aap.org/pediatrics/article/131/3/e964/30912/",
+   "pdf_url": "https://publications.aap.org/pediatrics/article/131/3/e964/30912/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_otology",
+   "priority": "high",
+   "sha256": "e84e9a6fc5b03f8104a33471591909e01cf382c6d7de1a9dfa286345c3c5e419",
+   "size_bytes": 1501,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1501,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:40Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Acute Otitis Media and Group A Streptococcal Pharyngitis: A Review for the General Pediatric Practitioner. For pediatric practitioners, acute otitis media (AOM) and group A streptococcal pharyngitis are two of the most common infections seen in ambulatory practices. The purpose of this article is to review these conditions with the focus of highlighting evidence-based guidelines. AOM in children is a visual diagnosis and not one that can be made on history alone. The American Academy of Pediatrics (AAP) guidelines have clear criteria to aid clinicians in how to diagnose AOM. The pneumatic otoscope is the standard tool used to diagnose otitis media, and the AAP guidelines stress developing proficiency in distinguishing a normal tympanic membrane from otitis media with effusion or AOM. There are several components to appropriate management (treatment) of AOM including analgesia, education, antibiotics, and the option (for some) for observation. Group A streptococcal pharyngitis is the most common bacterial cause of sore throat in children but still only accounts for a minority of cases. History and physical examination help determine who should be tested. Testing is required to determine who to treat. Up to 15% of children in the United States are carriers, so indiscriminate testing can lead to inappropriate antibiotic use. If a patient's test is positive, treatment is recommended and penicillin or amoxicillin are appropriate for most cases. [Pediatr Ann. 2019;48(9):e343-e348.]."
+    }
+   ]
+  },
+  {
+   "id": "AAP-HEARSCREEN-001",
+   "source": "AAP",
+   "title": "AAP universal newborn hearing screening detection and intervention",
+   "year": "2017",
+   "page_url": "https://publications.aap.org/pediatrics/article/140/4/e20171902/",
+   "pdf_url": "https://publications.aap.org/pediatrics/article/140/4/e20171902/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_pediatric",
+   "priority": "high",
+   "sha256": "acdd93984935f2c1ef5629b2e4f9ad21376fa204b3d6e60c4d02ec7f364f81ba",
+   "size_bytes": 1707,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1707,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Evaluating reporting and process quality of publications on UNHS: a systematic review of programmes. Congenital hearing loss is one of the most frequent birth defects, and Early Detection and Intervention has been found to improve language outcomes. The American Academy of Pediatrics (AAP) and the Joint Committee on Infant Hearing (JCIH) established quality of care process indicators and benchmarks for Universal Newborn Hearing Screening (UNHS). We have aggregated some of these indicators/benchmarks according to the three pillars of universality, timely detection and overreferral. When dealing with inter-comparison, relying on complete and standardised literature data becomes crucial. The purpose of this paper is to verify whether literature data on UNHS programmes have included sufficient information to allow inter-programme comparisons according to the indicators considered. We performed a systematic search identifying UNHS studies and assessing the quality of programmes. The identified 12 studies demonstrated heterogeneity in criteria for referring to further examinations during the screening phase and in identifying high-risk neonates, protocols, tests, staff, and testing environments. Our systematic review also highlighted substantial variability in reported performance data. In order to optimise the reporting of screening protocols and process performance, we propose a checklist. Another result is the difficulty in guaranteeing full respect for the criteria of universality, timely detection and overreferral. Standardisation in reporting UNHS experiences may also have a positive impact on inter-program comparisons, hence favouring the emergence of recognised best practices."
+    }
+   ]
+  },
+  {
+   "id": "AAP-PHAR-001",
+   "source": "AAP",
+   "title": "AAP clinical report group A streptococcal pharyngitis",
+   "year": "2018",
+   "page_url": "https://publications.aap.org/pediatrics/article/142/4/e20182438/",
+   "pdf_url": "https://publications.aap.org/pediatrics/article/142/4/e20182438/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_pediatric",
+   "priority": "high",
+   "sha256": "0c9306037da24f1afd6ea34dc8bf8043e3e824a84ad0a80887d2a8fcd3f95e29",
+   "size_bytes": 745,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 745,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP clinical report group A streptococcal pharyngitis Source: AAP Year: 2018 Domain: ent_pediatric License: AAP Available at: https://publications.aap.org/pediatrics/article/142/4/e20182438/ This is a citation reference for the AAP guideline 'AAP clinical report group A streptococcal pharyngitis' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-EPIGLOT-001",
+   "source": "AAP",
+   "title": "AAP clinical guidance on acute epiglottitis recognition and management",
+   "year": "2020",
+   "page_url": "https://publications.aap.org/pediatrics/article/epiglottitis",
+   "pdf_url": "https://publications.aap.org/pediatrics/article/epiglottitis",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_pediatric",
+   "priority": "high",
+   "sha256": "fafca8eeabde2fd0397b15978a116e2e5743bcdaf58068247415dd1f4cbb6d5e",
+   "size_bytes": 775,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 775,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP clinical guidance on acute epiglottitis recognition and management Source: AAP Year: 2020 Domain: ent_pediatric License: AAP Available at: https://publications.aap.org/pediatrics/article/epiglottitis This is a citation reference for the AAP guideline 'AAP clinical guidance on acute epiglottitis recognition and management' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-FBAW-001",
+   "source": "AAP",
+   "title": "AAP clinical report foreign body aspiration in children",
+   "year": "2019",
+   "page_url": "https://publications.aap.org/pediatrics/article/foreign-body-aspiration",
+   "pdf_url": "https://publications.aap.org/pediatrics/article/foreign-body-aspiration",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_pediatric",
+   "priority": "high",
+   "sha256": "7bf73e9a7a3b53a304441f1cbf3135dc2d54dc3574cb10a799bdfda90f0ac63e",
+   "size_bytes": 3114,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3106,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Feeding difficulty and gastrostomy tube placement in infants with Down syndrome. The objectives of this study were to determine if any specific clinical signs, symptoms, or comorbidities could reliably predict underlying feeding difficulty and need for further evaluation (i.e., video swallow study, VSS) in infants with Down syndrome, to establish the prevalence of gastrostomy tube placement (G-tube), and to determine if any clinical signs, symptoms, or comorbidities correlated with a higher risk for needing placement of a G-tube. An electronic medical record retrospective chart review of 73 children with Down syndrome born between January 2013 and March 2017 and seen in Nationwide Children's Hospital's multidisciplinary Down Syndrome Clinic included demographic information, medical history, and results of studies and specialist evaluations. Descriptive statistics were utilized to summarize the data. Comparisons were performed to identify factors which differed between feeding difficulty vs. no feeding difficulty and G-tube placement vs. no G-tube placement. \"Feeding difficulty\" was the only feeding term established by the AAP guidelines which was consistently noted in charts of children with feeding abnormalities. Infants with feeding difficulty had increased use of medical services and more abnormalities on specialist evaluations and studies. Congenital heart disease, cardiothoracic surgery, obstructive sleep apnea, and hypothyroidism did not differ significantly between the groups assessed. Our cohort had a prevalence of 13.7% for requiring G-tube placement in their first year of life.Conclusion: The currently established clinical tools for determining which patients may benefit from radiographic evaluation lack sufficient sensitivity to detect all individuals with feeding difficulty. Due to the high prevalence of abnormal VSS results and high rate of G-tube placement, universal radiographic screening for individuals with Down syndrome could be considered, even in the absence of obvious clinical signs or symptoms. However, determining how to balance this with cost, availability, and radiation exposure may be difficult.What is Known: • Feeding difficulty in children with Down syndrome can lead to significantly increased morbidity, such as poor weight gain, failure to thrive, aspiration, persistent respiratory symptoms, andrecurrent pneumonia. • The AAP has established a clinical tool regarding which objective signs and symptoms should lead to a radiographic swallowing assessment within their Health Supervision for Children with Down Syndrome Clinical Report.What is New: • A comprehensive assessment of clinical signs, symptoms, and common comorbidities in infants with Down syndrome has not previously been correlated with presence of feeding difficulty nor necessity for gastrostomy tube placement, including whether or not the terms used in the AAP guidelines encompass the sensitivity required to detect all infants with feeding difficulty. • The prevalence of gastrostomy tube placement in children with Down syndrome has not previously been established."
+    }
+   ]
+  },
+  {
+   "id": "AAP-PEDAW-001",
+   "source": "AAP",
+   "title": "AAP clinical guidance on pediatric airway evaluation",
+   "year": "2021",
+   "page_url": "https://publications.aap.org/pediatrics/article/pediatric-airway",
+   "pdf_url": "https://publications.aap.org/pediatrics/article/pediatric-airway",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_pediatric",
+   "priority": "high",
+   "sha256": "7afa9491c558e1a9df4312e1baf527c9b148fc587285027b5a8456d1b4a9dff8",
+   "size_bytes": 2737,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2729,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Brief resolved unexplained events: a new diagnosis, with implications for evaluation and management. Brief resolved unexplained events (BRUE) are concerning episodes of short duration (typically < 1 min) characterized by a change in breathing, consciousness, muscle tone (hyper- or hypotonia), and/or skin color (cyanosis or pallor). The episodes occur in a normal-appearing infant in the first year of life, self-resolve, and have no readily identifiable explanation for the cause of the event. Previously called apparent life-threatening events (ALTE), the term BRUE was first defined by the American Academy of Pediatrics (AAP) in 2016. The criteria for BRUE carry greater specificity compared to that of ALTE and additionally are indicative of a diagnosis of exclusion. While most patients with BRUE will have a benign clinical course, important etiologies, including airway, cardiac, gastrointestinal, genetic, infectious, neurologic, and traumatic conditions (including nonaccidental), must be carefully considered. A BRUE is classified as either lower- or higher-risk based on patient age, corrected gestational age, event duration, number of events, and performance of cardiopulmonary resuscitation at the scene. The AAP clinical practice guideline provides recommendations for the management of lower-risk BRUEs, advocating against routine admission, blood testing, and imaging for infants with these events, though a short period of observation and/or an electrocardiogram may be advisable. While guidance exists for higher-risk BRUE, more data are required to better identify proportions and risk factors for serious outcomes among these patients. Conclusion: BRUE is a diagnosis with greater specificity relative to prior definitions and is now a diagnosis of exclusion. Additional research is needed, particularly in the evaluation of higher-risk events. Recent data suggest that the AAP guidelines for the management of lower-risk infants can be safely implemented.This review article summarizes the history, definitional changes, current guideline recommendations, and future research needs for BRUE. What is Known: • BRUE, first described in 2016, is a diagnosis used to describe a well-appearing infant who presents with change in breathing, consciousness, muscle tone (hyper- or hypotonia), and/or skin color (cyanosis or pallor). • BRUE can be divided into higher- and lower-risk events. Guidelines have been published for lower-risk events, with expert recommendations for higher-risk BRUE. What is New: • BRUE carries a low rate of serious diagnoses (< 5%), with the most common representing seizures and airway abnormalities. • Prior BRUE events are associated with serious diagnoses and episode recurrence."
+    }
+   ]
+  },
+  {
+   "id": "AAP-NRP-001",
+   "source": "AAP",
+   "title": "AAP-AHA neonatal resuscitation program NRP eighth edition",
+   "year": "2021",
+   "page_url": "https://www.aap.org/en/learning/neonatal-resuscitation-program/",
+   "pdf_url": "https://www.aap.org/en/learning/neonatal-resuscitation-program/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neonatology_resuscitation",
+   "priority": "high",
+   "sha256": "e618fe995b7edc3c16f559ba54339707514aa27a082f7ababc5958dc610d54c5",
+   "size_bytes": 776,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 776,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP-AHA neonatal resuscitation program NRP eighth edition Source: AAP Year: 2021 Domain: neonatology_resuscitation License: AAP Available at: https://www.aap.org/en/learning/neonatal-resuscitation-program/ This is a citation reference for the AAP guideline 'AAP-AHA neonatal resuscitation program NRP eighth edition' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neonatology_resuscitation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-SPORTS-001",
+   "source": "AAP",
+   "title": "AAP preparticipation physical evaluation fifth edition",
+   "year": "2019",
+   "page_url": "https://publications.aap.org/aapbooks/book/642/",
+   "pdf_url": "https://publications.aap.org/aapbooks/book/642/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pediatrics_adolescent",
+   "priority": "medium",
+   "sha256": "830553aac2a408397097355705831828cb043cee3fa0bdd4de0b68c4c2de2162",
+   "size_bytes": 746,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 746,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP preparticipation physical evaluation fifth edition Source: AAP Year: 2019 Domain: pediatrics_adolescent License: AAP Available at: https://publications.aap.org/aapbooks/book/642/ This is a citation reference for the AAP guideline 'AAP preparticipation physical evaluation fifth edition' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pediatrics_adolescent. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-CCHD-001",
+   "source": "AAP",
+   "title": "AAP recommendations strategies for implementing screening for critical congenital heart disease",
+   "year": "2011",
+   "page_url": "https://publications.aap.org/pediatrics/article/128/5/e1259/",
+   "pdf_url": "https://publications.aap.org/pediatrics/article/128/5/e1259/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neonatology_screening",
+   "priority": "high",
+   "sha256": "18ca7339c1d764737a3973965f67410839d171346b8ab8b6989a21edf242c679",
+   "size_bytes": 1538,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1538,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Endorsement of Health and Human Services recommendation for pulse oximetry screening for critical congenital heart disease. Incorporation of pulse oximetry to the assessment of the newborn infant can enhance detection of critical congenital heart disease (CCHD). Recently, the Secretary of Health and Human Services (HHS) recommended that screening for CCHD be added to the uniform screening panel. The American Academy of Pediatrics (AAP) has been a strong advocate of early detection of CCHD and fully supports the decision of the Secretary of HHS. The AAP has published strategies for the implementation of pulse oximetry screening, which addressed critical issues such as necessary equipment, personnel, and training, and also provided specific recommendations for assessment of saturation by using pulse oximetry as well as appropriate management of a positive screening result. The AAP is committed to the safe and effective implementation of pulse oximetry screening and is working with other advocacy groups and governmental agencies to promote pulse oximetry and to support widespread surveillance for CCHD. Going forward, AAP chapters will partner with state health departments to implement the new screening strategy for CCHD and will work to ensure that there is an adequate system for referral for echocardiographic/pediatric cardiac evaluation after a positive screening result. It is imperative that AAP members engage their respective policy makers in adopting and funding the recommendations made by the Secretary of HHS."
+    }
+   ]
+  },
+  {
+   "id": "AAP-VITK-001",
+   "source": "AAP",
+   "title": "AAP clinical report controversies concerning vitamin K and the newborn",
+   "year": "2003",
+   "page_url": "https://publications.aap.org/pediatrics/article/112/1/191/",
+   "pdf_url": "https://publications.aap.org/pediatrics/article/112/1/191/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neonatology_screening",
+   "priority": "high",
+   "sha256": "839245b6f62c150b060cb04b9a0cba5ae18dec0819cab6f65784c60b41008dbd",
+   "size_bytes": 789,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 789,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP clinical report controversies concerning vitamin K and the newborn Source: AAP Year: 2003 Domain: neonatology_screening License: AAP Available at: https://publications.aap.org/pediatrics/article/112/1/191/ This is a citation reference for the AAP guideline 'AAP clinical report controversies concerning vitamin K and the newborn' published in 2003. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neonatology_screening. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-NEWBORN-001",
+   "source": "AAP",
+   "title": "AAP guidelines for perinatal care eighth edition newborn transition",
+   "year": "2017",
+   "page_url": "https://www.aap.org/",
+   "pdf_url": "https://www.aap.org/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neonatology_resuscitation",
+   "priority": "high",
+   "sha256": "02e34d91d494c64c66401498606ae6b84ffbac2c5583cd9ae2f17d3227981272",
+   "size_bytes": 753,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 753,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP guidelines for perinatal care eighth edition newborn transition Source: AAP Year: 2017 Domain: neonatology_resuscitation License: AAP Available at: https://www.aap.org/ This is a citation reference for the AAP guideline 'AAP guidelines for perinatal care eighth edition newborn transition' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neonatology_resuscitation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-NEONATAL-HYPO-001",
+   "source": "AAP",
+   "title": "AAP clinical report postnatal glucose homeostasis in late-preterm and term infants",
+   "year": "2011",
+   "page_url": "https://publications.aap.org/pediatrics/article/127/3/575/",
+   "pdf_url": "https://publications.aap.org/pediatrics/article/127/3/575/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neonatology_premature",
+   "priority": "high",
+   "sha256": "b28cd660f8ba6fd95d6a20138be51fbc01d58ebf1bd0da1f01989c5d26730f76",
+   "size_bytes": 813,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 813,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:56Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP clinical report postnatal glucose homeostasis in late-preterm and term infants Source: AAP Year: 2011 Domain: neonatology_premature License: AAP Available at: https://publications.aap.org/pediatrics/article/127/3/575/ This is a citation reference for the AAP guideline 'AAP clinical report postnatal glucose homeostasis in late-preterm and term infants' published in 2011. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neonatology_premature. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-FOREIGN-AIRWAY-001",
+   "source": "AAP",
+   "title": "AAP clinical guidance pediatric foreign body airway obstruction",
+   "year": "2018",
+   "page_url": "https://publications.aap.org/pediatrics/",
+   "pdf_url": "https://publications.aap.org/pediatrics/",
+   "license": "AAP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "emergency_pediatric",
+   "priority": "medium",
+   "sha256": "701d79c1ec26189a1bfff6c2ea5cc48f9bb9440e73faeeb3a51a313357fa8ee2",
+   "size_bytes": 753,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 753,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP clinical guidance pediatric foreign body airway obstruction Source: AAP Year: 2018 Domain: emergency_pediatric License: AAP Available at: https://publications.aap.org/pediatrics/ This is a citation reference for the AAP guideline 'AAP clinical guidance pediatric foreign body airway obstruction' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: emergency_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-PPE-001",
+   "source": "AAP",
+   "title": "AAP Preparticipation Physical Evaluation 5th Edition",
+   "year": "2019",
+   "page_url": "https://www.aap.org/en/patient-care/sports/preparticipation-physical-evaluation/",
+   "pdf_url": "https://www.aap.org/en/patient-care/sports/preparticipation-physical-evaluation/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_pediatric",
+   "priority": "high",
+   "sha256": "7747da79295ba15faa1c48ab4fdaf7df1bd21b5e62140eb6644d9bf3b833b5c6",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:59Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP Preparticipation Physical Evaluation 5th Edition Source: AAP Year: 2019 Domain: sports_pediatric License: Proprietary Available at: https://www.aap.org/en/patient-care/sports/preparticipation-physical-evaluation/ This is a citation reference for the AAP guideline 'AAP Preparticipation Physical Evaluation 5th Edition' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-CONCUSS-001",
+   "source": "AAP",
+   "title": "AAP Clinical Report Sport-Related Concussion in Children and Adolescents",
+   "year": "2018",
+   "page_url": "https://publications.aap.org/pediatrics",
+   "pdf_url": "https://publications.aap.org/pediatrics",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_pediatric",
+   "priority": "high",
+   "sha256": "609e48f12e26e5ec69162f94527f96e34cf4aa286ca1fd8ac32205480780a071",
+   "size_bytes": 772,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 772,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:01Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP Clinical Report Sport-Related Concussion in Children and Adolescents Source: AAP Year: 2018 Domain: sports_pediatric License: Proprietary Available at: https://publications.aap.org/pediatrics This is a citation reference for the AAP guideline 'AAP Clinical Report Sport-Related Concussion in Children and Adolescents' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-INTENSIVE-001",
+   "source": "AAP",
+   "title": "AAP Clinical Report Sports Specialization and Intensive Training in Young Athletes",
+   "year": "2019",
+   "page_url": "https://publications.aap.org/pediatrics",
+   "pdf_url": "https://publications.aap.org/pediatrics",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_pediatric",
+   "priority": "high",
+   "sha256": "f38b3d4b362b8bf1080eaa2cd4636ef1add4d94caf4a814ab753a83e85697f4b",
+   "size_bytes": 792,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 792,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:02Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP Clinical Report Sports Specialization and Intensive Training in Young Athletes Source: AAP Year: 2019 Domain: sports_pediatric License: Proprietary Available at: https://publications.aap.org/pediatrics This is a citation reference for the AAP guideline 'AAP Clinical Report Sports Specialization and Intensive Training in Young Athletes' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-PHYS-001",
+   "source": "AAP",
+   "title": "AAP Policy Statement on Promotion of Physical Activity in Children",
+   "year": "2020",
+   "page_url": "https://publications.aap.org/pediatrics",
+   "pdf_url": "https://publications.aap.org/pediatrics",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_pediatric",
+   "priority": "medium",
+   "sha256": "4fb787d1d3b259f635f3d735bb0ebb0c87cbd798c035a3720bc4276223e7d3c0",
+   "size_bytes": 2000,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2000,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Cholesterol Screening and Treatment Practices and Preferences: A Survey of United States Pediatricians. To determine pediatricians' practices, attitudes, and barriers regarding screening for and treatment of pediatric dyslipidemias in 9- to 11-year-olds and 17- to 21-year-olds. American Academy of Pediatrics (AAP) 2013-2014 Periodic Survey of a national, randomly selected sample of 1627 practicing AAP physicians. Pediatricians' responses were described and modeled. Of 614 (38%) respondents who met eligibility criteria, less than half (46%) were moderately/very knowledgeable about the 2008 AAP cholesterol statement; fewer were well-informed about 2011 National Heart, Lung, and Blood Institute Guidelines or 2007 US Preventive Service Task Force review (both 26%). Despite published recommendations, universal screening was not routine: 68% reported they never/rarely/sometimes screened healthy 9- to 11-year-olds. In contrast, more providers usually/most/all of the time screened based on family cardiovascular history (61%) and obesity (82%). Screening 17- to 21-year-olds was more common in all categories (P?<?.001). Only 58% agreed with universal screening, and 23% felt screening was low priority. Pediatricians uniformly provided lifestyle counseling but access to healthy food (81%), exercise (83%), and adherence to lifestyle recommendations (96%) were reported barriers. One-half of pediatricians (55%) reported a lack of local subspecialists. Although 62% and 89% believed statins were appropriate for children and adolescents with high low-density lipoprotein cholesterol (200?mg/dL) unresponsive to lifestyle, a minority initiated statins (8%, 21%). US pediatricians report lipid screening and treatment practices that are largely at odds with existing recommendations, likely because of lack of knowledge and conflicts among national guidelines, and concern about treatment efficacy and harms. Education regarding pediatric lipid disorders could promote guideline implementation."
+    }
+   ]
+  },
+  {
+   "id": "AAP-SIDS-001",
+   "source": "AAP",
+   "title": "AAP Policy Statement Safe Sleep Recommendations for Reducing SIDS Risk",
+   "year": "2022",
+   "page_url": "https://publications.aap.org/pediatrics",
+   "pdf_url": "https://publications.aap.org/pediatrics",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sleep_pediatric",
+   "priority": "high",
+   "sha256": "ef64e7a2222405363c4d2378e5243e625bfc829bce357b70c3c8db566d90be56",
+   "size_bytes": 1717,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1717,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:06Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "SIDS and other sleep-related infant deaths: expansion of recommendations for a safe infant sleeping environment. Despite a major decrease in the incidence of sudden infant death syndrome (SIDS) since the American Academy of Pediatrics (AAP) released its recommendation in 1992 that infants be placed for sleep in a nonprone position, this decline has plateaued in recent years. Concurrently, other causes of sudden unexpected infant death that occur during sleep (sleep-related deaths), including suffocation, asphyxia, and entrapment, and ill-defined or unspecified causes of death have increased in incidence, particularly since the AAP published its last statement on SIDS in 2005. It has become increasingly important to address these other causes of sleep-related infant death. Many of the modifiable and nonmodifiable risk factors for SIDS and suffocation are strikingly similar. The AAP, therefore, is expanding its recommendations from focusing only on SIDS to focusing on a safe sleep environment that can reduce the risk of all sleep-related infant deaths, including SIDS. The recommendations described in this policy statement include supine positioning, use of a firm sleep surface, breastfeeding, room-sharing without bed-sharing, routine immunizations, consideration of using a pacifier, and avoidance of soft bedding, overheating, and exposure to tobacco smoke, alcohol, and illicit drugs. The rationale for these recommendations is discussed in detail in the accompanying \"Technical Report--SIDS and Other Sleep-Related Infant Deaths: Expansion of Recommendations for a Safe Infant Sleeping Environment,\" which is included in this issue of Pediatrics (www.pediatrics.org/cgi/content/full/128/5/e1341)."
+    }
+   ]
+  },
+  {
+   "id": "AAP-PEDS-001",
+   "source": "AAP",
+   "title": "AAP Clinical Report Choking Prevention Children Foreign Body Airway",
+   "year": "2010",
+   "page_url": "https://publications.aap.org/pediatrics",
+   "pdf_url": "https://publications.aap.org/pediatrics",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "picu_resuscitation",
+   "priority": "high",
+   "sha256": "2594217c4d43c989f9ab7b8d2998addcb11c9fcac12ada70fe6ee36d53e832b3",
+   "size_bytes": 765,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 765,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP Clinical Report Choking Prevention Children Foreign Body Airway Source: AAP Year: 2010 Domain: picu_resuscitation License: Restricted Available at: https://publications.aap.org/pediatrics This is a citation reference for the AAP guideline 'AAP Clinical Report Choking Prevention Children Foreign Body Airway' published in 2010. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: picu_resuscitation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAP-PEDS-006",
+   "source": "AAP",
+   "title": "AAP Policy Pediatric Organ Donation Definition Brain Death",
+   "year": "2020",
+   "page_url": "https://publications.aap.org/pediatrics",
+   "pdf_url": "https://publications.aap.org/pediatrics",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "transplant_donor",
+   "priority": "high",
+   "sha256": "c91e3ec73995c637354f0951ad1c2e814d39d37f89ac84f5e9ac1355be9923c1",
+   "size_bytes": 743,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 743,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAP Policy Pediatric Organ Donation Definition Brain Death Source: AAP Year: 2020 Domain: transplant_donor License: Restricted Available at: https://publications.aap.org/pediatrics This is a citation reference for the AAP guideline 'AAP Policy Pediatric Organ Donation Definition Brain Death' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: transplant_donor. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

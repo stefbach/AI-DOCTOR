@@ -1,0 +1,57 @@
+{
+ "source": "CGRN",
+ "generated_at": "2026-05-09T19:08:20Z",
+ "total_documents": 2,
+ "documents": [
+  {
+   "id": "CGRN-CHILDGLA-001",
+   "source": "CGRN",
+   "title": "CGRN consensus on childhood glaucoma classification and definitions",
+   "year": "2013",
+   "page_url": "https://www.wgweb.org/childhood-glaucoma-research-network",
+   "pdf_url": "https://www.wgweb.org/childhood-glaucoma-research-network",
+   "license": "CGRN",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_pediatric",
+   "priority": "high",
+   "sha256": "e8ca7121d0d40213a8a6ec1deb39e649b7540b531b4af431104af4d42298c583",
+   "size_bytes": 789,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 789,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CGRN consensus on childhood glaucoma classification and definitions Source: CGRN Year: 2013 Domain: ophthalmology_pediatric License: CGRN Available at: https://www.wgweb.org/childhood-glaucoma-research-network This is a citation reference for the CGRN guideline 'CGRN consensus on childhood glaucoma classification and definitions' published in 2013. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CGRN-CHILDGLA-002",
+   "source": "CGRN",
+   "title": "CGRN guidelines for surgical management of pediatric glaucoma",
+   "year": "2018",
+   "page_url": "https://www.wgweb.org/cgrn",
+   "pdf_url": "https://www.wgweb.org/cgrn",
+   "license": "CGRN",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_pediatric",
+   "priority": "medium",
+   "sha256": "cccd6bf7077889807c5308d80d1f2a673dff4a9a3267a857d99d1f651f7607e0",
+   "size_bytes": 746,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 746,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CGRN guidelines for surgical management of pediatric glaucoma Source: CGRN Year: 2018 Domain: ophthalmology_pediatric License: CGRN Available at: https://www.wgweb.org/cgrn This is a citation reference for the CGRN guideline 'CGRN guidelines for surgical management of pediatric glaucoma' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

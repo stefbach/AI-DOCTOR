@@ -1,0 +1,57 @@
+{
+ "source": "ABFO",
+ "generated_at": "2026-05-09T19:04:16Z",
+ "total_documents": 2,
+ "documents": [
+  {
+   "id": "ABFO-FOR-001",
+   "source": "ABFO",
+   "title": "ABFO Standards and Guidelines for Bitemark Analysis",
+   "year": "2018",
+   "page_url": "https://abfo.org/standards-guidelines/",
+   "pdf_url": "https://abfo.org/standards-guidelines/",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_violence",
+   "priority": "medium",
+   "sha256": "e4e36e1ce19a7a6b039a39b0fcb10ec233645af683c6ac7f5674d867e59ac7d8",
+   "size_bytes": 790,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 790,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Old dogs can learn new tricks--a new application of the ABFO #2 scale. In 1984 at its first Bitemark Workshop, the American Board of Forensic Odontology (ABFO) developed guidelines for the analysis of bitemark evidence. Prior to this, no standards had been established for the evaluation of bitemarks. The development of the ABFO #2 scale in 1987 gave the forensic odontologist a reproducible way to rectify and measure bitemarks that had been documented photographically. Primarily developed for the analysis of bitemark evidence, its use has expanded to encompass myriad forms of evidence. While the ABFO #2 scale can depict horizontal and vertical measurements, it is unable to depict depth accurately. The purpose of this paper is to show its successful application to three dimensions."
+    }
+   ]
+  },
+  {
+   "id": "ABFO-FOR-002",
+   "source": "ABFO",
+   "title": "ABFO Standards Dental Identification Mass Disasters",
+   "year": "2020",
+   "page_url": "https://abfo.org/standards-guidelines/",
+   "pdf_url": "https://abfo.org/standards-guidelines/",
+   "license": "Open",
+   "commercial_use": "attribution",
+   "clinical_domain": "forensic_death",
+   "priority": "medium",
+   "sha256": "11f92f9747ca16ddb864469929d4a4793bc10575d6b627a478de8b00e5980ef7",
+   "size_bytes": 720,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 720,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:17Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ABFO Standards Dental Identification Mass Disasters Source: ABFO Year: 2020 Domain: forensic_death License: Open Available at: https://abfo.org/standards-guidelines/ This is a citation reference for the ABFO guideline 'ABFO Standards Dental Identification Mass Disasters' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: forensic_death. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

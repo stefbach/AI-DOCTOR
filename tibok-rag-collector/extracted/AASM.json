@@ -1,7 +1,7 @@
 {
  "source": "AASM",
  "generated_at": "2026-05-02T16:20:59Z",
- "total_documents": 31,
+ "total_documents": 32,
  "documents": [
   {
    "id": "AASM-001",
@@ -2155,6 +2155,31 @@
     {
      "chunk_index": 5,
      "content": "of treatment response, there is and behavioral function, and the emergence of psychopathol- currently not enough evidence to recommend the use of 1 treat- ogy in adolescence and adulthood need to be evaluated.4 ment over another. Similarly, although a total of 30 studies (5 of g) The use of behavioral treatment for bedtime problems and which were classified as Level 1 or II, 16 as Level III, and 9 as night wakings in older (> 5 years) children and adolescents Level IV or V) included 2 or more types of behavioral interven- needs to be explored. Additional studies are also needed to tions (e.g., parent education, positive reinforcement, graduated examine the use of these strategies in children with special extinction, individually tailored treatment) in combination, there needs (e.g., children with autism spectrum disorders, mental was a great deal of variability in the treatment components includ- retardation, neurodevelopmental disabilities) and in children ed in these studies. Therefore, no specific recommendations can with chronic medical and psychiatric conditions. be made regarding the relative superiority of any combination vs. single therapies. Only 1 study in children has compared the rela- ACKNOWLEDGEMENTS tive efficacy of combined behavioral-pharmacologic treatment vs. behavioral treatment alone. [4.3, 4.4] The AASM and the SPC would like to thank Sara Seaquist and Maria DeSena for coordinating the work on this practice param- RECOMMENDATIONS FOR SECONDARY OUTCOMES eter and Richard Rosenberg, PhD, Andrew L. Chesson, MD, Max Hirshkowitz, PhD, and Susan Benloucif, PhD for their contribu- 3.8. Behavioral interventions are recommended and effective in im- tions to the preparation of the manuscript. proving secondary outcomes (child’s daytime functioning, parental well-being) in children with bedtime problems and night wakings. REFERENCES [4.6] (Guideline) 1. Mindell JA, Kuhn B, Lewin DS, Meltzer LJ, Sadeh A. Behavioral A total of 13 studies have assessed a number of secondary treat- treatment of bedtime problems and night wakings in infants and ment outcomes related to daytime functioning in the child (in- young children. An American Academy of Sleep Medicine Review cluding behavior, mood, self-esteem, parent-child interactions). 2. Sackett DL. Rules of evidence and clinical recommendations for The majority of these studies reported positive effects on daytime the management of patients. Canadian Journal of Cardiology. 1993; SLEEP, Vol. 29, No. 10, 2006 1280 Review of Bedtime Problems in Children—Morgenthaler et al 9:487-9. 3. Eddy DM, (Ed.) A manual for assessing health practices and de- signing practice policies: the explicit approach. Philadelphia, PA: American College of Physicians; 1992 4. Ramchandani P, Wiggs L, Webb V, Stores G. A systematic review of treatments for settling problems and night waking in young chil- dren. BMJ. 2000 Jan 22;320(7229):209-13. SLEEP, Vol. 29, No. 10, 2006 1281"
+    }
+   ]
+  },
+  {
+   "id": "AASM-MAD-001",
+   "source": "AASM",
+   "title": "AASM clinical practice guideline oral appliances for OSA and snoring",
+   "year": "2015",
+   "page_url": "https://aasm.org/clinical-resources/practice-standards/",
+   "pdf_url": "https://aasm.org/clinical-resources/practice-standards/",
+   "license": "AASM",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "maxillofacial_orthognathic",
+   "priority": "high",
+   "sha256": "39de01eeda3b1db35f51d4e723d95600b7c33dbb6f6fc1b9a4fdb9a3c81a5a2c",
+   "size_bytes": 2846,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2838,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:16Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Clinical Practice Guideline for the Treatment of Obstructive Sleep Apnea and Snoring with Oral Appliance Therapy: An Update for 2015. Since the previous parameter and review paper publication on oral appliances (OAs) in 2006, the relevant scientific literature has grown considerably, particularly in relation to clinical outcomes. The purpose of this new guideline is to replace the previous and update recommendations for the use of OAs in the treatment of obstructive sleep apnea (OSA) and snoring. The American Academy of Sleep Medicine (AASM) and American Academy of Dental Sleep Medicine (AADSM) commissioned a seven-member task force. A systematic review of the literature was performed and a modified Grading of Recommendations Assessment, Development, and Evaluation (GRADE) process was used to assess the quality of evidence. The task force developed recommendations and assigned strengths based on the quality of the evidence counterbalanced by an assessment of the relative benefit of the treatment versus the potential harms. The AASM and AADSM Board of Directors approved the final guideline recommendations. 1. We recommend that sleep physicians prescribe oral appliances, rather than no therapy, for adult patients who request treatment of primary snoring (without obstructive sleep apnea). (STANDARD) 2. When oral appliance therapy is prescribed by a sleep physician for an adult patient with obstructive sleep apnea, we suggest that a qualified dentist use a custom, titratable appliance over non-custom oral devices. (GUIDELINE) 3. We recommend that sleep physicians consider prescription of oral appliances, rather than no treatment, for adult patients with obstructive sleep apnea who are intolerant of CPAP therapy or prefer alternate therapy. (STANDARD) 4. We suggest that qualified dentists provide oversight—rather than no follow-up—of oral appliance therapy in adult patients with obstructive sleep apnea, to survey for dental-related side effects or occlusal changes and reduce their incidence. (GUIDELINE) 5. We suggest that sleep physicians conduct follow-up sleep testing to improve or confirm treatment efficacy, rather than conduct follow-up without sleep testing, for patients fitted with oral appliances. (GUIDELINE) 6. We suggest that sleep physicians and qualified dentists instruct adult patients treated with oral appliances for obstructive sleep apnea to return for periodic office visits—as opposed to no follow-up—with a qualified dentist and a sleep physician. (GUIDELINE). The AASM and AADSM expect these guidelines to have a positive impact on professional behavior, patient outcomes, and, possibly, health care costs. This guideline reflects the state of knowledge at the time of publication and will require updates if new evidence warrants significant changes to the current recommendations."
     }
    ]
   }

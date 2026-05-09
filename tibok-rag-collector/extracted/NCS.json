@@ -1,7 +1,7 @@
 {
  "source": "NCS",
  "generated_at": "2026-05-09T07:57:18Z",
- "total_documents": 12,
+ "total_documents": 13,
  "documents": [
   {
    "id": "NCS-STROKE-001",
@@ -612,6 +612,31 @@
     {
      "chunk_index": 9,
      "content": "by employing procedures and policies to ensure compliance with legal requirements while improving clinical care. Institutions can implement multidisciplinary solutions in conjunction with medical education, legal departments and technology teams. One suggestion for reducing unintentional errors is for health administrators to establish uniform training or credentialing programs for physicians eligible to declare DNC. This would ensure they are aware of legal requirements, current guidelines, and how to resolve discrepancies where clinical guidelines conflict with the legal requirements. Braksick et al. found 23.9% of physicians surveyed who declare DNC reported no formal training, while Biel and Durrant reported training in only 27% of residents. Though further education and training are important, the question remains what type of training would be most effective. Bernat and Brust stipulate that lectures and videos are helpful yet ultimately insufficient; however, several authors have demonstrated the potential for didactic learning and the use of simulation with role playing. Simulation instruction should include how the exam should be conducted, how findings should be recorded, as well as how to discuss information with grieving family members. Simulations of these family member interactions can include elaborating on patient condition, addressing family concerns and emotions, and responding to follow up questions. A formal credentialing process is another possible strategy for standardizing practice, where health administration teams can implement required training for physicians to perform DNC assessment and diagnosis. This credentialing process must follow appropriate state laws that specify requirements for certain types of providers, such as a neurologist or neurosurgeon, to assess DNC. Finally, checklists serve as an additional tool in addressing inadvertent error or missed steps. Health administrators can work with medical education, the legal department, and technology teams to develop a checklist that can be integrated into the electronic health record. The Neurocritical Care Society Task Force provides sample checklists that could be used to inform this process as a component of its Brain Death Toolkit. Checklists should include accounting for common errors described in recent literature and will provide consistency in practice. Different checklists should be used for adult and pediatric patient populations. Checklists should also be updated as guidelines are revised. Checklists should include, but should not be limited to, identifying the etiology or cause of recent brain injury, documenting persistent nonfunction, considering and ruling out confounding factors, steps for clinical testing and documentation, apnea testing, ancillary testing only where indicated or appropriate, and documentation of questions and communication with family members. Checklists can assist with compliance and documentation as well as reduce omissions that lead to inadvertent misdiagnosis. Conclusion Public policy requires a bright line to determine when patients are alive or dead in clinical practice. Despite clear legal standards set forth in the UDDA, state implementation of this model reflects variations, ethical tensions, and unresolved questions. Part of the controversy acknowledges that current clinical exams do not accurately measure for irreversible loss of all neurological functioning. The solution, then, is that physicians and institutions must improve DNC exams to reduce both false positives and inadvertent misdiagnosis. Multiple stakeholders and the Uniform Law Commission have offered a variety of policy suggestions to modify the UDDA or state laws, but have not reached consensus to change the law. Despite AAN’s clinical guidelines, physicians and institutions should note the law generally still requires: (1) informed consent for patient interventions and evaluations in most instances (or possibly informed dissent); and (2) physicians must determine whether the patient has suffered irreversible cessation of all functions of the entire brain , which precludes the exceptions stated by AAN. Maintaining a clear, consistent, and reliable standard for DNC will reduce potential error and conflict arising from misdiagnosis and enhance the ethical practice of medicine."
+    }
+   ]
+  },
+  {
+   "id": "NCS-CSF-001",
+   "source": "NCS",
+   "title": "UK Neurological Society guidelines CSF analysis xanthochromia",
+   "year": "2020",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1002/acn3.51168",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1002/acn3.51168",
+   "license": "Society",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_body_fluids",
+   "priority": "high",
+   "sha256": "4a46f0e3298a3060b7a3ff2e24c5161fb4353c24b02540cc54f305be8f6175ea",
+   "size_bytes": 759,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 759,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: UK Neurological Society guidelines CSF analysis xanthochromia Source: NCS Year: 2020 Domain: lab_body_fluids License: Society Available at: https://onlinelibrary.wiley.com/doi/10.1002/acn3.51168 This is a citation reference for the NCS guideline 'UK Neurological Society guidelines CSF analysis xanthochromia' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_body_fluids. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

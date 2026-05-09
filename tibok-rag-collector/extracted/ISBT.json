@@ -1,0 +1,82 @@
+{
+ "source": "ISBT",
+ "generated_at": "2026-05-09T19:11:58Z",
+ "total_documents": 3,
+ "documents": [
+  {
+   "id": "ISBT-PLAS-001",
+   "source": "ISBT",
+   "title": "ISBT guidelines for plasma cryoprecipitate and pathogen-reduced products",
+   "year": "2021",
+   "page_url": "https://www.isbtweb.org/resources/guidelines.html",
+   "pdf_url": "https://www.isbtweb.org/resources/guidelines.html",
+   "license": "ISBT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_transfusion",
+   "priority": "medium",
+   "sha256": "2353f61b45b8cd1d804c6ab78ef3d960e6a5645d2680b68ea40ab246ddeaa08c",
+   "size_bytes": 789,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 789,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:59Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISBT guidelines for plasma cryoprecipitate and pathogen-reduced products Source: ISBT Year: 2021 Domain: hematology_transfusion License: ISBT Available at: https://www.isbtweb.org/resources/guidelines.html This is a citation reference for the ISBT guideline 'ISBT guidelines for plasma cryoprecipitate and pathogen-reduced products' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: hematology_transfusion. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ISBT-CROSS-001",
+   "source": "ISBT",
+   "title": "ISBT guidelines for blood typing and pretransfusion testing",
+   "year": "2022",
+   "page_url": "https://www.isbtweb.org/resources/guidelines.html",
+   "pdf_url": "https://www.isbtweb.org/resources/guidelines.html",
+   "license": "ISBT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "hematology_transfusion",
+   "priority": "medium",
+   "sha256": "aac6660eb7aefb19e986b96101d92045fff7d00ed2f0856e842126708171b1e8",
+   "size_bytes": 763,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 763,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:59Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISBT guidelines for blood typing and pretransfusion testing Source: ISBT Year: 2022 Domain: hematology_transfusion License: ISBT Available at: https://www.isbtweb.org/resources/guidelines.html This is a citation reference for the ISBT guideline 'ISBT guidelines for blood typing and pretransfusion testing' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: hematology_transfusion. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ISBT-TRANSFUSION-001",
+   "source": "ISBT",
+   "title": "ISBT guidelines validation laboratory blood group serology",
+   "year": "2020",
+   "page_url": "https://www.isbtweb.org/resources/working-parties.html",
+   "pdf_url": "https://www.isbtweb.org/resources/working-parties.html",
+   "license": "ISBT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_transfusion",
+   "priority": "high",
+   "sha256": "2b0fb8e91241c964650be07162e61c0d34bc317ca708c3f8bcfd4efda8f6faa7",
+   "size_bytes": 752,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 752,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:00Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ISBT guidelines validation laboratory blood group serology Source: ISBT Year: 2020 Domain: lab_transfusion License: ISBT Available at: https://www.isbtweb.org/resources/working-parties.html This is a citation reference for the ISBT guideline 'ISBT guidelines validation laboratory blood group serology' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_transfusion. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

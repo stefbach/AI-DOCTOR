@@ -1,7 +1,7 @@
 {
  "source": "ILAE",
  "generated_at": "2026-05-09T08:01:09Z",
- "total_documents": 4,
+ "total_documents": 18,
  "documents": [
   {
    "id": "ILAE-EPILEPSY-001",
@@ -164,6 +164,356 @@
     {
      "chunk_index": 5,
      "content": "effect of LTG concentration during the early administration period on the risk of rash. Further detailed prospective studies are required. Conclusions This study showed that FNZ increased LTG serum concentration and increased the risk of rash. Concomitant use of FNZ should be carefully considered in patients using LTG. This is the first report to clearly demonstrate an interaction with LTG in a drug other than VPA. Given that FNZ is a potent benzodiazepine used as a sleep medication, these results have implications for the choice of sleep medication in patients receiving LTG. When VPA is used in combination with LTG, the risk of rash is controlled by careful titration, and special attention must be paid to the incidence of rash in clinical practice. Furthermore, when LTG is used in combination with FNZ, LTG dosing should be carefully adjusted to prevent rash. Disclosure statement The authors declare no conflicts of interest associated with this study. Author contributions Study conception and design: H.B., M.G. Performance of the experiments and data acquisition: H.B., M.G., M.N., K.H., Y.N., T.Y., C.M., K.M. Analysis and interpretation of data: H.B., M.G., M.N., K.H., K.K. (Kei Kawada), T.Y., M.K., A.O., K.T., K.K. (Kohei Kitagawa), T.N., F.A., K.Y., M.C., S.N. Drafting the work or critically revising it for relevant intellectual content: H.B., M.G. K.H., Y.I., T.N., Y.T., S.N., K.I. Supporting information Data S1. Supporting Information."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-SE-001",
+   "source": "ILAE",
+   "title": "ILAE classification and definition of status epilepticus",
+   "year": "2015",
+   "page_url": "https://www.ilae.org/",
+   "pdf_url": "https://www.ilae.org/",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "emergency_neuro",
+   "priority": "high",
+   "sha256": "d472f90914db0db011662a248aab04599fccba3120c92e248a47a519ff4ce44b",
+   "size_bytes": 3156,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3154,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:45Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Defining neonatal status epilepticus: A scoping review from the ILAE neonatal task force. To review the available literature concerning the definition of neonatal status epilepticus (SE) and/or seizure burden. The International League Against Epilepsy Neonatal Task Force performed a scoping review of the definitions of neonatal SE. Following a systematic literature review, articles were screened and data were abstracted regarding: (1) article characteristics (author identification, publication year, journal name, digital object identifier, title, objective, and study design); (2) cohort characteristics (sample size, gestational age, seizure etiology); (3) definition of SE and/or seizure burden; and (4) the method used to identify and classify SE, including routine EEG (EEG), continuous EEG monitoring (cEEG), amplitude-integrated EEG (aEEG), or clinical features. The scoping review yielded 44 articles containing a definition of neonatal SE. Studies mainly included infants with hypoxic-ischemic encephalopathy or neonates considered at risk for seizures. SE identification and classification most often relied on cEEG. The majority of studies based the definition of SE on seizure duration, including summed duration of seizures comprising ≥50% of any 1-h epoch, recurrent seizures for >50% of the total recording time, or either electrographic seizures lasting >30 min and/or repeated electrographic seizures totaling >50% in any 1-h period. Seizure burden was reported in 20 studies, and the most commonly used approach assessed total seizure burden, defined as total duration of EEG seizures in minutes. Sixteen studies assessed the relationship between seizure burden and outcomes, and most identified a significant association between higher seizure burden and unfavorable outcomes. This scoping review demonstrates a substantial variation in neonatal SE definitions across the literature. The most common definitions were based around a 30-min seizure duration criterion, but evidence was insufficient to support that 30 min was a cutoff defining prolonged seizures or that seizures exceeding this burden were more likely to be pharmacoresistant or associated with worse outcomes. As a next step, the Neonatal Task Force intends to develop a standardized approach to assessing and describing neonatal seizure burden and defining neonatal SE. Prolonged seizures are a neurologic emergency, if untreated, can lead to permanent injury or death. In adults and children, seizures lasting longer than 30 min are believed to cause brain damage. However, it is not clear if this definition can be applied to neonates. The International League Against Epilepsy Neonatal Taskforce performed a scoping literature review which identified 44 articles containing a definition of neonatal status epilepticus. In this article, the authors reviewed the current used definitions for prolonged seizures in neonates to establish a relationship between seizure duration and neurological outcome. As a next step, the Neonatal Task Force intends to develop a standardized approach to assessing and describing neonatal seizure burden and defining neonatal SE."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-EPILEPSY-002",
+   "source": "ILAE",
+   "title": "Operational classification of seizure types ILAE position paper",
+   "year": "2017",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.13670",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.13670",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy",
+   "priority": "high",
+   "sha256": "a90fb1f0a067551fc8e7c8ca8241c0d525d2cf158767dc1d5e9c67e034aea433",
+   "size_bytes": 767,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 767,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:45Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Operational classification of seizure types ILAE position paper Source: ILAE Year: 2017 Domain: neurology_epilepsy License: ILAE Available at: https://onlinelibrary.wiley.com/doi/10.1111/epi.13670 This is a citation reference for the ILAE guideline 'Operational classification of seizure types ILAE position paper' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_epilepsy. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-EPILEPSY-003",
+   "source": "ILAE",
+   "title": "ILAE official report a practical clinical definition of epilepsy",
+   "year": "2014",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.12550",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.12550",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy",
+   "priority": "high",
+   "sha256": "eb1d5da6b58baded8c060abf981df580d17959d42eeb2f048d35c15462a9c628",
+   "size_bytes": 1573,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1573,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "ILAE official report: a practical clinical definition of epilepsy. Epilepsy was defined conceptually in 2005 as a disorder of the brain characterized by an enduring predisposition to generate epileptic seizures. This definition is usually practically applied as having two unprovoked seizures >24 h apart. The International League Against Epilepsy (ILAE) accepted recommendations of a task force altering the practical definition for special circumstances that do not meet the two unprovoked seizures criteria. The task force proposed that epilepsy be considered to be a disease of the brain defined by any of the following conditions: (1) At least two unprovoked (or reflex) seizures occurring >24 h apart; (2) one unprovoked (or reflex) seizure and a probability of further seizures similar to the general recurrence risk (at least 60%) after two unprovoked seizures, occurring over the next 10 years; (3) diagnosis of an epilepsy syndrome. Epilepsy is considered to be resolved for individuals who either had an age-dependent epilepsy syndrome but are now past the applicable age or who have remained seizure-free for the last 10 years and off antiseizure medicines for at least the last 5 years. \"Resolved\" is not necessarily identical to the conventional view of \"remission or \"cure.\" Different practical definitions may be formed and used for various specific purposes. This revised definition of epilepsy brings the term in concordance with common use. A PowerPoint slide summarizing this article is available for download in the Supporting Information section here."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-EPILEPSY-004",
+   "source": "ILAE",
+   "title": "ILAE classification and definition of epilepsy syndromes onset at neonate and infant",
+   "year": "2022",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.17239",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.17239",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy_pediatric",
+   "priority": "high",
+   "sha256": "f0052395d69fe68d845e13af5f82a1f0f6f625d706fc0f56531fbc42053dc234",
+   "size_bytes": 829,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 829,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ILAE classification and definition of epilepsy syndromes onset at neonate and infant Source: ILAE Year: 2022 Domain: neurology_epilepsy_pediatric License: ILAE Available at: https://onlinelibrary.wiley.com/doi/10.1111/epi.17239 This is a citation reference for the ILAE guideline 'ILAE classification and definition of epilepsy syndromes onset at neonate and infant' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_epilepsy_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-EPILEPSY-005",
+   "source": "ILAE",
+   "title": "ILAE classification of epilepsy syndromes onset at childhood",
+   "year": "2022",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.17241",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.17241",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy_pediatric",
+   "priority": "high",
+   "sha256": "ae9a6ecf1048f07a1b0c384b82c9a66c98384541c60ae4f71f6204aa0c50151b",
+   "size_bytes": 781,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 781,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ILAE classification of epilepsy syndromes onset at childhood Source: ILAE Year: 2022 Domain: neurology_epilepsy_pediatric License: ILAE Available at: https://onlinelibrary.wiley.com/doi/10.1111/epi.17241 This is a citation reference for the ILAE guideline 'ILAE classification of epilepsy syndromes onset at childhood' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_epilepsy_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-EPILEPSY-006",
+   "source": "ILAE",
+   "title": "ILAE classification of epilepsy syndromes with onset variable age",
+   "year": "2022",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.17240",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.17240",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy",
+   "priority": "high",
+   "sha256": "c7063e14c7d7928738a861754dd8b450190c703900442edd43b5e577eb2ae95d",
+   "size_bytes": 2233,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2233,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Predictors of drug-resistant epilepsy in childhood epilepsy syndromes: A subgroup analysis from a prospective cohort study. Previous studies assessing factors associated with drug-resistant epilepsy (DRE) were constrained by their amalgamation of all epilepsy syndromes in their analyses and the absence of uniform criteria for defining DRE. Our objective was to identify predictors of DRE among the four primary childhood epilepsy syndrome groups within a cohort of children with new onset seizures, using the International League Against Epilepsy (ILAE) definition of DRE and the recent classification of epilepsies. This is a prospective study of 676 children with new onset seizures initiated on antiseizure medication. Patients were monitored for the occurrence of DRE according to the ILAE criteria and were categorized into one of four epilepsy groups: self-limited focal epilepsies (SeLFEs), genetic generalized epilepsies (GGEs), developmental epileptic encephalopathies (DEEs), and focal epilepsies. Cox regression analysis was performed to identify predictors of DRE within each epilepsy group. Overall, 29.3% of children were classified as having DRE, with the highest incidence observed among children diagnosed with DEEs (77.7%), followed by focal epilepsies (31.5%). Across the entire cohort, predictors of DRE included the presence of an epileptogenic lesion, a higher pretreatment number of seizures, experiencing multiple seizure types, presence and severity of intellectual and developmental delay, myoclonus, and younger age at epilepsy onset. Within the GGEs, only a younger age at seizure onset and experiencing multiple seizure types predicted DRE. Among focal epilepsies, predictors of DRE included the presence of an epileptogenic lesion, experiencing multiple seizure types, and having a greater number of pretreatment seizures. Within the DEEs, predictors of DRE were the occurrence of tonic seizures. Predictors of DRE within SeLFEs could not be identified. This study indicates that different epilepsy syndromes are associated with distinct predictors of drug resistance. Anticipation of drug resistance within various groups is feasible using accessible clinical variables throughout the disease course."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-EPILEPSY-007",
+   "source": "ILAE",
+   "title": "ILAE definition of drug resistant epilepsy consensus proposal",
+   "year": "2010",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1528-1167.2009.02397.x",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1528-1167.2009.02397.x",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy",
+   "priority": "high",
+   "sha256": "08d85a7d3fad686a2fdad286d66bf2ba474b82da943f03284731c138c6b3ab42",
+   "size_bytes": 1696,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1696,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Drug-resistant epilepsy in Indian children at a tertiary-care public hospital. Drug-resistant epilepsy (DRE), a condition in which seizures persist and seizure freedom is unlikely to be attained with further manipulation of anti-epileptic drugs, occurs in around 20% of children with epilepsy. This study was conducted with the aim to study the profile of Indian children with resistant epilepsy, using the new consensus definition of DRE. All children who had been attending the Pediatric Neurology Clinic regularly for at least 6 months were reviewed between April and September 2015. Children fulfilling the ILAE Commission on Therapeutic Strategies Consensus Proposal definition of DRE were enrolled for the study. After informed consent, the records were reviewed and disease-related data was entered in the study form. The data were analyzed to determine etiological factors and treatment gaps in children with DRE. Fifty children (12 females) with median (range) age of 90 (11-159) months and follow-up of 17.9 (8.5-20) months were enrolled. The mean (standard deviation) age at seizure onset and start of anti-epileptic drugs (AED) were 1.8 (2.11) and 2.1 (2.09) years, respectively. The median (range) number of anti-epileptic drugs that had been tried in these children was 5 (2-9), with drug side effects leading to discontinuation in 8 (16%) patients. Only two patients had tried ketogenic diet; vagal nerve stimulation and epilepsy surgery had not been tried by any family, despite recommendation by the physicians in 7 children. Majority of Indian children with DRE have onset of epilepsy in early infancy, and are infrequently provided access to newer non-pharmacological measures."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-EPILEPSY-008",
+   "source": "ILAE",
+   "title": "Treatment of convulsive status epilepticus ILAE Task Force report",
+   "year": "2020",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1002/epi4.12384",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1002/epi4.12384",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy",
+   "priority": "high",
+   "sha256": "82a27fd24e9f50a2a1d524ff63ea80f3fffa5dc6a0c8e165019fe9beb6764d0a",
+   "size_bytes": 2356,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2356,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Evolution of the European Medicines Agency clinical guidelines for epilepsy drug development between 2010 and 2025: A comparative analysis by the ILAE Task Force on Regulatory Affairs. The latest European Medicines Agency (EMA) guideline on the clinical investigation of medicines to treat epileptic disorders was adopted by the EMA Committee for Medicinal Products for Human Use in 2025. We compared this guideline with the previous version (2010), highlighting areas where significant revisions were introduced. The 2025 and 2010 versions of the guideline were systematically analyzed to identify significant modifications. The latest EMA guideline incorporated terminology from the 2017 International League Against Epilepsy (ILAE) classification of seizures and epilepsy and the 2022 classification of syndromes and replaced the older term \"antiepileptic drug (AED)\" with \"antiseizure medication (ASM).\" Recommendations for add-on studies in common epilepsies have remained substantially unchanged, the main revision being the acceptability of the time-to-event design also for confirmatory trials, provided it is not the only design in the clinical development plan. A major novelty is the feasibility of extrapolating data from add-on trials to the monotherapy indication, provided specific conditions are met. Guidance on pediatric ASM development has been expanded, addressing extrapolation of efficacy from data in adults and older children and options for studies in developmental and epileptic encephalopathies and other rare epilepsies. Compared with the previous guideline, greater emphasis is placed on nonseizure outcomes, including functional, quality of life, and patient-reported outcomes. Two new sections have been introduced, addressing studies in neonates and clinical trials in status epilepticus and other seizure emergencies. Options for innovative designs, including registry-based studies, are also discussed in situations where randomized controlled trials are unfeasible. The updated guideline reflects the changing scenario in epilepsy treatment development, with a greater focus on pediatric epilepsies, rare epilepsies, and other indications with high unmet needs. The updates also reflect the contribution during the consultation process by a wide range of stakeholders, including the ILAE Task Force on Regulatory Affairs."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-EPILEPSY-009",
+   "source": "ILAE",
+   "title": "ILAE guideline on management of women with epilepsy",
+   "year": "2019",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.16395",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.16395",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy",
+   "priority": "high",
+   "sha256": "a859eb396b1fd2103fad7f135eedfa14eaeaf39147ff305eb0c72340c9bbb267",
+   "size_bytes": 743,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 743,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:48Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ILAE guideline on management of women with epilepsy Source: ILAE Year: 2019 Domain: neurology_epilepsy License: ILAE Available at: https://onlinelibrary.wiley.com/doi/10.1111/epi.16395 This is a citation reference for the ILAE guideline 'ILAE guideline on management of women with epilepsy' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_epilepsy. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-EPILEPSY-010",
+   "source": "ILAE",
+   "title": "ILAE consensus statement on antiseizure medication monitoring",
+   "year": "2008",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1528-1167.2008.01561.x",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1528-1167.2008.01561.x",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy",
+   "priority": "medium",
+   "sha256": "2a7528a219f2bfbcb5f37330cf258363d3b29e015bb0b5db80418dff42bbef05",
+   "size_bytes": 1276,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1276,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Importance of access to epilepsy monitoring units during the COVID-19 pandemic: Consensus statement of the International League against epilepsy and the International Federation of Clinical Neurophysiology. Restructuring of healthcare services during the COVID-19 pandemic has led to lockdown of Epilepsy Monitoring Units (EMUs) in many hospitals. The ad-hoc taskforce of the International League Against Epilepsy (ILAE) and the International Federation of Clinical Neurophysiology (IFCN) highlights the detrimental effect of postponing video-EEG monitoring of patients with epilepsy and other paroxysmal events. The taskforce calls for action to continue functioning of Epilepsy Monitoring Units during emergency situations, such as the COVID-19 pandemic. Long-term video-EEG monitoring is an essential diagnostic service. Access to video-EEG monitoring of the patients in the EMUs must be given high priority. Patients should be screened for COVID-19, before admission, according to the local regulations. Local policies for COVID-19 infection control should be adhered to during the video-EEG monitoring. In cases of differential diagnosis where reduction of antiseizure medication is not required, consider home video-EEG monitoring as an alternative in selected patients."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-EPILEPSY-011",
+   "source": "ILAE",
+   "title": "Updated ILAE evidence review of antiseizure medication efficacy",
+   "year": "2018",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.13970",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.13970",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy",
+   "priority": "high",
+   "sha256": "d70ce4aa80ca01de210962960dbd834a3d3412bd2fff69a8b087b28568e918f5",
+   "size_bytes": 3956,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3953,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Evidence of Sex-Related Pharmacodynamic Differences in Photosensitive Epilepsy Treated with Valproate: Findings from a Retrospective, Observational, Single-Center, Within-Patient, Cohort Study. Sexual dimorphism in drug efficacy, beyond pharmacokinetics (PK), remains underexplored. Significant sex differences exist in drug metabolism and adverse events, highlighting the need for personalized medicine. The objective of our study was to assess whether there are sex differences in the pharmacodynamic (PD) response to valproic acid (VPA) in photosensitive epilepsy, focusing on electroencephalographic (EEG) biomarkers (e.g., photoparoxysmal response [PPR] raw data and transformed PPR data, the standardized photosensitivity range [SPR]) that cannot be attributed to pharmacokinetics alone. On the basis of some exploratory published evidence plus our own clinical observations of VPA treatment in patients with epilepsy plus photosensitivity over time, we hypothesized that an EEG pharmacodynamic difference might exist between females and males. We conducted a retrospective, observational, single-center, within-patient EEG cohort study conducted on antiseizure medicine (ASM)-naïve photosensitive individuals before and after VPA treatment (nonrandomized). The data we reviewed had been collected from a referral hospital in the Netherlands from 1990 to 2000. Changes in EEG data, including raw PPR data (transformed into SPR), were analyzed before and after VPA therapy in 48 patients, including 27 females and 21 males, ranging in age from 8 to 50 years old for the entire cohort. Co-primary outcomes included a between-sex comparison in the distribution of within-patient SPR changes from pre-VPA to steady-state VPA therapy, and complete PPR elimination on EEG. Secondary outcomes included the comparison of percentage of males and females meaningfully responding to VPA across SPR change categories, VPA dose, potential impact of plasma [VPA] concentrations on SPR changes, and associaton of patient age with SPR values. Statistical analyses included univariate linear regression models, chi-squared tests, non-parametric Wilcoxon-Mann-Whitney tests, and Fisher's exact tests. Our first co-primary outcome revealed a statistically significant difference in the distribution of within-patient SPR changes from pre-VPA to steady-state VPA therapy. Males experienced a significantly greater reduction in SPR compared with females. The mean decrease in SPR was -7.0 ± 2.6 in males only versus -3.9 ± 3.3 in females only (p = 0.0018). The next co-primary outcome, the percent of patients with complete PPR elimination, or a SPR value = 0 on second EEG, was observed in ten (47.6%) males compared with four (14.8%) females, a 3.2-fold difference (p = 0.0237). One secondary outcome, the percentage of males with a VPA clinically meaningful to optimal response was 1.93-fold greater than females, at 100:51.8%, respectively (p < 0.0001). Between-sex VPA total daily milligram dose did not differ. Plasma [VPA] concentrations, although nearly twice as high in females, were not statistically different between sexes and [VPA] did not correlate with SPR changes in females. In our mixed-age population of pediatric, adolescent, and younger adults, significant sex differences were observed in the response of the PD EEG biomarkers, the PPR and SPR, to VPA for both primary outcomes. Males showed both a statistically greater reduction in EEG SPR and a statistically higher percent elimination of PPR on EEG with chronic VPA treatment compared with females. The percent of males having a clinically meaningful EEG SPR response to VPA, a secondary outcome, was almost two-fold greater for males compared with females. These findings emphasize the importance of considering sex in treatment planning and suggest that inherent biological differences may influence drug efficacy, advocating for further research to enhance personalized medical strategies."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-EPILEPSY-012",
+   "source": "ILAE",
+   "title": "Definition and classification of status epilepticus ILAE Task Force",
+   "year": "2015",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.13121",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.13121",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy",
+   "priority": "high",
+   "sha256": "d472f90914db0db011662a248aab04599fccba3120c92e248a47a519ff4ce44b",
+   "size_bytes": 3156,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 3154,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:51Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Defining neonatal status epilepticus: A scoping review from the ILAE neonatal task force. To review the available literature concerning the definition of neonatal status epilepticus (SE) and/or seizure burden. The International League Against Epilepsy Neonatal Task Force performed a scoping review of the definitions of neonatal SE. Following a systematic literature review, articles were screened and data were abstracted regarding: (1) article characteristics (author identification, publication year, journal name, digital object identifier, title, objective, and study design); (2) cohort characteristics (sample size, gestational age, seizure etiology); (3) definition of SE and/or seizure burden; and (4) the method used to identify and classify SE, including routine EEG (EEG), continuous EEG monitoring (cEEG), amplitude-integrated EEG (aEEG), or clinical features. The scoping review yielded 44 articles containing a definition of neonatal SE. Studies mainly included infants with hypoxic-ischemic encephalopathy or neonates considered at risk for seizures. SE identification and classification most often relied on cEEG. The majority of studies based the definition of SE on seizure duration, including summed duration of seizures comprising ≥50% of any 1-h epoch, recurrent seizures for >50% of the total recording time, or either electrographic seizures lasting >30 min and/or repeated electrographic seizures totaling >50% in any 1-h period. Seizure burden was reported in 20 studies, and the most commonly used approach assessed total seizure burden, defined as total duration of EEG seizures in minutes. Sixteen studies assessed the relationship between seizure burden and outcomes, and most identified a significant association between higher seizure burden and unfavorable outcomes. This scoping review demonstrates a substantial variation in neonatal SE definitions across the literature. The most common definitions were based around a 30-min seizure duration criterion, but evidence was insufficient to support that 30 min was a cutoff defining prolonged seizures or that seizures exceeding this burden were more likely to be pharmacoresistant or associated with worse outcomes. As a next step, the Neonatal Task Force intends to develop a standardized approach to assessing and describing neonatal seizure burden and defining neonatal SE. Prolonged seizures are a neurologic emergency, if untreated, can lead to permanent injury or death. In adults and children, seizures lasting longer than 30 min are believed to cause brain damage. However, it is not clear if this definition can be applied to neonates. The International League Against Epilepsy Neonatal Taskforce performed a scoping literature review which identified 44 articles containing a definition of neonatal status epilepticus. In this article, the authors reviewed the current used definitions for prolonged seizures in neonates to establish a relationship between seizure duration and neurological outcome. As a next step, the Neonatal Task Force intends to develop a standardized approach to assessing and describing neonatal seizure burden and defining neonatal SE."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-NEONATAL-001",
+   "source": "ILAE",
+   "title": "ILAE classification of neonatal seizures with definition criteria 2021",
+   "year": "2021",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.16815",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.16815",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy_pediatric",
+   "priority": "high",
+   "sha256": "b741023512336e31c728a50f01ff135e0fdba836b54ea0a585ce24d561b6c020",
+   "size_bytes": 801,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 801,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ILAE classification of neonatal seizures with definition criteria 2021 Source: ILAE Year: 2021 Domain: neurology_epilepsy_pediatric License: ILAE Available at: https://onlinelibrary.wiley.com/doi/10.1111/epi.16815 This is a citation reference for the ILAE guideline 'ILAE classification of neonatal seizures with definition criteria 2021' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: neurology_epilepsy_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ILAE-IMAGING-001",
+   "source": "ILAE",
+   "title": "ILAE neuroimaging task force recommendations for evaluation of epilepsy",
+   "year": "2019",
+   "page_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.16414",
+   "pdf_url": "https://onlinelibrary.wiley.com/doi/10.1111/epi.16414",
+   "license": "ILAE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "neurology_epilepsy",
+   "priority": "medium",
+   "sha256": "294a6effab53da11b76a39a5d6fcfc6e32a327fdd6fac6f73e480ddc924b8929",
+   "size_bytes": 2704,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2704,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Recommendations for structural magnetic resonance imaging in infants with first afebrile seizure or new onset epilepsy: Evidence-based recommendations from the ILAE Neuroimaging Task Force. Infants aged 1-24 months with new onset epilepsy frequently present with structural brain abnormalities, yet no updated evidence-based magnetic resonance imaging (MRI) guidelines exist for this population. The International League Against Epilepsy (ILAE) Neuroimaging Task Force developed evidence-based recommendations for structural brain MRI in infants with a first afebrile seizure or new onset epilepsy. A multidisciplinary panel defined three PICO (patients, intervention, comparison group, outcome under consideration) questions, conducted a systematic review (PROSPERO [Prospective Register of Systematic Reviews] CRD42024592653), and reported the results in line with PRISMA (Preferred Reporting Items for Systematic Reviews and Meta-Analyses) 2020 guidelines. Risk of bias was evaluated using the JBI (Joanna Briggs Institute) checklist. GRADE (Grading of Recommendations, Assessment, Development, and Evaluation) methodology was used to assess certainty of evidence and formulate recommendations for the following: (1) the effectiveness of MRI in identifying underlying etiologies, (2) clinical predictors of MRI abnormalities, and (3) MRI protocols. Seventeen studies (n = 1209) were included. Among 753 infants who underwent MRI, 438 (58.2%) had abnormal findings. Despite heterogeneity in MRI protocols and reporting, the evidence supports the utility of MRI in this population. Specific clinical features (focal seizure semiology, abnormal neurological examination, seizure duration > 5 min, focal electroencephalographic abnormalities, developmental delay, and perinatal complications) were associated with abnormal MRI findings, although methodological limitations reduce certainty. Only six studies provided data on MRI sequences; however, none reported findings specifically in relation to the diagnostic accuracy or yield of individual protocols, precluding the development of evidence-based recommendations on MRI protocol selection. MRI is conditionally recommended in all infants with a first afebrile seizure or new onset epilepsy. MRI could be prioritized in those with specific clinical features indicative of higher likelihood of abnormal findings. Recommendations are based on very low certainty of evidence. These are the first ILAE-endorsed, evidence-based recommendations for MRI in infants with first afebrile seizure or new onset epilepsy. Further prospective studies with standardized protocols are needed to refine MRI indications and optimize diagnostic yield in this age group."
     }
    ]
   }

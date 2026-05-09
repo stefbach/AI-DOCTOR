@@ -1,7 +1,7 @@
 {
  "source": "VigiBase",
  "generated_at": "2026-05-09T13:51:13Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "VIGIBASE-001",
@@ -102,6 +102,31 @@
     {
      "chunk_index": 8,
      "content": "years of multi-sectoral polio eradication efforts, eradicated WPV in 2020. Nigeria has one of the highest burdens of VDPV from genetic mutation of the type 2 component of OPV, which has caused transmission of cVDPV2, particularly in communities with low immunity and poor immunization coverage [ ]. The persistence of cVDPV2 is aggravated by vaccine hesitancy caused by cultural and religious influences, insecurity and poor health infrastructure. Despite the public health success of vaccination generally, building public confidence in vaccines and improving systems to monitor safety while maintaining data security and patient privacy are essential [ ]. This review has identified progress made through mass immunization campaigns, integration of polio intervention services into the broader health system, targeted community engagement and international collaboration to facilitate polio eradication strategies. However, multiple reasons have been identified for low or delayed polio vaccine uptake and the resulting challenges with global polio eradication, which adversely impact the control and eradication of infectious and communicable diseases such as polio [ , , ]. These challenges involve a complex interplay of factors, including misconceptions and misunderstandings about the polio vaccine; lack of access to healthcare services; a boycott in Northern Nigeria and vaccine hesitancy; illiteracy; areas in conflict, such as the area affected by the Boko Haram insurgency; challenges in reaching underserved communities; an ineffective vaccine service delivery system; deficits in surveillance and monitoring systems; low motivation among health workers; poor resource management and failures in the cold-chain system that have affected the delivery of vaccines in Nigeria; and, more recently, the impact of the COVID-19 pandemic, which disrupted global polio vaccination campaigns [ , , , , , , ]. These experiences emphasize the need for healthcare system strengthening [ ] and a sustained and funded focus on quality driven healthcare [ ]. Also needed is a parallel focus on long-term workforce planning [ ] and improved coordination at the national level among regulatory authorities and the department of health. Results from this review have important implications for public health practice and policy, both in Nigeria and globally. The recommendations and research priorities that have been suggested offer strategic advice for policymakers, researchers, public health professionals and clinical practitioners with respect to addressing the identified gaps and challenges. If implemented, the advice arising from this study would enhance the opportunities for Nigeria to sustain its WPD-free status and eradicate all variant forms of polio."
+    }
+   ]
+  },
+  {
+   "id": "VIGIBASE-002",
+   "source": "VigiBase",
+   "title": "WHO Uppsala Monitoring Centre Uppsala Reports newsletter",
+   "year": "2024",
+   "page_url": "https://who-umc.org/uppsala-reports/",
+   "pdf_url": "https://who-umc.org/uppsala-reports/",
+   "license": "UMC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacovigilance",
+   "priority": "high",
+   "sha256": "94689fc31d5ab3ad9ab548d6c9911ad9b1d0346906c854ed21175ea5f5beac69",
+   "size_bytes": 1739,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1739,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Cutaneous drug reaction case reports: from the world literature. Skin disorders are the most common adverse reactions attributed to drugs. Any skin disorder can be imitated, induced or aggravated by drugs. To help you keep up-to-date with the very latest skin reactions occurring with both new and established drugs, this section of the journal brings you information selected from the adverse drug reaction alerting service Reactions Weekly. Reactions Weekly is the complete drug safety alerting service and summarizes information selected from over 1600 biomedical journals. This newsletter is produced by Adis International and is available in a variety of formats. Please contact your nearest Adis office for subscription details. The use of tradenames, identified by ['~'] or the use of a registered ((R)) or trade mark ( trade mark ), is for product identification purposes only and does not imply endorsement. The following case reports are selected from the very latest to be published in the world dermatology literature. Any claim of a first report has been verified by a search of AdisBase (a proprietary database of Adis International) and Medline. In addition, the World Health Organization (WHO) Adverse Drug Reactions database is also searched. This database, maintained by the Uppsala Monitoring Centre in Sweden, is the largest and most comprehensive adverse drug reaction source in the world, with information obtained from National Centers of 65 affiliate countries. Each case report is assessed for seriousness using the FDA MedWatch definition of serious (patient outcome is: death; life-threatening; hospitalization; disability; congenital anomaly; or requires intervention to prevent permanent impairment or damage)."
     }
    ]
   }

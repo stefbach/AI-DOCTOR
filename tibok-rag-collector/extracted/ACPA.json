@@ -1,7 +1,7 @@
 {
  "source": "ACPA",
  "generated_at": "2026-05-09T13:31:54Z",
- "total_documents": 1,
+ "total_documents": 3,
  "documents": [
   {
    "id": "ACPA-CLEFT-001",
@@ -45,6 +45,56 @@
     {
      "chunk_index": 5,
      "content": "workup. The temporal association of hemivertebra and other anomalies is unclear: hemivertebra may be the initial finding or secondary following additional evaluation. Another limitation of our study was that other syndromes that may be associated with non-isolated hemivertebra have been excluded because they were not captured within our search terms and inclusion criteria, such as Pfeiffer syndrome. , , The 29 genes identified within the HPO query that were not picked up by our search were missed most likely due to age exclusion criteria or because age was not specified in potential cases ( ). Cases of hemivertebra diagnosed in the fetal, neonatal, and infant periods may be more often published when associated with congenital anomalies. Finally, data was not reported uniformly in every case report or series. Since the objective of our study is to describe the cytogenetic, single gene and syndromic etiologies of non-isolated hemivertebra, we had to use case reports and small case series especially as they described the prenatal and the postnatal phenotypes in depth. Therefore, our study cannot determine the detection rate of abnormal cytogenetics or single gene disorders in non-isolated hemivertebra. Single case reports of non-isolated hemivertebra associated with abnormal genetic results are more likely to be reported resulting in publication bias. Large series are the appropriate studies that should be used if we were to determine the detection rate of genetic aberrations in non-isolated hemivertebra. The large case series in presented their data in aggregate and thus we did not have individual data for each case. We recommend a detailed ultrasound to evaluate fetal anatomy once hemivertebra is visualized on prenatal ultrasound given the association of hemivertebra with malformations in multiple organ systems. We recommend a fetal echocardiogram due to the considerable association of hemivertebra with congenital heart disease in our review. In addition, we recommend neurosonography for improved central nervous system prenatal phenotype evaluation. Also, we recommend fetal MRI if available, as this may provide higher-resolution prenatal phenotyping since multiple organ systems are likely to be affected with fetal abnormalities. Serial growth ultrasounds are recommended given the known association between fetal growth restriction and genetic syndromes. If there are no additional complicating factors, we suggest standard obstetric management for labor and delivery. Prognosis for future pregnancies may include an increased risk of neural tube defects in future siblings. In patients diagnosed with multiple vertebral anomalies, there may be a 3%–7% recurrence risk for neural tube defects, and a 2%–3% recurrence risk for another child with multiple vertebral anomalies. Genetic counseling and prenatal ultrasound surveillance for subsequent pregnancies is recommended. Cytogenetic analysis should be offered especially when multiple anomalies are present. We suggest starting with a karyotype or single nucleotide polymorphism (SNP) chromosomal microarray when hemivertebra is identified, as multiple cases of chromosomal disorders with mosaicism are described in our systematic review. Exome sequencing should be the next line of investigation given its ability for molecular diagnosis for the diverse spectrum of single gene disorders associated with non-isolated hemivertebra. Supplementary Material Table S1 Table S2 Table S3 Tabe S4 Table S5"
+    }
+   ]
+  },
+  {
+   "id": "ACPA-CLEFT-002",
+   "source": "ACPA",
+   "title": "ACPA standards for cleft and craniofacial team approval",
+   "year": "2020",
+   "page_url": "https://acpa-cpf.org/team-care/standardscat/",
+   "pdf_url": "https://acpa-cpf.org/team-care/standardscat/",
+   "license": "ACPA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "maxillofacial_pediatric",
+   "priority": "high",
+   "sha256": "48aec962df7a6bda04061dc5eeca0c927ccbd610bd823d588a19eac6c2907fb3",
+   "size_bytes": 2432,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2432,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Orthodontic Care Delivery Across ACPA Teams in the US. American Cleft Palate and Craniofacial Association (ACPA) teams consist of trained professionals collaborating in an interdisciplinary approach to optimize outcomes for patients with cleft palate. Orthodontic care is essential to correct dental malocclusion, guide maxillary growth, enhance surgical outcomes, and improve oral function and aesthetics. Although ACPA approval requires an orthodontist in the multidisciplinary team, the methods of delivering orthodontic care remain unclear. This project aims to elucidate how orthodontic care is integrated into ACPA teams. A list of ACPA teams (n = 204) and reported orthodontists (n = 374) was obtained from the ACPA directory. Teams outside the US. and duplicate listings were excluded. Each team's website was reviewed to identify orthodontists, care delivery types (university/hospital, private practice, mixed, not listed), and orthodontic craniofacial fellowship status. Team geographic distribution was compared across the 4 US Centers for Disease Control and Prevention (CDC) Census regions: West, Midwest, South, and Northeast. Among 184 ACPA-approved teams, only 46.7% listed an orthodontist on their public websites, despite guidelines requiring orthodontic inclusion. The most common care model was university/hospital-based (25%), followed by private practice (18.5%), with variation across teams (P < 0.001). Only 16.3% of teams included a craniofacial fellowship-trained orthodontist, whereas over half did not report training status. Private practice teams were less likely to include a fellowship-trained orthodontist compared to university/hospital-based teams (OR, 0.086; P < 0.001). Most teams had 1 to 2 orthodontists (mean, 1.84), with no difference by region or care model. Regionally, the South had the highest proportion of teams (33.2%) and orthodontists (33.2%), whereas the Northeast had the fewest. Fellowship-trained orthodontists were most common in the South but showed no regional difference (P = 0.989). Orthodontists are inconsistently represented across ACPA teams with limited public reporting and low rates of fellowship training. Variation in care delivery models and regional access highlights structural gaps in interdisciplinary cleft care. Standardizing orthodontic integration and increasing fellowship training may improve the consistency and equity of craniofacial care nationwide."
+    }
+   ]
+  },
+  {
+   "id": "ACPA-CLEFTTIME-001",
+   "source": "ACPA",
+   "title": "ACPA timeline for management of cleft lip palate from birth to adulthood",
+   "year": "2018",
+   "page_url": "https://acpa-cpf.org/timeline",
+   "pdf_url": "https://acpa-cpf.org/timeline",
+   "license": "ACPA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "maxillofacial_pediatric",
+   "priority": "high",
+   "sha256": "e3891ffbf0da51216a39ff233ce4c922191318ee788f99d34a384b8f205179ed",
+   "size_bytes": 771,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 771,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACPA timeline for management of cleft lip palate from birth to adulthood Source: ACPA Year: 2018 Domain: maxillofacial_pediatric License: ACPA Available at: https://acpa-cpf.org/timeline This is a citation reference for the ACPA guideline 'ACPA timeline for management of cleft lip palate from birth to adulthood' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: maxillofacial_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,0 +1,32 @@
+{
+ "source": "NDMS",
+ "generated_at": "2026-05-09T19:12:46Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "NDMS-START-001",
+   "source": "NDMS",
+   "title": "NDMS START SALT triage system mass casualty triage",
+   "year": "2020",
+   "page_url": "https://www.phe.gov/preparedness/responders/ndms/",
+   "pdf_url": "https://www.phe.gov/preparedness/responders/ndms/",
+   "license": "NDMS",
+   "commercial_use": "allowed",
+   "clinical_domain": "emergency_trauma",
+   "priority": "medium",
+   "sha256": "611dc2d16313e4a01bacf3f10365fc5945666eba910b21a4c253f3e01ffa75e6",
+   "size_bytes": 733,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 733,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NDMS START SALT triage system mass casualty triage Source: NDMS Year: 2020 Domain: emergency_trauma License: NDMS Available at: https://www.phe.gov/preparedness/responders/ndms/ This is a citation reference for the NDMS guideline 'NDMS START SALT triage system mass casualty triage' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: emergency_trauma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

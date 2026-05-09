@@ -1,7 +1,7 @@
 {
  "source": "ECCO",
  "generated_at": "2026-05-09T10:01:47Z",
- "total_documents": 11,
+ "total_documents": 12,
  "documents": [
   {
    "id": "ECCO-CD-001",
@@ -487,6 +487,31 @@
     {
      "chunk_index": 5,
      "content": "assessment and support, particularly during disease flares, in the presence of disease complications, EEN treatment, and after surgery. There is a growing interest in and evidence integrating psychosocial HCPs in MCTs as the bidirectional relationship between mental health and IBD is increasingly understood. However, poor availability of mental health professionals, limited insurance or out-of-pocket costs, and a hesitancy by persons with IBD to see these psychosocial providers due to stigma surrounding mental health disorders remain barriers for fully integrated mental health care. , , Limitations We restricted our search to studies published in English, potentially excluding studies published in other languages describing innovative models of IBD care in non-English-speaking countries. Further, most articles in this review originated from tertiary or quaternary academic centres in high-income countries; the experiences and contexts from low- and middle-income countries and community gastroenterologists are not accounted for. Our findings may lack generalizability to countries with different healthcare systems and remuneration practices. Due to the volume of articles within the scoping review, data from each article were extracted by a single reviewer, but a subset of extracted studies were double checked to confirm accuracy and consistency. The wide breadth of the scoping review question and inclusion criteria yielded many heterogeneous articles. The literature searched was limited to peer-reviewed articles; information from the grey literature may have been missed. Finally, there is no rating of the quality of evidence in a scoping review according to the JBI framework, and therefore studies of lower methodological quality may have been considered alongside those of high quality. Implications for practice and future research Within the Canadian healthcare context, access to multidisciplinary teams and collaborative care approaches are not universal. While full uptake of a comprehensive value-based model of care may not be feasible in all geographic locations, integrating key components (eg, rapid access clinics, advice lines, remote monitoring, and remote healthcare) or integrating allied HCPs could enhance IBD care delivery. Our review identified several knowledge gaps that should be addressed through ongoing research. The feasibility and cost-effectiveness of integrating models of care in resource-limited settings and in community gastroenterology practices should be examined further. Models of care in equity deserving groups and the potential outcomes, barriers and facilitators to care should also be explored. The role and impact of primary HCPs in outpatient IBD care are limited and warrant further research. Some barriers to models of care delivery were described in the literature, but drawbacks or negative outcomes of using certain models of care were not identified. Lastly, describing the current IBD care landscape in Canada, including identifying any gaps in care and associated outcomes could be helpful to highlight areas for improvement. Conclusions Several IBD care models have been proposed; the value-based model of care focused on meeting the biopsychosocial needs of people living with IBD was the most comprehensive. Gastroenterologists and IBD nurses were the primary HCPs. Allied HCPs play critical roles, reducing workload for gastroenterologists and nurses, improving patient care and quality of life, decreasing disease activity and healthcare costs. Combining in-person and remote healthcare appointments and monitoring can increase access to care and facilitate a sustainable healthcare system that meets the individual needs of persons living with IBD. Implementation of these comprehensive models of care into IBD clinical practice is essential in managing the growing number of people living with IBD. Supplementary Material gwaf031_Supplementary_Data"
+    }
+   ]
+  },
+  {
+   "id": "ECCO-POUCH-001",
+   "source": "ECCO",
+   "title": "ECCO Topical Review on Ileoanal Pouch Disorders",
+   "year": "2022",
+   "page_url": "https://academic.oup.com/ecco-jcc/article/16/3/333/6394895",
+   "pdf_url": "https://academic.oup.com/ecco-jcc/article/16/3/333/6394895",
+   "license": "ECCO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gastro_ibd",
+   "priority": "high",
+   "sha256": "cc94fce159b92f4edffadd51a70eef7f26aea3229505ecfdefcc3d403bbf2ec1",
+   "size_bytes": 724,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 724,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:03Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ECCO Topical Review on Ileoanal Pouch Disorders Source: ECCO Year: 2022 Domain: gastro_ibd License: ECCO Available at: https://academic.oup.com/ecco-jcc/article/16/3/333/6394895 This is a citation reference for the ECCO guideline 'ECCO Topical Review on Ileoanal Pouch Disorders' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gastro_ibd. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

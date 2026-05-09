@@ -1,7 +1,7 @@
 {
  "source": "ACSM",
  "generated_at": "2026-05-02T17:08:04Z",
- "total_documents": 11,
+ "total_documents": 15,
  "documents": [
   {
    "id": "ACSM-001",
@@ -619,6 +619,106 @@
     {
      "chunk_index": 7,
      "content": "to data quality issues in men, precluding sex-specific comparisons of this technology. Future studies with larger sample sizes and improved motion sensor protocols across both sexes would strengthen these findings. Daily TEE decreased with NYHA class. This result confirms previous studies and is in line with a previous study from our team reporting a decrease in TEE with NYHA class, associated with a decrease in autonomic nervous system activity. This trend is consistent with the decrease in peak V̇O 2 and with the relative sedentarity of this population reported in this study (9.4% of TEE spent in activities > 3 METs). As the severity of the condition definitely plays a major role in daily living activities, regular physical effort is recommended in this population, as the beneficial effects of an increase, even modest, in daily PA in secondary prevention appear essential. TEE was higher in men and the pattern of activities was different between women and men, with women being globally more active but spending more time and energy in low-intensity activities as compared to men. This is consistent with the differences in peak V̇O 2 and body composition between men and women ( ). As formal intensive exercise rehabilitation programmes reduce rehospitalization rate and increase survival, , moderate-to-intensive activities should be integrated into daily living activities in order to increase total energy expenditure. Providing the patient a complete quantified picture of his daily activities seems, therefore, appropriate. Regarding the results of this study, both the questionnaire and the motion sensor are appropriate to address this issue, but improvements in the individual quantification of TEE and PAEE should be performed. Conclusion This study showed that, on average the DAQIHF showed a fair validity for estimating TEE across all activity domains in a population of patients with CHF. It also highlighted individual variations in the estimation of TEE, both with questionnaire and motion sensor, errors that should not be ignored in further analyses using these tools. Regarding its practical value, easiness of use, low cost, validity and ability to explore all domains of activity at various intensities, the DAQIHF seems a potentially useful tool for investigating PA and health-related issues in patients with CHF, particularly in large studies and/or clinical settings."
+    }
+   ]
+  },
+  {
+   "id": "ACSM-EXERCISE-001",
+   "source": "ACSM",
+   "title": "ACSM Guidelines for Exercise Testing and Prescription 11th Edition",
+   "year": "2021",
+   "page_url": "https://www.acsm.org/education-resources/books/exercise-testing-prescription",
+   "pdf_url": "https://www.acsm.org/education-resources/books/exercise-testing-prescription",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_exercise_rx",
+   "priority": "high",
+   "sha256": "b8ff67382f806014858681221e21580eb3830d35740b59928c49834cfa958420",
+   "size_bytes": 1735,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1735,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:06Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "[PHYSICAL ACTIVITY DURING PREGNANCY AND AFTER BIRTH]. Physical activity (PA) decreases morbidity, improves quality of life and elongates life span. PA during pregnancy is safe and decreases complications. Physical inactivity during pregnancy is an independent risk factor for maternal weight gain and complications. Pregnancy is a golden opportunity to promote a healthy lifestyle. This article aims to review the latest recommendations regarding PA in pregnancy. In this article we focused on the following: The joint guidelines of the Society of Obstetricians and Gynaecologists of Canada's (SOGC) and the Canadian Society for Exercise Physiology (CSEP), the American College of Obstetricians and Gynecologists (ACOG) committee opinion, and the ACSM's (American College of Sports Medicine) Guidelines for Exercise Testing and Prescription, the 11th Edition published in 2019, 2020 and 2022 respectively. PA during pregnancy is safe and essential. Every pregnant woman without contraindications should perform 150 weekly minutes of aerobic exercise and resistance training. A weekly goal of 150 medium intensity aerobic exercise minutes spread over at least 3 separate days combined with resistance training is recommended for every pregnant woman, including women who were inactive prior to the pregnancy, those diagnosed with gestational diabetes and overweight or obese women. Pregnant women with absolute contraindication can continue to perform their daily activities but avoid more intense activities, those with relative contraindications should discuss the advantages and risks of PA with their attending physician. After birth, women can return to PA gradually depending on the mode of delivery and complications encountered."
+    }
+   ]
+  },
+  {
+   "id": "ACSM-HEAT-001",
+   "source": "ACSM",
+   "title": "ACSM Position Stand Exertional Heat Illness",
+   "year": "2021",
+   "page_url": "https://journals.lww.com/acsm-msse/pages/default.aspx",
+   "pdf_url": "https://journals.lww.com/acsm-msse/pages/default.aspx",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_exercise_rx",
+   "priority": "high",
+   "sha256": "58c833fc14eb3ea980c7ac24fc89b534f2712a86432fc9e9fe5bdf63e8c24307",
+   "size_bytes": 734,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 734,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACSM Position Stand Exertional Heat Illness Source: ACSM Year: 2021 Domain: sports_exercise_rx License: Proprietary Available at: https://journals.lww.com/acsm-msse/pages/default.aspx This is a citation reference for the ACSM guideline 'ACSM Position Stand Exertional Heat Illness' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_exercise_rx. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACSM-HYDRO-001",
+   "source": "ACSM",
+   "title": "ACSM Position Stand on Exercise and Fluid Replacement",
+   "year": "2020",
+   "page_url": "https://journals.lww.com/acsm-msse/pages/default.aspx",
+   "pdf_url": "https://journals.lww.com/acsm-msse/pages/default.aspx",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_nutrition",
+   "priority": "high",
+   "sha256": "630e80f4ca703310e8c3f94a11617eba1e24f628fde4c4a839764a22b33a65bf",
+   "size_bytes": 750,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 750,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:07Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACSM Position Stand on Exercise and Fluid Replacement Source: ACSM Year: 2020 Domain: sports_nutrition License: Proprietary Available at: https://journals.lww.com/acsm-msse/pages/default.aspx This is a citation reference for the ACSM guideline 'ACSM Position Stand on Exercise and Fluid Replacement' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_nutrition. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACSM-PEDS-001",
+   "source": "ACSM",
+   "title": "ACSM Position Stand Resistance Training in Children and Adolescents",
+   "year": "2019",
+   "page_url": "https://journals.lww.com/acsm-msse/pages/default.aspx",
+   "pdf_url": "https://journals.lww.com/acsm-msse/pages/default.aspx",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "sports_pediatric",
+   "priority": "high",
+   "sha256": "0684e1258ae3415fed15374c4838752cd878a2b2f97800fe58763f18d721ae52",
+   "size_bytes": 778,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 778,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:08Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACSM Position Stand Resistance Training in Children and Adolescents Source: ACSM Year: 2019 Domain: sports_pediatric License: Proprietary Available at: https://journals.lww.com/acsm-msse/pages/default.aspx This is a citation reference for the ACSM guideline 'ACSM Position Stand Resistance Training in Children and Adolescents' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: sports_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

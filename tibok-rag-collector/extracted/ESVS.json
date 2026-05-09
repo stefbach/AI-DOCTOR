@@ -1,7 +1,7 @@
 {
  "source": "ESVS",
  "generated_at": "2026-05-02T16:25:35Z",
- "total_documents": 14,
+ "total_documents": 34,
  "documents": [
   {
    "id": "ESVS-001",
@@ -670,6 +670,506 @@
     {
      "chunk_index": 5,
      "content": "potentially imbalanced groups within the subgroup analyses (e.g., TEVAR timing windows) are prone to overinterpretation. These results should be interpreted with caution as exploratory and hypothesis-generating, due to the risk of residual confounding and the potential for Type I errors in small, non-randomized groups. To overcome the limitations of insufficient statistical power for subgroup analyses, future investigations should focus on large-scale, collaborative, and prospectively designed studies, such as multi-center RCTs. Fourth, the generalizability of our results may be limited to the Chinese population and the healthcare system studied. Variations in patient characteristics, access to care, medical therapy protocols, and device availability between regions and countries may influence outcomes. Our findings may provide insights for similar populations, but require validation in diverse international settings before being applied more broadly. Future international collaborative studies are necessary to explore potential regional differences in the management of TBIMH. Fifth, we did not classify adverse events using the Clavien–Dindo system due to the limited number of overall events, making it statistically infeasible to conduct a meaningful comparative analysis of specific severity grades (e.g., Grade III vs Grade IV). This low event rate restricts our ability to draw definitive conclusions regarding the differential severity of complications between the treatment strategies, representing a limitation in our safety profile analysis. Future studies are needed to gather a larger dataset specifically focused on adverse events to investigate differential rates of specific complication types and severity grades for these procedures. Conclusions In conclusion, our findings suggest that TEVAR is associated with improved survival outcomes in patients with TBIMH, including those presenting with severe imaging features, compared to medical management alone. Furthermore, our exploratory analysis cautiously suggests that avoiding TEVAR within the hyperacute phase (≤48 hours) may be associated with an improved prognosis in specific high-risk patient groups. Given the limitations inherent in this retrospective, observational study design, these findings should be interpreted with caution. Our results are hypothesis-generating and require confirmation through future large-scale, prospective randomized controlled trials to inform definitive clinical decision-making and ensure a more tailored and practical approach to TEVAR treatment."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-TAA-001",
+   "source": "ESVS",
+   "title": "ESVS 2024 Clinical practice guidelines on the management of descending thoracic aortic aneurysm",
+   "year": "2024",
+   "page_url": "https://www.ejves.com/article/S1078-5884(24)00141-8/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(24)00141-8/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_aorta",
+   "priority": "high",
+   "sha256": "d2515159f317b38459489485dff746ce5cfd065cb3293cc575b9a0918a16a49c",
+   "size_bytes": 830,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 830,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESVS 2024 Clinical practice guidelines on the management of descending thoracic aortic aneurysm Source: ESVS Year: 2024 Domain: vascular_aorta License: ESVS Available at: https://www.ejves.com/article/S1078-5884(24)00141-8/fulltext This is a citation reference for the ESVS guideline 'ESVS 2024 Clinical practice guidelines on the management of descending thoracic aortic aneurysm' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_aorta. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-DISS-001",
+   "source": "ESVS",
+   "title": "ESVS clinical practice guidelines on aortic dissection",
+   "year": "2017",
+   "page_url": "https://www.ejves.com/article/S1078-5884(16)30547-1/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(16)30547-1/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_aorta",
+   "priority": "high",
+   "sha256": "fd933671b4a13d4ad0e5683f056231a71bc8942b4f24040c102155b0d8bd3f5c",
+   "size_bytes": 1933,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1933,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "European Society for Vascular Surgery (ESVS) 2026 Clinical Practice Guidelines on the Management of Descending Thoracic and Thoraco-Abdominal Aortic Diseases - Editor's Choice. The European Society for Vascular Surgery (ESVS) has developed clinical practice guidelines for the care of patients with descending thoracic and thoraco-abdominal aortic pathologies, in succession to the 2017 version, with the aim of assisting physicians and patients in selecting the best management strategy. The guidelines are based on scientific evidence complemented with expert opinion on the matter. By summarising and evaluating the best available evidence, recommendations for the evaluation and treatment of patients have been formulated. The recommendations are graded according to the ESVS grading system, where the strength (class) of each recommendation is graded from I to III and the level of evidence from A to C. One hundred and twenty-nine recommendations have been issued across the following main topics: (1) acute thoracic aortic syndrome; (2) chronic type B aortic dissection; (3) descending thoracic and thoraco-abdominal aortic aneurysms; (4) ruptured descending thoracic and thoraco-abdominal aortic aneurysms; and (5) blunt thoracic aortic injury. Additional topics include genetic aortopathy, floating thrombus and shaggy aorta, inflammatory aortitis, mycotic aortic aneurysms, coarctation of the aorta, aberrant subclavian artery, and service standards such as surgical volume, imaging, risk assessment, and optimisation. Special considerations include pregnancy, left subclavian artery revascularisation, spinal cord ischaemia, stroke prevention, vascular access, and the patient's perspective. A final chapter addresses unresolved issues. These clinical practice guidelines provide comprehensive, up to date advice to clinicians and patients on the management of descending thoracic and thoraco-abdominal aortic pathologies."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-PAD-001",
+   "source": "ESVS",
+   "title": "ESVS 2024 Clinical practice guidelines on the management of asymptomatic atherosclerotic carotid and vertebral artery disease",
+   "year": "2024",
+   "page_url": "https://www.ejves.com/article/S1078-5884(23)00908-X/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(23)00908-X/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_arterial",
+   "priority": "high",
+   "sha256": "e3fc13d8966ec62f75b7fe52276396e5fd79c3a78b643ac39d392820d0190c3a",
+   "size_bytes": 912,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 912,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESVS 2024 Clinical practice guidelines on the management of asymptomatic atherosclerotic carotid and vertebral artery disease Source: ESVS Year: 2024 Domain: vascular_surgery_arterial License: ESVS Available at: https://www.ejves.com/article/S1078-5884(23)00908-X/fulltext This is a citation reference for the ESVS guideline 'ESVS 2024 Clinical practice guidelines on the management of asymptomatic atherosclerotic carotid and vertebral artery disease' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_surgery_arterial. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-PAD-002",
+   "source": "ESVS",
+   "title": "ESVS 2024 Clinical practice guidelines on the management of atherosclerotic carotid and vertebral artery disease",
+   "year": "2024",
+   "page_url": "https://www.ejves.com/article/S1078-5884(22)00237-2/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(22)00237-2/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_arterial",
+   "priority": "high",
+   "sha256": "70a12fe704a41ac5e65b206efba3923c3d67e9a3cfb7cf56e23f215bca4a3ce6",
+   "size_bytes": 886,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 886,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESVS 2024 Clinical practice guidelines on the management of atherosclerotic carotid and vertebral artery disease Source: ESVS Year: 2024 Domain: vascular_surgery_arterial License: ESVS Available at: https://www.ejves.com/article/S1078-5884(22)00237-2/fulltext This is a citation reference for the ESVS guideline 'ESVS 2024 Clinical practice guidelines on the management of atherosclerotic carotid and vertebral artery disease' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_surgery_arterial. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-CLI-001",
+   "source": "ESVS",
+   "title": "ESVS 2019 Clinical practice guidelines on the management of chronic limb-threatening ischaemia",
+   "year": "2019",
+   "page_url": "https://www.ejves.com/article/S1078-5884(19)30145-3/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(19)30145-3/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_arterial",
+   "priority": "high",
+   "sha256": "5bd81eb6c9e76f97c01950ef59b988b502bcce3e214c1c3b7f9866a0a7aed4e7",
+   "size_bytes": 2335,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2335,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "The intersocietal IWGDF, ESVS, SVS guidelines on peripheral artery disease in people with diabetes mellitus and a foot ulcer. Diabetes related foot complications have become a major cause of morbidity and are implicated in most major and minor amputations globally. Approximately 50% of people with diabetes and a foot ulcer have peripheral artery disease (PAD) and the presence of PAD significantly increases the risk of adverse limb and cardiovascular events. The International Working Group on the Diabetic Foot (IWGDF) has published evidence based guidelines on the management and prevention of diabetes related foot complications since 1999. This guideline is an update of the 2019 IWGDF guideline on the diagnosis, prognosis, and management of peripheral artery disease in people with diabetes mellitus and a foot ulcer. For this updated guideline, the IWGDF, the European Society for Vascular Surgery, and the Society for Vascular Surgery decided to collaborate to develop a consistent suite of recommendations relevant to clinicians in all countries. This guideline is based on three new systematic reviews. Using the Grading of Recommendations, Assessment, Development and Evaluation framework clinically relevant questions were formulated, and the literature was systematically reviewed. After assessing the certainty of the evidence, recommendations were formulated which were weighed against the balance of benefits and harms, patient values, feasibility, acceptability, equity, resources required, and when available, costs. Through this process five recommendations were developed for diagnosing PAD in a person with diabetes, with and without a foot ulcer or gangrene. Five recommendations were developed for prognosis relating to estimating likelihood of healing and amputation outcomes in a person with diabetes and a foot ulcer or gangrene. Fifteen recommendations were developed related to PAD treatment encompassing prioritisation of people for revascularisation, the choice of a procedure and post-surgical care. In addition, the Writing Committee has highlighted key research questions where current evidence is lacking. The Writing Committee believes that following these recommendations will help healthcare professionals to provide better care and will reduce the burden of diabetes related foot complications."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-MES-001",
+   "source": "ESVS",
+   "title": "ESVS 2020 Clinical practice guidelines on the management of chronic mesenteric ischaemia",
+   "year": "2020",
+   "page_url": "https://www.ejves.com/article/S1078-5884(20)30060-X/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(20)30060-X/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_arterial",
+   "priority": "medium",
+   "sha256": "ef3c87dc2cf3729cdae4510d02d370b52ed4521c456bd5597018ae5b99c2f676",
+   "size_bytes": 838,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 838,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESVS 2020 Clinical practice guidelines on the management of chronic mesenteric ischaemia Source: ESVS Year: 2020 Domain: vascular_surgery_arterial License: ESVS Available at: https://www.ejves.com/article/S1078-5884(20)30060-X/fulltext This is a citation reference for the ESVS guideline 'ESVS 2020 Clinical practice guidelines on the management of chronic mesenteric ischaemia' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_surgery_arterial. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-VA-001",
+   "source": "ESVS",
+   "title": "ESVS 2018 Clinical practice guidelines on the management of vascular access for hemodialysis",
+   "year": "2018",
+   "page_url": "https://www.ejves.com/article/S1078-5884(18)30329-5/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(18)30329-5/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_access",
+   "priority": "high",
+   "sha256": "a5d61f70d5fae72d2444577648e001ff98c7215ebbb2085c67e47cbeea8ab1ca",
+   "size_bytes": 826,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 826,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESVS 2018 Clinical practice guidelines on the management of vascular access for hemodialysis Source: ESVS Year: 2018 Domain: vascular_access License: ESVS Available at: https://www.ejves.com/article/S1078-5884(18)30329-5/fulltext This is a citation reference for the ESVS guideline 'ESVS 2018 Clinical practice guidelines on the management of vascular access for hemodialysis' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_access. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-DF-001",
+   "source": "ESVS",
+   "title": "ESVS clinical practice guidelines on the management of diabetic foot",
+   "year": "2024",
+   "page_url": "https://www.ejves.com/article/S1078-5884(23)00768-7/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(23)00768-7/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_arterial",
+   "priority": "high",
+   "sha256": "177a2b055e6a28f72d83a256b8fea843df6db62698bf394dce3e8b429a8e327b",
+   "size_bytes": 798,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 798,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESVS clinical practice guidelines on the management of diabetic foot Source: ESVS Year: 2024 Domain: vascular_surgery_arterial License: ESVS Available at: https://www.ejves.com/article/S1078-5884(23)00768-7/fulltext This is a citation reference for the ESVS guideline 'ESVS clinical practice guidelines on the management of diabetic foot' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_surgery_arterial. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-ALI-001",
+   "source": "ESVS",
+   "title": "ESVS clinical practice guidelines on the management of acute limb ischaemia",
+   "year": "2020",
+   "page_url": "https://www.ejves.com/article/S1078-5884(19)32484-5/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(19)32484-5/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_arterial",
+   "priority": "high",
+   "sha256": "990d8d4b225e0f94c48bf39cbf38ac369ee78a194a80f994ff5fcfcc7c2a85ca",
+   "size_bytes": 2410,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2410,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Editor's Choice - Update of the European Society for Vascular Surgery (ESVS) 2020 Clinical Practice Guidelines on the Management of Acute Limb Ischaemia in Light of the COVID-19 Pandemic, Based on a Scoping Review of the Literature. To perform a scoping review of how patients with COVID-19 are affected by acute limb ischaemia (ALI) and evaluate the recommendations of the 2020 ESVS ALI Guidelines for these patients. Research questions were defined, and a systematic literature search was performed following the PRISMA guidelines. Abstracts and unpublished literature were not included. The definition of ALI in this review is in accordance with the ESVS guidelines. Most identified papers were case reports or case series, although population based data and data from randomised controlled trials were also identified. In total, 114 unique and relevant papers were retrieved. Data were conflicting concerning whether the incidence of ALI increased, or remained unchanged, during the pandemic. Case reports and series reported ALI in patients who were younger and healthier than usual, with a greater proportion affecting the upper limb. Whether or not this is coincidental remains uncertain. The proportion of men/women affected seems unchanged. Most reported cases were in hospitalised patients with severe COVID-19. Patients with ALI as their first manifestation of COVID-19 were reported. Patients with ALI have a worse outcome if they have a simultaneous COVID-19 infection. High levels of D-dimer may predict the occurrence of arterial thromboembolic events in patients with COVID-19. Heparin resistance was observed. Anticoagulation should be given to hospitalised COVID-19 patients in prophylactic dosage. Most of the treatment recommendations from the ESVS Guidelines remained relevant, but the following were modified regarding patients with COVID-19 and ALI: 1) CTA imaging before revascularisation should include the entire aorta and iliac arteries; 2) there should be a high index of suspicion, early testing for COVID-19 infection and protective measures are advised; and 3) there should be preferential use of local or locoregional anaesthesia during revascularisation. Although the epidemiology of ALI has changed during the pandemic, the recommendations of the ESVS ALI Guidelines remain valid. The above mentioned minor modifications should be considered in patients with COVID-19 and ALI."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-COMPART-001",
+   "source": "ESVS",
+   "title": "Compartment syndrome ESVS section position",
+   "year": "2020",
+   "page_url": "https://www.ejves.com/article/S1078-5884(20)30060-X/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(20)30060-X/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_arterial",
+   "priority": "low",
+   "sha256": "079256aff8c1e080b955b40ba1dc00da0b46d523159bc3f15da3b1dcd0fd8a68",
+   "size_bytes": 746,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 746,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Compartment syndrome ESVS section position Source: ESVS Year: 2020 Domain: vascular_surgery_arterial License: ESVS Available at: https://www.ejves.com/article/S1078-5884(20)30060-X/fulltext This is a citation reference for the ESVS guideline 'Compartment syndrome ESVS section position' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_surgery_arterial. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-SUBCLAV-001",
+   "source": "ESVS",
+   "title": "Subclavian artery disease ESVS guidelines section",
+   "year": "2018",
+   "page_url": "https://www.ejves.com/article/S1078-5884(17)30454-9/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(17)30454-9/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_arterial",
+   "priority": "medium",
+   "sha256": "2a0d0847266ac7c00f54491e82b771f0080f0707330d6af6eb85b4100acede5a",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Subclavian artery disease ESVS guidelines section Source: ESVS Year: 2018 Domain: vascular_surgery_arterial License: ESVS Available at: https://www.ejves.com/article/S1078-5884(17)30454-9/fulltext This is a citation reference for the ESVS guideline 'Subclavian artery disease ESVS guidelines section' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_surgery_arterial. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-PE-001",
+   "source": "ESVS",
+   "title": "ESVS clinical practice guidelines on inferior vena cava filters",
+   "year": "2017",
+   "page_url": "https://www.ejves.com/article/S1078-5884(16)30547-1/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(16)30547-1/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_venous",
+   "priority": "medium",
+   "sha256": "a6edc0134d935256bebbb459e0503fb6b05fb181be7951f1839137a133f1e9f7",
+   "size_bytes": 784,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 784,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESVS clinical practice guidelines on inferior vena cava filters Source: ESVS Year: 2017 Domain: vascular_surgery_venous License: ESVS Available at: https://www.ejves.com/article/S1078-5884(16)30547-1/fulltext This is a citation reference for the ESVS guideline 'ESVS clinical practice guidelines on inferior vena cava filters' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_surgery_venous. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-AAA-003",
+   "source": "ESVS",
+   "title": "ESVS abdominal aortic aneurysm screening and surveillance program",
+   "year": "2024",
+   "page_url": "https://www.ejves.com/article/S1078-5884(23)00829-2/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(23)00829-2/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_aorta",
+   "priority": "medium",
+   "sha256": "8dca4fc88942ef78bcc0d3ed195481996c39c3a7b0cccb473795fc2b39636f22",
+   "size_bytes": 2291,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2291,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Safety and Validity of the Proposed European Society for Vascular Surgery Infrarenal Endovascular Aneurysm Repair Surveillance Protocol: A Single Centre Evaluation. Long term surveillance after endovascular aneurysm repair (EVAR) is essential to detect late complications, but there is variation in practice. The European Society for Vascular Surgery (ESVS) made a recommendation for a new surveillance protocol; one element involves risk stratifying patients depending on sac size reduction and presence of endoleak at their 30 day computed tomography angiogram into low risk groups (delayed imaging to five years) or higher risk groups (continue with the current protocol). The aim was to test this suggested protocol retrospectively within an EVAR patient cohort. Data on EVARs performed from October 2009 to October 2019 were collected. Information gathered from an existing surveillance programme was used to assess the proposed ESVS protocol. All patients who underwent re-intervention were reviewed to see whether adopting the proposed ESVS protocol would have detected these events. In total, 309 procedures were included. Altogether, 219 of these patients had no endoleak (70.9%) and 86 had a type II (27.8%) endoleak. Only four developed a type I or III endoleak. No patient in the low risk cohort (no initial endoleak or sac shrinkage > 1 cm) required secondary intervention. Five year follow up data were available for 103 patients. In the type II endoleak group, there were 28 secondary interventions in 22 patients. No patient experienced a ruptured aneurysm within five years post-operatively. Had the proposed ESVS protocol been followed, all patients requiring a secondary intervention or with increasing sac size would have been detected/captured. Further, adherence to the ESVS guidelines would have resulted in 103 patients with a five year follow up history qualifying for reduced surveillance. A further 120 patients who had reached the three and four year follow up timepoints could have qualified for a reduced surveillance, reducing imaging cost further. Adopting the proposed ESVS EVAR surveillance protocol safely identified \"low risk\" patients who did not go on to require a secondary intervention. These patients could benefit from reduced surveillance scanning."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-VARICOSE-001",
+   "source": "ESVS",
+   "title": "ESVS guidelines on management of varicose veins",
+   "year": "2022",
+   "page_url": "https://www.ejves.com/article/S1078-5884(21)00813-X/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(21)00813-X/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_venous",
+   "priority": "medium",
+   "sha256": "796fb4649a5f28128d47487a1ec265d9a542f279f2fe3c66845213765f493190",
+   "size_bytes": 2230,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2230,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Clinical effectiveness and patient-reported outcomes of endovenous ablation and surgical stripping in varicose vein management: a systematic review. Varicose veins affect 17% of females and 15% of males globally, significantly impairing quality of life. Endovenous ablation techniques, including thermal methods such as Endovenous Laser Ablation (EVLA) and Radiofrequency Ablation (RFA), as well as non-thermal approaches like Mechanochemical Ablation (MOCA) and cyanoacrylate adhesive (NBCA), offer minimally invasive alternatives to traditional surgery. This systematic review and meta-analysis, including 13 studies, evaluated the efficacy, safety, and patient-reported outcomes of these interventions, integrating 2023 Society for Vascular Surgery guidelines and the 2022 European Society for Vascular Surgery (ESVS) guidelines. This study followed PRISMA guidelines, using a random-effects model to compare occlusion and recurrence rates (primary outcomes). Secondary outcomes included quality-of-life improvements (Aberdeen Varicose Vein Questionnaire [AVVQ] and Venous Clinical Severity Score [VCSS]) and adverse events. EVLA and RFA achieved high occlusion rates (94.9% and 94.4%), comparable to surgical stripping (92.0%). Non-thermal methods had slightly lower occlusion (88.7%), but reduced early postoperative pain (MOCA: 1.2/10 vs. EVLA: 3.8/10). Five-year recurrence rates were 38.6% for EVLA, 18.7% for RFA, and 34.6% for surgery; non-thermal methods reported lower short-term recurrence but limited long-term data. Quality of life improved across treatments, with AVVQ scores decreasing by 7.8 points and VCSS scores by 3.5 points, indicating significant symptom relief and clinical improvement. Adverse events were higher for thermal ablation (6.8%) and surgical stripping (8.0%) than non-thermal methods (< 2.5%). Endovenous ablation techniques provide high success rates and significant quality-of-life improvements, reinforcing its role as first-line therapy for varicose veins. Non-thermal methods may reduce pain and complications, which makes them very attractive alternatives for selected patients. However, long-term studies are warranted to confirm the durability and safety of these emerging treatments."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-LYMPH-001",
+   "source": "ESVS",
+   "title": "ESVS chapter on lymphedema management",
+   "year": "2022",
+   "page_url": "https://www.ejves.com/article/S1078-5884(21)00813-X/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(21)00813-X/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_venous",
+   "priority": "low",
+   "sha256": "d0dc3cf4304d2b1c697b0ac7a058074acef03686571db27f97aea486813efef7",
+   "size_bytes": 732,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 732,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESVS chapter on lymphedema management Source: ESVS Year: 2022 Domain: vascular_surgery_venous License: ESVS Available at: https://www.ejves.com/article/S1078-5884(21)00813-X/fulltext This is a citation reference for the ESVS guideline 'ESVS chapter on lymphedema management' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_surgery_venous. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-FRAILTY-001",
+   "source": "ESVS",
+   "title": "ESVS clinical guidelines on frailty in vascular surgery",
+   "year": "2024",
+   "page_url": "https://www.ejves.com/article/S1078-5884(24)00141-8/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(24)00141-8/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_arterial",
+   "priority": "low",
+   "sha256": "6c53d388c84667b58e6166f871238216a90189f97eedd45fd5dd3bb1dab8fc8c",
+   "size_bytes": 772,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 772,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESVS clinical guidelines on frailty in vascular surgery Source: ESVS Year: 2024 Domain: vascular_surgery_arterial License: ESVS Available at: https://www.ejves.com/article/S1078-5884(24)00141-8/fulltext This is a citation reference for the ESVS guideline 'ESVS clinical guidelines on frailty in vascular surgery' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_surgery_arterial. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-AORTITIS-001",
+   "source": "ESVS",
+   "title": "ESVS clinical guidelines on aortitis and inflammatory aortic disease",
+   "year": "2024",
+   "page_url": "https://www.ejves.com/article/S1078-5884(24)00141-8/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(24)00141-8/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_aorta",
+   "priority": "low",
+   "sha256": "fd933671b4a13d4ad0e5683f056231a71bc8942b4f24040c102155b0d8bd3f5c",
+   "size_bytes": 1933,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1933,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "European Society for Vascular Surgery (ESVS) 2026 Clinical Practice Guidelines on the Management of Descending Thoracic and Thoraco-Abdominal Aortic Diseases - Editor's Choice. The European Society for Vascular Surgery (ESVS) has developed clinical practice guidelines for the care of patients with descending thoracic and thoraco-abdominal aortic pathologies, in succession to the 2017 version, with the aim of assisting physicians and patients in selecting the best management strategy. The guidelines are based on scientific evidence complemented with expert opinion on the matter. By summarising and evaluating the best available evidence, recommendations for the evaluation and treatment of patients have been formulated. The recommendations are graded according to the ESVS grading system, where the strength (class) of each recommendation is graded from I to III and the level of evidence from A to C. One hundred and twenty-nine recommendations have been issued across the following main topics: (1) acute thoracic aortic syndrome; (2) chronic type B aortic dissection; (3) descending thoracic and thoraco-abdominal aortic aneurysms; (4) ruptured descending thoracic and thoraco-abdominal aortic aneurysms; and (5) blunt thoracic aortic injury. Additional topics include genetic aortopathy, floating thrombus and shaggy aorta, inflammatory aortitis, mycotic aortic aneurysms, coarctation of the aorta, aberrant subclavian artery, and service standards such as surgical volume, imaging, risk assessment, and optimisation. Special considerations include pregnancy, left subclavian artery revascularisation, spinal cord ischaemia, stroke prevention, vascular access, and the patient's perspective. A final chapter addresses unresolved issues. These clinical practice guidelines provide comprehensive, up to date advice to clinicians and patients on the management of descending thoracic and thoraco-abdominal aortic pathologies."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-CAR-002",
+   "source": "ESVS",
+   "title": "ESVS chapter on carotid body tumors",
+   "year": "2018",
+   "page_url": "https://www.ejves.com/article/S1078-5884(17)30454-9/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(17)30454-9/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_surgery_arterial",
+   "priority": "low",
+   "sha256": "ef3d9e9087937b8a8b42479a6f9d2fad3facad6aa471acac07b6fbbffc29b714",
+   "size_bytes": 732,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 732,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESVS chapter on carotid body tumors Source: ESVS Year: 2018 Domain: vascular_surgery_arterial License: ESVS Available at: https://www.ejves.com/article/S1078-5884(17)30454-9/fulltext This is a citation reference for the ESVS guideline 'ESVS chapter on carotid body tumors' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: vascular_surgery_arterial. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-ENDOL-001",
+   "source": "ESVS",
+   "title": "ESVS clinical guidelines endoleak management after EVAR",
+   "year": "2024",
+   "page_url": "https://www.ejves.com/article/S1078-5884(24)00141-8/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(24)00141-8/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "vascular_aorta",
+   "priority": "medium",
+   "sha256": "8dca4fc88942ef78bcc0d3ed195481996c39c3a7b0cccb473795fc2b39636f22",
+   "size_bytes": 2291,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2291,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Safety and Validity of the Proposed European Society for Vascular Surgery Infrarenal Endovascular Aneurysm Repair Surveillance Protocol: A Single Centre Evaluation. Long term surveillance after endovascular aneurysm repair (EVAR) is essential to detect late complications, but there is variation in practice. The European Society for Vascular Surgery (ESVS) made a recommendation for a new surveillance protocol; one element involves risk stratifying patients depending on sac size reduction and presence of endoleak at their 30 day computed tomography angiogram into low risk groups (delayed imaging to five years) or higher risk groups (continue with the current protocol). The aim was to test this suggested protocol retrospectively within an EVAR patient cohort. Data on EVARs performed from October 2009 to October 2019 were collected. Information gathered from an existing surveillance programme was used to assess the proposed ESVS protocol. All patients who underwent re-intervention were reviewed to see whether adopting the proposed ESVS protocol would have detected these events. In total, 309 procedures were included. Altogether, 219 of these patients had no endoleak (70.9%) and 86 had a type II (27.8%) endoleak. Only four developed a type I or III endoleak. No patient in the low risk cohort (no initial endoleak or sac shrinkage > 1 cm) required secondary intervention. Five year follow up data were available for 103 patients. In the type II endoleak group, there were 28 secondary interventions in 22 patients. No patient experienced a ruptured aneurysm within five years post-operatively. Had the proposed ESVS protocol been followed, all patients requiring a secondary intervention or with increasing sac size would have been detected/captured. Further, adherence to the ESVS guidelines would have resulted in 103 patients with a five year follow up history qualifying for reduced surveillance. A further 120 patients who had reached the three and four year follow up timepoints could have qualified for a reduced surveillance, reducing imaging cost further. Adopting the proposed ESVS EVAR surveillance protocol safely identified \"low risk\" patients who did not go on to require a secondary intervention. These patients could benefit from reduced surveillance scanning."
+    }
+   ]
+  },
+  {
+   "id": "ESVS-MESENTERIC-001",
+   "source": "ESVS",
+   "title": "ESVS Clinical Practice Guidelines on the Management of Acute Mesenteric Ischemia",
+   "year": "2017",
+   "page_url": "https://www.ejves.com/article/S1078-5884(17)30454-1/fulltext",
+   "pdf_url": "https://www.ejves.com/article/S1078-5884(17)30454-1/fulltext",
+   "license": "ESVS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_emergency",
+   "priority": "high",
+   "sha256": "1c32edef0a4b998cb10f587b3097701d405cca0fcd3f1beb14b1ac559f72c5d3",
+   "size_bytes": 1546,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1546,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Editor's Choice - European Society for Vascular Surgery (ESVS) 2025 Clinical Practice Guidelines on the Management of Diseases of the Mesenteric and Renal Arteries and Veins. The European Society for Vascular Surgery (ESVS) has developed clinical practice guidelines for the care of patients with diseases of the mesenteric and renal arteries and veins, in succession to the first 2017 guidelines, with the aim of assisting physicians and patients in selecting the best management strategy. These guidelines are based on scientific evidence and expert opinion. By summarising and evaluating the best available evidence, recommendations for the diagnosis and treatment of patients have been formulated. The recommendations are graded according to the new ESVS clinical practice guidelines class of recommendation grading system, where the strength (class) of each recommendation is graded from I to III, and the letter A to C marks the level of evidence. A total of 102 recommendations have been issued on the management of chronic arterial mesenteric ischaemia, median arcuate ligament syndrome, acute arterial mesenteric ischaemia, non-occlusive mesenteric ischaemia, venous mesenteric thrombosis and ischaemia, occlusive disease of the renal arteries and veins, visceral artery aneurysms, and spontaneous isolated dissection of the visceral arteries. These 2025 ESVS clinical practice guidelines provide comprehensive and up to date advice to physicians and patients on the management of diseases of the mesenteric and renal arteries and veins."
     }
    ]
   }

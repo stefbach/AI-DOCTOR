@@ -1,7 +1,7 @@
 {
  "source": "Sphere",
  "generated_at": "2026-05-03T07:32:30Z",
- "total_documents": 3,
+ "total_documents": 4,
  "documents": [
   {
    "id": "SPHERE-002",
@@ -163,6 +163,31 @@
     {
      "chunk_index": 8,
      "content": "best diagnostic performance in the diagnosis of AMI and risk stratification of patients with chest pain, the need for a second cTn measurement at 1 or 2 h persists for patients who do not meet single low-risk or rule-out criteria. This raises logistical considerations, depending on the location of the POC device, particularly if a second measurement is conducted using a laboratory-based instrument. 5. Conclusion The development of POC hs-cTn assay testing is progressing rapidly, and as highlighted in the various studies reviewed in this article, several POC hs-cTns achieve the necessary sensitivity and precision to detect cTn at very low concentrations when using ESC-derived algorithms, meeting the criteria established by clinical guidelines. Although their diagnostic performance is comparable to that of well-established laboratory-based assays, the key features of POC instruments must be carefully considered to ensure their optimal use and broad acceptance in routine clinical practice."
+    }
+   ]
+  },
+  {
+   "id": "SPHERE-001",
+   "source": "Sphere",
+   "title": "Humanitarian Charter Minimum Standards",
+   "year": "2018",
+   "page_url": "https://spherestandards.org/handbook-2018/",
+   "pdf_url": "https://spherestandards.org/handbook-2018/",
+   "license": "Sphere CC BY-NC-ND",
+   "commercial_use": "restricted",
+   "clinical_domain": "humanitarian",
+   "priority": "high",
+   "sha256": "5e3abdea6e4f77e8057a44ab62d8bc492d818f52d68d2b0ddc43b4b95906ce24",
+   "size_bytes": 712,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 712,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Humanitarian Charter Minimum Standards Source: Sphere Year: 2018 Domain: humanitarian License: Sphere CC BY-NC-ND Available at: https://spherestandards.org/handbook-2018/ This is a citation reference for the Sphere guideline 'Humanitarian Charter Minimum Standards' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: humanitarian. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

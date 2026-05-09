@@ -1,7 +1,7 @@
 {
  "source": "ESGE",
  "generated_at": "2026-05-02T16:22:39Z",
- "total_documents": 18,
+ "total_documents": 19,
  "documents": [
   {
    "id": "ESGE-001",
@@ -918,6 +918,31 @@
     {
      "chunk_index": 6,
      "content": "were achieved [ , ]. This approach reflects the low LNM rates (2–4%) seen in high-quality retrospective series when these criteria are met, weighed against the significant morbidity and mortality associated with esophagectomy [ , , ]. The presence of deeper submucosal invasion, LVI or poor differentiation has traditionally been linked with higher rates of LNM, approaching 60%, and therefore esophagectomy and/or adjuvant chemoradiotherapy is recommended provided patient factors do not preclude treatment [ , , ]. However, historic data from surgical specimens may have understaged T1 EAC and overestimated LNM risk as a result. More recent analyses of ER specimens, which are processed using thinner slices, report LNM rates between 9 and 20% for high-risk T1a EAC, and 8–11% for high-risk T1b EAC [ , , ]. These data are derived from small, retrospective series. The ongoing PREFER study ( NCT03222635 ), is a prospective series investigating the outcomes of close surveillance for patients with high-risk T1a/T1b EAC. In the event of a non-curative resection, staging EUS and CT-PET should be performed around 6 weeks following ER (to avoid local inflammation confounding image interpretation), followed by MDT discussion. A watchful approach is increasingly being recognised as a reasonable alternative to esophagectomy. As the criteria for ER are set to expand, deep margin involvement may become a more frequent challenge for the MDT. In a retrospective analysis of 101 ER specimens with apparent tumour positive deep margins, only 75% were confirmed R1 after second expert pathologist assessment. Of those, 50% had no residual neoplasia. All residual neoplasia was endoscopically visible and mostly amenable to endoscopic curative therapy [ ]. Therefore, endoscopic reassessment may be preferable to immediate referral for non-endoscopic therapy, although again the suitability of this approach requires prospective study (PREFERENCE, NL009247). Surveillance after Endoscopic Eradication Therapy Following ER, if no additional non-endoscopic therapy is required, ablation is performed until CE-BE is achieved. This can be confirmed endoscopically by the presence of a neo Z-line within 1 cm of the proximal limit of the gastric folds. Biopsies of the neosquamous epithelium and cardia are no longer performed in expert centres, as they do not influence the detection of neoplastic recurrence [ ]. Once EET is completed, ongoing surveillance is required due to the risk of recurrent or metachronous disease (1–2%) [ , , ]. This usually occurs in the first 2 years following EET, therefore in this period surveillance should be conducted in an expert BE centre [ ]. Ongoing acid suppression is crucial, although the dose can be titrated to the patient’s symptoms and endoscopic appearances. Before embarking on intensive and long-term surveillance, it is important to again consider the overall benefit to the individual patient. In a cohort of 1,154 patients who completed EET, during a follow-up period of 59 months, the risk of unrelated mortality was 40 times higher than the risk of death from recurrent EAC. Furthermore, the risk of unrelated death could be reliably predicted using the Charlson Comorbidity Index (C-statistic 0.78) [ ]. Conclusion EET has transformed the management of BE-neoplasia, offering high rates of cure and durable remission, without incurring unnecessary risk. Treatment is nuanced, with best outcomes achieved where expertise is concentrated. High-quality optical assessment and ER of visible BE-neoplasia are required before embarking on ablative therapy. Careful patient selection, counselling and MDT discussion are crucial particularly given the competing risks of comorbidity in this population. Importantly, ongoing prospective studies are set to refine technique selection and post-resection management, helping us tailor therapy more precisely to lesion behaviour and patient factors. Conflict of Interest Statement J.L.G.: speaker’s fees from Medtronic. R.E.P.: is a consultant for Medtronic, MicroTech, Medtronic, Boston Scientific, and Cook and has received fees from Olympus, Pentax and Fujifilm, received research support from Moeller Medical. Funding Sources This study was not supported by any sponsor or funder. Author Contributions J.L.G.: conceptualisation and writing original draft. R.E.P.: conceptualisation, supervision, critical revision, and final approval of manuscript."
+    }
+   ]
+  },
+  {
+   "id": "ESGE-MALT-GI-001",
+   "source": "ESGE",
+   "title": "ESGE Statement on Endoscopic Management of Gastric MALT Lymphoma",
+   "year": "2019",
+   "page_url": "https://www.esge.com/maps-ii-management-of-epithelial-precancerous-conditions-and-lesions-in-the-stomach",
+   "pdf_url": "https://www.esge.com/maps-ii-management-of-epithelial-precancerous-conditions-and-lesions-in-the-stomach",
+   "license": "ESGE",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gastro_stomach",
+   "priority": "high",
+   "sha256": "0013c8464dce7a47b298ce0f9ea95b9e49b273dcb399b4d991ec2d3ef0c00af2",
+   "size_bytes": 812,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 812,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:09:45Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESGE Statement on Endoscopic Management of Gastric MALT Lymphoma Source: ESGE Year: 2019 Domain: gastro_stomach License: ESGE Available at: https://www.esge.com/maps-ii-management-of-epithelial-precancerous-conditions-and-lesions-in-the-stomach This is a citation reference for the ESGE guideline 'ESGE Statement on Endoscopic Management of Gastric MALT Lymphoma' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gastro_stomach. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

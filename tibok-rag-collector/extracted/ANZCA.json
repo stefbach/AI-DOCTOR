@@ -1,7 +1,7 @@
 {
  "source": "ANZCA",
  "generated_at": "2026-05-09T14:55:54Z",
- "total_documents": 1,
+ "total_documents": 3,
  "documents": [
   {
    "id": "ANZCA-PEDIATRIC-001",
@@ -29,6 +29,56 @@
     {
      "chunk_index": 1,
      "content": "in training, education, research, and setting clinical standards for our specialties; what we're doing to foster safe and high quality patient care. Learn more Is your specialist a FANZCA or FFPMANZCA? Search our fellowship directory What's on 21 Mar 2026 - 30 Nov 2026 2026 WA ACE Lecture Series 12 May 2026 FPM VRC CME Evening Meeting 20 Jun 2026 2026 NSW ACE Winter Meeting 17 - 19 Jul 2026 2026 Queensland ACE Annual Conference See all Our professional documents (prof docs) are crucial for promoting the safety and quality of patient care for those undergoing anaesthesia for surgical and other procedures and for those receiving pain medicine treatment. Find a prof doc"
+    }
+   ]
+  },
+  {
+   "id": "ANZCA-PAIN-001",
+   "source": "ANZCA",
+   "title": "ANZCA acute pain management scientific evidence fifth edition",
+   "year": "2020",
+   "page_url": "https://www.anzca.edu.au/resources/college-publications/acute-pain-management-scientific-evidence",
+   "pdf_url": "https://www.anzca.edu.au/resources/college-publications/acute-pain-management-scientific-evidence",
+   "license": "ANZCA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_pain",
+   "priority": "high",
+   "sha256": "a292f8b90ebd92ae6b245907379511d86d06c1ae68f952a492cda30bef3cdef7",
+   "size_bytes": 804,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 804,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ANZCA acute pain management scientific evidence fifth edition Source: ANZCA Year: 2020 Domain: anesthesia_pain License: ANZCA Available at: https://www.anzca.edu.au/resources/college-publications/acute-pain-management-scientific-evidence This is a citation reference for the ANZCA guideline 'ANZCA acute pain management scientific evidence fifth edition' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: anesthesia_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ANZCA-OPIOID-001",
+   "source": "ANZCA",
+   "title": "ANZCA position statement on the use of slow-release opioids in acute pain",
+   "year": "2022",
+   "page_url": "https://www.anzca.edu.au/",
+   "pdf_url": "https://www.anzca.edu.au/",
+   "license": "ANZCA",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "anesthesia_pain",
+   "priority": "high",
+   "sha256": "58a0531f793e87215e02e504db4847d496da46a26a4adf71b1d07c026b8a3f60",
+   "size_bytes": 756,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 756,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:05:42Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ANZCA position statement on the use of slow-release opioids in acute pain Source: ANZCA Year: 2022 Domain: anesthesia_pain License: ANZCA Available at: https://www.anzca.edu.au/ This is a citation reference for the ANZCA guideline 'ANZCA position statement on the use of slow-release opioids in acute pain' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: anesthesia_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

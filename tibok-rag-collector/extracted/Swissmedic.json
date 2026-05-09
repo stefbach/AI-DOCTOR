@@ -1,7 +1,7 @@
 {
  "source": "Swissmedic",
  "generated_at": "2026-05-09T13:46:23Z",
- "total_documents": 2,
+ "total_documents": 3,
  "documents": [
   {
    "id": "SWISSMEDIC-002",
@@ -78,6 +78,31 @@
     {
      "chunk_index": 3,
      "content": "participants will be analysed through per protocol analysis. Non-compliant participants will be considered as those who have had less than 80% compliance throughout the treatment period or who have missed two consecutive doses. Secondary endpoint analysis The same analysis as for the primary endpoint will be repeated for VL at days 8 and 21. The duration of symptoms will be analysed using the same linear model as for the primary analysis and adjusting for VL. Time-to-event variables (duration of symptoms) will be analysed using a Cox model. The SF-12 survey score (mental and physical scores) will be analysed using a linear regression model comparing the intervention arm with the placebo arm. Interim analyses are not planned. Available data will be analysed at the end of the study. No imputation will be performed. Ethics and dissemination This study will be conducted in compliance with the protocol, the current version of the Declaration of Helsinki, the ICH-Good Clinical Practice guidelines and all national legal and regulatory requirements. Substantial amendments to the study protocol are only implemented after the obtention of the competent authorities’ approvals. Under emergency circumstances, deviations from the protocol to protect the rights, safety and well-being of human subjects may proceed without prior approval of the authorities. Such deviations shall be documented and reported to the authorities within 72 hours. Results from this study will be presented at national and international scientific conferences and disseminated via articles published in scientific journals. No patient data that could permit study participant identification will be presented. Publication of data derived from this study will be supervised by the sponsor. No publication will be made without the prior approval of the sponsor. The sponsor will have access to the final trial dataset. Supplementary Material Reviewer comments Author's manuscript"
+    }
+   ]
+  },
+  {
+   "id": "SWISSMEDIC-001",
+   "source": "Swissmedic",
+   "title": "Swissmedic authorised medicinal products list Switzerland",
+   "year": "2024",
+   "page_url": "https://www.swissmedic.ch/swissmedic/en/home/services/listen_neu.html",
+   "pdf_url": "https://www.swissmedic.ch/swissmedic/en/home/services/listen_neu.html",
+   "license": "Public Domain",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_regulatory",
+   "priority": "high",
+   "sha256": "b899daa9f16b9bf5820da8967cdbb236d333004b7367b517e726b99807ffff9f",
+   "size_bytes": 786,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 786,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:16:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Swissmedic authorised medicinal products list Switzerland Source: Swissmedic Year: 2024 Domain: drug_regulatory License: Public Domain Available at: https://www.swissmedic.ch/swissmedic/en/home/services/listen_neu.html This is a citation reference for the Swissmedic guideline 'Swissmedic authorised medicinal products list Switzerland' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_regulatory. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

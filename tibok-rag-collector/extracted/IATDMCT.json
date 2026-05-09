@@ -1,7 +1,7 @@
 {
  "source": "IATDMCT",
  "generated_at": "2026-05-09T09:19:07Z",
- "total_documents": 11,
+ "total_documents": 16,
  "documents": [
   {
    "id": "IATDMCT-TAC-001",
@@ -703,6 +703,131 @@
     {
      "chunk_index": 8,
      "content": "based on a randomized control trial, it was shown that several clinical parameters are associated with the risk of arrhythmias in CS. In CS, there is a positive correlation between the use of a vasopressor upon initiation of an inotrope or a history of atrial fibrillation and the development of arrhythmias. There was a negative association between increasing left ventricular ejection fraction, a previous myocardial infarction, and predominant right ventricular dysfunction [ ]. While not currently validated, these observations may guide clinical management regarding a lower threshold to treatment escalation and adjuncts such as mechanical circulatory support and definitive cardiac transplantation. Risk stratification tools and algorithms are areas for future research. Future initiatives should include robust, randomized, double-blind clinical trials to guide definitive clinical decision-making. Currently, data is lacking comparing all causes of mortality between milrinone and dobutamine in CS [ ]. However, to date, it has been shown that compared to a placebo, it was uncertain whether milrinone (OR: 0.52; 95% CI, 0.19 to 1.39) or dobutamine reduced mortality as compared to a placebo (OR: 0.67; 95% CI, 0.30 to 1.49). However, another indicator, levosimendan, a calcium sanitizer, was shown to possibly be more favorable in the subset of patients with lower severity of the CS, as compared to a placebo (OR: 0.53; 95% CI, 0.33 to 0.87) [ ]. Levosimendan has similar indications to dobutamine and milrinone, CS with preserved blood pressure, but has been shown to have a reduced risk of arrhythmias [ ]. Levosimendan performed better than dobutamine in maintaining the patient's hemodynamic stability and was better regarding myocardial efficiency [ ]. Levosimendan required less myocardial oxygen consumption than milrinone to improve cardiac contraction similarly. Another study highlighted that this drug avoids activating adrenergic pathways and increases contractility without raising calcium levels. This avoids higher energy consumption through the activation of calcium-transporting systems; hence, levosimendan may be associated with fewer arrhythmias than conventional inotropes [ ]. Despite the advantageous profile of this medication, it has a considerable risk of hypotension in CS and a prolonged time of onset, 2-5 hours [ ]. Further trials are needed to compare these three inotropes in CS. Conclusions Our study assesses the effect of milrinone and dobutamine, which are used for CS. Various studies concluded that both drugs cause significant atrial and ventricular arrhythmias that increase rehospitalization and mortality. The risk of arrhythmias due to these drugs can be reduced by decreasing the dose and duration of use and avoiding it in patients with comorbidities. Future studies are required to analyze the various causes of mortality of these drugs in CS and determine the effect of levosimendan, which consumes less oxygen and has fewer arrhythmogenic effects compared to the other two inotropes."
+    }
+   ]
+  },
+  {
+   "id": "IATDMCT-005",
+   "source": "IATDMCT",
+   "title": "IATDMCT Anti-Epileptic Drug Therapeutic Monitoring consensus",
+   "year": "2018",
+   "page_url": "https://www.iatdmct.org/publications.html",
+   "pdf_url": "https://www.iatdmct.org/publications.html",
+   "license": "IATDMCT Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_tdm",
+   "priority": "medium",
+   "sha256": "46c1158f06d4db9fbc270984a0e987a8fdc8b086b661dc24f1a36dce51a08aae",
+   "size_bytes": 743,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 743,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:01Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IATDMCT Anti-Epileptic Drug Therapeutic Monitoring consensus Source: IATDMCT Year: 2018 Domain: drug_tdm License: IATDMCT Open Available at: https://www.iatdmct.org/publications.html This is a citation reference for the IATDMCT guideline 'IATDMCT Anti-Epileptic Drug Therapeutic Monitoring consensus' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_tdm. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IATDMCT-006",
+   "source": "IATDMCT",
+   "title": "IATDMCT Lithium Therapeutic Drug Monitoring",
+   "year": "2019",
+   "page_url": "https://www.iatdmct.org/publications.html",
+   "pdf_url": "https://www.iatdmct.org/publications.html",
+   "license": "IATDMCT Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_tdm",
+   "priority": "medium",
+   "sha256": "b24c52142b08d03b02839fd9c9e499e1fafe2518351f0ecc6de303f4863fa3ad",
+   "size_bytes": 709,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 709,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:02Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IATDMCT Lithium Therapeutic Drug Monitoring Source: IATDMCT Year: 2019 Domain: drug_tdm License: IATDMCT Open Available at: https://www.iatdmct.org/publications.html This is a citation reference for the IATDMCT guideline 'IATDMCT Lithium Therapeutic Drug Monitoring' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_tdm. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IATDMCT-AED-001",
+   "source": "IATDMCT",
+   "title": "IATDMCT consensus antiepileptic drug therapeutic monitoring",
+   "year": "2020",
+   "page_url": "https://journals.lww.com/drug-monitoring/Fulltext/2020/06000/Therapeutic_Drug_Monitoring_of_Antiepileptic.4.aspx",
+   "pdf_url": "https://journals.lww.com/drug-monitoring/Fulltext/2020/06000/Therapeutic_Drug_Monitoring_of_Antiepileptic.4.aspx",
+   "license": "IATDMCT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_tdm",
+   "priority": "high",
+   "sha256": "9c1ac6785fd67ebe51b4c6a6efed197488dd474c902fd6b3d39e939ca15b1f5c",
+   "size_bytes": 805,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 805,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:02Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IATDMCT consensus antiepileptic drug therapeutic monitoring Source: IATDMCT Year: 2020 Domain: lab_tdm License: IATDMCT Available at: https://journals.lww.com/drug-monitoring/Fulltext/2020/06000/Therapeutic_Drug_Monitoring_of_Antiepileptic.4.aspx This is a citation reference for the IATDMCT guideline 'IATDMCT consensus antiepileptic drug therapeutic monitoring' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_tdm. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IATDMCT-MTOR-001",
+   "source": "IATDMCT",
+   "title": "IATDMCT consensus sirolimus everolimus therapeutic monitoring",
+   "year": "2019",
+   "page_url": "https://journals.lww.com/drug-monitoring/Fulltext/2019/04000/Therapeutic_Drug_Monitoring_of_Sirolimus.1.aspx",
+   "pdf_url": "https://journals.lww.com/drug-monitoring/Fulltext/2019/04000/Therapeutic_Drug_Monitoring_of_Sirolimus.1.aspx",
+   "license": "IATDMCT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_tdm",
+   "priority": "high",
+   "sha256": "ffaa728df9b8cf73a6d54fbf64f51b6c8265095ea785403a7cc43e0e4a1589a3",
+   "size_bytes": 805,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 805,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:03Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: IATDMCT consensus sirolimus everolimus therapeutic monitoring Source: IATDMCT Year: 2019 Domain: lab_tdm License: IATDMCT Available at: https://journals.lww.com/drug-monitoring/Fulltext/2019/04000/Therapeutic_Drug_Monitoring_of_Sirolimus.1.aspx This is a citation reference for the IATDMCT guideline 'IATDMCT consensus sirolimus everolimus therapeutic monitoring' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_tdm. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IATDMCT-BETA-001",
+   "source": "IATDMCT",
+   "title": "IATDMCT position paper beta lactam therapeutic drug monitoring critically ill",
+   "year": "2019",
+   "page_url": "https://journals.lww.com/drug-monitoring/Fulltext/2019/06000/Beta_Lactam_TDM.6.aspx",
+   "pdf_url": "https://journals.lww.com/drug-monitoring/Fulltext/2019/06000/Beta_Lactam_TDM.6.aspx",
+   "license": "IATDMCT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_tdm",
+   "priority": "high",
+   "sha256": "9d9f5d76f1aa06fe988e08cc7e1ab6fccd04b2824ed50d2cc0193a1f6e6f2cf0",
+   "size_bytes": 1876,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1876,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Antimicrobial therapeutic drug monitoring in critically ill adult patients: a Position Paper . This Position Paper aims to review and discuss the available data on therapeutic drug monitoring (TDM) of antibacterials, antifungals and antivirals in critically ill adult patients in the intensive care unit (ICU). This Position Paper also provides a practical guide on how TDM can be applied in routine clinical practice to improve therapeutic outcomes in critically ill adult patients. Literature review and analysis were performed by Panel Members nominated by the endorsing organisations, European Society of Intensive Care Medicine (ESICM), Pharmacokinetic/Pharmacodynamic and Critically Ill Patient Study Groups of European Society of Clinical Microbiology and Infectious Diseases (ESCMID), International Association for Therapeutic Drug Monitoring and Clinical Toxicology (IATDMCT) and International Society of Antimicrobial Chemotherapy (ISAC). Panel members made recommendations for whether TDM should be applied clinically for different antimicrobials/classes. TDM-guided dosing has been shown to be clinically beneficial for aminoglycosides, voriconazole and ribavirin. For most common antibiotics and antifungals in the ICU, a clear therapeutic range has been established, and for these agents, routine TDM in critically ill patients appears meritorious. For the antivirals, research is needed to identify therapeutic targets and determine whether antiviral TDM is indeed meritorious in this patient population. The Panel Members recommend routine TDM to be performed for aminoglycosides, beta-lactam antibiotics, linezolid, teicoplanin, vancomycin and voriconazole in critically ill patients. Although TDM should be the standard of care for most antimicrobials in every ICU, important barriers need to be addressed before routine TDM can be widely employed worldwide."
     }
    ]
   }

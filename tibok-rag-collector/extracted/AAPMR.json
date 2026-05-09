@@ -1,7 +1,7 @@
 {
  "source": "AAPMR",
  "generated_at": "2026-05-09T14:42:55Z",
- "total_documents": 2,
+ "total_documents": 10,
  "documents": [
   {
    "id": "AAPMR-PHANTOM-001",
@@ -590,6 +590,218 @@
     {
      "chunk_index": 20,
      "content": "on routinely available data. BMC Health Serv Res 2015 Feb 07;15:52 [FREE Full text] [doi: 10.1186/s12913-015-0686-6] [Medline: 25889368] 112. Chen R, Rafaeli E, Ziv-Beiman S, Bar-Kalifa E, Solomonov N, Barber JP, et al. Therapeutic technique diversity is linked to quality of working alliance and client functioning following alliance ruptures. J Consult Clin Psychol 2020 Sep;88(9):844-858. [doi: 10.1037/ccp0000490] [Medline: 32584116] 113. Fadhil A, Schiavo G. Designing for Health Chatbots. ArXiv. Preprint posted online on February 24, 2019 [FREE Full text] 114. Yorita A, Egerton S, Oakman J, Chan C, Kubota N. Self-Adapting Chatbot Personalities for Better Peer Support. : IEEE; 2019 Presented at: 2019 IEEE International Conference on Systems, Man and Cybernetics (SMC); 2019; Bari, Italy p. 4094-4100. [doi: 10.1109/smc.2019.8914583] 115. Wilkins M. Optical headwear for augmented reality. United States BAE SYSTEMS plc (London, GB) D865042. 2019 Oct 29. URL: https://www.freepatentsonline.com/D865042.html [accessed 2021-01-18] Abbreviations AR: augmented reality BCT: behavioral change technique CA: conversational agent HUC: hybrid ubiquitous coaching MSD: musculoskeletal disorder NPS: Net Promoter Score QR: quick response RQ: research question TAD: treatment adherence dimension Edited by G Eysenbach; submitted 25.08.20; peer-reviewed by A Lau, J Salisbury; comments to author 16.09.20; revised version received 28.09.20; accepted 18.01.21; published 22.02.21 Please cite as: Kowatsch T, Lohse KM, Erb V, Schittenhelm L, Galliker H, Lehner R, Huang EM Hybrid Ubiquitous Coaching With a Novel Combination of Mobile and Holographic Conversational Agents Targeting Adherence to Home Exercises: Four Design and Evaluation Studies J Med Internet Res 2021;23(2):e23612 URL: https://www.jmir.org/2021/2/e23612 doi: 10.2196/23612 PMID: 33461957 ©Tobias Kowatsch, Kim-Morgaine Lohse, Valérie Erb, Leo Schittenhelm, Helen Galliker, Rea Lehner, Elaine M Huang. Originally published in the Journal of Medical Internet Research (http://www.jmir.org), 22.02.2021. This is an open-access article distributed under the terms of the Creative Commons Attribution License (https://creativecommons.org/licenses/by/4.0/), which permits unrestricted use, distribution, and reproduction in any medium, provided the original work, first published in the Journal of https://www.jmir.org/2021/2/e23612 J Med Internet Res 2021 | vol. 23 | iss. 2 | e23612 | p. 24 (page number not for citation purposes) XSL• FO RenderX JOURNAL OF MEDICAL INTERNET RESEARCH Kowatsch et al Medical Internet Research, is properly cited. The complete bibliographic information, a link to the original publication on http://www.jmir.org/, as well as this copyright and license information must be included. https://www.jmir.org/2021/2/e23612 J Med Internet Res 2021 | vol. 23 | iss. 2 | e23612 | p. 25 (page number not for citation purposes) XSL• FO RenderX"
+    }
+   ]
+  },
+  {
+   "id": "AAPMR-AMPUT-001",
+   "source": "AAPMR",
+   "title": "AAPM&R clinical practice guideline lower limb amputation rehabilitation",
+   "year": "2020",
+   "page_url": "https://www.aapmr.org/",
+   "pdf_url": "https://www.aapmr.org/",
+   "license": "AAPMR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_amputation",
+   "priority": "high",
+   "sha256": "6364c6102c5bcb7083f40bef6f3d2b7351f39e0114138ef323187630ecd27c85",
+   "size_bytes": 747,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 747,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAPM&R clinical practice guideline lower limb amputation rehabilitation Source: AAPMR Year: 2020 Domain: pmr_amputation License: AAPMR Available at: https://www.aapmr.org/ This is a citation reference for the AAPMR guideline 'AAPM&R clinical practice guideline lower limb amputation rehabilitation' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pmr_amputation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAPMR-PROSTH-001",
+   "source": "AAPMR",
+   "title": "AAPM&R prosthetic prescription clinical guidance",
+   "year": "2021",
+   "page_url": "https://www.aapmr.org/",
+   "pdf_url": "https://www.aapmr.org/",
+   "license": "AAPMR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_amputation",
+   "priority": "medium",
+   "sha256": "64920e07853099ff4873881b77b2112266343d3b2e1bb700424d5f1ecb0410cf",
+   "size_bytes": 701,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 701,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:11Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAPM&R prosthetic prescription clinical guidance Source: AAPMR Year: 2021 Domain: pmr_amputation License: AAPMR Available at: https://www.aapmr.org/ This is a citation reference for the AAPMR guideline 'AAPM&R prosthetic prescription clinical guidance' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pmr_amputation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAPMR-MSK-001",
+   "source": "AAPMR",
+   "title": "AAPM&R clinical practice guideline musculoskeletal rehabilitation",
+   "year": "2020",
+   "page_url": "https://www.aapmr.org/",
+   "pdf_url": "https://www.aapmr.org/",
+   "license": "AAPMR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_msk",
+   "priority": "high",
+   "sha256": "0a5629b8dc568aef3593c2a87d064b963bffed4d75e88efccea5b9806d4a109e",
+   "size_bytes": 6367,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 6361,
+   "chunk_count": 2,
+   "extracted_at": "2026-05-09T19:04:12Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Consensus practice guidelines on sacroiliac joint complex pain from a multispecialty, international working group. The past two decades have witnessed tremendous growth in the appreciation and treatment of sacroiliac joint (SIJ) complex pain, including anatomical dissections that shed light on innervation, an appreciation for the contribution of extra-articular components to SIJ complex pain, the advent of radiofrequency ablation (RFA) and a host of minimally invasive surgical techniques. Yet, there is no standardization on diagnosis and treatment paradigms. In February 2023, the Boards of Directors for the American Academy of Pain Medicine (AAPM) and American Society of Regional Anesthesia & Pain Medicine (ASRA-PM) approved the development of multispecialty guidelines on SIJ complex pain. Thirty partner organizations with clinical and scientific interests in SIJ complex pain were identified, and formal letters of request-for-participation were sent to each, along with a request for nominees to serve on the committee. Twenty five organizations agreed to participate in addition to the Departments of Defense and Veterans Affairs. A steering committee developed 21 questions, which spanned criteria for diagnosis, non-interventional and interventional treatments including surgery, technical parameters on how to optimize results, and what constitutes positive outcomes. Questions were methodically assigned to specialized modules comprising 4-5 members with complementary expertise, who collaborated with the Subcommittee Lead and one of three Committee Chairs to develop preliminary drafts. Following thorough revisions, these drafts were subsequently submitted to the full committee for comprehensive review. A modified Delphi method was used in which the answers to questions were sent to the committee en bloc and comments were returned in a non-blinded fashion to the Chairs, who incorporated the comments and sent out revised versions until consensus was achieved. During a committee meeting before commencement, it was agreed that recommendations would be noted when there was >50% agreement among committee members, but that a formal recommendation would require ≥75% consensus. Twenty-one organizations formally endorsed the guidelines. The American Society of Anesthesiologists, and American Academy of Physical Medicine & Rehabilitation, and the North American Spine Society affirmed the benefit of the guidelines but did not officially endorse them. The American Academy of Neurology declined to affirm the benefit of the guidelines citing \"lack of relevance to their membership.\" Per policies, while the Departments of Defense and Veterans Affairs did not formally review the guidelines for endorsement, their representatives approved them. In addition to being endorsed or the benefit affirmed by all voting organizations, complete consensus from committee members was obtained on all 21 questions. On 2 recommendations, there were dissensions from 3 societies who thought that selecting patients for sacral lateral branch RFA and minimally invasive fusion should be based on ≥75% relief from 2 blocks instead of at least 50% relief from a single block before RFA, and greater than 50% pain relief with documented functional improvement after a single block before fusion. One additional society (Latin American Society of Regional Anesthesia) abstained on the statement that the evidence is stronger for extra-articular than intra-articular injections. The committee found that a battery of physical exam tests has reasonable sensitivity, but lower specificity, for identifying intra-articular but not extra-articular pathology, with negative tests having greater predictive value than positive ones. Intra-articular injections have diagnostic validity for SIJ intra-articular, but not extra-articular pain. There is unclear or negative evidence for imaging. The prevalence rates of intra-articular and extra-articular pathology are comparable, with both intra- and extra-articular steroid injections providing at least 4 weeks of relief in well-selected patients. However, the evidence is slightly stronger for extra-articular corticosteroid injections to provide short-term relief. The evidence base for non-interventional therapies is indirect, extrapolated mostly from low back pain studies. There is weak evidence supporting dextrose-based prolotherapy and platelet-rich plasma to provide at least 3 months of pain relief. There is strong evidence for sacral lateral branch RFA to provide relief for at least 6 months in individuals with extra-articular pathology, with face validity and indirect evidence from randomized trials supporting sacral lateral branch blocks as a prognostic tool. There is stronger evidence for larger lesions or more aggressive lesioning strategies than for less stringent techniques. There is weak evidence to support non-steroidal anti-inflammatory drugs to prevent neuritis after RFA, and in most cases anticoagulation does not require cessation in the periprocedural perioid. With an aggressive lesioning strategy, sensory stimulation provides minimal therapeutic benefit, with weak, extrapolated evidence that motor stimulation can provide safety benefit. The cutoff to designate diagnostic or prognostic blocks as positive is most commonly set at 50%, with higher values not shown to improve outcomes for more definitive procedures; for therapeutic treatment outcomes, the evidence supports a lower threshold of ≥30% pain relief or meaningful benefit on non-pain outcomes (eg, opioid cessation) for designation of a positive response. For carefully selected patients with intra-articular SIJ complex pain based on controlled blocks who"
+    },
+    {
+     "chunk_index": 1,
+     "content": "not require cessation in the periprocedural perioid. With an aggressive lesioning strategy, sensory stimulation provides minimal therapeutic benefit, with weak, extrapolated evidence that motor stimulation can provide safety benefit. The cutoff to designate diagnostic or prognostic blocks as positive is most commonly set at 50%, with higher values not shown to improve outcomes for more definitive procedures; for therapeutic treatment outcomes, the evidence supports a lower threshold of ≥30% pain relief or meaningful benefit on non-pain outcomes (eg, opioid cessation) for designation of a positive response. For carefully selected patients with intra-articular SIJ complex pain based on controlled blocks who have failed conservative therapies, there is weak or very weak evidence that minimally invasive SIJ fusion can provide benefit for at least one year. SIJ complex pain remains an underappreciated source of chronic low back pain, affecting between 15% and 30% of patients with axial pain predominantly below L5. Answers to many questions were limited by low-quality evidence, indicating the need for better research. SIJ complex pain is a multifarious condition (ie, pain can be from different portions of both the intra- and extra-articular components of the joint) for which an interdisciplinary, multimodal treatment plan can optimize treatment outcomes."
+    }
+   ]
+  },
+  {
+   "id": "AAPMR-SPINE-001",
+   "source": "AAPMR",
+   "title": "AAPM&R consensus low back pain rehabilitation",
+   "year": "2020",
+   "page_url": "https://www.aapmr.org/",
+   "pdf_url": "https://www.aapmr.org/",
+   "license": "AAPMR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_msk",
+   "priority": "high",
+   "sha256": "0a5629b8dc568aef3593c2a87d064b963bffed4d75e88efccea5b9806d4a109e",
+   "size_bytes": 6367,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 6361,
+   "chunk_count": 2,
+   "extracted_at": "2026-05-09T19:04:12Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Consensus practice guidelines on sacroiliac joint complex pain from a multispecialty, international working group. The past two decades have witnessed tremendous growth in the appreciation and treatment of sacroiliac joint (SIJ) complex pain, including anatomical dissections that shed light on innervation, an appreciation for the contribution of extra-articular components to SIJ complex pain, the advent of radiofrequency ablation (RFA) and a host of minimally invasive surgical techniques. Yet, there is no standardization on diagnosis and treatment paradigms. In February 2023, the Boards of Directors for the American Academy of Pain Medicine (AAPM) and American Society of Regional Anesthesia & Pain Medicine (ASRA-PM) approved the development of multispecialty guidelines on SIJ complex pain. Thirty partner organizations with clinical and scientific interests in SIJ complex pain were identified, and formal letters of request-for-participation were sent to each, along with a request for nominees to serve on the committee. Twenty five organizations agreed to participate in addition to the Departments of Defense and Veterans Affairs. A steering committee developed 21 questions, which spanned criteria for diagnosis, non-interventional and interventional treatments including surgery, technical parameters on how to optimize results, and what constitutes positive outcomes. Questions were methodically assigned to specialized modules comprising 4-5 members with complementary expertise, who collaborated with the Subcommittee Lead and one of three Committee Chairs to develop preliminary drafts. Following thorough revisions, these drafts were subsequently submitted to the full committee for comprehensive review. A modified Delphi method was used in which the answers to questions were sent to the committee en bloc and comments were returned in a non-blinded fashion to the Chairs, who incorporated the comments and sent out revised versions until consensus was achieved. During a committee meeting before commencement, it was agreed that recommendations would be noted when there was >50% agreement among committee members, but that a formal recommendation would require ≥75% consensus. Twenty-one organizations formally endorsed the guidelines. The American Society of Anesthesiologists, and American Academy of Physical Medicine & Rehabilitation, and the North American Spine Society affirmed the benefit of the guidelines but did not officially endorse them. The American Academy of Neurology declined to affirm the benefit of the guidelines citing \"lack of relevance to their membership.\" Per policies, while the Departments of Defense and Veterans Affairs did not formally review the guidelines for endorsement, their representatives approved them. In addition to being endorsed or the benefit affirmed by all voting organizations, complete consensus from committee members was obtained on all 21 questions. On 2 recommendations, there were dissensions from 3 societies who thought that selecting patients for sacral lateral branch RFA and minimally invasive fusion should be based on ≥75% relief from 2 blocks instead of at least 50% relief from a single block before RFA, and greater than 50% pain relief with documented functional improvement after a single block before fusion. One additional society (Latin American Society of Regional Anesthesia) abstained on the statement that the evidence is stronger for extra-articular than intra-articular injections. The committee found that a battery of physical exam tests has reasonable sensitivity, but lower specificity, for identifying intra-articular but not extra-articular pathology, with negative tests having greater predictive value than positive ones. Intra-articular injections have diagnostic validity for SIJ intra-articular, but not extra-articular pain. There is unclear or negative evidence for imaging. The prevalence rates of intra-articular and extra-articular pathology are comparable, with both intra- and extra-articular steroid injections providing at least 4 weeks of relief in well-selected patients. However, the evidence is slightly stronger for extra-articular corticosteroid injections to provide short-term relief. The evidence base for non-interventional therapies is indirect, extrapolated mostly from low back pain studies. There is weak evidence supporting dextrose-based prolotherapy and platelet-rich plasma to provide at least 3 months of pain relief. There is strong evidence for sacral lateral branch RFA to provide relief for at least 6 months in individuals with extra-articular pathology, with face validity and indirect evidence from randomized trials supporting sacral lateral branch blocks as a prognostic tool. There is stronger evidence for larger lesions or more aggressive lesioning strategies than for less stringent techniques. There is weak evidence to support non-steroidal anti-inflammatory drugs to prevent neuritis after RFA, and in most cases anticoagulation does not require cessation in the periprocedural perioid. With an aggressive lesioning strategy, sensory stimulation provides minimal therapeutic benefit, with weak, extrapolated evidence that motor stimulation can provide safety benefit. The cutoff to designate diagnostic or prognostic blocks as positive is most commonly set at 50%, with higher values not shown to improve outcomes for more definitive procedures; for therapeutic treatment outcomes, the evidence supports a lower threshold of ≥30% pain relief or meaningful benefit on non-pain outcomes (eg, opioid cessation) for designation of a positive response. For carefully selected patients with intra-articular SIJ complex pain based on controlled blocks who"
+    },
+    {
+     "chunk_index": 1,
+     "content": "not require cessation in the periprocedural perioid. With an aggressive lesioning strategy, sensory stimulation provides minimal therapeutic benefit, with weak, extrapolated evidence that motor stimulation can provide safety benefit. The cutoff to designate diagnostic or prognostic blocks as positive is most commonly set at 50%, with higher values not shown to improve outcomes for more definitive procedures; for therapeutic treatment outcomes, the evidence supports a lower threshold of ≥30% pain relief or meaningful benefit on non-pain outcomes (eg, opioid cessation) for designation of a positive response. For carefully selected patients with intra-articular SIJ complex pain based on controlled blocks who have failed conservative therapies, there is weak or very weak evidence that minimally invasive SIJ fusion can provide benefit for at least one year. SIJ complex pain remains an underappreciated source of chronic low back pain, affecting between 15% and 30% of patients with axial pain predominantly below L5. Answers to many questions were limited by low-quality evidence, indicating the need for better research. SIJ complex pain is a multifarious condition (ie, pain can be from different portions of both the intra- and extra-articular components of the joint) for which an interdisciplinary, multimodal treatment plan can optimize treatment outcomes."
+    }
+   ]
+  },
+  {
+   "id": "AAPMR-GERIA-001",
+   "source": "AAPMR",
+   "title": "AAPM&R clinical practice geriatric rehabilitation",
+   "year": "2019",
+   "page_url": "https://www.aapmr.org/",
+   "pdf_url": "https://www.aapmr.org/",
+   "license": "AAPMR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_msk",
+   "priority": "medium",
+   "sha256": "590108a4ce370a0efd2432ad69f79d4038a9fa01969a13085768d555977fd7b5",
+   "size_bytes": 689,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 689,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAPM&R clinical practice geriatric rehabilitation Source: AAPMR Year: 2019 Domain: pmr_msk License: AAPMR Available at: https://www.aapmr.org/ This is a citation reference for the AAPMR guideline 'AAPM&R clinical practice geriatric rehabilitation' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pmr_msk. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAPMR-VEST-001",
+   "source": "AAPMR",
+   "title": "AAPM&R consensus vestibular rehabilitation",
+   "year": "2019",
+   "page_url": "https://www.aapmr.org/",
+   "pdf_url": "https://www.aapmr.org/",
+   "license": "AAPMR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_msk",
+   "priority": "low",
+   "sha256": "321b85c11b09761a12631f77cd94a4a54f9bb217a443f54ccc3c77453459bdb7",
+   "size_bytes": 675,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 675,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:13Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAPM&R consensus vestibular rehabilitation Source: AAPMR Year: 2019 Domain: pmr_msk License: AAPMR Available at: https://www.aapmr.org/ This is a citation reference for the AAPMR guideline 'AAPM&R consensus vestibular rehabilitation' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pmr_msk. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAPMR-CANCER-001",
+   "source": "AAPMR",
+   "title": "AAPM&R cancer rehabilitation clinical practice consensus",
+   "year": "2021",
+   "page_url": "https://www.aapmr.org/",
+   "pdf_url": "https://www.aapmr.org/",
+   "license": "AAPMR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_cancer",
+   "priority": "high",
+   "sha256": "0a5629b8dc568aef3593c2a87d064b963bffed4d75e88efccea5b9806d4a109e",
+   "size_bytes": 6367,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 6361,
+   "chunk_count": 2,
+   "extracted_at": "2026-05-09T19:04:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Consensus practice guidelines on sacroiliac joint complex pain from a multispecialty, international working group. The past two decades have witnessed tremendous growth in the appreciation and treatment of sacroiliac joint (SIJ) complex pain, including anatomical dissections that shed light on innervation, an appreciation for the contribution of extra-articular components to SIJ complex pain, the advent of radiofrequency ablation (RFA) and a host of minimally invasive surgical techniques. Yet, there is no standardization on diagnosis and treatment paradigms. In February 2023, the Boards of Directors for the American Academy of Pain Medicine (AAPM) and American Society of Regional Anesthesia & Pain Medicine (ASRA-PM) approved the development of multispecialty guidelines on SIJ complex pain. Thirty partner organizations with clinical and scientific interests in SIJ complex pain were identified, and formal letters of request-for-participation were sent to each, along with a request for nominees to serve on the committee. Twenty five organizations agreed to participate in addition to the Departments of Defense and Veterans Affairs. A steering committee developed 21 questions, which spanned criteria for diagnosis, non-interventional and interventional treatments including surgery, technical parameters on how to optimize results, and what constitutes positive outcomes. Questions were methodically assigned to specialized modules comprising 4-5 members with complementary expertise, who collaborated with the Subcommittee Lead and one of three Committee Chairs to develop preliminary drafts. Following thorough revisions, these drafts were subsequently submitted to the full committee for comprehensive review. A modified Delphi method was used in which the answers to questions were sent to the committee en bloc and comments were returned in a non-blinded fashion to the Chairs, who incorporated the comments and sent out revised versions until consensus was achieved. During a committee meeting before commencement, it was agreed that recommendations would be noted when there was >50% agreement among committee members, but that a formal recommendation would require ≥75% consensus. Twenty-one organizations formally endorsed the guidelines. The American Society of Anesthesiologists, and American Academy of Physical Medicine & Rehabilitation, and the North American Spine Society affirmed the benefit of the guidelines but did not officially endorse them. The American Academy of Neurology declined to affirm the benefit of the guidelines citing \"lack of relevance to their membership.\" Per policies, while the Departments of Defense and Veterans Affairs did not formally review the guidelines for endorsement, their representatives approved them. In addition to being endorsed or the benefit affirmed by all voting organizations, complete consensus from committee members was obtained on all 21 questions. On 2 recommendations, there were dissensions from 3 societies who thought that selecting patients for sacral lateral branch RFA and minimally invasive fusion should be based on ≥75% relief from 2 blocks instead of at least 50% relief from a single block before RFA, and greater than 50% pain relief with documented functional improvement after a single block before fusion. One additional society (Latin American Society of Regional Anesthesia) abstained on the statement that the evidence is stronger for extra-articular than intra-articular injections. The committee found that a battery of physical exam tests has reasonable sensitivity, but lower specificity, for identifying intra-articular but not extra-articular pathology, with negative tests having greater predictive value than positive ones. Intra-articular injections have diagnostic validity for SIJ intra-articular, but not extra-articular pain. There is unclear or negative evidence for imaging. The prevalence rates of intra-articular and extra-articular pathology are comparable, with both intra- and extra-articular steroid injections providing at least 4 weeks of relief in well-selected patients. However, the evidence is slightly stronger for extra-articular corticosteroid injections to provide short-term relief. The evidence base for non-interventional therapies is indirect, extrapolated mostly from low back pain studies. There is weak evidence supporting dextrose-based prolotherapy and platelet-rich plasma to provide at least 3 months of pain relief. There is strong evidence for sacral lateral branch RFA to provide relief for at least 6 months in individuals with extra-articular pathology, with face validity and indirect evidence from randomized trials supporting sacral lateral branch blocks as a prognostic tool. There is stronger evidence for larger lesions or more aggressive lesioning strategies than for less stringent techniques. There is weak evidence to support non-steroidal anti-inflammatory drugs to prevent neuritis after RFA, and in most cases anticoagulation does not require cessation in the periprocedural perioid. With an aggressive lesioning strategy, sensory stimulation provides minimal therapeutic benefit, with weak, extrapolated evidence that motor stimulation can provide safety benefit. The cutoff to designate diagnostic or prognostic blocks as positive is most commonly set at 50%, with higher values not shown to improve outcomes for more definitive procedures; for therapeutic treatment outcomes, the evidence supports a lower threshold of ≥30% pain relief or meaningful benefit on non-pain outcomes (eg, opioid cessation) for designation of a positive response. For carefully selected patients with intra-articular SIJ complex pain based on controlled blocks who"
+    },
+    {
+     "chunk_index": 1,
+     "content": "not require cessation in the periprocedural perioid. With an aggressive lesioning strategy, sensory stimulation provides minimal therapeutic benefit, with weak, extrapolated evidence that motor stimulation can provide safety benefit. The cutoff to designate diagnostic or prognostic blocks as positive is most commonly set at 50%, with higher values not shown to improve outcomes for more definitive procedures; for therapeutic treatment outcomes, the evidence supports a lower threshold of ≥30% pain relief or meaningful benefit on non-pain outcomes (eg, opioid cessation) for designation of a positive response. For carefully selected patients with intra-articular SIJ complex pain based on controlled blocks who have failed conservative therapies, there is weak or very weak evidence that minimally invasive SIJ fusion can provide benefit for at least one year. SIJ complex pain remains an underappreciated source of chronic low back pain, affecting between 15% and 30% of patients with axial pain predominantly below L5. Answers to many questions were limited by low-quality evidence, indicating the need for better research. SIJ complex pain is a multifarious condition (ie, pain can be from different portions of both the intra- and extra-articular components of the joint) for which an interdisciplinary, multimodal treatment plan can optimize treatment outcomes."
+    }
+   ]
+  },
+  {
+   "id": "AAPMR-LYMPH-001",
+   "source": "AAPMR",
+   "title": "AAPM&R clinical practice guidance lymphedema rehabilitation",
+   "year": "2020",
+   "page_url": "https://www.aapmr.org/",
+   "pdf_url": "https://www.aapmr.org/",
+   "license": "AAPMR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_cancer",
+   "priority": "medium",
+   "sha256": "528f8b21c27ee405f5037c134f8afc48b03ddaa259e8a304ec999bfe134c162c",
+   "size_bytes": 715,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 715,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:14Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAPM&R clinical practice guidance lymphedema rehabilitation Source: AAPMR Year: 2020 Domain: pmr_cancer License: AAPMR Available at: https://www.aapmr.org/ This is a citation reference for the AAPMR guideline 'AAPM&R clinical practice guidance lymphedema rehabilitation' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pmr_cancer. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,0 +1,57 @@
+{
+ "source": "BSAC",
+ "generated_at": "2026-05-09T19:07:26Z",
+ "total_documents": 2,
+ "documents": [
+  {
+   "id": "BSAC-FITNESS-001",
+   "source": "BSAC",
+   "title": "BSAC UK Sport Diving Medical Standards",
+   "year": "2023",
+   "page_url": "https://www.bsac.com/safety-and-incidents/medical-matters/",
+   "pdf_url": "https://www.bsac.com/safety-and-incidents/medical-matters/",
+   "license": "Proprietary",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "diving_fitness",
+   "priority": "medium",
+   "sha256": "9303fe813119f7af21951978fd7265febc3c671e2ad6a51ff4a4cb7951ea6aa5",
+   "size_bytes": 721,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 721,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BSAC UK Sport Diving Medical Standards Source: BSAC Year: 2023 Domain: diving_fitness License: Proprietary Available at: https://www.bsac.com/safety-and-incidents/medical-matters/ This is a citation reference for the BSAC guideline 'BSAC UK Sport Diving Medical Standards' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: diving_fitness. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "BSAC-AMINO-001",
+   "source": "BSAC",
+   "title": "BSAC working party report aminoglycoside therapeutic monitoring",
+   "year": "2017",
+   "page_url": "https://academic.oup.com/jac/article/72/1/i1/2702305",
+   "pdf_url": "https://academic.oup.com/jac/article/72/1/i1/2702305",
+   "license": "BSAC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_tdm",
+   "priority": "high",
+   "sha256": "33fd30aad0c486d65406d976dc395685a21ec604ce1cb63b200abfc4c9edb659",
+   "size_bytes": 744,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 744,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:07:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: BSAC working party report aminoglycoside therapeutic monitoring Source: BSAC Year: 2017 Domain: lab_tdm License: BSAC Available at: https://academic.oup.com/jac/article/72/1/i1/2702305 This is a citation reference for the BSAC guideline 'BSAC working party report aminoglycoside therapeutic monitoring' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_tdm. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

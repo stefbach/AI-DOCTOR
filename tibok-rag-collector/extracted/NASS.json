@@ -1,7 +1,7 @@
 {
  "source": "NASS",
  "generated_at": "2026-05-09T09:53:20Z",
- "total_documents": 10,
+ "total_documents": 13,
  "documents": [
   {
    "id": "NASS-ANTIBIOTIC-001",
@@ -918,6 +918,81 @@
     {
      "chunk_index": 6,
      "content": "nonpharmacological therapies, and may increase risk of bias and reduce validity. In addition, underlying clinical heterogeneity across studies may have obscured true treatment differences. Fourth, although the literature search was systematic, relatively few interventions were supported by multiple trials or direct head-to-head comparisons. As a result, the network was sparse, and many estimates relied heavily on indirect evidence; thus, the SUCRA rankings should be regarded as exploratory. Fifth, quality-of-life outcomes were reported inconsistently and therefore could not be synthesized. 4.5 Conclusions and suggestions for future research This study provides a comprehensive but inconclusive synthesis of the current evidence because certainty ranged from low to very low. Although effect estimates and SUCRA rankings suggested that some interventions, particularly acupuncture, may be promising, these findings remain highly uncertain. The quality and heterogeneity of the included studies, together with the limited number of trials, precluded definitive conclusions regarding comparative effectiveness. Further high-quality RCTs with adequate sample sizes and long-term follow-up are needed to provide more reliable evidence for clinical decision-making. Funding This study was supported by the High Level Chinese Medical Hospital Promotion Project ( HLCMHPP2023089 ). Ethics statement Not applicable. Data availability The data that support the findings of this study are available from the corresponding author upon reasonable request. CRediT authorship contribution statement He Chen: Formal analysis, Methodology, Software, Writing – original draft. Xun Chen: Formal analysis, Methodology, Software, Writing – original draft. Jiufei Fang: Investigation, Data curation, Formal analysis, Writing – original draft. Wei Wang: Investigation, Data curation, Formal analysis, Writing – original draft. Jiarong Fan: Investigation, Data curation, Formal analysis, Writing – original draft. Yuan Xie: Software, Visualization, Writing – review & editing. Hanwei Lun: Software, Visualization, Writing – review & editing. Zhishun Liu: Conceptualization, Supervision. Declaration of competing interest Zhishun Liu is an editorial board member of this journal but had no role in the peer review process or editorial decision for this manuscript. The authors declare no other conflict of interest."
+    }
+   ]
+  },
+  {
+   "id": "NASS-CSM-001",
+   "source": "NASS",
+   "title": "NASS clinical practice guideline cervical spondylotic myelopathy",
+   "year": "2023",
+   "page_url": "https://www.spine.org/Research-Clinical-Care/Quality-Improvement/Clinical-Guidelines",
+   "pdf_url": "https://www.spine.org/Research-Clinical-Care/Quality-Improvement/Clinical-Guidelines",
+   "license": "NASS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_spine",
+   "priority": "high",
+   "sha256": "88a3a2a01678f5645c0d8653c3dcb1be7ee3f0b7e4a90d375427294a100341b8",
+   "size_bytes": 798,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 798,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NASS clinical practice guideline cervical spondylotic myelopathy Source: NASS Year: 2023 Domain: orthopedics_spine License: NASS Available at: https://www.spine.org/Research-Clinical-Care/Quality-Improvement/Clinical-Guidelines This is a citation reference for the NASS guideline 'NASS clinical practice guideline cervical spondylotic myelopathy' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_spine. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "NASS-ASD-001",
+   "source": "NASS",
+   "title": "NASS coverage policy adult spinal deformity surgery",
+   "year": "2020",
+   "page_url": "https://www.spine.org/Research-Clinical-Care/Quality-Improvement/Coverage-Policy",
+   "pdf_url": "https://www.spine.org/Research-Clinical-Care/Quality-Improvement/Coverage-Policy",
+   "license": "NASS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "orthopedics_spine",
+   "priority": "medium",
+   "sha256": "14b040e2b08c2d88d243899211d98e95b94f0d2f3a0a6b2e3f0652b195563c15",
+   "size_bytes": 768,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 768,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:37Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NASS coverage policy adult spinal deformity surgery Source: NASS Year: 2020 Domain: orthopedics_spine License: NASS Available at: https://www.spine.org/Research-Clinical-Care/Quality-Improvement/Coverage-Policy This is a citation reference for the NASS guideline 'NASS coverage policy adult spinal deformity surgery' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: orthopedics_spine. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "NASS-VERTEBRO-001",
+   "source": "NASS",
+   "title": "NASS clinical guideline percutaneous vertebroplasty kyphoplasty for vertebral compression fracture",
+   "year": "2020",
+   "page_url": "https://www.spine.org/Research-Clinical-Care/Quality-Improvement/Clinical-Guidelines",
+   "pdf_url": "https://www.spine.org/Research-Clinical-Care/Quality-Improvement/Clinical-Guidelines",
+   "license": "NASS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_ir_nonvascular",
+   "priority": "high",
+   "sha256": "407c09cd6f28f9e64c2d73197961d2d58fa290dfcdd4c1c403b11e1d908f68b4",
+   "size_bytes": 880,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 880,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:38Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: NASS clinical guideline percutaneous vertebroplasty kyphoplasty for vertebral compression fracture Source: NASS Year: 2020 Domain: radiology_ir_nonvascular License: NASS Available at: https://www.spine.org/Research-Clinical-Care/Quality-Improvement/Clinical-Guidelines This is a citation reference for the NASS guideline 'NASS clinical guideline percutaneous vertebroplasty kyphoplasty for vertebral compression fracture' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: radiology_ir_nonvascular. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

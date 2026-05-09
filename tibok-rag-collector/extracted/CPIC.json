@@ -1,7 +1,7 @@
 {
  "source": "CPIC",
  "generated_at": "2026-05-02T17:07:46Z",
- "total_documents": 18,
+ "total_documents": 31,
  "documents": [
   {
    "id": "CPIC-001",
@@ -890,6 +890,339 @@
     {
      "chunk_index": 3,
      "content": "of PM and 43% of IM, indicating our findings align with the literature. This high frequency of PM reinforces the need for implementing pre-therapeutic UGT1A1 testing, with existing cost-effectiveness reports for routine testing due to reductions in severe neutropenia and hospitalizations . Unfortunately, the adoption of pharmacogenetics is still incipient as an oncological routine in developing countries like Brazil, especially within the Public Healthcare System (\"Sistema Único de Saúde,\" in Portuguese) . Pioneer implementation projects within the public sector have only been able to successfully execute these tests for patients as part of research studies due to many factors, but especially the need for more evidence of cost-effectiveness . Despite the existence of pre-therapeutic genetic testing for chemotherapy drugs in the private sector in Brazil, its adoption is not widespread even in this context . Even in the United States, there are still several implementation challenges for the use of these tests, such as a lack of awareness of positive patient experiences, clinician education, clinician perception of benefits of pharmacogenomics, inadequate allele coverage in panels, lack of Electronic Medical Record (EMR) integration, and reimbursement issues with insurance companies . Limitations The study's main limitation is its relatively modest sample size, restricting its ability to detect very rare variants. The differences in MAFs observed could be a direct result of it, considering the values observed in other studies are almost entirely within our 95%CI. Other limitations include that phenotypes are exclusively inferred rather than experimentally determined for comparison, and the absence of clinical outcomes to contrast metabolizer status with the occurrence of toxicities. Besides, this study did not follow how many patients effectively had their treatment modified to adhere to the recommendations. Patients had their guideline recommendations added to their EMR so that their physicians could make individualized decisions regarding their application in the clinical setting. CONCLUSION The data from this oncological patient population aligns with the observed data from other larger studies in the Brazilian population, in accordance with our initial hypothesis. The presence of these DPYD and UGT1A1 variants is considerable among Brazilian gastrointestinal cancer patients, and the use of pre-therapeutic genetic testing in this context is growing as a promising precision medicine tool to avoid severe toxicities. Additionally, genetic panels for these variants must be continuously updated and adapted for population-specific characteristics, incorporating new findings about clinically significant variants and genetic diversity in admixed populations."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-006",
+   "source": "CPIC",
+   "title": "CPIC Guideline for TPMT NUDT15 and Thiopurines",
+   "year": "2019",
+   "page_url": "https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/",
+   "pdf_url": "https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/",
+   "license": "CPIC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "high",
+   "sha256": "16e27a70faf345f70205b5358c5766defc542e6a8842b28b00d9f088f9b31313",
+   "size_bytes": 757,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 757,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CPIC Guideline for TPMT NUDT15 and Thiopurines Source: CPIC Year: 2019 Domain: drug_pharmacogenomics License: CPIC Open Available at: https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/ This is a citation reference for the CPIC guideline 'CPIC Guideline for TPMT NUDT15 and Thiopurines' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pharmacogenomics. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-007",
+   "source": "CPIC",
+   "title": "CPIC Guideline for DPYD and Fluoropyrimidines 5-FU Capecitabine",
+   "year": "2018",
+   "page_url": "https://cpicpgx.org/guidelines/guideline-for-fluoropyrimidines-and-dpyd/",
+   "pdf_url": "https://cpicpgx.org/guidelines/guideline-for-fluoropyrimidines-and-dpyd/",
+   "license": "CPIC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "high",
+   "sha256": "17e37ce5c271f4d4516e7449948c69efd6e98ee89ad30aa199789c535dea6a33",
+   "size_bytes": 1806,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1806,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Severe toxicity following genotype-guided reduced 5-FU dose in a heterozygous DPYD c.2846A>T carrier with stage III anal carcinoma: A case report. Fluoropyrimidines (e.g., 5-fluorouracil, capecitabine) are antineoplastic agents commonly used in the setting of gastrointestinal cancer. Dihydropyridine dehydrogenase (DPD), encoded by the DPYD gene, is the enzyme responsible for up to 85% of 5-FU catabolism into inactive metabolites. Decreased or no function genetic variations in DPYD are rare but increase risk of potentially fatal adverse effects (e.g., myelosuppression) due to decreased metabolism of 5-FU. The extent of which DPD enzyme activity is impaired varies among individual decreased function DPYD variants. A 75-year-old female was diagnosed with stage III squamous cell carcinoma of the anal canal. She was scheduled to receive therapy consisting of mitomycin C (8 mg/m2) administered over 30 min and continuous infusion 5-FU (4000 mg/m2) over 96 h for 2 cycles with concurrent radiotherapy. Prior to treatment, the patient underwent DPYD genotyping which revealed she was a heterozygous carrier of the decreased function allele, c.2846 A > T. In accordance with Clinical Pharmacogenomics Implementation Consortium (CPIC) guideline recommendations, the dose of 5-FU for cycle 1 was reduced by 50%. Despite the dose reduction, she still experienced mucositis (G3), neutropenia (G3), diarrhea (G2), nausea and vomiting (G2), and dyspnea (G2). This case report supports the clinical utility of pre-emptive DPYD genotyping to guide initial 5-FU dosing in intermediate metabolizers, and it suggests that all patients still require close monitoring and some (particularly carriers of c.2846 A > T) may require an initial dose reduction greater than the recommended 50% to prevent severe toxicity."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-009",
+   "source": "CPIC",
+   "title": "CPIC Guideline for CYP2D6 Atomoxetine",
+   "year": "2019",
+   "page_url": "https://cpicpgx.org/guidelines/cpic-guideline-for-atomoxetine-based-on-cyp2d6-genotype/",
+   "pdf_url": "https://cpicpgx.org/guidelines/cpic-guideline-for-atomoxetine-based-on-cyp2d6-genotype/",
+   "license": "CPIC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "medium",
+   "sha256": "e799c1e53fcc34017e37f44b0781862dc4c60f14fc1ed447c0d26829be7ac3e4",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CPIC Guideline for CYP2D6 Atomoxetine Source: CPIC Year: 2019 Domain: drug_pharmacogenomics License: CPIC Open Available at: https://cpicpgx.org/guidelines/cpic-guideline-for-atomoxetine-based-on-cyp2d6-genotype/ This is a citation reference for the CPIC guideline 'CPIC Guideline for CYP2D6 Atomoxetine' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_pharmacogenomics. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-011",
+   "source": "CPIC",
+   "title": "CPIC Guideline for CYP2C19 and Voriconazole",
+   "year": "2017",
+   "page_url": "https://cpicpgx.org/guidelines/guideline-for-voriconazole-and-cyp2c19/",
+   "pdf_url": "https://cpicpgx.org/guidelines/guideline-for-voriconazole-and-cyp2c19/",
+   "license": "CPIC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "medium",
+   "sha256": "5161bd209a00804c0210a9b7c93b14707a2fa16994b95e1b6ff5bf09c927b320",
+   "size_bytes": 1763,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1756,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Establishment of a mathematical prediction model for voriconazole stable maintenance dose: a prospective study. In patients with invasive fungal infection (IFI), the steady-state serum trough concentration ( C min ) of voriconazole (VCZ) is highly variable and can lead to treatment failure ( C min < 0.5 mg/L) and toxicity ( C min ≥ 5.0 mg/L). However, It remains challenging to determine the ideal maintenance dose to achieve the desired C min level quickly. This randomized, prospective observational single-center study aimed to identify factors affecting VCZ- C min and maintenance dose and create an algorithmic model to predict the necessary maintenance dose. MeThe study enrolled 306 adult IFI patients, split into two groups: non-gene-directed (A) (where CYP2C19 phenotype is not involved in determining VCZ dose) and gene-directed (B) (where CYP2C19 phenotype is involved in determining VCZ dose). Results indicated that CYP2C19 genetic polymorphisms might significantly impact VCZ loading and maintenance dose selection. CYP2C19 phenotype, C-reaction protein (CRP), and average daily dose/body weight were significant influencers on VCZ- C min , while CYP2C19 phenotype, CRP, and body weight significantly impacted VCZ maintenance dose. A feasible predictive formula for VCZ stable maintenance dose was derived from the regression equation as a maintenance dose (mg) =282.774-0.735×age (year)+2.946×body weight(Kg)-19.402×CYP2C19 phenotype (UM/RM/NM:0, IM:1, PM:2)-0.316×CRP (mg/L) ( p < 0.001). DiThis formula may serve as a valuable supplement to the Clinical Pharmacogenetics Implementation Consortium (CPIC ® ) guideline for CYP2C19 and VCZ therapy, especially for IFI patients with highly variable inflammatory cytokines during VCZ therapy."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-013",
+   "source": "CPIC",
+   "title": "CPIC Guideline for CYP2C19 SSRIs",
+   "year": "2023",
+   "page_url": "https://cpicpgx.org/guidelines/guideline-for-selective-serotonin-reuptake-inhibitors-and-cyp2d6-and-cyp2c19/",
+   "pdf_url": "https://cpicpgx.org/guidelines/guideline-for-selective-serotonin-reuptake-inhibitors-and-cyp2d6-and-cyp2c19/",
+   "license": "CPIC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "high",
+   "sha256": "2a3d61ab668b347b2b2f6cc8ddcf5cc0821aa07b38527864a13479f2e103752d",
+   "size_bytes": 5574,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 5551,
+   "chunk_count": 2,
+   "extracted_at": "2026-05-09T19:08:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Imipramine Therapy and CYP2D6 and CYP2C19 Genotype Imipramine is a tricyclic antidepressant (TCA) used in the treatment of several psychiatric disorders, including major depression, obsessive-compulsive disorder, generalized anxiety disorder, post-traumatic stress disorder, and bulimia. Imipramine may also be useful as an adjunctive treatment for managing panic attacks, neuropathic pain, attention-deficit disorder, and childhood enuresis (bedwetting) (1). Tricyclic antidepressants primarily mediate their therapeutic effect by inhibiting the reuptake of both serotonin and norepinephrine, increasing the concentration of these neurotransmitters in the synaptic cleft stimulating the neuron. Because tricyclics can also block different receptors (histamine H1, α1-adrenergic, and muscarinic receptors), side effects are common. Consequently, more selective serotonin reuptake inhibitors have largely replaced TCAs. However, TCAs still have an important role in treating specific types of depression and other conditions. Imipramine is primarily metabolized via CYP2C19 to active metabolites, including desipramine, another TCA. Further metabolism is catalyzed by CYP2D6 to create inactive metabolites. Individuals who are “CYP2D6 ultrarapid metabolizers” (CYP2D6 UM) have more than 2 normal-function alleles (multiple copies), whereas individuals who are “CYP2C19 ultrarapid metabolizers” (CYP2C19 UM) have 2 increased-function alleles. Individuals who are CYP2D6 or CYP2C19 “poor metabolizers” (PM) have 2 no-function alleles for CYP2D6 or CYP2C19. Individuals who are CYP2D6 or CYP2C19 “intermediate metabolizers” (IM) have one no-function allele. Individuals with one normal-function and one increased-function allele for CYP2C19 are classified as “rapid metabolizers” (CYP2C19 RM). The FDA-approved drug label for imipramine states that CYP2D6 PMs have higher-than-expected plasma concentrations of TCAs when given usual doses. The FDA recommendations include monitoring TCA plasma levels whenever a TCA is co-administered with another drug known to inhibit CYP2D6 (Table 1) (1). The Dutch Pharmacogenetics Working Group (DPWG) of the Royal Dutch Pharmacists Association has also issued dose-adjustment recommendations based on CYP2C19 and CYP2D6, as well (Table 2) (2). Individuals who are CYP2D6 IM should take 70% of the standard dose and be monitored for side effects and appropriate plasma levels of imipramine and desipramine. A genotype associated with CYP2D6 PM status warrants a decrease to 30% of the standard dose, with similar monitoring for adverse effects and plasma concentration to optimize dosing. The DPWG recommends a dose increase for CYP2D6 UM individuals, up to 1.7 times the standard dose if the potentially cardiotoxic hydroxy metabolites can be tolerated; otherwise, imipramine should be avoided. For CYP2C19 PMs, DPWG recommends taking 70% of the standard dose, along with close monitoring for side effects or plasma levels of imipramine and desipramine to determine an appropriate maintenance dose; alternatively, avoidance of imipramine is recommended (2). No dosing changes are recommended for CYP2C19 UM or IM individuals. When monitoring plasma levels of the active drug and metabolites, the combined levels of imipramine and desipramine should remain within 150–300 ng/mL; levels above 500 ng/mL are considered toxic (2). In 2016, the Clinical Pharmacogenetics Implementation Consortium (CPIC) provided dosing recommendations for TCAs based on CYP2C19 and CYP2D6 genotype, either alone (Table 3) or in combination (Table 4). Amitriptyline and nortriptyline were used as model drugs for the guideline because most pharmacogenomic studies have focused on these 2 drugs. According to the CPIC guideline, because TCAs have comparable pharmacokinetic properties, the recommendations may be reasonably applied to other tricyclics, including imipramine (3). For CYP2D6 UMs, CPIC recommends avoiding the use of a tricyclic due to the potential lack of efficacy and suggests considering an alternative drug not metabolized by CYP2D6. If a TCA is still warranted, CPIC recommends titrating the TCA to a higher target dose (compared to normal metabolizers [NM]) and using therapeutic drug monitoring (TDM) to guide dose adjustments. For CYP2D6 IMs, CPIC recommends a 25% reduction of the starting dose, while for CYP2D6 PMs, advises avoiding tricyclics due to the potential for side effects. If a TCA is still warranted for CYP2D6 PMs, CPIC recommends a 50% reduction in the starting dose with drug plasma concentration monitoring to avoid side effects. For gene-based dosing of TCAs for neuropathic pain, where the initial doses are lower, CPIC does not recommend dose modifications for PMs or IMs (either CYP2D6 or CYP2C19). For CYP2D6 UM individuals, CPIC optionally recommends considering an alternative medication due to a higher risk of therapeutic failure of TCAs for neuropathic pain (3). For CYP2C19 UMs, CPIC recommends avoiding tertiary amines (for example, imipramine) due to the potential for a sub-optimal response and suggests considering an alternative drug not metabolized by CYP2C19, such as the secondary amines nortriptyline or desipramine. For CYP2C19 PMs, CPIC similarly recommends avoiding tertiary amines due to the potential for sub-optimal response, and to consider an alternative drug not metabolized by CYP2C19. If a tertiary amine is still warranted for CYP2C19 PMs, CPIC recommends a 50% reduction of the starting dose while monitoring drug plasma concentrations to minimize side effects (3)."
+    },
+    {
+     "chunk_index": 1,
+     "content": "UMs, CPIC recommends avoiding tertiary amines (for example, imipramine) due to the potential for a sub-optimal response and suggests considering an alternative drug not metabolized by CYP2C19, such as the secondary amines nortriptyline or desipramine. For CYP2C19 PMs, CPIC similarly recommends avoiding tertiary amines due to the potential for sub-optimal response, and to consider an alternative drug not metabolized by CYP2C19. If a tertiary amine is still warranted for CYP2C19 PMs, CPIC recommends a 50% reduction of the starting dose while monitoring drug plasma concentrations to minimize side effects (3)."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-014",
+   "source": "CPIC",
+   "title": "CPIC Guideline for CYP2D6 Tricyclic Antidepressants",
+   "year": "2017",
+   "page_url": "https://cpicpgx.org/guidelines/guideline-for-tricyclic-antidepressants-and-cyp2d6-and-cyp2c19/",
+   "pdf_url": "https://cpicpgx.org/guidelines/guideline-for-tricyclic-antidepressants-and-cyp2d6-and-cyp2c19/",
+   "license": "CPIC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "medium",
+   "sha256": "2a3d61ab668b347b2b2f6cc8ddcf5cc0821aa07b38527864a13479f2e103752d",
+   "size_bytes": 5574,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 5551,
+   "chunk_count": 2,
+   "extracted_at": "2026-05-09T19:08:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Imipramine Therapy and CYP2D6 and CYP2C19 Genotype Imipramine is a tricyclic antidepressant (TCA) used in the treatment of several psychiatric disorders, including major depression, obsessive-compulsive disorder, generalized anxiety disorder, post-traumatic stress disorder, and bulimia. Imipramine may also be useful as an adjunctive treatment for managing panic attacks, neuropathic pain, attention-deficit disorder, and childhood enuresis (bedwetting) (1). Tricyclic antidepressants primarily mediate their therapeutic effect by inhibiting the reuptake of both serotonin and norepinephrine, increasing the concentration of these neurotransmitters in the synaptic cleft stimulating the neuron. Because tricyclics can also block different receptors (histamine H1, α1-adrenergic, and muscarinic receptors), side effects are common. Consequently, more selective serotonin reuptake inhibitors have largely replaced TCAs. However, TCAs still have an important role in treating specific types of depression and other conditions. Imipramine is primarily metabolized via CYP2C19 to active metabolites, including desipramine, another TCA. Further metabolism is catalyzed by CYP2D6 to create inactive metabolites. Individuals who are “CYP2D6 ultrarapid metabolizers” (CYP2D6 UM) have more than 2 normal-function alleles (multiple copies), whereas individuals who are “CYP2C19 ultrarapid metabolizers” (CYP2C19 UM) have 2 increased-function alleles. Individuals who are CYP2D6 or CYP2C19 “poor metabolizers” (PM) have 2 no-function alleles for CYP2D6 or CYP2C19. Individuals who are CYP2D6 or CYP2C19 “intermediate metabolizers” (IM) have one no-function allele. Individuals with one normal-function and one increased-function allele for CYP2C19 are classified as “rapid metabolizers” (CYP2C19 RM). The FDA-approved drug label for imipramine states that CYP2D6 PMs have higher-than-expected plasma concentrations of TCAs when given usual doses. The FDA recommendations include monitoring TCA plasma levels whenever a TCA is co-administered with another drug known to inhibit CYP2D6 (Table 1) (1). The Dutch Pharmacogenetics Working Group (DPWG) of the Royal Dutch Pharmacists Association has also issued dose-adjustment recommendations based on CYP2C19 and CYP2D6, as well (Table 2) (2). Individuals who are CYP2D6 IM should take 70% of the standard dose and be monitored for side effects and appropriate plasma levels of imipramine and desipramine. A genotype associated with CYP2D6 PM status warrants a decrease to 30% of the standard dose, with similar monitoring for adverse effects and plasma concentration to optimize dosing. The DPWG recommends a dose increase for CYP2D6 UM individuals, up to 1.7 times the standard dose if the potentially cardiotoxic hydroxy metabolites can be tolerated; otherwise, imipramine should be avoided. For CYP2C19 PMs, DPWG recommends taking 70% of the standard dose, along with close monitoring for side effects or plasma levels of imipramine and desipramine to determine an appropriate maintenance dose; alternatively, avoidance of imipramine is recommended (2). No dosing changes are recommended for CYP2C19 UM or IM individuals. When monitoring plasma levels of the active drug and metabolites, the combined levels of imipramine and desipramine should remain within 150–300 ng/mL; levels above 500 ng/mL are considered toxic (2). In 2016, the Clinical Pharmacogenetics Implementation Consortium (CPIC) provided dosing recommendations for TCAs based on CYP2C19 and CYP2D6 genotype, either alone (Table 3) or in combination (Table 4). Amitriptyline and nortriptyline were used as model drugs for the guideline because most pharmacogenomic studies have focused on these 2 drugs. According to the CPIC guideline, because TCAs have comparable pharmacokinetic properties, the recommendations may be reasonably applied to other tricyclics, including imipramine (3). For CYP2D6 UMs, CPIC recommends avoiding the use of a tricyclic due to the potential lack of efficacy and suggests considering an alternative drug not metabolized by CYP2D6. If a TCA is still warranted, CPIC recommends titrating the TCA to a higher target dose (compared to normal metabolizers [NM]) and using therapeutic drug monitoring (TDM) to guide dose adjustments. For CYP2D6 IMs, CPIC recommends a 25% reduction of the starting dose, while for CYP2D6 PMs, advises avoiding tricyclics due to the potential for side effects. If a TCA is still warranted for CYP2D6 PMs, CPIC recommends a 50% reduction in the starting dose with drug plasma concentration monitoring to avoid side effects. For gene-based dosing of TCAs for neuropathic pain, where the initial doses are lower, CPIC does not recommend dose modifications for PMs or IMs (either CYP2D6 or CYP2C19). For CYP2D6 UM individuals, CPIC optionally recommends considering an alternative medication due to a higher risk of therapeutic failure of TCAs for neuropathic pain (3). For CYP2C19 UMs, CPIC recommends avoiding tertiary amines (for example, imipramine) due to the potential for a sub-optimal response and suggests considering an alternative drug not metabolized by CYP2C19, such as the secondary amines nortriptyline or desipramine. For CYP2C19 PMs, CPIC similarly recommends avoiding tertiary amines due to the potential for sub-optimal response, and to consider an alternative drug not metabolized by CYP2C19. If a tertiary amine is still warranted for CYP2C19 PMs, CPIC recommends a 50% reduction of the starting dose while monitoring drug plasma concentrations to minimize side effects (3)."
+    },
+    {
+     "chunk_index": 1,
+     "content": "UMs, CPIC recommends avoiding tertiary amines (for example, imipramine) due to the potential for a sub-optimal response and suggests considering an alternative drug not metabolized by CYP2C19, such as the secondary amines nortriptyline or desipramine. For CYP2C19 PMs, CPIC similarly recommends avoiding tertiary amines due to the potential for sub-optimal response, and to consider an alternative drug not metabolized by CYP2C19. If a tertiary amine is still warranted for CYP2C19 PMs, CPIC recommends a 50% reduction of the starting dose while monitoring drug plasma concentrations to minimize side effects (3)."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-015",
+   "source": "CPIC",
+   "title": "CPIC Guideline for CYP2B6 Efavirenz",
+   "year": "2019",
+   "page_url": "https://cpicpgx.org/guidelines/cpic-guideline-for-efavirenz-based-on-cyp2b6-genotype/",
+   "pdf_url": "https://cpicpgx.org/guidelines/cpic-guideline-for-efavirenz-based-on-cyp2b6-genotype/",
+   "license": "CPIC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "medium",
+   "sha256": "ef53c202bb484cad7a9495d9572ed38b9f23292cf5627a079b56cb976c12ac9c",
+   "size_bytes": 652,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 652,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Clinical Pharmacogenetics Implementation Consortium (CPIC) Guideline for CYP2B6 and Efavirenz-Containing Antiretroviral Therapy. The HIV type-1 nonnucleoside reverse transcriptase inhibitor, efavirenz, is widely used to treat HIV type-1 infection. Efavirenz is predominantly metabolized into inactive metabolites by cytochrome P450 (CYP)2B6, and patients with certain CYP2B6 genetic variants may be at increased risk for adverse effects, particularly central nervous system toxicity and treatment discontinuation. We summarize the evidence from the literature and provide therapeutic recommendations for efavirenz prescribing based on CYP2B6 genotypes."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-016",
+   "source": "CPIC",
+   "title": "CPIC Guideline for HLA Allopurinol",
+   "year": "2015",
+   "page_url": "https://cpicpgx.org/guidelines/guideline-for-allopurinol-and-hla-b/",
+   "pdf_url": "https://cpicpgx.org/guidelines/guideline-for-allopurinol-and-hla-b/",
+   "license": "CPIC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "medium",
+   "sha256": "f606dcf552856eb1a723487232bedf3a393029d755cac0aec69a5f287fd231e8",
+   "size_bytes": 752,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 752,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for human leukocyte antigen B (HLA-B) genotype and allopurinol dosing: 2015 update. The Clinical Pharmacogenetics Implementation Consortium (CPIC) Guidelines for HLA-B*58:01 Genotype and Allopurinol Dosing was originally published in February 2013. We reviewed the recent literature and concluded that none of the evidence would change the therapeutic recommendations in the original guideline; therefore, the original publication remains clinically current. However, we have updated the Supplemental Material and included additional resources for applying CPIC guidelines into the electronic health record. Up-to-date information can be found at PharmGKB (http://www.pharmgkb.org)."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-017",
+   "source": "CPIC",
+   "title": "CPIC Guideline for IFNL3 IL28B and PEG Interferon Ribavirin Therapy",
+   "year": "2014",
+   "page_url": "https://cpicpgx.org/guidelines/guideline-for-pegylated-interferon-alpha-based-regimens-and-ifnl3/",
+   "pdf_url": "https://cpicpgx.org/guidelines/guideline-for-pegylated-interferon-alpha-based-regimens-and-ifnl3/",
+   "license": "CPIC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "low",
+   "sha256": "676da641bd0b3e9c6af50f6054804e153a8f53260de428affd82d8d8e12cd1fe",
+   "size_bytes": 683,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 678,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for IFNL3 (IL28B) genotype and PEG interferon-α-based regimens. Pegylated interferon-α (PEG-IFN-α or PEG-IFN 2a and 2b)- and ribavirin (RBV)-based regimens are the mainstay for treatment of hepatitis C virus (HCV) genotype 1. IFNL3 (IL28B) genotype is the strongest baseline predictor of response to PEG-IFN-α and RBV therapy in previously untreated patients and can be used by patients and clinicians as part of the shared decision-making process for initiating treatment for HCV infection. We provide information regarding the clinical use of PEG-IFN-α- and RBV-containing regimens based on IFNL3 genotype."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-018",
+   "source": "CPIC",
+   "title": "CPIC Guideline for CYP3A5 and Tacrolimus",
+   "year": "2015",
+   "page_url": "https://cpicpgx.org/guidelines/guideline-for-tacrolimus-and-cyp3a5/",
+   "pdf_url": "https://cpicpgx.org/guidelines/guideline-for-tacrolimus-and-cyp3a5/",
+   "license": "CPIC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "high",
+   "sha256": "cefa84bb83af4c0b6dbb7fb6d14635aec85d5365c4e808830103863b93980ae1",
+   "size_bytes": 2007,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2006,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Pharmacogenomics research and clinical implementation in Brazil. We searched PubMed entries and the Lattes database of Brazilian Pharmacogenetics Network investigators, for pharmacogenetic/genomic (PGx) studies in the Brazilian population, focusing on the drugs and genes included in the Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines. Warfarin was the most extensively studied drug in a PGx context: a genomewide association study targeting warfarin stable dose identified significant signals in VKORC1 and CYP2C9, several PGx dosing algorithms were developed based on these and other genes, and the implications of population admixture on extrapolation of dosing recommendations in the CPIC guidelines were examined. A study in renal transplanted patients disclosed association of CYP3A5*6 and CYP3A5*7 with tacrolimus dosing, which led to addition of these variants to CYP3A5*3 in the CPIC tacrolimus guideline. Studies verified predisposition of HIV-positive carriers of UGT1A1*28 to severe atazanavir-induced hyperbilirubinaemia, intolerance to 5-fluorouracyl in gastrointestinal cancer patients with deleterious DPYD variants, failure of HCV-infected carriers of IFNL3 rs12979860 to obtain a sustained viral response to PEG-IFN-α, and hypersensitivity reactions to abacavir in HIV-positive carriers of HLA-B*57:01. No prospective analyses of drug therapy outcomes or cost-effectiveness assessments of PGx-guided therapy were found. In conclusion, the limited adoption of PGx-informed drug prescription in Brazil reflects combination of recognized barriers to PGx implementation worldwide plus factors specific to the Brazilian population. The latter include rarity/absence of genetic variants on which international PGx guidelines are based (eg HLA-B*15.02 for phenytoin and carbamazepine) and the caveat of extrapolating to the admixed Brazilian population, guidelines based on categorical variables, such as continental ancestry (eg warfarin guidelines), \"race\" or ethnicity."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-019",
+   "source": "CPIC",
+   "title": "CPIC Guideline for G6PD and Rasburicase",
+   "year": "2014",
+   "page_url": "https://cpicpgx.org/guidelines/guideline-for-rasburicase-and-g6pd/",
+   "pdf_url": "https://cpicpgx.org/guidelines/guideline-for-rasburicase-and-g6pd/",
+   "license": "CPIC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "medium",
+   "sha256": "8b8324c60af63f32caf5592bb3349e193b3a17a46f59dd403a095b12dfba5675",
+   "size_bytes": 1146,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1146,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines for rasburicase therapy in the context of G6PD deficiency genotype. Glucose-6-phosphate dehydrogenase (G6PD) deficiency is associated with development of acute hemolytic anemia (AHA) induced by a number of drugs. We provide guidance as to which G6PD genotypes are associated with G6PD deficiency in males and females. Rasburicase is contraindicated in G6PD-deficient patients due to the risk of AHA and possibly methemoglobinemia. Unless preemptive genotyping has established a positive diagnosis of G6PD deficiency, quantitative enzyme assay remains the mainstay of screening prior to rasburicase use. The purpose of this article is to help interpret the results of clinical G6PD genotype tests so that they can guide the use of rasburicase. Detailed guidelines on other aspects of the use of rasburicase, including analyses of cost-effectiveness, are beyond the scope of this document. Clinical Pharmacogenetics Implementation Consortium (CPIC) guidelines are published and updated periodically on https://www.pharmgkb.org/page/cpic to reflect new developments in the field."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-020",
+   "source": "CPIC",
+   "title": "CPIC Guideline for CYP2C19 and Proton Pump Inhibitors",
+   "year": "2020",
+   "page_url": "https://cpicpgx.org/guidelines/cpic-guideline-for-proton-pump-inhibitors-and-cyp2c19/",
+   "pdf_url": "https://cpicpgx.org/guidelines/cpic-guideline-for-proton-pump-inhibitors-and-cyp2c19/",
+   "license": "CPIC Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_pharmacogenomics",
+   "priority": "medium",
+   "sha256": "4bc73b5698de17dc386b7b5c6505bc11388832cd6bbca4e7583b8a8bc2d2f3ef",
+   "size_bytes": 2405,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2405,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Implementing pharmacogenetic testing to optimize proton-pump inhibitors use among Indian population based on CPIC-CYP2C19-PPI dosing guidelines: The need of the hour. Proton-pump inhibitors (PPIs) are widely prescribed to decrease stomach acid and treat various acid-related Gastrointestinal tract (GIT) diseases. However, genetic variations, particularly in the CYP2C19 gene, affect PPIs metabolism and efficacy. Variants in CYP2C19 can result in different rates of PPI metabolism, influencing their effectiveness. Personalized medicine strategies, such as genotyping for CYP2C19, have the potential to enhance the effectiveness of PPI therapy and patient safety. This review aims to describe the relevance of CYP2C19 genetic profiling in the indian population, including normal function (e.g. CYP2C19*1, *11, *13, *15, *18, *28, and 38), decreased function (e.g., CYP2C19*9, *10, *16, *19, *25, and 26), loss of function (e.g., CYP2C19*2, *3, *4, *5, *6, *7, *8, *22, *24, *35, *36, and *37), and increased function (e.g., CYP2C19*17) variants. This review also examines the clinical pharmacogenomics implementation consortium (CPIC)-CYP2C19-PPI guidelines to highlight the importance of pharmacogenomics (PGx)-informed personalized PPI therapy for gastroesophageal reflux disease and peptic ulcer disease treatment. On average, each person in India possesses eight pharmacogenetic (PGx) variants that can be clinically significant, underscoring the need for preemptive testing. Implementing CYP2C19 genetic testing in India requires expanding laboratory capacity, increasing accessibility in primary care, increasing public awareness, collaboration between pharmacovigilance and PGx programs, investing in advanced sequencing technologies, data management systems, and integration with electronic health records and clinical decision support systems. Addressing challenges such as genetic diversity, socioeconomic factors, health-care access issues, and shortage of trained professionals is essential for implementation. Due to the lack of definitive country-specific policies and PGx guidelines from Indian drug regulatory agencies, guidelines from international consortia such as the Clinical Pharmacogenetics Implementation Consortium and drug labeling offer crucial foundational evidence. This evidence can be used to enhance patient outcomes and ensure the safe and effective use of PPIs in India."
+    }
+   ]
+  },
+  {
+   "id": "CPIC-HLAB57-001",
+   "source": "CPIC",
+   "title": "CPIC guideline HLA-B5701 abacavir hypersensitivity",
+   "year": "2014",
+   "page_url": "https://cpicpgx.org/guidelines/guideline-for-abacavir-and-hla-b/",
+   "pdf_url": "https://cpicpgx.org/guidelines/guideline-for-abacavir-and-hla-b/",
+   "license": "CPIC",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "lab_molecular",
+   "priority": "high",
+   "sha256": "74eebea08503dee5375c804e4901d4ce4ebb55463cf1a37d332bbfc716bcdf42",
+   "size_bytes": 742,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 742,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: CPIC guideline HLA-B5701 abacavir hypersensitivity Source: CPIC Year: 2014 Domain: lab_molecular License: CPIC Available at: https://cpicpgx.org/guidelines/guideline-for-abacavir-and-hla-b/ This is a citation reference for the CPIC guideline 'CPIC guideline HLA-B5701 abacavir hypersensitivity' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: lab_molecular. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

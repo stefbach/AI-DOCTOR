@@ -1,7 +1,7 @@
 {
  "source": "ESPGHAN",
  "generated_at": "2026-05-02T15:56:03Z",
- "total_documents": 21,
+ "total_documents": 22,
  "documents": [
   {
    "id": "ESPGHAN-001",
@@ -1189,6 +1189,31 @@
     {
      "chunk_index": 3,
      "content": "symptoms of WD [ ]. In our case, zinc monotherapy, in addition to achieving a gradual reduction in urinary copper excretion and a progressive improvement in renal function, resulted in resolution of mild hypomimia and a stabilization of the hepatic and ophthalmological findings. A limitation of this study is the absence of follow-up brain MRI, which prevents formal assessment of radiological evolution, even if in WD imaging abnormalities may persist despite clinical neurological improvement. The absence of progression of liver disease was supported by the absence of varices on repeated endoscopy, the lack of liver function worsening, and the unchanged liver stiffness values (5.8 kPa). The discrepancy between a multinodular liver morphology on abdominal ultrasound and a low FibroScan value (5.8 kPa) may appear contradictory, but it has been well described [ ]. Indeed, transient elastography is a valuable non-invasive tool, but low liver stiffness values ​​can be detected in heterogeneous or macronodular cirrhosis because only a limited volume of liver parenchyma is sampled. In line with EASL guidelines, liver stiffness measurements should be interpreted in the clinical and morphological context and do not exclude cirrhosis in the presence of signs of portal hypertension as in our patient [ ]. Of interest is the stability of corneal copper deposition which showed only slight non-directional fluctuations on serial Scheimpflug densitometry, in line with the slow or absent regression of KF rings reported with zinc monotherapy [ , , ]. The stability of ophthalmic copper accumulation in this case treated with zinc monotherapy does not appear to reproduce the reduction/disappearance of KF reported in WD patients successfully treated with chelators [ ]. In this regard, some considerations must be made. The experience with chelators certainly involves a larger number of patients, even if there is a lack of sufficient data on how the reduction/disappearance of KF is associated with the modification of other clinical, laboratory and imaging parameters. The ability of the drugs used in WD (chelators or zinc) to deplete organs is not fully understood. Initially, it was believed that zinc, rather than depleting the liver of copper, promoted the binding of copper to metallothioneins in a non-toxic form. This concept could also be applied to the eye. More recently, however, it has been reported that zinc, even more than chelators, can lead to a marked copper deficiency with consequent neurological and haematological damage. Data on KF changes in patients with copper deficiency are lacking. On the other hand, studies on liver biopsies of progressors and non-progressors treated with chelators have shown that copper content tends to remain stable over time [ ]. Therefore, there does not appear to be a linear correlation between the clinical efficacy of drug therapies and measurable copper accumulation in various organs. This clinical case promotes an evaluation of treatment efficacy based on the integration of multiple parameters and not exclusively on quantitative copper levels or the persistence/disappearance of KF rings. In patients with WD undergoing zinc monotherapy, KF may remain stable despite an improvement in renal and neurological symptoms and a stable liver status. Further studies are desirable to confirm this interpretation and to clarify the most appropriate induction strategy in WD patients with concurrent renal and subtle neurological features."
+    }
+   ]
+  },
+  {
+   "id": "ESPGHAN-CMA-001",
+   "source": "ESPGHAN",
+   "title": "ESPGHAN diagnostic approach and management of cow milk allergy in infants and children",
+   "year": "2023",
+   "page_url": "https://www.espghan.org/knowledge-center/publications",
+   "pdf_url": "https://www.espghan.org/knowledge-center/publications",
+   "license": "ESPGHAN",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "allergology_food",
+   "priority": "high",
+   "sha256": "4c78b9c3159a64ade97b9d989e9a55d26c8f2a1bc9e4e820689dff84d4ec06c5",
+   "size_bytes": 1722,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1722,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Diagnostic approach and management of cow's-milk protein allergy in infants and children: ESPGHAN GI Committee practical guidelines. This guideline provides recommendations for the diagnosis and management of suspected cow's-milk protein allergy (CMPA) in Europe. It presents a practical approach with a diagnostic algorithm and is based on recently published evidence-based guidelines on CMPA. If CMPA is suspected by history and examination, then strict allergen avoidance is initiated. In certain circumstances (eg, a clear history of immediate symptoms, a life-threatening reaction with a positive test for CMP-specific IgE), the diagnosis can be made without a milk challenge. In all other circumstances, a controlled oral food challenge (open or blind) under medical supervision is required to confirm or exclude the diagnosis of CMPA. In breast-fed infants, the mother should start a strict CMP-free diet. Non-breast-fed infants with confirmed CMPA should receive an extensively hydrolyzed protein-based formula with proven efficacy in appropriate clinical trials; amino acids-based formulae are reserved for certain situations. Soy protein formula, if tolerated, is an option beyond 6 months of age. Nutritional counseling and regular monitoring of growth are mandatory in all age groups requiring CMP exclusion. REEVALUATION: Patients should be reevaluated every 6 to 12 months to assess whether they have developed tolerance to CMP. This is achieved in >75% by 3 years of age and >90% by 6 years of age. Inappropriate or overly long dietary eliminations should be avoided. Such restrictions may impair the quality of life of both child and family, induce improper growth, and incur unnecessary health care costs."
     }
    ]
   }

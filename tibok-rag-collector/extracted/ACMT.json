@@ -1,7 +1,7 @@
 {
  "source": "ACMT",
  "generated_at": "2026-05-09T08:37:13Z",
- "total_documents": 4,
+ "total_documents": 35,
  "documents": [
   {
    "id": "ACMT-OPIOID-001",
@@ -236,6 +236,781 @@
     {
      "chunk_index": 4,
      "content": "J Anaesth 13. Roberts DM, Aaron CK. Managing acute 2002; 46: 40-43. organophosphorus pesticide poisoning. BMJ 2007; 334: 629-34. 7. Eddleston M, Phillips MR. Self poisonig with pesticides. BMJ 2004; 328: 42-44. 14. Cherian MA, Roshini C, Visalakshi J, Jeyaseelan et al. Biochemical and clinical 8. Kumar SV, Fareedullah K Sudhakar Y, profile after organophosphorus poisoning A Venkateswarln B. Cerrent review on placebo controlled trial using pralidoxime. organophosphorus, poisoning. Archives of JAPI 2005; 53: 427-431. applied science research 2010; 2: 199-205. 15. Chugh SN, Aggarwal N, Dabla. S, Chhabra B. 9. Peter JV, Moran JL, Graham PL. Advances in Comparative evaluation of Atropine alone and the management of organophosphate Atropine with pralidoxime, in the poisoning. Expert opin. Pharmacother 2007; management of organophosphorus poisoning 8: 1451-1463. 2005: 6: 33-7."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-INIT-001",
+   "source": "ACMT",
+   "title": "ACMT position statement initial approach to the poisoned patient",
+   "year": "2023",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_acute",
+   "priority": "high",
+   "sha256": "e29a613ddbdb2acae6c2d4a136c6f3ff952c9556c8a77b877320c5fddb0f3910",
+   "size_bytes": 765,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 765,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:21Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement initial approach to the poisoned patient Source: ACMT Year: 2023 Domain: toxicology_acute License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement initial approach to the poisoned patient' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_acute. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-APAP-001",
+   "source": "ACMT",
+   "title": "ACMT position statement IV N-acetylcysteine for acetaminophen poisoning",
+   "year": "2021",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "high",
+   "sha256": "9633b05cab4ffb53ae5f1a3decd74141af86710edaa133b334d2d3d138fe2054",
+   "size_bytes": 785,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 785,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement IV N-acetylcysteine for acetaminophen poisoning Source: ACMT Year: 2021 Domain: toxicology_specific License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement IV N-acetylcysteine for acetaminophen poisoning' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_specific. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-METHANOL-001",
+   "source": "ACMT",
+   "title": "ACMT position statement on management of toxic alcohol poisoning fomepizole",
+   "year": "2023",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "high",
+   "sha256": "133f6f255d6710e2c3c540c9edaedd5fafbf3cc416e8b62adec9f1261de3f0e3",
+   "size_bytes": 793,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 793,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement on management of toxic alcohol poisoning fomepizole Source: ACMT Year: 2023 Domain: toxicology_specific License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement on management of toxic alcohol poisoning fomepizole' published in 2023. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_specific. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-TCA-001",
+   "source": "ACMT",
+   "title": "ACMT position statement use of sodium bicarbonate in tricyclic antidepressant poisoning",
+   "year": "2017",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "high",
+   "sha256": "b98f0244c4e4e5c67f4a8f1f2fdeaaa6c9c9bf0db235857a6ba81b757dea538e",
+   "size_bytes": 817,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 817,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement use of sodium bicarbonate in tricyclic antidepressant poisoning Source: ACMT Year: 2017 Domain: toxicology_specific License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement use of sodium bicarbonate in tricyclic antidepressant poisoning' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_specific. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-CCB-001",
+   "source": "ACMT",
+   "title": "ACMT consensus on management of severe calcium channel blocker poisoning",
+   "year": "2017",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "high",
+   "sha256": "9f7d6db87420d6fce33b95abf098de7b7519cc9716b89f3e279b75cd1f0a3d77",
+   "size_bytes": 787,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 787,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT consensus on management of severe calcium channel blocker poisoning Source: ACMT Year: 2017 Domain: toxicology_specific License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT consensus on management of severe calcium channel blocker poisoning' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_specific. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-BB-001",
+   "source": "ACMT",
+   "title": "ACMT recommendations for management of beta-blocker overdose",
+   "year": "2017",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "high",
+   "sha256": "6929b2c74f97246f0c02ed2038f2a03923003d1461a5e73f821bd60c1bbc16d0",
+   "size_bytes": 763,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 763,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT recommendations for management of beta-blocker overdose Source: ACMT Year: 2017 Domain: toxicology_specific License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT recommendations for management of beta-blocker overdose' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_specific. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-DIG-001",
+   "source": "ACMT",
+   "title": "ACMT position statement digoxin immune fab use in cardiac glycoside poisoning",
+   "year": "2021",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "high",
+   "sha256": "385dd331def87e054e0f25c33b57ffa5f3b30c3d98c0e24d012584ea437acd42",
+   "size_bytes": 797,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 797,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement digoxin immune fab use in cardiac glycoside poisoning Source: ACMT Year: 2021 Domain: toxicology_specific License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement digoxin immune fab use in cardiac glycoside poisoning' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_specific. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-LITH-001",
+   "source": "ACMT",
+   "title": "ACMT consensus on management of acute and chronic lithium toxicity",
+   "year": "2020",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "high",
+   "sha256": "794af9383fa1ae014fed381a1440a960c7fba53666b1b901c4b2453d33736114",
+   "size_bytes": 775,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 775,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT consensus on management of acute and chronic lithium toxicity Source: ACMT Year: 2020 Domain: toxicology_specific License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT consensus on management of acute and chronic lithium toxicity' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_specific. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-WARF-001",
+   "source": "ACMT",
+   "title": "ACMT consensus on warfarin and direct oral anticoagulant overdose",
+   "year": "2021",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "high",
+   "sha256": "0f0fe88bafd29850fecf9926f6c6378c157776420429eecf7cd8ed33f3ccd503",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT consensus on warfarin and direct oral anticoagulant overdose Source: ACMT Year: 2021 Domain: toxicology_specific License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT consensus on warfarin and direct oral anticoagulant overdose' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_specific. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-BENZO-001",
+   "source": "ACMT",
+   "title": "ACMT position statement on flumazenil for benzodiazepine overdose",
+   "year": "2018",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "medium",
+   "sha256": "48394c3ee196587fbb271b473f3fd8dfe9ab675c3de1c713c669244e5b2bc4f0",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement on flumazenil for benzodiazepine overdose Source: ACMT Year: 2018 Domain: toxicology_specific License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement on flumazenil for benzodiazepine overdose' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_specific. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-COCAINE-001",
+   "source": "ACMT",
+   "title": "ACMT clinical guidance management of cocaine and amphetamine toxicity",
+   "year": "2022",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "high",
+   "sha256": "9673ddad1dc2dd315d42586a3c721c033df822e2c706744f174088b7268bc921",
+   "size_bytes": 781,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 781,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:26Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT clinical guidance management of cocaine and amphetamine toxicity Source: ACMT Year: 2022 Domain: toxicology_specific License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT clinical guidance management of cocaine and amphetamine toxicity' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_specific. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-KET-001",
+   "source": "ACMT",
+   "title": "ACMT position statement on use of ketamine and dissociative drug toxicity",
+   "year": "2021",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_specific",
+   "priority": "medium",
+   "sha256": "22b9dd056215b4729e4aed054d3d0c5980573c211686ed13f3ca45f52de7fd93",
+   "size_bytes": 789,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 789,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement on use of ketamine and dissociative drug toxicity Source: ACMT Year: 2021 Domain: toxicology_specific License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement on use of ketamine and dissociative drug toxicity' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_specific. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-LEAD-001",
+   "source": "ACMT",
+   "title": "ACMT position statement chelation therapy for adult lead poisoning",
+   "year": "2018",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_metals",
+   "priority": "high",
+   "sha256": "0422de8ea1929b868bd4862d05a2bd9acfb8ef936a1cc8ed677e7d13b95d5395",
+   "size_bytes": 771,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 771,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement chelation therapy for adult lead poisoning Source: ACMT Year: 2018 Domain: toxicology_metals License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement chelation therapy for adult lead poisoning' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_metals. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-MERC-001",
+   "source": "ACMT",
+   "title": "ACMT position statement on chelation for mercury poisoning",
+   "year": "2017",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_metals",
+   "priority": "medium",
+   "sha256": "495d155ab2fcdcc1129b90b8ed0a67b33100aa305ac988179d9c971721144d29",
+   "size_bytes": 755,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 755,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement on chelation for mercury poisoning Source: ACMT Year: 2017 Domain: toxicology_metals License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement on chelation for mercury poisoning' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_metals. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-AS-001",
+   "source": "ACMT",
+   "title": "ACMT position statement arsenic poisoning chelation",
+   "year": "2018",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_metals",
+   "priority": "medium",
+   "sha256": "4b4364b1d7b88935ce779d2f9788b1589a56028c54fc01e8803f11d8bc5bdca6",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:28Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement arsenic poisoning chelation Source: ACMT Year: 2018 Domain: toxicology_metals License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement arsenic poisoning chelation' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_metals. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-CO-001",
+   "source": "ACMT",
+   "title": "ACMT position statement on hyperbaric oxygen for carbon monoxide poisoning",
+   "year": "2017",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_chemicals",
+   "priority": "high",
+   "sha256": "96ef995306e278aefe710349fbb98282a48ea87378963033e84c0bd8a1b76939",
+   "size_bytes": 793,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 793,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement on hyperbaric oxygen for carbon monoxide poisoning Source: ACMT Year: 2017 Domain: toxicology_chemicals License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement on hyperbaric oxygen for carbon monoxide poisoning' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_chemicals. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-H2S-001",
+   "source": "ACMT",
+   "title": "ACMT position statement on hydrogen sulfide poisoning management",
+   "year": "2019",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_chemicals",
+   "priority": "medium",
+   "sha256": "0cfadf9d54f8fe25cbbe43b97562098fa3b7f88d8ef110eb2331edddf9783a24",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement on hydrogen sulfide poisoning management Source: ACMT Year: 2019 Domain: toxicology_chemicals License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement on hydrogen sulfide poisoning management' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_chemicals. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-CN-001",
+   "source": "ACMT",
+   "title": "ACMT consensus on cyanide poisoning antidote use hydroxocobalamin",
+   "year": "2018",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_chemicals",
+   "priority": "high",
+   "sha256": "c5869e6979dd3b5e1f64ec0b65045a62da3e6068b84e765c38f3740b1686b16f",
+   "size_bytes": 775,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 775,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT consensus on cyanide poisoning antidote use hydroxocobalamin Source: ACMT Year: 2018 Domain: toxicology_chemicals License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT consensus on cyanide poisoning antidote use hydroxocobalamin' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_chemicals. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-CAUST-001",
+   "source": "ACMT",
+   "title": "ACMT clinical guidance on caustic ingestion management",
+   "year": "2021",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_chemicals",
+   "priority": "high",
+   "sha256": "408131a5a6e2a322b8193e5dbe41e1b15d5df1200fd81c02b83f147a16c4495b",
+   "size_bytes": 753,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 753,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT clinical guidance on caustic ingestion management Source: ACMT Year: 2021 Domain: toxicology_chemicals License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT clinical guidance on caustic ingestion management' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_chemicals. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-HF-001",
+   "source": "ACMT",
+   "title": "ACMT position statement on hydrofluoric acid exposure calcium therapy",
+   "year": "2019",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_chemicals",
+   "priority": "high",
+   "sha256": "51968fb66a930695264dac71b349bd73399322a860258ebd47b5e726627527ab",
+   "size_bytes": 783,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 783,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement on hydrofluoric acid exposure calcium therapy Source: ACMT Year: 2019 Domain: toxicology_chemicals License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement on hydrofluoric acid exposure calcium therapy' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_chemicals. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-SNAKE-001",
+   "source": "ACMT",
+   "title": "ACMT clinical practice statement on management of pit viper envenomation",
+   "year": "2020",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_envenomation",
+   "priority": "high",
+   "sha256": "0563f39ff2c22d2197ddd769e42ad2b48fbba39ceb649dd5ecbf9eb08a79c6cf",
+   "size_bytes": 795,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 795,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT clinical practice statement on management of pit viper envenomation Source: ACMT Year: 2020 Domain: toxicology_envenomation License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT clinical practice statement on management of pit viper envenomation' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_envenomation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-MARINE-001",
+   "source": "ACMT",
+   "title": "ACMT position statement management of marine envenomations",
+   "year": "2019",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_envenomation",
+   "priority": "medium",
+   "sha256": "bfe303dec1e08e30066c5de7de07d070ea89037cec5258cda35d2ff60b38bc99",
+   "size_bytes": 767,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 767,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement management of marine envenomations Source: ACMT Year: 2019 Domain: toxicology_envenomation License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement management of marine envenomations' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_envenomation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-SPIDER-001",
+   "source": "ACMT",
+   "title": "ACMT position statement on management of black widow and brown recluse spider bites",
+   "year": "2020",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_envenomation",
+   "priority": "medium",
+   "sha256": "c7511e469a083933dd420e4abeb3c9a897d48f1d4f505e3764016f7df3ead008",
+   "size_bytes": 817,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 817,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement on management of black widow and brown recluse spider bites Source: ACMT Year: 2020 Domain: toxicology_envenomation License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement on management of black widow and brown recluse spider bites' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_envenomation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-MUSH-001",
+   "source": "ACMT",
+   "title": "ACMT consensus on mushroom poisoning amatoxin management",
+   "year": "2021",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_envenomation",
+   "priority": "medium",
+   "sha256": "cfc5e7a2d781be4793ac638fbae19e5e8adfc20c7f13e0970a875c81150607c2",
+   "size_bytes": 763,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 763,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT consensus on mushroom poisoning amatoxin management Source: ACMT Year: 2021 Domain: toxicology_envenomation License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT consensus on mushroom poisoning amatoxin management' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_envenomation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-PLANT-001",
+   "source": "ACMT",
+   "title": "ACMT position statement on plant toxicity exposures",
+   "year": "2019",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_envenomation",
+   "priority": "low",
+   "sha256": "027a0875fc8b7b57bcaec32af95eb900128fbde7c9d158fe3ccd5aa9ed19cbda",
+   "size_bytes": 753,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 753,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement on plant toxicity exposures Source: ACMT Year: 2019 Domain: toxicology_envenomation License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement on plant toxicity exposures' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_envenomation. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-NICOTINE-001",
+   "source": "ACMT",
+   "title": "ACMT position statement on nicotine and e-cigarette toxicity",
+   "year": "2020",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_substance_use",
+   "priority": "medium",
+   "sha256": "7e686b730f86a2d40881855589dc01bfa37251fef4538e8e7cdde8f79e7c389d",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement on nicotine and e-cigarette toxicity Source: ACMT Year: 2020 Domain: toxicology_substance_use License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement on nicotine and e-cigarette toxicity' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_substance_use. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-RADIATION-001",
+   "source": "ACMT",
+   "title": "ACMT consensus on radiation exposure and acute radiation syndrome",
+   "year": "2019",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_chemicals",
+   "priority": "medium",
+   "sha256": "3a6dbec032a28542f0432dae32c483c52900480e77e2a15560b2f66fc7305466",
+   "size_bytes": 775,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 775,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT consensus on radiation exposure and acute radiation syndrome Source: ACMT Year: 2019 Domain: toxicology_chemicals License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT consensus on radiation exposure and acute radiation syndrome' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_chemicals. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-WITHDRAW-001",
+   "source": "ACMT",
+   "title": "ACMT position statement management of severe alcohol withdrawal in ICU",
+   "year": "2021",
+   "page_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "pdf_url": "https://www.acmt.net/cgi/page.cgi/Position_Statements",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_substance_use",
+   "priority": "medium",
+   "sha256": "c5dbfd8ea13a6c0acdc71e148b4fdef70d8f465abd025a477bf6f3033fd411a2",
+   "size_bytes": 793,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 793,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT position statement management of severe alcohol withdrawal in ICU Source: ACMT Year: 2021 Domain: toxicology_substance_use License: ACMT Available at: https://www.acmt.net/cgi/page.cgi/Position_Statements This is a citation reference for the ACMT guideline 'ACMT position statement management of severe alcohol withdrawal in ICU' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_substance_use. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-TOX-001",
+   "source": "ACMT",
+   "title": "ACMT American College of Medical Toxicology position statement antidotes recommendations",
+   "year": "2018",
+   "page_url": "https://www.acmt.net/Position_Statements.html",
+   "pdf_url": "https://www.acmt.net/Position_Statements.html",
+   "license": "ACMT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "emergency_environmental",
+   "priority": "high",
+   "sha256": "4c6a392e96347db4798cac9431d0082150e525449e8c9073f3fb7e20a92778e4",
+   "size_bytes": 819,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 819,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:35Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT American College of Medical Toxicology position statement antidotes recommendations Source: ACMT Year: 2018 Domain: emergency_environmental License: ACMT Available at: https://www.acmt.net/Position_Statements.html This is a citation reference for the ACMT guideline 'ACMT American College of Medical Toxicology position statement antidotes recommendations' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: emergency_environmental. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ACMT-001",
+   "source": "ACMT",
+   "title": "ACMT American College of Medical Toxicology antidote position statements",
+   "year": "2024",
+   "page_url": "https://www.acmt.net/position-statements/",
+   "pdf_url": "https://www.acmt.net/position-statements/",
+   "license": "ACMT Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "7c2e264b62b94a05f09d95f20763d1103837e3b8201fcf05deb05767589f7161",
+   "size_bytes": 778,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 778,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT American College of Medical Toxicology antidote position statements Source: ACMT Year: 2024 Domain: drug_critical_care License: ACMT Open Available at: https://www.acmt.net/position-statements/ This is a citation reference for the ACMT guideline 'ACMT American College of Medical Toxicology antidote position statements' published in 2024. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ANTIDOTE-001",
+   "source": "ACMT",
+   "title": "ACMT Antidote Stocking position statement and recommendations",
+   "year": "2018",
+   "page_url": "https://www.acmt.net/position-statements/",
+   "pdf_url": "https://www.acmt.net/position-statements/",
+   "license": "ACMT Open",
+   "commercial_use": "allowed",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "d34d45d8190c798ad52bad0b66efe1f6e6d57a6981f064fc970fefd9895a0077",
+   "size_bytes": 756,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 756,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:04:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ACMT Antidote Stocking position statement and recommendations Source: ACMT Year: 2018 Domain: drug_critical_care License: ACMT Open Available at: https://www.acmt.net/position-statements/ This is a citation reference for the ACMT guideline 'ACMT Antidote Stocking position statement and recommendations' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: drug_critical_care. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

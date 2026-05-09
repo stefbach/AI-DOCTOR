@@ -1,7 +1,7 @@
 {
  "source": "ESPN",
  "generated_at": "2026-05-09T12:18:35Z",
- "total_documents": 1,
+ "total_documents": 3,
  "documents": [
   {
    "id": "ESPN-CKDPED-001",
@@ -77,6 +77,56 @@
     {
      "chunk_index": 13,
      "content": "vitamin D insufficiency. Research is needed to evaluate whether profiling of vitamin D metabolites beyond 25(OH)D will improve risk stratification and provide therapeutic guidance The optimal frequency of 25(OH)D measurement should be investigated, taking into consideration different supplementation strategies (for example cholecaliferol versus extended-release calcifediol and different dosing regimens) (Pragmatic) trials are needed to evaluate the effect of nutritional vitamin D supplementation on meaningful skeletal and non-skeletal (particularly cardiovascular) outcomes across different stages of CKD and after kidney transplantation. Future trials should primarily include participants with clinically apparent vitamin D deficiency. CONCLUDING REMARKS Despite consistent associations between vitamin D deficiency and morbidity and mortality both in the general population and in patients with CKD, there is no conclusive evidence for a benefit of vitamin D supplementation on patient-relevant skeletal or non-skeletal outcomes. However, CKD is a setting of severely affected vitamin D metabolism, which contributes to the complex mineral metabolism disturbances of CKD-MBD, and vitamin D supplementation has been shown to improve the control of secondary hyperparathyroidism. Therefore, based on available evidence, we recommend monitoring for, and treating, vitamin D deficiency in adults and children with CKD across stages of disease and after kidney transplantation. Vitamin D supplementation is well-tolerated without prominent safety signals in CKD, but based on concerns raised in the background population, we suggest avoiding mega-doses of vitamin D and very high serum levels of 25(OH)D. Future research should focus on (pragmatic) clinical trials investigating the benefit of vitamin D supplementation on patient-relevant outcomes in the setting of vitamin D deficiency, across the spectrum of CKD. Supplementary Material gfae293_Supplemental_File"
+    }
+   ]
+  },
+  {
+   "id": "ESPN-STONE-001",
+   "source": "ESPN",
+   "title": "ESPN Recommendations on Pediatric Urolithiasis Diagnosis and Management",
+   "year": "2020",
+   "page_url": "https://www.espn-online.org/",
+   "pdf_url": "https://www.espn-online.org/",
+   "license": "ESPN",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "urology_stones",
+   "priority": "medium",
+   "sha256": "32ca5aa3a9001d2724ffdb3f92157ccc907edae78d5afcffe89430ff60825546",
+   "size_bytes": 750,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 750,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:10Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESPN Recommendations on Pediatric Urolithiasis Diagnosis and Management Source: ESPN Year: 2020 Domain: urology_stones License: ESPN Available at: https://www.espn-online.org/ This is a citation reference for the ESPN guideline 'ESPN Recommendations on Pediatric Urolithiasis Diagnosis and Management' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: urology_stones. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "ESPN-ENURESIS-001",
+   "source": "ESPN",
+   "title": "ESPN Recommendations on Daytime Lower Urinary Tract Conditions Children",
+   "year": "2020",
+   "page_url": "https://www.espn-online.org/",
+   "pdf_url": "https://www.espn-online.org/",
+   "license": "ESPN",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "urology_pediatric",
+   "priority": "medium",
+   "sha256": "31ba14fbffc6abbfa4a0701892e2c7b61cd3c8da3a2b4384df1e1f44bcf4cfc6",
+   "size_bytes": 756,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 756,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:10:12Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: ESPN Recommendations on Daytime Lower Urinary Tract Conditions Children Source: ESPN Year: 2020 Domain: urology_pediatric License: ESPN Available at: https://www.espn-online.org/ This is a citation reference for the ESPN guideline 'ESPN Recommendations on Daytime Lower Urinary Tract Conditions Children' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: urology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "IHI",
  "generated_at": "2026-05-09T16:22:41Z",
- "total_documents": 6,
+ "total_documents": 8,
  "documents": [
   {
    "id": "IHI-QI-001",
@@ -278,6 +278,56 @@
     {
      "chunk_index": 1,
      "content": "de l’IPECP. Conclusion : Une intégration accrue des étudiants en santé buccodentaire aux professions de la santé par l’entremise de l’IPECP et une exposition uniforme dans l’ensemble des programmes sont nécessaires. Le programme d’études de l’IPECP doit permettre à tous les étudiants d’explorer leurs contributions professionnelles aux équipes interprofessionnelles. La contribution de l’IPECP au développement d’une identité interprofessionnelle chez les étudiants en santé buccodentaire demeure sous-étudié; des analyses longitudinales et qualitatives sont nécessaires. collaborative practice interprofessional education interprofessional identity oral health education professional identity pmc-status-qastatus 0 pmc-status-live yes pmc-status-embargo no pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf yes pmc-prop-has-supplement yes pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc yes"
+    }
+   ]
+  },
+  {
+   "id": "IHI-QI-003",
+   "source": "IHI",
+   "title": "Quadruple Aim Framework Adding Clinician Wellbeing",
+   "year": "2014",
+   "page_url": "https://www.ihi.org/Topics/Quadruple-Aim/Pages/default.aspx",
+   "pdf_url": "https://www.ihi.org/Topics/Quadruple-Aim/Pages/default.aspx",
+   "license": "IHI",
+   "commercial_use": "restricted",
+   "clinical_domain": "quality_safety_systems",
+   "priority": "medium",
+   "sha256": "36ee96645289a2c56f62c5226cceabba896db62a45136942b5a2594e65625ddd",
+   "size_bytes": 752,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 752,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: Quadruple Aim Framework Adding Clinician Wellbeing Source: IHI Year: 2014 Domain: quality_safety_systems License: IHI Available at: https://www.ihi.org/Topics/Quadruple-Aim/Pages/default.aspx This is a citation reference for the IHI guideline 'Quadruple Aim Framework Adding Clinician Wellbeing' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: quality_safety_systems. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "IHI-QI-005",
+   "source": "IHI",
+   "title": "100000 Lives Campaign Bundles",
+   "year": "2006",
+   "page_url": "https://www.ihi.org/Engage/Initiatives/Completed/5MillionLivesCampaign/Pages/default.aspx",
+   "pdf_url": "https://www.ihi.org/Engage/Initiatives/Completed/5MillionLivesCampaign/Pages/default.aspx",
+   "license": "IHI",
+   "commercial_use": "restricted",
+   "clinical_domain": "quality_safety_systems",
+   "priority": "medium",
+   "sha256": "4a849a26dbbd44aee355099aae25dc170468dbeb8763d482a289b63614f681c8",
+   "size_bytes": 740,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 740,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:11:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: 100000 Lives Campaign Bundles Source: IHI Year: 2006 Domain: quality_safety_systems License: IHI Available at: https://www.ihi.org/Engage/Initiatives/Completed/5MillionLivesCampaign/Pages/default.aspx This is a citation reference for the IHI guideline '100000 Lives Campaign Bundles' published in 2006. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: quality_safety_systems. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

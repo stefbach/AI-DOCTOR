@@ -1,7 +1,7 @@
 {
  "source": "ISN",
  "generated_at": "2026-05-03T07:34:53Z",
- "total_documents": 3,
+ "total_documents": 4,
  "documents": [
   {
    "id": "ISN-002",
@@ -135,6 +135,31 @@
     {
      "chunk_index": 5,
      "content": "burden of adverse consequences. The current definition of AKI misses out significant proportion of CA-AKI and prevalent guidelines fail to recognize risk factors for CA-AKI. This inequity needs urgent attention. Active collaborative efforts and multi-disciplinary approaches with equitable representation from affected regions are required to find and test Interventions at community level that will improve outcomes in AKI."
+    }
+   ]
+  },
+  {
+   "id": "ISN-001",
+   "source": "ISN",
+   "title": "Pediatric AKI Recognition Treatment Tropical",
+   "year": "2017",
+   "page_url": "https://www.kidney-international.org/article/S0085-2538(17)30106-7/fulltext",
+   "pdf_url": "https://www.kidney-international.org/article/S0085-2538(17)30106-7/fulltext",
+   "license": "ISN ©",
+   "commercial_use": "restricted",
+   "clinical_domain": "pediatrics",
+   "priority": "high",
+   "sha256": "a5762c6aaf20f5908dc7fe503d68a3996661fe929f3bd34b8569898743fcf4d1",
+   "size_bytes": 1692,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1692,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:12:05Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Identifying acute kidney injury in children: comparing electronic alerts with health record data. Electronic (e-)alerts for rising serum creatinine values are increasingly used as clinical indicators of acute kidney injury (AKI). The aim of this study was to investigate to what degree AKI episodes, as identified using e-alerts, correlated with coding for AKI in the hospital record for a national cohort of hospitalised children and examine whether coding corresponded with 30-day mortality after an AKI episode. A cross-section of AKI episodes based on alerts issued for children under 18 years in England during 2017 were linked to hospital records. Multivariable logistic regression was used to examine patient and clinical factors associated with AKI coding. Agreement between coding and 30-day mortality was examined at hospital level. 6272 AKI episodes in 5582 hospitalised children were analysed. Overall, coding was poor (19.7%). Older age, living in the least deprived quintile (odds ratio (OR) 1.4, 95% Confidence Interval (CI) 1.1, 1.7) and higher peak AKI stage (stage 1 reference; stage 2 OR 2.0, 95% CI 1.7, 2.4; stage 3 OR 8.6, 95% CI 7.1, 10.6) were associated with higher likelihood of coding in the hospital record. AKI episodes during birth admissions were less likely to be coded (OR 0.4, 95% CI 0.3, 0.5). No correlation was seen between coding and 30-day mortality. The proportion of AKI alert-identified episodes coded in the hospital record is low, suggesting under-recognition and underestimation of AKI incidence. Understanding the reasons for inequalities in coding, variation in coding between hospitals and how alerts can enhance clinical recognition is needed."
     }
    ]
   }

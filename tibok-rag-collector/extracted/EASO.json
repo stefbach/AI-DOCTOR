@@ -1,7 +1,7 @@
 {
  "source": "EASO",
  "generated_at": "2026-05-09T13:27:58Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "EASO-OBES-001",
@@ -57,6 +57,31 @@
     {
      "chunk_index": 8,
      "content": "kidney disease which can negatively impact long-term survival ( LoE 2, strong consensus ). No specific issues related to MASLD are known to alter choice of medication or target values; the risk of recurrence of severe, fibrotic steatohepatitis reinforces the need to obtain optimal control of cardiometabolic risk factors ( LoE 5, strong consensus ). The benefit of controlling weight and obesity-related comorbidities on recurrence of MASLD post-liver transplant and on progression to advanced fibrosis is expected but needs to be demonstrated in dedicated trials ( LoE 5, strong consensus ). Recommendations In adults transplanted for MASLD-related end-stage liver disease, therapeutic interventions to control obesity and related cardiometabolic complications are recommended ( LoE 3, strong recommendation, strong consensus ). After liver transplantation, standard non-pharmacological dietary and lifestyle interventions should be universally implemented; pharmacological management of hypertension, type 2 diabetes and lipid disorders should be implemented according to general clinical guidelines ( LoE 3, strong recommendation, strong consensus ). GLP1 receptor agonists may be considered to control weight and obesity-related comorbidities, although specific trials in transplant recipients are needed ( LoE 5, weak recommendation, strong consensus ). Future directions Despite the enormous advances in the field, many important areas on the management of MASLD require further evidence to refine our clinical practice. Some of these areas, where further research is pressingly needed, are listed in Box 1. Supplementary Information Below is the link to the electronic supplementary material. ESM Tables (PDF 220 KB)"
+    }
+   ]
+  },
+  {
+   "id": "EASO-BARIATRIC-001",
+   "source": "EASO",
+   "title": "EASO Position Statement on Eligibility Criteria for Bariatric Surgery",
+   "year": "2014",
+   "page_url": "https://www.karger.com/Article/FullText/365116",
+   "pdf_url": "https://www.karger.com/Article/FullText/365116",
+   "license": "EASO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "digestive_surgery_bariatric",
+   "priority": "high",
+   "sha256": "7387e8c16b9b7a6905d7725244744f5a9ba8cf4dc9d7c353ba86a5bb2d5bbd16",
+   "size_bytes": 790,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 790,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:08:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: EASO Position Statement on Eligibility Criteria for Bariatric Surgery Source: EASO Year: 2014 Domain: digestive_surgery_bariatric License: EASO Available at: https://www.karger.com/Article/FullText/365116 This is a citation reference for the EASO guideline 'EASO Position Statement on Eligibility Criteria for Bariatric Surgery' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: digestive_surgery_bariatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }
