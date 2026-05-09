@@ -1,0 +1,305 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+AAO-PPP-CAT-001,AAO,AAO PPP cataract in the adult eye,2021,https://www.aao.org/preferred-practice-pattern/cataract-in-adult-eye-ppp-2021,,AAO PPP,restricted-cds,ophthalmology_anterior,high
+AAO-PPP-CAT-002,AAO,AAO PPP cataract pediatric evaluation and management,2022,https://www.aao.org/preferred-practice-pattern/pediatric-cataract-ppp,,AAO PPP,restricted-cds,ophthalmology_pediatric,high
+ESCRS-CAT-001,ESCRS,ESCRS guidelines for prevention and treatment of endophthalmitis,2013,https://www.escrs.org/endophthalmitis,,ESCRS,restricted-cds,ophthalmology_anterior,high
+ESCRS-CAT-002,ESCRS,ESCRS clinical trends survey on cataract refractive procedures,2023,https://www.escrs.org/publications/clinical-trends-survey,,ESCRS,restricted-cds,ophthalmology_anterior,medium
+ESCRS-CAT-003,ESCRS,ESCRS PREMED study perioperative cystoid macular edema prevention,2018,https://www.escrs.org/research/premed-study,,ESCRS,restricted-cds,ophthalmology_anterior,high
+ESCRS-CAT-004,ESCRS,ESCRS guidelines for femtosecond laser-assisted cataract surgery,2020,https://www.escrs.org/guidelines/flacs,,ESCRS,restricted-cds,ophthalmology_anterior,medium
+RCOPHTH-CAT-001,RCOphth,RCOphth cataract surgery guidelines,2018,https://www.rcophth.ac.uk/wp-content/uploads/2021/08/Cataract-Surgery-Guidelines-2018-1.pdf,,RCOphth,restricted-cds,ophthalmology_anterior,high
+RCOPHTH-CAT-002,RCOphth,RCOphth managing posterior capsular rupture during cataract surgery,2020,https://www.rcophth.ac.uk/clinical-guidelines/,,RCOphth,restricted-cds,ophthalmology_anterior,medium
+ASCRS-LASIK-001,ASCRS,ASCRS clinical practice guideline LASIK and screening for refractive surgery,2022,https://ascrs.org/clinical-resources/clinical-practice-guidelines,,ASCRS,restricted-cds,ophthalmology_anterior,high
+ASCRS-LASIK-002,ASCRS,ASCRS guidelines for management of post-refractive surgery ectasia,2021,https://ascrs.org/clinical-resources,,ASCRS,restricted-cds,ophthalmology_anterior,high
+ASCRS-SMILE-001,ASCRS,ASCRS SMILE small incision lenticule extraction position paper,2023,https://ascrs.org/clinical-resources,,ASCRS,restricted-cds,ophthalmology_anterior,medium
+ESCRS-REFR-001,ESCRS,ESCRS guidelines for refractive surgery patient selection,2019,https://www.escrs.org/guidelines/refractive,,ESCRS,restricted-cds,ophthalmology_anterior,high
+AAO-PPP-REFR-001,AAO,AAO PPP refractive errors and refractive surgery,2022,https://www.aao.org/preferred-practice-pattern/refractive-errors-refractive-surgery-ppp,,AAO PPP,restricted-cds,ophthalmology_anterior,high
+AAO-PPP-COR-001,AAO,AAO PPP bacterial keratitis,2018,https://www.aao.org/preferred-practice-pattern/bacterial-keratitis-ppp,,AAO PPP,restricted-cds,ophthalmology_anterior,high
+AAO-PPP-COR-002,AAO,AAO PPP corneal ectasia,2018,https://www.aao.org/preferred-practice-pattern/corneal-ectasia-ppp-2018,,AAO PPP,restricted-cds,ophthalmology_anterior,high
+AAO-PPP-COR-003,AAO,AAO PPP corneal edema and opacification,2018,https://www.aao.org/preferred-practice-pattern/corneal-edema-opacification-ppp-2018,,AAO PPP,restricted-cds,ophthalmology_anterior,high
+EUCORNEA-KC-001,EuCornea,EuCornea consensus on keratoconus diagnosis and management,2021,https://www.eucornea.org/guidelines,,EuCornea,restricted-cds,ophthalmology_anterior,high
+EUCORNEA-CXL-001,EuCornea,EuCornea guidelines for corneal cross-linking in progressive keratoconus,2020,https://www.eucornea.org/guidelines/cxl,,EuCornea,restricted-cds,ophthalmology_anterior,high
+EUCORNEA-DYS-001,EuCornea,EuCornea Fuchs endothelial corneal dystrophy management,2019,https://www.eucornea.org/guidelines/dystrophies,,EuCornea,restricted-cds,ophthalmology_anterior,medium
+EUCORNEA-HSV-001,EuCornea,EuCornea consensus on herpes simplex keratitis,2020,https://www.eucornea.org/guidelines/hsv,,EuCornea,restricted-cds,ophthalmology_anterior,high
+TFOS-DEWS-001,TFOS,TFOS DEWS II definition and classification of dry eye disease,2017,https://www.tearfilm.org/dewsii-definitionclassification/,,TFOS,restricted-cds,ophthalmology_anterior,high
+TFOS-DEWS-002,TFOS,TFOS DEWS II diagnostic methodology report,2017,https://www.tearfilm.org/dewsii-diagnosticmethodology/,,TFOS,restricted-cds,ophthalmology_anterior,high
+TFOS-DEWS-003,TFOS,TFOS DEWS II management and therapy report,2017,https://www.tearfilm.org/dewsii-managementtherapy/,,TFOS,restricted-cds,ophthalmology_anterior,high
+TFOS-DEWS-004,TFOS,TFOS DEWS II pain and sensation report,2017,https://www.tearfilm.org/dewsii-painsensation/,,TFOS,restricted-cds,ophthalmology_anterior,medium
+TFOS-DEWS-005,TFOS,TFOS DEWS II tear film report,2017,https://www.tearfilm.org/dewsii-tearfilm/,,TFOS,restricted-cds,ophthalmology_anterior,medium
+TFOS-LIFESTYLE-001,TFOS,TFOS Lifestyle workshop digital environment and dry eye,2023,https://www.tearfilm.org/lifestyle/,,TFOS,restricted-cds,ophthalmology_anterior,medium
+AAO-PPP-DRY-001,AAO,AAO PPP dry eye syndrome,2018,https://www.aao.org/preferred-practice-pattern/dry-eye-syndrome-ppp-2018,,AAO PPP,restricted-cds,ophthalmology_anterior,high
+AAO-PPP-CONJ-001,AAO,AAO PPP conjunctivitis,2018,https://www.aao.org/preferred-practice-pattern/conjunctivitis-ppp-2018,,AAO PPP,restricted-cds,ophthalmology_anterior,high
+AAO-PPP-BLE-001,AAO,AAO PPP blepharitis,2018,https://www.aao.org/preferred-practice-pattern/blepharitis-ppp-2018,,AAO PPP,restricted-cds,ophthalmology_anterior,medium
+AAAAI-OCALLERG-001,AAAAI,AAAAI practice parameter for allergic conjunctivitis,2020,https://www.aaaai.org/practice-resources/practice-parameters,,AAAAI,restricted-cds,ophthalmology_anterior,medium
+AAO-PPP-UVE-001,AAO,AAO PPP uveitis,2019,https://www.aao.org/education/preferred-practice-pattern/uveitis-ppp,,AAO PPP,restricted-cds,ophthalmology_anterior,high
+IUSG-UVE-001,IUSG,IUSG standardization of uveitis nomenclature classification,2019,https://www.iusg.net/guidelines,,IUSG,restricted-cds,ophthalmology_anterior,high
+SUN-UVE-001,SUN,SUN working group standardization of uveitis nomenclature for reporting clinical data,2005,https://www.sunworkinggroup.org/,,SUN,restricted-cds,ophthalmology_anterior,high
+SUN-UVE-002,SUN,SUN classification criteria for noninfectious anterior uveitis,2021,https://www.sunworkinggroup.org/criteria,,SUN,restricted-cds,ophthalmology_anterior,high
+SUN-UVE-003,SUN,SUN classification criteria for Behcet uveitis,2021,https://www.sunworkinggroup.org/behcet,,SUN,restricted-cds,ophthalmology_anterior,medium
+SUN-UVE-004,SUN,SUN classification criteria for sarcoid uveitis,2021,https://www.sunworkinggroup.org/sarcoid,,SUN,restricted-cds,ophthalmology_anterior,medium
+SUN-UVE-005,SUN,SUN classification criteria for Vogt-Koyanagi-Harada disease,2021,https://www.sunworkinggroup.org/vkh,,SUN,restricted-cds,ophthalmology_anterior,medium
+AAO-PPP-DR-001,AAO,AAO PPP diabetic retinopathy,2019,https://www.aao.org/preferred-practice-pattern/diabetic-retinopathy-ppp,,AAO PPP,restricted-cds,ophthalmology_retina,high
+ICO-DR-001,ICO,ICO guidelines for diabetic eye care,2017,https://icoph.org/eye-care-delivery/diabetic-eye-care/,,ICO,allowed,ophthalmology_retina,high
+IDF-DR-001,IDF,IDF diabetes eye health guidelines,2019,https://www.idf.org/our-activities/care-prevention/eye-health,,IDF,allowed,ophthalmology_retina,high
+ETDRS-DR-001,ETDRS,ETDRS early treatment diabetic retinopathy study report severity scale,1991,https://www.nei.nih.gov/research/clinical-trials/etdrs,,ETDRS,allowed,ophthalmology_retina,high
+EURETINA-DR-001,EURETINA,EURETINA guidelines for management of diabetic macular edema,2019,https://www.euretina.org/guidelines/diabetic-macular-edema/,,EURETINA,restricted-cds,ophthalmology_retina,high
+AAO-PPP-AMD-001,AAO,AAO PPP age-related macular degeneration,2019,https://www.aao.org/preferred-practice-pattern/age-related-macular-degeneration-ppp,,AAO PPP,restricted-cds,ophthalmology_retina,high
+EURETINA-AMD-001,EURETINA,EURETINA guidelines for management of neovascular age-related macular degeneration,2020,https://www.euretina.org/guidelines/amd/,,EURETINA,restricted-cds,ophthalmology_retina,high
+EURETINA-AMD-002,EURETINA,EURETINA recommendations for treat and extend regimens in neovascular AMD,2021,https://www.euretina.org/guidelines/treat-and-extend/,,EURETINA,restricted-cds,ophthalmology_retina,high
+EURETINA-GA-001,EURETINA,EURETINA expert consensus on geographic atrophy management,2023,https://www.euretina.org/guidelines/geographic-atrophy/,,EURETINA,restricted-cds,ophthalmology_retina,medium
+AAO-PPP-RVO-001,AAO,AAO PPP retinal vein occlusions,2019,https://www.aao.org/preferred-practice-pattern/retinal-vein-occlusions-ppp,,AAO PPP,restricted-cds,ophthalmology_retina,high
+EURETINA-RVO-001,EURETINA,EURETINA guidelines for management of retinal vein occlusion,2019,https://www.euretina.org/guidelines/rvo/,,EURETINA,restricted-cds,ophthalmology_retina,high
+AAO-PPP-CRAO-001,AAO,AAO PPP central and branch retinal artery occlusion clinical statement,2021,https://www.aao.org/clinical-statement/central-retinal-artery-occlusion,,AAO PPP,restricted-cds,ophthalmology_retina,high
+AAO-PPP-RD-001,AAO,AAO PPP posterior vitreous detachment retinal breaks and lattice degeneration,2019,https://www.aao.org/preferred-practice-pattern/posterior-vitreous-detachment-retinal-breaks-latti,,AAO PPP,restricted-cds,ophthalmology_retina,high
+ASRS-RD-001,ASRS,ASRS clinical update on rhegmatogenous retinal detachment,2022,https://www.asrs.org/clinical/clinical-updates,,ASRS,restricted-cds,ophthalmology_retina,high
+ASRS-RD-002,ASRS,ASRS preferences and trends survey on retinal detachment surgery,2023,https://www.asrs.org/clinical/pat-survey,,ASRS,restricted-cds,ophthalmology_retina,medium
+EURETINA-RD-001,EURETINA,EURETINA recommendations for surgical management of rhegmatogenous retinal detachment,2020,https://www.euretina.org/guidelines/retinal-detachment/,,EURETINA,restricted-cds,ophthalmology_retina,high
+ASRS-MH-001,ASRS,ASRS clinical update on macular hole surgery,2021,https://www.asrs.org/clinical/clinical-updates,,ASRS,restricted-cds,ophthalmology_retina,high
+ASRS-ERM-001,ASRS,ASRS clinical update on epiretinal membrane,2021,https://www.asrs.org/clinical/clinical-updates,,ASRS,restricted-cds,ophthalmology_retina,medium
+AAO-PVD-001,AAO,AAO clinical statement on symptomatic vitreous floaters and posterior vitreous detachment,2020,https://www.aao.org/clinical-statement/floaters-pvd,,AAO,restricted-cds,ophthalmology_retina,medium
+AAP-ROP-001,AAP,AAP screening examination of premature infants for retinopathy of prematurity,2018,https://publications.aap.org/pediatrics/article/142/6/e20183061/37425/,,AAP,restricted-cds,ophthalmology_pediatric,high
+AAO-ROP-001,AAO,AAO ROP international classification of retinopathy of prematurity third edition,2021,https://www.aao.org/clinical-statement/rop-classification,,AAO,restricted-cds,ophthalmology_pediatric,high
+BAPM-ROP-001,BAPM,BAPM UK ROP guideline screening and treatment of retinopathy of prematurity,2022,https://www.bapm.org/resources/rop-guideline,,BAPM,restricted-cds,ophthalmology_pediatric,high
+AAO-IRD-001,AAO,AAO recommendations on clinical assessment of inherited retinal diseases,2022,https://www.aao.org/clinical-statement/inherited-retinal-diseases,,AAO,restricted-cds,ophthalmology_retina,medium
+AAO-IRD-002,AAO,AAO recommendations on genetic testing for inherited eye diseases,2022,https://www.aao.org/clinical-statement/genetic-testing-eye-disease,,AAO,restricted-cds,ophthalmology_retina,medium
+AAO-MELANOMA-001,AAO,AAO clinical guidance on choroidal and uveal melanoma management,2022,https://www.aao.org/clinical-statement/uveal-melanoma,,AAO,restricted-cds,ophthalmology_oncology,high
+AAO-ENDO-001,AAO,AAO clinical statement on postoperative endophthalmitis prevention,2021,https://www.aao.org/clinical-statement/endophthalmitis,,AAO,restricted-cds,ophthalmology_anterior,high
+ESCRS-ENDO-001,ESCRS,ESCRS endophthalmitis prophylaxis intracameral cefuroxime guideline,2013,https://www.escrs.org/endophthalmitis/guidelines,,ESCRS,restricted-cds,ophthalmology_anterior,high
+AAO-PPP-POAG-001,AAO,AAO PPP primary open-angle glaucoma,2020,https://www.aao.org/preferred-practice-pattern/primary-open-angle-glaucoma-ppp,,AAO PPP,restricted-cds,ophthalmology_glaucoma,high
+AAO-PPP-POAGS-001,AAO,AAO PPP primary open-angle glaucoma suspect,2020,https://www.aao.org/preferred-practice-pattern/primary-open-angle-glaucoma-suspect-ppp,,AAO PPP,restricted-cds,ophthalmology_glaucoma,high
+EGS-GUIDE-001,EGS,EGS terminology and guidelines for glaucoma 5th edition,2020,https://www.eugs.org/eng/EGS_guidelines.asp,,EGS,restricted-cds,ophthalmology_glaucoma,high
+EGS-GUIDE-002,EGS,EGS guidelines on selective laser trabeculoplasty as first-line therapy,2022,https://www.eugs.org/eng/guidelines/slt,,EGS,restricted-cds,ophthalmology_glaucoma,high
+AGS-GLAU-001,AGS,AGS position statement on minimally invasive glaucoma surgery,2021,https://www.americanglaucomasociety.net/position-statements,,AGS,restricted-cds,ophthalmology_glaucoma,medium
+AGS-GLAU-002,AGS,AGS clinical statement on glaucoma medication adherence,2020,https://www.americanglaucomasociety.net/position-statements,,AGS,restricted-cds,ophthalmology_glaucoma,medium
+AAO-PPP-PACG-001,AAO,AAO PPP primary angle closure disease,2020,https://www.aao.org/preferred-practice-pattern/primary-angle-closure-disease-ppp,,AAO PPP,restricted-cds,ophthalmology_glaucoma,high
+EGS-PACG-001,EGS,EGS guidance on management of acute angle closure crisis,2021,https://www.eugs.org/eng/guidelines/acg,,EGS,restricted-cds,ophthalmology_glaucoma,high
+CGRN-CHILDGLA-001,CGRN,CGRN consensus on childhood glaucoma classification and definitions,2013,https://www.wgweb.org/childhood-glaucoma-research-network,,CGRN,restricted-cds,ophthalmology_pediatric,high
+CGRN-CHILDGLA-002,CGRN,CGRN guidelines for surgical management of pediatric glaucoma,2018,https://www.wgweb.org/cgrn,,CGRN,restricted-cds,ophthalmology_pediatric,medium
+AAO-SECGLA-001,AAO,AAO clinical statement on uveitic and neovascular glaucoma management,2021,https://www.aao.org/clinical-statement/secondary-glaucoma,,AAO,restricted-cds,ophthalmology_glaucoma,medium
+AAO-ON-001,AAO,AAO clinical statement on optic neuritis evaluation and treatment,2020,https://www.aao.org/clinical-statement/optic-neuritis,,AAO,restricted-cds,ophthalmology_neuro,high
+AAN-ON-001,AAN,AAN practice parameter optic neuritis evidence-based recommendations,2008,https://www.aan.com/Guidelines/home/GuidelineDetail/293,,AAN,restricted-cds,ophthalmology_neuro,high
+AAO-AION-001,AAO,AAO clinical guidance on nonarteritic anterior ischemic optic neuropathy,2021,https://www.aao.org/clinical-statement/aion,,AAO,restricted-cds,ophthalmology_neuro,high
+AAO-GCA-001,AAO,AAO clinical statement on giant cell arteritis and arteritic AION,2020,https://www.aao.org/clinical-statement/gca-aion,,AAO,restricted-cds,ophthalmology_neuro,high
+AAO-IIH-001,AAO,AAO consensus on idiopathic intracranial hypertension and papilledema,2021,https://www.aao.org/clinical-statement/iih-papilledema,,AAO,restricted-cds,ophthalmology_neuro,high
+AAO-DIPL-001,AAO,AAO clinical guidance on evaluation of acute diplopia,2021,https://www.aao.org/clinical-statement/diplopia-evaluation,,AAO,restricted-cds,ophthalmology_neuro,medium
+AAO-PUPIL-001,AAO,AAO clinical guidance on pupillary disorders Adie Horner RAPD,2020,https://www.aao.org/clinical-statement/pupillary-disorders,,AAO,restricted-cds,ophthalmology_neuro,medium
+AAO-VF-001,AAO,AAO clinical guidance on visual field defect interpretation,2021,https://www.aao.org/clinical-statement/visual-field-defects,,AAO,restricted-cds,ophthalmology_neuro,medium
+AAPOS-STRAB-001,AAPOS,AAPOS basic clinical and surgical management of strabismus,2022,https://aapos.org/clinical-resources/strabismus,,AAPOS,restricted-cds,ophthalmology_pediatric,high
+AAO-PPP-STRAB-001,AAO,AAO PPP esotropia and exotropia,2017,https://www.aao.org/preferred-practice-pattern/esotropia-exotropia-ppp-2017,,AAO PPP,restricted-cds,ophthalmology_pediatric,high
+AAO-PPP-AMB-001,AAO,AAO PPP amblyopia,2017,https://www.aao.org/preferred-practice-pattern/amblyopia-ppp-2017,,AAO PPP,restricted-cds,ophthalmology_pediatric,high
+AAPOS-AMB-001,AAPOS,AAPOS clinical care recommendation amblyopia screening and treatment,2021,https://aapos.org/clinical-resources/amblyopia,,AAPOS,restricted-cds,ophthalmology_pediatric,high
+AAP-VISION-001,AAP,AAP visual system assessment in infants children and young adults,2016,https://publications.aap.org/pediatrics/article/137/1/e20153596/,,AAP,restricted-cds,ophthalmology_pediatric,high
+AAPOS-VISIONSCREEN-001,AAPOS,AAPOS vision screening recommendations for children,2022,https://aapos.org/clinical-resources/vision-screening,,AAPOS,restricted-cds,ophthalmology_pediatric,high
+USPSTF-VISION-001,USPSTF,USPSTF recommendation vision screening in children ages 3 to 5 years,2022,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/vision-in-children-ages-6-months-to-5-years-screening,,USPSTF,allowed,ophthalmology_pediatric,high
+USPSTF-VISIONADULT-001,USPSTF,USPSTF recommendation impaired visual acuity screening in older adults,2022,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/impaired-visual-acuity-screening-older-adults,,USPSTF,allowed,ophthalmology_neuro,medium
+AAPOS-CONGCAT-001,AAPOS,AAPOS guidance on congenital cataract evaluation and management,2021,https://aapos.org/clinical-resources/congenital-cataract,,AAPOS,restricted-cds,ophthalmology_pediatric,high
+AAO-OSSN-001,AAO,AAO clinical statement on ocular surface squamous neoplasia,2020,https://www.aao.org/clinical-statement/ossn,,AAO,restricted-cds,ophthalmology_oncology,medium
+AAO-EYELID-001,AAO,AAO clinical guidance on eyelid tumor evaluation and management,2021,https://www.aao.org/clinical-statement/eyelid-tumors,,AAO,restricted-cds,ophthalmology_oncology,medium
+AAO-PPP-BLEPH-001,AAO,AAO PPP blepharoplasty and dermatochalasis,2018,https://www.aao.org/preferred-practice-pattern/blepharoplasty-ppp,,AAO PPP,restricted-cds,ophthalmology_oculoplastic,medium
+AAO-LACRIMAL-001,AAO,AAO clinical guidance on adult lacrimal drainage disorders,2021,https://www.aao.org/clinical-statement/lacrimal-disorders,,AAO,restricted-cds,ophthalmology_oculoplastic,medium
+AAO-ORBFRX-001,AAO,AAO clinical guidance on orbital floor and wall fractures,2021,https://www.aao.org/clinical-statement/orbital-fractures,,AAO,restricted-cds,ophthalmology_trauma,high
+EUGOGO-TED-001,EUGOGO,EUGOGO guidelines for management of Graves orbitopathy,2021,https://www.eugogo.eu/guidelines,,EUGOGO,restricted-cds,ophthalmology_oculoplastic,high
+EUGOGO-TED-002,EUGOGO,EUGOGO clinical activity score and severity assessment of thyroid eye disease,2021,https://www.eugogo.eu/cas,,EUGOGO,restricted-cds,ophthalmology_oculoplastic,high
+ATA-TED-001,ATA,ATA consensus on management of thyroid eye disease,2022,https://www.thyroid.org/professionals/ata-clinical-guidelines/,,ATA,restricted-cds,ophthalmology_oculoplastic,high
+AAO-ORBTUM-001,AAO,AAO clinical guidance on orbital tumors evaluation and management,2021,https://www.aao.org/clinical-statement/orbital-tumors,,AAO,restricted-cds,ophthalmology_oncology,medium
+AAO-OPENGLOBE-001,AAO,AAO clinical guidance on open globe injury initial management,2021,https://www.aao.org/clinical-statement/open-globe,,AAO,restricted-cds,ophthalmology_trauma,high
+AAO-CHEMBURN-001,AAO,AAO clinical guidance on ocular chemical burns,2020,https://www.aao.org/clinical-statement/chemical-burns,,AAO,restricted-cds,ophthalmology_trauma,high
+AAO-HYPHEMA-001,AAO,AAO clinical guidance on traumatic hyphema management,2020,https://www.aao.org/clinical-statement/hyphema,,AAO,restricted-cds,ophthalmology_trauma,medium
+IMI-MYOPIA-001,IMI,IMI international myopia institute clinical management guidelines,2021,https://myopiainstitute.org/imi-white-papers/,,IMI,restricted-cds,ophthalmology_anterior,high
+IMI-MYOPIA-002,IMI,IMI defining and classifying myopia,2019,https://myopiainstitute.org/imi-white-papers/,,IMI,restricted-cds,ophthalmology_anterior,medium
+IMI-MYOPIA-003,IMI,IMI risk factors for myopia and onset prevention,2021,https://myopiainstitute.org/imi-white-papers/,,IMI,restricted-cds,ophthalmology_anterior,medium
+AAO-PRESBYOPIA-001,AAO,AAO clinical guidance on presbyopia evaluation and treatment options,2022,https://www.aao.org/clinical-statement/presbyopia,,AAO,restricted-cds,ophthalmology_anterior,medium
+AAO-OCT-001,AAO,AAO clinical guidance on optical coherence tomography in retinal disease,2021,https://www.aao.org/clinical-statement/oct-retinal,,AAO,restricted-cds,ophthalmology_retina,high
+EURETINA-OCT-001,EURETINA,EURETINA OCT angiography clinical interpretation guidelines,2022,https://www.euretina.org/guidelines/oct-angiography/,,EURETINA,restricted-cds,ophthalmology_retina,medium
+AAO-FA-001,AAO,AAO clinical guidance on fluorescein angiography indications and interpretation,2021,https://www.aao.org/clinical-statement/fluorescein-angiography,,AAO,restricted-cds,ophthalmology_retina,medium
+AAO-ERG-001,AAO,AAO clinical guidance on electrophysiological testing ERG VEP,2020,https://www.aao.org/clinical-statement/electrophysiology,,AAO,restricted-cds,ophthalmology_retina,low
+AAO-HNS-OE-001,AAO-HNS,AAO-HNS clinical practice guideline acute otitis externa update,2014,https://journals.sagepub.com/doi/10.1177/0194599813517083,,AAO-HNS,restricted-cds,ent_otology,high
+IDSA-OE-001,IDSA,IDSA practice guidelines for diagnosis and management of skin and soft tissue infections including otitis externa,2014,https://www.idsociety.org/practice-guideline/skin-and-soft-tissue-infections/,,IDSA,allowed,ent_otology,medium
+AAP-AOM-001,AAP,AAP clinical practice guideline diagnosis and management of acute otitis media,2013,https://publications.aap.org/pediatrics/article/131/3/e964/30912/,,AAP,restricted-cds,ent_otology,high
+AAO-HNS-OM-001,AAO-HNS,AAO-HNS clinical practice guideline tympanostomy tubes in children update,2022,https://journals.sagepub.com/doi/10.1177/01945998211065662,,AAO-HNS,restricted-cds,ent_otology,high
+AAO-HNS-OME-001,AAO-HNS,AAO-HNS clinical practice guideline otitis media with effusion update,2016,https://journals.sagepub.com/doi/10.1177/0194599815623467,,AAO-HNS,restricted-cds,ent_otology,high
+AAFP-AOM-001,AAFP,AAFP clinical practice guideline acute otitis media in children,2019,https://www.aafp.org/pubs/afp/issues/2019/0915/p350.html,,AAFP,allowed,ent_otology,medium
+AAO-HNS-CSOM-001,AAO-HNS,AAO-HNS clinical consensus statement chronic suppurative otitis media,2021,https://journals.sagepub.com/doi/10.1177/01945998211030698,,AAO-HNS,restricted-cds,ent_otology,high
+AAO-HNS-CHOLE-001,AAO-HNS,AAO-HNS clinical consensus on cholesteatoma management,2022,https://journals.sagepub.com/doi/10.1177/01945998221080796,,AAO-HNS,restricted-cds,ent_otology,high
+AAO-HNS-SSHL-001,AAO-HNS,AAO-HNS clinical practice guideline sudden hearing loss update,2019,https://journals.sagepub.com/doi/10.1177/0194599819859885,,AAO-HNS,restricted-cds,ent_otology,high
+AAO-HNS-MENIERE-001,AAO-HNS,AAO-HNS clinical practice guideline Meniere disease,2020,https://journals.sagepub.com/doi/10.1177/0194599820909438,,AAO-HNS,restricted-cds,ent_otology,high
+BARANY-MEN-001,Barany,Barany Society diagnostic criteria for Meniere disease,2015,https://www.thebaranysociety.org/diagnostic-criteria,,Barany,restricted-cds,ent_otology,high
+BARANY-VEST-001,Barany,Barany Society classification of vestibular disorders,2015,https://www.thebaranysociety.org/classification,,Barany,restricted-cds,ent_otology,high
+BARANY-VM-001,Barany,Barany Society diagnostic criteria for vestibular migraine,2012,https://www.thebaranysociety.org/vestibular-migraine,,Barany,restricted-cds,ent_otology,high
+BARANY-PPPD-001,Barany,Barany Society diagnostic criteria for persistent postural-perceptual dizziness,2017,https://www.thebaranysociety.org/pppd,,Barany,restricted-cds,ent_otology,medium
+BARANY-BVP-001,Barany,Barany Society diagnostic criteria for bilateral vestibulopathy,2017,https://www.thebaranysociety.org/bvp,,Barany,restricted-cds,ent_otology,medium
+AAO-HNS-BPPV-001,AAO-HNS,AAO-HNS clinical practice guideline benign paroxysmal positional vertigo update,2017,https://journals.sagepub.com/doi/10.1177/0194599816689667,,AAO-HNS,restricted-cds,ent_otology,high
+BARANY-BPPV-001,Barany,Barany Society diagnostic criteria for benign paroxysmal positional vertigo,2015,https://www.thebaranysociety.org/bppv,,Barany,restricted-cds,ent_otology,high
+AAO-HNS-TINN-001,AAO-HNS,AAO-HNS clinical practice guideline tinnitus,2014,https://journals.sagepub.com/doi/10.1177/0194599814545325,,AAO-HNS,restricted-cds,ent_otology,high
+NICE-TINN-001,NICE,NICE guideline tinnitus assessment and management,2020,https://www.nice.org.uk/guidance/ng155,,NICE,allowed,ent_otology,high
+USPSTF-HEARING-001,USPSTF,USPSTF recommendation hearing loss screening in older adults,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hearing-loss-in-older-adults-screening,,USPSTF,allowed,ent_otology,high
+AAO-HNS-HEARLOSS-001,AAO-HNS,AAO-HNS clinical practice guideline age-related hearing loss management,2023,https://journals.sagepub.com/doi/10.1177/01945998231211717,,AAO-HNS,restricted-cds,ent_otology,high
+BSA-AUDIO-001,BSA,BSA practice guidance pure tone audiometry,2018,https://www.thebsa.org.uk/resources/,,BSA,restricted-cds,ent_otology,medium
+BSA-TYMP-001,BSA,BSA recommended procedure tympanometry,2013,https://www.thebsa.org.uk/resources/,,BSA,restricted-cds,ent_otology,medium
+BAA-HA-001,BAA,BAA guidance on hearing aid services for adults,2022,https://www.baaudiology.org/professional-guidance/,,BAA,restricted-cds,ent_otology,medium
+ASHA-HA-001,ASHA,ASHA preferred practice patterns for hearing aid fitting,2021,https://www.asha.org/practice-portal/professional-issues/hearing-aids/,,ASHA,allowed,ent_otology,medium
+AAO-HNS-CI-001,AAO-HNS,AAO-HNS position statement on cochlear implants in adults and children,2020,https://www.entnet.org/resource/position-statement-cochlear-implants/,,AAO-HNS,restricted-cds,ent_otology,high
+BCIG-CI-001,BCIG,BCIG quality standards for cochlear implant services,2021,https://www.bcig.org.uk/quality-standards/,,BCIG,restricted-cds,ent_otology,medium
+AAO-HNS-OTOSCL-001,AAO-HNS,AAO-HNS clinical consensus on otosclerosis management,2021,https://www.entnet.org/resource/otosclerosis,,AAO-HNS,restricted-cds,ent_otology,medium
+JCIH-NHS-001,JCIH,JCIH year 2019 position statement on principles and guidelines for early hearing detection,2019,https://www.jcih.org/JCIH_2019_Position_Statement.pdf,,JCIH,restricted-cds,ent_pediatric,high
+AAP-HEARSCREEN-001,AAP,AAP universal newborn hearing screening detection and intervention,2017,https://publications.aap.org/pediatrics/article/140/4/e20171902/,,AAP,restricted-cds,ent_pediatric,high
+AAO-HNS-VERTIGO-001,AAO-HNS,AAO-HNS clinical guidance on evaluation of dizziness and vertigo in adults,2022,https://journals.sagepub.com/doi/10.1177/01945998221100850,,AAO-HNS,restricted-cds,ent_otology,high
+AAO-HNS-BELL-001,AAO-HNS,AAO-HNS clinical practice guideline Bell palsy,2013,https://journals.sagepub.com/doi/10.1177/0194599813505967,,AAO-HNS,restricted-cds,ent_otology,high
+AAN-BELL-001,AAN,AAN evidence-based guideline update steroids and antivirals for Bell palsy,2012,https://www.aan.com/Guidelines/home/GuidelineDetail/567,,AAN,restricted-cds,ent_otology,high
+ARIA-AR-001,ARIA,ARIA allergic rhinitis and its impact on asthma 2019 update,2019,https://www.ariaguidelines.org/,,ARIA,restricted-cds,ent_rhinology,high
+EAACI-AR-001,EAACI,EAACI guideline on allergen immunotherapy for allergic rhinoconjunctivitis,2018,https://www.eaaci.org/resources/guidelines/,,EAACI,restricted-cds,ent_rhinology,high
+AAAAI-AR-001,AAAAI,AAAAI practice parameter allergic rhinitis update,2020,https://www.aaaai.org/practice-resources/practice-parameters,,AAAAI,restricted-cds,ent_rhinology,high
+AAO-HNS-AR-001,AAO-HNS,AAO-HNS clinical practice guideline allergic rhinitis,2015,https://journals.sagepub.com/doi/10.1177/0194599814561600,,AAO-HNS,restricted-cds,ent_rhinology,high
+AAO-HNS-ARS-001,AAO-HNS,AAO-HNS clinical practice guideline adult sinusitis update,2015,https://journals.sagepub.com/doi/10.1177/0194599815572097,,AAO-HNS,restricted-cds,ent_rhinology,high
+IDSA-RS-001,IDSA,IDSA clinical practice guideline acute bacterial rhinosinusitis,2012,https://www.idsociety.org/practice-guideline/acute-bacterial-rhinosinusitis/,,IDSA,allowed,ent_rhinology,high
+EPOS-CRS-001,EPOS,EPOS European position paper on rhinosinusitis and nasal polyps 2020,2020,https://epos2020.com/,,EPOS,restricted-cds,ent_rhinology,high
+EPOS-CRS-002,EPOS,EPOS pocket guide for primary care management of rhinosinusitis,2020,https://epos2020.com/pocket-guide,,EPOS,restricted-cds,ent_rhinology,high
+AAO-HNS-CRS-001,AAO-HNS,AAO-HNS clinical practice guideline chronic rhinosinusitis,2015,https://journals.sagepub.com/doi/10.1177/0194599815572097,,AAO-HNS,restricted-cds,ent_rhinology,high
+EPOS-NP-001,EPOS,EPOS recommendations for biologics in chronic rhinosinusitis with nasal polyps,2021,https://epos2020.com/biologics,,EPOS,restricted-cds,ent_rhinology,high
+AAO-HNS-SEPTO-001,AAO-HNS,AAO-HNS clinical consensus on septoplasty for nasal airway obstruction,2020,https://www.entnet.org/resource/septoplasty,,AAO-HNS,restricted-cds,ent_rhinology,medium
+AAO-HNS-EPI-001,AAO-HNS,AAO-HNS clinical practice guideline nosebleed epistaxis,2020,https://journals.sagepub.com/doi/10.1177/0194599819890327,,AAO-HNS,restricted-cds,ent_rhinology,high
+AAO-HNS-OLF-001,AAO-HNS,AAO-HNS clinical practice guideline olfactory dysfunction,2022,https://journals.sagepub.com/doi/10.1177/01945998221086998,,AAO-HNS,restricted-cds,ent_rhinology,high
+UPSIT-OLF-001,UPSIT,UPSIT University of Pennsylvania smell identification test reference manual,2020,https://sensonics.com/upsit/,,UPSIT,restricted,ent_rhinology,low
+IDSA-PHAR-001,IDSA,IDSA clinical practice guideline group A streptococcal pharyngitis,2012,https://www.idsociety.org/practice-guideline/strep-throat/,,IDSA,allowed,ent_laryngology,high
+AAP-PHAR-001,AAP,AAP clinical report group A streptococcal pharyngitis,2018,https://publications.aap.org/pediatrics/article/142/4/e20182438/,,AAP,restricted-cds,ent_pediatric,high
+AAO-HNS-PHAR-001,AAO-HNS,AAO-HNS clinical guidance on adult sore throat evaluation,2021,https://www.entnet.org/resource/sore-throat,,AAO-HNS,restricted-cds,ent_laryngology,medium
+AAO-HNS-TONS-001,AAO-HNS,AAO-HNS clinical practice guideline tonsillectomy in children update,2019,https://journals.sagepub.com/doi/10.1177/0194599818801757,,AAO-HNS,restricted-cds,ent_pediatric,high
+NICE-TONS-001,NICE,NICE guidance on tonsillectomy referral indications,2022,https://www.nice.org.uk/guidance/ng150,,NICE,allowed,ent_laryngology,medium
+AAO-HNS-ADENO-001,AAO-HNS,AAO-HNS clinical consensus on adenoidectomy indications,2021,https://www.entnet.org/resource/adenoidectomy,,AAO-HNS,restricted-cds,ent_pediatric,medium
+AAO-HNS-PTA-001,AAO-HNS,AAO-HNS clinical guidance on peritonsillar abscess management,2021,https://www.entnet.org/resource/peritonsillar-abscess,,AAO-HNS,restricted-cds,ent_laryngology,medium
+AAO-HNS-LARYNG-001,AAO-HNS,AAO-HNS clinical practice guideline hoarseness dysphonia update,2018,https://journals.sagepub.com/doi/10.1177/0194599817751030,,AAO-HNS,restricted-cds,ent_laryngology,high
+AAO-HNS-LARYNG-002,AAO-HNS,AAO-HNS clinical guidance on acute and chronic laryngitis,2020,https://www.entnet.org/resource/laryngitis,,AAO-HNS,restricted-cds,ent_laryngology,medium
+AAO-HNS-VFP-001,AAO-HNS,AAO-HNS clinical consensus on vocal fold paralysis,2020,https://www.entnet.org/resource/vocal-fold-paralysis,,AAO-HNS,restricted-cds,ent_laryngology,high
+AAO-HNS-LPR-001,AAO-HNS,AAO-HNS clinical guidance on laryngopharyngeal reflux,2019,https://journals.sagepub.com/doi/10.1177/0194599819876137,,AAO-HNS,restricted-cds,ent_laryngology,high
+ACG-LPR-001,ACG,ACG clinical guideline gastroesophageal reflux disease with extraesophageal manifestations,2022,https://gi.org/guideline/gastroesophageal-reflux-disease-gerd/,,ACG,restricted-cds,ent_laryngology,medium
+AAO-HNS-SUBSTEN-001,AAO-HNS,AAO-HNS clinical guidance on adult subglottic and tracheal stenosis,2021,https://www.entnet.org/resource/subglottic-stenosis,,AAO-HNS,restricted-cds,ent_laryngology,medium
+AAP-CROUP-001,AAP,AAP clinical practice guidance on croup laryngotracheobronchitis,2020,https://publications.aap.org/pediatrics/article/croup-guidance,,AAP,restricted-cds,ent_pediatric,high
+AAP-EPIGLOT-001,AAP,AAP clinical guidance on acute epiglottitis recognition and management,2020,https://publications.aap.org/pediatrics/article/epiglottitis,,AAP,restricted-cds,ent_pediatric,high
+AAP-FBAW-001,AAP,AAP clinical report foreign body aspiration in children,2019,https://publications.aap.org/pediatrics/article/foreign-body-aspiration,,AAP,restricted-cds,ent_pediatric,high
+ATS-FBAW-001,ATS,ATS guidelines on bronchoscopy for foreign body removal,2020,https://www.thoracic.org/statements/,,ATS,restricted-cds,ent_laryngology,medium
+AAO-HNS-OSA-001,AAO-HNS,AAO-HNS clinical practice guideline polysomnography prior to tonsillectomy,2019,https://journals.sagepub.com/doi/10.1177/0194599819854572,,AAO-HNS,restricted-cds,ent_sleep,high
+AAO-HNS-OSA-002,AAO-HNS,AAO-HNS position statement on upper airway stimulation hypoglossal nerve,2021,https://www.entnet.org/resource/upper-airway-stimulation,,AAO-HNS,restricted-cds,ent_sleep,high
+AAO-HNS-UPPP-001,AAO-HNS,AAO-HNS clinical consensus on uvulopalatopharyngoplasty for OSA,2021,https://www.entnet.org/resource/uppp,,AAO-HNS,restricted-cds,ent_sleep,medium
+AAO-HNS-DISE-001,AAO-HNS,AAO-HNS clinical guidance on drug-induced sleep endoscopy,2020,https://www.entnet.org/resource/dise,,AAO-HNS,restricted-cds,ent_sleep,medium
+AAO-HNS-SIAL-001,AAO-HNS,AAO-HNS clinical guidance on sialolithiasis and sialadenitis management,2021,https://www.entnet.org/resource/salivary-stones,,AAO-HNS,restricted-cds,ent_salivary,medium
+AAO-HNS-SIAL-002,AAO-HNS,AAO-HNS clinical consensus on sialendoscopy,2022,https://www.entnet.org/resource/sialendoscopy,,AAO-HNS,restricted-cds,ent_salivary,medium
+AAO-HNS-SALTUM-001,AAO-HNS,AAO-HNS clinical practice guideline benign and malignant salivary gland tumors,2018,https://journals.sagepub.com/doi/10.1177/0194599818770007,,AAO-HNS,restricted-cds,ent_oncology,high
+AAO-HNS-OCSCREEN-001,AAO-HNS,AAO-HNS clinical guidance on oral cavity cancer screening,2021,https://www.entnet.org/resource/oral-cancer-screening,,AAO-HNS,restricted-cds,ent_oncology,high
+AAO-HNS-LARCAN-001,AAO-HNS,AAO-HNS clinical practice guideline laryngeal cancer evaluation and management,2020,https://www.entnet.org/resource/laryngeal-cancer,,AAO-HNS,restricted-cds,ent_oncology,high
+NCCN-HN-001,NCCN,NCCN guidelines head and neck cancers,2024,https://www.nccn.org/guidelines/category_1,,NCCN,restricted-cds,ent_oncology,high
+AAO-HNS-SKULLBASE-001,AAO-HNS,AAO-HNS clinical guidance on skull base tumor management,2021,https://www.entnet.org/resource/skull-base-tumors,,AAO-HNS,restricted-cds,ent_oncology,medium
+AAP-PEDAW-001,AAP,AAP clinical guidance on pediatric airway evaluation,2021,https://publications.aap.org/pediatrics/article/pediatric-airway,,AAP,restricted-cds,ent_pediatric,high
+AAO-HNS-PEDAW-001,AAO-HNS,AAO-HNS clinical consensus on tracheostomy in children,2020,https://www.entnet.org/resource/pediatric-tracheostomy,,AAO-HNS,restricted-cds,ent_pediatric,medium
+AAO-HNS-SUBHEMA-001,AAO-HNS,AAO-HNS clinical guidance on subglottic hemangioma in infants,2021,https://www.entnet.org/resource/subglottic-hemangioma,,AAO-HNS,restricted-cds,ent_pediatric,medium
+AAO-HNS-CHOANAL-001,AAO-HNS,AAO-HNS clinical guidance on choanal atresia diagnosis and repair,2021,https://www.entnet.org/resource/choanal-atresia,,AAO-HNS,restricted-cds,ent_pediatric,medium
+AAO-HNS-LARMAL-001,AAO-HNS,AAO-HNS clinical guidance on laryngomalacia management,2021,https://www.entnet.org/resource/laryngomalacia,,AAO-HNS,restricted-cds,ent_pediatric,medium
+AAO-HNS-NASFRX-001,AAO-HNS,AAO-HNS clinical guidance on nasal bone fracture management,2021,https://www.entnet.org/resource/nasal-fracture,,AAO-HNS,restricted-cds,ent_trauma,medium
+AAO-HNS-TBONE-001,AAO-HNS,AAO-HNS clinical guidance on temporal bone trauma evaluation,2020,https://www.entnet.org/resource/temporal-bone-trauma,,AAO-HNS,restricted-cds,ent_trauma,medium
+AAO-HNS-LARTRAUM-001,AAO-HNS,AAO-HNS clinical consensus on acute laryngeal trauma,2021,https://www.entnet.org/resource/laryngeal-trauma,,AAO-HNS,restricted-cds,ent_trauma,medium
+WHO-OLP-001,WHO,WHO classification head and neck tumours oral lichen planus and oral potentially malignant disorders,2022,https://www.iarc.who.int/cards_page/who-classification-of-tumours/,,WHO,restricted-cds,stomatology_oral_medicine,high
+AAOM-OLP-001,AAOM,AAOM clinical practice statement oral lichen planus diagnosis and management,2021,https://www.aaom.com/clinical-practice-statements,,AAOM,restricted-cds,stomatology_oral_medicine,high
+WHO-LEUK-001,WHO,WHO definition and classification of oral leukoplakia and dysplasia,2022,https://www.iarc.who.int/cards_page/who-classification-oral-leukoplakia/,,WHO,restricted-cds,stomatology_oral_medicine,high
+AAOM-LEUK-001,AAOM,AAOM clinical practice statement oral leukoplakia management,2021,https://www.aaom.com/clinical-practice-statements,,AAOM,restricted-cds,stomatology_oral_medicine,high
+AAOM-ERYT-001,AAOM,AAOM clinical practice statement oral erythroplakia management,2021,https://www.aaom.com/clinical-practice-statements,,AAOM,restricted-cds,stomatology_oral_medicine,medium
+WHO-OSF-001,WHO,WHO position oral submucous fibrosis classification,2022,https://www.iarc.who.int/cards_page/oral-submucous-fibrosis/,,WHO,restricted-cds,stomatology_oral_medicine,medium
+AAOM-RAS-001,AAOM,AAOM clinical practice statement recurrent aphthous stomatitis,2021,https://www.aaom.com/clinical-practice-statements,,AAOM,restricted-cds,stomatology_oral_medicine,medium
+IDSA-CAND-001,IDSA,IDSA clinical practice guideline management of candidiasis update,2016,https://www.idsociety.org/practice-guideline/candidiasis/,,IDSA,allowed,stomatology_oral_medicine,high
+ESCMID-CAND-001,ESCMID,ESCMID guideline diagnosis and management of Candida diseases mucosal,2012,https://www.escmid.org/escmid_publications/escmid_guidelines/,,ESCMID,restricted-cds,stomatology_oral_medicine,high
+AAOM-GLOSS-001,AAOM,AAOM clinical practice statement geographic tongue and benign migratory glossitis,2020,https://www.aaom.com/clinical-practice-statements,,AAOM,restricted-cds,stomatology_oral_medicine,low
+AAOM-BMS-001,AAOM,AAOM clinical practice statement burning mouth syndrome,2021,https://www.aaom.com/clinical-practice-statements,,AAOM,restricted-cds,stomatology_oral_medicine,medium
+AAOM-HALI-001,AAOM,AAOM clinical practice statement halitosis evaluation and management,2020,https://www.aaom.com/clinical-practice-statements,,AAOM,restricted-cds,stomatology_oral_medicine,low
+EFP-PERIO-001,EFP,EFP and AAP world workshop classification of periodontal and peri-implant diseases,2018,https://www.efp.org/publications/projects/classification/,,EFP,restricted-cds,stomatology_periodontology,high
+EFP-PERIO-002,EFP,EFP S3 level clinical practice guideline treatment of stage I to III periodontitis,2020,https://www.efp.org/publications/treatment-of-stage-i-iii-periodontitis/,,EFP,restricted-cds,stomatology_periodontology,high
+EFP-PERIO-003,EFP,EFP S3 level clinical practice guideline treatment of stage IV periodontitis,2022,https://www.efp.org/publications/treatment-of-stage-iv-periodontitis/,,EFP,restricted-cds,stomatology_periodontology,high
+EFP-PERIO-004,EFP,EFP S3 level clinical practice guideline prevention and treatment of peri-implant diseases,2023,https://www.efp.org/publications/peri-implantitis-cpg/,,EFP,restricted-cds,stomatology_periodontology,high
+AAP-PERIO-001,AAP-Perio,AAP-Perio best evidence consensus on scaling and root planing,2020,https://www.perio.org/research-science/,,AAP-Perio,restricted-cds,stomatology_periodontology,high
+AAP-PERIO-002,AAP-Perio,AAP-Perio clinical practice guideline gingivitis management,2021,https://www.perio.org/research-science/,,AAP-Perio,restricted-cds,stomatology_periodontology,high
+AAP-PERIO-003,AAP-Perio,AAP-Perio clinical practice guideline peri-implantitis treatment,2022,https://www.perio.org/research-science/,,AAP-Perio,restricted-cds,stomatology_periodontology,high
+AAE-PULP-001,AAE,AAE consensus on management of irreversible pulpitis,2021,https://www.aae.org/specialty/clinical-resources/,,AAE,restricted-cds,stomatology_oral_medicine,medium
+AAE-AP-001,AAE,AAE quality assurance guidelines apical periodontitis treatment,2020,https://www.aae.org/specialty/clinical-resources/,,AAE,restricted-cds,stomatology_oral_medicine,medium
+AOCMF-MAND-001,AOCMF,AOCMF clinical practice guideline mandibular fracture treatment,2020,https://www.aofoundation.org/cmf/,,AOCMF,restricted-cds,maxillofacial_trauma,high
+AOCMF-MAND-002,AOCMF,AOCMF principles of internal fixation in mandibular angle fractures,2021,https://www.aofoundation.org/cmf/mandible,,AOCMF,restricted-cds,maxillofacial_trauma,medium
+AOCMF-MAXI-001,AOCMF,AOCMF clinical practice guideline maxillary and Le Fort fractures,2020,https://www.aofoundation.org/cmf/maxilla,,AOCMF,restricted-cds,maxillofacial_trauma,high
+AOCMF-ZYG-001,AOCMF,AOCMF clinical practice guideline zygomaticomaxillary complex fractures,2020,https://www.aofoundation.org/cmf/zygoma,,AOCMF,restricted-cds,maxillofacial_trauma,high
+AOCMF-ORBFLOOR-001,AOCMF,AOCMF clinical practice guideline orbital floor reconstruction,2020,https://www.aofoundation.org/cmf/orbit,,AOCMF,restricted-cds,maxillofacial_trauma,high
+AAOMS-ORBIT-001,AAOMS,AAOMS clinical guidelines for orbital floor and zygoma fractures,2021,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_trauma,high
+AOCMF-FRONT-001,AOCMF,AOCMF clinical practice guideline frontal sinus fracture management,2021,https://www.aofoundation.org/cmf/frontal,,AOCMF,restricted-cds,maxillofacial_trauma,medium
+IADT-DENT-001,IADT,IADT guidelines for management of traumatic dental injuries fractures and luxations,2020,https://www.iadt-dentaltrauma.org/for-professionals/treatment-guidelines/,,IADT,restricted-cds,maxillofacial_trauma,high
+IADT-DENT-002,IADT,IADT guidelines for management of avulsed permanent teeth,2020,https://www.iadt-dentaltrauma.org/for-professionals/avulsion/,,IADT,restricted-cds,maxillofacial_trauma,high
+IADT-DENT-003,IADT,IADT guidelines for management of traumatic dental injuries primary teeth,2020,https://www.iadt-dentaltrauma.org/for-professionals/primary-teeth/,,IADT,restricted-cds,maxillofacial_trauma,medium
+AAPD-DENT-001,AAPD,AAPD clinical practice guideline pediatric dental trauma,2022,https://www.aapd.org/research/oral-health-policies--recommendations/,,AAPD,restricted-cds,maxillofacial_pediatric,high
+AAOMS-FACEINJ-001,AAOMS,AAOMS parameters of care for facial soft tissue injuries,2017,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_trauma,medium
+AAOP-TMD-001,AAOP,AAOP guidelines for assessment diagnosis and management of orofacial pain,2018,https://aaop.clubexpress.com/content.aspx?page_id=22,,AAOP,restricted-cds,maxillofacial_tmj,high
+RDC-TMD-001,RDC-TMD,Diagnostic criteria for temporomandibular disorders DC-TMD,2014,https://ubwp.buffalo.edu/rdc-tmdinternational/,,RDC-TMD,restricted-cds,maxillofacial_tmj,high
+AAOMS-TMJ-001,AAOMS,AAOMS parameters of care for management of temporomandibular joint disorders,2017,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_tmj,high
+AAOMS-TMJ-002,AAOMS,AAOMS clinical guidance on TMJ arthroscopy and arthroplasty,2020,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_tmj,medium
+AAOP-BRUX-001,AAOP,AAOP consensus on bruxism diagnosis and management,2018,https://aaop.clubexpress.com/bruxism,,AAOP,restricted-cds,maxillofacial_tmj,medium
+ACPA-CLEFT-001,ACPA,ACPA parameters for evaluation and treatment of patients with cleft lip palate or other craniofacial anomalies,2018,https://acpa-cpf.org/team-care/standardscat/parameters-of-care/,,ACPA,restricted-cds,maxillofacial_pediatric,high
+ACPA-CLEFT-002,ACPA,ACPA standards for cleft and craniofacial team approval,2020,https://acpa-cpf.org/team-care/standardscat/,,ACPA,restricted-cds,maxillofacial_pediatric,high
+AAOMS-CLEFT-001,AAOMS,AAOMS parameters of care for cleft lip and palate surgery,2017,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_pediatric,high
+AAOMS-ORTHOG-001,AAOMS,AAOMS parameters of care for orthognathic surgery,2017,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_orthognathic,high
+ABOMS-ORTHOG-001,ABOMS,ABOMS clinical guidelines on orthognathic surgical planning,2021,https://www.aboms.org/clinical-resources/,,ABOMS,restricted-cds,maxillofacial_orthognathic,medium
+AAOMS-MANDREC-001,AAOMS,AAOMS clinical guidance on mandibular reconstruction,2020,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_oncology,high
+AAOMS-IMPLANT-001,AAOMS,AAOMS parameters of care for dental implant surgery,2017,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_implant,high
+AAOMS-BONEGRAFT-001,AAOMS,AAOMS clinical guidance on bone grafting for the maxillofacial skeleton,2020,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_implant,medium
+AAOMS-DISTRACTION-001,AAOMS,AAOMS clinical guidance on distraction osteogenesis of the craniofacial skeleton,2019,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_orthognathic,medium
+AAOMS-SINUSLIFT-001,AAOMS,AAOMS clinical guidance on sinus floor elevation,2020,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_implant,medium
+AJCC-OC-001,AJCC,AJCC cancer staging manual oral cavity 8th edition,2017,https://www.facs.org/quality-programs/cancer/ajcc/,,AJCC,restricted,maxillofacial_oncology,high
+AAOMS-OC-001,AAOMS,AAOMS parameters of care for oral and oropharyngeal cancer surgery,2017,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_oncology,high
+NCCN-OC-001,NCCN,NCCN guidelines for head and neck cancers oral cavity,2024,https://www.nccn.org/guidelines/category_1,,NCCN,restricted-cds,maxillofacial_oncology,high
+AAOMS-OSCC-001,AAOMS,AAOMS clinical guidance on oral squamous cell carcinoma surgical management,2020,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_oncology,high
+AAOMS-SALG-001,AAOMS,AAOMS clinical guidance on salivary gland tumor surgery,2020,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_oncology,medium
+AAOMS-RECON-001,AAOMS,AAOMS clinical guidance on free flap reconstruction of head and neck defects,2021,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_oncology,medium
+ITI-IMPLANT-001,ITI,ITI consensus statements and clinical recommendations on implant dentistry,2018,https://www.iti.org/treatment-guides,,ITI,restricted-cds,maxillofacial_implant,high
+ITI-IMPLANT-002,ITI,ITI treatment guide loading protocols for dental implants,2019,https://www.iti.org/treatment-guides/loading-protocols,,ITI,restricted-cds,maxillofacial_implant,medium
+ITI-IMPLANT-003,ITI,ITI treatment guide ridge augmentation procedures,2021,https://www.iti.org/treatment-guides/ridge-augmentation,,ITI,restricted-cds,maxillofacial_implant,medium
+EAO-IMPLANT-001,EAO,EAO consensus conference on implant dentistry,2021,https://www.eao.org/consensus,,EAO,restricted-cds,maxillofacial_implant,high
+EAO-IMPLANT-002,EAO,EAO clinical guidelines on sinus floor elevation,2019,https://www.eao.org/consensus/sinus,,EAO,restricted-cds,maxillofacial_implant,medium
+AAID-IMPLANT-001,AAID,AAID clinical practice standards for implant dentistry,2020,https://www.aaid.com/about/standards,,AAID,restricted-cds,maxillofacial_implant,medium
+ACPA-CLEFTTIME-001,ACPA,ACPA timeline for management of cleft lip palate from birth to adulthood,2018,https://acpa-cpf.org/timeline,,ACPA,restricted-cds,maxillofacial_pediatric,high
+AAPD-PEDTRAUMA-001,AAPD,AAPD oral health policy on management of acute dental trauma in children,2022,https://www.aapd.org/research/oral-health-policies--recommendations/,,AAPD,restricted-cds,maxillofacial_pediatric,medium
+AAPD-ERUPT-001,AAPD,AAPD clinical guidance on tooth eruption disorders in children,2021,https://www.aapd.org/research/oral-health-policies--recommendations/,,AAPD,restricted-cds,maxillofacial_pediatric,low
+AAOMS-MRONJ-001,AAOMS,AAOMS position paper on medication-related osteonecrosis of the jaw 2022 update,2022,https://www.aaoms.org/practice-resources/aaoms-position-papers,,AAOMS,restricted-cds,maxillofacial_oncology,high
+IOF-MRONJ-001,IOF,IOF working group recommendations on osteonecrosis of jaw in osteoporosis,2017,https://www.osteoporosis.foundation/educational-hub/topic/osteonecrosis-of-the-jaw,,IOF,restricted-cds,maxillofacial_oncology,medium
+AASM-MAD-001,AASM,AASM clinical practice guideline oral appliances for OSA and snoring,2015,https://aasm.org/clinical-resources/practice-standards/,,AASM,restricted-cds,maxillofacial_orthognathic,high
+AAOMS-BOTOX-001,AAOMS,AAOMS clinical guidance on botulinum toxin in oral and maxillofacial surgery,2021,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_tmj,low
+AAOP-TN-001,AAOP,AAOP consensus on trigeminal neuralgia and orofacial pain neuropathic conditions,2018,https://aaop.clubexpress.com/trigeminal,,AAOP,restricted-cds,maxillofacial_tmj,high
+AAN-TN-001,AAN,AAN practice parameter trigeminal neuralgia diagnosis and management,2008,https://www.aan.com/Guidelines/home/GuidelineDetail/277,,AAN,restricted-cds,maxillofacial_tmj,high
+AAO-PPP-LOWVISION-001,AAO,AAO PPP vision rehabilitation,2017,https://www.aao.org/preferred-practice-pattern/vision-rehabilitation-ppp-2017,,AAO PPP,restricted-cds,ophthalmology_neuro,medium
+AAO-PPP-COMPEYE-001,AAO,AAO PPP comprehensive adult medical eye evaluation,2020,https://www.aao.org/preferred-practice-pattern/comprehensive-adult-medical-eye-evaluation-ppp,,AAO PPP,restricted-cds,ophthalmology_anterior,high
+AAO-PPP-PEDEYE-001,AAO,AAO PPP pediatric eye evaluations,2017,https://www.aao.org/preferred-practice-pattern/pediatric-eye-evaluations-ppp-2017,,AAO PPP,restricted-cds,ophthalmology_pediatric,high
+AAO-FUNGAL-001,AAO,AAO clinical guidance on fungal keratitis diagnosis and treatment,2020,https://www.aao.org/clinical-statement/fungal-keratitis,,AAO,restricted-cds,ophthalmology_anterior,medium
+AAO-ACANTH-001,AAO,AAO clinical guidance on Acanthamoeba keratitis,2020,https://www.aao.org/clinical-statement/acanthamoeba-keratitis,,AAO,restricted-cds,ophthalmology_anterior,medium
+AAO-CONTACT-001,AAO,AAO clinical guidance on contact lens-related complications,2021,https://www.aao.org/clinical-statement/contact-lens,,AAO,restricted-cds,ophthalmology_anterior,medium
+AAO-CSR-001,AAO,AAO clinical guidance on central serous chorioretinopathy,2021,https://www.aao.org/clinical-statement/csr,,AAO,restricted-cds,ophthalmology_retina,medium
+EURETINA-PCV-001,EURETINA,EURETINA expert consensus on polypoidal choroidal vasculopathy,2022,https://www.euretina.org/guidelines/pcv/,,EURETINA,restricted-cds,ophthalmology_retina,medium
+ASRS-MYOPIC-001,ASRS,ASRS clinical update on myopic maculopathy,2022,https://www.asrs.org/clinical/clinical-updates/myopic,,ASRS,restricted-cds,ophthalmology_retina,medium
+AAO-HNS-EUSTACH-001,AAO-HNS,AAO-HNS clinical consensus on eustachian tube dysfunction,2022,https://www.entnet.org/resource/eustachian-tube,,AAO-HNS,restricted-cds,ent_otology,medium
+AAO-HNS-PERFOR-001,AAO-HNS,AAO-HNS clinical guidance on tympanic membrane perforation management,2021,https://www.entnet.org/resource/tm-perforation,,AAO-HNS,restricted-cds,ent_otology,medium
+AAO-HNS-FACIALPAIN-001,AAO-HNS,AAO-HNS clinical guidance on rhinogenic facial pain evaluation,2020,https://www.entnet.org/resource/facial-pain,,AAO-HNS,restricted-cds,ent_rhinology,low
+AAO-HNS-NPC-001,AAO-HNS,AAO-HNS clinical guidance on nasopharyngeal carcinoma evaluation,2021,https://www.entnet.org/resource/nasopharyngeal-carcinoma,,AAO-HNS,restricted-cds,ent_oncology,medium
+AAO-HNS-DEEPNECK-001,AAO-HNS,AAO-HNS clinical guidance on deep neck space infections,2021,https://www.entnet.org/resource/deep-neck-infection,,AAO-HNS,restricted-cds,ent_laryngology,high
+AAO-HNS-LUDWIG-001,AAO-HNS,AAO-HNS clinical guidance on Ludwig angina,2021,https://www.entnet.org/resource/ludwig-angina,,AAO-HNS,restricted-cds,ent_laryngology,high
+AAOMS-DENTOAL-001,AAOMS,AAOMS parameters of care for dentoalveolar surgery,2017,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_implant,medium
+AAOMS-IMPACT-001,AAOMS,AAOMS clinical guidance on management of impacted third molars,2020,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,maxillofacial_implant,high
+AAOMS-INFECT-001,AAOMS,AAOMS clinical guidance on odontogenic infections,2020,https://www.aaoms.org/practice-resources/clinical-resources,,AAOMS,restricted-cds,stomatology_oral_medicine,high
+EFP-DIAB-001,EFP,EFP and IDF consensus on diabetes and periodontitis,2018,https://www.efp.org/publications/diabetes-periodontitis/,,EFP,restricted-cds,stomatology_periodontology,medium
+EFP-CV-001,EFP,EFP and WHF consensus on periodontitis and cardiovascular disease,2020,https://www.efp.org/publications/perio-cv/,,EFP,restricted-cds,stomatology_periodontology,medium
+AAP-PERIO-RECESSION-001,AAP-Perio,AAP-Perio best evidence consensus on gingival recession treatment,2022,https://www.perio.org/research-science/recession,,AAP-Perio,restricted-cds,stomatology_periodontology,medium
+WHO-ORAL-001,WHO,WHO global oral health status report,2022,https://www.who.int/team/noncommunicable-diseases/oral-health,,WHO,allowed,stomatology_oral_medicine,medium
+AAO-HNS-COFB-001,AAO-HNS,AAO-HNS clinical guidance on cerumen impaction update,2017,https://journals.sagepub.com/doi/10.1177/0194599816671491,,AAO-HNS,restricted-cds,ent_otology,high
+AAO-HNS-NECK-001,AAO-HNS,AAO-HNS clinical practice guideline evaluation of the neck mass in adults,2017,https://journals.sagepub.com/doi/10.1177/0194599817722550,,AAO-HNS,restricted-cds,ent_oncology,high
+AAO-HNS-THYROID-001,AAO-HNS,AAO-HNS clinical guidance on thyroid nodule and surgery indications,2021,https://www.entnet.org/resource/thyroid-surgery,,AAO-HNS,restricted-cds,ent_oncology,medium
+ATA-THYROIDCA-001,ATA,ATA management guidelines for adult patients with thyroid nodules and differentiated thyroid cancer,2015,https://www.thyroid.org/professionals/ata-clinical-guidelines/,,ATA,restricted-cds,ent_oncology,high
+AAO-HNS-ANTIBIO-001,AAO-HNS,AAO-HNS clinical practice guideline antibiotic prophylaxis in tonsillectomy and sinus surgery,2021,https://www.entnet.org/resource/antibiotic-prophylaxis,,AAO-HNS,restricted-cds,ent_laryngology,medium
+AAO-HNS-RHINOPLAS-001,AAO-HNS,AAO-HNS clinical practice guideline improving nasal form and function after rhinoplasty,2017,https://journals.sagepub.com/doi/10.1177/0194599816683156,,AAO-HNS,restricted-cds,ent_rhinology,medium
+AAO-PED-CATARACT-001,AAO,AAO clinical guidance on infantile cataract surgical timing,2021,https://www.aao.org/clinical-statement/infantile-cataract,,AAO,restricted-cds,ophthalmology_pediatric,high
+AAO-NLDO-001,AAO,AAO clinical guidance on congenital nasolacrimal duct obstruction,2020,https://www.aao.org/clinical-statement/nldo,,AAO,restricted-cds,ophthalmology_pediatric,medium
+AAO-RB-001,AAO,AAO clinical guidance on retinoblastoma evaluation and treatment,2021,https://www.aao.org/clinical-statement/retinoblastoma,,AAO,restricted-cds,ophthalmology_oncology,high
+AAO-PPP-IDIOPATH-001,AAO,AAO PPP idiopathic macular hole,2019,https://www.aao.org/preferred-practice-pattern/idiopathic-macular-hole-ppp,,AAO PPP,restricted-cds,ophthalmology_retina,medium
+AAO-PPP-ERMVMT-001,AAO,AAO PPP idiopathic epiretinal membrane and vitreomacular traction,2019,https://www.aao.org/preferred-practice-pattern/idiopathic-epiretinal-membrane-vitreomacular-tract,,AAO PPP,restricted-cds,ophthalmology_retina,medium
+ESCRS-IOL-001,ESCRS,ESCRS guidelines for intraocular lens calculation and biometry,2021,https://www.escrs.org/iol-calculation,,ESCRS,restricted-cds,ophthalmology_anterior,medium
+ESCRS-TORIC-001,ESCRS,ESCRS guidelines for toric intraocular lens implantation,2020,https://www.escrs.org/toric-iol,,ESCRS,restricted-cds,ophthalmology_anterior,medium
+ASCRS-MULTIFOCAL-001,ASCRS,ASCRS clinical guidance on multifocal IOL patient selection,2022,https://ascrs.org/clinical-resources/multifocal-iol,,ASCRS,restricted-cds,ophthalmology_anterior,medium
+AAO-IRITIS-001,AAO,AAO clinical guidance on acute anterior uveitis and iritis,2020,https://www.aao.org/clinical-statement/iritis,,AAO,restricted-cds,ophthalmology_anterior,high
+AAO-SCLERITIS-001,AAO,AAO clinical guidance on scleritis and episcleritis,2020,https://www.aao.org/clinical-statement/scleritis,,AAO,restricted-cds,ophthalmology_anterior,medium
+EFP-PERIO-MED-001,EFP,EFP guidance on systemic antimicrobials in periodontitis treatment,2021,https://www.efp.org/publications/systemic-antimicrobials/,,EFP,restricted-cds,stomatology_periodontology,medium
+ITI-PERIIMPLANT-001,ITI,ITI consensus on prevention and management of peri-implantitis,2022,https://www.iti.org/peri-implantitis,,ITI,restricted-cds,stomatology_periodontology,medium
