@@ -1,0 +1,362 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+WHO-PH-001,WHO,Thirteenth General Programme of Work,2019,https://www.who.int/about/general-programme-of-work,,WHO,allowed,public_health_general,high
+WHO-PH-002,WHO,Triple Billion Targets Framework,2023,https://www.who.int/data/triple-billion-dashboard,,WHO,allowed,public_health_general,high
+WHO-PH-003,WHO,Operational Framework for Primary Health Care,2020,https://www.who.int/publications/i/item/9789240017832,,WHO,allowed,public_health_general,high
+WHO-PH-004,WHO,Sustainable Development Goals Health Targets,2023,https://www.who.int/data/gho/data/themes/sustainable-development-goals,,WHO,allowed,public_health_general,medium
+ASTHO-PH-001,ASTHO,State Public Health Operations Framework,2023,https://www.astho.org/topic/public-health-infrastructure/,,ASTHO,restricted,public_health_general,medium
+ASTHO-PH-002,ASTHO,Health Equity Resource Library,2023,https://www.astho.org/topic/health-equity/,,ASTHO,restricted,public_health_general,medium
+NACCHO-PH-001,NACCHO,Local Health Department Standards,2022,https://www.naccho.org/programs/public-health-infrastructure,,NACCHO,restricted,public_health_general,medium
+NACCHO-PH-002,NACCHO,Mobilizing for Action through Planning and Partnerships MAPP,2022,https://www.naccho.org/programs/public-health-infrastructure/mapp,,NACCHO,restricted,public_health_general,medium
+CDC-FETP-001,CDC,Field Epidemiology Training Program Curriculum,2022,https://www.cdc.gov/eis/field-epi-manual/index.html,,CDC,allowed,public_health_outbreak,high
+CDC-FETP-002,CDC,Outbreak Investigation Steps Guide,2021,https://www.cdc.gov/training/quicklearns/outbreak/,,CDC,allowed,public_health_outbreak,high
+CDC-FETP-003,CDC,Principles of Epidemiology in Public Health Practice,2012,https://www.cdc.gov/csels/dsepd/ss1978/index.html,,CDC,allowed,public_health_outbreak,high
+ECDC-OUT-001,ECDC,Outbreak Toolbox,2023,https://www.ecdc.europa.eu/en/publications-data/outbreak-toolbox,,ECDC,allowed,public_health_outbreak,high
+ECDC-OUT-002,ECDC,Communicable Disease Threats Report Methodology,2023,https://www.ecdc.europa.eu/en/publications-data/communicable-disease-threats-report,,ECDC,allowed,public_health_outbreak,medium
+WHO-IHR-001,WHO,International Health Regulations 2005 Third Edition,2016,https://www.who.int/publications/i/item/9789241580496,,WHO,allowed,public_health_outbreak,high
+WHO-IHR-002,WHO,IHR State Party Self-Assessment Annual Report,2023,https://www.who.int/teams/ihr/monitoring-evaluation,,WHO,allowed,public_health_outbreak,medium
+CDC-SURV-001,CDC,National Notifiable Diseases Surveillance System,2024,https://www.cdc.gov/nndss/,,CDC,allowed,public_health_general,high
+CDC-SURV-002,CDC,Updated Guidelines for Evaluating Public Health Surveillance Systems,2001,https://www.cdc.gov/mmwr/preview/mmwrhtml/rr5013a1.htm,,CDC,allowed,public_health_general,medium
+CDC-SURV-003,CDC,Syndromic Surveillance BioSense Platform Guidance,2023,https://www.cdc.gov/nssp/biosense/,,CDC,allowed,public_health_general,medium
+WHO-PAND-001,WHO,Pandemic Influenza Risk Management Framework,2017,https://www.who.int/publications/i/item/pandemic-influenza-risk-management,,WHO,allowed,public_health_outbreak,high
+WHO-PAND-002,WHO,Strategic Preparedness and Response Plan,2023,https://www.who.int/emergencies/diseases/managing-epidemics,,WHO,allowed,public_health_outbreak,high
+WHO-GOARN-001,WHO,Global Outbreak Alert and Response Network Operational Guide,2022,https://www.who.int/initiatives/goarn,,WHO,allowed,public_health_outbreak,medium
+CDC-COVID-001,CDC,COVID-19 Public Health Response Guidance,2023,https://www.cdc.gov/coronavirus/2019-ncov/php/public-health-recommendations.html,,CDC,allowed,public_health_outbreak,high
+WHO-COVID-001,WHO,Living Guidance for COVID-19 Therapeutics,2023,https://www.who.int/publications/i/item/WHO-2019-nCoV-therapeutics-2023.2,,WHO,allowed,public_health_outbreak,high
+ACIP-VPD-001,ACIP,Recommended Adult Immunization Schedule,2024,https://www.cdc.gov/vaccines/hcp/imz-schedules/index.html,,CDC,allowed,preventive_immunization,high
+ACIP-VPD-002,ACIP,Recommended Child and Adolescent Immunization Schedule,2024,https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent.html,,CDC,allowed,preventive_immunization,high
+ACIP-VPD-003,ACIP,General Best Practice Guidelines for Immunization,2023,https://www.cdc.gov/vaccines/hcp/acip-recs/general-recs/index.html,,CDC,allowed,preventive_immunization,high
+ACIP-VPD-004,ACIP,RSV Vaccine Recommendations Adults,2023,https://www.cdc.gov/vaccines/acip/recommendations.html,,CDC,allowed,preventive_immunization,high
+ACIP-VPD-005,ACIP,HPV Vaccine Recommendations,2023,https://www.cdc.gov/vaccines/vpd/hpv/hcp/recommendations.html,,CDC,allowed,preventive_immunization,high
+WHO-VPD-001,WHO,Immunization Agenda 2030,2020,https://www.immunizationagenda2030.org/,,WHO,allowed,preventive_immunization,high
+WHO-VPD-002,WHO,Vaccine Position Papers Compendium,2024,https://www.who.int/teams/immunization-vaccines-and-biologicals/policies/position-papers,,WHO,allowed,preventive_immunization,high
+WHO-TB-001,WHO,Consolidated Guidelines on Tuberculosis Treatment Drug-Susceptible,2022,https://www.who.int/publications/i/item/9789240048126,,WHO,allowed,public_health_outbreak,high
+WHO-TB-002,WHO,Consolidated Guidelines on Tuberculosis Treatment Drug-Resistant,2022,https://www.who.int/publications/i/item/9789240063129,,WHO,allowed,public_health_outbreak,high
+WHO-TB-003,WHO,Global Tuberculosis Report,2023,https://www.who.int/teams/global-tuberculosis-programme/tb-reports,,WHO,allowed,public_health_outbreak,medium
+CDC-TB-001,CDC,Treatment of Drug-Susceptible TB Clinical Practice Guidelines,2016,https://www.cdc.gov/tb/publications/guidelines/treatment.htm,,CDC,allowed,public_health_outbreak,high
+CDC-TB-002,CDC,Latent TB Infection Diagnosis and Treatment,2020,https://www.cdc.gov/tb/topic/treatment/ltbi.htm,,CDC,allowed,public_health_outbreak,high
+UNAIDS-HIV-001,UNAIDS,Global AIDS Strategy 2021-2026,2021,https://www.unaids.org/en/Global-AIDS-Strategy-2021-2026,,UNAIDS,allowed,public_health_outbreak,high
+UNAIDS-HIV-002,UNAIDS,90-90-90 and 95-95-95 Targets Framework,2023,https://www.unaids.org/en/resources/909090,,UNAIDS,allowed,public_health_outbreak,medium
+WHO-HIV-001,WHO,Consolidated Guidelines on HIV Prevention Testing Treatment,2021,https://www.who.int/publications/i/item/9789240031593,,WHO,allowed,public_health_outbreak,high
+WHO-HEP-001,WHO,Global Health Sector Strategy on Viral Hepatitis 2022-2030,2022,https://www.who.int/publications/i/item/9789240053779,,WHO,allowed,public_health_outbreak,high
+WHO-HEP-002,WHO,Hepatitis B and C Elimination Targets,2022,https://www.who.int/health-topics/hepatitis,,WHO,allowed,public_health_outbreak,medium
+WHO-MAL-001,WHO,WHO Guidelines for Malaria,2023,https://www.who.int/publications/i/item/guidelines-for-malaria,,WHO,allowed,public_health_outbreak,high
+WHO-MAL-002,WHO,Global Technical Strategy for Malaria 2016-2030,2021,https://www.who.int/publications/i/item/9789240031357,,WHO,allowed,public_health_outbreak,medium
+WHO-NTD-001,WHO,Ending Neglected Tropical Diseases Roadmap 2021-2030,2021,https://www.who.int/publications/i/item/9789240010352,,WHO,allowed,public_health_outbreak,high
+WHO-NTD-002,WHO,Schistosomiasis Treatment Guidelines,2022,https://www.who.int/publications/i/item/9789240041608,,WHO,allowed,public_health_outbreak,medium
+WHO-AMR-001,WHO,Global Action Plan on Antimicrobial Resistance,2015,https://www.who.int/publications/i/item/9789241509763,,WHO,allowed,public_health_amr,high
+WHO-AMR-002,WHO,AWaRe Antibiotic Book,2022,https://www.who.int/publications/i/item/9789240062382,,WHO,allowed,public_health_amr,high
+CDC-AMR-001,CDC,Antibiotic Resistance Threats in the United States,2019,https://www.cdc.gov/drugresistance/biggest-threats.html,,CDC,allowed,public_health_amr,high
+CDC-AMR-002,CDC,Core Elements of Hospital Antibiotic Stewardship Programs,2019,https://www.cdc.gov/antibiotic-use/healthcare/implementation/core-elements.html,,CDC,allowed,public_health_amr,high
+ECDC-AMR-001,ECDC,Antimicrobial Resistance Surveillance in Europe,2023,https://www.ecdc.europa.eu/en/antimicrobial-resistance/surveillance-and-disease-data,,ECDC,allowed,public_health_amr,high
+ECDC-AMR-002,ECDC,Proposals for EU Guidelines on Prudent Use of Antimicrobials,2017,https://www.ecdc.europa.eu/en/publications-data/proposals-eu-guidelines-prudent-use-antimicrobials-humans,,ECDC,allowed,public_health_amr,medium
+WHO-ONEHEALTH-001,WHO,One Health Joint Plan of Action 2022-2026,2022,https://www.who.int/publications/i/item/9789240059139,,WHO,allowed,public_health_amr,high
+WHO-ONEHEALTH-002,WHO,Tripartite One Health Operational Framework,2019,https://www.who.int/initiatives/tripartite-zoonosis-guide,,WHO,allowed,public_health_amr,medium
+WHO-NCD-001,WHO,Global Action Plan for Prevention and Control of NCDs 2013-2030,2023,https://www.who.int/publications/i/item/9789241506236,,WHO,allowed,public_health_ncd,high
+WHO-NCD-002,WHO,WHO Package of Essential NCD Interventions PEN,2020,https://www.who.int/publications/i/item/9789240009226,,WHO,allowed,public_health_ncd,high
+WHO-NCD-003,WHO,Best Buys NCD Tackling Cost-Effective Interventions,2017,https://www.who.int/publications/i/item/WHO-NMH-NVI-17.9,,WHO,allowed,public_health_ncd,medium
+WHO-FCTC-001,WHO,Framework Convention on Tobacco Control,2003,https://fctc.who.int/who-fctc/overview,,WHO,allowed,public_health_ncd,high
+WHO-FCTC-002,WHO,MPOWER Tobacco Control Package,2023,https://www.who.int/initiatives/mpower,,WHO,allowed,public_health_ncd,high
+WHO-ALC-001,WHO,Global Strategy to Reduce Harmful Use of Alcohol,2010,https://www.who.int/publications/i/item/9789241599931,,WHO,allowed,public_health_ncd,high
+WHO-ALC-002,WHO,SAFER Alcohol Control Initiative,2018,https://www.who.int/initiatives/SAFER,,WHO,allowed,public_health_ncd,medium
+WHO-MCH-001,WHO,Ending Preventable Maternal Mortality EPMM Strategy,2021,https://www.who.int/publications/i/item/9789240028678,,WHO,allowed,public_health_general,high
+WHO-MCH-002,WHO,Global Strategy for Womens Childrens and Adolescents Health,2016,https://www.who.int/publications/i/item/9789241510165,,WHO,allowed,public_health_general,high
+UNICEF-MCH-001,UNICEF,State of the Worlds Children Report,2023,https://www.unicef.org/reports/state-of-worlds-children,,UNICEF,allowed,public_health_general,medium
+WHO-ADOL-001,WHO,Global Accelerated Action for Health of Adolescents AA-HA,2017,https://www.who.int/publications/i/item/9789241512343,,WHO,allowed,public_health_general,medium
+USPSTF-CVD-001,USPSTF,Statin Use for Primary Prevention of CVD in Adults,2022,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/statin-use-in-adults-preventive-medication,,USPSTF,allowed,preventive_screening,high
+USPSTF-CVD-002,USPSTF,Aspirin for Primary Prevention of CVD,2022,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/aspirin-to-prevent-cardiovascular-disease-preventive-medication,,USPSTF,allowed,preventive_screening,high
+USPSTF-CVD-003,USPSTF,Screening for Hypertension in Adults,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hypertension-in-adults-screening,,USPSTF,allowed,preventive_screening,high
+USPSTF-CVD-004,USPSTF,Behavioral Counseling for Cardiovascular Disease Prevention,2020,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/healthy-diet-and-physical-activity-counseling-adults-with-high-risk-of-cvd,,USPSTF,allowed,preventive_behavioral,high
+USPSTF-DM-001,USPSTF,Screening for Prediabetes and Type 2 Diabetes in Adults,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes,,USPSTF,allowed,preventive_screening,high
+USPSTF-CA-001,USPSTF,Screening for Breast Cancer,2024,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening,,USPSTF,allowed,preventive_screening,high
+USPSTF-CA-002,USPSTF,Screening for Colorectal Cancer,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening,,USPSTF,allowed,preventive_screening,high
+USPSTF-CA-003,USPSTF,Screening for Cervical Cancer,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cervical-cancer-screening,,USPSTF,allowed,preventive_screening,high
+USPSTF-CA-004,USPSTF,Screening for Lung Cancer,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening,,USPSTF,allowed,preventive_screening,high
+USPSTF-CA-005,USPSTF,Screening for Prostate Cancer,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening,,USPSTF,allowed,preventive_screening,high
+USPSTF-MH-001,USPSTF,Screening for Depression and Suicide Risk in Adults,2023,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-depression-suicide-risk-adults,,USPSTF,allowed,preventive_screening,high
+USPSTF-MH-002,USPSTF,Screening for Anxiety Disorders in Adults,2023,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-anxiety-adults,,USPSTF,allowed,preventive_screening,high
+USPSTF-IPV-001,USPSTF,Intimate Partner Violence Screening,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/intimate-partner-violence-and-abuse-of-elderly-and-vulnerable-adults-screening,,USPSTF,allowed,preventive_screening,high
+USPSTF-AUD-001,USPSTF,Unhealthy Alcohol Use in Adolescents and Adults Screening,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/unhealthy-alcohol-use-in-adolescents-and-adults-screening-and-behavioral-counseling-interventions,,USPSTF,allowed,preventive_behavioral,high
+USPSTF-TOB-001,USPSTF,Tobacco Smoking Cessation in Adults,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/tobacco-smoking-cessation-in-adults-including-pregnant-persons-interventions,,USPSTF,allowed,preventive_behavioral,high
+USPSTF-OB-001,USPSTF,Behavioral Weight Loss Interventions for Adult Obesity,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/obesity-in-adults-interventions,,USPSTF,allowed,preventive_behavioral,high
+USPSTF-FALL-001,USPSTF,Falls Prevention in Community-Dwelling Older Adults,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/falls-prevention-in-older-adults-interventions,,USPSTF,allowed,preventive_screening,high
+USPSTF-OST-001,USPSTF,Osteoporosis Screening to Prevent Fractures,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/osteoporosis-screening,,USPSTF,allowed,preventive_screening,high
+USPSTF-AAA-001,USPSTF,Abdominal Aortic Aneurysm Screening,2019,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/abdominal-aortic-aneurysm-screening,,USPSTF,allowed,preventive_screening,medium
+USPSTF-HEP-001,USPSTF,Screening for Hepatitis B Virus Infection in Adolescents and Adults,2020,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-b-virus-infection-screening,,USPSTF,allowed,preventive_screening,high
+USPSTF-HEP-002,USPSTF,Screening for Hepatitis C Virus Infection in Adolescents and Adults,2020,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hepatitis-c-screening,,USPSTF,allowed,preventive_screening,high
+USPSTF-HIV-001,USPSTF,Screening for HIV Infection in Adolescents and Adults,2019,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/human-immunodeficiency-virus-hiv-infection-screening,,USPSTF,allowed,preventive_screening,high
+USPSTF-PREP-001,USPSTF,Pre-Exposure Prophylaxis to Prevent HIV Infection,2023,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prevention-of-human-immunodeficiency-virus-hiv-infection-pre-exposure-prophylaxis,,USPSTF,allowed,preventive_screening,high
+USPSTF-FOL-001,USPSTF,Folic Acid Supplementation for Prevention of Neural Tube Defects,2023,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/folic-acid-for-the-prevention-of-neural-tube-defects-preventive-medication,,USPSTF,allowed,preventive_screening,high
+USPSTF-PE-001,USPSTF,Aspirin Use to Prevent Preeclampsia and Related Morbidity,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/aspirin-use-to-prevent-preeclampsia-and-related-morbidity-and-mortality-preventive-medication,,USPSTF,allowed,preventive_screening,high
+USPSTF-VIT-001,USPSTF,Vitamin Mineral and Multivitamin Supplements for CVD and Cancer,2022,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/vitamin-supplementation-to-prevent-cvd-and-cancer-preventive-medication,,USPSTF,allowed,preventive_screening,medium
+ACPM-PREV-001,ACPM,Lifestyle Medicine Core Competencies,2022,https://www.acpm.org/about-acpm/who-we-are/leadership/policy-statements/,,ACPM,restricted,preventive_behavioral,medium
+CTFPHC-PREV-001,CTFPHC,Recommendations on Screening for Hypertension in Primary Care,2024,https://canadiantaskforce.ca/guidelines/published-guidelines/hypertension/,,CTFPHC,restricted,preventive_screening,high
+CTFPHC-PREV-002,CTFPHC,Recommendations on Screening for Lung Cancer,2016,https://canadiantaskforce.ca/guidelines/published-guidelines/lung-cancer/,,CTFPHC,restricted,preventive_screening,high
+CTFPHC-PREV-003,CTFPHC,Cervical Cancer Screening Guideline,2013,https://canadiantaskforce.ca/guidelines/published-guidelines/cervical-cancer/,,CTFPHC,restricted,preventive_screening,medium
+AAFP-PREV-001,AAFP,Summary of Recommendations for Clinical Preventive Services,2024,https://www.aafp.org/family-physician/patient-care/clinical-recommendations/cps.html,,AAFP,restricted,preventive_screening,high
+NICE-PREV-001,NICE,Cardiovascular Disease Risk Assessment and Reduction CG181,2023,https://www.nice.org.uk/guidance/cg181,,NICE,restricted-cds,preventive_screening,high
+NICE-PREV-002,NICE,Type 2 Diabetes Prevention NG38,2017,https://www.nice.org.uk/guidance/ph38,,NICE,restricted-cds,preventive_screening,high
+NICE-PREV-003,NICE,Behaviour Change Individual Approaches PH49,2014,https://www.nice.org.uk/guidance/ph49,,NICE,restricted-cds,preventive_behavioral,medium
+IDSA-IMM-001,IDSA,Adult Immunization Practice Recommendations,2023,https://www.idsociety.org/practice-guideline/immunization/,,IDSA,restricted,preventive_immunization,high
+WMA-CONSENT-001,WMA,Declaration of Helsinki Ethical Principles for Research Involving Human Subjects,2013,https://www.wma.net/policies-post/wma-declaration-of-helsinki-ethical-principles-for-medical-research-involving-human-subjects/,,WMA,restricted,ethics_research,high
+WMA-CONSENT-002,WMA,Declaration of Lisbon on the Rights of the Patient,2015,https://www.wma.net/policies-post/wma-declaration-of-lisbon-on-the-rights-of-the-patient/,,WMA,restricted,ethics_consent,high
+WMA-CONSENT-003,WMA,International Code of Medical Ethics,2022,https://www.wma.net/policies-post/wma-international-code-of-medical-ethics/,,WMA,restricted,ethics_consent,high
+AMA-CONSENT-001,AMA,Code of Medical Ethics Informed Consent,2024,https://code-medical-ethics.ama-assn.org/chapter/2,,AMA,restricted,ethics_consent,high
+AMA-CONSENT-002,AMA,Code of Medical Ethics Patient-Physician Relationship,2024,https://code-medical-ethics.ama-assn.org/chapter/1,,AMA,restricted,ethics_consent,high
+GMC-CONSENT-001,GMC,Decision Making and Consent Guidance,2020,https://www.gmc-uk.org/professional-standards/professional-standards-for-doctors/decision-making-and-consent,,GMC,restricted,ethics_consent,high
+GMC-CONFI-001,GMC,Confidentiality Good Practice in Handling Patient Information,2024,https://www.gmc-uk.org/professional-standards/professional-standards-for-doctors/confidentiality,,GMC,restricted,ethics_consent,high
+CIOMS-CONSENT-001,CIOMS,International Ethical Guidelines for Health-Related Research Involving Humans,2016,https://cioms.ch/publications/product/international-ethical-guidelines-for-health-related-research-involving-humans/,,CIOMS,restricted,ethics_research,high
+APA-CAPACITY-001,APA,Assessment of Older Adults with Diminished Capacity Handbook,2021,https://www.apa.org/pi/aging/programs/assessment/capacity-psychologist-handbook.pdf,,APA,restricted,ethics_consent,medium
+AGS-CAPACITY-001,AGS,Position Statement on Decision-Making Capacity in Older Adults,2022,https://www.americangeriatrics.org/about-us/policy/policy-statements,,AGS,restricted,ethics_consent,medium
+AAHPM-EOL-001,AAHPM,Advance Care Planning Position Statement,2022,https://aahpm.org/positions/advance-care-planning,,AAHPM,restricted,ethics_eol,high
+AAHPM-EOL-002,AAHPM,Statement on Physician-Assisted Dying,2016,https://aahpm.org/positions/pad,,AAHPM,restricted,ethics_eol,medium
+AAN-EOL-001,AAN,Determination of Brain Death Adults Practice Guideline,2023,https://www.aan.com/Guidelines/home/GuidelineDetail/1098,,AAN,restricted,ethics_eol,high
+AAN-EOL-002,AAN,Pediatric Brain Death Determination Guideline,2023,https://www.aan.com/Guidelines/home/GuidelineDetail/1099,,AAN,restricted,ethics_eol,high
+SCCM-EOL-001,SCCM,Withholding and Withdrawing Life-Sustaining Therapy in ICU,2016,https://www.sccm.org/Clinical-Resources/Guidelines,,SCCM,restricted,ethics_eol,high
+CMA-MAID-001,CMA,Medical Assistance in Dying Policy,2023,https://policybase.cma.ca/permalink/policy15032,,CMA,restricted,ethics_eol,high
+RDMA-MAID-001,RDMA,Royal Dutch Medical Association Euthanasia Guidelines,2022,https://www.knmg.nl/advies-richtlijnen/dossiers/euthanasie,,KNMG,restricted,ethics_eol,medium
+TTS-DON-001,TTS,Ethics of Organ Donation and Transplantation,2020,https://www.tts.org/about-tts/policy,,TTS,restricted,ethics_eol,high
+WHO-ORGAN-001,WHO,Guiding Principles on Human Cell Tissue and Organ Transplantation,2010,https://www.who.int/publications/i/item/9789241500401,,WHO,allowed,ethics_eol,high
+NSGC-GENETIC-001,NSGC,Practice Guidelines for Genetic Counseling,2023,https://www.nsgc.org/Policy-Research-and-Publications/Practice-Resources,,NSGC,restricted,ethics_genetic,high
+ACMG-GENETIC-001,ACMG,Recommendations for Reporting of Secondary Findings,2023,https://www.acmg.net/ACMG/Medical-Genetics-Practice-Resources/Practice-Guidelines.aspx,,ACMG,restricted,ethics_genetic,high
+ACMG-GENETIC-002,ACMG,Standards for Interpretation of Sequence Variants,2015,https://www.acmg.net/ACMG/Medical-Genetics-Practice-Resources/Practice-Guidelines.aspx,,ACMG,restricted,ethics_genetic,high
+FIGO-REPRO-001,FIGO,Ethical Issues in Obstetrics and Gynecology Guidelines,2021,https://www.figo.org/resources/figo-statements,,FIGO,restricted,ethics_consent,high
+ESHRE-REPRO-001,ESHRE,Good Practice Recommendations on Recurrent Implantation Failure,2023,https://www.eshre.eu/Guidelines-and-Legal,,ESHRE,restricted,ethics_consent,medium
+ESHRE-REPRO-002,ESHRE,Ethics of Reproductive Medicine Position Papers,2022,https://www.eshre.eu/Guidelines-and-Legal/Ethics-Documents,,ESHRE,restricted,ethics_consent,medium
+ASRM-REPRO-001,ASRM,Ethics Committee Opinions Compendium,2023,https://www.asrm.org/practice-guidance/ethics-opinions/,,ASRM,restricted,ethics_consent,medium
+ACOG-REPRO-001,ACOG,Informed Consent and Shared Decision Making in Obstetrics and Gynecology,2021,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2021/02/informed-consent-and-shared-decision-making,,ACOG,restricted,ethics_consent,high
+AAP-PED-001,AAP,Informed Consent in Decision-Making in Pediatric Practice,2016,https://publications.aap.org/pediatrics/article/138/2/e20161484/52409/,,AAP,restricted,ethics_pediatric,high
+AAP-PED-002,AAP,Adolescent Confidentiality and Electronic Health Records,2020,https://publications.aap.org/pediatrics/article/145/3/e20193149/76906/,,AAP,restricted,ethics_pediatric,high
+WPATH-GA-001,WPATH,Standards of Care for Health of Transgender and Gender Diverse People Version 8,2022,https://www.wpath.org/soc8,,WPATH,restricted,ethics_consent,high
+ICH-GCP-001,ICH-GCP,Good Clinical Practice E6 R3,2023,https://www.ich.org/page/efficacy-guidelines,,ICH,restricted,ethics_research,high
+NIH-RES-001,NIH,Belmont Report Ethical Principles and Guidelines for Research,1979,https://www.hhs.gov/ohrp/regulations-and-policy/belmont-report/index.html,,HHS,allowed,ethics_research,high
+HHS-COMMON-001,HHS,Common Rule 45 CFR 46 Protection of Human Subjects,2018,https://www.hhs.gov/ohrp/regulations-and-policy/regulations/45-cfr-46/index.html,,HHS,allowed,ethics_research,high
+ABIM-PROF-001,ABIM,Medical Professionalism in the New Millennium Physician Charter,2002,https://abimfoundation.org/what-we-do/physician-charter,,ABIM,restricted,ethics_consent,high
+ICMJE-COI-001,ICMJE,Recommendations for the Conduct Reporting Editing and Publication of Scholarly Work,2024,https://www.icmje.org/recommendations/,,ICMJE,restricted,ethics_research,high
+ISMP-DISCLOSE-001,ISMP,Recommendations for Open Disclosure After Adverse Events,2022,https://www.ismp.org/resources/disclosure-policy,,ISMP,restricted,quality_safety_systems,high
+AHRQ-DISCLOSE-001,AHRQ,CANDOR Toolkit for Communication and Optimal Resolution,2022,https://www.ahrq.gov/patient-safety/settings/hospital/candor/index.html,,AHRQ,allowed,quality_safety_systems,high
+WHO-AI-ETHICS-001,WHO,Ethics and Governance of Artificial Intelligence for Health,2021,https://www.who.int/publications/i/item/9789240029200,,WHO,allowed,digital_ai,high
+WHO-AI-ETHICS-002,WHO,Ethics and Governance of AI for Health Large Multi-Modal Models,2024,https://www.who.int/publications/i/item/9789240084759,,WHO,allowed,digital_ai,high
+IHI-QI-001,IHI,Model for Improvement Framework,2023,https://www.ihi.org/resources/how-to-improve,,IHI,restricted,quality_safety_systems,high
+IHI-QI-002,IHI,Triple Aim Framework for Optimizing Health System Performance,2008,https://www.ihi.org/Topics/TripleAim/Pages/default.aspx,,IHI,restricted,quality_safety_systems,high
+IHI-QI-003,IHI,Quadruple Aim Framework Adding Clinician Wellbeing,2014,https://www.ihi.org/Topics/Quadruple-Aim/Pages/default.aspx,,IHI,restricted,quality_safety_systems,medium
+IHI-QI-004,IHI,Breakthrough Series Collaborative Methodology,2003,https://www.ihi.org/resources/Pages/IHIWhitePapers/TheBreakthroughSeriesIHIsCollaborativeModelforAchievingBreakthroughImprovement.aspx,,IHI,restricted,quality_safety_systems,medium
+IHI-QI-005,IHI,100000 Lives Campaign Bundles,2006,https://www.ihi.org/Engage/Initiatives/Completed/5MillionLivesCampaign/Pages/default.aspx,,IHI,restricted,quality_safety_systems,medium
+IHI-PRESSURE-001,IHI,How-to Guide Prevent Pressure Ulcers,2011,https://www.ihi.org/resources/Pages/Tools/HowtoGuidePreventPressureUlcers.aspx,,IHI,restricted,quality_safety_systems,high
+IHI-FALLS-001,IHI,How-to Guide Reducing Patient Injuries from Falls,2012,https://www.ihi.org/resources/Pages/Tools/TCABHowToGuideReducingPatientInjuriesfromFalls.aspx,,IHI,restricted,quality_safety_systems,high
+LEAN-QI-001,LEI,Lean Healthcare Transformation Framework,2022,https://www.lean.org/explore-lean/healthcare/,,LEI,restricted,quality_safety_systems,medium
+SIGMA-QI-001,ASQ,Six Sigma DMAIC Methodology in Healthcare,2021,https://asq.org/quality-resources/six-sigma,,ASQ,restricted,quality_safety_systems,medium
+PDSA-QI-001,IHI,Plan-Do-Study-Act Cycle Worksheet,2023,https://www.ihi.org/resources/Pages/Tools/PlanDoStudyActWorksheet.aspx,,IHI,restricted,quality_safety_systems,high
+JC-NPSG-001,JointCommission,National Patient Safety Goals Hospital,2024,https://www.jointcommission.org/standards/national-patient-safety-goals/hospital-national-patient-safety-goals/,,JointCommission,restricted,quality_safety_systems,high
+JC-NPSG-002,JointCommission,Universal Protocol for Preventing Wrong Site Surgery,2024,https://www.jointcommission.org/standards/universal-protocol/,,JointCommission,restricted,quality_safety_surgical,high
+JC-NPSG-003,JointCommission,Sentinel Event Policy and Procedures,2024,https://www.jointcommission.org/sentinel-event/,,JointCommission,restricted,quality_safety_systems,high
+WHO-SAFETY-001,WHO,Patient Safety Solutions Compendium,2022,https://www.who.int/teams/integrated-health-services/patient-safety,,WHO,allowed,quality_safety_systems,high
+WHO-SAFETY-002,WHO,Global Patient Safety Action Plan 2021-2030,2021,https://www.who.int/publications/i/item/9789240032705,,WHO,allowed,quality_safety_systems,high
+WHO-SURG-001,WHO,Surgical Safety Checklist Implementation Manual,2009,https://www.who.int/publications/i/item/9789241598590,,WHO,allowed,quality_safety_surgical,high
+WHO-HH-001,WHO,Guidelines on Hand Hygiene in Health Care,2009,https://www.who.int/publications/i/item/9789241597906,,WHO,allowed,quality_safety_infection,high
+WHO-HH-002,WHO,Hand Hygiene Self-Assessment Framework,2010,https://www.who.int/publications/i/item/9789241598798,,WHO,allowed,quality_safety_infection,medium
+JC-MEDREC-001,JointCommission,Medication Reconciliation Process Guide,2024,https://www.jointcommission.org/resources/patient-safety-topics/medication-safety/,,JointCommission,restricted,quality_safety_medication,high
+ISMP-MED-001,ISMP,List of High-Alert Medications in Acute Care Settings,2024,https://www.ismp.org/recommendations/high-alert-medications-acute-list,,ISMP,restricted,quality_safety_medication,high
+ISMP-MED-002,ISMP,Targeted Medication Safety Best Practices for Hospitals,2024,https://www.ismp.org/guidelines/best-practices-hospitals,,ISMP,restricted,quality_safety_medication,high
+ISMP-MED-003,ISMP,Confused Drug Names List Look-Alike Sound-Alike,2023,https://www.ismp.org/recommendations/confused-drug-names-list,,ISMP,restricted,quality_safety_medication,medium
+AHRQ-CARE-001,AHRQ,Care Transitions From Hospital to Home IDEAL Discharge,2023,https://www.ahrq.gov/patient-safety/settings/hospital/engaging-families/strategy4/index.html,,AHRQ,allowed,quality_safety_systems,high
+CDC-CLABSI-001,CDC,Guidelines for Prevention of Intravascular Catheter-Related Infections,2017,https://www.cdc.gov/infectioncontrol/guidelines/bsi/index.html,,CDC,allowed,quality_safety_infection,high
+CDC-CAUTI-001,CDC,Guideline for Prevention of Catheter-Associated Urinary Tract Infections,2009,https://www.cdc.gov/infectioncontrol/guidelines/cauti/index.html,,CDC,allowed,quality_safety_infection,high
+CDC-VAP-001,CDC,Guidelines for Prevention of Healthcare-Associated Pneumonia,2003,https://www.cdc.gov/infectioncontrol/guidelines/pneumonia/index.html,,CDC,allowed,quality_safety_infection,high
+CDC-SSI-001,CDC,Guideline for Prevention of Surgical Site Infection,2017,https://www.cdc.gov/infectioncontrol/guidelines/ssi/index.html,,CDC,allowed,quality_safety_infection,high
+CDC-CDIFF-001,CDC,Clostridioides difficile Infection Prevention,2022,https://www.cdc.gov/cdiff/clinicians/cdi-prevention.html,,CDC,allowed,quality_safety_infection,high
+IDSA-CDIFF-001,IDSA,Clinical Practice Guidelines for C difficile Infection in Adults and Children,2021,https://www.idsociety.org/practice-guideline/clostridium-difficile/,,IDSA,restricted,quality_safety_infection,high
+SHEA-IPC-001,SHEA,Compendium of Strategies to Prevent HAIs,2022,https://www.shea-online.org/index.php/practice-resources/41-priority-topics/health-care-associated-infections/65-compendium-of-strategies-to-prevent-healthcare-associated-infections,,SHEA,restricted,quality_safety_infection,high
+SHEA-IPC-002,SHEA,Strategies to Prevent CLABSI in Acute Care Hospitals,2022,https://www.shea-online.org/index.php/practice-resources/priority-topics/healthcare-associated-infections,,SHEA,restricted,quality_safety_infection,high
+NPIAP-PRESS-001,NPIAP,Prevention and Treatment of Pressure Ulcers Clinical Practice Guideline,2019,https://npiap.com/page/2019Guideline,,NPIAP,restricted,quality_safety_systems,high
+ACS-VTE-001,ACS,Venous Thromboembolism Prophylaxis Surgical Patients,2022,https://www.facs.org/quality-programs/strong-for-surgery/,,ACS,restricted,quality_safety_surgical,high
+ACCP-VTE-001,ACCP,Antithrombotic Therapy for VTE Disease CHEST Guideline,2021,https://journal.chestnet.org/article/S0012-3692(21)01506-3/fulltext,,ACCP,restricted,quality_safety_systems,high
+SSC-SEPSIS-001,SCCM,Surviving Sepsis Campaign Guidelines for Management of Sepsis and Septic Shock,2021,https://www.sccm.org/Clinical-Resources/Guidelines/Guidelines/Surviving-Sepsis-Guidelines-2021,,SCCM,restricted,quality_safety_systems,high
+SSC-SEPSIS-002,SCCM,Surviving Sepsis Campaign Pediatric Guidelines,2020,https://www.sccm.org/Clinical-Resources/Guidelines/Guidelines/Surviving-Sepsis-Campaign-International-Guidelines,,SCCM,restricted,quality_safety_systems,high
+NQF-SRE-001,NQF,Serious Reportable Events in Healthcare Update,2011,https://www.qualityforum.org/Topics/SREs/Serious_Reportable_Events.aspx,,NQF,restricted,quality_safety_systems,high
+CMS-HAC-001,CMS,Hospital-Acquired Condition Reduction Program,2024,https://www.cms.gov/medicare/quality/value-modifier/hospital-acquired-condition-reduction-program,,CMS,allowed,quality_safety_systems,high
+RCA-AHRQ-001,AHRQ,Root Cause Analysis Methodology Guide,2023,https://psnet.ahrq.gov/primer/root-cause-analysis,,AHRQ,allowed,quality_safety_systems,high
+JUST-CULTURE-001,AHRQ,Just Culture Framework Implementation,2022,https://psnet.ahrq.gov/primer/culture-safety,,AHRQ,allowed,quality_safety_systems,high
+HRO-AHRQ-001,AHRQ,High Reliability Organizations in Healthcare Primer,2023,https://psnet.ahrq.gov/primer/high-reliability,,AHRQ,allowed,quality_safety_systems,medium
+MMI-MORTAL-001,ACS,Morbidity and Mortality Conference Best Practices,2022,https://www.facs.org/for-medical-professionals/education/programs/,,ACS,restricted,quality_safety_systems,medium
+ATA-TELE-001,ATA,Practice Guidelines for Live On-Demand Primary and Urgent Care,2023,https://www.americantelemed.org/resources/practice-guidelines/,,ATA,restricted,digital_telemedicine,high
+ATA-TELE-002,ATA,Telehealth Practice Guidelines for Telemental Health,2022,https://www.americantelemed.org/resources/telemental-health/,,ATA,restricted,digital_telemedicine,high
+ATA-TELE-003,ATA,Telehealth Practice Recommendations for Telestroke,2017,https://www.americantelemed.org/resources/telestroke-guidelines/,,ATA,restricted,digital_telemedicine,high
+AMA-TELE-001,AMA,Telehealth Implementation Playbook,2022,https://www.ama-assn.org/practice-management/digital/ama-telehealth-implementation-playbook,,AMA,restricted,digital_telemedicine,high
+AMA-TELE-002,AMA,Augmented Intelligence in Health Care AMA Policy,2023,https://www.ama-assn.org/system/files/ama-ai-principles.pdf,,AMA,restricted,digital_ai,high
+SCCM-TELEICU-001,SCCM,Tele-ICU Guidelines for Practice and Quality,2022,https://www.sccm.org/Communications/Critical-Connections/Archives,,SCCM,restricted,digital_telemedicine,medium
+AAD-TELEDERM-001,AAD,Position Statement on Teledermatology,2022,https://www.aad.org/member/practice/coding/teledermatology,,AAD,restricted,digital_telemedicine,medium
+AAP-TELEPED-001,AAP,Telehealth in Pediatrics Policy Statement,2023,https://publications.aap.org/pediatrics/article/151/1/e2022060652/,,AAP,restricted,digital_telemedicine,medium
+APA-TELEPSY-001,APA,Telepsychiatry Practice Guidelines,2023,https://www.psychiatry.org/psychiatrists/practice/telepsychiatry,,APA,restricted,digital_telemedicine,high
+CMS-RPM-001,CMS,Remote Patient Monitoring Reimbursement Guidelines,2024,https://www.cms.gov/medicare/coverage/telehealth,,CMS,allowed,digital_telemedicine,high
+FDA-DTX-001,FDA,Software as a Medical Device SaMD Clinical Evaluation Guidance,2023,https://www.fda.gov/medical-devices/software-medical-device-samd,,FDA,allowed,digital_ai,high
+FDA-DTX-002,FDA,Digital Health Technologies for Remote Data Acquisition Guidance,2023,https://www.fda.gov/regulatory-information/search-fda-guidance-documents/digital-health-technologies-remote-data-acquisition-clinical-investigations,,FDA,allowed,digital_telemedicine,high
+NICE-DTX-001,NICE,Evidence Standards Framework for Digital Health Technologies,2022,https://www.nice.org.uk/about/what-we-do/our-programmes/evidence-standards-framework-for-digital-health-technologies,,NICE,restricted-cds,digital_ai,high
+EMA-DTX-001,EMA,Reflection Paper on Use of AI in Lifecycle of Medicines,2023,https://www.ema.europa.eu/en/use-artificial-intelligence-ai-medicinal-product-lifecycle,,EMA,restricted,digital_ai,high
+WHO-MHEALTH-001,WHO,Recommendations on Digital Interventions for Health System Strengthening,2019,https://www.who.int/publications/i/item/9789241550505,,WHO,allowed,digital_telemedicine,high
+WHO-MHEALTH-002,WHO,Global Strategy on Digital Health 2020-2025,2021,https://www.who.int/publications/i/item/9789240020924,,WHO,allowed,digital_telemedicine,high
+FDA-AI-001,FDA,Artificial Intelligence and Machine Learning Software as a Medical Device Action Plan,2021,https://www.fda.gov/medical-devices/software-medical-device-samd/artificial-intelligence-and-machine-learning-software-medical-device,,FDA,allowed,digital_ai,high
+FDA-AI-002,FDA,Good Machine Learning Practice for Medical Device Development,2021,https://www.fda.gov/medical-devices/software-medical-device-samd/good-machine-learning-practice-medical-device-development-guiding-principles,,FDA,allowed,digital_ai,high
+NICE-AI-001,NICE,Artificial Intelligence in Health and Care Guidance,2024,https://www.nice.org.uk/about/what-we-do/our-programmes/artificial-intelligence,,NICE,restricted-cds,digital_ai,high
+AAFP-AI-001,AAFP,Artificial Intelligence in Family Medicine Position Paper,2023,https://www.aafp.org/about/policies/all/artificial-intelligence.html,,AAFP,restricted,digital_ai,medium
+HIMSS-CDS-001,HIMSS,Clinical Decision Support Maturity Model,2023,https://www.himss.org/resources/clinical-decision-support,,HIMSS,restricted,digital_records,medium
+HIMSS-EHR-001,HIMSS,Electronic Medical Record Adoption Model EMRAM,2023,https://www.himss.org/what-we-do-solutions/digital-health-transformation/maturity-models/electronic-medical-record-adoption-model-emram,,HIMSS,restricted,digital_records,high
+ONC-EHR-001,ONC,Health IT Certification Program Cures Update,2023,https://www.healthit.gov/topic/certification-ehrs/about-onc-health-it-certification-program,,ONC,allowed,digital_records,high
+ONC-HIE-001,ONC,Trusted Exchange Framework and Common Agreement TEFCA,2024,https://www.healthit.gov/topic/interoperability/policy/trusted-exchange-framework-and-common-agreement-tefca,,ONC,allowed,digital_records,high
+HHS-CYBER-001,HHS,405 d Health Industry Cybersecurity Practices,2023,https://405d.hhs.gov/Documents/HICP-Main-508.pdf,,HHS,allowed,digital_records,high
+NIST-CYBER-001,NIST,Cybersecurity Framework for Healthcare,2024,https://www.nist.gov/cyberframework,,NIST,allowed,digital_records,high
+AHA-WEAR-001,AHA,Scientific Statement on Wearable Devices in Cardiovascular Care,2023,https://www.heart.org/en/professional/quality-improvement,,AHA,restricted,digital_telemedicine,medium
+ESC-WEAR-001,ESC,Position Paper on Mobile Health and Wearables in CV Care,2022,https://www.escardio.org/Guidelines,,ESC,restricted,digital_telemedicine,medium
+WHO-HSF-001,WHO,Health Systems Framework Six Building Blocks,2007,https://www.who.int/publications/i/item/everybody-s-business----strengthening-health-systems-to-improve-health-outcomes,,WHO,allowed,health_systems_uhc,high
+WHO-UHC-001,WHO,Universal Health Coverage Roadmap,2023,https://www.who.int/health-topics/universal-health-coverage,,WHO,allowed,health_systems_uhc,high
+WHO-ASTANA-001,WHO,Declaration of Astana on Primary Health Care,2018,https://www.who.int/publications/i/item/WHO-HIS-SDS-2018.61,,WHO,allowed,health_systems_uhc,high
+WHO-WORK-001,WHO,Global Strategy on Human Resources for Health Workforce 2030,2016,https://www.who.int/publications/i/item/9789241511131,,WHO,allowed,health_systems_uhc,high
+WHO-FIN-001,WHO,Health Financing Country Diagnostic Guide,2017,https://www.who.int/publications/i/item/9789241513357,,WHO,allowed,health_systems_uhc,medium
+OECD-HSF-001,OECD,Health at a Glance Indicators Report,2023,https://www.oecd.org/health/health-at-a-glance/,,OECD,restricted,health_systems_uhc,medium
+NICE-HTA-001,NICE,Methods for Technology Appraisal Manual,2022,https://www.nice.org.uk/process/pmg36/chapter/introduction-to-health-technology-evaluation,,NICE,restricted-cds,health_systems_hta,high
+CADTH-HTA-001,CADTH,Procedure and Guidelines for Reimbursement Reviews,2023,https://www.cadth.ca/about-cadth/what-we-do/products-services/procedure-and-guidelines,,CADTH,restricted,health_systems_hta,high
+INAHTA-HTA-001,INAHTA,Health Technology Assessment Glossary,2023,https://www.inahta.org/HTA/,,INAHTA,restricted,health_systems_hta,medium
+CHOOSE-WISE-001,ABIMFoundation,Choosing Wisely Recommendations Compendium,2024,https://www.choosingwisely.org/clinician-lists/,,ABIMFoundation,restricted,health_systems_hta,high
+CMS-VBC-001,CMS,Value-Based Care Strategy Innovation Center,2024,https://innovation.cms.gov/,,CMS,allowed,health_systems_uhc,high
+CMS-ACO-001,CMS,Medicare Shared Savings Program ACO Guidance,2024,https://www.cms.gov/medicare/payment/fee-for-service-providers/shared-savings-program,,CMS,allowed,health_systems_uhc,high
+CMS-BUNDLE-001,CMS,Bundled Payments for Care Improvement Advanced,2024,https://innovation.cms.gov/innovation-models/bpci-advanced,,CMS,allowed,health_systems_uhc,medium
+WHO-EMERG-001,WHO,Health Emergency and Disaster Risk Management Framework,2019,https://www.who.int/publications/i/item/9789241516181,,WHO,allowed,global_health_emergency,high
+WHO-EMERG-002,WHO,Public Health Emergency Operations Centre Framework,2015,https://www.who.int/publications/i/item/9789241565134,,WHO,allowed,global_health_emergency,medium
+WHO-BLUEPRINT-001,WHO,R and D Blueprint for Action to Prevent Epidemics,2024,https://www.who.int/teams/blueprint,,WHO,allowed,global_health_emergency,medium
+UNHCR-MIG-001,UNHCR,Refugee Health Operational Guidance,2023,https://www.unhcr.org/public-health,,UNHCR,allowed,global_health_emergency,high
+WHO-MIG-001,WHO,Global Action Plan to Promote Health of Refugees and Migrants,2019,https://www.who.int/publications/i/item/9789241514392,,WHO,allowed,global_health_emergency,high
+WHO-CLIM-001,WHO,Operational Framework for Building Climate Resilient Health Systems,2015,https://www.who.int/publications/i/item/9789241565073,,WHO,allowed,global_health_climate,high
+WHO-CLIM-002,WHO,Climate Change and Health Country Profiles,2023,https://www.who.int/teams/environment-climate-change-and-health/climate-change-and-health,,WHO,allowed,global_health_climate,high
+LANCET-CLIM-001,LancetCountdown,Lancet Countdown on Health and Climate Change Annual Report,2023,https://www.lancetcountdown.org/2023-report/,,LancetCountdown,restricted,global_health_climate,high
+WHO-AIR-001,WHO,Global Air Quality Guidelines,2021,https://www.who.int/publications/i/item/9789240034228,,WHO,allowed,global_health_climate,high
+GBD-AIR-001,IHME,Global Burden of Disease Air Pollution Estimates,2023,https://www.healthdata.org/research-analysis/health-risks-issues/air-pollution,,IHME,restricted,global_health_climate,medium
+WHO-WASH-001,WHO,Drinking Water Quality Guidelines Fourth Edition,2022,https://www.who.int/publications/i/item/9789240045064,,WHO,allowed,global_health_emergency,high
+WHO-WASH-002,WHO,Sanitation and Health Guidelines,2018,https://www.who.int/publications/i/item/9789241514705,,WHO,allowed,global_health_emergency,high
+UNICEF-WASH-001,UNICEF,WASH Strategy 2022-2030,2022,https://www.unicef.org/wash,,UNICEF,allowed,global_health_emergency,medium
+FAO-FOOD-001,FAO,State of Food Security and Nutrition in the World,2023,https://www.fao.org/publications/sofi/,,FAO,allowed,nutrition_adult,medium
+GAVI-VAX-001,GAVI,Vaccine Alliance Strategy 5.0,2023,https://www.gavi.org/our-alliance/strategy,,GAVI,restricted,public_health_outbreak,medium
+GFATM-001,GlobalFund,Global Fund Strategy 2023-2028 Fight for What Counts,2022,https://www.theglobalfund.org/en/strategy/,,GlobalFund,restricted,public_health_outbreak,medium
+NCCIH-INT-001,NCCIH,Complementary Health Approaches Clinical Practice Guidelines Summary,2023,https://www.nccih.nih.gov/health/providers,,NCCIH,allowed,integrative_mindbody,high
+NCCIH-INT-002,NCCIH,Pain Management Complementary Health Approaches,2023,https://www.nccih.nih.gov/health/pain,,NCCIH,allowed,integrative_mindbody,high
+WHO-ACU-001,WHO,Standardized Acupuncture Point Locations in Western Pacific Region,2008,https://www.who.int/publications/i/item/9789290612483,,WHO,allowed,integrative_acupuncture,medium
+WHO-ACU-002,WHO,Traditional Medicine Strategy 2014-2023,2013,https://www.who.int/publications/i/item/9789241506096,,WHO,allowed,integrative_acupuncture,medium
+ESCOP-HERB-001,ESCOP,Monographs on Use of Plant Drugs,2023,https://escop.com/monographs-overview/,,ESCOP,restricted,integrative_supplements,medium
+WGO-PROB-001,WGO,Probiotics and Prebiotics Global Guidelines,2023,https://www.worldgastroenterology.org/guidelines/probiotics-and-prebiotics,,WGO,restricted,integrative_supplements,high
+ESPGHAN-PROB-001,ESPGHAN,Use of Probiotics for Pediatric Gastroenteritis Position Paper,2023,https://www.espghan.org/knowledge-center/publications/Position-Paper,,ESPGHAN,restricted,integrative_supplements,high
+YOGA-VAH-001,VAYoga,Yoga Therapy Clinical Application VA Whole Health,2022,https://www.va.gov/wholehealth/professional-resources/clinical-tools/yoga.asp,,VA,allowed,integrative_mindbody,medium
+MIND-AHRQ-001,AHRQ,Meditation and Mindfulness for Chronic Pain Evidence Review,2022,https://effectivehealthcare.ahrq.gov/products/mindfulness-meditation/research,,AHRQ,allowed,integrative_mindbody,high
+ACA-CHIRO-001,ACA,Chiropractic Best Practices Guidelines,2023,https://www.acatoday.org/practice-resources/clinical-resources-tools/,,ACA,restricted,integrative_mindbody,medium
+AMTA-MASS-001,AMTA,Best Practices in Massage Therapy,2022,https://www.amtamassage.org/practice-information/,,AMTA,restricted,integrative_mindbody,low
+AMTA-MUSIC-001,AMTA-Music,Music Therapy Clinical Practice Standards,2023,https://www.musictherapy.org/about/standards/,,AMTA-Music,restricted,integrative_mindbody,low
+AATA-ART-001,AATA,Art Therapy Clinical Practice Standards,2023,https://arttherapy.org/about-art-therapy/,,AATA,restricted,integrative_mindbody,low
+AVMA-AAT-001,AVMA,Animal-Assisted Interventions Guidelines,2022,https://www.avma.org/resources-tools/avma-policies/animal-assisted-interventions-guidelines,,AVMA,restricted,integrative_mindbody,low
+USDA-DIET-001,USDA,Dietary Guidelines for Americans 2020-2025,2020,https://www.dietaryguidelines.gov/,,USDA,allowed,nutrition_adult,high
+USDA-DIET-002,USDA,MyPlate Healthy Eating Plan,2024,https://www.myplate.gov/,,USDA,allowed,nutrition_adult,medium
+EFSA-NUT-001,EFSA,Dietary Reference Values for Nutrients Summary Report,2017,https://www.efsa.europa.eu/en/topics/topic/dietary-reference-values,,EFSA,restricted,nutrition_adult,medium
+WHO-NUT-001,WHO,Healthy Diet Fact Sheet and Recommendations,2020,https://www.who.int/news-room/fact-sheets/detail/healthy-diet,,WHO,allowed,nutrition_adult,high
+WHO-NUT-002,WHO,Saturated Fatty Acid and Trans-Fatty Acid Intake Guideline,2023,https://www.who.int/publications/i/item/9789240073616,,WHO,allowed,nutrition_adult,high
+WHO-NUT-003,WHO,Sodium Intake for Adults and Children Guideline,2012,https://www.who.int/publications/i/item/9789241504836,,WHO,allowed,nutrition_adult,high
+WHO-NUT-004,WHO,Sugars Intake for Adults and Children Guideline,2015,https://www.who.int/publications/i/item/9789241549028,,WHO,allowed,nutrition_adult,high
+AAP-PEDNUT-001,AAP,Pediatric Nutrition Handbook Eighth Edition Recommendations,2020,https://publications.aap.org/aapbooks/book/543/Pediatric-Nutrition,,AAP,restricted,nutrition_pediatric,high
+ESPGHAN-PEDNUT-001,ESPGHAN,Complementary Feeding Position Paper,2017,https://www.espghan.org/knowledge-center/publications/Position-Paper,,ESPGHAN,restricted,nutrition_pediatric,high
+ESPGHAN-PEDNUT-002,ESPGHAN,Pediatric Parenteral Nutrition Guidelines,2018,https://www.espghan.org/knowledge-center/publications/Nutrition,,ESPGHAN,restricted,nutrition_pediatric,high
+ESPEN-CLIN-001,ESPEN,Clinical Nutrition in Hospitalized Adult Patients Guideline,2022,https://www.espen.org/guidelines-home/espen-guidelines,,ESPEN,restricted,nutrition_clinical,high
+ESPEN-CLIN-002,ESPEN,Clinical Nutrition in the ICU Guideline,2023,https://www.espen.org/guidelines-home/espen-guidelines,,ESPEN,restricted,nutrition_clinical,high
+ESPEN-CLIN-003,ESPEN,Clinical Nutrition in Cancer Guideline,2021,https://www.espen.org/guidelines-home/espen-guidelines,,ESPEN,restricted,nutrition_clinical,high
+ASPEN-CLIN-001,ASPEN,Adult Nutrition Support Core Curriculum,2023,https://www.nutritioncare.org/Guidelines_and_Clinical_Resources/,,ASPEN,restricted,nutrition_clinical,high
+ASPEN-CLIN-002,ASPEN,Pediatric Nutrition Support Core Curriculum,2023,https://www.nutritioncare.org/Guidelines_and_Clinical_Resources/,,ASPEN,restricted,nutrition_clinical,high
+ASPEN-CLIN-003,ASPEN,Enteral Nutrition Practice Recommendations,2022,https://www.nutritioncare.org/Guidelines_and_Clinical_Resources/,,ASPEN,restricted,nutrition_clinical,high
+ADA-DM-NUT-001,ADA,Nutrition Therapy for Adults With Diabetes Consensus Report,2019,https://diabetesjournals.org/care/article/42/5/731/40739,,ADA,restricted,nutrition_clinical,high
+AHA-CV-NUT-001,AHA,2021 Dietary Guidance to Improve Cardiovascular Health,2021,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001031,,AHA,restricted,nutrition_clinical,high
+ESC-CV-NUT-001,ESC,Nutrition Recommendations in CVD Prevention,2021,https://www.escardio.org/Guidelines,,ESC,restricted,nutrition_clinical,high
+KDIGO-NUT-001,KDIGO,Nutrition in CKD Clinical Practice Guideline,2020,https://kdigo.org/guidelines/nutrition-in-ckd/,,KDIGO,restricted,nutrition_clinical,high
+AASLD-NUT-001,AASLD,Nutrition in Liver Disease Practice Guidance,2021,https://www.aasld.org/practice-guidelines,,AASLD,restricted,nutrition_clinical,high
+ECCO-IBD-NUT-001,ECCO,Nutrition Therapy in IBD Topical Review,2023,https://www.ecco-ibd.eu/publications/ecco-guidelines-science.html,,ECCO,restricted,nutrition_clinical,high
+EATRIGHT-001,AcademyOfNutrition,Evidence Analysis Library Recommendations,2024,https://www.andeal.org/,,AcademyOfNutrition,restricted,nutrition_adult,medium
+MED-DIET-001,EFSA,Mediterranean Diet Health Claims Position,2018,https://www.efsa.europa.eu/en/efsajournal/pub/scientific-output,,EFSA,restricted,nutrition_adult,medium
+VEG-AND-001,AcademyOfNutrition,Position on Vegetarian Diets,2016,https://www.eatrightpro.org/practice/position-and-practice-papers/position-papers,,AcademyOfNutrition,restricted,nutrition_adult,medium
+ACG-CELIAC-001,ACG,Diagnosis and Management of Celiac Disease and Gluten-Free Diet,2023,https://gi.org/guidelines/,,ACG,restricted,nutrition_clinical,high
+WHO-IPC-001,WHO,Core Components for Infection Prevention and Control Programmes,2016,https://www.who.int/publications/i/item/9789241549929,,WHO,allowed,cd_control_ipc,high
+WHO-IPC-002,WHO,Minimum Requirements for Infection Prevention and Control Programmes,2019,https://www.who.int/publications/i/item/9789241516945,,WHO,allowed,cd_control_ipc,high
+CDC-IPC-001,CDC,Guideline for Isolation Precautions Preventing Transmission of Infectious Agents,2007,https://www.cdc.gov/infectioncontrol/guidelines/isolation/index.html,,CDC,allowed,cd_control_ipc,high
+CDC-IPC-002,CDC,Standard Precautions in Healthcare,2024,https://www.cdc.gov/infectioncontrol/basics/standard-precautions.html,,CDC,allowed,cd_control_ipc,high
+CDC-IPC-003,CDC,Transmission-Based Precautions Contact Droplet Airborne,2024,https://www.cdc.gov/infectioncontrol/basics/transmission-based-precautions.html,,CDC,allowed,cd_control_ipc,high
+ECDC-IPC-001,ECDC,Core Competencies for Infection Control and Hospital Hygiene Professionals,2013,https://www.ecdc.europa.eu/en/publications-data/core-competencies-infection-control,,ECDC,allowed,cd_control_ipc,medium
+ECDC-IPC-002,ECDC,Healthcare-Associated Infections Surveillance Network HAI-Net,2023,https://www.ecdc.europa.eu/en/about-us/networks/disease-and-laboratory-networks/hai-net,,ECDC,allowed,cd_control_ipc,medium
+SHEA-OUT-001,SHEA,Outbreak Response Practices in Hospitals Compendium,2022,https://www.shea-online.org/index.php/practice-resources/priority-topics/outbreak-response,,SHEA,restricted,cd_control_outbreak,high
+CDC-OCC-001,CDC,Healthcare Personnel Occupational Exposure Management,2023,https://www.cdc.gov/infectioncontrol/guidelines/healthcare-personnel/index.html,,CDC,allowed,cd_control_ipc,high
+OSHA-BBP-001,OSHA,Bloodborne Pathogens Standard 1910.1030,2023,https://www.osha.gov/bloodborne-pathogens/standards,,OSHA,allowed,cd_control_ipc,high
+ACIP-HCW-001,ACIP,Immunization of Healthcare Personnel Recommendations,2011,https://www.cdc.gov/mmwr/preview/mmwrhtml/rr6007a1.htm,,CDC,allowed,cd_control_ipc,high
+IDSA-STEW-001,IDSA,Implementing an Antibiotic Stewardship Program Guidelines,2016,https://www.idsociety.org/practice-guideline/implementing-an-asp/,,IDSA,restricted,cd_control_amr,high
+ECDC-STEW-001,ECDC,Antimicrobial Stewardship in Hospitals Guidance,2017,https://www.ecdc.europa.eu/en/publications-data/proposals-eu-guidelines-prudent-use-antimicrobials-humans,,ECDC,allowed,cd_control_amr,high
+WHO-STEW-001,WHO,Antimicrobial Stewardship Programmes in Health-Care Facilities Toolkit,2019,https://www.who.int/publications/i/item/9789241515481,,WHO,allowed,cd_control_amr,high
+WHO-PHEIC-001,WHO,Public Health Emergency of International Concern Procedures,2023,https://www.who.int/news/item/30-01-2020-statement-on-the-second-meeting-of-the-international-health-regulations-(2005)-emergency-committee,,WHO,allowed,cd_control_outbreak,high
+CDC-IMMIG-001,CDC,Technical Instructions for Panel Physicians for Immigrant Medical Examinations,2023,https://www.cdc.gov/immigrantrefugeehealth/exams/medical-examination.html,,CDC,allowed,cd_control_outbreak,medium
+CDC-MPOX-001,CDC,Mpox Clinical Recognition and Treatment Guidance,2023,https://www.cdc.gov/poxvirus/mpox/clinicians/index.html,,CDC,allowed,cd_control_outbreak,high
+CDC-EBOLA-001,CDC,Ebola Clinical Care Guidelines for US Healthcare Providers,2023,https://www.cdc.gov/vhf/ebola/clinicians/index.html,,CDC,allowed,cd_control_outbreak,medium
+CDC-MEAS-001,CDC,Measles Outbreak Response Guidance,2023,https://www.cdc.gov/measles/hcp/index.html,,CDC,allowed,cd_control_outbreak,high
+CDC-PERT-001,CDC,Pertussis Clinical and Public Health Management,2022,https://www.cdc.gov/pertussis/clinical/index.html,,CDC,allowed,cd_control_outbreak,medium
+CDC-INFLU-001,CDC,Seasonal Influenza Vaccination Recommendations ACIP,2024,https://www.cdc.gov/flu/professionals/acip/index.htm,,CDC,allowed,preventive_immunization,high
+CDC-FOOD-001,CDC,Foodborne Outbreak Response Reporting Manual,2022,https://www.cdc.gov/foodsafety/outbreaks/investigating-outbreaks/index.html,,CDC,allowed,cd_control_outbreak,medium
+WHO-DENGUE-001,WHO,Dengue Guidelines for Diagnosis Treatment Prevention and Control,2009,https://www.who.int/publications/i/item/9789241547871,,WHO,allowed,public_health_outbreak,medium
+WHO-CHOL-001,WHO,Cholera Outbreak Response Field Manual,2019,https://www.who.int/publications/i/item/cholera-outbreak-response-field-manual,,WHO,allowed,cd_control_outbreak,medium
+WHO-POLIO-001,WHO,Polio Eradication Strategy 2022-2026,2021,https://polioeradication.org/gpei-strategy-2022-2026/,,WHO,allowed,public_health_outbreak,high
+WHO-MEN-001,WHO,Mental Health Action Plan 2013-2030,2021,https://www.who.int/publications/i/item/9789240031029,,WHO,allowed,public_health_general,high
+WHO-DROW-001,WHO,Global Report on Drowning Prevention,2014,https://www.who.int/publications/i/item/9789241564786,,WHO,allowed,public_health_general,low
+WHO-RTI-001,WHO,Save LIVES Road Safety Technical Package,2017,https://www.who.int/publications/i/item/save-lives-a-road-safety-technical-package,,WHO,allowed,public_health_general,medium
+WHO-VIO-001,WHO,RESPECT Women Preventing Violence Against Women Framework,2019,https://www.who.int/publications/i/item/WHO-RHR-18.19,,WHO,allowed,public_health_general,medium
+WHO-SUI-001,WHO,LIVE LIFE Implementation Guide for Suicide Prevention,2021,https://www.who.int/publications/i/item/9789240026629,,WHO,allowed,public_health_general,medium
+WHO-OBES-001,WHO,Acceleration Plan to Stop Obesity,2023,https://www.who.int/publications/i/item/9789240075634,,WHO,allowed,public_health_ncd,high
+WHO-PA-001,WHO,Global Action Plan on Physical Activity 2018-2030,2018,https://www.who.int/publications/i/item/9789241514187,,WHO,allowed,public_health_ncd,high
+WHO-AGE-001,WHO,Decade of Healthy Ageing 2021-2030 Plan of Action,2020,https://www.who.int/initiatives/decade-of-healthy-ageing,,WHO,allowed,public_health_general,medium
+CDC-LEAD-001,CDC,Lead Exposure Prevention and Response Guidance,2023,https://www.cdc.gov/nceh/lead/,,CDC,allowed,public_health_general,medium
+CDC-OPIOID-001,CDC,Clinical Practice Guideline for Prescribing Opioids for Pain,2022,https://www.cdc.gov/mmwr/volumes/71/rr/rr7103a1.htm,,CDC,allowed,public_health_general,high
+CDC-OVERDOSE-001,CDC,Overdose Prevention Strategy,2023,https://www.cdc.gov/drugoverdose/od2a/index.html,,CDC,allowed,public_health_general,high
+WHO-DRUG-001,WHO,UNODC WHO International Standards on Drug Use Prevention,2018,https://www.who.int/publications/i/item/9789240002227,,WHO,allowed,public_health_general,medium
+WHO-EQUITY-001,WHO,Closing the Gap in a Generation Health Equity Final Report,2008,https://www.who.int/publications/i/item/WHO-IER-CSDH-08.1,,WHO,allowed,public_health_general,high
+WHO-SDH-001,WHO,Operational Framework for Monitoring Social Determinants of Health Equity,2024,https://www.who.int/publications/i/item/9789240088320,,WHO,allowed,public_health_general,high
+NICE-PUB-001,NICE,Public Health Guidance Methods Manual,2022,https://www.nice.org.uk/process/pmg4,,NICE,restricted-cds,public_health_general,medium
+ESPGHAN-FORM-001,ESPGHAN,Infant Formula Composition Recommendations,2023,https://www.espghan.org/knowledge-center/publications/Nutrition,,ESPGHAN,restricted,nutrition_pediatric,high
+AAP-FORM-001,AAP,Infant Formula Feeding and Choice Clinical Report,2022,https://publications.aap.org/pediatrics/article/146/2/e2020024042/,,AAP,restricted,nutrition_pediatric,high
+WHO-BF-001,WHO,Implementation Guidance Protecting Promoting and Supporting Breastfeeding,2017,https://www.who.int/publications/i/item/9789241550086,,WHO,allowed,nutrition_pediatric,high
+WHO-CODE-001,WHO,International Code of Marketing of Breast-Milk Substitutes,1981,https://www.who.int/publications/i/item/9241541601,,WHO,allowed,nutrition_pediatric,medium
+ASPEN-PARENT-001,ASPEN,Parenteral Nutrition Safety Recommendations,2021,https://www.nutritioncare.org/Guidelines_and_Clinical_Resources/,,ASPEN,restricted,nutrition_clinical,high
+ESPEN-HOME-001,ESPEN,Home Enteral Nutrition Guidelines,2020,https://www.espen.org/guidelines-home/espen-guidelines,,ESPEN,restricted,nutrition_clinical,medium
+ASPEN-TUBE-001,ASPEN,Safe Practices for Enteral Nutrition Therapy,2017,https://www.nutritioncare.org/Guidelines_and_Clinical_Resources/,,ASPEN,restricted,nutrition_clinical,high
+CDC-VAX-COV-001,CDC,COVID-19 Vaccine Recommendations Updated Schedule,2024,https://www.cdc.gov/vaccines/covid-19/clinical-considerations/index.html,,CDC,allowed,preventive_immunization,high
+ACIP-MEN-001,ACIP,Meningococcal Vaccination Recommendations,2024,https://www.cdc.gov/vaccines/vpd/mening/hcp/recommendations.html,,CDC,allowed,preventive_immunization,high
+ACIP-PNEUM-001,ACIP,Pneumococcal Vaccination Recommendations Adults,2023,https://www.cdc.gov/vaccines/vpd/pneumo/hcp/index.html,,CDC,allowed,preventive_immunization,high
+ACIP-ZOSTER-001,ACIP,Zoster Vaccine Recommendations,2022,https://www.cdc.gov/vaccines/vpd/shingles/hcp/recommendations.html,,CDC,allowed,preventive_immunization,high
+ACIP-TRAVEL-001,ACIP,Travel Vaccine Recommendations Yellow Book,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/table-of-contents,,CDC,allowed,preventive_immunization,medium
+WHO-RABIES-001,WHO,Rabies Vaccines Position Paper,2018,https://www.who.int/publications/i/item/who-wer9316,,WHO,allowed,preventive_immunization,medium
+WHO-YF-001,WHO,Yellow Fever Vaccine Position Paper,2013,https://www.who.int/publications/i/item/who-wer8827,,WHO,allowed,preventive_immunization,medium
+HIMSS-ANALYT-001,HIMSS,Adoption Model for Analytics Maturity AMAM,2023,https://www.himss.org/what-we-do-solutions/digital-health-transformation/maturity-models/adoption-model-analytics-maturity,,HIMSS,restricted,digital_records,medium
+ACR-AI-001,ACR,Data Science Institute AI Use Cases for Radiology,2023,https://www.acrdsi.org/,,ACR,restricted,digital_ai,medium
+RSNA-AI-001,RSNA,Imaging AI Certificate Recommendations,2023,https://www.rsna.org/practice-tools/data-tools-and-standards/ai-resources-and-training,,RSNA,restricted,digital_ai,medium
+ASCO-AI-001,ASCO,Use of AI in Cancer Care Position Statement,2023,https://www.asco.org/news-initiatives/policy-news-analysis,,ASCO,restricted,digital_ai,medium
+WHO-GENOMICS-001,WHO,Genomic Surveillance Strategy for Pathogens with Pandemic Potential 2022-2032,2022,https://www.who.int/publications/i/item/9789240046979,,WHO,allowed,digital_ai,medium
+NIH-PREDICT-001,NIH,All of Us Research Program Genomic Data Sharing,2023,https://allofus.nih.gov/,,NIH,allowed,digital_ai,low
+WHO-BIGDATA-001,WHO,Ethics and Governance of AI Big Data Use Cases,2023,https://www.who.int/publications/i/item/9789240029200,,WHO,allowed,digital_ai,medium
+EU-AIACT-001,EU,EU AI Act High-Risk AI Systems Healthcare,2024,https://artificialintelligenceact.eu/,,EU,restricted,digital_ai,high
+ABMS-PROF-001,ABMS,Maintenance of Certification Standards Professionalism,2023,https://www.abms.org/board-certification/standards-of-board-certification/,,ABMS,restricted,ethics_consent,medium
+NEJM-EQUITY-001,NEJM,Cultural Competence and Health Equity Curriculum,2022,https://www.nejm.org/medical-education,,NEJM,restricted,ethics_consent,medium
+ACP-EQUITY-001,ACP,Racial and Ethnic Disparities in Health Care Position Paper,2021,https://www.acponline.org/acp-newsroom/acp-position-papers,,ACP,restricted,public_health_general,high
+SAMHSA-MH-001,SAMHSA,Trauma-Informed Care Implementation Guide,2023,https://www.samhsa.gov/trauma-informed-care,,SAMHSA,allowed,public_health_general,medium
+HRSA-WORK-001,HRSA,Health Workforce Strategic Plan,2023,https://www.hrsa.gov/about/strategic-plan,,HRSA,allowed,health_systems_uhc,medium
+AHRQ-PCMH-001,AHRQ,Patient-Centered Medical Home Resource Center,2023,https://www.ahrq.gov/ncepcr/research/care-coordination/pcmh/index.html,,AHRQ,allowed,health_systems_uhc,medium
+NQF-MEAS-001,NQF,Measure Evaluation Criteria for Endorsement,2023,https://www.qualityforum.org/Measuring_Performance/Measuring_Performance.aspx,,NQF,restricted,health_systems_uhc,medium
+WHO-RH-001,WHO,Reproductive Health Strategy Implementation Framework,2022,https://www.who.int/teams/sexual-and-reproductive-health-and-research,,WHO,allowed,public_health_general,medium
+WHO-FP-001,WHO,Selected Practice Recommendations for Contraceptive Use,2016,https://www.who.int/publications/i/item/9789241565400,,WHO,allowed,public_health_general,high
+WHO-MEC-001,WHO,Medical Eligibility Criteria for Contraceptive Use,2015,https://www.who.int/publications/i/item/9789241549158,,WHO,allowed,public_health_general,high
+WHO-AIRBORNE-001,WHO,Roadmap to Improve and Ensure Good Indoor Ventilation,2021,https://www.who.int/publications/i/item/9789240021280,,WHO,allowed,cd_control_ipc,medium
+CDC-VENTIL-001,CDC,Ventilation in Buildings COVID-19 Recommendations,2023,https://www.cdc.gov/coronavirus/2019-ncov/community/ventilation.html,,CDC,allowed,cd_control_ipc,medium
+WHO-PPE-001,WHO,Rational Use of Personal Protective Equipment for COVID-19,2022,https://www.who.int/publications/i/item/rational-use-of-personal-protective-equipment-for-coronavirus-disease-(covid-19)-and-considerations-during-severe-shortages,,WHO,allowed,cd_control_ipc,high
+CDC-PPE-001,CDC,Using Personal Protective Equipment Sequence Guide,2022,https://www.cdc.gov/hai/pdfs/ppe/PPE-Sequence.pdf,,CDC,allowed,cd_control_ipc,high
+WHO-LAB-001,WHO,Laboratory Biosafety Manual Fourth Edition,2020,https://www.who.int/publications/i/item/9789240011311,,WHO,allowed,cd_control_ipc,medium
+CDC-BSL-001,CDC,Biosafety in Microbiological and Biomedical Laboratories BMBL Sixth Edition,2020,https://www.cdc.gov/labs/BMBL.html,,CDC,allowed,cd_control_ipc,medium
+WHO-DISINFECT-001,WHO,Cleaning and Disinfection of Environmental Surfaces in Healthcare,2020,https://www.who.int/publications/i/item/cleaning-and-disinfection-of-environmental-surfaces-inthe-context-of-covid-19,,WHO,allowed,cd_control_ipc,medium
+APIC-IPC-001,APIC,Text of Infection Control and Epidemiology,2023,https://text.apic.org/,,APIC,restricted,cd_control_ipc,high
+APIC-IPC-002,APIC,Construction and Renovation IPC Risk Assessment,2022,https://apic.org/resources/topic-specific-infection-prevention/,,APIC,restricted,cd_control_ipc,medium
+SHEA-MDRO-001,SHEA,Multidrug-Resistant Organism Prevention Guidance,2022,https://www.shea-online.org/index.php/practice-resources,,SHEA,restricted,cd_control_amr,high
+CDC-MDRO-001,CDC,Management of Multidrug-Resistant Organisms in Healthcare Settings,2006,https://www.cdc.gov/infectioncontrol/guidelines/mdro/index.html,,CDC,allowed,cd_control_amr,high
+CDC-CRE-001,CDC,Carbapenem-Resistant Enterobacteriaceae Prevention Toolkit,2015,https://www.cdc.gov/hai/organisms/cre/cre-toolkit/index.html,,CDC,allowed,cd_control_amr,medium
+WHO-PRIORITY-001,WHO,Priority Pathogens List for Research and Development of New Antibiotics,2024,https://www.who.int/news/item/17-05-2024-who-updates-list-of-drug-resistant-bacteria-most-threatening-to-human-health,,WHO,allowed,cd_control_amr,high
