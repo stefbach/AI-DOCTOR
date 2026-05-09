@@ -1,7 +1,7 @@
 {
  "source": "AAO",
  "generated_at": "2026-05-02T15:53:45Z",
- "total_documents": 54,
+ "total_documents": 69,
  "documents": [
   {
    "id": "AAO-001",
@@ -4434,6 +4434,381 @@
     {
      "chunk_index": 0,
      "content": "Title: AAO clinical guidance on nonarteritic anterior ischemic optic neuropathy Source: AAO Year: 2021 Domain: ophthalmology_neuro License: AAO Available at: https://www.aao.org/clinical-statement/aion This is a citation reference for the AAO guideline 'AAO clinical guidance on nonarteritic anterior ischemic optic neuropathy' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_neuro. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-GCA-001",
+   "source": "AAO",
+   "title": "AAO clinical statement on giant cell arteritis and arteritic AION",
+   "year": "2020",
+   "page_url": "https://www.aao.org/clinical-statement/gca-aion",
+   "pdf_url": "https://www.aao.org/clinical-statement/gca-aion",
+   "license": "AAO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_neuro",
+   "priority": "high",
+   "sha256": "33b13c17bda3780d187a0f6a32bb917144518a75df02f769beb0b89c5f6c2fbe",
+   "size_bytes": 764,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 764,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:41Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO clinical statement on giant cell arteritis and arteritic AION Source: AAO Year: 2020 Domain: ophthalmology_neuro License: AAO Available at: https://www.aao.org/clinical-statement/gca-aion This is a citation reference for the AAO guideline 'AAO clinical statement on giant cell arteritis and arteritic AION' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_neuro. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-PUPIL-001",
+   "source": "AAO",
+   "title": "AAO clinical guidance on pupillary disorders Adie Horner RAPD",
+   "year": "2020",
+   "page_url": "https://www.aao.org/clinical-statement/pupillary-disorders",
+   "pdf_url": "https://www.aao.org/clinical-statement/pupillary-disorders",
+   "license": "AAO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_neuro",
+   "priority": "medium",
+   "sha256": "5c7a57917a190bcc9baba155af8c9cbc96f30febd81901331da11687d5261eb2",
+   "size_bytes": 767,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 767,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:43Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO clinical guidance on pupillary disorders Adie Horner RAPD Source: AAO Year: 2020 Domain: ophthalmology_neuro License: AAO Available at: https://www.aao.org/clinical-statement/pupillary-disorders This is a citation reference for the AAO guideline 'AAO clinical guidance on pupillary disorders Adie Horner RAPD' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_neuro. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-PPP-BLEPH-001",
+   "source": "AAO",
+   "title": "AAO PPP blepharoplasty and dermatochalasis",
+   "year": "2018",
+   "page_url": "https://www.aao.org/preferred-practice-pattern/blepharoplasty-ppp",
+   "pdf_url": "https://www.aao.org/preferred-practice-pattern/blepharoplasty-ppp",
+   "license": "AAO PPP",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_oculoplastic",
+   "priority": "medium",
+   "sha256": "a3482ba9d0e8ea27fa4b58dedafb9ef67e5db9613238d133013f340c3394fa64",
+   "size_bytes": 754,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 754,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO PPP blepharoplasty and dermatochalasis Source: AAO Year: 2018 Domain: ophthalmology_oculoplastic License: AAO PPP Available at: https://www.aao.org/preferred-practice-pattern/blepharoplasty-ppp This is a citation reference for the AAO guideline 'AAO PPP blepharoplasty and dermatochalasis' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_oculoplastic. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-LACRIMAL-001",
+   "source": "AAO",
+   "title": "AAO clinical guidance on adult lacrimal drainage disorders",
+   "year": "2021",
+   "page_url": "https://www.aao.org/clinical-statement/lacrimal-disorders",
+   "pdf_url": "https://www.aao.org/clinical-statement/lacrimal-disorders",
+   "license": "AAO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_oculoplastic",
+   "priority": "medium",
+   "sha256": "3de63a085f6a49d49cc7672aa82859399ea7b345afa8179c483b76fc6536c826",
+   "size_bytes": 774,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 774,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:46Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO clinical guidance on adult lacrimal drainage disorders Source: AAO Year: 2021 Domain: ophthalmology_oculoplastic License: AAO Available at: https://www.aao.org/clinical-statement/lacrimal-disorders This is a citation reference for the AAO guideline 'AAO clinical guidance on adult lacrimal drainage disorders' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_oculoplastic. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-ORBFRX-001",
+   "source": "AAO",
+   "title": "AAO clinical guidance on orbital floor and wall fractures",
+   "year": "2021",
+   "page_url": "https://www.aao.org/clinical-statement/orbital-fractures",
+   "pdf_url": "https://www.aao.org/clinical-statement/orbital-fractures",
+   "license": "AAO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_trauma",
+   "priority": "high",
+   "sha256": "2d902b33a8ef337db0cfce6ce411ec1879010ec97d6c294f7281d59009c61ef7",
+   "size_bytes": 759,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 759,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO clinical guidance on orbital floor and wall fractures Source: AAO Year: 2021 Domain: ophthalmology_trauma License: AAO Available at: https://www.aao.org/clinical-statement/orbital-fractures This is a citation reference for the AAO guideline 'AAO clinical guidance on orbital floor and wall fractures' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_trauma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-ORBTUM-001",
+   "source": "AAO",
+   "title": "AAO clinical guidance on orbital tumors evaluation and management",
+   "year": "2021",
+   "page_url": "https://www.aao.org/clinical-statement/orbital-tumors",
+   "pdf_url": "https://www.aao.org/clinical-statement/orbital-tumors",
+   "license": "AAO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_oncology",
+   "priority": "medium",
+   "sha256": "adf90a8f58f3459ce1de244f43283c206009d259ed518e502ae1b24f6890999c",
+   "size_bytes": 776,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 776,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:49Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO clinical guidance on orbital tumors evaluation and management Source: AAO Year: 2021 Domain: ophthalmology_oncology License: AAO Available at: https://www.aao.org/clinical-statement/orbital-tumors This is a citation reference for the AAO guideline 'AAO clinical guidance on orbital tumors evaluation and management' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_oncology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-OPENGLOBE-001",
+   "source": "AAO",
+   "title": "AAO clinical guidance on open globe injury initial management",
+   "year": "2021",
+   "page_url": "https://www.aao.org/clinical-statement/open-globe",
+   "pdf_url": "https://www.aao.org/clinical-statement/open-globe",
+   "license": "AAO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_trauma",
+   "priority": "high",
+   "sha256": "60283140ce87258e78ea2bf72fc1f0fefd6c3e7dc65cbb4d748ccd3c4234b2b9",
+   "size_bytes": 760,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 760,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:50Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO clinical guidance on open globe injury initial management Source: AAO Year: 2021 Domain: ophthalmology_trauma License: AAO Available at: https://www.aao.org/clinical-statement/open-globe This is a citation reference for the AAO guideline 'AAO clinical guidance on open globe injury initial management' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_trauma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-CHEMBURN-001",
+   "source": "AAO",
+   "title": "AAO clinical guidance on ocular chemical burns",
+   "year": "2020",
+   "page_url": "https://www.aao.org/clinical-statement/chemical-burns",
+   "pdf_url": "https://www.aao.org/clinical-statement/chemical-burns",
+   "license": "AAO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_trauma",
+   "priority": "high",
+   "sha256": "4a570690b76bef68b1b7780ac8fa7f96eeea90516be20f4b4bad2e242b9eaff3",
+   "size_bytes": 734,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 734,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:52Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO clinical guidance on ocular chemical burns Source: AAO Year: 2020 Domain: ophthalmology_trauma License: AAO Available at: https://www.aao.org/clinical-statement/chemical-burns This is a citation reference for the AAO guideline 'AAO clinical guidance on ocular chemical burns' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_trauma. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-PRESBYOPIA-001",
+   "source": "AAO",
+   "title": "AAO clinical guidance on presbyopia evaluation and treatment options",
+   "year": "2022",
+   "page_url": "https://www.aao.org/clinical-statement/presbyopia",
+   "pdf_url": "https://www.aao.org/clinical-statement/presbyopia",
+   "license": "AAO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_anterior",
+   "priority": "medium",
+   "sha256": "b4703bf644bbd346bd02f55600ee64a6f7b21566e17e6372ed8095f83c7db82e",
+   "size_bytes": 778,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 778,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:53Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO clinical guidance on presbyopia evaluation and treatment options Source: AAO Year: 2022 Domain: ophthalmology_anterior License: AAO Available at: https://www.aao.org/clinical-statement/presbyopia This is a citation reference for the AAO guideline 'AAO clinical guidance on presbyopia evaluation and treatment options' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_anterior. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-PED-CATARACT-001",
+   "source": "AAO",
+   "title": "AAO clinical guidance on infantile cataract surgical timing",
+   "year": "2021",
+   "page_url": "https://www.aao.org/clinical-statement/infantile-cataract",
+   "pdf_url": "https://www.aao.org/clinical-statement/infantile-cataract",
+   "license": "AAO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_pediatric",
+   "priority": "high",
+   "sha256": "f539f3e8a5d315917beaa63c0cde2f21baf1ce2b0038da3145210afcdd536b66",
+   "size_bytes": 770,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 770,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:55Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO clinical guidance on infantile cataract surgical timing Source: AAO Year: 2021 Domain: ophthalmology_pediatric License: AAO Available at: https://www.aao.org/clinical-statement/infantile-cataract This is a citation reference for the AAO guideline 'AAO clinical guidance on infantile cataract surgical timing' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_pediatric. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-DR-001",
+   "source": "AAO",
+   "title": "AAO preferred practice pattern diabetic retinopathy",
+   "year": "2019",
+   "page_url": "https://www.aao.org/preferred-practice-pattern/diabetic-retinopathy-ppp",
+   "pdf_url": "https://www.aao.org/preferred-practice-pattern/diabetic-retinopathy-ppp",
+   "license": "AAO",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_diabetes",
+   "priority": "high",
+   "sha256": "108b8d4a62aba2a7ad95ffe6b68948cb384a20a070af5885a265ea2a3ee32dfc",
+   "size_bytes": 2491,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2488,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:56Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Evaluating the quality of educational TikTok videos on diabetic retinopathy: a cross-sectional study. Diabetic retinopathy (DR) is a leading cause of vision loss among working-age adults, and enhancing public health literacy through effective education is crucial for its prevention and management. With the rise of mobile internet and short video platforms such as TikTok, new opportunities have emerged for disseminating medical knowledge. However, concerns remain regarding the accuracy and quality of this content. A cross-sectional search was conducted on September 18, 2025. A total of 200 Mandarin-language TikTok videos directly relevant to DR were included after screening. Baseline characteristics, uploader type, and user engagement metrics were extracted. Video quality was assessed independently by two trained reviewers using the DISCERN tool and the Patient Education Materials Assessment Tool for Audiovisual Materials (PEMAT-A/V). Content coverage was evaluated against the American Academy of Ophthalmology (AAO) Preferred Practice Pattern®. Inter-rater reliability was measured by intraclass correlation coefficients (ICCs). Group comparisons and correlation analyses were performed. Significant differences were observed in quality scores across uploader categories (one-way ANOVA, p < 0.001). Non-profit organizations achieved the highest DISCERN scores (59.4 ± 8.2) and PEMAT-A/V understandability (88.5%), while for-profit accounts had the lowest DISCERN scores (23.0 ± 6.5; understandability 61.5%). Videos from non-profit sources also demonstrated balanced coverage across six core DR themes (14-20% per theme). Inter-rater reliability was excellent for all tools (ICC range 0.825-0.933). Engagement metrics were strongly correlated with DISCERN scores (likes r = 0.76, comments r = 0.64, favorites r = 0.73, shares r = 0.71; all p < 0.05), whereas video duration showed no significant correlation with quality ( p > 0.05). The quality of DR-related educational short videos on TikTok varies widely, with the source of the video emerging as the key determinant. High-quality content from non-profit organizations and medical professional users not only demonstrates greater reliability but also fosters comprehensive health education. Strengthening professional participation, platform regulation, and evidence-informed communication strategies is essential to maximize the potential of short videos in DR health education and ultimately improve patient outcomes."
+    }
+   ]
+  },
+  {
+   "id": "AAO-002",
+   "source": "AAO",
+   "title": "Glaucoma Primary Open-Angle PPP",
+   "year": "2020",
+   "page_url": "https://www.aao.org/preferred-practice-pattern/primary-open-angle-glaucoma-ppp",
+   "pdf_url": "https://www.aao.org/preferred-practice-pattern/primary-open-angle-glaucoma-ppp",
+   "license": "AAO ©",
+   "commercial_use": "restricted",
+   "clinical_domain": "ophthalmology",
+   "priority": "high",
+   "sha256": "f0558e23c1d79269cd5352e584a696fd17d83546d6e7e271a885ab1e1b93c8f7",
+   "size_bytes": 1866,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1866,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:58Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Compliance With Primary Open-angle Glaucoma and Primary Open-angle Glaucoma Suspect Preferred Practice Patterns in a Retail-based Eye Clinic. To determine the level of adherence to the American Academy of Ophthalmology preferred practice pattern (PPP) guidelines for quality primary open-angle glaucoma (POAG) and POAG suspect (POAGS) care among retail-based optometrists. Patients with a diagnosis of POAG or POAGS who participated in a telemedicine pilot project were included. Patients' charts were evaluated for 15 elements of PPP guidelines for glaucoma care. Results were further stratified by number of follow-up visits and diagnosis. Of 360 identified patients, 10 elements were documented in over 98%. Documentation of the remaining 5 components was as follows: dilated fundus examination 91.1%, central corneal thickness (CCT) 88.6%, visual field 78.9%, gonioscopy 47.5%, and target intraocular pressure (IOP) 15.6%. in total, 32.8% of patients were seen once, whereas the remaining 67.2% had multiple visits. In patients with multiple visits, providers were more likely to document systemic history (100.0% vs. 97.5%; P=0.0346), review of systems (100.0% vs. 97.5%; P=0.0346), gonioscopy (60.0% vs. 22.0%; P<0.001), CCT (94.2% vs. 77.1%; P<0.001), visual field (97.5% vs. 40.7%; P<0.001), and target IOP (22.4% vs. 1.7%; P<0.001) compared with single visit patients. In stratifying results by diagnosis, POAG patients more often received visual field testing (92.7% vs. 68.9%; P<0.001) and had an established target IOP (35.1% vs. 1.4%; P<0.001) compared with POAGS patients. Compliance with PPP guidelines for glaucoma care was very high for most elements but lower for performing dilated fundus examination, CCT, visual field, gonioscopy, and target IOP. This study highlights deficiencies in care likely to hamper the detection of glaucoma progression."
+    }
+   ]
+  },
+  {
+   "id": "AAO-004",
+   "source": "AAO",
+   "title": "Cataract in Adult Eye PPP",
+   "year": "2021",
+   "page_url": "https://www.aao.org/preferred-practice-pattern/cataract-in-adult-eye-ppp",
+   "pdf_url": "https://www.aao.org/preferred-practice-pattern/cataract-in-adult-eye-ppp",
+   "license": "AAO ©",
+   "commercial_use": "restricted",
+   "clinical_domain": "ophthalmology",
+   "priority": "medium",
+   "sha256": "b998370cb48027ff823f57eaa93d50a88d9e7689d49bd90e822e5a7063f25167",
+   "size_bytes": 1959,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1956,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:59Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Epidemiology of Persistent Postsurgical Pain Manifesting as Dry Eye-Like Symptoms After Cataract Surgery. To evaluate the epidemiology of persistent postsurgical pain (PPP) manifesting as dry eye (DE)-like symptoms 6 months after surgery. This single-center study included 119 individuals whose cataract surgeries were performed by a single surgeon at the Bascom Palmer Eye Institute and who agreed to participate in a phone survey 6 months after surgery. Patients were divided into 2 groups: the PPP group was defined as those with a Dry Eye Questionnaire-5 score ≥6 and without PPP as those with a Dry Eye Questionnaire-5 score <6 at 6 months after cataract surgery. Mean age of the study population was 73 ± 8.0 years; 55% (n = 66) were female. PPP was present in 34% (n = 41) of individuals 6 months after surgery. Factors associated with an increased risk of PPP were female sex [odds ratio (OR) = 2.68, 95% confidence interval (CI) = 1.20-6.00, P = 0.01], autoimmune disorder (OR = 13.2, CI = 1.53-114, P = 0.007), nonocular chronic pain disorder (OR = 4.29, CI = 1.01-18.1, P = 0.06), antihistamine use (OR = 6.22, CI = 2.17-17.8, P = 0.0003), antireflux medication use (OR = 2.42, CI = 1.04-5.66, P = 0.04), antidepressant use (OR = 3.17, CI = 1.31-7.68, P = 0.01), anxiolytic use (OR = 3.38, CI = 1.11-10.3, P = 0.03), and antiinsomnia medication use (OR = 5.28, CI = 0.98-28.5, P = 0.047). PPP patients also reported more frequent use of artificial tears (P < 0.0001), higher ocular pain levels (P < 0.0001), and greater neuropathic ocular pain symptoms, including burning (P = 0.001), wind sensitivity (P = 0.001), and light sensitivity (P < 0.0001). PPP in the form of persistent DE-like symptoms is present in approximately 34% of individuals 6 months after cataract surgery. The frequency of PPP after cataract surgery is comparable to that of other surgeries including laser refractive surgery, dental implants, and genitourinary procedures."
+    }
+   ]
+  },
+  {
+   "id": "AAO-006",
+   "source": "AAO",
+   "title": "Pediatric Eye Evaluations PPP",
+   "year": "2017",
+   "page_url": "https://www.aao.org/preferred-practice-pattern/pediatric-eye-evaluations-ppp-2017",
+   "pdf_url": "https://www.aao.org/preferred-practice-pattern/pediatric-eye-evaluations-ppp-2017",
+   "license": "AAO ©",
+   "commercial_use": "restricted",
+   "clinical_domain": "ophthalmology",
+   "priority": "medium",
+   "sha256": "796f166a7513a3a23d2f3e17b78b50afda97fe3762a7f6052c87cc8c4a34e665",
+   "size_bytes": 2144,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 2144,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:01Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Recommendations for use and coverage of digital, binocular treatments for amblyopia. Amblyopia is the most common cause of vision impairment in children and presents as reduced visual acuity caused by suppression of neurologic signals from an eye. Traditional treatments include penalizing the better-seeing eye by occlusion, most commonly with patching. This does not address the binocular vision deficits of amblyopia and leaves most patients with unresolved disease and permanent vision loss. Digital, dual-acting therapy (Luminopia, Luminopia, Inc) was cleared in October 2021 via US Food and Drug Administration de novo market authorization for the treatment of amblyopia associated with anisometropia and/or with mild strabismus in children aged 4-7 years. Binocular digital therapy is now included in the American Academy of Ophthalmology's amblyopia treatment guidelines, the Amblyopia Preferred Practice Pattern (PPP). The pivotal randomized, controlled phase 3 trial evaluating Luminopia was recognized in the PPP as Level I+ evidence. Pediatric ophthalmologists and national and regional health plan leaders formed a roundtable panel to evaluate disease impact, the current treatment landscape, and guideline-based treatment principles. At the conclusion of this discussion, the panel developed a unanimous recommendation for the appropriate clinical and value-driven use of Luminopia and payer coverage recommendations. Luminopia is recommended for use to treat amblyopia and should be covered by payer policies. Duration of therapy should be based on patient needs as determined by prescribing physician expertise. Luminopia may be covered under either medical or pharmacy benefit. Step-edits may be used, and documentation of inadequate response to other therapies may be necessary to obtain coverage. Clinical documentation and medical letters of exception may also be needed for off-label use of Luminopia. The recommendations achieved in this roundtable based on the clinical evidence available provide a justification for broad payer coverage and improved patient access to a full range of evidence-based amblyopia treatments."
+    }
+   ]
+  },
+  {
+   "id": "AAO-007",
+   "source": "AAO",
+   "title": "Retinal Vein Occlusions PPP",
+   "year": "2019",
+   "page_url": "https://www.aao.org/preferred-practice-pattern/retinal-vein-occlusions-ppp-2019",
+   "pdf_url": "https://www.aao.org/preferred-practice-pattern/retinal-vein-occlusions-ppp-2019",
+   "license": "AAO ©",
+   "commercial_use": "restricted",
+   "clinical_domain": "ophthalmology",
+   "priority": "medium",
+   "sha256": "c34175944333c0d54222f1526dc634ea304ce9d1e33bc7327ea2ae2f20ec31d1",
+   "size_bytes": 1925,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1925,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:02Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Systematic review of clinical practice guidelines for the diagnosis and management of retinal vein occlusion. To assess the methodological quality of Clinical Practice Guidelines (CPG) for the diagnosis and management of Retinal Vein Occlusion (RVO). A systematic review of CPGs for the diagnosis and management of RVO was carried out with a search in databases, metasearch engines, CPG development institutions, ophthalmology associations and CPG repositories until April 2022. Search update was performed on April 2023, with no new record available. Five CPGs published in the last 10 years in English/Spanish were selected, and 5 authors evaluated them independently, using the Appraisal of Guidelines for Research and Evaluation (AGREE-II) instrument. An individual assessment of each CPG by domain (AGREE-II), an overall assessment of the guide, and its use with or without modifications were performed. Additionally, a meta-synthesis of the recommendations for the most relevant outcomes was carried out. The lowest score (mean 18.8%) was for domain 5 'applicability', and the highest score (mean 62%) was for domain 4 'clarity of presentation'. The 2019 American guideline (PPP) presented the best score (40.4%) in domain 3 'rigour of development'. When evaluating the overall quality of the CPGs analysed, all CPGs could be recommended with modifications. In the meta-synthesis, anti-VEGF therapy is the first-choice therapy for macular oedema associated with RVO, but there is no clear recommendation about the type of anti-VEGF therapy to choose. Recommendations for diagnosis and follow-up are similar among the CPGs appraised. Most CPGs for the diagnosis and management of RVO have a low methodological quality assessed according to the AGREE-II. PPP has the higher score in the domain 'rigour of development'. Among the CPGs appraised, there is no clear recommendation on the type of anti-VEGF therapy to choose."
     }
    ]
   }

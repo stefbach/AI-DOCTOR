@@ -1,7 +1,7 @@
 {
  "source": "AAO-HNS",
  "generated_at": "2026-05-02T16:23:48Z",
- "total_documents": 54,
+ "total_documents": 56,
  "documents": [
   {
    "id": "AAO-HNS-001",
@@ -3218,6 +3218,56 @@
     {
      "chunk_index": 4,
      "content": "may influence individual surgical goals, perhaps reflecting differences in health literacy, access to information, or sociocultural contexts associated with educational attainment [ - ]. Nevertheless, the nature of these educational differences in motivation is an important area for future research. The absence of significant associations between rhinoplasty motivations and nationality or employment status suggests that these factors may have a minimal influence on surgical decision-making. This finding challenges assumptions about the socioeconomic determinants of interest in cosmetic surgery, suggesting that psychological and perceptual factors may have a greater influence on rhinoplasty decisions. The study highlights important implications for clinical practice, patient education, and future research directions. For clinical practice, assessing patients’ perception of their overall nasal shape is crucial, as it is the strongest predictor of surgical willingness. Surgeons should develop standardized methods to evaluate specific anatomical concerns and patients’ overall satisfaction with their nasal appearance. Dissatisfaction with certain features decreased surgical willingness, requiring clinicians to explore patients’ understanding of surgical possibilities and limitations related to these features. Moreover, it is worth noting that self-reported questionnaires are susceptible to misinterpretation, miscomprehension, hidden agendas, bias, and limited participation. The gender differences in nasal satisfaction without corresponding differences in surgical motivation suggest a need for gender-sensitive approaches to patient counseling that address the potentially different pathways from dissatisfaction to surgical decision-making in men and women. Educational differences in rhinoplasty motivations indicate that patient communication should be tailored to diverse educational backgrounds, with particular attention to ensuring that all patients receive accessible information about both aesthetic and functional aspects of rhinoplasty, regardless of educational attainment. Future research should explore decision-making among individuals who are highly dissatisfied with specific nasal features but hesitant about undergoing surgery. Additionally, longitudinal research is essential to understand how nasal satisfaction and surgical motivations evolve to identify critical periods for intervention. Developing and validating more nuanced assessment tools would help capture the complex relationship between specific anatomical concerns and global nasal perception. Furthermore, cross-cultural studies are critical to examining how sociocultural contexts influence the relationship between nasal dissatisfaction and surgical decision-making. Investigations into the potential mediating role of psychological factors, such as body image, self-esteem, and social anxiety, are also essential to understanding rhinoplasty decision pathways. The in-depth study of individual nasal attributes and population variables provides a multidimensional understanding of rhinoplasty decision-making. The model’s fit is good (p < 0.001), indicating that the predictive model successfully explains the significant variability in surgical willingness, including both aesthetic and functional concerns. Nonetheless, the study’s cross-sectional design limits causation or temporal association between surgical willingness and nasal dissatisfaction. Self-reported surgical willingness and nasal satisfaction could be influenced by social desirability or limited self-awareness. Lastly, the research focused on direct associations between the variables, and more complex mediating or moderating processes likely impact the relationship between surgical decision-making and nasal satisfaction. Conclusions This study explores the complex relationship between predictors of surgical willingness for rhinoplasty. The main predictor is dissatisfaction with the overall nose shape. However, dissatisfaction with specific nose features, such as nose size and nostrils, was negatively correlated with surgical willingness. Females reported lower satisfaction in various aspects of the nose than males. Educational level is also positively associated with rhinoplasty motives. The decision regarding rhinoplasty depends on physical, psychological, and social factors. As cosmetic surgery becomes more accessible and socially accepted, patient variables such as perception, motivation, and concerns should be prioritized over fixed assumptions regarding specific features of the nose or demographic variables."
+    }
+   ]
+  },
+  {
+   "id": "AAO-HNS-LARYNG-002",
+   "source": "AAO-HNS",
+   "title": "AAO-HNS clinical guidance on acute and chronic laryngitis",
+   "year": "2020",
+   "page_url": "https://www.entnet.org/resource/laryngitis",
+   "pdf_url": "https://www.entnet.org/resource/laryngitis",
+   "license": "AAO-HNS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_laryngology",
+   "priority": "medium",
+   "sha256": "e53bbcf20ecfd0d0f77804d1fc27a3d2b1d74a5d888e3ddc3ef14d7853cb2414",
+   "size_bytes": 747,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 747,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:04Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO-HNS clinical guidance on acute and chronic laryngitis Source: AAO-HNS Year: 2020 Domain: ent_laryngology License: AAO-HNS Available at: https://www.entnet.org/resource/laryngitis This is a citation reference for the AAO-HNS guideline 'AAO-HNS clinical guidance on acute and chronic laryngitis' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_laryngology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAO-HNS-SUBSTEN-001",
+   "source": "AAO-HNS",
+   "title": "AAO-HNS clinical guidance on adult subglottic and tracheal stenosis",
+   "year": "2021",
+   "page_url": "https://www.entnet.org/resource/subglottic-stenosis",
+   "pdf_url": "https://www.entnet.org/resource/subglottic-stenosis",
+   "license": "AAO-HNS",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ent_laryngology",
+   "priority": "medium",
+   "sha256": "854ca158892cca9fdf090f656e1a833d88068c42efa1c11e66ab14dcb0e5aef5",
+   "size_bytes": 776,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 776,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:03:05Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAO-HNS clinical guidance on adult subglottic and tracheal stenosis Source: AAO-HNS Year: 2021 Domain: ent_laryngology License: AAO-HNS Available at: https://www.entnet.org/resource/subglottic-stenosis This is a citation reference for the AAO-HNS guideline 'AAO-HNS clinical guidance on adult subglottic and tracheal stenosis' published in 2021. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ent_laryngology. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }
