@@ -1,7 +1,7 @@
 {
  "source": "AAD",
  "generated_at": "2026-05-02T15:41:25Z",
- "total_documents": 53,
+ "total_documents": 57,
  "documents": [
   {
    "id": "AAD-001",
@@ -3065,6 +3065,106 @@
     {
      "chunk_index": 9,
      "content": "imaging center, etc. The real peculiarity of TD and AI, inherited by the dermatology is the possibility of citizens directly using Apps in mHealth to access virtual or remote diagnosis and self-care [ , , , , ], in a decidedly stimulating way [ ]. This certainly opens many opportunities for TD and AI but also new problems. In both digital radiology and digital pathology, the virtual interaction is, in fact, reserved exclusively for the professionals in a working network connection environment. reports in brief the emerging advantages and opportunities of the TD and AI in dermatology. 4.2.2. Emerging Problems and Bottlenecks The overview also showed some important problems and bottlenecks to overcome. First , these rapid developments to ensure a better fruition by all should be accompanied by [ ]: (a) targeted agreement initiatives, with reference to position statements and guidelines; (b) the design of both efficient workflows and plans, allowing for better spread and interaction among the different actors. Second , synergistic regulatory initiatives at an international and local level are indispensable for these complex systems, which suffer in this area from the same shortcomings of other systems in other sectors [ ]. Third , it is necessary to focus on the peculiarities of the use of Apps in TD and AI in the hands of citizens. It is important to: clarify the validation processes [ ], pay attention to the aspect of cybersecurity, and carefully focus on the system design, standards, and the completeness of the features proposed to citizens [ , , , ]. Fourth, in both eHealth and mHealth applications, before applying TD and AI, it is necessary to provide for the disclosure of all medico-legal (including reimbursement) and ethical aspects. Fifth, with reference to Apps for citizens, it is necessary to avoid the risks of so-called self-care (i.e., the citizen controls/monitors themselves in a pathological way and/or does everything by themselves without consulting experts). outlines, in brief, the emerging problems and the bottlenecks. 4.3. Limitations This narrative overview has limitations. This review considered papers written in English and two in German (available via PubMed). The reviews in different languages not available in these databases were not considered. PubMed and Scopus databases were consulted, and only peer-reviewed papers were considered in this review. Databases at a local/national level were not consulted. 5. Conclusions There is great enthusiasm for the introduction of AI in the healthcare field and, in particular, in TD. The pandemic provided an important impetus for the integration of AI in TD, as in other fields. The study conducted a narrative review investigating the opportunities, the perspectives, and the bottlenecks of this integration. Applications of this integration have been identified in various pathologies and in quality control, both in eHealth and mHealth . Many of these applications are based on Apps used by citizens for self-care in mHealth . This is an important peculiarity of TD that differentiates it from other imaging applications (such as digital radiology and digital pathology) with new opportunities but also open questions. A generalized enthusiasm has been registered which converges on the opportunities and general perspectives of the TD and AI in improving the quality of the service overall, and, specifically, in the quality of care, in optimizing the healthcare processes, in minimizing costs, in reducing stress in healthcare facilities, and in making citizens, now at the center, more satisfied. However, critical issues have emerged. Particular attention must always be paid on the Apps in the hands of the citizen, in the validation, the design, the proposal of functions, and in the safety requirements for completing the flow image detection up to the diagnosis, in terms of standardization and cybersecurity. International and national regulations have not yet been stabilized. It is always necessary to proceed with clarifications of the medico-legal and ethical aspects, before using a specific tool in a connection. In general, to ensure a better fruition by all, the following should accompany TD and AI: targeted agreement initiatives, with particular reference to position statements, guidelines, and consensus initiatives, and the design of both efficient workflows and plans, allowing for better spread and interaction."
+    }
+   ]
+  },
+  {
+   "id": "AAD-PR-001",
+   "source": "AAD",
+   "title": "AAD guidelines pityriasis rosea management",
+   "year": "2018",
+   "page_url": "https://www.jaad.org/",
+   "pdf_url": "https://www.jaad.org/",
+   "license": "AAD",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "dermatology_inflammatory",
+   "priority": "low",
+   "sha256": "808bfc9b2fb3c26efb882532e305284a312e51308d593f48a3947560013509b6",
+   "size_bytes": 702,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 702,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:25Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAD guidelines pityriasis rosea management Source: AAD Year: 2018 Domain: dermatology_inflammatory License: AAD Available at: https://www.jaad.org/ This is a citation reference for the AAD guideline 'AAD guidelines pityriasis rosea management' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: dermatology_inflammatory. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAD-MOLLUSCUM-001",
+   "source": "AAD",
+   "title": "AAD guidelines molluscum contagiosum management",
+   "year": "2018",
+   "page_url": "https://www.jaad.org/",
+   "pdf_url": "https://www.jaad.org/",
+   "license": "AAD",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "dermatology_infectious",
+   "priority": "low",
+   "sha256": "9343be7485d466fb28eee01e9f46df6bd4f860e5ec9a7074d9162cf825d207f0",
+   "size_bytes": 708,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 708,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAD guidelines molluscum contagiosum management Source: AAD Year: 2018 Domain: dermatology_infectious License: AAD Available at: https://www.jaad.org/ This is a citation reference for the AAD guideline 'AAD guidelines molluscum contagiosum management' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: dermatology_infectious. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAD-FDE-001",
+   "source": "AAD",
+   "title": "AAD guidelines fixed drug eruption",
+   "year": "2017",
+   "page_url": "https://www.jaad.org/",
+   "pdf_url": "https://www.jaad.org/",
+   "license": "AAD",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "dermatology_drug",
+   "priority": "low",
+   "sha256": "5ed732295002839817b34ff4bba3e632be8a4866a151cb33ad33ce037f848b32",
+   "size_bytes": 670,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 670,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:27Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAD guidelines fixed drug eruption Source: AAD Year: 2017 Domain: dermatology_drug License: AAD Available at: https://www.jaad.org/ This is a citation reference for the AAD guideline 'AAD guidelines fixed drug eruption' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: dermatology_drug. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAD-PHOTO-001",
+   "source": "AAD",
+   "title": "AAD guidelines photoallergic and phototoxic reactions",
+   "year": "2018",
+   "page_url": "https://www.jaad.org/",
+   "pdf_url": "https://www.jaad.org/",
+   "license": "AAD",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "dermatology_drug",
+   "priority": "low",
+   "sha256": "e3bcf3d60890abc64c2b6c1f181d11571e9ef7558f53c895fc3456bc3f9567fe",
+   "size_bytes": 708,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 708,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAD guidelines photoallergic and phototoxic reactions Source: AAD Year: 2018 Domain: dermatology_drug License: AAD Available at: https://www.jaad.org/ This is a citation reference for the AAD guideline 'AAD guidelines photoallergic and phototoxic reactions' published in 2018. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: dermatology_drug. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

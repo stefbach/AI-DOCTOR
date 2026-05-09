@@ -1,7 +1,7 @@
 {
  "source": "AACVPR",
  "generated_at": "2026-05-09T09:50:47Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "AACVPR-CR-001",
@@ -49,6 +49,31 @@
     {
      "chunk_index": 6,
      "content": "context of COVID-19 may have influenced HCP perspectives of DHIs and therefore, factors influencing implementation may not be as relevant in the post pandemic era. Furthermore, as this was a nested qualitative study of a digital CR intervention in one region, we acknowledge that our findings may differ to other digital CR interventions. Nonetheless, we found similarities in our results to international data on DHIs in CVD care and CR , , . Understanding health workers perspectives of digital CR is a growing area of research and therefore future research inclusive of other health workers (for example physicians and psychologists) is required. This study was part of a multi-method evaluation of MySláinte, and while previous research has examined clinical outcomes and patient experiences , there is also a need to consider cost effectiveness, an often neglected area in DHI research . Finally, while the aim of this study was to identify contextual factors influencing implementation of MySláinte, future research should align these factors to implementation outcomes (e.g., fidelity) to help determine which factors matter most. Conclusion With an increasing emphasis being placed on offering patients a range of CR options, successful implementation of DHIs is contingent upon a comprehensive understanding of the challenges and opportunities faced by health workers. Leveraging on the practical experiences of implementing a digital CR intervention during the COVID-19 pandemic, we identified a number of factors which may help inform future strategies to enable scale up and integration into clinical practice. Findings from this study highlight how factors influencing implementation of digital CR are interconnected. Therefore, multi-level implementation strategies are required if the true potential of digital health in improving equitable CR access, participation and patient outcomes is to be realised. Ethics and consent Ethical approval was obtained from the Galway Clinical Research Ethics Committee (Ref. C.A 2689) on the 27 th of August 2021. Informed written consent, was obtained by providing participants with a description of the research along with a participant information sheet."
+    }
+   ]
+  },
+  {
+   "id": "AACVPR-CARDIAC-001",
+   "source": "AACVPR",
+   "title": "AACVPR cardiopulmonary rehabilitation guidelines fifth edition",
+   "year": "2020",
+   "page_url": "https://www.aacvpr.org/",
+   "pdf_url": "https://www.aacvpr.org/",
+   "license": "AACVPR",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "pmr_cardiac",
+   "priority": "high",
+   "sha256": "b9fbe878f4f6323d45c3cfc9d2d606ead5f2bf6abfa6898bea8f33f19135c8fa",
+   "size_bytes": 727,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 727,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:24Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AACVPR cardiopulmonary rehabilitation guidelines fifth edition Source: AACVPR Year: 2020 Domain: pmr_cardiac License: AACVPR Available at: https://www.aacvpr.org/ This is a citation reference for the AACVPR guideline 'AACVPR cardiopulmonary rehabilitation guidelines fifth edition' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: pmr_cardiac. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

@@ -1,7 +1,7 @@
 {
  "source": "AACT",
  "generated_at": "2026-05-09T13:53:21Z",
- "total_documents": 3,
+ "total_documents": 6,
  "documents": [
   {
    "id": "AACT-DECON-003",
@@ -139,6 +139,81 @@
     {
      "chunk_index": 6,
      "content": "admission NLR may serve as a reliable biomarker for risk stratification across the early clinical window within 72 hours after envenomation. However, the observational design of the present study precludes definitive causal inference regarding these biological pathways. Clinical implications From a clinical standpoint, our findings highlight the potential utility of admission NLR as a simple and readily available marker for early risk stratification in snakebite patients. Unlike specialized coagulation assays or venom-specific diagnostics, NLR can be rapidly calculated from routine complete blood counts obtained at presentation, making it particularly suitable for emergency settings and resource-limited environments ( ,22). The observed dose–response relationship across NLR quartiles further supports its clinical relevance, suggesting that NLR may aid not only in dichotomous severity classification but also in identifying gradations of risk. Integration of NLR into existing bedside assessment frameworks may enhance early recognition of patients at higher risk for severe envenomation, thereby informing decisions regarding monitoring intensity, antivenom administration, and early referral. Beyond its association with concurrent severity, admission NLR was positively correlated with the total antivenom dose administered during hospitalization (ρ = 0.207, P = 0.003), suggesting that early immune profiling using NLR may reflect overall envenomation burden and subsequent treatment requirements. Strengths and limitations This study has several strengths. First, we employed a clinically grounded severity assessment based exclusively on bedside manifestations, avoiding circularity with laboratory variables used in exposure or outcome definitions. Second, all laboratory indices, including NLR and coagulation parameters, were obtained prior to antivenom administration, minimizing treatment-related confounding. Third, the robustness of our findings was supported by multiple complementary analytical approaches, including hierarchical multivariable modeling, dose–response analyses, and sensitivity analyses incorporating coagulation-related phenotypes. Several limitations should be acknowledged. The retrospective single-center design may limit generalizability, and residual confounding cannot be entirely excluded. Species identification relied predominantly on expert clinical assessment rather than universal specimen confirmation.Although this approach reflects real-world practice, it may have introduced a small degree of misclassification bias. In addition, NLR was assessed at a single time point; dynamic immune trajectories during hospitalization were not captured. Future prospective studies are warranted to validate these findings and to elucidate the temporal relationship between immune activation, immunothrombosis, and clinical outcomes. Conclusion In conclusion, admission NLR is independently and dose-dependently associated with clinical severity in patients with Gloydius brevicaudus envenomation. By reflecting early innate immune activation and immune imbalance, NLR provides clinically meaningful information beyond conventional inflammatory markers and coagulation indices. These findings support the role of NLR as a practical immunological biomarker for early risk stratification in snakebite envenomation and underscore the importance of host immune responses in determining clinical severity.Our findings provide clinical support for the proposed immunothrombotic pathway contributing to snakebite severity."
+    }
+   ]
+  },
+  {
+   "id": "AACT-DECON-001",
+   "source": "AACT",
+   "title": "AACT EAPCCT position paper single-dose activated charcoal",
+   "year": "2005",
+   "page_url": "https://www.clintox.org/position-statements",
+   "pdf_url": "https://www.clintox.org/position-statements",
+   "license": "AACT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_acute",
+   "priority": "high",
+   "sha256": "a806a8652f335c8c8cb4b62b2430016754aa696b79609e61c01a13260aa19cdb",
+   "size_bytes": 741,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 741,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AACT EAPCCT position paper single-dose activated charcoal Source: AACT Year: 2005 Domain: toxicology_acute License: AACT Available at: https://www.clintox.org/position-statements This is a citation reference for the AACT guideline 'AACT EAPCCT position paper single-dose activated charcoal' published in 2005. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_acute. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AACT-DECON-002",
+   "source": "AACT",
+   "title": "AACT EAPCCT position paper gastric lavage",
+   "year": "2013",
+   "page_url": "https://www.clintox.org/position-statements",
+   "pdf_url": "https://www.clintox.org/position-statements",
+   "license": "AACT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_acute",
+   "priority": "high",
+   "sha256": "abafac9c2d5878eab959cf1741437346e6643038c763d9c4ee63d9c20e520a04",
+   "size_bytes": 709,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 709,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AACT EAPCCT position paper gastric lavage Source: AACT Year: 2013 Domain: toxicology_acute License: AACT Available at: https://www.clintox.org/position-statements This is a citation reference for the AACT guideline 'AACT EAPCCT position paper gastric lavage' published in 2013. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_acute. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AACT-DECON-005",
+   "source": "AACT",
+   "title": "AACT EAPCCT position paper urinary alkalinization",
+   "year": "2004",
+   "page_url": "https://www.clintox.org/position-statements",
+   "pdf_url": "https://www.clintox.org/position-statements",
+   "license": "AACT",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "toxicology_acute",
+   "priority": "medium",
+   "sha256": "3ae83bbe69b66c58d0d87768e36d7e77a5b9b7a7bf9b4910d238c45f050648f6",
+   "size_bytes": 725,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 725,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:23Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AACT EAPCCT position paper urinary alkalinization Source: AACT Year: 2004 Domain: toxicology_acute License: AACT Available at: https://www.clintox.org/position-statements This is a citation reference for the AACT guideline 'AACT EAPCCT position paper urinary alkalinization' published in 2004. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: toxicology_acute. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

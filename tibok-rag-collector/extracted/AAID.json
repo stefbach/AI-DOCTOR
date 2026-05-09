@@ -1,0 +1,32 @@
+{
+ "source": "AAID",
+ "generated_at": "2026-05-09T19:02:34Z",
+ "total_documents": 1,
+ "documents": [
+  {
+   "id": "AAID-IMPLANT-001",
+   "source": "AAID",
+   "title": "AAID clinical practice standards for implant dentistry",
+   "year": "2020",
+   "page_url": "https://www.aaid.com/about/standards",
+   "pdf_url": "https://www.aaid.com/about/standards",
+   "license": "AAID",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "maxillofacial_implant",
+   "priority": "medium",
+   "sha256": "8d2c905725568958df151b05233af6e3cadacfc95543bc6e61238ec695d88a8f",
+   "size_bytes": 738,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 738,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAID clinical practice standards for implant dentistry Source: AAID Year: 2020 Domain: maxillofacial_implant License: AAID Available at: https://www.aaid.com/about/standards This is a citation reference for the AAID guideline 'AAID clinical practice standards for implant dentistry' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: maxillofacial_implant. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  }
+ ]
+}

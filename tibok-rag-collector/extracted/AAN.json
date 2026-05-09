@@ -1,7 +1,7 @@
 {
  "source": "AAN",
  "generated_at": "2026-05-02T15:40:50Z",
- "total_documents": 57,
+ "total_documents": 58,
  "documents": [
   {
    "id": "AAN-001",
@@ -4881,6 +4881,31 @@
     {
      "chunk_index": 1,
      "content": "perform BD/DNC evaluations, (3) prerequisites for BD/DNC determination, (4) components of the BD/DNC neurologic examination, (5) apnea testing as part of the BD/DNC evaluation, (6) ancillary testing as part of the BD/DNC evaluation, and (7) special considerations for BD/DNC determination. pmc-status-qastatus 0 pmc-status-live yes pmc-status-embargo no pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf yes pmc-prop-has-supplement no pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc yes"
+    }
+   ]
+  },
+  {
+   "id": "AAN-ON-001",
+   "source": "AAN",
+   "title": "AAN practice parameter optic neuritis evidence-based recommendations",
+   "year": "2008",
+   "page_url": "https://www.aan.com/Guidelines/home/GuidelineDetail/293",
+   "pdf_url": "https://www.aan.com/Guidelines/home/GuidelineDetail/293",
+   "license": "AAN",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "ophthalmology_neuro",
+   "priority": "high",
+   "sha256": "e422583bc631a5fb9a6dd014b58fe9b0c55285c2ad25191d5b621516602c7902",
+   "size_bytes": 778,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 778,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:36Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAN practice parameter optic neuritis evidence-based recommendations Source: AAN Year: 2008 Domain: ophthalmology_neuro License: AAN Available at: https://www.aan.com/Guidelines/home/GuidelineDetail/293 This is a citation reference for the AAN guideline 'AAN practice parameter optic neuritis evidence-based recommendations' published in 2008. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: ophthalmology_neuro. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

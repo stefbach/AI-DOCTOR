@@ -1,7 +1,7 @@
 {
  "source": "AAGL",
  "generated_at": "2026-05-09T11:16:08Z",
- "total_documents": 2,
+ "total_documents": 4,
  "documents": [
   {
    "id": "AAGL-MYO-001",
@@ -86,6 +86,56 @@
     {
      "chunk_index": 4,
      "content": "the data used in this analysis included both structured and unstructured abstracted free text from the EMR to provide a more complete assessment of the clinical information available to rate the appropriateness of the surgeries. Third, to our knowledge, this is one of the few studies to directly explore the characteristics associated with appropriateness of benign and non-obstetric hysterectomy. This study also has some limitations. Our estimates of inappropriate hysterectomies at non-academic medical centers are likely biased due to misclassification of missing data related to diagnostic imaging. We conducted sensitivity analyses stratified by a proxy for EMR completeness to examine this potential bias. However, we are not able to assess the true number of non-academic medical centers that lacked diagnostic imaging data, which limits our ability to make definitive conclusions. Conclusions In the past 20 years, there has been a dramatic decrease in research exploring the appropriateness of hysterectomy for benign hysterectomy. Our study found that patients with Medicaid had lower prevalence of inappropriate ratings, while surgeries at non-academic medical centers had a higher prevalence of inappropriate ratings. EMR completeness and data management may be an unappreciated but important quality measure for assessing equity in clinical care. Clearly defining appropriate hysterectomy care is a needed next step in gynecologic research. Supplementary Material Supplement"
+    }
+   ]
+  },
+  {
+   "id": "AAGL-LAPAR-001",
+   "source": "AAGL",
+   "title": "AAGL Practice Guidelines for the Diagnosis and Management of Submucosal Leiomyomas",
+   "year": "2012",
+   "page_url": "https://www.aagl.org/practice-statements/",
+   "pdf_url": "https://www.aagl.org/practice-statements/",
+   "license": "AAGL",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gynecologic_surgery_uterine",
+   "priority": "medium",
+   "sha256": "0e21a818fc9e80fcb4cdb4ed8a6a2ed40deb137d71c31d50cd74554d7c5bd477",
+   "size_bytes": 811,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 811,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAGL Practice Guidelines for the Diagnosis and Management of Submucosal Leiomyomas Source: AAGL Year: 2012 Domain: gynecologic_surgery_uterine License: AAGL Available at: https://www.aagl.org/practice-statements/ This is a citation reference for the AAGL guideline 'AAGL Practice Guidelines for the Diagnosis and Management of Submucosal Leiomyomas' published in 2012. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gynecologic_surgery_uterine. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAGL-MORC-001",
+   "source": "AAGL",
+   "title": "AAGL Position Statement on Power Morcellation of Uterine Tissue",
+   "year": "2014",
+   "page_url": "https://www.aagl.org/practice-statements/",
+   "pdf_url": "https://www.aagl.org/practice-statements/",
+   "license": "AAGL",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "gynecologic_surgery_uterine",
+   "priority": "high",
+   "sha256": "587caf3088342de4c0698f19b21899b26582ba58a391c05850a10244f26c0f64",
+   "size_bytes": 773,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 773,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAGL Position Statement on Power Morcellation of Uterine Tissue Source: AAGL Year: 2014 Domain: gynecologic_surgery_uterine License: AAGL Available at: https://www.aagl.org/practice-statements/ This is a citation reference for the AAGL guideline 'AAGL Position Statement on Power Morcellation of Uterine Tissue' published in 2014. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: gynecologic_surgery_uterine. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

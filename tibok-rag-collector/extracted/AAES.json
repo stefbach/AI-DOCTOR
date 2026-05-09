@@ -1,7 +1,7 @@
 {
  "source": "AAES",
  "generated_at": "2026-05-09T10:32:37Z",
- "total_documents": 3,
+ "total_documents": 7,
  "documents": [
   {
    "id": "AAES-ADRENAL-001",
@@ -115,6 +115,106 @@
     {
      "chunk_index": 4,
      "content": "malignancy, emphasizing the entailment of surgical approach has had importance. The present case had a symptomatic substernal multinodular goiter with the most inferior border of its left lobe was not extending beyond the left innominate vein, Grade I, Mercante and colleagues’ classification. Herein, we opt for performing the total thyroidectomy with a transverse collar incision by using LSJ and I-IONM, considering to split the branches of superior thyroid arteries and the superior thyroid veins, separately. Of note, we dissected and divided the superficial vascular layer of the Ligament of Berry meticulously in order to expose the RLN lying on and also lateral to the underlying fibrous Ligament of Berry, also known as the true Ligament of Berry. Last but not least, in our opinion, dividing the branches of superior thyroid vasculature individually and exploring the true Ligament of Berry with its safe interrelation to the RLN punctiliously may be considered as peas in a pod in a complete sutureless thyroidectomy for substernal goiter."
+    }
+   ]
+  },
+  {
+   "id": "AAES-PARATHYROID-001",
+   "source": "AAES",
+   "title": "AAES Definitive Management of Primary Hyperparathyroidism Guidelines",
+   "year": "2016",
+   "page_url": "https://jamanetwork.com/journals/jamasurgery/fullarticle/2546124",
+   "pdf_url": "https://jamanetwork.com/journals/jamasurgery/fullarticle/2546124",
+   "license": "AAES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrine_surgery_parathyroid",
+   "priority": "high",
+   "sha256": "27d85bb341a208117d3b54af128ca1e3e27ef995e3ceb68975897d4dd151d825",
+   "size_bytes": 810,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 810,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:29Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAES Definitive Management of Primary Hyperparathyroidism Guidelines Source: AAES Year: 2016 Domain: endocrine_surgery_parathyroid License: AAES Available at: https://jamanetwork.com/journals/jamasurgery/fullarticle/2546124 This is a citation reference for the AAES guideline 'AAES Definitive Management of Primary Hyperparathyroidism Guidelines' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrine_surgery_parathyroid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAES-MEN-001",
+   "source": "AAES",
+   "title": "AAES Position Statement on Surgical Management of MEN1 and MEN2 Syndromes",
+   "year": "2019",
+   "page_url": "https://www.surgjournal.com/article/S0039-6060(19)30163-1/fulltext",
+   "pdf_url": "https://www.surgjournal.com/article/S0039-6060(19)30163-1/fulltext",
+   "license": "AAES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrine_surgery_thyroid",
+   "priority": "high",
+   "sha256": "6c17219dbc3fa6af31063cffe663eec05c6f723b770b2c67c4000077e7e0a772",
+   "size_bytes": 814,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 814,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAES Position Statement on Surgical Management of MEN1 and MEN2 Syndromes Source: AAES Year: 2019 Domain: endocrine_surgery_thyroid License: AAES Available at: https://www.surgjournal.com/article/S0039-6060(19)30163-1/fulltext This is a citation reference for the AAES guideline 'AAES Position Statement on Surgical Management of MEN1 and MEN2 Syndromes' published in 2019. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrine_surgery_thyroid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAES-SHPT-001",
+   "source": "AAES",
+   "title": "AAES Guidelines for Surgical Management of Secondary and Tertiary Hyperparathyroidism",
+   "year": "2017",
+   "page_url": "https://jamanetwork.com/journals/jamasurgery/fullarticle/2546124",
+   "pdf_url": "https://jamanetwork.com/journals/jamasurgery/fullarticle/2546124",
+   "license": "AAES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrine_surgery_parathyroid",
+   "priority": "high",
+   "sha256": "a3adbea4430f5e08d162d2943a37f0c60d6bd6d53356b72860f87995d3771ea3",
+   "size_bytes": 844,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 844,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:30Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAES Guidelines for Surgical Management of Secondary and Tertiary Hyperparathyroidism Source: AAES Year: 2017 Domain: endocrine_surgery_parathyroid License: AAES Available at: https://jamanetwork.com/journals/jamasurgery/fullarticle/2546124 This is a citation reference for the AAES guideline 'AAES Guidelines for Surgical Management of Secondary and Tertiary Hyperparathyroidism' published in 2017. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrine_surgery_parathyroid. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAES-PHPT-001",
+   "source": "AAES",
+   "title": "AAES guidelines for definitive management of primary hyperparathyroidism",
+   "year": "2016",
+   "page_url": "https://www.endocrinesurgery.org/practice-quality-initiatives/",
+   "pdf_url": "https://www.endocrinesurgery.org/practice-quality-initiatives/",
+   "license": "AAES",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "endocrinology_bone",
+   "priority": "high",
+   "sha256": "adbd7feb4c1c285de6f6323b8056484a7acfa6723be49ac480a3ca4177c4bcb3",
+   "size_bytes": 794,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 794,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:31Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAES guidelines for definitive management of primary hyperparathyroidism Source: AAES Year: 2016 Domain: endocrinology_bone License: AAES Available at: https://www.endocrinesurgery.org/practice-quality-initiatives/ This is a citation reference for the AAES guideline 'AAES guidelines for definitive management of primary hyperparathyroidism' published in 2016. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: endocrinology_bone. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }

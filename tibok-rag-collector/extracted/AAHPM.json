@@ -1,7 +1,7 @@
 {
  "source": "AAHPM",
  "generated_at": "2026-05-09T16:20:42Z",
- "total_documents": 5,
+ "total_documents": 9,
  "documents": [
   {
    "id": "AAHPM-PAL-001",
@@ -213,6 +213,106 @@
     {
      "chunk_index": 5,
      "content": "what is viewed favourably by others ,not what they perceived ‘ethical’ to responded questions. Our assessment of knowledge on medical ethics was limited to knowledge on three codes of medical ethics. Further assessment of knowledge would have been possible by inclusion of knowledge on principles of biomedical ethics namely ‘Autonomy’, ‘Beneficence’, ‘Maleficence’ and ‘Justice’. However, inclusion of these principles into the questionnaire would need a pilot study with further work on instrumentation of questionnaire for analysis. Conclusions Medical ethics is one of the much neglected topics in healthcare in resource poor settings. This study demonstrated that significant proportion of doctors and nurses were unaware of the universally recognized ethical principles (three major documents on medical ethics) which are essential part of clinical practice. A majority of respondents in this study showed interest in learning medical ethics and recommended for inclusion of medical ethics in the curriculum. Provision of information on medical ethics in medical institution through subscription of journals and books on ethics in addition to the lectures and training on medical ethics at workplace can significantly raise the current paucity of knowledge in health care workers."
+    }
+   ]
+  },
+  {
+   "id": "AAHPM-PAL-002",
+   "source": "AAHPM",
+   "title": "AAHPM Position Statement Physician-Assisted Dying",
+   "year": "2016",
+   "page_url": "https://aahpm.org/positions/pad",
+   "pdf_url": "https://aahpm.org/positions/pad",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_eol",
+   "priority": "medium",
+   "sha256": "ebac914b82734c267ff33893dd26673fae905a17104d24cf54238121a901fcad",
+   "size_bytes": 1601,
+   "pdf_source": "pubmed-abstract",
+   "pmcid": null,
+   "char_count": 1601,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:32Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Position statement on physician-assisted death. In the past year, the American Academy of Hospice and Palliative Medicine (AAHPM) Board of Directors charged the Academy's Ethics Committee with updating our positions on a number of topics, and the board recently approved and published position statements on artificial hydration and nutrition, palliative sedation, and physician-assisted death, as well as statements on palliative care research, quality palliative care, and palliative care accreditation. AAHPM supports intense efforts to alleviate suffering and to reduce any perceived need for physician assisted death (PAD). The Board of Directors respects the beliefs and opinions of all members and does not suggest that physicians or healthcare providers be forced to deliver care they see as harmful or wrong. We want all patients to continue to receive the best possible palliative care, whatever decisions are made regarding PAD. Situations in which patients or their surrogates request physician assisted death (PAD) are particularly challenging for physicians and other healthcare providers because they raise significant clinical, ethical, and legal issues. Deep disagreement persists about the morality of PAD, and sincere, compassionate, and morally conscientious individuals stand on both sides of this debate. Rather than take a position of one side or the other, the Board's position of \"studied neutrality\" is intended to stimulate thinking and discussion about how best to respond to the urgent needs of the few dying patients who continue to suffer despite expert palliative care."
+    }
+   ]
+  },
+  {
+   "id": "AAHPM-PAL-004",
+   "source": "AAHPM",
+   "title": "AAHPM HPM PASS Self-Assessment Pain Symptoms Last Hours of Living",
+   "year": "2022",
+   "page_url": "https://aahpm.org/education/hpmpass",
+   "pdf_url": "https://aahpm.org/education/hpmpass",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_eol",
+   "priority": "medium",
+   "sha256": "beef8996ee9bafbb8cae31eab4e14bb7c9b5cef6857262d81d68d250048b4e74",
+   "size_bytes": 753,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 753,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAHPM HPM PASS Self-Assessment Pain Symptoms Last Hours of Living Source: AAHPM Year: 2022 Domain: palliative_eol License: Restricted Available at: https://aahpm.org/education/hpmpass This is a citation reference for the AAHPM guideline 'AAHPM HPM PASS Self-Assessment Pain Symptoms Last Hours of Living' published in 2022. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: palliative_eol. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAHPM-PAL-005",
+   "source": "AAHPM",
+   "title": "AAHPM Primer of Palliative Care Symptom Management",
+   "year": "2020",
+   "page_url": "https://aahpm.org/publications/primer",
+   "pdf_url": "https://aahpm.org/publications/primer",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_pain",
+   "priority": "high",
+   "sha256": "7ea1a9578a24dad134522cf54dc9e5b0c16aa4d4b7d99f5815798c4abad157c7",
+   "size_bytes": 727,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 727,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:33Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAHPM Primer of Palliative Care Symptom Management Source: AAHPM Year: 2020 Domain: palliative_pain License: Restricted Available at: https://aahpm.org/publications/primer This is a citation reference for the AAHPM guideline 'AAHPM Primer of Palliative Care Symptom Management' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: palliative_pain. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
+    }
+   ]
+  },
+  {
+   "id": "AAHPM-PAL-007",
+   "source": "AAHPM",
+   "title": "AAHPM Pruritus Symptom Management Pearls",
+   "year": "2020",
+   "page_url": "https://aahpm.org/education",
+   "pdf_url": "https://aahpm.org/education",
+   "license": "Restricted",
+   "commercial_use": "attribution",
+   "clinical_domain": "palliative_general",
+   "priority": "low",
+   "sha256": "83319db8cbe51250835a962be78bd6bf3f86b04197815db66b8491b1b198a34e",
+   "size_bytes": 703,
+   "pdf_source": "citation-stub",
+   "pmcid": null,
+   "char_count": 703,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T19:02:34Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Title: AAHPM Pruritus Symptom Management Pearls Source: AAHPM Year: 2020 Domain: palliative_general License: Restricted Available at: https://aahpm.org/education This is a citation reference for the AAHPM guideline 'AAHPM Pruritus Symptom Management Pearls' published in 2020. The full text was not freely retrievable at the time of indexing (proprietary access, member portal, or content not yet indexed in open repositories). Clinicians should consult the original publication at the URL provided. The topic area is: palliative_general. This citation enables the RAG system to surface this guideline as a recommendation when relevant to a clinical query, even though detailed content is not embedded."
     }
    ]
   }
