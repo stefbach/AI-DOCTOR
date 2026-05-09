@@ -1,7 +1,7 @@
 {
  "source": "ASH",
  "generated_at": "2026-05-02T15:42:26Z",
- "total_documents": 46,
+ "total_documents": 47,
  "documents": [
   {
    "id": "ASH-001",
@@ -2350,6 +2350,31 @@
     {
      "chunk_index": 10,
      "content": "and AstraZeneca; speaker's bureau or advisory committees for Amgen, Sanofi, Regeneron, Menarini, Takeda, GSK, BMS, Janssen, BeiGene, Swixx, and AstraZeneca. Mario Boccadoro: honoraria from Sanofi, Celgene, Amgen, Janssen, Novartis, Bristol Myers Squibb, and AbbVie; advisory boards for Janssen and GSK; research funding from Sanofi, Celgene, Amgen, Janssen, Novartis, Bristol Myers Squibb, and Mundipharma. Pieter Sonneveld: consulting or advisory role for BMS/Celgene, Janssen, Sanofi, GSK, and Pfizer; research funding from BMS/Celgene, Janssen, Karyopharm, Amgen, and Sanofi; honoraria from BMS/Celgene, Janssen, Sanofi, and GSK. Anna Falanga: no relevant conflicts. Evangelos Terpos: advisory boards for Amgen, AstraZeneca, EUSA Pharma, BMS, GSK, J&J, Menarini/Stemline, Pfizer, Sanofi, and Takeda; honoraria from Amgen, Antengene, AstraZeneca, EUSA Pharma, BMS, Forus, GSK, J&J, Menarini/Stemline, Novartis, Pfizer, Sanofi, Swixx, and Takeda; research funding from Amgen, GSK, J&J, Sanofi, and Takeda; travel expenses from Takeda. ETHICS STATEMENT No ethics approval was required for this study. FUNDING No funding received. Supporting information Supporting Information."
+    }
+   ]
+  },
+  {
+   "id": "ANTICOAG-002",
+   "source": "ASH",
+   "title": "ASH 2018 Guidelines for Management of Venous Thromboembolism",
+   "year": "2018",
+   "page_url": "https://www.hematology.org/education/clinicians/guidelines-and-quality-care/clinical-practice-guidelines/venous-thromboembolism-guidelines",
+   "pdf_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=6258911",
+   "license": "ASH",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_critical_care",
+   "priority": "high",
+   "sha256": "43a1264b22b26cb826d665de457efb5544ccf5f3fccbed95eb40a9d3841c4169",
+   "size_bytes": 5300,
+   "pdf_source": "recovery-pubmed-enriched:30482766",
+   "pmcid": "PMC6258911",
+   "char_count": 5272,
+   "chunk_count": 1,
+   "extracted_at": "2026-05-09T14:40:22Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Blood Adv Blood Adv 3318 bloodadv Blood Advances Blood Advances 2473-9529 2473-9537 The American Society of Hematology PMC6258911 PMC6258911.1 6258911 6258911 30482766 10.1182/bloodadvances.2018024786 2018/024786CG 1 8 29 Clinical Guidelines American Society of Hematology 2018 Guidelines for management of venous thromboembolism: treatment of pediatric venous thromboembolism Monagle Paul http://orcid.org/0000-0002-1742-0242 Cuello Carlos A. Augustine Caitlin Bonduel Mariana Brandão Leonardo R. Capman Tammy Chan Anthony K. C. Hanson Sheila Male Christoph Meerpohl Joerg Newall Fiona O’Brien Sarah H. Raffini Leslie van Ommen Heleen Wiernikowski John Williams Suzan Bhatt Meha Riva John J. Roldan Yetiani Schwab Nicole Mustafa Reem A. http://orcid.org/0000-0003-3448-0156 Vesely Sara K. 1 Department of Clinical Haematology, Royal Children’s Hospital, University of Melbourne and Murdoch Children’s Research Institute, VIC, Australia; 2 Department of Health Research Methods, Evidence, and Impact, McMaster University, Hamilton, ON, Canada; 3 Tecnologico de Monterrey School of Medicine, Monterrey, Mexico; 4 Boston, MA; 5 Department of Hematology/Oncology, Hospital de Pediatria “Prof. Dr. Juan P. Garrahan,” Buenos Aires, Argentina; 6 Division of Haematology/Oncology, Department of Pediatrics, The Hospital for Sick Children, Toronto, ON, Canada; 7 Melbourne, FL; 8 Department of Pediatrics, McMaster University, Hamilton, ON, Canada; 9 Department of Pediatrics, Medical College of Wisconsin and Critical Care Section, Children’s Hospital of Wisconsin, Milwaukee, WI; 10 Department of Pediatrics, Medical University of Vienna, Vienna, Austria; 11 Department of Medical Biometry and Statistics, Institute of Medical Biometry and Medical Informatics, University of Freiburg and University Medical Center Freiburg, Freiburg, Germany; 12 Department of Clinical Haematology and 13 Department of Nursing Research, Royal Children’s Hospital, University of Melbourne, Murdoch Children’s Research Institute, Melbourne, VIC, Australia; 14 Division of Pediatric Hematology/Oncology, Nationwide Children’s Hospital, The Ohio State University, Columbus, OH; 15 Department of Pediatrics, Children’s Hospital of Philadelphia, University of Pennsylvania, Philadelphia, PA; 16 Department of Pediatric Hematology, Sophia Children’s Hospital Erasmus MC, Rotterdam, The Netherlands; 17 Division of Hematology/Oncology, Department of Pediatrics, McMaster Children’s Hospital, McMaster University, Hamilton, ON, Canada; 18 Department of Pediatrics, Hospital for Sick Children, University of Toronto, Toronto, ON, Canada; 19 Department of Family Medicine, McMaster University, Hamilton, ON, Canada; 20 Division of Nephrology and Hypertension, Department of Medicine, University of Kansas Medical Center, Kansas City, KS; and 21 Department of Biostatistics and Epidemiology, University of Oklahoma Health Sciences Center, Oklahoma City, OK 27 11 2018 27 11 2018 2 22 324686 3292 3316 19 8 2018 24 9 2018 27 11 2018 28 11 2018 04 10 2023 © 2018 by The American Society of Hematology 2018 Background: Despite an increasing incidence of venous thromboembolism (VTE) in pediatric patients in tertiary care settings, relatively few pediatric physicians have experience with antithrombotic interventions. Objective: These guidelines of the American Society of Hematology (ASH), based on the best available evidence, are intended to support patients, clinicians, and other health care professionals in their decisions about management of pediatric VTE. Methods: ASH formed a multidisciplinary guideline panel that included 2 patient representatives and was balanced to minimize potential bias from conflicts of interest. The McMaster University GRADE Centre supported the guideline-development process, including updating or performing systematic evidence reviews (up to April of 2017). The panel prioritized clinical questions and outcomes according to their importance for clinicians and patients. The panel used the Grading of Recommendations Assessment, Development, and Evaluation (GRADE) approach, including GRADE Evidence-to-Decision frameworks, to assess evidence and make recommendations, which were subject to public comment. Results: The panel agreed on 30 recommendations, covering symptomatic and asymptomatic deep vein thrombosis, with specific focus on management of central venous access device–associated VTE. The panel also addressed renal and portal vein thrombosis, cerebral sino venous thrombosis, and homozygous protein C deficiency. Conclusions: Although the panel offered many recommendations, additional research is required. Priorities include understanding the natural history of asymptomatic thrombosis, determining subgroup boundaries that enable risk stratification of children for escalation of treatment, and appropriate study of newer anticoagulant agents in children. pmc-status-qastatus 0 pmc-status-live yes pmc-status-embargo no pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf yes pmc-prop-has-supplement yes pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc yes access free"
     }
    ]
   }
