@@ -1,7 +1,7 @@
 {
  "source": "GOLD",
  "generated_at": "2026-05-02T14:08:35Z",
- "total_documents": 3,
+ "total_documents": 4,
  "documents": [
   {
    "id": "GOLD-001",
@@ -791,6 +791,35 @@
     {
      "chunk_index": 7,
      "content": ". (2024). Accessed: October 10, 2024: https://academic.oup.com/jamia. 33. Plos Digital Health. (2024). Accessed: October 10, 2024: https://journals.plos.org/digitalhealth/. 34. Reddy S: Translational Application of Artificial Intelligence in Healthcare . Chapman & Hall, 2023. 35. Byrne MF, Parsa N, Greenhill AT, Chahal D, Ahmad O, Bagci U: AI in Clinical Medicine: A Practical Guide for Healthcare Professionals. Wiley, 2023. 36. Géron A: Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow . O'Reilly Media, Inc., 2019. 37. Chang AC: Intelligence-Based Medicine: Artificial Intelligence and Human Cognition in Clinical Medicine and Healthcare. Elsevier Inc, 2020. 38. Papay FA, Mathur P: Strategies for Artificial Intelligence in Healthcare: : Real-World Solutions for Reshaping Healthcare Through Artificial Intelligence and Beyond. Mangus JA (ed): Amazon (Kindle Direct Publishing), 2024. 39. Stanford AIMI. (2024). Accessed: October 10, 2024: https://aimi.stanford.edu/shared-datasets. 40. Kaggle Datasets. (2024). Accessed: October 10, 2024: https://www.kaggle.com/datasets. 41. Physionet. (2024). Accessed: October 10, 2024: https://physionet.org/about/database/. 42. UK Biobank. (2024). Accessed: October 10, 2024: https://www.ukbiobank.ac.uk/enable-your- research/about-our-data. 43. BrainX Community: Data. (2024). Accessed: October 10, 2024: https://brainxai.org/data/. 44. Harvard Dataverse. (2024). Accessed: October 10, 2024: https://dataverse.harvard.edu/. 2024 Mathur et al. Cureus 16(10): e72501. DOI 10.7759/cureus.72501 9 of 9"
+    }
+   ]
+  },
+  {
+   "id": "GOLD-DRUG-001",
+   "source": "GOLD",
+   "title": "GOLD Pocket Guide to COPD Diagnosis Management Prevention pharmacotherapy",
+   "year": "2024",
+   "page_url": "https://goldcopd.org/2024-gold-report/",
+   "pdf_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=5556909",
+   "license": "GOLD",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "drug_lipid_htn_diabetes",
+   "priority": "high",
+   "sha256": "324b548df34b7ff5ddd322fad23a1aedb47c4824f8fd5dc639ca0d77945aafa3",
+   "size_bytes": 5624,
+   "pdf_source": "recovery-pubmed-enriched:28848929",
+   "pmcid": "PMC5556909",
+   "char_count": 5623,
+   "chunk_count": 2,
+   "extracted_at": "2026-05-09T15:17:47Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "Chronic Obstr Pulm Dis Chronic Obstr Pulm Dis 3246 copdis Chronic Obstr Pulm Dis Chronic Obstructive Pulmonary Diseases: Journal of the COPD Foundation 2372-952X COPD Foundation PMC5556909 PMC5556909.1 5556909 5556909 28848929 10.15326/jcopdf.4.3.2017.0136 1 Statement of the COPD Foundation The 2017 Update to the COPD Foundation COPD Pocket Consultant Guide 2017 Update of COPD Foundation Pocket Guide Yawn Barbara P. MD MSc Thomashaw Byron MD Mannino David M. MD Han MeiLan K. MD MS Kalhan Ravi MD Rennard Stephen MD Cerrata Scott Crapo James D. MD Wise Robert MD Department of Family and Community Health, University of Minnesota School of Medicine, Minneapolis Department of Medicine, Columbia University College of Physicians and Surgeons, New York, New York Department of Preventive Medicine and Environmental Health, University of Kentucky, College of Public Health, Lexington Division of Pulmonary and Critical Care Medicine, Department of Internal Medicine, University of Michigan Health System, Ann Arbor Asthma and COPD Program, Northwestern University Feinberg School of Medicine, Chicago, Illinois Clinical Discovery Unit, Early Clinical Development, AstraZeneca, Cambridge, United Kingdom and Department of Medicine, University of Nebraska Medical Center, Omaha COPD Foundation, Washington, D.C. Division of Pulmonary, Critical Care and Sleep Medicine, National Jewish Health, Denver, Colorado Pulmonary and Critical Care, Department of Medicine, Johns Hopkins University School of Medicine, Baltimore, Maryland Address correspondence to: Barbara P. Yawn, MD, MSc 1963 112th Circle NE Blaine, MN 55449 507 261 3096 byawn47@gmail.com Barbara P. Yawn reports receiving COPD-related personal fees from Boehringer-Ingelheim, GlaxoSmithKline, AstraZeneca and Novartis and COPD-related research grant support from Boehringer-Ingelheim outside the submitted work. Scott Cerreta reports he has nothing to declare. MeiLan Han reports receiving personal fees from Sunovion, Boehringer-Ingelheim, GlaxoSmithKline, AstraZeneca and Novartis and receiving research grant support from Novartis and Sunovion outside the submitted work. David Mannino reports grants and personal fees from GlaxoSmithKline, personal fees from AstraZeneca, grants and personal fees from Novartis, personal fees from Amgen, grants and personal fees from Boehringer Ingelheim, personal fees from Merck, personal fees from Forest, personal fees from Up to Date, other from COPD Foundation, personal fees from Schlesinger Law Firm, non-financial support from Sunovion, outside the submitted work. Byron Thomashow reports receiving personal fees from Boehringer-Ingelheim, GlaxoSmithKline, AstraZeneca, and Novartis outside the submitted work. Robert Wise reports receiving personal fees from AstraZeneca, Boehringer-Ingelheim, Contrafect, GlaxoSmithKline, Merck, Novartis, Pulmonx, Roche-Genentech, Spiration, Sunovion, Teva and research grant support from AstraZeneca, Boehringer-Ingelheim, and GlaxoSmithKline outside the submitted work. Stephen Rennard is employed by AstraZeneca, Cambridge, United Kingdom. He reports receiving personal fees from Baxter, AstraZeneca, Dailchi Sankyo, Forest, Penn Technology, Novartis, Pulmirix, and Takeda as well as research grant support from Pfizer, GlaxoSmithKline, Boehringer Ingelheim, Nycomed, Astra-Zeneca, Centocor, and Almirall outside the submitted work. Ravi Kahlan reports personal fees from Forest Laboratories, Boehringer Ingelheim, Merck, Smith Medical, AstraZeneca, CVS Caremark, and Aptus Health, as well as research grant support from Boehringer Ingelheim, GlaxoSmithKline, PneumRx (BTG), Spiration, all outside the submitted work 2017 15 7 2017 4 3 296975 177 185 23 3 2017 15 07 2017 28 08 2017 25 03 2024 JCOPDF © 2017 The COPD Foundation Pocket Consultant Guide (PCG) was first released in 2007 as a practice tool for use at point of service for clinicians, especially primary care clinicians diagnosing and treating patients with chronic obstructive pulmonary disease (COPD). Over the years, the PCG has been supplemented with a mobile app that presents the tool in an online smart phone accessible version that also allows the clinician to enter patient specific data for guidance to next steps of diagnosis or management. In November 2016, a new update of the PCG was released that incorporates a flow diagram for stepped care that includes the newest recommendation for diagnosis, assessment and treatment; including the broad use of dual bronchodilator therapy and consideration of asthma COPD overlap syndrome (ACOS). The current controversy regarding when to add inhaled corticosteroids (ICSs) is addressed to support clinical decision making. The PCG comes in 2 versions, one with generic names for COPD drugs available in the United States and one with trade names for those drugs. The update continues to recommend spirometry for those at highest risk, also emphasizing the need to assess symptoms, exacerbation risks and comorbidity before selecting appropriate non-pharmacological as well as pharmacological therapy. The tool is designed to facilitate COPD management in daily practice. copd chronic obstructive pulmonary disease GOLD primary care guidelines care recommendations point of care pmc-status-qastatus 0 pmc-status-live yes pmc-status-embargo no pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf no pmc-prop-has-supplement no pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc yes"
+    },
+    {
+     "chunk_index": 1,
+     "content": "as well as pharmacological therapy. The tool is designed to facilitate COPD management in daily practice. copd chronic obstructive pulmonary disease GOLD primary care guidelines care recommendations point of care pmc-status-qastatus 0 pmc-status-live yes pmc-status-embargo no pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf no pmc-prop-has-supplement no pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc yes"
     }
    ]
   }
