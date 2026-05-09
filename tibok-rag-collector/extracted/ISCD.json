@@ -1,7 +1,7 @@
 {
  "source": "ISCD",
  "generated_at": "2026-05-09T11:09:30Z",
- "total_documents": 1,
+ "total_documents": 2,
  "documents": [
   {
    "id": "ISCD-DEXA-002",
@@ -61,6 +61,35 @@
     {
      "chunk_index": 9,
      "content": "patient group or clinical scenario. More robust reference data are needed for both technological platforms (Hologic and GE Lunar devices) to provide complete representation according to age, sex, and population ancestry. Additionally, in order to adequately monitor bone health in at-risk groups of children and adolescents, precision data are needed in samples representative of the patients for whom DXA scans are clinically utilized. As these knowledge gaps are addressed, improvements can be expected in earlier identification of risk for fracture, monitoring practices, and the clinical care of children and adolescents with a variety of medical conditions who are at risk for compromised bone accretion and low energy fractures. Supplementary Material 1"
+    }
+   ]
+  },
+  {
+   "id": "ISCD-DEXA-001",
+   "source": "ISCD",
+   "title": "ISCD Official Positions adult bone densitometry",
+   "year": "2023",
+   "page_url": "https://iscd.org/learn/official-positions/",
+   "pdf_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=13143439",
+   "license": "ISCD",
+   "commercial_use": "restricted-cds",
+   "clinical_domain": "radiology_xray",
+   "priority": "high",
+   "sha256": "d6432f79225ff69d818506a4e94394783e15896691338151cffaa96c00ec81c8",
+   "size_bytes": 5921,
+   "pdf_source": "recovery-pubmed-enriched:38007332",
+   "pmcid": "PMC13143439",
+   "char_count": 5912,
+   "chunk_count": 2,
+   "extracted_at": "2026-05-09T12:07:44Z",
+   "chunks": [
+    {
+     "chunk_index": 0,
+     "content": "J Am Soc Nephrol J Am Soc Nephrol 612 jnephrol JASN Journal of the American Society of Nephrology : JASN 1046-6673 1533-3450 American Society of Nephrology PMC13143439 PMC13143439.1 13143439 13143439 41563361 10.1681/ASN.0000000960 JASN-2025-000760 1 3 Clinical Research Chronic Kidney Disease Bone Mineral Density and the Risk of Fracture According to eGFR in Postmenopausal Women https://orcid.org/0000-0002-7209-198X Kim Minsang https://orcid.org/0000-0002-6096-1263 Han Kyungdo https://orcid.org/0009-0000-3986-0639 Kwon Jin Kyung https://orcid.org/0009-0001-7497-1067 Oh Jae-ik https://orcid.org/0009-0006-9086-1075 Lee Jinsun https://orcid.org/0000-0001-7373-5487 Koh Jung Hun https://orcid.org/0000-0002-9411-3481 Kang Min Woo https://orcid.org/0000-0001-7643-994X Cho Jeong Min https://orcid.org/0000-0002-6060-9032 Cho Semin https://orcid.org/0000-0002-8831-9838 Kim Seong Geun https://orcid.org/0000-0002-2510-8822 Jung Sehyun Huh Hyuk https://orcid.org/0000-0001-5633-3961 Lee Soojin https://orcid.org/0000-0002-2191-2784 Kang Eunjeong https://orcid.org/0000-0003-1596-1528 Kim Yaerim https://orcid.org/0000-0001-9941-7858 Joo Kwon Wook https://orcid.org/0000-0002-5195-7852 Kim Dong Ki https://orcid.org/0000-0002-4221-2453 Park Sehoon 1 Department of Internal Medicine, Seoul National University Hospital, Seoul, Republic of Korea 2 Department of Statistics and Actuarial Science, Soongsil University, Seoul, Republic of Korea 3 Department of Internal Medicine, Keimyung University School of Medicine, Daegu, Republic of Korea 4 Department of Internal Medicine, Korea University Guro Hospital, Seoul, Republic of Korea 5 Department of Internal Medicine, Chung-Ang University Gwangmyeong Hospital, Gwangmyeong, Republic of Korea 6 Department of Internal Medicine, Inje University Sanggye Paik Hospital, Seoul, Republic of Korea 7 Department of Internal Medicine, Gyeongsang National University Hospital, Jinju, Republic of Korea 8 Department of Internal Medicine, Hallym University Kangnam Sacred Heart Hospital, Seoul, Republic of Korea 9 Department of Internal Medicine, Uijeongbu Eulji University Medical Center, Uijeongbu, Republic of Korea 10 Transplantation Center, Seoul National University Hospital, Seoul, Republic of Korea 11 Department of Internal Medicine, Seoul National University College of Medicine, Seoul, Republic of Korea Correspondence: Prof. Kyungdo Han or Dr. Sehoon Park, email: hkd917@naver.com or mailofsehoon@gmail.com 5 2026 01 12 2025 37 5 513089 984 994 11 6 2025 25 11 2025 01 05 2027 07 05 2026 07 05 2026 Copyright © 2025 by the American Society of Nephrology 2025 Cassandra's Cortex 37 5 31 3 2026 904 906 Journal of the American Society of Nephrology : JASN 10.1681/ASN.0000001080 41915434 Visual Abstract Key Points Lower bone mineral density was associated with a higher risk of fracture, irrespective of eGFR. At a similar bone mineral density, the fracture risk was higher with lower eGFR, more prominently for hip fractures than for vertebral fractures. The higher risk of fracture associated with lower eGFR was more pronounced in individuals with poor static balance. Background Although both lower bone mineral density (BMD) and impaired kidney function are well-established risk factors for fracture, large-scale studies evaluating their effects and interaction on fracture, particularly site-specific fractures including vertebra and hip, are still limited. Methods The main study population included female participants aged 66 years who underwent BMD assessment through dual-energy x-ray absorptiometry through the Korean National Screening Program between 2010 and 2016. BMD was categorized as normal, osteopenia, and osteoporosis on the basis of T -score. Kidney function was classified as eGFR ≥60, 45–59, and <45 ml/min per 1.73 m 2 . Primary outcome was any fracture, including vertebral, hip, and other fractures, defined using International Classification of Diseases, Tenth Revision codes. Subgroup analysis was performed by physical performance, including the single-leg stance test. Results Among 551,548 participants included in the main study population, 80,514 developed any fracture over a median follow-up of 8.2 (interquartile range, 6.7–10.0) years. The prevalence of osteoporosis was 36%, and those with lower BMD showed higher eGFR and lower body mass index. Lower BMD was associated with a higher risk of any fracture, irrespective of eGFR, with nonsignificant interaction ( P for interaction = 0.54). Among participants with normal BMD, those with eGFR <45 ml/min per 1.73 m 2 showed a greater risk of hip fracture than those with normal eGFR (adjusted hazard ratio, 2.44 [1.88–3.18]), whereas vertebral fracture risks were similar across different eGFR categories at a given BMD status. Furthermore, a higher fracture risk with lower eGFR was more pronounced in women with poor static balance assessed by the single-leg stance test than in those with normal static balance. Conclusions In postmenopausal women, lower BMD was associated with a higher fracture risk, irrespective of eGFR. However, at any given BMD, lower eGFR was associated with a greater risk for hip fracture, but not for vertebral fracture. CKD GFR health status bones, stones, and mineral metabolism cohort studies College of Medicine, Seoul National University 800-20190571 Dong Ki Kim Ministry of Health and Welfare, Republic of Korea RS-2024-00403375 Sehoon Park National Research Foundation of Korea RS-2024-00345867 Sehoon Park pmc-exception-type EMBARGO pmc-status-qastatus 4 pmc-status-live no pmc-status-embargo yes pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf yes pmc-prop-has-supplement no pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc no SDC T Read-along YES"
+    },
+    {
+     "chunk_index": 1,
+     "content": "bones, stones, and mineral metabolism cohort studies College of Medicine, Seoul National University 800-20190571 Dong Ki Kim Ministry of Health and Welfare, Republic of Korea RS-2024-00403375 Sehoon Park National Research Foundation of Korea RS-2024-00345867 Sehoon Park pmc-exception-type EMBARGO pmc-status-qastatus 4 pmc-status-live no pmc-status-embargo yes pmc-status-released yes pmc-prop-open-access no pmc-prop-olf no pmc-prop-manuscript no pmc-prop-legally-suppressed no pmc-prop-has-pdf yes pmc-prop-has-supplement no pmc-prop-pdf-only no pmc-prop-suppress-copyright no pmc-prop-is-real-version no pmc-prop-is-scanned-article no pmc-prop-preprint no pmc-prop-in-epmc no SDC T Read-along YES"
     }
    ]
   }
