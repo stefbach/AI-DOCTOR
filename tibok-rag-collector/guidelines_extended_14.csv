@@ -1,0 +1,351 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+AAP-CHILD-ABUSE-001,AAP,AAP clinical report diagnostic imaging of child abuse,2015,https://publications.aap.org/pediatrics/article/135/5/e1337/33808/,,AAP,restricted-cds,radiology_pediatric,high
+ACEP-POCUS-001,ACEP,ACEP policy statement ultrasound guidelines emergency point-of-care,2023,https://www.acep.org/patient-care/policy-statements/ultrasound-guidelines-emergency-point-of-care-and-clinical-ultrasound-guidelines-in-medicine,,ACEP,restricted-cds,radiology_us_pocus,high
+ACOG-FETAL-US-001,ACOG,ACOG ultrasound in pregnancy practice bulletin,2016,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,radiology_us_obs,high
+ACOG-RAD-001,ACOG,ACOG Committee Opinion 723 guidelines for diagnostic imaging during pregnancy and lactation,2017,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2017/10/guidelines-for-diagnostic-imaging-during-pregnancy-and-lactation,,ACOG,restricted-cds,radiology_safety,high
+ACOG-UAE-001,ACOG,ACOG Practice Bulletin uterine fibroids alternatives to hysterectomy including UAE,2021,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,radiology_ir_vascular,medium
+ACR-APPROP-001,ACR,ACR Appropriateness Criteria master list of all topics,2024,https://www.acr.org/Clinical-Resources/ACR-Appropriateness-Criteria,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ABD-001,ACR,ACR Appropriateness Criteria right lower quadrant pain suspected appendicitis,2022,https://acsearch.acr.org/docs/69357/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ABD-002,ACR,ACR Appropriateness Criteria right upper quadrant pain,2022,https://acsearch.acr.org/docs/69474/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ABD-003,ACR,ACR Appropriateness Criteria left lower quadrant pain suspected diverticulitis,2019,https://acsearch.acr.org/docs/69356/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ABD-004,ACR,ACR Appropriateness Criteria acute nonlocalized abdominal pain,2018,https://acsearch.acr.org/docs/69467/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ABD-005,ACR,ACR Appropriateness Criteria suspected small bowel obstruction,2019,https://acsearch.acr.org/docs/70910/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ABD-006,ACR,ACR Appropriateness Criteria pancreatitis,2019,https://acsearch.acr.org/docs/69468/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ABD-007,ACR,ACR Appropriateness Criteria Crohn disease,2019,https://acsearch.acr.org/docs/69470/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ABD-008,ACR,ACR Appropriateness Criteria liver lesion characterization,2021,https://acsearch.acr.org/docs/69472/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ABD-009,ACR,ACR Appropriateness Criteria jaundice,2018,https://acsearch.acr.org/docs/69497/Narrative/,,ACR,restricted-cds,radiology_appropriateness,medium
+ACR-APPROP-ABD-010,ACR,ACR Appropriateness Criteria renal cell carcinoma staging,2021,https://acsearch.acr.org/docs/69367/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ABD-011,ACR,ACR Appropriateness Criteria hematuria,2019,https://acsearch.acr.org/docs/69490/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ABD-012,ACR,ACR Appropriateness Criteria acute pyelonephritis,2018,https://acsearch.acr.org/docs/69489/Narrative/,,ACR,restricted-cds,radiology_appropriateness,medium
+ACR-APPROP-ABD-013,ACR,ACR Appropriateness Criteria acute onset flank pain suspicion of stone disease,2018,https://acsearch.acr.org/docs/69362/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-CARD-001,ACR,ACR Appropriateness Criteria chest pain low to intermediate probability of CAD,2023,https://acsearch.acr.org/docs/3168003/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-CARD-002,ACR,ACR Appropriateness Criteria suspected acute aortic syndrome,2022,https://acsearch.acr.org/docs/69412/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-CARD-003,ACR,ACR Appropriateness Criteria nonischemic myocardial disease with clinical manifestations,2021,https://acsearch.acr.org/docs/69402/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-CARD-004,ACR,ACR Appropriateness Criteria infective endocarditis,2021,https://acsearch.acr.org/docs/3082002/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-CHEST-001,ACR,ACR Appropriateness Criteria acute respiratory illness in immunocompetent patients,2023,https://acsearch.acr.org/docs/69446/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-CHEST-002,ACR,ACR Appropriateness Criteria routine chest radiography,2021,https://acsearch.acr.org/docs/69451/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-CHEST-003,ACR,ACR Appropriateness Criteria suspected pulmonary embolism,2022,https://acsearch.acr.org/docs/69404/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-CHEST-004,ACR,ACR Appropriateness Criteria hemoptysis,2020,https://acsearch.acr.org/docs/69449/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-CHEST-005,ACR,ACR Appropriateness Criteria chronic dyspnea suspected pulmonary origin,2023,https://acsearch.acr.org/docs/69447/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-CHEST-006,ACR,ACR Appropriateness Criteria lung cancer screening,2022,https://acsearch.acr.org/docs/69451/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-CHEST-007,ACR,ACR Appropriateness Criteria solitary pulmonary nodule,2022,https://acsearch.acr.org/docs/69443/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-MSK-001,ACR,ACR Appropriateness Criteria acute trauma to the knee,2020,https://acsearch.acr.org/docs/69419/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-MSK-002,ACR,ACR Appropriateness Criteria chronic knee pain,2018,https://acsearch.acr.org/docs/69432/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-MSK-003,ACR,ACR Appropriateness Criteria shoulder pain atraumatic,2022,https://acsearch.acr.org/docs/3082001/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-MSK-004,ACR,ACR Appropriateness Criteria shoulder pain traumatic,2023,https://acsearch.acr.org/docs/69433/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-MSK-005,ACR,ACR Appropriateness Criteria acute hip pain suspected fracture,2018,https://acsearch.acr.org/docs/3082587/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-MSK-006,ACR,ACR Appropriateness Criteria chronic hip pain,2022,https://acsearch.acr.org/docs/69425/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-MSK-007,ACR,ACR Appropriateness Criteria low back pain,2021,https://acsearch.acr.org/docs/69483/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-MSK-008,ACR,ACR Appropriateness Criteria cervical neck pain or cervical radiculopathy,2021,https://acsearch.acr.org/docs/69426/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-MSK-009,ACR,ACR Appropriateness Criteria suspected osteomyelitis of the foot in patients with diabetes,2021,https://acsearch.acr.org/docs/3094201/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-MSK-010,ACR,ACR Appropriateness Criteria stress soft tissue or insufficiency fractures,2022,https://acsearch.acr.org/docs/3082574/Narrative/,,ACR,restricted-cds,radiology_appropriateness,medium
+ACR-APPROP-MSK-011,ACR,ACR Appropriateness Criteria osteoporosis and bone mineral density,2022,https://acsearch.acr.org/docs/69431/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-MSK-012,ACR,ACR Appropriateness Criteria primary bone tumors,2020,https://acsearch.acr.org/docs/3094201/Narrative/,,ACR,restricted-cds,radiology_appropriateness,medium
+ACR-APPROP-MSK-013,ACR,ACR Appropriateness Criteria soft tissue masses,2021,https://acsearch.acr.org/docs/69434/Narrative/,,ACR,restricted-cds,radiology_appropriateness,medium
+ACR-APPROP-NEURO-001,ACR,ACR Appropriateness Criteria headache,2023,https://acsearch.acr.org/docs/69482/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-NEURO-002,ACR,ACR Appropriateness Criteria cerebrovascular diseases stroke,2023,https://acsearch.acr.org/docs/69478/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-NEURO-003,ACR,ACR Appropriateness Criteria seizures and epilepsy,2020,https://acsearch.acr.org/docs/69479/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-NEURO-004,ACR,ACR Appropriateness Criteria dementia,2020,https://acsearch.acr.org/docs/3111292/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-NEURO-005,ACR,ACR Appropriateness Criteria head trauma,2021,https://acsearch.acr.org/docs/69481/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-NEURO-006,ACR,ACR Appropriateness Criteria movement disorders and neurodegenerative diseases,2020,https://acsearch.acr.org/docs/3112274/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-NEURO-007,ACR,ACR Appropriateness Criteria cranial neuropathy,2022,https://acsearch.acr.org/docs/69484/Narrative/,,ACR,restricted-cds,radiology_appropriateness,medium
+ACR-APPROP-NEURO-008,ACR,ACR Appropriateness Criteria sinonasal disease,2022,https://acsearch.acr.org/docs/69488/Narrative/,,ACR,restricted-cds,radiology_appropriateness,medium
+ACR-APPROP-NEURO-009,ACR,ACR Appropriateness Criteria orbits vision and visual loss,2018,https://acsearch.acr.org/docs/69483/Narrative/,,ACR,restricted-cds,radiology_appropriateness,medium
+ACR-APPROP-ONC-001,ACR,ACR Appropriateness Criteria staging of pancreatic ductal adenocarcinoma,2021,https://acsearch.acr.org/docs/69468/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ONC-003,ACR,ACR Appropriateness Criteria staging of colorectal cancer,2022,https://acsearch.acr.org/docs/69457/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-ONC-005,ACR,ACR Appropriateness Criteria pretreatment detection staging follow up of prostate cancer,2022,https://acsearch.acr.org/docs/69371/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-PED-001,ACR,ACR Appropriateness Criteria suspected physical abuse child,2022,https://acsearch.acr.org/docs/69443/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-PED-002,ACR,ACR Appropriateness Criteria fever without source or unknown origin child,2018,https://acsearch.acr.org/docs/3094199/Narrative/,,ACR,restricted-cds,radiology_appropriateness,medium
+ACR-APPROP-PED-003,ACR,ACR Appropriateness Criteria limping child ages 0 to 5 years,2018,https://acsearch.acr.org/docs/69437/Narrative/,,ACR,restricted-cds,radiology_appropriateness,medium
+ACR-APPROP-PED-004,ACR,ACR Appropriateness Criteria headache child,2018,https://acsearch.acr.org/docs/69439/Narrative/,,ACR,restricted-cds,radiology_appropriateness,medium
+ACR-APPROP-PED-005,ACR,ACR Appropriateness Criteria seizures child,2021,https://acsearch.acr.org/docs/69441/Narrative/,,ACR,restricted-cds,radiology_appropriateness,medium
+ACR-APPROP-WI-001,ACR,ACR Appropriateness Criteria breast cancer screening,2023,https://acsearch.acr.org/docs/70910/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-APPROP-WI-003,ACR,ACR Appropriateness Criteria palpable breast masses,2021,https://acsearch.acr.org/docs/69495/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-BIOPSY-001,ACR,ACR-SAR-SCBT-MR practice parameter for performance of image-guided percutaneous biopsy,2022,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/Img-Guided-Biopsy.pdf,,ACR,restricted-cds,radiology_ir_nonvascular,high
+ACR-BIRADS-MAMMO-001,ACR,ACR BI-RADS Atlas mammography lexicon and reporting,2013,https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/Bi-Rads,,ACR,restricted-cds,radiology_breast,high
+ACR-BIRADS-MRI-001,ACR,ACR BI-RADS Atlas MRI lexicon and reporting,2013,https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/Bi-Rads,,ACR,restricted-cds,radiology_breast,high
+ACR-BIRADS-US-001,ACR,ACR BI-RADS Atlas ultrasound lexicon and reporting,2013,https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/Bi-Rads,,ACR,restricted-cds,radiology_breast,high
+ACR-BREAST-DENSE-001,ACR,ACR position statement on supplemental screening in dense breasts,2023,https://www.acr.org/Advocacy-and-Economics/ACR-Position-Statements/Dense-Breast-Tissue,,ACR,restricted-cds,radiology_breast,high
+ACR-BREAST-MRI-001,ACR,ACR practice parameter for the performance of contrast-enhanced breast MRI,2022,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/MR-Breast.pdf,,ACR,restricted-cds,radiology_breast,high
+ACR-CADRADS-001,ACR,ACR CAD-RADS reporting and data system v2.0 for coronary CTA,2022,https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/CAD-RADS,,ACR,restricted-cds,radiology_ct,high
+ACR-CONTRAST-001,ACR,ACR Manual on Contrast Media,2024,https://www.acr.org/Clinical-Resources/Contrast-Manual,,ACR,restricted-cds,radiology_contrast,high
+ACR-CONTRAST-002,ACR,ACR Committee on Drugs and Contrast Media position on iodinated contrast renal safety,2020,https://www.acr.org/-/media/ACR/Files/Clinical-Resources/Contrast_Media.pdf,,ACR,restricted-cds,radiology_contrast,high
+ACR-CONTRAST-003,ACR,ACR ASNR position statement on use of gadolinium contrast agents,2021,https://www.acr.org/Advocacy-and-Economics/ACR-Position-Statements/Gadolinium-Based-Contrast-Agents,,ACR,restricted-cds,radiology_contrast,high
+ACR-CONTRAST-004,ACR,ACR guidance on contrast extravasation management,2024,https://www.acr.org/Clinical-Resources/Contrast-Manual,,ACR,restricted-cds,radiology_contrast,high
+ACR-CONTRAST-005,ACR,ACR guideline on premedication for breakthrough hypersensitivity reactions to contrast,2022,https://www.acr.org/Clinical-Resources/Contrast-Manual,,ACR,restricted-cds,radiology_contrast,high
+ACR-CONTRAST-006,ACR,ACR statement on iodinated contrast in pregnancy and lactation,2023,https://www.acr.org/Clinical-Resources/Contrast-Manual,,ACR,restricted-cds,radiology_contrast,high
+ACR-CONTRAST-CKD-001,ACR,ACR consensus on iodinated contrast in CKD patients,2024,https://www.acr.org/Clinical-Resources/Contrast-Manual,,ACR,restricted-cds,radiology_contrast,high
+ACR-CRADS-001,ACR,ACR C-RADS CT colonography reporting and data system,2022,https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/C-Rads,,ACR,restricted-cds,radiology_ct,medium
+ACR-CT-ANGIO-001,ACR,ACR practice parameter for performance and interpretation of body CT angiography,2022,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/Body-CTA.pdf,,ACR,restricted-cds,radiology_ct,high
+ACR-CT-COL-001,ACR,ACR-SAR-SCBT-MR practice parameter for performance of CT colonography,2024,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/CT-Colonography.pdf,,ACR,restricted-cds,radiology_ct,high
+ACR-CT-ENT-001,ACR,ACR-SPR-SAR practice parameter for performance of CT enterography,2020,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/CT-Enterography.pdf,,ACR,restricted-cds,radiology_ct,medium
+ACR-CT-PED-001,ACR,ACR-SPR practice parameter for performance of pediatric CT,2023,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/CT-Ped.pdf,,ACR,restricted-cds,radiology_pediatric,high
+ACR-CT-STROKE-001,ACR,ACR ASNR ASNR practice parameter for performance of brain CT angiography and CTP for stroke,2023,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/CT-Brain.pdf,,ACR,restricted-cds,radiology_ct,high
+ACR-CT-URO-001,ACR,ACR-SAR-SUR practice parameter for performance of CT urography,2022,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/CT-Urography.pdf,,ACR,restricted-cds,radiology_ct,high
+ACR-CTA-AAA-001,ACR,ACR practice parameter for performance of CTA aorta and lower extremity,2022,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/CTA-Aorta.pdf,,ACR,restricted-cds,radiology_ct,medium
+ACR-DBT-001,ACR,ACR practice parameter for the performance of digital breast tomosynthesis,2023,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/Tomosynthesis.pdf,,ACR,restricted-cds,radiology_breast,medium
+ACR-DOSE-CT-001,ACR,ACR practice parameter for performance of CT and dose optimization,2020,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/CT-Performance-Dose.pdf,,ACR,restricted-cds,radiology_safety,high
+ACR-DOSE-RAD-001,ACR,ACR practice parameter for diagnostic reference levels in medical x-ray imaging,2018,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/Diag-Ref-Levels.pdf,,ACR,restricted-cds,radiology_safety,medium
+ACR-FDG-PET-001,ACR,ACR-SNMMI practice parameter for performance of FDG PET CT in oncology,2022,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/FDG-PET.pdf,,ACR,restricted-cds,radiology_nuclear_pet,high
+ACR-FETAL-MRI-001,ACR,ACR-SPR practice parameter for performance of fetal MRI,2020,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/MR-Fetal.pdf,,ACR,restricted-cds,radiology_mri_general,medium
+ACR-HCC-001,ACR,ACR appropriateness criteria HCC screening and management,2022,https://acsearch.acr.org/docs/69472/Narrative/,,ACR,restricted-cds,radiology_appropriateness,high
+ACR-IODINE-AKI-001,ACR,ACR ASN consensus on contrast-induced AKI prevention,2020,https://www.acr.org/Clinical-Resources/Contrast-Manual,,ACR,restricted-cds,radiology_contrast,high
+ACR-LIRADS-001,ACR,ACR Liver Imaging Reporting and Data System LI-RADS v2018 CT MRI,2018,https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/LI-RADS,,ACR,restricted-cds,radiology_mri_abdomen,high
+ACR-LIRADS-002,ACR,ACR LI-RADS US algorithm and CEUS algorithm,2024,https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/LI-RADS,,ACR,restricted-cds,radiology_mri_abdomen,high
+ACR-LUNG-RADS-001,ACR,ACR Lung-RADS reporting and data system v2022,2022,https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/Lung-Rads,,ACR,restricted-cds,radiology_ct,high
+ACR-MAMMO-IMP-001,ACR,ACR practice parameter for the performance of screening mammography in patients with breast implants,2023,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/Screening-Mammography-Implants.pdf,,ACR,restricted-cds,radiology_breast,medium
+ACR-MAMMO-PERF-001,ACR,ACR practice parameter for performance of screening and diagnostic mammography,2023,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/Screening-Mammography.pdf,,ACR,restricted-cds,radiology_breast,high
+ACR-METFORMIN-001,ACR,ACR statement on metformin use with iodinated contrast,2024,https://www.acr.org/Clinical-Resources/Contrast-Manual,,ACR,restricted-cds,radiology_contrast,high
+ACR-MRCP-001,ACR,ACR practice parameter for the performance of MR cholangiopancreatography MRCP,2021,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/MR-Cholangiopancreatography.pdf,,ACR,restricted-cds,radiology_mri_abdomen,medium
+ACR-MRI-CARDIAC-001,ACR,ACR-NASCI-SCMR practice parameter for performance and interpretation of cardiac MRI,2021,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/MR-Cardiac.pdf,,ACR,restricted-cds,radiology_mri_general,high
+ACR-MRI-IMPLANT-001,ACR,ACR ASNR statement on MRI safety implanted devices and pacemakers,2021,https://www.acr.org/Clinical-Resources/Radiology-Safety/MR-Safety,,ACR,restricted-cds,radiology_mri_safety,high
+ACR-MRI-PROST-001,ACR,ACR practice parameter for the performance of prostate MRI,2022,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/MR-Prostate.pdf,,ACR,restricted-cds,radiology_mri_abdomen,high
+ACR-MRI-SAFETY-001,ACR,ACR Manual on MR Safety,2024,https://www.acr.org/Clinical-Resources/Radiology-Safety/MR-Safety,,ACR,restricted-cds,radiology_mri_safety,high
+ACR-MRI-SAFETY-002,ACR,ACR Guidance Document on MR Safe Practices update,2020,https://onlinelibrary.wiley.com/doi/10.1002/jmri.27164,,ACR,restricted-cds,radiology_mri_safety,high
+ACR-OB-US-001,ACR,ACR-AIUM-SRU practice parameter for performance of US examination of fetus,2018,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/US-Fetal.pdf,,ACR,restricted-cds,radiology_us_obs,high
+ACR-ORADS-001,ACR,ACR O-RADS US risk stratification ovarian and adnexal masses,2020,https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/O-Rads,,ACR,restricted-cds,radiology_us_obs,high
+ACR-PEDI-MRI-001,ACR,ACR-SPR practice parameter for performance of pediatric MRI,2023,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/MR-Ped.pdf,,ACR,restricted-cds,radiology_pediatric,medium
+ACR-PREG-001,ACR,ACR-SPR practice parameter for imaging pregnant or potentially pregnant patients,2023,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/Pregnant-Pts.pdf,,ACR,restricted-cds,radiology_safety,high
+ACR-PREMED-001,ACR,ACR Manual on Contrast Media premedication strategies,2024,https://www.acr.org/Clinical-Resources/Contrast-Manual,,ACR,restricted-cds,radiology_contrast,high
+ACR-PSMA-001,ACR,ACR-SNMMI practice parameter for performance of PSMA targeted PET prostate,2023,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/PSMA-PET.pdf,,ACR,restricted-cds,radiology_nuclear_pet,high
+ACR-RFA-001,ACR,ACR-SIR-SPR practice parameter for performance of percutaneous tumor ablation,2022,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/Tumor-Ablation.pdf,,ACR,restricted-cds,radiology_ir_oncology,high
+ACR-STEREO-BX-001,ACR,ACR practice parameter for performance of stereotactic guided breast biopsy,2021,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/Stereo-Breast.pdf,,ACR,restricted-cds,radiology_breast,medium
+ACR-TIRADS-001,ACR,ACR Thyroid Imaging Reporting and Data System TI-RADS white paper,2017,https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/TI-RADS,,ACR,restricted-cds,radiology_us_thyroid,high
+ACR-TIRADS-002,ACR,ACR TI-RADS update on management thresholds,2022,https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/TI-RADS,,ACR,restricted-cds,radiology_us_thyroid,high
+ACR-ULTRASOUND-CONT-001,ACR,ACR-AIUM-SPR-SRU practice parameter on use of microbubble US contrast in adults,2023,https://www.acr.org/-/media/ACR/Files/Practice-Parameters/US-Contrast.pdf,,ACR,restricted-cds,radiology_contrast,medium
+AECC-LUS-001,Lung POCUS,International evidence-based recommendations for point-of-care lung ultrasound LUS,2012,https://link.springer.com/article/10.1007/s00134-012-2513-4,,Open Access,restricted-cds,radiology_us_pocus,high
+AECC-LUS-002,Lung POCUS,Lung ultrasound for COVID-19 diagnostic and prognostic value international consensus,2021,https://link.springer.com/article/10.1186/s13089-020-00200-8,,Open Access,restricted-cds,radiology_us_pocus,medium
+AHA-CARD-CT-001,AHA,AHA scientific statement on noninvasive cardiac imaging chest pain in ED,2021,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000994,,AHA,restricted-cds,radiology_ct,high
+AIUM-US-001,AIUM,AIUM Practice Parameter for the Performance of an Ultrasound Examination of the Abdomen,2023,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_general,high
+AIUM-US-002,AIUM,AIUM practice parameter for performance of pelvic US in females,2020,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_obs,high
+AIUM-US-003,AIUM,AIUM practice parameter for performance of obstetric US examination,2018,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_obs,high
+AIUM-US-004,AIUM,AIUM practice parameter for performance of fetal echocardiography,2020,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_obs,high
+AIUM-US-005,AIUM,AIUM practice parameter for performance of thyroid and parathyroid US examination,2022,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_thyroid,high
+AIUM-US-006,AIUM,AIUM practice parameter for performance of breast US examination,2021,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_breast,high
+AIUM-US-007,AIUM,AIUM practice parameter for performance of US examination of extracranial cerebrovascular system,2022,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_general,medium
+AIUM-US-008,AIUM,AIUM practice parameter for performance of peripheral arterial US,2020,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_general,medium
+AIUM-US-009,AIUM,AIUM practice parameter for performance of peripheral venous US,2020,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_general,medium
+AIUM-US-010,AIUM,AIUM practice parameter for performance of MSK US examination,2018,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_msk,high
+AIUM-US-011,AIUM,AIUM practice parameter for performance of pediatric US,2019,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_general,medium
+AIUM-US-012,AIUM,AIUM practice parameter for performance of neonatal head US,2020,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_general,medium
+AIUM-US-013,AIUM,AIUM practice parameter for performance of US for DDH,2018,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_msk,medium
+AIUM-US-014,AIUM,AIUM practice parameter for performance of FAST examination,2020,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_pocus,high
+AIUM-US-015,AIUM,AIUM practice parameter for performance of POCUS examinations,2019,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_pocus,high
+AIUM-US-016,AIUM,AIUM safety in ultrasound bioeffects statement,2020,https://www.aium.org/resources/official-statements,,AIUM,restricted-cds,radiology_us_general,medium
+ASE-ECHO-001,ASE,ASE recommendations for chamber quantification by echocardiography update,2015,https://www.asecho.org/guidelines-and-standards/,,ASE,restricted-cds,radiology_us_card,high
+ASE-ECHO-002,ASE,ASE recommendations for evaluation of left ventricular diastolic function,2016,https://www.asecho.org/guidelines-and-standards/,,ASE,restricted-cds,radiology_us_card,high
+ASE-ECHO-003,ASE,ASE guidelines for performance of TEE comprehensive examination,2013,https://www.asecho.org/guidelines-and-standards/,,ASE,restricted-cds,radiology_us_card,high
+ASE-ECHO-004,ASE,ASE recommendations for cardiac chamber quantification using contrast,2018,https://www.asecho.org/guidelines-and-standards/,,ASE,restricted-cds,radiology_us_card,medium
+ASE-ECHO-005,ASE,ASE EACVI clinical recommendations for stress echocardiography,2020,https://www.asecho.org/guidelines-and-standards/,,ASE,restricted-cds,radiology_us_card,high
+ASE-ECHO-006,ASE,ASE recommendations multimodality echocardiographic imaging adult congenital heart disease,2019,https://www.asecho.org/guidelines-and-standards/,,ASE,restricted-cds,radiology_us_card,medium
+ASER-EMER-001,ASER,ASER consensus statements on emergency radiology imaging trauma,2022,https://www.aserweb.org/,,ASER,restricted-cds,radiology_emergency,high
+ASER-EMER-002,ASER,ASER recommendations on imaging of acute abdominal pain,2020,https://www.aserweb.org/,,ASER,restricted-cds,radiology_emergency,medium
+ASIPP-SPINE-001,ASIPP,ASIPP guidelines on epidural injections for spinal pain,2020,https://www.asipp.org/guidelines.htm,,ASIPP,restricted-cds,radiology_ir_nonvascular,medium
+ASNC-NUCLEAR-001,ASNC,ASNC SNMMI imaging guidelines for SPECT nuclear cardiology procedures,2018,https://www.asnc.org/imagingguidelines,,ASNC,restricted-cds,radiology_nuclear_pet,high
+ASNC-NUCLEAR-002,ASNC,ASNC SNMMI imaging guidelines for cardiac PET myocardial perfusion and viability,2020,https://www.asnc.org/imagingguidelines,,ASNC,restricted-cds,radiology_nuclear_pet,high
+ASNR-EMERG-NEURO-001,ASNR,ASNR ASER consensus on emergency neuroimaging,2020,https://www.ajnr.org/content/41/9/1525,,ASNR,restricted-cds,radiology_emergency,high
+ASNR-MRI-001,ASNR,ASNR consensus brain MRI protocol for stroke imaging,2020,https://www.ajnr.org/content/41/11/E83,,ASNR,restricted-cds,radiology_mri_neuro,high
+ASNR-MRI-002,ASNR,ASNR consensus on MRI protocols for multiple sclerosis MAGNIMS,2021,https://www.ajnr.org/content/42/8/1417,,ASNR,restricted-cds,radiology_mri_neuro,high
+ASNR-MRI-003,ASNR,ASNR consensus brain tumor MRI protocol BT-RADS,2020,https://link.springer.com/article/10.1007/s11060-020-03570-0,,ASNR,restricted-cds,radiology_mri_neuro,medium
+ASNR-MRI-004,ASNR,ASNR consensus on dementia neuroimaging recommendations,2020,https://www.ajnr.org/content/41/9/1525,,ASNR,restricted-cds,radiology_mri_neuro,medium
+ASNR-MRI-005,ASNR,ASNR consensus on imaging of cervical spine,2020,https://www.ajnr.org/content/41/4/E25,,ASNR,restricted-cds,radiology_mri_neuro,medium
+ASNR-MRI-006,ASNR,ASNR vessel wall imaging consensus statement,2017,https://www.ajnr.org/content/38/2/218,,ASNR,restricted-cds,radiology_mri_neuro,medium
+ASNR-MRI-007,ASNR,ASNR consensus on MR neurography brachial lumbosacral plexus,2018,https://www.ajnr.org/content/39/11/1995,,ASNR,restricted-cds,radiology_mri_neuro,medium
+ASNR-STROKE-IMAGE-001,ASNR,ASNR consensus on imaging selection in acute stroke including CTP and MRI,2018,https://www.ajnr.org/content/39/3/E37,,ASNR,restricted-cds,radiology_emergency,high
+ASRA-SPINE-001,ASRA,ASRA practice advisory on neuraxial procedures and anticoagulation,2018,https://www.asra.com/guidelines-articles,,ASRA,restricted-cds,radiology_ir_nonvascular,high
+ATA-THYROID-BIOPSY-001,ATA,ATA management guidelines for thyroid nodules FNA biopsy criteria,2015,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,radiology_us_thyroid,high
+ATA-TIRADS-001,ATA,ATA management guidelines for adult patients with thyroid nodules and DTC,2015,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,radiology_us_thyroid,high
+AUA-STONE-CT-001,AUA,AUA EAU practice statement on CT for renal stone disease,2019,https://www.auanet.org/guidelines-and-quality/guidelines/kidney-stones-medical-mangement-guideline,,AUA,restricted-cds,radiology_ct,high
+CIRSE-AVM-001,CIRSE,CIRSE Standards of Practice on peripheral arteriovenous malformations AVM,2017,https://link.springer.com/article/10.1007/s00270-017-1741-y,,CIRSE,restricted-cds,radiology_ir_vascular,medium
+CIRSE-BAE-001,CIRSE,CIRSE Standards of Practice for bronchial artery embolization,2017,https://link.springer.com/article/10.1007/s00270-017-1617-1,,CIRSE,restricted-cds,radiology_ir_vascular,medium
+CIRSE-BIOPSY-001,CIRSE,CIRSE Standards of Practice on percutaneous needle biopsy,2017,https://link.springer.com/article/10.1007/s00270-017-1799-6,,CIRSE,restricted-cds,radiology_ir_nonvascular,high
+CIRSE-BONE-RFA-001,CIRSE,CIRSE Standards of Practice on thermal ablation of bone tumors,2020,https://link.springer.com/article/10.1007/s00270-020-02475-9,,CIRSE,restricted-cds,radiology_ir_oncology,medium
+CIRSE-BTK-001,CIRSE,CIRSE Standards of Practice on below-the-knee revascularization,2024,https://link.springer.com/article/10.1007/s00270-024-03700-5,,CIRSE,restricted-cds,radiology_ir_vascular,medium
+CIRSE-CAS-001,CIRSE,CIRSE Standards of Practice on carotid artery stenting CAS,2022,https://link.springer.com/article/10.1007/s00270-022-03134-x,,CIRSE,restricted-cds,radiology_ir_neuro,high
+CIRSE-CRYO-001,CIRSE,CIRSE Standards of Practice on cryoablation of solid tumors,2022,https://link.springer.com/article/10.1007/s00270-022-03134-x,,CIRSE,restricted-cds,radiology_ir_oncology,medium
+CIRSE-DRAIN-001,CIRSE,CIRSE Standards of Practice on percutaneous abscess drainage,2017,https://link.springer.com/article/10.1007/s00270-017-1617-1,,CIRSE,restricted-cds,radiology_ir_nonvascular,high
+CIRSE-DVT-001,CIRSE,CIRSE Standards of Practice on management of acute DVT iliofemoral,2017,https://link.springer.com/article/10.1007/s00270-016-1538-4,,CIRSE,restricted-cds,radiology_ir_vascular,medium
+CIRSE-GASTRO-001,CIRSE,CIRSE Standards of Practice on percutaneous radiologic gastrostomy and gastrojejunostomy,2018,https://link.springer.com/article/10.1007/s00270-018-2025-x,,CIRSE,restricted-cds,radiology_ir_nonvascular,medium
+CIRSE-IVC-001,CIRSE,CIRSE Standards of Practice on inferior vena cava IVC filters,2017,https://link.springer.com/article/10.1007/s00270-016-1605-x,,CIRSE,restricted-cds,radiology_ir_vascular,high
+CIRSE-LUNG-BIOPSY-001,CIRSE,CIRSE Standards of Practice on percutaneous transthoracic lung biopsy,2020,https://link.springer.com/article/10.1007/s00270-020-02475-9,,CIRSE,restricted-cds,radiology_ir_nonvascular,high
+CIRSE-LUNG-RFA-001,CIRSE,CIRSE Standards of Practice on thermal ablation of lung tumors,2020,https://link.springer.com/article/10.1007/s00270-020-02475-9,,CIRSE,restricted-cds,radiology_ir_oncology,high
+CIRSE-MES-ANG-001,CIRSE,CIRSE Standards of Practice on mesenteric ischemia intervention,2019,https://link.springer.com/article/10.1007/s00270-019-02263-0,,CIRSE,restricted-cds,radiology_ir_vascular,medium
+CIRSE-NEPHRO-001,CIRSE,CIRSE Standards of Practice on percutaneous nephrostomy,2020,https://link.springer.com/article/10.1007/s00270-020-02475-9,,CIRSE,restricted-cds,radiology_ir_nonvascular,high
+CIRSE-PAD-001,CIRSE,CIRSE Standards of Practice on iliac and femoropopliteal PAD intervention,2021,https://link.springer.com/article/10.1007/s00270-021-02968-1,,CIRSE,restricted-cds,radiology_ir_vascular,high
+CIRSE-PAE-001,CIRSE,CIRSE Standards of Practice on prostate artery embolization,2024,https://link.springer.com/article/10.1007/s00270-024-03700-5,,CIRSE,restricted-cds,radiology_ir_vascular,medium
+CIRSE-PAVM-001,CIRSE,CIRSE Standards of Practice for pulmonary arteriovenous malformation PAVM treatment,2020,https://link.springer.com/article/10.1007/s00270-020-02475-9,,CIRSE,restricted-cds,radiology_ir_vascular,medium
+CIRSE-PE-001,CIRSE,CIRSE Standards of Practice on catheter-directed therapy for acute PE,2024,https://link.springer.com/article/10.1007/s00270-024-03720-1,,CIRSE,restricted-cds,radiology_ir_vascular,high
+CIRSE-PERIPROC-001,CIRSE,CIRSE Standards of Practice on periprocedural management coagulation in IR,2021,https://link.springer.com/article/10.1007/s00270-021-02954-7,,CIRSE,restricted-cds,radiology_ir_vascular,high
+CIRSE-PORT-001,CIRSE,CIRSE Standards of Practice on totally implantable venous access ports,2020,https://link.springer.com/article/10.1007/s00270-020-02633-z,,CIRSE,restricted-cds,radiology_ir_vascular,medium
+CIRSE-PTC-001,CIRSE,CIRSE Standards of Practice on percutaneous transhepatic biliary drainage and stenting,2021,https://link.springer.com/article/10.1007/s00270-021-02954-7,,CIRSE,restricted-cds,radiology_ir_nonvascular,high
+CIRSE-RENAL-ANG-001,CIRSE,CIRSE Standards of Practice on renal artery stenosis intervention,2018,https://link.springer.com/article/10.1007/s00270-018-2032-y,,CIRSE,restricted-cds,radiology_ir_vascular,medium
+CIRSE-RENAL-EMB-001,CIRSE,CIRSE Standards of Practice on renal artery embolization,2017,https://link.springer.com/article/10.1007/s00270-016-1564-2,,CIRSE,restricted-cds,radiology_ir_vascular,medium
+CIRSE-RENAL-RFA-001,CIRSE,CIRSE Standards of Practice on percutaneous ablation of renal tumors,2017,https://link.springer.com/article/10.1007/s00270-017-1646-9,,CIRSE,restricted-cds,radiology_ir_oncology,high
+CIRSE-RFA-001,CIRSE,CIRSE Standards of Practice on thermal ablation of liver tumors,2021,https://link.springer.com/article/10.1007/s00270-020-02738-5,,CIRSE,restricted-cds,radiology_ir_oncology,high
+CIRSE-TACE-001,CIRSE,CIRSE Standards of Practice on conventional TACE for HCC,2021,https://link.springer.com/article/10.1007/s00270-021-02968-1,,CIRSE,restricted-cds,radiology_ir_oncology,high
+CIRSE-TARE-001,CIRSE,CIRSE Standards of Practice on transarterial radioembolization 90Y,2024,https://link.springer.com/article/10.1007/s00270-024-03704-1,,CIRSE,restricted-cds,radiology_ir_oncology,high
+CIRSE-TIPS-001,CIRSE,CIRSE Standards of Practice on transjugular intrahepatic portosystemic shunt TIPS,2021,https://link.springer.com/article/10.1007/s00270-021-02954-7,,CIRSE,restricted-cds,radiology_ir_vascular,high
+CIRSE-UAE-001,CIRSE,CIRSE Standards of Practice on uterine artery embolization for fibroids,2018,https://link.springer.com/article/10.1007/s00270-018-2025-x,,CIRSE,restricted-cds,radiology_ir_vascular,high
+CIRSE-VAS-ACCESS-001,CIRSE,CIRSE Standards of Practice on central venous access,2022,https://www.cirse.org/standards-of-practice/,,CIRSE,restricted-cds,radiology_ir_vascular,high
+CWC-RAD-001,Choosing Wisely,Choosing Wisely radiology recommendations ACR list,2023,https://www.choosingwisely.org/clinician-lists/#parentSociety=American_College_of_Radiology,,Choosing Wisely,restricted-cds,radiology_appropriateness,high
+EACVI-ECHO-001,EACVI,EACVI recommendations standardization adult transthoracic echocardiography,2017,https://academic.oup.com/ehjcimaging/,,EACVI,restricted-cds,radiology_us_card,high
+EACVI-ECHO-002,EACVI,EACVI ASE clinical recommendations multimodality cardiovascular imaging valvular heart disease,2017,https://academic.oup.com/ehjcimaging/,,EACVI,restricted-cds,radiology_us_card,high
+EANM-AMYLOID-001,EANM,EANM SNMMI procedure guidelines for amyloid PET brain imaging,2020,https://link.springer.com/article/10.1007/s00259-020-04826-7,,EANM,restricted-cds,radiology_nuclear_pet,high
+EANM-BONE-001,EANM,EANM procedure guidelines for bone scintigraphy,2016,https://link.springer.com/article/10.1007/s00259-016-3415-4,,EANM,restricted-cds,radiology_nuclear_pet,high
+EANM-CARDIAC-001,EANM,EANM procedure guidelines for cardiac SPECT MPI,2015,https://link.springer.com/article/10.1007/s00259-015-3139-x,,EANM,restricted-cds,radiology_nuclear_pet,medium
+EANM-DAT-001,EANM,EANM procedure guidelines for brain neurotransmission SPECT DaTSCAN,2020,https://link.springer.com/article/10.1007/s00259-020-04817-8,,EANM,restricted-cds,radiology_nuclear_pet,high
+EANM-DOSE-001,EANM,EANM dosimetry committee guidelines for absorbed dose calculations in nuclear medicine,2019,https://link.springer.com/article/10.1007/s00259-019-04450-0,,EANM,restricted-cds,radiology_nuclear_therapy,medium
+EANM-DOTATATE-001,EANM,EANM procedure guidelines for somatostatin receptor PET CT 68Ga DOTATATE NET,2017,https://link.springer.com/article/10.1007/s00259-017-3728-y,,EANM,restricted-cds,radiology_nuclear_pet,high
+EANM-I131-001,EANM,EANM procedure guidelines for 131I therapy of differentiated thyroid cancer,2022,https://link.springer.com/article/10.1007/s00259-022-05727-7,,EANM,restricted-cds,radiology_nuclear_therapy,high
+EANM-LU177-001,EANM,EANM procedure guidelines for 177Lu DOTATATE therapy of NETs,2022,https://link.springer.com/article/10.1007/s00259-022-05727-7,,EANM,restricted-cds,radiology_nuclear_therapy,high
+EANM-LU177-002,EANM,EANM procedure guidelines for 177Lu PSMA radioligand therapy of prostate cancer,2023,https://link.springer.com/article/10.1007/s00259-023-06255-8,,EANM,restricted-cds,radiology_nuclear_therapy,high
+EANM-PEDI-001,EANM,EANM paediatrics committee dosage card and best practice,2016,https://link.springer.com/article/10.1007/s00259-016-3415-4,,EANM,restricted-cds,radiology_pediatric,medium
+EANM-PETCT-001,EANM,EANM SNMMI procedure guideline for tumor imaging FDG PET CT version 2.0,2015,https://link.springer.com/article/10.1007/s00259-014-2961-x,,EANM,restricted-cds,radiology_nuclear_pet,high
+EANM-PETCT-002,EANM,EANM procedure guidelines for PET MR hybrid imaging,2017,https://link.springer.com/article/10.1007/s00259-017-3743-z,,EANM,restricted-cds,radiology_nuclear_pet,medium
+EANM-PETCT-003,EANM,EANM SNMMI joint procedure guideline for FDG PET CT in pediatric oncology,2020,https://link.springer.com/article/10.1007/s00259-020-04959-9,,EANM,restricted-cds,radiology_nuclear_pet,medium
+EANM-PSMA-001,EANM,EANM SNMMI procedure guidelines for PSMA PET CT prostate cancer,2023,https://link.springer.com/article/10.1007/s00259-023-06247-8,,EANM,restricted-cds,radiology_nuclear_pet,high
+EANM-RA223-001,EANM,EANM procedure guidelines for 223Ra alpha therapy of bone metastases,2018,https://link.springer.com/article/10.1007/s00259-018-3970-y,,EANM,restricted-cds,radiology_nuclear_therapy,medium
+EANM-TAU-001,EANM,EANM SNMMI procedure guidelines for tau PET brain imaging,2024,https://link.springer.com/article/10.1007/s00259-024-06702-0,,EANM,restricted-cds,radiology_nuclear_pet,medium
+EANM-VQ-001,EANM,EANM guidelines for ventilation perfusion scintigraphy SPECT for PE,2019,https://link.springer.com/article/10.1007/s00259-019-04450-0,,EANM,restricted-cds,radiology_nuclear_pet,high
+EANM-Y90-001,EANM,EANM procedure guidelines for radioembolization 90Y SIRT,2022,https://link.springer.com/article/10.1007/s00259-022-05727-7,,EANM,restricted-cds,radiology_nuclear_therapy,high
+EAST-CT-TRAUMA-001,EAST,EAST practice management guideline pan-scan whole body CT in trauma,2017,https://www.east.org/education-resources/practice-management-guidelines,,EAST,restricted-cds,radiology_emergency,high
+EAU-PCa-001,EAU,EAU prostate cancer guideline imaging staging recommendations,2024,https://uroweb.org/guidelines/prostate-cancer,,EAU,restricted-cds,radiology_mri_abdomen,high
+EAU-PROST-MRI-001,EAU,EAU European Association of Urology guideline on prostate MRI before biopsy,2024,https://uroweb.org/guidelines/prostate-cancer,,EAU,restricted-cds,radiology_mri_abdomen,high
+EFSUMB-CEUS-001,EFSUMB,EFSUMB Guidelines and Recommendations on Clinical Practice of CEUS Non-Hepatic Applications,2018,https://www.efsumb.org/wp-content/uploads/2021/01/CEUS_NHA_Guidelines_2018.pdf,,EFSUMB,restricted-cds,radiology_contrast,high
+EFSUMB-CEUS-002,EFSUMB,EFSUMB Guidelines and Recommendations CEUS Liver,2020,https://www.efsumb.org/guidelines/,,EFSUMB,restricted-cds,radiology_contrast,high
+EFSUMB-CEUS-003,EFSUMB,EFSUMB position paper on CEUS in pediatric applications,2017,https://www.efsumb.org/guidelines/,,EFSUMB,restricted-cds,radiology_contrast,medium
+EFSUMB-LIVER-FIB-001,EFSUMB,EFSUMB recommendations clinical use of liver elastography for fibrosis,2017,https://www.efsumb.org/guidelines/,,EFSUMB,restricted-cds,radiology_us_general,high
+EFSUMB-US-001,EFSUMB,EFSUMB Position Paper on contrast-enhanced ultrasound liver applications,2020,https://www.efsumb.org/guidelines/,,EFSUMB,restricted-cds,radiology_us_general,high
+EFSUMB-US-002,EFSUMB,EFSUMB Guidelines and Recommendations on the Clinical Use of Liver Ultrasound Elastography,2017,https://www.efsumb.org/guidelines/,,EFSUMB,restricted-cds,radiology_us_general,high
+EFSUMB-US-003,EFSUMB,EFSUMB Position Paper on Liver Ultrasound Elastography Update 2024,2024,https://www.efsumb.org/guidelines/,,EFSUMB,restricted-cds,radiology_us_general,high
+EFSUMB-US-004,EFSUMB,EFSUMB Position Paper on lung ultrasound,2021,https://www.efsumb.org/guidelines/,,EFSUMB,restricted-cds,radiology_us_pocus,high
+EFSUMB-US-005,EFSUMB,EFSUMB recommendations on US guided procedures,2018,https://www.efsumb.org/guidelines/,,EFSUMB,restricted-cds,radiology_us_general,medium
+ENETS-NET-IMAGE-001,ENETS,ENETS consensus guidelines for imaging of NETs,2017,https://www.enets.org/guidelines.html,,ENETS,restricted-cds,radiology_nuclear_pet,high
+ESGAR-CT-COL-001,ESGAR,ESGAR consensus statement on CT colonography,2014,https://link.springer.com/article/10.1007/s00330-013-2992-z,,ESGAR,restricted-cds,radiology_ct,high
+ESGAR-CT-ENT-001,ESGAR,ESGAR consensus on CT and MR enterography Crohn disease,2018,https://link.springer.com/article/10.1007/s00330-018-5511-2,,ESGAR,restricted-cds,radiology_ct,high
+ESGAR-IBD-001,ESGAR,ESGAR ESPR consensus on diagnostic imaging in IBD adults,2018,https://link.springer.com/article/10.1007/s00330-018-5511-2,,ESGAR,restricted-cds,radiology_ct,high
+ESGAR-MRCP-001,ESGAR,ESGAR consensus on MRCP for pancreaticobiliary disease,2018,https://link.springer.com/article/10.1007/s00330-018-5377-3,,ESGAR,restricted-cds,radiology_mri_abdomen,medium
+ESGAR-MRE-001,ESGAR,ESGAR ESPR consensus on imaging of inflammatory bowel disease in children,2018,https://link.springer.com/article/10.1007/s00330-018-5667-9,,ESGAR,restricted-cds,radiology_mri_abdomen,medium
+ESGAR-RECTAL-001,ESGAR,ESGAR consensus statement on rectal MRI for cancer staging,2018,https://link.springer.com/article/10.1007/s00330-017-5026-2,,ESGAR,restricted-cds,radiology_mri_abdomen,high
+ESMINT-ANEU-001,ESMINT,ESMINT clinical practice consensus on endovascular treatment of intracranial aneurysms,2019,https://www.esmint.eu/standards-of-practice/,,ESMINT,restricted-cds,radiology_ir_neuro,high
+ESMINT-AVM-001,ESMINT,ESMINT recommendations endovascular treatment of brain AVM,2021,https://www.esmint.eu/standards-of-practice/,,ESMINT,restricted-cds,radiology_ir_neuro,medium
+ESMINT-STROKE-001,ESMINT,ESMINT ESNR ESO consensus on imaging selection and treatment of acute ischemic stroke,2019,https://www.esmint.eu/standards-of-practice/,,ESMINT,restricted-cds,radiology_ir_neuro,high
+ESNR-MS-001,ESNR,ESNR MAGNIMS recommendations imaging multiple sclerosis,2021,https://www.esnr.org/guidelines/,,ESNR,restricted-cds,radiology_mri_neuro,high
+ESNR-NEURO-001,ESNR,ESNR neurological imaging guidelines compendium,2022,https://www.esnr.org/guidelines/,,ESNR,restricted-cds,radiology_mri_neuro,medium
+ESPR-ABUSE-001,ESPR,ESPR consensus on imaging in suspected non-accidental injury,2022,https://www.espr.org/recommendations/,,ESPR,restricted-cds,radiology_pediatric,high
+ESPR-PEDI-001,ESPR,ESPR European Society of Paediatric Radiology imaging recommendations master list,2023,https://www.espr.org/recommendations/,,ESPR,restricted-cds,radiology_pediatric,high
+ESPR-PEDI-002,ESPR,ESPR ASPR recommendation on suspected non-accidental injury imaging,2018,https://www.espr.org/recommendations/,,ESPR,restricted-cds,radiology_pediatric,high
+ESPR-PEDI-003,ESPR,ESPR neonatal cranial ultrasound recommendations,2020,https://www.espr.org/recommendations/,,ESPR,restricted-cds,radiology_us_general,high
+ESPR-PEDI-004,ESPR,ESPR recommendations imaging of pediatric urinary tract infection,2018,https://www.espr.org/recommendations/,,ESPR,restricted-cds,radiology_pediatric,medium
+ESPR-PEDI-005,ESPR,ESPR consensus on whole-body MRI in pediatric oncology,2020,https://link.springer.com/article/10.1007/s00247-020-04683-4,,ESPR,restricted-cds,radiology_pediatric,medium
+ESR-DECT-001,ESR,ESR EuSoMII consensus statement on dual-energy CT clinical applications,2022,https://link.springer.com/article/10.1007/s00330-022-08801-8,,ESR Open Access,restricted-cds,radiology_ct,medium
+ESR-EBI-001,ESR,ESR Evidence-Based Imaging Series Eur Radiol,2023,https://link.springer.com/journal/330,,ESR Open Access,restricted-cds,radiology_appropriateness,high
+ESR-EU-LCS-001,ESR,ESR ERS statement on lung cancer screening with low dose CT in Europe,2020,https://link.springer.com/article/10.1007/s00330-020-06727-7,,ESR Open Access,restricted-cds,radiology_ct,high
+ESR-IGUIDE-001,ESR,ESR iGuide European clinical decision support imaging referral guidelines,2023,https://www.myesr.org/quality-safety/esr-iguide,,ESR Open Access,restricted-cds,radiology_appropriateness,high
+ESR-PCCT-001,ESR,ESR consensus on photon-counting CT clinical practice,2023,https://link.springer.com/article/10.1007/s00330-022-09204-5,,ESR Open Access,restricted-cds,radiology_ct,medium
+ESR-WBMRI-001,ESR,ESR consensus on whole-body MRI in cancer screening multiple myeloma,2019,https://link.springer.com/article/10.1007/s00330-019-06243-3,,ESR Open Access,restricted-cds,radiology_mri_general,medium
+ESSR-MSK-MRI-001,ESSR,ESSR consensus on MRI of knee internal derangement,2018,https://link.springer.com/article/10.1007/s00330-017-4862-4,,ESSR,restricted-cds,radiology_mri_msk,high
+ESSR-MSK-MRI-002,ESSR,ESSR consensus on MRI of shoulder rotator cuff,2017,https://link.springer.com/article/10.1007/s00330-016-4548-3,,ESSR,restricted-cds,radiology_mri_msk,high
+ESSR-MSK-MRI-003,ESSR,ESSR consensus statements on MRI for sports injury,2020,https://link.springer.com/article/10.1007/s00330-020-06907-5,,ESSR,restricted-cds,radiology_mri_msk,medium
+ESSR-MSK-MRI-004,ESSR,ESSR consensus statement MRI of bone marrow disease,2021,https://link.springer.com/article/10.1007/s00330-021-08010-9,,ESSR,restricted-cds,radiology_mri_msk,medium
+ESSR-MSK-US-001,ESSR,ESSR consensus statement musculoskeletal interventional ultrasound,2020,https://www.essr.org/content-essr/uploads/2021/03/ESSR-Consensus-on-MSK-US.pdf,,ESSR,restricted-cds,radiology_us_msk,high
+ESSR-MSK-US-002,ESSR,ESSR recommendations for MSK US clinical applications,2018,https://www.essr.org/guidelines/,,ESSR,restricted-cds,radiology_us_msk,medium
+ESUR-AKI-001,ESUR,ESUR contrast media safety committee post-contrast AKI guideline update,2018,https://www.esur.org/guidelines/,,ESUR,restricted-cds,radiology_contrast,high
+ESUR-CONTRAST-001,ESUR,ESUR Guidelines on Contrast Agents version 10,2018,https://www.esur.org/guidelines/,,ESUR,restricted-cds,radiology_contrast,high
+ESUR-CONTRAST-002,ESUR,ESUR guidelines on contrast-induced nephropathy contrast media safety,2023,https://www.esur.org/guidelines/,,ESUR,restricted-cds,radiology_contrast,high
+ESUR-CONTRAST-003,ESUR,ESUR ESPR statement on use of gadolinium-based contrast agents,2019,https://www.esur.org/guidelines/,,ESUR,restricted-cds,radiology_contrast,high
+ESUR-CONTRAST-004,ESUR,ESUR contrast agent safety committee statement on NSF,2018,https://www.esur.org/guidelines/,,ESUR,restricted-cds,radiology_contrast,medium
+ESUR-CONTRAST-005,ESUR,ESUR guidelines for hypersensitivity reactions to contrast,2018,https://www.esur.org/guidelines/,,ESUR,restricted-cds,radiology_contrast,high
+ESUR-CONTRAST-006,ESUR,ESUR guidelines for contrast media in pregnancy and lactation,2018,https://www.esur.org/guidelines/,,ESUR,restricted-cds,radiology_contrast,medium
+ESUR-PELV-001,ESUR,ESUR guidelines on staging endometrial cancer with MRI update,2020,https://link.springer.com/article/10.1007/s00330-020-07220-x,,ESUR,restricted-cds,radiology_mri_abdomen,medium
+ESUR-PELV-002,ESUR,ESUR cervical cancer MRI staging recommendations,2021,https://link.springer.com/article/10.1007/s00330-020-07334-2,,ESUR,restricted-cds,radiology_mri_abdomen,medium
+ESUR-PIRADS-001,ESUR,ESUR ACR PI-RADS v2.1 prostate imaging reporting and data system,2019,https://www.acr.org/Clinical-Resources/Reporting-and-Data-Systems/PI-RADS,,ESUR,restricted-cds,radiology_mri_abdomen,high
+ESUR-PIRADS-002,ESUR,ESUR consensus on quality requirements for prostate MRI,2019,https://link.springer.com/article/10.1007/s00330-019-06576-z,,ESUR,restricted-cds,radiology_mri_abdomen,high
+ESUR-PROST-001,ESUR,ESUR statement on appropriate role of MRI biparametric vs multiparametric,2019,https://www.esur.org/guidelines/,,ESUR,restricted-cds,radiology_mri_abdomen,medium
+ESUR-RECTAL-001,ESUR,ESUR ESGAR consensus update on rectal cancer MRI staging,2024,https://link.springer.com/article/10.1007/s00330-023-10081-9,,ESUR,restricted-cds,radiology_mri_abdomen,high
+ESVS-CAR-001,ESVS,ESVS clinical practice guidelines on carotid and vertebral artery disease,2023,https://www.ejves.com/article/S1078-5884(23)00037-5/fulltext,,ESVS,restricted-cds,radiology_ir_neuro,high
+ESVS-EVAR-001,ESVS,ESVS clinical practice guidelines on management of abdominal aorto-iliac artery aneurysms,2024,https://www.ejves.com/article/S1078-5884(23)00673-6/fulltext,,ESVS,restricted-cds,radiology_ir_vascular,high
+ESVS-TEVAR-001,ESVS,ESVS clinical practice guidelines on management of thoracic aortic disease,2024,https://www.ejves.com/article/S1078-5884(24)00198-9/fulltext,,ESVS,restricted-cds,radiology_ir_vascular,high
+EU-TIRADS-001,ETA,European Thyroid Association EU-TIRADS classification thyroid nodules,2017,https://www.eurothyroid.com/guidelines/eta-guidelines.html,,ETA,restricted-cds,radiology_us_thyroid,high
+EUSOBI-BREAST-001,EUSOBI,EUSOBI recommendations for women information on breast cancer screening,2018,https://link.springer.com/article/10.1007/s00330-018-5369-3,,EUSOBI,restricted-cds,radiology_breast,high
+EUSOBI-BREAST-002,EUSOBI,EUSOBI recommendations for breast MRI screening high risk women,2022,https://link.springer.com/article/10.1007/s00330-022-08539-3,,EUSOBI,restricted-cds,radiology_breast,high
+EUSOBI-BREAST-003,EUSOBI,EUSOBI recommendations on contrast-enhanced mammography,2022,https://link.springer.com/article/10.1007/s00330-022-08749-9,,EUSOBI,restricted-cds,radiology_breast,high
+EUSOBI-BREAST-004,EUSOBI,EUSOBI recommendations on breast tomosynthesis DBT clinical use,2019,https://link.springer.com/article/10.1007/s00330-019-06256-y,,EUSOBI,restricted-cds,radiology_breast,medium
+EUSOBI-BREAST-005,EUSOBI,EUSOBI recommendations on supplemental breast US screening dense breasts,2021,https://link.springer.com/article/10.1007/s00330-021-08049-8,,EUSOBI,restricted-cds,radiology_breast,high
+FMF-OB-001,Fetal Medicine Foundation,FMF first trimester combined screening guideline,2023,https://fetalmedicine.org/research/screening,,FMF,restricted-cds,radiology_us_obs,high
+FUSF-MRGFUS-001,FUSF,Focused Ultrasound Foundation consensus on MR-guided focused ultrasound clinical applications,2023,https://www.fusfoundation.org/the-technology/state-of-the-field-report/,,FUSF,restricted-cds,radiology_ir_nonvascular,medium
+HRS-MRI-PACE-001,HRS,HRS expert consensus on MRI for patients with cardiac implantable electronic devices,2017,https://www.hrsonline.org/clinical-resources/clinical-guidelines-documents,,HRS,restricted-cds,radiology_mri_safety,high
+IAEA-RAD-001,IAEA,IAEA Safety Standards Series radiation protection and safety in medical uses of ionizing radiation SSG-46,2018,https://www.iaea.org/publications/11102/,,IAEA,restricted-cds,radiology_safety,high
+IAEA-RAD-002,IAEA,IAEA Bonn Call for Action 10 actions for global radiation protection,2014,https://www.iaea.org/resources/rpop/resources/bonn-call-for-action,,IAEA,restricted-cds,radiology_safety,medium
+IAEA-RAD-003,IAEA,IAEA Justification of medical exposure in diagnostic imaging,2011,https://www.iaea.org/publications/8625/,,IAEA,restricted-cds,radiology_safety,medium
+ICRP-RAD-001,ICRP,ICRP Publication 103 recommendations of the International Commission on Radiological Protection,2007,https://www.icrp.org/publication.asp?id=ICRP%20Publication%20103,,ICRP,restricted-cds,radiology_safety,high
+ICRP-RAD-002,ICRP,ICRP Publication 105 radiation protection in medicine,2007,https://www.icrp.org/publication.asp?id=ICRP%20Publication%20105,,ICRP,restricted-cds,radiology_safety,high
+ICRP-RAD-003,ICRP,ICRP Publication 121 radiological protection in paediatric diagnostic and interventional radiology,2013,https://www.icrp.org/publication.asp?id=ICRP%20Publication%20121,,ICRP,restricted-cds,radiology_safety,high
+ICRP-RAD-004,ICRP,ICRP Publication 139 occupational radiological protection in interventional procedures,2018,https://www.icrp.org/publication.asp?id=ICRP%20Publication%20139,,ICRP,restricted-cds,radiology_safety,high
+ICRP-RAD-005,ICRP,ICRP Publication 154 occupational radiation protection in brachytherapy,2024,https://www.icrp.org/publication.asp?id=ICRP%20Publication%20154,,ICRP,restricted-cds,radiology_safety,medium
+ICUS-CEUS-001,ICUS,International Contrast Ultrasound Society best practices document,2020,https://icus-society.org/best-practices/,,ICUS,restricted-cds,radiology_contrast,medium
+IMAGE-GENTLY-001,Image Gently,Image Gently Alliance pediatric imaging dose optimization,2024,https://www.imagegently.org/,,Image Gently,restricted-cds,radiology_safety,high
+IMAGE-WISELY-001,Image Wisely,Image Wisely adult imaging radiation safety,2024,https://www.imagewisely.org/,,Image Wisely,restricted-cds,radiology_safety,high
+IMRSER-MRI-001,IMRSER,Institute for Magnetic Resonance Safety Education and Research consensus on safe MR practices,2023,https://imrser.org/,,IMRSER,restricted-cds,radiology_mri_safety,high
+IOF-DEXA-001,IOF,IOF position paper on management of postmenopausal osteoporosis,2020,https://www.osteoporosis.foundation/health-professionals/health-economics/policy-papers,,IOF,restricted-cds,radiology_xray,medium
+ISCD-DEXA-001,ISCD,ISCD Official Positions adult bone densitometry,2023,https://iscd.org/learn/official-positions/,,ISCD,restricted-cds,radiology_xray,high
+ISCD-DEXA-002,ISCD,ISCD Official Positions pediatric bone densitometry,2019,https://iscd.org/learn/official-positions/,,ISCD,restricted-cds,radiology_xray,medium
+ISMRM-GAD-001,ISMRM,ISMRM Safety Committee statement on gadolinium retention,2018,https://www.ismrm.org/safety/,,ISMRM,restricted-cds,radiology_contrast,medium
+ISMRM-MRI-001,ISMRM,ISMRM safety in 7T MRI guidelines for clinical practice,2022,https://www.ismrm.org/safety/,,ISMRM,restricted-cds,radiology_mri_safety,medium
+ISUOG-OB-001,ISUOG,ISUOG Practice Guidelines performance of routine mid-trimester fetal US scan,2022,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,ISUOG,restricted-cds,radiology_us_obs,high
+ISUOG-OB-002,ISUOG,ISUOG Practice Guidelines first trimester fetal US,2023,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,ISUOG,restricted-cds,radiology_us_obs,high
+ISUOG-OB-003,ISUOG,ISUOG Practice Guidelines fetal cardiac screening,2023,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,ISUOG,restricted-cds,radiology_us_obs,high
+ISUOG-OB-004,ISUOG,ISUOG Practice Guidelines invasive procedures for prenatal diagnosis,2016,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,ISUOG,restricted-cds,radiology_us_obs,high
+ISUOG-OB-005,ISUOG,ISUOG Practice Guidelines role of ultrasound in screening for and follow-up of pre-eclampsia,2019,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,ISUOG,restricted-cds,radiology_us_obs,medium
+ISUOG-OB-006,ISUOG,ISUOG Practice Guidelines fetal growth assessment,2019,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,ISUOG,restricted-cds,radiology_us_obs,high
+ISUOG-OB-007,ISUOG,ISUOG Practice Guidelines ultrasound assessment of fetal biometry growth,2019,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,ISUOG,restricted-cds,radiology_us_obs,medium
+ISUOG-OB-008,ISUOG,ISUOG Practice Guidelines US examination of fetal central nervous system Part 1,2020,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,ISUOG,restricted-cds,radiology_us_obs,medium
+NASS-EPIDURAL-001,NASS,NASS coverage policy recommendations for epidural steroid injections,2020,https://www.spine.org/Policy-Practice/Coverage-Policy-Recommendations,,NASS,restricted-cds,radiology_ir_nonvascular,medium
+NASS-SPINE-001,NASS,NASS evidence-based clinical guideline lumbar disc herniation with radiculopathy,2022,https://www.spine.org/Research-Clinical-Care/Quality-Improvement/Clinical-Guidelines,,NASS,restricted-cds,radiology_mri_neuro,medium
+NASS-SPINE-002,NASS,NASS clinical guideline lumbar spinal stenosis,2014,https://www.spine.org/Research-Clinical-Care/Quality-Improvement/Clinical-Guidelines,,NASS,restricted-cds,radiology_mri_neuro,medium
+NASS-VERTEBRO-001,NASS,NASS clinical guideline percutaneous vertebroplasty kyphoplasty for vertebral compression fracture,2020,https://www.spine.org/Research-Clinical-Care/Quality-Improvement/Clinical-Guidelines,,NASS,restricted-cds,radiology_ir_nonvascular,high
+NCCN-BREAST-MRI-001,NCCN,NCCN Guidelines for Breast Cancer Screening and Diagnosis high risk MRI,2024,https://www.nccn.org/professionals/physician_gls/default.aspx,,NCCN,restricted-cds,radiology_breast,high
+NCCN-BREAST-SCR-001,NCCN,NCCN Guidelines Breast Cancer Screening and Diagnosis,2024,https://www.nccn.org/professionals/physician_gls/default.aspx,,NCCN,restricted-cds,radiology_breast,high
+NCRP-RAD-001,NCRP,NCRP Report 168 radiation dose management in fluoroscopically-guided interventional procedures,2010,https://ncrponline.org/publications/reports/ncrp-report-168/,,NCRP,restricted-cds,radiology_safety,high
+NCRP-RAD-002,NCRP,NCRP Report 177 radiation protection in dentistry,2019,https://ncrponline.org/publications/reports/ncrp-report-177/,,NCRP,restricted-cds,radiology_safety,medium
+NCRP-RAD-003,NCRP,NCRP Report 184 medical radiation exposure of patients in the United States,2019,https://ncrponline.org/publications/reports/ncrp-report-184/,,NCRP,restricted-cds,radiology_safety,medium
+RCR-CHILD-ABUSE-001,RCR,RCR ROCR standards for the radiological investigation of suspected non-accidental injury,2018,https://www.rcr.ac.uk/our-services/all-our-publications/clinical-radiology-publications/the-radiological-investigation-of-suspected-physical-abuse-in-children/,,RCR,restricted-cds,radiology_pediatric,high
+RCR-CONTRAST-001,RCR,RCR standards for intravascular contrast administration to adult patients,2020,https://www.rcr.ac.uk/our-services/all-our-publications/clinical-radiology-publications/standards-for-intravascular-contrast-administration-to-adult-patients-third-edition/,,RCR,restricted-cds,radiology_contrast,high
+RCR-IREFER-001,RCR,iRefer Making the best use of clinical radiology RCR,2022,https://www.rcr.ac.uk/our-services/all-our-publications/clinical-radiology-publications/irefer-making-the-best-use-of-clinical-radiology/,,RCR,restricted-cds,radiology_appropriateness,high
+SBI-BREAST-001,SBI,Society of Breast Imaging recommendations for breast cancer screening,2023,https://www.sbi-online.org/breast-imaging/screening-recommendations,,SBI,restricted-cds,radiology_breast,high
+SBI-BREAST-002,SBI,SBI position statement on supplemental screening for women with dense breasts,2023,https://www.sbi-online.org/Portals/0/Position%20Statements/Density-Position-Statement.pdf,,SBI,restricted-cds,radiology_breast,high
+SCCT-CAC-001,SCCT,SCCT consensus on coronary artery calcium scoring,2018,https://www.jcct.org/article/S1934-5925(18)30237-9/fulltext,,SCCT,restricted-cds,radiology_ct,high
+SCCT-CAD-RADS-001,SCCT,CAD-RADS 2.0 reporting and data system for coronary CT angiography,2022,https://www.jcct.org/article/S1934-5925(22)00216-X/fulltext,,SCCT,restricted-cds,radiology_ct,high
+SCCT-CTA-001,SCCT,SCCT guidelines for the performance and acquisition of coronary CTA,2021,https://www.jcct.org/article/S1934-5925(21)00097-5/fulltext,,SCCT,restricted-cds,radiology_ct,high
+SCCT-CTA-002,SCCT,SCCT 2016 SCMR appropriate use criteria for chest pain in adult patients,2021,https://www.jcct.org/article/S1934-5925(21)00097-5/fulltext,,SCCT,restricted-cds,radiology_ct,high
+SCCT-FFR-CT-001,SCCT,SCCT expert consensus on FFR-CT clinical use coronary,2017,https://www.jcct.org/article/S1934-5925(17)30164-0/fulltext,,SCCT,restricted-cds,radiology_ct,high
+SCMR-CARDIAC-001,SCMR,SCMR consensus on cardiac MRI standardized image acquisition,2020,https://jcmr-online.biomedcentral.com/articles/10.1186/s12968-020-00682-4,,SCMR,restricted-cds,radiology_mri_general,high
+SCMR-CARDIAC-002,SCMR,SCMR appropriate use criteria for cardiac MRI,2020,https://jcmr-online.biomedcentral.com/articles/10.1186/s12968-020-00682-4,,SCMR,restricted-cds,radiology_mri_general,high
+SIR-BIOPSY-001,SIR,SIR practice guideline on image-guided percutaneous biopsy,2018,https://www.jvir.org/article/S1051-0443(18)30148-1/fulltext,,SIR,restricted-cds,radiology_ir_nonvascular,high
+SIR-COAG-001,SIR,SIR consensus on periprocedural coagulation management for image-guided interventions,2019,https://www.jvir.org/article/S1051-0443(19)30421-9/fulltext,,SIR,restricted-cds,radiology_ir_vascular,high
+SIR-DIALYSIS-001,SIR,SIR practice guideline for hemodialysis access maintenance and intervention,2021,https://www.jvir.org/article/S1051-0443(21)00118-X/fulltext,,SIR,restricted-cds,radiology_ir_vascular,high
+SIR-DRAIN-001,SIR,SIR practice guideline on percutaneous fluid drainage and abscess drainage,2018,https://www.jvir.org/article/S1051-0443(18)30148-1/fulltext,,SIR,restricted-cds,radiology_ir_nonvascular,medium
+SIR-DVT-001,SIR,SIR position statement and consensus on DVT thrombolysis and thrombectomy,2023,https://www.jvir.org/article/S1051-0443(23)00302-X/fulltext,,SIR,restricted-cds,radiology_ir_vascular,medium
+SIR-EVAR-001,SIR,SIR position statement on management of endoleaks after EVAR,2018,https://www.jvir.org/article/S1051-0443(18)30148-1/fulltext,,SIR,restricted-cds,radiology_ir_vascular,medium
+SIR-IVC-001,SIR,SIR practice guideline for inferior vena cava filter retrieval and use,2020,https://www.jvir.org/article/S1051-0443(20)30193-4/fulltext,,SIR,restricted-cds,radiology_ir_vascular,high
+SIR-NEPHRO-001,SIR,SIR Quality Improvement Guidelines for percutaneous nephrostomy,2016,https://www.jvir.org/article/S1051-0443(16)30264-X/fulltext,,SIR,restricted-cds,radiology_ir_nonvascular,medium
+SIR-PAE-001,SIR,SIR position statement on prostate artery embolization PAE,2019,https://www.jvir.org/article/S1051-0443(19)30421-9/fulltext,,SIR,restricted-cds,radiology_ir_vascular,medium
+SIR-PE-001,SIR,SIR position statement and consensus on catheter-directed therapy for acute PE,2018,https://www.jvir.org/article/S1051-0443(18)30148-1/fulltext,,SIR,restricted-cds,radiology_ir_vascular,high
+SIR-PTC-001,SIR,SIR Quality Improvement Guidelines on percutaneous transhepatic cholangiography PTC and biliary drainage,2016,https://www.jvir.org/article/S1051-0443(16)30264-X/fulltext,,SIR,restricted-cds,radiology_ir_nonvascular,medium
+SIR-TACE-001,SIR,SIR Quality Improvement Guidelines for transcatheter arterial embolization TACE,2017,https://www.jvir.org/article/S1051-0443(17)30495-2/fulltext,,SIR,restricted-cds,radiology_ir_oncology,high
+SIR-TIPS-001,SIR,SIR Quality Improvement Guidelines for TIPS,2016,https://www.jvir.org/article/S1051-0443(16)30264-X/fulltext,,SIR,restricted-cds,radiology_ir_vascular,high
+SIR-TRAUMA-001,SIR,SIR EAST joint consensus on transcatheter embolization in trauma,2017,https://www.jvir.org/article/S1051-0443(17)30495-2/fulltext,,SIR,restricted-cds,radiology_ir_vascular,high
+SIR-UAE-001,SIR,SIR Quality Improvement Guidelines for uterine artery embolization UAE,2020,https://www.jvir.org/article/S1051-0443(20)30193-4/fulltext,,SIR,restricted-cds,radiology_ir_vascular,high
+SIR-VAS-ACCESS-001,SIR,SIR clinical practice guideline central venous access,2022,https://www.jvir.org/article/S1051-0443(22)00118-X/fulltext,,SIR,restricted-cds,radiology_ir_vascular,high
+SIR-VERTEBRO-001,SIR,SIR ASNR ASSR position statement on percutaneous vertebroplasty and kyphoplasty,2019,https://www.jvir.org/article/S1051-0443(19)30421-9/fulltext,,SIR,restricted-cds,radiology_ir_nonvascular,high
+SNMMI-BONE-001,SNMMI,SNMMI procedure standard for bone scintigraphy,2018,https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414,,SNMMI,restricted-cds,radiology_nuclear_pet,high
+SNMMI-DAT-001,SNMMI,SNMMI procedure guideline for brain dopamine transporter imaging,2017,https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414,,SNMMI,restricted-cds,radiology_nuclear_pet,medium
+SNMMI-I131-001,SNMMI,SNMMI procedure standard for therapy of thyroid disease with iodine-131,2012,https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414,,SNMMI,restricted-cds,radiology_nuclear_therapy,high
+SNMMI-PEDI-001,SNMMI,SNMMI procedure guideline general pediatric nuclear medicine imaging,2017,https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414,,SNMMI,restricted-cds,radiology_pediatric,medium
+SNMMI-PETCT-001,SNMMI,SNMMI procedure standard for general imaging FDG PET,2018,https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414,,SNMMI,restricted-cds,radiology_nuclear_pet,high
+SNMMI-PETCT-002,SNMMI,SNMMI procedure standard for tumor imaging using F-18 FDG,2017,https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414,,SNMMI,restricted-cds,radiology_nuclear_pet,high
+SNMMI-PSMA-001,SNMMI,SNMMI EANM procedure standard for PSMA targeted PET imaging update,2023,https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414,,SNMMI,restricted-cds,radiology_nuclear_pet,high
+SNMMI-VQ-001,SNMMI,SNMMI procedure standard for ventilation perfusion scintigraphy V/Q,2019,https://www.snmmi.org/ClinicalPractice/content.aspx?ItemNumber=6414,,SNMMI,restricted-cds,radiology_nuclear_pet,medium
+USPSTF-LCS-001,USPSTF,USPSTF Lung Cancer Screening recommendation low-dose CT,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening,,USPSTF,restricted-cds,radiology_ct,high
+WFITN-ANEU-001,WFITN,WFITN consensus statement on flow diverters for intracranial aneurysms,2018,https://www.wfitn.com/,,WFITN,restricted-cds,radiology_ir_neuro,medium
+WFUMB-US-002,WFUMB,WFUMB guidelines on liver elastography update,2024,https://www.wfumb.org/guidelines/,,WFUMB,restricted-cds,radiology_us_general,high
