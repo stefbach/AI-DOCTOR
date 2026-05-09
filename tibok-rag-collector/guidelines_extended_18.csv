@@ -1,0 +1,538 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+FDA-DRUG-001,FDA,FDA Approved Drug Products with Therapeutic Equivalence Evaluations Orange Book,2024,https://www.accessdata.fda.gov/scripts/cder/ob/index.cfm,,Public Domain,allowed,drug_regulatory,high
+FDA-DRUG-002,FDA,FDA Drugs@FDA database approved drug products,2024,https://www.accessdata.fda.gov/scripts/cder/daf/,,Public Domain,allowed,drug_regulatory,high
+FDA-DRUG-003,FDA,FDA Drug Safety Communications archive,2024,https://www.fda.gov/drugs/drug-safety-and-availability/drug-safety-communications,,Public Domain,allowed,drug_pharmacovigilance,high
+FDA-DRUG-004,FDA,FDA Risk Evaluation and Mitigation Strategies REMS database,2024,https://www.accessdata.fda.gov/scripts/cder/rems/,,Public Domain,allowed,drug_safety_practice,high
+FDA-DRUG-005,FDA,FDA MedWatch Safety Information and Adverse Event Reporting Program,2024,https://www.fda.gov/safety/medwatch-fda-safety-information-and-adverse-event-reporting-program,,Public Domain,allowed,drug_pharmacovigilance,high
+FDA-DRUG-006,FDA,FDA Boxed Warning database black box warnings,2024,https://www.fda.gov/drugs/postmarket-drug-safety-information-patients-and-providers,,Public Domain,allowed,drug_safety_practice,high
+FDA-DRUG-007,FDA,FDA FAERS Adverse Event Reporting System Public Dashboard,2024,https://www.fda.gov/drugs/questions-and-answers-fdas-adverse-event-reporting-system-faers,,Public Domain,allowed,drug_pharmacovigilance,high
+FDA-DRUG-008,FDA,FDA Pregnancy and Lactation Labeling Final Rule PLLR,2014,https://www.fda.gov/drugs/labeling-information-drug-products/pregnancy-and-lactation-labeling-drugs-final-rule,,Public Domain,allowed,drug_pregnancy_lactation,high
+FDA-DRUG-009,FDA,FDA Drug Shortages database current and resolved,2024,https://www.accessdata.fda.gov/scripts/drugshortages/,,Public Domain,allowed,drug_shortage_recall,high
+FDA-DRUG-010,FDA,FDA Drug Recalls Market Withdrawals and Safety Alerts,2024,https://www.fda.gov/safety/recalls-market-withdrawals-safety-alerts,,Public Domain,allowed,drug_shortage_recall,high
+FDA-DRUG-011,FDA,FDA CDER Guidances for Industry drug development,2024,https://www.fda.gov/drugs/guidance-compliance-regulatory-information/guidances-drugs,,Public Domain,allowed,drug_regulatory_guidance,high
+FDA-DRUG-012,FDA,FDA Bioequivalence Recommendations for Specific Products,2024,https://www.fda.gov/drugs/guidances-drugs/bioequivalence-recommendations-specific-products,,Public Domain,allowed,drug_regulatory_guidance,medium
+FDA-DRUG-013,FDA,FDA Table of Pharmacogenomic Biomarkers in Drug Labeling,2024,https://www.fda.gov/drugs/science-and-research-drugs/table-pharmacogenomic-biomarkers-drug-labeling,,Public Domain,allowed,drug_pharmacogenomics,high
+FDA-DRUG-014,FDA,FDA Drug Interactions Table substrates inhibitors and inducers,2023,https://www.fda.gov/drugs/drug-interactions-labeling/drug-development-and-drug-interactions-table-substrates-inhibitors-and-inducers,,Public Domain,allowed,drug_interactions,high
+FDA-DRUG-015,FDA,FDA QT prolongation drug labeling guidance,2017,https://www.fda.gov/regulatory-information/search-fda-guidance-documents,,Public Domain,allowed,drug_regulatory_guidance,medium
+FDA-DRUG-016,FDA,FDA Purple Book biologics database,2024,https://purplebooksearch.fda.gov/,,Public Domain,allowed,drug_regulatory,medium
+FDA-DRUG-017,FDA,FDA Postmarket Drug Safety Information for Patients and Providers,2024,https://www.fda.gov/drugs/drug-safety-and-availability,,Public Domain,allowed,drug_pharmacovigilance,high
+FDA-DRUG-018,FDA,FDA Drug-Induced Liver Injury guidance for industry,2009,https://www.fda.gov/regulatory-information/search-fda-guidance-documents/drug-induced-liver-injury-premarketing-clinical-evaluation,,Public Domain,allowed,drug_renal_hepatic_dosing,medium
+FDA-DRUG-019,FDA,FDA Pharmacokinetics in Patients with Impaired Renal Function guidance,2020,https://www.fda.gov/regulatory-information/search-fda-guidance-documents,,Public Domain,allowed,drug_renal_hepatic_dosing,high
+FDA-DRUG-020,FDA,FDA Pharmacokinetics in Patients with Impaired Hepatic Function guidance,2003,https://www.fda.gov/regulatory-information/search-fda-guidance-documents,,Public Domain,allowed,drug_renal_hepatic_dosing,medium
+EMA-EPAR-001,EMA,EMA European Public Assessment Reports EPAR database,2024,https://www.ema.europa.eu/en/medicines,,EMA Open,allowed,drug_regulatory,high
+EMA-EPAR-002,EMA,EMA Pharmacovigilance Risk Assessment Committee PRAC monthly recommendations,2024,https://www.ema.europa.eu/en/committees/pharmacovigilance-risk-assessment-committee-prac,,EMA Open,allowed,drug_pharmacovigilance,high
+EMA-EPAR-003,EMA,EMA Direct Healthcare Professional Communications DHPC archive,2024,https://www.ema.europa.eu/en/human-regulatory/post-authorisation/pharmacovigilance/direct-healthcare-professional-communications,,EMA Open,allowed,drug_pharmacovigilance,high
+EMA-EPAR-004,EMA,EMA EudraVigilance European database of suspected adverse drug reactions,2024,https://www.adrreports.eu/,,EMA Open,allowed,drug_pharmacovigilance,high
+EMA-EPAR-005,EMA,EMA Good Pharmacovigilance Practices GVP modules,2024,https://www.ema.europa.eu/en/human-regulatory/post-authorisation/pharmacovigilance/good-pharmacovigilance-practices,,EMA Open,allowed,drug_pharmacovigilance,high
+EMA-EPAR-006,EMA,EMA Scientific Guidelines for human medicines,2024,https://www.ema.europa.eu/en/human-regulatory/research-development/scientific-guidelines,,EMA Open,allowed,drug_regulatory_guidance,high
+EMA-EPAR-007,EMA,EMA Shortages of medicines reporting and management,2024,https://www.ema.europa.eu/en/human-regulatory/post-authorisation/availability-medicines/shortages-medicines,,EMA Open,allowed,drug_shortage_recall,high
+EMA-EPAR-008,EMA,EMA Paediatric Investigation Plans PIP database,2024,https://www.ema.europa.eu/en/human-regulatory/research-development/paediatric-medicines,,EMA Open,allowed,drug_pediatric,high
+EMA-EPAR-009,EMA,EMA Pregnancy and breastfeeding scientific guideline,2020,https://www.ema.europa.eu/en/risk-assessment-medicinal-products-human-reproduction-lactation-data-product-information,,EMA Open,allowed,drug_pregnancy_lactation,high
+EMA-EPAR-010,EMA,EMA Investigation of drug interactions guideline CHMP,2012,https://www.ema.europa.eu/en/investigation-drug-interactions,,EMA Open,allowed,drug_interactions,high
+EMA-EPAR-011,EMA,EMA QT interval prolongation guideline ICH E14,2008,https://www.ema.europa.eu/en/ich-e14-clinical-evaluation-qtqtc-interval-prolongation,,EMA Open,allowed,drug_regulatory_guidance,medium
+EMA-EPAR-012,EMA,EMA Risk Management Plan RMP guidance,2017,https://www.ema.europa.eu/en/human-regulatory/post-authorisation/pharmacovigilance/risk-management/risk-management-plans,,EMA Open,allowed,drug_pharmacovigilance,high
+MHRA-DSU-001,MHRA,MHRA Drug Safety Update monthly bulletin archive,2024,https://www.gov.uk/drug-safety-update,,Crown Copyright,allowed,drug_pharmacovigilance,high
+MHRA-DSU-002,MHRA,MHRA Yellow Card Scheme adverse drug reaction reporting,2024,https://yellowcard.mhra.gov.uk/,,Crown Copyright,allowed,drug_pharmacovigilance,high
+MHRA-DSU-003,MHRA,MHRA Public Assessment Reports PARs database,2024,https://products.mhra.gov.uk/,,Crown Copyright,allowed,drug_regulatory,high
+MHRA-DSU-004,MHRA,MHRA Off-label or unlicensed use of medicines guidance,2023,https://www.gov.uk/government/publications/off-label-or-unlicensed-use-of-medicines-prescribers-responsibilities,,Crown Copyright,allowed,drug_regulatory_guidance,medium
+MHRA-DSU-005,MHRA,MHRA Sodium valproate use in pregnancy regulatory action,2024,https://www.gov.uk/government/publications/valproate-use-by-women-and-girls,,Crown Copyright,allowed,drug_pregnancy_lactation,high
+MHRA-DSU-006,MHRA,MHRA Drug Alerts and Recalls archive,2024,https://www.gov.uk/drug-device-alerts,,Crown Copyright,allowed,drug_shortage_recall,high
+HC-DRUG-001,Health-Canada,Health Canada Drug Product Database DPD,2024,https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/drug-product-database.html,,Public Domain,allowed,drug_regulatory,high
+HC-DRUG-002,Health-Canada,Health Canada Notice of Compliance NOC database,2024,https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/notice-compliance.html,,Public Domain,allowed,drug_regulatory,medium
+HC-DRUG-003,Health-Canada,Health Canada MedEffect Adverse Reaction Reporting Canada Vigilance,2024,https://www.canada.ca/en/health-canada/services/drugs-health-products/medeffect-canada.html,,Public Domain,allowed,drug_pharmacovigilance,high
+HC-DRUG-004,Health-Canada,Health Canada Recalls and Safety Alerts database,2024,https://recalls-rappels.canada.ca/en,,Public Domain,allowed,drug_shortage_recall,high
+HC-DRUG-005,Health-Canada,Health Canada Summary Safety Reviews,2024,https://hpr-rps.hres.ca/reg-content/summary-safety-review.php,,Public Domain,allowed,drug_pharmacovigilance,high
+HC-DRUG-006,Health-Canada,Health Canada Drug Shortages Canada database,2024,https://www.drugshortagescanada.ca/,,Public Domain,allowed,drug_shortage_recall,high
+TGA-DRUG-001,TGA,TGA Australian Register of Therapeutic Goods ARTG,2024,https://www.tga.gov.au/resources/artg,,Public Domain,allowed,drug_regulatory,high
+TGA-DRUG-002,TGA,TGA Database of Adverse Event Notifications DAEN medicines,2024,https://www.tga.gov.au/safety/safety/database-adverse-event-notifications-daen,,Public Domain,allowed,drug_pharmacovigilance,high
+TGA-DRUG-003,TGA,TGA Medicines safety alerts and recalls,2024,https://www.tga.gov.au/safety/alerts,,Public Domain,allowed,drug_shortage_recall,high
+TGA-DRUG-004,TGA,TGA Australian Public Assessment Reports AusPARs,2024,https://www.tga.gov.au/resources/auspar,,Public Domain,allowed,drug_regulatory,high
+TGA-DRUG-005,TGA,TGA Prescribing medicines in pregnancy database,2023,https://www.tga.gov.au/products/medicines/prescription-medicines/prescribing-medicines-pregnancy-database,,Public Domain,allowed,drug_pregnancy_lactation,high
+PMDA-DRUG-001,PMDA,PMDA Pharmaceuticals and Medical Devices Agency Japan drug information,2024,https://www.pmda.go.jp/english/,,Public Domain,allowed,drug_regulatory,high
+PMDA-DRUG-002,PMDA,PMDA Review Reports approved drugs Japan,2024,https://www.pmda.go.jp/english/review-services/reviews/approved-information/drugs/0001.html,,Public Domain,allowed,drug_regulatory,medium
+PMDA-DRUG-003,PMDA,PMDA Pharmaceuticals and Medical Devices Safety Information,2024,https://www.pmda.go.jp/english/safety/info-services/drugs/0001.html,,Public Domain,allowed,drug_pharmacovigilance,high
+ANSM-DRUG-001,ANSM,ANSM Repertoire des specialites pharmaceutiques France,2024,https://base-donnees-publique.medicaments.gouv.fr/,,Public Domain,allowed,drug_regulatory,high
+ANSM-DRUG-002,ANSM,ANSM Surveillance des medicaments pharmacovigilance France,2024,https://ansm.sante.fr/page/declarer-un-effet-indesirable,,Public Domain,allowed,drug_pharmacovigilance,high
+ANSM-DRUG-003,ANSM,ANSM Points d information securite des medicaments,2024,https://ansm.sante.fr/qui-sommes-nous/notre-perimetre/les-medicaments/p/securite-des-medicaments,,Public Domain,allowed,drug_pharmacovigilance,high
+ANSM-DRUG-004,ANSM,ANSM Recommandations et bon usage des medicaments,2024,https://ansm.sante.fr/documents/reference/recommandations-et-bon-usage,,Public Domain,allowed,drug_regulatory_guidance,high
+ANSM-DRUG-005,ANSM,ANSM Ruptures de stock et tensions d approvisionnement medicaments,2024,https://ansm.sante.fr/disponibilites-des-produits-de-sante/medicaments,,Public Domain,allowed,drug_shortage_recall,medium
+SWISSMEDIC-001,Swissmedic,Swissmedic authorised medicinal products list Switzerland,2024,https://www.swissmedic.ch/swissmedic/en/home/services/listen_neu.html,,Public Domain,allowed,drug_regulatory,high
+SWISSMEDIC-002,Swissmedic,Swissmedic safety alerts Healthcare Professional Communication,2024,https://www.swissmedic.ch/swissmedic/en/home/humanarzneimittel/market-surveillance/health-professional-communication--hpc-.html,,Public Domain,allowed,drug_pharmacovigilance,high
+SWISSMEDIC-003,Swissmedic,Swissmedic Swiss Public Assessment Reports SwissPAR,2024,https://www.swissmedic.ch/swissmedic/en/home/about-us/publications/public-summary-swiss-par.html,,Public Domain,allowed,drug_regulatory,medium
+ANVISA-001,ANVISA,ANVISA Brazilian Health Regulatory Agency drug registry,2024,https://consultas.anvisa.gov.br/#/medicamentos/,,Public Domain,allowed,drug_regulatory,high
+ANVISA-002,ANVISA,ANVISA pharmacovigilance Notivisa system,2024,https://www.gov.br/anvisa/pt-br/assuntos/fiscalizacao-e-monitoramento/notivisa,,Public Domain,allowed,drug_pharmacovigilance,medium
+NMPA-001,NMPA,NMPA National Medical Products Administration China drug approvals,2024,https://english.nmpa.gov.cn/,,Public Domain,allowed,drug_regulatory,high
+NMPA-002,NMPA,NMPA China drug post-market safety surveillance bulletins,2024,https://english.nmpa.gov.cn/news.html,,Public Domain,allowed,drug_pharmacovigilance,medium
+MFDS-001,MFDS,MFDS Korea Ministry of Food and Drug Safety drug approvals,2024,https://www.mfds.go.kr/eng/,,Public Domain,allowed,drug_regulatory,high
+MFDS-002,MFDS,MFDS Korea Adverse Drug Reaction reporting system,2024,https://www.mfds.go.kr/eng/wpge/m_31/de0101l001.do,,Public Domain,allowed,drug_pharmacovigilance,medium
+CDSCO-001,CDSCO,CDSCO Central Drugs Standard Control Organization India approvals,2024,https://cdsco.gov.in/opencms/opencms/en/Home/,,Public Domain,allowed,drug_regulatory,high
+CDSCO-002,CDSCO,CDSCO India Pharmacovigilance Programme PvPI,2024,https://cdsco.gov.in/opencms/opencms/en/Pharmacovigilance/,,Public Domain,allowed,drug_pharmacovigilance,medium
+WHO-PQ-001,WHO,WHO Prequalified Medicines list active pharmaceutical products,2024,https://extranet.who.int/prequal/medicines,,WHO Open Access,allowed,drug_regulatory,high
+WHO-PQ-002,WHO,WHO Prequalification of Medicines Programme guidelines,2024,https://extranet.who.int/prequal/key-resources,,WHO Open Access,allowed,drug_regulatory_guidance,high
+WHO-EML-001,WHO,WHO Model List of Essential Medicines 23rd edition adults,2023,https://www.who.int/publications/i/item/WHO-MHP-HPS-EML-2023.02,,WHO Open Access,allowed,drug_essential_medicines,high
+WHO-EML-002,WHO,WHO Model List of Essential Medicines for Children EMLc 9th edition,2023,https://www.who.int/publications/i/item/WHO-MHP-HPS-EML-2023.03,,WHO Open Access,allowed,drug_essential_medicines,high
+WHO-EML-003,WHO,WHO Model Formulary for Children pharmacological reference,2010,https://www.who.int/publications/i/item/9789241599320,,WHO Open Access,allowed,drug_pediatric,high
+WHO-EML-004,WHO,WHO Model Formulary 2008 adult pharmacological reference,2008,https://www.who.int/publications/i/item/9789241547659,,WHO Open Access,allowed,drug_essential_medicines,high
+WHO-EML-005,WHO,WHO AWaRe classification of antibiotics Access Watch Reserve,2023,https://www.who.int/publications/i/item/WHO-MHP-HPS-EML-2023.04,,WHO Open Access,allowed,drug_antimicrobial_stewardship,high
+WHO-EML-006,WHO,WHO Bacterial Priority Pathogens List 2024,2024,https://www.who.int/publications/i/item/9789240093461,,WHO Open Access,allowed,drug_antimicrobial_stewardship,high
+WHO-EML-007,WHO,WHO AWaRe Antibiotic Book essential medicines guidance,2022,https://www.who.int/publications/i/item/9789240062382,,WHO Open Access,allowed,drug_antimicrobial_stewardship,high
+WHO-DI-001,WHO,WHO Drug Information quarterly bulletin,2024,https://www.who.int/teams/regulation-prequalification/regulation-and-safety/pharmacovigilance/who-drug-information,,WHO Open Access,allowed,drug_pharmacovigilance,high
+WHO-DI-002,WHO,WHO Pharmaceuticals Newsletter pharmacovigilance,2024,https://www.who.int/teams/regulation-prequalification/regulation-and-safety/pharmacovigilance/publications,,WHO Open Access,allowed,drug_pharmacovigilance,medium
+WHO-IMCI-001,WHO,WHO Pocket Book of Hospital Care for Children essential drugs second edition,2013,https://www.who.int/publications/i/item/978-92-4-154837-3,,WHO Open Access,allowed,drug_pediatric,high
+WHO-IMCI-002,WHO,WHO Integrated Management of Childhood Illness essential medicines,2014,https://www.who.int/publications/i/item/9789241506823,,WHO Open Access,allowed,drug_pediatric,high
+BNF-001,BNF,British National Formulary BNF online clinical drug reference,2024,https://bnf.nice.org.uk/,,Crown Copyright,restricted-cds,drug_formulary,high
+BNF-002,BNF,British National Formulary monographs medicinal forms and dosing,2024,https://bnf.nice.org.uk/drug/,,Crown Copyright,restricted-cds,drug_formulary,high
+BNF-003,BNF,British National Formulary treatment summaries clinical guidance,2024,https://bnf.nice.org.uk/treatment-summary/,,Crown Copyright,restricted-cds,drug_formulary,high
+BNF-004,BNF,BNF Medical Emergencies in the Community drug doses,2024,https://bnf.nice.org.uk/medicines-guidance/medical-emergencies-in-the-community/,,Crown Copyright,restricted-cds,drug_critical_care,high
+BNF-005,BNF,BNF Prescribing in renal impairment guidance,2024,https://bnf.nice.org.uk/medicines-guidance/prescribing-in-renal-impairment/,,Crown Copyright,restricted-cds,drug_renal_hepatic_dosing,high
+BNF-006,BNF,BNF Prescribing in hepatic impairment guidance,2024,https://bnf.nice.org.uk/medicines-guidance/prescribing-in-hepatic-impairment/,,Crown Copyright,restricted-cds,drug_renal_hepatic_dosing,high
+BNF-007,BNF,BNF Prescribing in pregnancy guidance,2024,https://bnf.nice.org.uk/medicines-guidance/prescribing-in-pregnancy/,,Crown Copyright,restricted-cds,drug_pregnancy_lactation,high
+BNF-008,BNF,BNF Prescribing in breast-feeding guidance,2024,https://bnf.nice.org.uk/medicines-guidance/prescribing-in-breast-feeding/,,Crown Copyright,restricted-cds,drug_pregnancy_lactation,high
+BNF-009,BNF,BNF Prescribing in palliative care guidance,2024,https://bnf.nice.org.uk/medicines-guidance/prescribing-in-palliative-care/,,Crown Copyright,restricted-cds,drug_pain,high
+BNF-010,BNF,BNF Prescribing in the elderly guidance,2024,https://bnf.nice.org.uk/medicines-guidance/prescribing-in-the-elderly/,,Crown Copyright,restricted-cds,drug_formulary,high
+BNFc-001,BNFc,British National Formulary for Children BNFc online,2024,https://bnfc.nice.org.uk/,,Crown Copyright,restricted-cds,drug_pediatric,high
+BNFc-002,BNFc,BNFc Pediatric drug monographs and dosing,2024,https://bnfc.nice.org.uk/drug/,,Crown Copyright,restricted-cds,drug_pediatric,high
+BNFc-003,BNFc,BNFc Neonatal prescribing guidance,2024,https://bnfc.nice.org.uk/medicines-guidance/prescribing-in-neonates/,,Crown Copyright,restricted-cds,drug_pediatric,high
+BNFc-004,BNFc,BNFc Pediatric medical emergencies dosing chart,2024,https://bnfc.nice.org.uk/medicines-guidance/medical-emergencies-in-the-community/,,Crown Copyright,restricted-cds,drug_critical_care,high
+AHFS-001,AHFS,AHFS Drug Information American Society of Health-System Pharmacists annual edition,2024,https://www.ashp.org/products-and-services/database-and-software-solutions/ahfs-drug-information,,ASHP Restricted,restricted,drug_formulary,high
+AHFS-002,AHFS,AHFS Pediatric and Neonatal Lexi-Drugs equivalent monographs,2024,https://www.ashp.org/,,ASHP Restricted,restricted,drug_pediatric,medium
+AHFS-003,AHFS,AHFS Clinical Drug Information dosing and monitoring,2024,https://www.ashp.org/,,ASHP Restricted,restricted,drug_formulary,high
+USP-DI-001,USP,USP DI Drug Information for the Health Care Professional,2024,https://www.usp.org/,,USP Restricted,restricted,drug_formulary,medium
+USP-DI-002,USP,USP Pharmacopeia drug standards monographs,2024,https://www.uspnf.com/,,USP Restricted,restricted,drug_formulary,high
+USP-797-001,USP,USP General Chapter 797 Pharmaceutical Compounding Sterile Preparations,2023,https://www.usp.org/compounding/general-chapter-797,,USP Restricted,restricted,drug_compounding,high
+USP-800-001,USP,USP General Chapter 800 Hazardous Drugs Handling in Healthcare Settings,2020,https://www.usp.org/compounding/general-chapter-hazardous-drugs-handling-healthcare,,USP Restricted,restricted,drug_compounding,high
+USP-795-001,USP,USP General Chapter 795 Nonsterile Compounding,2023,https://www.usp.org/compounding/general-chapter-795,,USP Restricted,restricted,drug_compounding,high
+USP-825-001,USP,USP General Chapter 825 Radiopharmaceuticals Preparation Compounding Dispensing,2022,https://www.usp.org/compounding/general-chapter-825,,USP Restricted,restricted,drug_compounding,medium
+MARTINDALE-001,Martindale,Martindale The Complete Drug Reference 40th edition,2024,https://www.medicinescomplete.com/mc/martindale/current/,,Pharm Press,restricted,drug_formulary,high
+MARTINDALE-002,Martindale,Martindale international drug nomenclature and synonyms,2024,https://www.medicinescomplete.com/,,Pharm Press,restricted,drug_formulary,medium
+VIDAL-001,Vidal,Vidal Dictionnaire des medicaments France national formulary,2024,https://www.vidal.fr/,,Vidal,restricted,drug_formulary,high
+VIDAL-002,Vidal,Vidal Recos recommandations pratiques cliniques France,2024,https://www.vidal.fr/maladies/recommandations.html,,Vidal,restricted,drug_formulary,high
+LIPPINCOTT-001,Lippincott,Lippincott Drug Facts and Comparisons drug reference,2024,https://www.wolterskluwer.com/en/solutions/lippincott-medicines-complete,,Wolters Kluwer,restricted,drug_formulary,medium
+NICE-BNF-001,NICE,NICE BNF clinical decision support drug information,2024,https://www.nice.org.uk/bnf-uk-only,,Crown Copyright,restricted-cds,drug_formulary,high
+LIVERPOOL-HIV-001,Liverpool,Liverpool HIV Drug Interactions Checker comprehensive database,2024,https://www.hiv-druginteractions.org/,,Liverpool Open,allowed,drug_interactions,high
+LIVERPOOL-HIV-002,Liverpool,Liverpool HIV Interactions prescribing resources tables,2024,https://www.hiv-druginteractions.org/prescribing_resources,,Liverpool Open,allowed,drug_interactions,high
+LIVERPOOL-HEP-001,Liverpool,Liverpool Hepatitis Drug Interactions Checker DAA HCV,2024,https://www.hep-druginteractions.org/,,Liverpool Open,allowed,drug_interactions,high
+LIVERPOOL-TB-001,Liverpool,Liverpool Tuberculosis Drug Interactions Checker,2024,https://www.tb-druginteractions.org/,,Liverpool Open,allowed,drug_interactions,high
+LIVERPOOL-COVID-001,Liverpool,Liverpool COVID-19 Drug Interactions Checker,2024,https://www.covid19-druginteractions.org/,,Liverpool Open,allowed,drug_interactions,high
+LIVERPOOL-CANCER-001,Liverpool,Liverpool Cancer Chemotherapy Drug Interactions Checker,2024,https://www.cancer-druginteractions.org/,,Liverpool Open,allowed,drug_interactions,high
+DRUGSCOM-001,Drugs-com,Drugs.com Drug Interactions Checker consumer reference,2024,https://www.drugs.com/drug_interactions.html,,Drugs.com,restricted,drug_interactions,medium
+DRUGSCOM-002,Drugs-com,Drugs.com pill identifier and drug index,2024,https://www.drugs.com/pill_identification.html,,Drugs.com,restricted,drug_formulary,low
+STOCKLEY-001,Stockley,Stockley Drug Interactions reference Pharmaceutical Press,2024,https://www.medicinescomplete.com/mc/stockley/current/,,Pharm Press,restricted,drug_interactions,high
+STOCKLEY-002,Stockley,Stockley Herbal Medicines Interactions reference,2023,https://www.medicinescomplete.com/,,Pharm Press,restricted,drug_interactions,medium
+DDI-CYP-001,FDA,Cytochrome P450 drug interactions clinical pharmacology principles,2023,https://www.fda.gov/drugs/drug-interactions-labeling/drug-development-and-drug-interactions-table-substrates-inhibitors-and-inducers,,Public Domain,allowed,drug_interactions,high
+DRUGBANK-001,DrugBank,DrugBank Online open database drug and target information,2024,https://go.drugbank.com/,,DrugBank Open,allowed,drug_formulary,high
+DRUGBANK-002,DrugBank,DrugBank Pharmacology data SmPC mechanism of action,2024,https://go.drugbank.com/categories,,DrugBank Open,allowed,drug_interactions,medium
+VIGIBASE-001,VigiBase,VigiBase WHO global database of individual case safety reports,2024,https://who-umc.org/vigibase/,,UMC Restricted,restricted,drug_pharmacovigilance,high
+VIGIBASE-002,VigiBase,WHO Uppsala Monitoring Centre Uppsala Reports newsletter,2024,https://who-umc.org/uppsala-reports/,,UMC Open,allowed,drug_pharmacovigilance,high
+VIGIBASE-003,VigiBase,WHO Pharmacovigilance Method Reviews technical guidance,2024,https://who-umc.org/research-innovation/methods-research/,,UMC Open,allowed,drug_pharmacovigilance,medium
+LAREB-001,Lareb,Lareb Netherlands Pharmacovigilance Centre adverse drug reactions,2024,https://www.lareb.nl/en,,Lareb Open,allowed,drug_pharmacovigilance,medium
+LAREB-002,Lareb,Lareb Pregnancy Register teratovigilance Netherlands,2024,https://www.lareb.nl/teratology,,Lareb Open,allowed,drug_pregnancy_lactation,medium
+ICH-E2A-001,ICH,ICH E2A Clinical Safety Data Management Definitions and Standards,1995,https://www.ich.org/page/efficacy-guidelines,,ICH Open,allowed,drug_pharmacovigilance,high
+ICH-E2B-001,ICH,ICH E2B Clinical Safety Data Management Data Elements for Transmission,2013,https://www.ich.org/page/efficacy-guidelines,,ICH Open,allowed,drug_pharmacovigilance,high
+ICH-E2C-001,ICH,ICH E2C Periodic Benefit-Risk Evaluation Report PBRER,2012,https://www.ich.org/page/efficacy-guidelines,,ICH Open,allowed,drug_pharmacovigilance,high
+ICH-E2D-001,ICH,ICH E2D Post-Approval Safety Data Management,2003,https://www.ich.org/page/efficacy-guidelines,,ICH Open,allowed,drug_pharmacovigilance,high
+ICH-E2E-001,ICH,ICH E2E Pharmacovigilance Planning,2004,https://www.ich.org/page/efficacy-guidelines,,ICH Open,allowed,drug_pharmacovigilance,high
+ICH-E2F-001,ICH,ICH E2F Development Safety Update Report DSUR,2010,https://www.ich.org/page/efficacy-guidelines,,ICH Open,allowed,drug_pharmacovigilance,medium
+ICH-E14-001,ICH,ICH E14 Clinical Evaluation of QT QTc Interval Prolongation,2005,https://www.ich.org/page/efficacy-guidelines,,ICH Open,allowed,drug_regulatory_guidance,medium
+ICH-E6-001,ICH,ICH E6 R3 Good Clinical Practice GCP,2023,https://www.ich.org/page/efficacy-guidelines,,ICH Open,allowed,drug_regulatory_guidance,high
+ICH-Q1-001,ICH,ICH Q1A Stability Testing of New Drug Substances and Products,2003,https://www.ich.org/page/quality-guidelines,,ICH Open,allowed,drug_regulatory_guidance,medium
+ICH-Q3-001,ICH,ICH Q3A Impurities in New Drug Substances,2006,https://www.ich.org/page/quality-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-Q7-001,ICH,ICH Q7 Good Manufacturing Practice for Active Pharmaceutical Ingredients,2000,https://www.ich.org/page/quality-guidelines,,ICH Open,allowed,drug_regulatory_guidance,medium
+ICH-Q9-001,ICH,ICH Q9 R1 Quality Risk Management,2023,https://www.ich.org/page/quality-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-Q10-001,ICH,ICH Q10 Pharmaceutical Quality System,2008,https://www.ich.org/page/quality-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-Q12-001,ICH,ICH Q12 Technical and Regulatory Considerations Lifecycle Management,2019,https://www.ich.org/page/quality-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+CIOMS-001,CIOMS,CIOMS Working Group VI Management of Safety Information from Clinical Trials,2005,https://cioms.ch/publications/,,CIOMS Open,allowed,drug_pharmacovigilance,medium
+CIOMS-002,CIOMS,CIOMS Working Group VIII Practical Aspects of Signal Detection in Pharmacovigilance,2010,https://cioms.ch/publications/,,CIOMS Open,allowed,drug_pharmacovigilance,high
+CIOMS-003,CIOMS,CIOMS Working Group IX Practical Approaches to Risk Minimisation for Medicinal Products,2014,https://cioms.ch/publications/,,CIOMS Open,allowed,drug_pharmacovigilance,high
+CIOMS-004,CIOMS,CIOMS Working Group X Evidence Synthesis and Meta-Analysis for Drug Safety,2016,https://cioms.ch/publications/,,CIOMS Open,allowed,drug_pharmacovigilance,medium
+CIOMS-005,CIOMS,CIOMS Drug-Induced Liver Injury DILI Working Group consensus,2020,https://cioms.ch/publications/,,CIOMS Open,allowed,drug_renal_hepatic_dosing,high
+CIOMS-006,CIOMS,CIOMS International Reporting of Adverse Drug Reactions,2018,https://cioms.ch/publications/,,CIOMS Open,allowed,drug_pharmacovigilance,medium
+NEOFAX-001,NeoFax,NeoFax neonatal drug reference Thomson Micromedex,2024,https://www.micromedexsolutions.com/,,Micromedex,restricted,drug_pediatric,high
+NEOFAX-002,NeoFax,NeoFax Pediatrics dosing reference NICU,2024,https://www.micromedexsolutions.com/,,Micromedex,restricted,drug_pediatric,high
+HARRIET-LANE-001,Harriet-Lane,Harriet Lane Handbook Manual for Pediatric House Officers Johns Hopkins 23rd edition,2023,https://www.elsevier.com/books/the-harriet-lane-handbook/9780323876988,,Elsevier,restricted,drug_pediatric,high
+HARRIET-LANE-002,Harriet-Lane,Harriet Lane Pediatric drug formulary dosing reference,2023,https://www.elsevier.com/,,Elsevier,restricted,drug_pediatric,high
+SHANN-001,Shann,Frank Shann Drug Doses pediatric reference 18th edition Australia,2023,https://shanndrugdoses.com/,,Shann,restricted,drug_pediatric,high
+CFF-DRUG-001,CFF,Cystic Fibrosis Foundation Manual of Drug Use in Cystic Fibrosis,2022,https://www.cff.org/medical-professionals/clinical-care-guidelines,,CFF,restricted-cds,drug_pediatric,medium
+CFF-DRUG-002,CFF,CFF CFTR Modulator Therapy Clinical Guidelines drug-specific,2023,https://www.cff.org/medical-professionals/clinical-care-guidelines,,CFF,restricted-cds,drug_specialty_hiv_hcv_tb,high
+LACTMED-001,LactMed,LactMed NIH NLM Drugs and Lactation Database online,2024,https://www.ncbi.nlm.nih.gov/books/NBK501922/,,Public Domain,allowed,drug_pregnancy_lactation,high
+LACTMED-002,LactMed,LactMed monograph format breastfeeding drug safety,2024,https://www.ncbi.nlm.nih.gov/books/NBK501922/,,Public Domain,allowed,drug_pregnancy_lactation,high
+LACTMED-CITALOPRAM-001,LactMed,LactMed Citalopram in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501195/,,Public Domain,allowed,drug_pregnancy_lactation,medium
+LACTMED-SERTRALINE-001,LactMed,LactMed Sertraline in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501191/,,Public Domain,allowed,drug_pregnancy_lactation,medium
+LACTMED-AMOXICILLIN-001,LactMed,LactMed Amoxicillin in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501197/,,Public Domain,allowed,drug_pregnancy_lactation,medium
+LACTMED-METFORMIN-001,LactMed,LactMed Metformin in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501116/,,Public Domain,allowed,drug_pregnancy_lactation,medium
+LACTMED-IBUPROFEN-001,LactMed,LactMed Ibuprofen in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501232/,,Public Domain,allowed,drug_pregnancy_lactation,medium
+LACTMED-PARACETAMOL-001,LactMed,LactMed Acetaminophen in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501194/,,Public Domain,allowed,drug_pregnancy_lactation,medium
+REPROTOX-001,REPROTOX,REPROTOX Reproductive Toxicology Center database,2024,https://reprotox.org/,,REPROTOX,restricted,drug_pregnancy_lactation,high
+TERIS-001,TERIS,TERIS Teratology Information Service database University of Washington,2024,https://depts.washington.edu/terisweb/teris/,,TERIS,restricted,drug_pregnancy_lactation,high
+MOTHERTOBABY-001,MotherToBaby,MotherToBaby OTIS fact sheets medications in pregnancy and lactation,2024,https://mothertobaby.org/fact-sheets/,,OTIS Open,allowed,drug_pregnancy_lactation,high
+MOTHERTOBABY-002,MotherToBaby,MotherToBaby OTIS counseling resource for clinicians,2024,https://mothertobaby.org/healthcare-professionals/,,OTIS Open,allowed,drug_pregnancy_lactation,high
+CRAT-001,CRAT,CRAT Centre de reference sur les agents teratogenes France,2024,https://www.lecrat.fr/,,CRAT Open,allowed,drug_pregnancy_lactation,high
+CRAT-002,CRAT,CRAT medicaments grossesse et allaitement bases de donnees,2024,https://www.lecrat.fr/spip.php?page=sommaireA,,CRAT Open,allowed,drug_pregnancy_lactation,high
+ELACTANCIA-001,e-lactancia,e-lactancia Spanish lactation drug compatibility database,2024,https://www.e-lactancia.org/,,e-lactancia Open,allowed,drug_pregnancy_lactation,high
+ACOG-PREG-DRUG-001,ACOG,ACOG Committee Opinion Pharmacologic Treatment in Pregnancy,2023,https://www.acog.org/clinical/clinical-guidance,,ACOG,restricted-cds,drug_pregnancy_lactation,high
+ACOG-PREG-DRUG-002,ACOG,ACOG Antenatal Corticosteroid Therapy for Fetal Maturation,2020,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2020/02/antenatal-corticosteroid-therapy-for-fetal-maturation,,ACOG,restricted-cds,drug_pregnancy_lactation,high
+ISMP-001,ISMP,ISMP List of High-Alert Medications in Acute Care Settings,2024,https://www.ismp.org/recommendations/high-alert-medications-acute-list,,ISMP,restricted-cds,drug_safety_practice,high
+ISMP-002,ISMP,ISMP List of High-Alert Medications in Long-Term Care,2024,https://www.ismp.org/recommendations/high-alert-medications-long-term-care-list,,ISMP,restricted-cds,drug_safety_practice,high
+ISMP-003,ISMP,ISMP List of High-Alert Medications in Community Ambulatory Settings,2024,https://www.ismp.org/recommendations/high-alert-medications-community-ambulatory-list,,ISMP,restricted-cds,drug_safety_practice,high
+ISMP-004,ISMP,ISMP List of Confused Drug Names look-alike sound-alike,2024,https://www.ismp.org/recommendations/confused-drug-names-list,,ISMP,restricted-cds,drug_safety_practice,high
+ISMP-005,ISMP,ISMP List of Error-Prone Abbreviations Symbols and Dose Designations,2024,https://www.ismp.org/recommendations/error-prone-abbreviations-list,,ISMP,restricted-cds,drug_safety_practice,high
+ISMP-006,ISMP,ISMP Targeted Medication Safety Best Practices for Hospitals,2024,https://www.ismp.org/guidelines/best-practices-hospitals,,ISMP,restricted-cds,drug_safety_practice,high
+ISMP-007,ISMP,ISMP Guidelines for Safe Preparation of Compounded Sterile Preparations,2016,https://www.ismp.org/guidelines/safe-preparation-compounded-sterile-preparations,,ISMP,restricted-cds,drug_compounding,high
+ISMP-008,ISMP,ISMP Medication Safety Alert acute care newsletter,2024,https://www.ismp.org/resources/newsletters,,ISMP,restricted-cds,drug_safety_practice,high
+ISMP-009,ISMP,ISMP Guidelines for Standard Order Sets,2010,https://www.ismp.org/guidelines/standard-order-sets,,ISMP,restricted-cds,drug_safety_practice,medium
+ISMP-010,ISMP,ISMP Guidelines for Optimizing Safe Implementation and Use of Smart Infusion Pumps,2020,https://www.ismp.org/guidelines/safe-implementation-and-use-smart-pumps,,ISMP,restricted-cds,drug_safety_practice,medium
+ISMP-CAN-001,ISMP-Canada,ISMP Canada Safety Bulletins medication safety alerts,2024,https://www.ismpcanada.ca/safety-bulletins/,,ISMP-Canada,restricted-cds,drug_safety_practice,high
+ISMP-CAN-002,ISMP-Canada,ISMP Canada Do Not Use Dangerous Abbreviations Symbols and Dose Designations,2023,https://www.ismpcanada.ca/dangerous-abbreviations/,,ISMP-Canada,restricted-cds,drug_safety_practice,high
+WHO-PS-001,WHO,WHO Patient Safety Medication Without Harm Global Challenge,2017,https://www.who.int/initiatives/medication-without-harm,,WHO Open Access,allowed,drug_safety_practice,high
+WHO-PS-002,WHO,WHO Medication Safety in Polypharmacy technical report,2019,https://www.who.int/publications/i/item/WHO-UHC-SDS-2019.11,,WHO Open Access,allowed,drug_safety_practice,high
+WHO-PS-003,WHO,WHO Medication Safety in High-Risk Situations technical report,2019,https://www.who.int/publications/i/item/WHO-UHC-SDS-2019.10,,WHO Open Access,allowed,drug_safety_practice,high
+WHO-PS-004,WHO,WHO Medication Safety in Transitions of Care technical report,2019,https://www.who.int/publications/i/item/WHO-UHC-SDS-2019.9,,WHO Open Access,allowed,drug_safety_practice,high
+AHRQ-PS-001,AHRQ,AHRQ Patient Safety Network medication safety primer,2024,https://psnet.ahrq.gov/primer/medication-errors-and-adverse-drug-events,,Public Domain,allowed,drug_safety_practice,high
+AHRQ-PS-002,AHRQ,AHRQ Making Health Care Safer III medication safety chapter,2020,https://www.ahrq.gov/research/findings/making-healthcare-safer/mhs3/index.html,,Public Domain,allowed,drug_safety_practice,high
+AHRQ-PS-003,AHRQ,AHRQ Medications at Transitions and Clinical Handoffs MATCH Toolkit,2012,https://www.ahrq.gov/patient-safety/settings/hospital/match/index.html,,Public Domain,allowed,drug_safety_practice,medium
+TJC-NPSG-001,TJC,Joint Commission National Patient Safety Goals NPSG medication safety,2024,https://www.jointcommission.org/standards/national-patient-safety-goals/,,TJC,restricted-cds,drug_safety_practice,high
+TJC-NPSG-002,TJC,Joint Commission Medication Management Standards Sentinel Event Alerts,2024,https://www.jointcommission.org/resources/sentinel-event/,,TJC,restricted-cds,drug_safety_practice,high
+TJC-NPSG-003,TJC,Joint Commission Look-Alike Sound-Alike Drug List,2023,https://www.jointcommission.org/,,TJC,restricted-cds,drug_safety_practice,medium
+ASHP-COMPOUND-001,ASHP,ASHP Guidelines on Compounding Sterile Preparations,2014,https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines/Browse-by-Document-Type/Guidelines,,ASHP,restricted-cds,drug_compounding,high
+ASHP-COMPOUND-002,ASHP,ASHP Guidelines on Handling Hazardous Drugs,2018,https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines/Browse-by-Document-Type/Guidelines,,ASHP,restricted-cds,drug_compounding,high
+ASHP-IV-001,ASHP,ASHP Standardize 4 Safety IV Push Medications adult,2022,https://www.ashp.org/Pharmacy-Practice/Standardize-4-Safety-Initiative,,ASHP,restricted-cds,drug_critical_care,high
+ASHP-IV-002,ASHP,ASHP Standardize 4 Safety IV Continuous Infusions adult,2022,https://www.ashp.org/Pharmacy-Practice/Standardize-4-Safety-Initiative,,ASHP,restricted-cds,drug_critical_care,high
+ASHP-IV-003,ASHP,ASHP Standardize 4 Safety Pediatric Continuous Infusions,2022,https://www.ashp.org/Pharmacy-Practice/Standardize-4-Safety-Initiative,,ASHP,restricted-cds,drug_pediatric,high
+ASHP-STEW-001,ASHP,ASHP Statement on the Pharmacist Role in Antimicrobial Stewardship,2022,https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines,,ASHP,restricted-cds,drug_antimicrobial_stewardship,high
+ASHP-SHORT-001,ASHP,ASHP Drug Shortages current shortages list,2024,https://www.ashp.org/drug-shortages,,ASHP,restricted-cds,drug_shortage_recall,high
+TRISSEL-001,Trissel,Trissel Handbook on Injectable Drugs IV admixture compatibility,2023,https://www.ashp.org/products-and-services/database-and-software-solutions/handbook-on-injectable-drugs,,ASHP,restricted,drug_compounding,high
+KING-GUIDE-001,King-Guide,King Guide to Parenteral Admixtures IV compatibility reference,2024,https://www.kingguide.com/,,King Guide,restricted,drug_compounding,high
+SANFORD-001,Sanford,Sanford Guide to Antimicrobial Therapy 54th edition,2024,https://www.sanfordguide.com/,,Sanford,restricted,drug_antimicrobial_stewardship,high
+SANFORD-002,Sanford,Sanford Guide HIV ARV antiretroviral therapy reference,2024,https://www.sanfordguide.com/products/hiv-aids,,Sanford,restricted,drug_specialty_hiv_hcv_tb,high
+SANFORD-003,Sanford,Sanford Guide Hepatitis Therapy reference,2024,https://www.sanfordguide.com/,,Sanford,restricted,drug_specialty_hiv_hcv_tb,high
+STANFORD-ABX-001,Stanford-SHC,Stanford Antimicrobial Safety and Sustainability Program guidebook,2024,https://med.stanford.edu/bugsanddrugs.html,,Stanford,restricted-cds,drug_antimicrobial_stewardship,high
+STANFORD-ABX-002,Stanford-SHC,Stanford SHC Empiric Antimicrobial Therapy guidance,2024,https://med.stanford.edu/bugsanddrugs.html,,Stanford,restricted-cds,drug_antimicrobial_stewardship,high
+JHH-ABX-001,JHH-ABX,Johns Hopkins ABX Guide antibiotic reference,2024,https://www.hopkinsguides.com/hopkins/view/Johns_Hopkins_ABX_Guide,,JHH,restricted,drug_antimicrobial_stewardship,high
+JHH-ABX-002,JHH-ABX,Johns Hopkins ABX Bartlett Pocket Book of Infectious Disease Therapy,2024,https://www.hopkinsguides.com/,,JHH,restricted,drug_antimicrobial_stewardship,high
+JHH-ABX-003,JHH-ABX,Johns Hopkins HIV Guide antiretroviral reference,2024,https://www.hopkinsguides.com/hopkins/view/Johns_Hopkins_HIV_Guide,,JHH,restricted,drug_specialty_hiv_hcv_tb,high
+CDC-ABX-001,CDC,CDC Antibiotic Use Antibiotic Spectrum chart,2023,https://www.cdc.gov/antibiotic-use/clinicians/index.html,,Public Domain,allowed,drug_antimicrobial_stewardship,high
+CDC-ABX-002,CDC,CDC Core Elements of Hospital Antibiotic Stewardship Programs,2019,https://www.cdc.gov/antibiotic-use/core-elements/hospital.html,,Public Domain,allowed,drug_antimicrobial_stewardship,high
+CDC-ABX-003,CDC,CDC Core Elements of Outpatient Antibiotic Stewardship,2016,https://www.cdc.gov/antibiotic-use/core-elements/outpatient.html,,Public Domain,allowed,drug_antimicrobial_stewardship,high
+CDC-ABX-004,CDC,CDC Treatment Guidelines for Sexually Transmitted Infections,2021,https://www.cdc.gov/std/treatment-guidelines/default.htm,,Public Domain,allowed,drug_specialty_hiv_hcv_tb,high
+CDC-TB-001,CDC,CDC Treatment of Drug-Susceptible Tuberculosis ATS IDSA CDC joint guideline,2016,https://www.cdc.gov/tb/topic/treatment/default.htm,,Public Domain,allowed,drug_specialty_hiv_hcv_tb,high
+CDC-TB-002,CDC,CDC Treatment of Drug-Resistant Tuberculosis,2019,https://www.cdc.gov/tb/topic/drtb/default.htm,,Public Domain,allowed,drug_specialty_hiv_hcv_tb,high
+CDC-TB-003,CDC,CDC Treatment for Latent TB Infection LTBI rifapentine isoniazid,2020,https://www.cdc.gov/tb/topic/treatment/ltbi.htm,,Public Domain,allowed,drug_specialty_hiv_hcv_tb,high
+WHO-STI-001,WHO,WHO Guidelines for the Treatment of Sexually Transmitted Infections,2021,https://www.who.int/health-topics/sexually-transmitted-infections,,WHO Open Access,allowed,drug_specialty_hiv_hcv_tb,high
+WHO-TB-001,WHO,WHO Consolidated Guidelines on Tuberculosis Treatment Drug-Susceptible TB,2022,https://www.who.int/publications/i/item/9789240048126,,WHO Open Access,allowed,drug_specialty_hiv_hcv_tb,high
+WHO-TB-002,WHO,WHO Consolidated Guidelines on Tuberculosis Drug-Resistant TB Treatment,2022,https://www.who.int/publications/i/item/9789240063129,,WHO Open Access,allowed,drug_specialty_hiv_hcv_tb,high
+WHO-TB-003,WHO,WHO Consolidated Guidelines on Tuberculosis Children and Adolescents,2022,https://www.who.int/publications/i/item/9789240046764,,WHO Open Access,allowed,drug_specialty_hiv_hcv_tb,high
+WHO-HIV-001,WHO,WHO Consolidated Guidelines on HIV Prevention Treatment Service Delivery,2021,https://www.who.int/publications/i/item/9789240031593,,WHO Open Access,allowed,drug_specialty_hiv_hcv_tb,high
+WHO-HIV-002,WHO,WHO Antiretroviral Therapy ARV Drug Optimization,2021,https://www.who.int/teams/global-hiv-hepatitis-and-stis-programmes/hiv/treatment,,WHO Open Access,allowed,drug_specialty_hiv_hcv_tb,high
+WHO-HCV-001,WHO,WHO Guidelines for the Care and Treatment of Hepatitis C Infection,2022,https://www.who.int/publications/i/item/9789240052697,,WHO Open Access,allowed,drug_specialty_hiv_hcv_tb,high
+WHO-HBV-001,WHO,WHO Guidelines on Hepatitis B Virus Infection Prevention Care Treatment,2024,https://www.who.int/publications/i/item/9789240090903,,WHO Open Access,allowed,drug_specialty_hiv_hcv_tb,high
+WHO-FUNGAL-001,WHO,WHO Fungal Priority Pathogens List antifungal stewardship,2022,https://www.who.int/publications/i/item/9789240060241,,WHO Open Access,allowed,drug_antimicrobial_stewardship,high
+NCCN-DRUG-001,NCCN,NCCN Drugs and Biologics Compendium oncology,2024,https://www.nccn.org/compendia-templates/compendia/nccn-compendium,,NCCN,restricted-cds,drug_oncology,high
+NCCN-DRUG-002,NCCN,NCCN Chemotherapy Order Templates standardized regimens,2024,https://www.nccn.org/professionals/order_templates/default.aspx,,NCCN,restricted-cds,drug_oncology,high
+NCCN-DRUG-003,NCCN,NCCN Antiemesis Clinical Practice Guidelines in Oncology,2024,https://www.nccn.org/professionals/physician_gls/default.aspx,,NCCN,restricted-cds,drug_oncology,high
+NCCN-DRUG-004,NCCN,NCCN Cancer- and Chemotherapy-Induced Anemia Guidelines,2024,https://www.nccn.org/professionals/physician_gls/default.aspx,,NCCN,restricted-cds,drug_oncology,high
+NCCN-DRUG-005,NCCN,NCCN Hematopoietic Growth Factors Guidelines,2024,https://www.nccn.org/professionals/physician_gls/default.aspx,,NCCN,restricted-cds,drug_oncology,high
+NCCN-DRUG-006,NCCN,NCCN Adult Cancer Pain Guidelines,2024,https://www.nccn.org/professionals/physician_gls/default.aspx,,NCCN,restricted-cds,drug_pain,high
+ASCO-DRUG-001,ASCO,ASCO Antiemetics for Antineoplastic Agents Clinical Practice Guideline,2020,https://ascopubs.org/doi/10.1200/JCO.20.01296,,ASCO,restricted-cds,drug_oncology,high
+ASCO-DRUG-002,ASCO,ASCO Use of Granulocyte Colony-Stimulating Factors Update,2020,https://ascopubs.org/doi/10.1200/JCO.19.03265,,ASCO,restricted-cds,drug_oncology,high
+ASCO-DRUG-003,ASCO,ASCO Management of Immune-Related Adverse Events from Checkpoint Inhibitors,2021,https://ascopubs.org/doi/10.1200/JCO.21.01440,,ASCO,restricted-cds,drug_oncology,high
+ASCO-DRUG-004,ASCO,ASCO Standards for Safe Handling of Hazardous Drugs,2022,https://ascopubs.org/doi/10.1200/OP.21.00833,,ASCO,restricted-cds,drug_compounding,high
+ESMO-DRUG-001,ESMO,ESMO Clinical Practice Guideline Management of Toxicities from Immunotherapy,2022,https://www.esmo.org/guidelines/guidelines-by-topic/esmo-clinical-practice-guidelines-supportive-and-palliative-care,,ESMO,restricted-cds,drug_oncology,high
+ESMO-DRUG-002,ESMO,ESMO Antiemetics in Cancer Patients Clinical Practice Guidelines,2024,https://www.esmo.org/guidelines/,,ESMO,restricted-cds,drug_oncology,high
+ESMO-DRUG-003,ESMO,ESMO Cancer-Related Anaemia Treatment Recommendations,2018,https://www.esmo.org/guidelines/,,ESMO,restricted-cds,drug_oncology,high
+HEMONC-001,HemOnc,HemOnc.org open hematology oncology drug regimens,2024,https://hemonc.org/wiki/Main_Page,,HemOnc Open,allowed,drug_oncology,high
+HEMONC-002,HemOnc,HemOnc.org chemotherapy regimen reference cards,2024,https://hemonc.org/wiki/Reference_pages,,HemOnc Open,allowed,drug_oncology,high
+CPIC-001,CPIC,CPIC Clinical Pharmacogenetics Implementation Consortium guideline list,2024,https://cpicpgx.org/guidelines/,,CPIC Open,allowed,drug_pharmacogenomics,high
+CPIC-002,CPIC,CPIC Guideline for CYP2D6 Codeine and Tramadol,2021,https://cpicpgx.org/guidelines/guideline-for-codeine-and-cyp2d6/,,CPIC Open,allowed,drug_pharmacogenomics,high
+CPIC-003,CPIC,CPIC Guideline for CYP2C19 Clopidogrel,2022,https://cpicpgx.org/guidelines/guideline-for-clopidogrel-and-cyp2c19/,,CPIC Open,allowed,drug_pharmacogenomics,high
+CPIC-004,CPIC,CPIC Guideline for HLA-B and Abacavir,2014,https://cpicpgx.org/guidelines/guideline-for-abacavir-and-hla-b/,,CPIC Open,allowed,drug_pharmacogenomics,high
+CPIC-005,CPIC,CPIC Guideline for HLA-B and Carbamazepine Oxcarbazepine,2018,https://cpicpgx.org/guidelines/guideline-for-carbamazepine-and-hla-b/,,CPIC Open,allowed,drug_pharmacogenomics,high
+CPIC-006,CPIC,CPIC Guideline for TPMT NUDT15 and Thiopurines,2019,https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/,,CPIC Open,allowed,drug_pharmacogenomics,high
+CPIC-007,CPIC,CPIC Guideline for DPYD and Fluoropyrimidines 5-FU Capecitabine,2018,https://cpicpgx.org/guidelines/guideline-for-fluoropyrimidines-and-dpyd/,,CPIC Open,allowed,drug_pharmacogenomics,high
+CPIC-008,CPIC,CPIC Guideline for CYP2C9 HLA-B and Phenytoin,2020,https://cpicpgx.org/guidelines/guideline-for-phenytoin-and-cyp2c9-and-hla-b/,,CPIC Open,allowed,drug_pharmacogenomics,high
+CPIC-009,CPIC,CPIC Guideline for CYP2D6 Atomoxetine,2019,https://cpicpgx.org/guidelines/cpic-guideline-for-atomoxetine-based-on-cyp2d6-genotype/,,CPIC Open,allowed,drug_pharmacogenomics,medium
+CPIC-010,CPIC,CPIC Guideline for SLCO1B1 ABCG2 CYP2C9 and Statins,2022,https://cpicpgx.org/guidelines/cpic-guideline-for-statins/,,CPIC Open,allowed,drug_pharmacogenomics,high
+CPIC-011,CPIC,CPIC Guideline for CYP2C19 and Voriconazole,2017,https://cpicpgx.org/guidelines/guideline-for-voriconazole-and-cyp2c19/,,CPIC Open,allowed,drug_pharmacogenomics,medium
+CPIC-012,CPIC,CPIC Guideline for CYP2D6 Tamoxifen,2018,https://cpicpgx.org/guidelines/cpic-guideline-for-tamoxifen-based-on-cyp2d6-genotype/,,CPIC Open,allowed,drug_pharmacogenomics,medium
+CPIC-013,CPIC,CPIC Guideline for CYP2C19 SSRIs,2023,https://cpicpgx.org/guidelines/guideline-for-selective-serotonin-reuptake-inhibitors-and-cyp2d6-and-cyp2c19/,,CPIC Open,allowed,drug_pharmacogenomics,high
+CPIC-014,CPIC,CPIC Guideline for CYP2D6 Tricyclic Antidepressants,2017,https://cpicpgx.org/guidelines/guideline-for-tricyclic-antidepressants-and-cyp2d6-and-cyp2c19/,,CPIC Open,allowed,drug_pharmacogenomics,medium
+CPIC-015,CPIC,CPIC Guideline for CYP2B6 Efavirenz,2019,https://cpicpgx.org/guidelines/cpic-guideline-for-efavirenz-based-on-cyp2b6-genotype/,,CPIC Open,allowed,drug_pharmacogenomics,medium
+CPIC-016,CPIC,CPIC Guideline for HLA Allopurinol,2015,https://cpicpgx.org/guidelines/guideline-for-allopurinol-and-hla-b/,,CPIC Open,allowed,drug_pharmacogenomics,medium
+CPIC-017,CPIC,CPIC Guideline for IFNL3 IL28B and PEG Interferon Ribavirin Therapy,2014,https://cpicpgx.org/guidelines/guideline-for-pegylated-interferon-alpha-based-regimens-and-ifnl3/,,CPIC Open,allowed,drug_pharmacogenomics,low
+CPIC-018,CPIC,CPIC Guideline for CYP3A5 and Tacrolimus,2015,https://cpicpgx.org/guidelines/guideline-for-tacrolimus-and-cyp3a5/,,CPIC Open,allowed,drug_pharmacogenomics,high
+CPIC-019,CPIC,CPIC Guideline for G6PD and Rasburicase,2014,https://cpicpgx.org/guidelines/guideline-for-rasburicase-and-g6pd/,,CPIC Open,allowed,drug_pharmacogenomics,medium
+CPIC-020,CPIC,CPIC Guideline for CYP2C19 and Proton Pump Inhibitors,2020,https://cpicpgx.org/guidelines/cpic-guideline-for-proton-pump-inhibitors-and-cyp2c19/,,CPIC Open,allowed,drug_pharmacogenomics,medium
+DPWG-001,DPWG,DPWG Dutch Pharmacogenetics Working Group guideline list,2024,https://www.knmp.nl/dossiers/farmacogenetica,,DPWG Open,allowed,drug_pharmacogenomics,high
+DPWG-002,DPWG,DPWG Pharmacogenetic recommendations for psychiatry,2023,https://www.knmp.nl/,,DPWG Open,allowed,drug_pharmacogenomics,high
+PHARMGKB-001,PharmGKB,PharmGKB Pharmacogenomics Knowledge Base annotations,2024,https://www.pharmgkb.org/,,PharmGKB Open,allowed,drug_pharmacogenomics,high
+PHARMGKB-002,PharmGKB,PharmGKB Drug Label Annotations FDA EMA HCSC PMDA,2024,https://www.pharmgkb.org/labels,,PharmGKB Open,allowed,drug_pharmacogenomics,high
+CPNDS-001,CPNDS,Canadian Pharmacogenomics Network for Drug Safety guidelines,2024,http://cpnds.ubc.ca/,,CPNDS Open,allowed,drug_pharmacogenomics,medium
+IATDMCT-001,IATDMCT,IATDMCT Position Paper Therapeutic Drug Monitoring of Vancomycin AUC-Based,2020,https://www.iatdmct.org/publications.html,,IATDMCT Open,allowed,drug_tdm,high
+IATDMCT-002,IATDMCT,IATDMCT Therapeutic Drug Monitoring of Beta-Lactams Critically Ill,2020,https://www.iatdmct.org/publications.html,,IATDMCT Open,allowed,drug_tdm,high
+IATDMCT-003,IATDMCT,IATDMCT Voriconazole Therapeutic Drug Monitoring,2014,https://www.iatdmct.org/publications.html,,IATDMCT Open,allowed,drug_tdm,medium
+IATDMCT-004,IATDMCT,IATDMCT Aminoglycoside Therapeutic Drug Monitoring,2018,https://www.iatdmct.org/publications.html,,IATDMCT Open,allowed,drug_tdm,high
+IATDMCT-005,IATDMCT,IATDMCT Anti-Epileptic Drug Therapeutic Monitoring consensus,2018,https://www.iatdmct.org/publications.html,,IATDMCT Open,allowed,drug_tdm,medium
+IATDMCT-006,IATDMCT,IATDMCT Lithium Therapeutic Drug Monitoring,2019,https://www.iatdmct.org/publications.html,,IATDMCT Open,allowed,drug_tdm,medium
+ASHP-VANC-001,ASHP,ASHP IDSA SIDP PIDS Therapeutic Monitoring of Vancomycin AUC-Based,2020,https://academic.oup.com/ajhp/article/77/11/835/5810200,,ASHP,restricted-cds,drug_tdm,high
+DIGOXIN-TDM-001,IATDMCT,Digoxin Therapeutic Drug Monitoring narrow therapeutic index reference,2020,https://www.iatdmct.org/,,IATDMCT Open,allowed,drug_tdm,medium
+RDH-001,RDH,The Renal Drug Handbook Ashley Currie 5th edition reference,2018,https://www.crcpress.com/The-Renal-Drug-Handbook-The-Ultimate-Prescribing-Guide-for-Renal-Practitioners/Ashley-Dunleavy/p/book/9781138624511,,RDH,restricted,drug_renal_hepatic_dosing,high
+KDIGO-DRUG-001,KDIGO,KDIGO 2024 Clinical Practice Guideline for Evaluation and Management of CKD drug dosing,2024,https://kdigo.org/guidelines/ckd-evaluation-and-management/,,KDIGO Open,allowed,drug_renal_hepatic_dosing,high
+KDIGO-DRUG-002,KDIGO,KDIGO Living with Kidney Disease Drug Dosing Considerations Conference,2022,https://kdigo.org/conferences/optimal-anaemia-management-in-ckd/,,KDIGO Open,allowed,drug_renal_hepatic_dosing,medium
+AASLD-DILI-001,AASLD,AASLD Practice Guidance Drug-Induced Liver Injury DILI Diagnosis Management,2022,https://www.aasld.org/practice-guidelines,,AASLD,restricted-cds,drug_renal_hepatic_dosing,high
+EASL-DILI-001,EASL,EASL Clinical Practice Guidelines Drug-Induced Liver Injury,2019,https://easl.eu/publication/easl-cpg-drug-induced-liver-injury/,,EASL,restricted-cds,drug_renal_hepatic_dosing,high
+LIVERTOX-001,LiverTox,LiverTox NIH NIDDK Clinical and Research Information on Drug-Induced Liver Injury,2024,https://www.ncbi.nlm.nih.gov/books/NBK547852/,,Public Domain,allowed,drug_renal_hepatic_dosing,high
+LIVERTOX-002,LiverTox,LiverTox monograph format hepatotoxicity drug entries,2024,https://www.ncbi.nlm.nih.gov/books/NBK547852/,,Public Domain,allowed,drug_renal_hepatic_dosing,high
+RUCAM-001,RUCAM,Roussel Uclaf Causality Assessment Method RUCAM updated 2016,2016,https://www.mdpi.com/1422-0067/17/1/14,,Open Access,allowed,drug_renal_hepatic_dosing,high
+ALCS-DRUG-001,AHA,ACLS Drug Reference cardiac arrest and emergency cardiovascular drugs,2020,https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines,,AHA,restricted-cds,drug_critical_care,high
+ATLS-DRUG-001,ACS,ATLS Advanced Trauma Life Support drug list 10th edition,2018,https://www.facs.org/quality-programs/trauma/education/advanced-trauma-life-support/,,ACS,restricted-cds,drug_critical_care,high
+SCCM-DRUG-001,SCCM,SCCM ICU Liberation Bundle pain agitation delirium drug guidance,2018,https://www.sccm.org/Clinical-Resources/ICULiberation-Home,,SCCM,restricted-cds,drug_critical_care,high
+SCCM-DRUG-002,SCCM,SCCM Surviving Sepsis Campaign drug recommendations vasopressors antibiotics,2021,https://www.sccm.org/SurvivingSepsisCampaign,,SCCM,restricted-cds,drug_critical_care,high
+SCCM-DRUG-003,SCCM,SCCM Pediatric Surviving Sepsis Campaign drug recommendations,2020,https://www.sccm.org/SurvivingSepsisCampaign/Guidelines,,SCCM,restricted-cds,drug_critical_care,high
+SCCM-DRUG-004,SCCM,SCCM Stress Ulcer Prophylaxis in critically ill adults,2024,https://www.sccm.org/Clinical-Resources/Guidelines,,SCCM,restricted-cds,drug_critical_care,medium
+SCCM-DRUG-005,SCCM,SCCM Glycemic Control in Critically Ill Patients,2012,https://www.sccm.org/Clinical-Resources/Guidelines,,SCCM,restricted-cds,drug_critical_care,medium
+SCCM-DRUG-006,SCCM,SCCM PADIS guidelines pain agitation delirium immobility sleep ICU,2018,https://www.sccm.org/Clinical-Resources/Guidelines,,SCCM,restricted-cds,drug_critical_care,high
+ACMT-001,ACMT,ACMT American College of Medical Toxicology antidote position statements,2024,https://www.acmt.net/position-statements/,,ACMT Open,allowed,drug_critical_care,high
+AAPCC-001,AAPCC,AAPCC American Association of Poison Control Centers antidote stocking,2018,https://aapcc.org/,,AAPCC,restricted-cds,drug_critical_care,high
+AAPCC-002,AAPCC,AAPCC National Poison Data System annual report,2023,https://aapcc.org/national-poison-data-system,,AAPCC,restricted-cds,drug_critical_care,medium
+DHHS-HIV-001,DHHS,DHHS Guidelines for the Use of Antiretroviral Agents in Adults and Adolescents,2024,https://clinicalinfo.hiv.gov/en/guidelines/adult-and-adolescent-arv,,Public Domain,allowed,drug_specialty_hiv_hcv_tb,high
+DHHS-HIV-002,DHHS,DHHS Guidelines for the Use of Antiretroviral Agents in Pediatric HIV Infection,2024,https://clinicalinfo.hiv.gov/en/guidelines/pediatric-arv,,Public Domain,allowed,drug_specialty_hiv_hcv_tb,high
+DHHS-HIV-003,DHHS,DHHS Recommendations for Use of Antiretroviral Drugs in Pregnancy Perinatal,2024,https://clinicalinfo.hiv.gov/en/guidelines/perinatal,,Public Domain,allowed,drug_specialty_hiv_hcv_tb,high
+DHHS-HIV-004,DHHS,DHHS Guidelines for the Prevention and Treatment of Opportunistic Infections in Adults,2024,https://clinicalinfo.hiv.gov/en/guidelines/adult-and-adolescent-opportunistic-infection,,Public Domain,allowed,drug_specialty_hiv_hcv_tb,high
+IAS-USA-001,IAS-USA,IAS-USA Antiretroviral Drugs for Treatment and Prevention of HIV in Adults,2022,https://www.iasusa.org/resources/guidelines/,,IAS-USA,restricted-cds,drug_specialty_hiv_hcv_tb,high
+IAS-USA-002,IAS-USA,IAS-USA HIV Drug Resistance Mutations Update,2022,https://www.iasusa.org/resources/hiv-drug-resistance-mutations/,,IAS-USA,restricted-cds,drug_specialty_hiv_hcv_tb,high
+EACS-001,EACS,EACS European AIDS Clinical Society Guidelines version 12.0,2023,https://www.eacsociety.org/guidelines/eacs-guidelines/,,EACS Open,allowed,drug_specialty_hiv_hcv_tb,high
+AASLD-HCV-001,AASLD,AASLD IDSA HCV Guidance Recommendations for Testing Managing and Treating Hepatitis C,2024,https://www.hcvguidelines.org/,,AASLD Open,allowed,drug_specialty_hiv_hcv_tb,high
+EASL-HCV-001,EASL,EASL Recommendations on Treatment of Hepatitis C 2020,2020,https://easl.eu/publication/easl-recommendations-on-treatment-of-hepatitis-c-final-update-of-the-series/,,EASL,restricted-cds,drug_specialty_hiv_hcv_tb,high
+ATS-TB-001,ATS,ATS CDC IDSA Treatment of Drug-Susceptible Tuberculosis joint guideline,2016,https://www.thoracic.org/statements/tuberculosis.php,,ATS,restricted-cds,drug_specialty_hiv_hcv_tb,high
+ATS-TB-002,ATS,ATS CDC IDSA Treatment of Drug-Resistant TB clinical guideline,2019,https://www.thoracic.org/statements/tuberculosis.php,,ATS,restricted-cds,drug_specialty_hiv_hcv_tb,high
+ATS-NTM-001,ATS,ATS ERS ESCMID IDSA Treatment of Nontuberculous Mycobacterial Pulmonary Disease,2020,https://www.thoracic.org/statements/,,ATS,restricted-cds,drug_specialty_hiv_hcv_tb,high
+SAMHSA-001,SAMHSA,SAMHSA TIP 63 Medications for Opioid Use Disorder MOUD,2021,https://store.samhsa.gov/product/tip-63-medications-opioid-use-disorder/pep21-02-01-002,,Public Domain,allowed,drug_pain,high
+SAMHSA-002,SAMHSA,SAMHSA Buprenorphine Quick Start Guide office-based,2021,https://www.samhsa.gov/medications-substance-use-disorders,,Public Domain,allowed,drug_pain,high
+SAMHSA-003,SAMHSA,SAMHSA Methadone Treatment for Opioid Use Disorder OTP,2023,https://www.samhsa.gov/medications-substance-use-disorders/medications-counseling-related-conditions/methadone,,Public Domain,allowed,drug_pain,high
+SAMHSA-004,SAMHSA,SAMHSA Naltrexone Medication for Alcohol and Opioid Use Disorder,2023,https://www.samhsa.gov/medications-substance-use-disorders/medications-counseling-related-conditions/naltrexone,,Public Domain,allowed,drug_pain,high
+ASAM-001,ASAM,ASAM National Practice Guideline for the Treatment of Opioid Use Disorder,2020,https://www.asam.org/quality-care/clinical-guidelines/national-practice-guideline,,ASAM,restricted-cds,drug_pain,high
+ASAM-002,ASAM,ASAM Clinical Practice Guideline on Alcohol Withdrawal Management,2020,https://www.asam.org/quality-care/clinical-guidelines,,ASAM,restricted-cds,drug_pain,high
+ASAM-003,ASAM,ASAM Public Policy Statement on Use of Naloxone for Opioid Overdose,2024,https://www.asam.org/advocacy/public-policy-statements,,ASAM,restricted-cds,drug_pain,high
+USPSTF-SMOKING-001,USPSTF,USPSTF Final Recommendation Smoking Cessation Pharmacotherapy,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/tobacco-use-in-adults-and-pregnant-women-counseling-and-interventions,,Public Domain,allowed,drug_pain,high
+ATS-SMOKING-001,ATS,ATS Initiating Pharmacologic Treatment in Tobacco-Dependent Adults,2020,https://www.thoracic.org/statements/,,ATS,restricted-cds,drug_pain,high
+CDC-OPIOID-001,CDC,CDC Clinical Practice Guideline for Prescribing Opioids for Pain,2022,https://www.cdc.gov/mmwr/volumes/71/rr/rr7103a1.htm,,Public Domain,allowed,drug_pain,high
+CDC-OPIOID-002,CDC,CDC Calculating Total Daily Dose of Opioids MME conversion,2022,https://www.cdc.gov/opioids/healthcare-professionals/prescribing/index.html,,Public Domain,allowed,drug_pain,high
+IASP-001,IASP,IASP International Association for the Study of Pain pharmacological recommendations,2022,https://www.iasp-pain.org/publications/iasp-news/,,IASP,restricted-cds,drug_pain,medium
+NEUPSIG-001,NeuPSIG,NeuPSIG IASP Pharmacotherapy for Neuropathic Pain in Adults systematic review,2015,https://www.iasp-pain.org/group/neupsig/,,NeuPSIG,restricted-cds,drug_pain,high
+ESC-LIPID-DRUG-001,ESC-EAS,ESC EAS Guidelines for the Management of Dyslipidaemias lipid-lowering therapy,2019,https://academic.oup.com/eurheartj/article/41/1/111/5556353,,ESC,restricted-cds,drug_lipid_htn_diabetes,high
+AHA-LIPID-DRUG-001,AHA,AHA ACC Guideline on the Management of Blood Cholesterol,2018,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000625,,AHA,restricted-cds,drug_lipid_htn_diabetes,high
+NICE-LIPID-DRUG-001,NICE,NICE CG181 Cardiovascular Disease Risk Assessment and Reduction lipid modification,2023,https://www.nice.org.uk/guidance/cg181,,Crown Copyright,restricted-cds,drug_lipid_htn_diabetes,high
+NICE-OPIOID-001,NICE,NICE NG193 Chronic Pain Primary and Secondary in over 16s pharmacological,2021,https://www.nice.org.uk/guidance/ng193,,Crown Copyright,restricted-cds,drug_pain,high
+ICH-S1-001,ICH,ICH S1 Carcinogenicity Studies of Pharmaceuticals,2012,https://www.ich.org/page/safety-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-S5-001,ICH,ICH S5 Reproductive and Developmental Toxicity,2020,https://www.ich.org/page/safety-guidelines,,ICH Open,allowed,drug_regulatory_guidance,medium
+ICH-S7A-001,ICH,ICH S7A Safety Pharmacology Studies for Human Pharmaceuticals,2000,https://www.ich.org/page/safety-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-S7B-001,ICH,ICH S7B Nonclinical Evaluation Potential for Delayed Ventricular Repolarization QT,2005,https://www.ich.org/page/safety-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+CFR-21-PART11-001,FDA,21 CFR Part 11 Electronic Records Electronic Signatures regulation,2003,https://www.ecfr.gov/current/title-21/chapter-I/subchapter-A/part-11,,Public Domain,allowed,drug_regulatory_guidance,medium
+RCUK-DRUG-001,RCUK,Resuscitation Council UK Drug List adult advanced life support,2021,https://www.resus.org.uk/library/2021-resuscitation-guidelines,,RCUK,restricted-cds,drug_critical_care,high
+RCUK-DRUG-002,RCUK,Resuscitation Council UK Drug List paediatric advanced life support,2021,https://www.resus.org.uk/library/2021-resuscitation-guidelines,,RCUK,restricted-cds,drug_critical_care,high
+RCUK-DRUG-003,RCUK,Resuscitation Council UK Drug List newborn life support,2021,https://www.resus.org.uk/library/2021-resuscitation-guidelines,,RCUK,restricted-cds,drug_critical_care,high
+ERC-DRUG-001,ERC,ERC European Resuscitation Council Drug List adult and pediatric ALS,2021,https://www.erc.edu/guidelines,,ERC,restricted-cds,drug_critical_care,high
+AHA-ACLS-DRUG-001,AHA,AHA ACLS Pharmacology cardiac arrest drug doses focused update,2020,https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines,,AHA,restricted-cds,drug_critical_care,high
+AHA-PALS-DRUG-001,AHA,AHA PALS Pediatric Advanced Life Support drug doses,2020,https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines,,AHA,restricted-cds,drug_critical_care,high
+AHA-NRP-DRUG-001,AHA,AHA NRP Neonatal Resuscitation Program drug doses,2020,https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines,,AHA,restricted-cds,drug_critical_care,high
+WHO-IMCI-DRUG-001,WHO,WHO IMCI Chart Booklet Outpatient Care Essential Drugs,2014,https://www.who.int/publications/i/item/9789241506823,,WHO Open Access,allowed,drug_pediatric,high
+ASHP-SHORT-002,ASHP,ASHP Drug Shortages Management at the Hospital Pharmacy guidance,2018,https://www.ashp.org/drug-shortages,,ASHP,restricted-cds,drug_shortage_recall,medium
+WHO-ALERT-001,WHO,WHO Medical Product Alert system substandard and falsified medicines,2024,https://www.who.int/teams/regulation-prequalification/incidents-and-SF/full-list-of-WHO-Medical-Product-Alerts,,WHO Open Access,allowed,drug_shortage_recall,high
+EMA-SHORT-001,EMA,EMA Catalogue of medicines for veterinary use shortages and supply problems,2024,https://www.ema.europa.eu/en/human-regulatory/post-authorisation/availability-medicines/shortages,,EMA Open,allowed,drug_shortage_recall,medium
+WHO-SI-001,WHO,WHO International Pharmacopoeia Ph.Int. compendium,2022,https://digicollections.net/phint/,,WHO Open Access,allowed,drug_regulatory_guidance,medium
+ICH-M2-001,ICH,ICH M2 Electronic Standards for Transmission Regulatory Information,2024,https://www.ich.org/page/multidisciplinary-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-M9-001,ICH,ICH M9 Biopharmaceutics Classification System-Based Biowaivers,2019,https://www.ich.org/page/multidisciplinary-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-M10-001,ICH,ICH M10 Bioanalytical Method Validation,2022,https://www.ich.org/page/multidisciplinary-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-M11-001,ICH,ICH M11 Clinical Electronic Structured Harmonised Protocol,2024,https://www.ich.org/page/multidisciplinary-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-M12-001,ICH,ICH M12 Drug Interaction Studies,2024,https://www.ich.org/page/multidisciplinary-guidelines,,ICH Open,allowed,drug_interactions,medium
+WHO-PHARM-001,WHO,WHO Good Pharmacy Practice GPP joint FIP statement,2011,https://www.fip.org/files/fip/WHO/GPP%20guidelines%20FIP%20publication_final.pdf,,WHO Open Access,allowed,drug_safety_practice,medium
+WHO-AMR-001,WHO,WHO Global Action Plan on Antimicrobial Resistance,2015,https://www.who.int/publications/i/item/9789241509763,,WHO Open Access,allowed,drug_antimicrobial_stewardship,high
+WHO-AMR-002,WHO,WHO Antimicrobial Stewardship Programmes Practical Toolkit,2019,https://www.who.int/publications/i/item/9789241515481,,WHO Open Access,allowed,drug_antimicrobial_stewardship,high
+WHO-AMR-003,WHO,WHO Critically Important Antimicrobials for Human Medicine 6th revision,2019,https://www.who.int/publications/i/item/9789241515528,,WHO Open Access,allowed,drug_antimicrobial_stewardship,high
+WHO-OPIOID-001,WHO,WHO Guidelines for the Pharmacological Treatment of Persisting Pain in Children,2012,https://www.who.int/publications/i/item/9789241548120,,WHO Open Access,allowed,drug_pain,medium
+WHO-OPIOID-002,WHO,WHO Community Management of Opioid Overdose Naloxone,2014,https://www.who.int/publications/i/item/9789241548816,,WHO Open Access,allowed,drug_pain,high
+WHO-MH-DRUG-001,WHO,WHO mhGAP Mental Health Gap Action Programme essential drug list mental disorders,2023,https://www.who.int/teams/mental-health-and-substance-use/treatment-care/mental-health-gap-action-programme,,WHO Open Access,allowed,drug_essential_medicines,high
+EMA-PED-001,EMA,EMA Pediatric Investigation Plan and Waiver guidelines,2024,https://www.ema.europa.eu/en/human-regulatory/research-development/paediatric-medicines/paediatric-investigation-plans,,EMA Open,allowed,drug_pediatric,medium
+EMA-GERIATRIC-001,EMA,EMA Geriatric Medicine Strategy and considerations for elderly,2018,https://www.ema.europa.eu/en/human-regulatory/research-development/scientific-guidelines/multidisciplinary/multidisciplinary-geriatrics,,EMA Open,allowed,drug_formulary,medium
+FDA-PED-001,FDA,FDA Pediatric Drug Development guidance documents,2024,https://www.fda.gov/drugs/development-resources/pediatric-research,,Public Domain,allowed,drug_pediatric,high
+FDA-PED-002,FDA,FDA Best Pharmaceuticals for Children Act BPCA labeling changes,2024,https://www.fda.gov/drugs/development-resources/pediatric-product-development,,Public Domain,allowed,drug_pediatric,high
+FDA-GERIATRIC-001,FDA,FDA Drug Use Studies in Older Adults guidance,2023,https://www.fda.gov/drugs/special-features/drug-research-and-children,,Public Domain,allowed,drug_formulary,medium
+WHO-NEONATAL-001,WHO,WHO Pocket Book of Hospital Care for Mothers Birth Care,2017,https://www.who.int/publications/i/item/9789241565448,,WHO Open Access,allowed,drug_pediatric,high
+LACTMED-WARFARIN-001,LactMed,LactMed Warfarin in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501113/,,Public Domain,allowed,drug_pregnancy_lactation,low
+LACTMED-HEPARIN-001,LactMed,LactMed Heparin in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501112/,,Public Domain,allowed,drug_pregnancy_lactation,low
+LACTMED-LITHIUM-001,LactMed,LactMed Lithium in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501144/,,Public Domain,allowed,drug_pregnancy_lactation,medium
+LACTMED-FLUOXETINE-001,LactMed,LactMed Fluoxetine in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501190/,,Public Domain,allowed,drug_pregnancy_lactation,medium
+LACTMED-METHYLDOPA-001,LactMed,LactMed Methyldopa in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501122/,,Public Domain,allowed,drug_pregnancy_lactation,low
+LACTMED-INSULIN-001,LactMed,LactMed Insulin in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501335/,,Public Domain,allowed,drug_pregnancy_lactation,medium
+LACTMED-LEVOTHYROXINE-001,LactMed,LactMed Levothyroxine in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501074/,,Public Domain,allowed,drug_pregnancy_lactation,medium
+LACTMED-PRENISOLONE-001,LactMed,LactMed Prednisolone in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501077/,,Public Domain,allowed,drug_pregnancy_lactation,medium
+LACTMED-AZITHROMYCIN-001,LactMed,LactMed Azithromycin in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK500561/,,Public Domain,allowed,drug_pregnancy_lactation,low
+LACTMED-CIPROFLOXACIN-001,LactMed,LactMed Ciprofloxacin in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK500766/,,Public Domain,allowed,drug_pregnancy_lactation,low
+LACTMED-METRONIDAZOLE-001,LactMed,LactMed Metronidazole in lactation,2024,https://www.ncbi.nlm.nih.gov/books/NBK501153/,,Public Domain,allowed,drug_pregnancy_lactation,low
+LIVERTOX-AMOXICILLIN-001,LiverTox,LiverTox Amoxicillin Clavulanate hepatotoxicity monograph,2024,https://www.ncbi.nlm.nih.gov/books/NBK548517/,,Public Domain,allowed,drug_renal_hepatic_dosing,medium
+LIVERTOX-ISONIAZID-001,LiverTox,LiverTox Isoniazid hepatotoxicity monograph,2024,https://www.ncbi.nlm.nih.gov/books/NBK548754/,,Public Domain,allowed,drug_renal_hepatic_dosing,medium
+LIVERTOX-METHOTREXATE-001,LiverTox,LiverTox Methotrexate hepatotoxicity monograph,2024,https://www.ncbi.nlm.nih.gov/books/NBK548219/,,Public Domain,allowed,drug_renal_hepatic_dosing,medium
+LIVERTOX-VALPROATE-001,LiverTox,LiverTox Valproate hepatotoxicity monograph,2024,https://www.ncbi.nlm.nih.gov/books/NBK547852/,,Public Domain,allowed,drug_renal_hepatic_dosing,medium
+LIVERTOX-NSAID-001,LiverTox,LiverTox NSAIDs hepatotoxicity overview,2024,https://www.ncbi.nlm.nih.gov/books/NBK548614/,,Public Domain,allowed,drug_renal_hepatic_dosing,low
+LIVERTOX-STATIN-001,LiverTox,LiverTox HMG-CoA Reductase Inhibitors statins hepatotoxicity overview,2024,https://www.ncbi.nlm.nih.gov/books/NBK548021/,,Public Domain,allowed,drug_renal_hepatic_dosing,medium
+WHO-DRUGREG-001,WHO,WHO Guidelines on the Conduct of Bioequivalence Studies,2017,https://www.who.int/publications/m/item/trs1003-annex6,,WHO Open Access,allowed,drug_regulatory_guidance,low
+WHO-DRUGREG-002,WHO,WHO Guidelines on Active Pharmaceutical Ingredient master file procedure,2018,https://www.who.int/publications/m/item/trs1010-annex5,,WHO Open Access,allowed,drug_regulatory_guidance,low
+WHO-DRUGREG-003,WHO,WHO Procedure for Prequalification of Pharmaceutical Products,2017,https://www.who.int/publications/m/item/trs1003-annex10,,WHO Open Access,allowed,drug_regulatory_guidance,medium
+EMA-BIOSIM-001,EMA,EMA Biosimilars in the EU Information Guide for Healthcare Professionals,2019,https://www.ema.europa.eu/en/documents/leaflet/biosimilars-eu-information-guide-healthcare-professionals_en.pdf,,EMA Open,allowed,drug_regulatory_guidance,medium
+FDA-BIOSIM-001,FDA,FDA Biosimilar and Interchangeable Products,2024,https://www.fda.gov/drugs/biosimilars,,Public Domain,allowed,drug_regulatory_guidance,medium
+ASHP-NEONATAL-001,ASHP,ASHP Pediatric and Neonatal Drug Information Pediatric Lexi-Drugs,2024,https://www.ashp.org/,,ASHP,restricted,drug_pediatric,high
+WHO-MENTAL-001,WHO,WHO Pharmacological Treatment of Mental Disorders in Primary Health Care,2009,https://www.who.int/publications/i/item/9789241547697,,WHO Open Access,allowed,drug_essential_medicines,medium
+SHEA-IDSA-STEW-001,IDSA,IDSA SHEA PIDS Implementing an Antibiotic Stewardship Program,2016,https://www.idsociety.org/practice-guideline/implementing-an-antibiotic-stewardship-program/,,IDSA,restricted-cds,drug_antimicrobial_stewardship,high
+IDSA-CANDIDA-001,IDSA,IDSA Clinical Practice Guideline for the Management of Candidiasis update,2016,https://www.idsociety.org/practice-guideline/candidiasis/,,IDSA,restricted-cds,drug_antimicrobial_stewardship,high
+IDSA-ASPER-001,IDSA,IDSA Practice Guidelines for the Diagnosis and Management of Aspergillosis,2016,https://www.idsociety.org/practice-guideline/aspergillosis/,,IDSA,restricted-cds,drug_antimicrobial_stewardship,high
+IDSA-CRYPTO-001,IDSA,IDSA Clinical Practice Guidelines for the Management of Cryptococcal Disease,2010,https://www.idsociety.org/practice-guideline/cryptococcal-disease/,,IDSA,restricted-cds,drug_antimicrobial_stewardship,medium
+NICE-DRUG-MISUSE-001,NICE,NICE CG52 Drug Misuse in Over 16s Opioid Detoxification,2007,https://www.nice.org.uk/guidance/cg52,,Crown Copyright,restricted-cds,drug_pain,medium
+NICE-DRUG-MISUSE-002,NICE,NICE CG51 Drug Misuse in Over 16s Psychosocial Interventions,2007,https://www.nice.org.uk/guidance/cg51,,Crown Copyright,restricted-cds,drug_pain,low
+EMA-PRAC-001,EMA,EMA PRAC list of safety signals under evaluation,2024,https://www.ema.europa.eu/en/human-regulatory/post-authorisation/pharmacovigilance/signal-management,,EMA Open,allowed,drug_pharmacovigilance,high
+WHO-ALERT-002,WHO,WHO Drug Information regulatory news section,2024,https://www.who.int/teams/regulation-prequalification/regulation-and-safety/pharmacovigilance,,WHO Open Access,allowed,drug_pharmacovigilance,medium
+ASHP-DEPRESCRIBE-001,ASHP,ASHP Resources on Deprescribing in Older Adults,2024,https://www.ashp.org/,,ASHP,restricted-cds,drug_formulary,medium
+BEERS-001,AGS,AGS Beers Criteria for Potentially Inappropriate Medication Use in Older Adults,2023,https://www.americangeriatrics.org/publications-tools/clinical-guidelines-recommendations,,AGS,restricted-cds,drug_formulary,high
+STOPP-START-001,EUGMS,STOPP START Criteria version 3 European screening tool prescribing in older adults,2023,https://www.eugms.org/publications/stopp-start.html,,EUGMS,restricted-cds,drug_formulary,high
+ASHP-SUPPORT-001,ASHP,ASHP Therapeutic Position Statements drug class summaries,2024,https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines,,ASHP,restricted-cds,drug_formulary,medium
+WHO-DRUG-PED-001,WHO,WHO Guidance on Better Medicines for Children technical report,2011,https://www.who.int/publications/i/item/9789241502146,,WHO Open Access,allowed,drug_pediatric,high
+WHO-DRUG-PED-002,WHO,WHO Promoting Safety of Medicines for Children,2007,https://www.who.int/publications/i/item/9789241563437,,WHO Open Access,allowed,drug_pediatric,medium
+EMA-NANO-001,EMA,EMA Reflection paper on nanomedicines and nanosimilars,2017,https://www.ema.europa.eu/en/human-regulatory/research-development/scientific-guidelines,,EMA Open,allowed,drug_regulatory_guidance,low
+ICH-Q4-001,ICH,ICH Q4B Pharmacopoeial Texts Regulatory Acceptance,2008,https://www.ich.org/page/quality-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-Q5-001,ICH,ICH Q5A Q5E Quality of Biotechnological Products,2018,https://www.ich.org/page/quality-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-Q6-001,ICH,ICH Q6A Q6B Specifications Test Procedures and Acceptance Criteria,1999,https://www.ich.org/page/quality-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-Q8-001,ICH,ICH Q8 R2 Pharmaceutical Development,2009,https://www.ich.org/page/quality-guidelines,,ICH Open,allowed,drug_quality_guidance,low
+ICH-Q11-001,ICH,ICH Q11 Development and Manufacture of Drug Substances,2012,https://www.ich.org/page/quality-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ASHP-PEDS-DOSE-001,ASHP,ASHP Pediatric Dosage Handbook 28th edition,2023,https://www.ashp.org/,,ASHP,restricted,drug_pediatric,high
+LEXICOMP-001,Lexicomp,Lexicomp Drug Information clinical drug reference,2024,https://www.wolterskluwer.com/en/solutions/lexicomp,,Wolters Kluwer,restricted,drug_formulary,high
+LEXICOMP-002,Lexicomp,Lexicomp Pediatric and Neonatal Lexi-Drugs,2024,https://www.wolterskluwer.com/en/solutions/lexicomp,,Wolters Kluwer,restricted,drug_pediatric,high
+LEXICOMP-003,Lexicomp,Lexicomp Drug Interactions Module,2024,https://www.wolterskluwer.com/en/solutions/lexicomp,,Wolters Kluwer,restricted,drug_interactions,high
+MICROMEDEX-001,Micromedex,Micromedex DRUGDEX comprehensive drug evaluation,2024,https://www.merative.com/clinical-decision-support,,Merative,restricted,drug_formulary,high
+MICROMEDEX-002,Micromedex,Micromedex IV Compatibility,2024,https://www.merative.com/clinical-decision-support,,Merative,restricted,drug_compounding,high
+MICROMEDEX-003,Micromedex,Micromedex Reproductive Effects database,2024,https://www.merative.com/clinical-decision-support,,Merative,restricted,drug_pregnancy_lactation,medium
+MICROMEDEX-004,Micromedex,Micromedex Poisindex toxicology database,2024,https://www.merative.com/clinical-decision-support,,Merative,restricted,drug_critical_care,high
+EPOCRATES-001,Epocrates,Epocrates Drug Reference and Interaction Checker,2024,https://www.epocrates.com/,,Athenahealth,restricted,drug_formulary,medium
+NLM-DAILYMED-001,DailyMed,DailyMed NIH NLM official prescribing information SPL,2024,https://dailymed.nlm.nih.gov/dailymed/,,Public Domain,allowed,drug_formulary,high
+NLM-DAILYMED-002,DailyMed,DailyMed Drug Label search FDA approved labels,2024,https://dailymed.nlm.nih.gov/dailymed/,,Public Domain,allowed,drug_formulary,high
+RXNAV-001,RxNav,RxNav RxNorm Drug Vocabulary NIH NLM,2024,https://lhncbc.nlm.nih.gov/RxNav/,,Public Domain,allowed,drug_formulary,medium
+NDF-RT-001,VA,VA NDF-RT National Drug File Reference Terminology,2023,https://www.nlm.nih.gov/research/umls/sourcereleasedocs/current/NDFRT/,,Public Domain,allowed,drug_formulary,low
+SIDP-001,SIDP,SIDP Society of Infectious Diseases Pharmacists practice resources,2024,https://sidp.org/,,SIDP,restricted-cds,drug_antimicrobial_stewardship,medium
+SIDP-002,SIDP,SIDP Antimicrobial Stewardship Certificate Program resources,2024,https://sidp.org/Stewardship-Certificate,,SIDP,restricted-cds,drug_antimicrobial_stewardship,medium
+PIDS-DRUG-001,PIDS,PIDS Pediatric Infectious Diseases Society antimicrobial stewardship recommendations,2017,https://pids.org/clinical-practice/clinical-guidelines/,,PIDS,restricted-cds,drug_pediatric,high
+ESCMID-DRUG-001,ESCMID,ESCMID Antimicrobial Stewardship guidelines and resources,2024,https://www.escmid.org/research_projects/study_groups/study_groups_g_n/,,ESCMID,restricted-cds,drug_antimicrobial_stewardship,medium
+ESCMID-DRUG-002,ESCMID,ESCMID European Committee on Antimicrobial Susceptibility Testing EUCAST clinical breakpoints,2024,https://www.eucast.org/clinical_breakpoints/,,ESCMID,restricted-cds,drug_antimicrobial_stewardship,high
+CLSI-DRUG-001,CLSI,CLSI M100 Performance Standards for Antimicrobial Susceptibility Testing,2024,https://clsi.org/standards/products/microbiology/documents/m100/,,CLSI,restricted,drug_antimicrobial_stewardship,high
+CLSI-DRUG-002,CLSI,CLSI M60 Performance Standards for Antifungal Susceptibility Testing,2022,https://clsi.org/standards/products/microbiology/documents/m60/,,CLSI,restricted,drug_antimicrobial_stewardship,medium
+WHO-INSULIN-001,WHO,WHO Recommendations Insulin Access and Use,2021,https://www.who.int/publications/i/item/9789240035683,,WHO Open Access,allowed,drug_lipid_htn_diabetes,medium
+WHO-CV-DRUG-001,WHO,WHO HEARTS Technical Package Drug-Based Treatment for Cardiovascular Disease,2018,https://www.who.int/publications/i/item/who-noncommunicable-diseases-hearts-technical-package,,WHO Open Access,allowed,drug_lipid_htn_diabetes,high
+EMA-NEURO-DRUG-001,EMA,EMA Guideline on clinical investigation of medicinal products in epilepsy,2010,https://www.ema.europa.eu/en/clinical-investigation-medicinal-products-treatment-epileptic-disorders,,EMA Open,allowed,drug_regulatory_guidance,low
+NICE-FORMULARY-001,NICE,NICE Drug class evidence reviews and technology appraisals,2024,https://www.nice.org.uk/guidance,,Crown Copyright,restricted-cds,drug_formulary,high
+SMC-001,SMC,SMC Scottish Medicines Consortium drug technology appraisals,2024,https://www.scottishmedicines.org.uk/medicines-advice/,,Crown Copyright,restricted-cds,drug_formulary,medium
+AWMSG-001,AWMSG,AWMSG All Wales Medicines Strategy Group appraisals,2024,https://awmsg.nhs.wales/,,Crown Copyright,restricted-cds,drug_formulary,low
+HAS-DRUG-001,HAS,HAS Haute Autorite de Sante Commission de la Transparence drug evaluations,2024,https://www.has-sante.fr/jcms/c_412210/fr/medicaments,,HAS,restricted-cds,drug_formulary,high
+G-BA-001,G-BA,G-BA Federal Joint Committee Germany drug benefit assessments AMNOG,2024,https://www.g-ba.de/english/,,G-BA Open,allowed,drug_formulary,medium
+PBS-001,PBAC,PBAC Pharmaceutical Benefits Advisory Committee Australia,2024,https://www.pbs.gov.au/info/industry/listing/elements/pbac-meetings,,Public Domain,allowed,drug_formulary,medium
+CADTH-001,CADTH,CADTH Canadian Agency for Drugs and Technologies in Health drug reviews,2024,https://www.cadth.ca/,,Public Domain,allowed,drug_formulary,high
+WHOCC-001,WHOCC,WHOCC Anatomical Therapeutic Chemical ATC classification system,2024,https://www.whocc.no/atc_ddd_index/,,WHO Open Access,allowed,drug_formulary,high
+WHOCC-002,WHOCC,WHOCC Defined Daily Dose DDD methodology,2024,https://www.whocc.no/ddd/,,WHO Open Access,allowed,drug_formulary,medium
+ATC-VET-001,WHOCC,WHOCC ATCvet Anatomical Therapeutic Chemical veterinary,2024,https://www.whocc.no/atcvet/,,WHO Open Access,allowed,drug_formulary,low
+SNOMED-DRUG-001,SNOMED,SNOMED CT Pharmaceutical Biologic Product subset,2024,https://www.snomed.org/snomed-ct,,SNOMED,restricted,drug_formulary,medium
+ICD-DRUG-001,WHO,WHO ICD-11 chapter on adverse drug reactions and poisoning,2024,https://icd.who.int/browse11,,WHO Open Access,allowed,drug_pharmacovigilance,medium
+MEDDRA-001,MedDRA,MedDRA Medical Dictionary for Regulatory Activities,2024,https://www.meddra.org/,,MedDRA,restricted,drug_pharmacovigilance,high
+CDC-IMMUNE-DRUG-001,CDC,CDC Treatment of Patients Bitten by Animals Rabies Postexposure Prophylaxis,2022,https://www.cdc.gov/rabies/medical_care/index.html,,Public Domain,allowed,drug_specialty_hiv_hcv_tb,medium
+WHO-MAL-DRUG-001,WHO,WHO Guidelines for the Treatment of Malaria 3rd edition,2021,https://www.who.int/publications/i/item/guidelines-for-the-treatment-of-malaria,,WHO Open Access,allowed,drug_specialty_hiv_hcv_tb,high
+WHO-LEPRO-001,WHO,WHO Guidelines for the Diagnosis Treatment and Prevention of Leprosy,2018,https://www.who.int/publications/i/item/9789290226383,,WHO Open Access,allowed,drug_specialty_hiv_hcv_tb,medium
+WHO-NTD-DRUG-001,WHO,WHO Essential Medicines for Neglected Tropical Diseases,2023,https://www.who.int/teams/control-of-neglected-tropical-diseases,,WHO Open Access,allowed,drug_essential_medicines,medium
+ANTICOAG-001,ACCP,CHEST American College of Chest Physicians Antithrombotic Therapy guidelines,2022,https://www.chestnet.org/Guidelines-and-Resources,,CHEST,restricted-cds,drug_critical_care,high
+ANTICOAG-002,ASH,ASH 2018 Guidelines for Management of Venous Thromboembolism,2018,https://www.hematology.org/education/clinicians/guidelines-and-quality-care/clinical-practice-guidelines/venous-thromboembolism-guidelines,,ASH,restricted-cds,drug_critical_care,high
+ANTIDOTE-001,ACMT,ACMT Antidote Stocking position statement and recommendations,2018,https://www.acmt.net/position-statements/,,ACMT Open,allowed,drug_critical_care,high
+ANTIDOTE-002,EAPCCT,EAPCCT European Association of Poisons Centres Antidote position papers,2023,https://www.eapcct.org/index.php?page=position,,EAPCCT,restricted-cds,drug_critical_care,medium
+INFUSED-001,INS,INS Infusion Therapy Standards of Practice,2024,https://www.ins1.org/,,INS,restricted-cds,drug_compounding,high
+WHO-IV-001,WHO,WHO Best Practices for Injections and Related Procedures Toolkit,2010,https://www.who.int/publications/i/item/9789241599252,,WHO Open Access,allowed,drug_safety_practice,medium
+ASHP-VAC-001,ASHP,ASHP Guidelines on Outsourcing Sterile Compounding Services,2017,https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines,,ASHP,restricted-cds,drug_compounding,medium
+WHO-COMP-001,WHO,WHO Quality Assurance of Pharmaceuticals Compendium guidelines and related materials,2018,https://www.who.int/publications/i/item/9789241513586,,WHO Open Access,allowed,drug_regulatory_guidance,low
+EMA-IRAE-001,EMA,EMA scientific guideline on management of immune-related adverse reactions,2023,https://www.ema.europa.eu/en/human-regulatory/research-development/scientific-guidelines,,EMA Open,allowed,drug_oncology,medium
+ESMO-EVIDENCE-001,ESMO,ESMO Magnitude of Clinical Benefit Scale ESMO-MCBS,2017,https://www.esmo.org/guidelines/esmo-mcbs,,ESMO,restricted-cds,drug_oncology,medium
+ASCO-SAFETY-001,ASCO,ASCO Safe Handling of Hazardous Drugs in Oncology Practice,2022,https://ascopubs.org/doi/10.1200/OP.21.00833,,ASCO,restricted-cds,drug_compounding,high
+ONCO-DRUG-EXTRAVAS-001,EONS,EONS European Oncology Nursing Society Guidelines for Extravasation Management,2018,https://www.cancernurse.eu/research/extravasation/,,EONS,restricted-cds,drug_oncology,medium
+SCCM-VTE-001,SCCM,SCCM ASHP ACCP Society of Critical Care Medicine VTE prophylaxis ICU,2018,https://www.sccm.org/Clinical-Resources/Guidelines,,SCCM,restricted-cds,drug_critical_care,medium
+SCCM-NUT-DRUG-001,SCCM,SCCM ASPEN Critical Care Nutrition drug-nutrient interactions,2022,https://www.sccm.org/Clinical-Resources/Guidelines,,SCCM,restricted-cds,drug_critical_care,medium
+WHO-WAH-001,WHO,WHO World Alliance for Patient Safety High 5s project medication safety solutions,2014,https://www.who.int/initiatives/high-5s-project,,WHO Open Access,allowed,drug_safety_practice,medium
+WHO-PAT-SAFE-001,WHO,WHO Patient Safety Curriculum Guide medication safety module,2011,https://www.who.int/publications/i/item/9789241501958,,WHO Open Access,allowed,drug_safety_practice,medium
+ASHP-SUBQ-001,ASHP,ASHP Standardize 4 Safety Subcutaneous Continuous Infusions,2023,https://www.ashp.org/Pharmacy-Practice/Standardize-4-Safety-Initiative,,ASHP,restricted-cds,drug_safety_practice,medium
+ASHP-IM-001,ASHP,ASHP Standardize 4 Safety Intramuscular Injections,2023,https://www.ashp.org/Pharmacy-Practice/Standardize-4-Safety-Initiative,,ASHP,restricted-cds,drug_safety_practice,low
+ESC-AF-DRUG-001,ESC,ESC Guidelines for management of atrial fibrillation antithrombotic and rate control,2024,https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines/Atrial-Fibrillation-Management,,ESC,restricted-cds,drug_critical_care,high
+NICE-AF-DRUG-001,NICE,NICE NG196 Atrial Fibrillation Diagnosis and Management,2021,https://www.nice.org.uk/guidance/ng196,,Crown Copyright,restricted-cds,drug_critical_care,high
+SAMHSA-PREG-001,SAMHSA,SAMHSA Clinical Guidance for Treating Pregnant and Parenting Women with Opioid Use,2018,https://store.samhsa.gov/product/Clinical-Guidance-for-Treating-Pregnant-and-Parenting-Women-With-Opioid-Use-Disorder/SMA18-5054,,Public Domain,allowed,drug_pregnancy_lactation,high
+ADA-DRUG-PREG-001,ADA,ADA Standards of Care Diabetes Pregnancy pharmacotherapy section,2024,https://diabetesjournals.org/care,,ADA,restricted-cds,drug_pregnancy_lactation,high
+NICE-PREG-DM-001,NICE,NICE NG3 Diabetes in pregnancy management from preconception to postnatal,2020,https://www.nice.org.uk/guidance/ng3,,Crown Copyright,restricted-cds,drug_pregnancy_lactation,high
+USPSTF-DRUG-PREG-001,USPSTF,USPSTF Aspirin Use to Prevent Preeclampsia and Related Morbidity recommendation,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/low-dose-aspirin-use-for-the-prevention-of-morbidity-and-mortality-from-preeclampsia-preventive-medication,,Public Domain,allowed,drug_pregnancy_lactation,high
+USPSTF-FOLIC-001,USPSTF,USPSTF Folic Acid Supplementation to Prevent Neural Tube Defects recommendation,2023,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/folic-acid-for-the-prevention-of-neural-tube-defects-preventive-medication,,Public Domain,allowed,drug_pregnancy_lactation,high
+WHO-MAT-DRUG-001,WHO,WHO Recommendations on Antenatal Care for a Positive Pregnancy Experience,2016,https://www.who.int/publications/i/item/9789241549912,,WHO Open Access,allowed,drug_pregnancy_lactation,high
+ESC-PREG-DRUG-001,ESC,ESC Guidelines for the Management of Cardiovascular Diseases during Pregnancy,2018,https://academic.oup.com/eurheartj/article/39/34/3165/5078465,,ESC,restricted-cds,drug_pregnancy_lactation,high
+ASRA-PAIN-001,ASRA,ASRA Pain Medicine Acute Pain Management in Patients on Opioid Use Disorder Therapy,2021,https://www.asra.com/practice-resources/asra-news/asra-news-issues,,ASRA,restricted-cds,drug_pain,high
+APS-001,APS,APS American Pain Society Guideline for Use of Chronic Opioid Therapy,2009,https://americanpainsociety.org/,,APS,restricted-cds,drug_pain,medium
+WHO-DRUG-LAB-001,WHO,WHO Guidelines on Good Manufacturing Practices for Pharmaceutical Products,2014,https://www.who.int/publications/m/item/trs986-annex2,,WHO Open Access,allowed,drug_regulatory_guidance,low
+EMA-RWD-001,EMA,EMA Real-World Evidence Framework guidelines,2024,https://www.ema.europa.eu/en/human-regulatory/research-development/real-world-evidence,,EMA Open,allowed,drug_regulatory_guidance,medium
+FDA-RWD-001,FDA,FDA Real-World Evidence Framework guidance for industry,2023,https://www.fda.gov/regulatory-information/search-fda-guidance-documents/real-world-data-and-real-world-evidence,,Public Domain,allowed,drug_regulatory_guidance,medium
+EMA-PROBLEMATIC-001,EMA,EMA Public statement on falsified medicines and unauthorized products,2024,https://www.ema.europa.eu/en/news,,EMA Open,allowed,drug_shortage_recall,low
+WHO-IMMUNO-001,WHO,WHO Position Papers on Vaccines and Immunoglobulins drug profiles,2024,https://www.who.int/teams/immunization-vaccines-and-biologicals/policies/position-papers,,WHO Open Access,allowed,drug_essential_medicines,high
+WHO-CONTRA-001,WHO,WHO Medical Eligibility Criteria for Contraceptive Use 5th edition drug-related,2015,https://www.who.int/publications/i/item/9789241549158,,WHO Open Access,allowed,drug_pregnancy_lactation,high
+WHO-CONTRA-002,WHO,WHO Selected Practice Recommendations for Contraceptive Use 3rd edition,2016,https://www.who.int/publications/i/item/9789241565400,,WHO Open Access,allowed,drug_pregnancy_lactation,high
+EUCAST-001,EUCAST,EUCAST Clinical Breakpoints bacterial table,2024,https://www.eucast.org/clinical_breakpoints/,,EUCAST,restricted-cds,drug_antimicrobial_stewardship,high
+EUCAST-002,EUCAST,EUCAST Antifungal Clinical Breakpoints table,2024,https://www.eucast.org/astoffungi/clinicalbreakpointsforantifungals/,,EUCAST,restricted-cds,drug_antimicrobial_stewardship,high
+WHO-ASTHMA-DRUG-001,WHO,WHO Package of Essential Asthma Interventions step-up therapy,2021,https://www.who.int/publications/i/item/9789240037762,,WHO Open Access,allowed,drug_essential_medicines,medium
+GINA-DRUG-001,GINA,GINA Pocket Guide for Asthma drug step therapy,2024,https://ginasthma.org/pocket-guide-for-asthma-management-and-prevention/,,GINA,restricted-cds,drug_lipid_htn_diabetes,high
+GOLD-DRUG-001,GOLD,GOLD Pocket Guide to COPD Diagnosis Management Prevention pharmacotherapy,2024,https://goldcopd.org/2024-gold-report/,,GOLD,restricted-cds,drug_lipid_htn_diabetes,high
+WHO-NCD-DRUG-001,WHO,WHO Package of Essential NCD Interventions PEN essential medicines for primary care,2020,https://www.who.int/publications/i/item/9789240009226,,WHO Open Access,allowed,drug_essential_medicines,high
+SAFE-INJECT-001,WHO,WHO Safe Injection Global Network guidance,2018,https://www.who.int/teams/integrated-health-services/infection-prevention-control/injection-safety,,WHO Open Access,allowed,drug_safety_practice,medium
+ICH-E11-001,ICH,ICH E11 R1 Clinical Investigation of Medicinal Products in the Pediatric Population,2017,https://www.ich.org/page/efficacy-guidelines,,ICH Open,allowed,drug_pediatric,medium
+ICH-E11A-001,ICH,ICH E11A Pediatric Extrapolation,2024,https://www.ich.org/page/efficacy-guidelines,,ICH Open,allowed,drug_pediatric,medium
+EMA-PED-DRUG-002,EMA,EMA Guideline on pharmaceutical development of medicines for paediatric use,2013,https://www.ema.europa.eu/en/pharmaceutical-development-medicines-paediatric-use,,EMA Open,allowed,drug_pediatric,medium
+WHO-VAC-DRUG-001,WHO,WHO Vaccine Position Papers reference list,2024,https://www.who.int/teams/immunization-vaccines-and-biologicals/policies/position-papers,,WHO Open Access,allowed,drug_essential_medicines,medium
+ASHP-IRAE-001,ASHP,ASHP Therapeutic Position Statement Immune-Related Adverse Events,2022,https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines,,ASHP,restricted-cds,drug_oncology,medium
+NICE-DEPRES-001,NICE,NICE NG222 Medicines associated with dependence or withdrawal,2022,https://www.nice.org.uk/guidance/ng215,,Crown Copyright,restricted-cds,drug_pain,high
+NICE-MEDOPT-001,NICE,NICE NG5 Medicines optimisation safe and effective use,2015,https://www.nice.org.uk/guidance/ng5,,Crown Copyright,restricted-cds,drug_safety_practice,high
+NICE-MED-RECON-001,NICE,NICE NG67 Managing medicines for adults receiving social care in the community,2017,https://www.nice.org.uk/guidance/ng67,,Crown Copyright,restricted-cds,drug_safety_practice,medium
+NICE-CONTROLLED-001,NICE,NICE NG46 Controlled drugs safe use and management,2016,https://www.nice.org.uk/guidance/ng46,,Crown Copyright,restricted-cds,drug_safety_practice,high
+ASHP-MED-USE-EVAL-001,ASHP,ASHP Guidelines on Medication Use Evaluation,2010,https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines,,ASHP,restricted-cds,drug_safety_practice,low
+WHO-RATIONAL-001,WHO,WHO Promoting Rational Use of Medicines core components,2002,https://apps.who.int/iris/handle/10665/67438,,WHO Open Access,allowed,drug_safety_practice,medium
+WHO-PHARMNET-001,WHO,WHO Programme for International Drug Monitoring members states,2024,https://who-umc.org/who-programme/who-programme-members/,,WHO Open Access,allowed,drug_pharmacovigilance,low
+ICH-M4-001,ICH,ICH M4 Common Technical Document CTD,2016,https://www.ich.org/page/multidisciplinary-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-M7-001,ICH,ICH M7 R1 Assessment and Control of DNA Reactive Mutagenic Impurities,2017,https://www.ich.org/page/multidisciplinary-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+ICH-M8-001,ICH,ICH M8 Electronic Common Technical Document eCTD,2024,https://www.ich.org/page/multidisciplinary-guidelines,,ICH Open,allowed,drug_regulatory_guidance,low
+EMA-CARDIO-DRUG-001,EMA,EMA Clinical investigation of medicinal products for the treatment of heart failure,2017,https://www.ema.europa.eu/en/clinical-investigation-medicinal-products-treatment-chronic-heart-failure,,EMA Open,allowed,drug_regulatory_guidance,low
+FDA-DDI-PHYSI-001,FDA,FDA In Vitro Drug Interaction Studies Cytochrome P450 Enzyme- and Transporter-Mediated guidance,2020,https://www.fda.gov/regulatory-information/search-fda-guidance-documents/vitro-drug-interaction-studies-cytochrome-p450-enzyme-and-transporter-mediated-drug-interactions,,Public Domain,allowed,drug_interactions,high
+FDA-DDI-PHYSI-002,FDA,FDA Clinical Drug Interaction Studies Cytochrome P450 Enzyme- and Transporter-Mediated guidance,2020,https://www.fda.gov/regulatory-information/search-fda-guidance-documents/clinical-drug-interaction-studies-cytochrome-p450-enzyme-and-transporter-mediated-drug-interactions,,Public Domain,allowed,drug_interactions,high
+NIH-CLINICALINFO-001,NIH,NIH ClinicalInfo HIV opportunistic infections drug guidance,2024,https://clinicalinfo.hiv.gov/,,Public Domain,allowed,drug_specialty_hiv_hcv_tb,high
+NIH-COVID-001,NIH,NIH COVID-19 Treatment Guidelines drug recommendations,2024,https://www.covid19treatmentguidelines.nih.gov/,,Public Domain,allowed,drug_specialty_hiv_hcv_tb,high
+IDSA-COVID-001,IDSA,IDSA Guidelines on the Treatment and Management of COVID-19,2023,https://www.idsociety.org/practice-guideline/covid-19-guideline-treatment-and-management/,,IDSA,restricted-cds,drug_specialty_hiv_hcv_tb,high
+IDSA-FLU-001,IDSA,IDSA Clinical Practice Guidelines for Seasonal Influenza antiviral therapy,2018,https://www.idsociety.org/practice-guideline/influenza/,,IDSA,restricted-cds,drug_specialty_hiv_hcv_tb,high
+IDSA-CDIFF-001,IDSA,IDSA SHEA Clinical Practice Guidelines for Clostridioides difficile Infection,2021,https://www.idsociety.org/practice-guideline/clostridioides-difficile-2021-focused-update/,,IDSA,restricted-cds,drug_antimicrobial_stewardship,high
+IDSA-MRSA-001,IDSA,IDSA Clinical Practice Guidelines for Treatment of MRSA Infections,2011,https://www.idsociety.org/practice-guideline/mrsa/,,IDSA,restricted-cds,drug_antimicrobial_stewardship,high
+WHO-NEONATAL-DRUG-001,WHO,WHO Recommendations on Newborn Health drug interventions,2017,https://www.who.int/publications/i/item/who-recommendations-on-newborn-health,,WHO Open Access,allowed,drug_pediatric,high
+PIDS-VAN-001,PIDS,PIDS IDSA SIDP ASHP Therapeutic Monitoring of Vancomycin in Pediatric Patients,2020,https://academic.oup.com/jpids/article/9/2/138/5715608,,PIDS,restricted-cds,drug_pediatric,high
+ESPID-001,ESPID,ESPID European Society for Paediatric Infectious Diseases consensus on antimicrobial dosing,2020,https://www.espid.org/,,ESPID,restricted-cds,drug_pediatric,medium
+WHO-EBP-001,WHO,WHO Essential Biological Products list,2023,https://www.who.int/teams/health-product-policy-and-standards/standards-and-specifications,,WHO Open Access,allowed,drug_essential_medicines,medium
+SAMHSA-MAT-PREG-001,SAMHSA,SAMHSA TIP 43 Medication-Assisted Treatment for Opioid Addiction in Pregnancy,2018,https://store.samhsa.gov/,,Public Domain,allowed,drug_pregnancy_lactation,medium
+MSF-DRUG-001,MSF,MSF Essential Drugs Practical Guide for prescribers,2024,https://medicalguidelines.msf.org/viewport/EssDr/english/essential-drugs-23443367.html,,MSF Open,allowed,drug_essential_medicines,high
+MSF-DRUG-002,MSF,MSF Clinical Guidelines diagnosis and treatment manual essential drugs,2024,https://medicalguidelines.msf.org/viewport/CG/english/clinical-guidelines-diagnosis-and-treatment-manual-16686604.html,,MSF Open,allowed,drug_essential_medicines,high
+MSF-DRUG-003,MSF,MSF Tuberculosis Practical Guide for clinicians nurses laboratory technicians and medical auxiliaries,2024,https://medicalguidelines.msf.org/viewport/TUB/english/tuberculosis-practical-guide-23444673.html,,MSF Open,allowed,drug_specialty_hiv_hcv_tb,high
+GAVI-DRUG-001,GAVI,GAVI Alliance vaccine and immunization product list,2024,https://www.gavi.org/programmes-impact/types-support/vaccine-support,,GAVI Open,allowed,drug_essential_medicines,low
+GLOBAL-FUND-DRUG-001,Global-Fund,Global Fund List of Pharmaceutical Products HIV TB Malaria,2024,https://www.theglobalfund.org/en/sourcing-management/quality-assurance/medicines/,,Global Fund Open,allowed,drug_essential_medicines,medium
+UNICEF-DRUG-001,UNICEF,UNICEF Supply Catalogue essential medicines for children,2024,https://supply.unicef.org/medicines.html,,UNICEF Open,allowed,drug_pediatric,medium
+ASHP-VTE-001,ASHP,ASHP Therapeutic Position Statement on the Use of Direct Oral Anticoagulants,2022,https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines,,ASHP,restricted-cds,drug_critical_care,medium
+ACR-DRUG-001,ACR,ACR American College of Rheumatology DMARDs guideline reference,2021,https://rheumatology.org/clinical-practice-guidelines,,ACR,restricted-cds,drug_specialty_hiv_hcv_tb,medium
+NCCN-IRAE-001,NCCN,NCCN Management of Immunotherapy-Related Toxicities,2024,https://www.nccn.org/professionals/physician_gls/default.aspx,,NCCN,restricted-cds,drug_oncology,high
+WHO-LIST-DRUG-DEVICE-001,WHO,WHO Compendium of innovative health technologies for low-resource settings,2022,https://www.who.int/teams/health-product-policy-and-standards/assistive-and-medical-technology/medical-devices/innovative-technologies,,WHO Open Access,allowed,drug_essential_medicines,low
+SAMHSA-NALOX-001,SAMHSA,SAMHSA Naloxone for Opioid Safety Evidence-Based community distribution toolkit,2023,https://store.samhsa.gov/,,Public Domain,allowed,drug_pain,high
+WHO-NALOXONE-001,WHO,WHO Information Note on Use of Dolutegravir in Pregnancy,2019,https://www.who.int/publications/i/item/WHO-CDS-HIV-19.38,,WHO Open Access,allowed,drug_pregnancy_lactation,medium
+WHO-MED-CHILD-001,WHO,WHO Better Medicines for Children Project Initiative,2018,https://www.who.int/teams/maternal-newborn-child-adolescent-health-and-ageing/child-health/medicines,,WHO Open Access,allowed,drug_pediatric,medium
+ASHP-PHARMD-PALL-001,ASHP,ASHP Statement on the Pharmacist Role in Palliative and Hospice Care,2016,https://www.ashp.org/Pharmacy-Practice/Policy-Positions-and-Guidelines,,ASHP,restricted-cds,drug_pain,medium
+WHO-PALL-DRUG-001,WHO,WHO Palliative Care Essential Medicines list,2018,https://www.who.int/news-room/fact-sheets/detail/palliative-care,,WHO Open Access,allowed,drug_pain,high
+ESPEN-DRUG-001,ESPEN,ESPEN Guideline on Clinical Nutrition drug-nutrient interactions,2022,https://www.espen.org/guidelines-home,,ESPEN,restricted-cds,drug_critical_care,low
+LIVERPOOL-MENH-001,Liverpool,Liverpool Mental Health Drug Interactions Checker,2024,https://mental-health.druginteractions.org/,,Liverpool Open,allowed,drug_interactions,medium
+LIVERPOOL-COVID-CHILD-001,Liverpool,Liverpool COVID-19 Drug Interactions in Pediatrics,2023,https://www.covid19-druginteractions.org/checker,,Liverpool Open,allowed,drug_interactions,medium
+WHO-DI-BULL-001,WHO,WHO Pharmaceuticals Newsletter monthly bulletin recent issues,2024,https://www.who.int/teams/regulation-prequalification/regulation-and-safety/pharmacovigilance/publications/newsletter,,WHO Open Access,allowed,drug_pharmacovigilance,medium
+WHO-PV-PROG-001,WHO,WHO The Importance of Pharmacovigilance Safety Monitoring of Medicinal Products,2002,https://apps.who.int/iris/handle/10665/42493,,WHO Open Access,allowed,drug_pharmacovigilance,medium
+ASCO-EVID-001,ASCO,ASCO Value Framework drug benefit assessment,2016,https://ascopubs.org/doi/10.1200/JCO.2016.68.2518,,ASCO,restricted-cds,drug_oncology,low
+NCCN-EVIDENCE-001,NCCN,NCCN Evidence Blocks oncology drug benefit assessment,2024,https://www.nccn.org/professionals/evidence_blocks/default.aspx,,NCCN,restricted-cds,drug_oncology,medium
+ESMO-FOLLOWUP-001,ESMO,ESMO Patient Guides drug regimen patient information,2024,https://www.esmo.org/for-patients/patient-guides,,ESMO,restricted-cds,drug_oncology,low
