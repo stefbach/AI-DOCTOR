@@ -1,0 +1,277 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+BSH-CBC-001,BSH,Guidelines significant haematological abnormalities adults,2022,https://b-s-h.org.uk/guidelines/guidelines/significant-haematological-abnormalities-in-adults/,,Society,restricted-cds,lab_hematology,high
+ICSH-CBC-001,ICSH,ICSH recommendations standardization reporting CBC parameters,2014,https://onlinelibrary.wiley.com/doi/10.1111/ijlh.12201,,ICSH,restricted-cds,lab_hematology,high
+ICSH-RETIC-001,ICSH,ICSH guidelines for evaluation of blood cell analysers reticulocytes,2014,https://onlinelibrary.wiley.com/doi/10.1111/ijlh.12253,,ICSH,restricted-cds,lab_hematology,high
+ICSH-SMEAR-001,ICSH,ICSH recommendations for identification standardization peripheral blood smear morphology,2015,https://onlinelibrary.wiley.com/doi/10.1111/ijlh.12327,,ICSH,restricted-cds,lab_hematology,high
+ICSH-SMEAR-002,ICSH,ICSH guidelines reporting nomenclature peripheral blood film findings,2015,https://onlinelibrary.wiley.com/doi/10.1111/ijlh.12340,,ICSH,restricted-cds,lab_hematology,high
+ICSH-BMA-001,ICSH,ICSH guidelines bone marrow specimen handling reporting,2008,https://onlinelibrary.wiley.com/doi/10.1111/j.1751-553X.2008.01066.x,,ICSH,restricted-cds,lab_hematology,high
+BSH-BMA-001,BSH,BSH guidelines bone marrow aspiration trephine biopsy,2018,https://b-s-h.org.uk/guidelines/guidelines/bone-marrow-aspiration-and-trephine-biopsy/,,Society,restricted-cds,lab_hematology,high
+ICCS-FLOW-001,ICCS,ICCS practical guidelines clinical flow cytometry,2020,https://onlinelibrary.wiley.com/doi/10.1002/cyto.b.21847,,ICCS,restricted-cds,lab_hematology,high
+ESCCA-FLOW-001,ESCCA,ESCCA recommendations clinical flow cytometry leukemia lymphoma,2018,https://onlinelibrary.wiley.com/doi/10.1002/cyto.b.21620,,ESCCA,restricted-cds,lab_hematology,high
+EUROFLOW-001,EuroFlow,EuroFlow standardization protocols immunophenotyping,2012,https://www.nature.com/articles/leu2012120,,EuroFlow,restricted-cds,lab_hematology,high
+EUROFLOW-MRD-001,EuroFlow,EuroFlow next generation flow MRD detection acute leukemia,2017,https://www.nature.com/articles/leu201729,,EuroFlow,restricted-cds,lab_hematology,high
+BSH-IRON-001,BSH,BSH guideline laboratory diagnosis iron deficiency,2021,https://b-s-h.org.uk/guidelines/guidelines/laboratory-diagnosis-of-iron-deficiency-in-adults/,,Society,restricted-cds,lab_hematology,high
+AGA-IRON-001,AGA,AGA clinical practice guideline gastrointestinal evaluation iron deficiency anemia,2020,https://www.gastrojournal.org/article/S0016-5085(20)35150-5/fulltext,,AGA,restricted-cds,lab_hematology,high
+BSH-B12-001,BSH,BSH guidelines diagnosis treatment cobalamin folate disorders,2014,https://b-s-h.org.uk/guidelines/guidelines/cobalamin-and-folate-disorders/,,Society,restricted-cds,lab_hematology,high
+BSH-HEMOGLOBINOPATHY-001,BSH,BSH guideline laboratory diagnosis haemoglobinopathies thalassaemia,2010,https://b-s-h.org.uk/guidelines/guidelines/significant-haemoglobinopathies-guidelines-for-screening-and-diagnosis/,,Society,restricted-cds,lab_hematology,high
+BSH-SICKLE-001,BSH,BSH guidelines sickle cell disease laboratory diagnosis,2018,https://b-s-h.org.uk/guidelines/guidelines/sickle-cell-disease-in-pregnancy/,,Society,restricted-cds,lab_hematology,high
+WHO-INR-001,WHO,WHO guidelines thromboplastin calibration INR standardization,2013,https://www.who.int/publications/m/item/who-tech-report-series-no-979-annex-6,,WHO Open Access,allowed,lab_coagulation,high
+ISTH-INR-001,ISTH,ISTH SSC recommendations laboratory monitoring oral anticoagulant therapy,2016,https://onlinelibrary.wiley.com/doi/10.1111/jth.13456,,ISTH,restricted-cds,lab_coagulation,high
+CLSI-COAG-001,CLSI,CLSI H47 one stage prothrombin time activated partial thromboplastin time,2022,https://clsi.org/standards/products/hematology/documents/h47/,,CLSI,restricted,lab_coagulation,high
+ISTH-DDIMER-001,ISTH,ISTH guidance D-dimer testing exclusion venous thromboembolism,2017,https://onlinelibrary.wiley.com/doi/10.1111/jth.13735,,ISTH,restricted-cds,lab_coagulation,high
+ISTH-ANTIXA-001,ISTH,ISTH SSC anti-Xa monitoring low molecular weight heparin,2018,https://onlinelibrary.wiley.com/doi/10.1111/jth.14219,,ISTH,restricted-cds,lab_coagulation,high
+BSH-DOAC-001,BSH,BSH guidelines laboratory measurement direct oral anticoagulants,2018,https://b-s-h.org.uk/guidelines/guidelines/measurement-of-non-coumarin-anticoagulants/,,Society,restricted-cds,lab_coagulation,high
+ACCP-ANTITHROMB-001,ACCP,ACCP antithrombotic therapy VTE disease laboratory monitoring,2021,https://journal.chestnet.org/article/S0012-3692(21)01506-3/fulltext,,ACCP,restricted-cds,lab_coagulation,high
+ISTH-THROMBOPHILIA-001,ISTH,ISTH SSC subcommittee guidance thrombophilia testing,2021,https://onlinelibrary.wiley.com/doi/10.1111/jth.15533,,ISTH,restricted-cds,lab_coagulation,high
+BCSH-THROMBOPHILIA-001,BCSH,BCSH guidelines investigation heritable thrombophilia,2010,https://onlinelibrary.wiley.com/doi/10.1111/j.1365-2141.2009.08022.x,,Society,restricted-cds,lab_coagulation,high
+ISTH-LUPUS-001,ISTH,ISTH SSC update lupus anticoagulant detection,2020,https://onlinelibrary.wiley.com/doi/10.1111/jth.14935,,ISTH,restricted-cds,lab_coagulation,high
+ISTH-PLT-001,ISTH,ISTH SSC platelet function testing diagnosis bleeding disorders,2018,https://onlinelibrary.wiley.com/doi/10.1111/jth.14201,,ISTH,restricted-cds,lab_coagulation,high
+ICSH-PLT-001,ICSH,ICSH guidelines platelet counting reference method flow cytometry,2014,https://onlinelibrary.wiley.com/doi/10.1111/ijlh.12172,,ICSH,restricted-cds,lab_coagulation,high
+ISTH-TEG-001,ISTH,ISTH guidance viscoelastic testing perioperative bleeding,2021,https://onlinelibrary.wiley.com/doi/10.1111/jth.15396,,ISTH,restricted-cds,lab_coagulation,high
+NHF-VWD-001,NHF,NHF ASH ISTH WFH USHCRN VWD diagnosis guidelines,2021,https://ashpublications.org/bloodadvances/article/5/1/280/474886,,NHF,restricted-cds,lab_coagulation,high
+NHF-HEMOPHILIA-001,NHF,WFH guidelines management hemophilia laboratory diagnosis,2020,https://onlinelibrary.wiley.com/doi/10.1111/hae.14046,,WFH,restricted-cds,lab_coagulation,high
+IFCC-HBA1C-001,IFCC,IFCC reference system measurement HbA1c standardization,2017,https://www.ifcc.org/ifcc-scientific-division/sd-working-groups/hba1c/,,IFCC,restricted-cds,lab_chemistry,high
+ADA-HBA1C-001,ADA,ADA standards medical care diabetes diagnosis classification,2024,https://diabetesjournals.org/care/issue/47/Supplement_1,,ADA,restricted-cds,lab_chemistry,high
+EASD-DIABETES-001,EASD,EASD ADA consensus management hyperglycaemia type 2 diabetes,2022,https://link.springer.com/article/10.1007/s00125-022-05787-2,,EASD,restricted-cds,lab_chemistry,high
+WHO-GLUCOSE-001,WHO,WHO definition diagnosis diabetes mellitus intermediate hyperglycaemia,2006,https://www.who.int/publications/i/item/definition-and-diagnosis-of-diabetes-mellitus-and-intermediate-hyperglycaemia,,WHO Open Access,allowed,lab_chemistry,high
+NCEP-LIPID-001,NCEP,NCEP ATP III detection evaluation treatment high blood cholesterol,2002,https://www.nhlbi.nih.gov/health-topics/atp-iii-cholesterol-full-report,,Public Domain,allowed,lab_chemistry,high
+ESC-LIPID-001,ESC,ESC EAS guidelines management dyslipidaemias,2019,https://academic.oup.com/eurheartj/article/41/1/111/5556353,,ESC,restricted-cds,lab_chemistry,high
+AHA-LIPID-001,AHA,AHA ACC guideline management blood cholesterol,2018,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000625,,AHA,restricted-cds,lab_chemistry,high
+KDIGO-CKD-001,KDIGO,KDIGO 2024 clinical practice guideline evaluation management CKD,2024,https://kdigo.org/guidelines/ckd-evaluation-and-management/,,KDIGO,restricted-cds,lab_chemistry,high
+NKDEP-CREAT-001,NKDEP,NKDEP creatinine standardization program isotope dilution mass spectrometry,2014,https://www.niddk.nih.gov/health-information/professionals/clinical-tools-patient-management/kidney-disease/laboratory-evaluation/glomerular-filtration-rate/creatinine-standardization,,Public Domain,allowed,lab_chemistry,high
+NKF-EGFR-001,NKF,NKF ASN task force reassessing inclusion race eGFR estimation,2021,https://www.kidney.org/sites/default/files/01-10-7297_HBE_NKF_FullReport_Web.pdf,,NKF,restricted-cds,lab_chemistry,high
+KDIGO-CYSTATIN-001,KDIGO,KDIGO controversies conference cystatin C use clinical practice,2019,https://kdigo.org/conferences/ckd/,,KDIGO,restricted-cds,lab_chemistry,high
+IMWG-MGUS-001,IMWG,IMWG criteria diagnosis monoclonal gammopathies serum protein electrophoresis,2014,https://www.thelancet.com/journals/lanonc/article/PIIS1470-2045(14)70442-5/fulltext,,IMWG,restricted-cds,lab_chemistry,high
+BSH-PARAPROTEIN-001,BSH,BSH guidelines investigation diagnosis paraproteinaemia,2014,https://b-s-h.org.uk/guidelines/guidelines/diagnosis-and-management-of-multiple-myeloma/,,Society,restricted-cds,lab_chemistry,high
+AASLD-LFT-001,AASLD,AASLD guideline evaluation abnormal liver chemistries,2017,https://journals.lww.com/ajg/Fulltext/2017/01000/ACG_Clinical_Guideline__Evaluation_of_Abnormal.10.aspx,,AASLD,restricted-cds,lab_chemistry,high
+EASL-LFT-001,EASL,EASL clinical practice guidelines management abnormal liver blood tests,2022,https://www.journal-of-hepatology.eu/article/S0168-8278(22)00027-1/fulltext,,EASL,restricted-cds,lab_chemistry,high
+SSC-LACTATE-001,SSC,Surviving Sepsis Campaign lactate guided resuscitation,2021,https://www.sccm.org/SurvivingSepsisCampaign/Guidelines,,SCCM,restricted-cds,lab_chemistry,high
+CLSI-BG-001,CLSI,CLSI C46 blood gas pH analysis related measurements,2020,https://clsi.org/standards/products/clinical-chemistry-and-toxicology/documents/c46/,,CLSI,restricted,lab_chemistry,high
+ASA-BG-001,ASA,ASA practice guidelines blood gas analysis,2018,https://pubs.asahq.org/anesthesiology/article/128/3/437/19097,,ASA,restricted-cds,lab_chemistry,medium
+ESC-TROPONIN-001,ESC,ESC guidelines management ACS high sensitivity troponin algorithms,2023,https://academic.oup.com/eurheartj/article/44/38/3720/7243210,,ESC,restricted-cds,lab_cardiac_markers,high
+AHA-TROPONIN-001,AHA,AHA ACC guideline evaluation diagnosis chest pain troponin,2021,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001029,,AHA,restricted-cds,lab_cardiac_markers,high
+IFCC-TROPONIN-001,IFCC,IFCC clinical applications cardiac troponin task force,2020,https://www.ifcc.org/ifcc-scientific-division/sd-committees/c-ctta/,,IFCC,restricted-cds,lab_cardiac_markers,high
+ESC-BNP-001,ESC,ESC guidelines diagnosis treatment heart failure natriuretic peptides,2021,https://academic.oup.com/eurheartj/article/42/36/3599/6358045,,ESC,restricted-cds,lab_cardiac_markers,high
+AHA-BNP-001,AHA,AHA ACC HFSA guideline management heart failure biomarkers,2022,https://www.ahajournals.org/doi/10.1161/CIR.0000000000001063,,AHA,restricted-cds,lab_cardiac_markers,high
+HFA-BIOMARKERS-001,HFA,HFA recommendations biomarker assessment heart failure,2019,https://onlinelibrary.wiley.com/doi/10.1002/ejhf.1494,,ESC,restricted-cds,lab_cardiac_markers,medium
+ATA-THYROID-001,ATA,ATA guidelines diagnosis management hypothyroidism,2014,https://www.liebertpub.com/doi/10.1089/thy.2014.0028,,ATA,restricted-cds,lab_endocrinology,high
+ATA-HYPER-001,ATA,ATA guidelines hyperthyroidism other causes thyrotoxicosis,2016,https://www.liebertpub.com/doi/10.1089/thy.2016.0229,,ATA,restricted-cds,lab_endocrinology,high
+ETA-THYROID-001,ETA,ETA guideline interpretation TSH measurement subclinical disease,2013,https://www.karger.com/Article/FullText/356507,,ETA,restricted-cds,lab_endocrinology,high
+NACB-THYROID-001,NACB,NACB laboratory medicine practice guidelines thyroid disease,2003,https://academic.oup.com/clinchem/article/49/10/1583/5642068,,NACB,restricted-cds,lab_endocrinology,high
+ENDO-CORTISOL-001,EndoSoc,Endocrine Society guideline diagnosis Cushing syndrome,2008,https://academic.oup.com/jcem/article/93/5/1526/2598096,,EndoSoc,restricted-cds,lab_endocrinology,high
+ENDO-AI-001,EndoSoc,Endocrine Society guideline diagnosis treatment primary adrenal insufficiency,2016,https://academic.oup.com/jcem/article/101/2/364/2810222,,EndoSoc,restricted-cds,lab_endocrinology,high
+ENDO-PHEO-001,EndoSoc,Endocrine Society guideline pheochromocytoma paraganglioma metanephrines,2014,https://academic.oup.com/jcem/article/99/6/1915/2537399,,EndoSoc,restricted-cds,lab_endocrinology,high
+ENDO-ALDO-001,EndoSoc,Endocrine Society guideline primary aldosteronism case detection,2016,https://academic.oup.com/jcem/article/101/5/1889/2804729,,EndoSoc,restricted-cds,lab_endocrinology,high
+ENDO-PROLACTIN-001,EndoSoc,Endocrine Society guideline diagnosis treatment hyperprolactinemia,2011,https://academic.oup.com/jcem/article/96/2/273/2709150,,EndoSoc,restricted-cds,lab_endocrinology,high
+ENDO-GH-001,EndoSoc,Endocrine Society guideline evaluation treatment adult GH deficiency,2011,https://academic.oup.com/jcem/article/96/6/1587/2833876,,EndoSoc,restricted-cds,lab_endocrinology,high
+ENDO-ACRO-001,EndoSoc,Endocrine Society guideline acromegaly IGF1 GH testing,2014,https://academic.oup.com/jcem/article/99/11/3933/2836425,,EndoSoc,restricted-cds,lab_endocrinology,high
+ENDO-TESTO-001,EndoSoc,Endocrine Society guideline testosterone therapy men hypogonadism,2018,https://academic.oup.com/jcem/article/103/5/1715/4939465,,EndoSoc,restricted-cds,lab_endocrinology,high
+ESHRE-AMH-001,ESHRE,ESHRE guideline ovarian reserve testing AMH antral follicle count,2023,https://www.eshre.eu/Guidelines-and-Legal/Guidelines,,ESHRE,restricted-cds,lab_endocrinology,high
+ENDO-VITD-001,EndoSoc,Endocrine Society guideline vitamin D deficiency evaluation treatment,2024,https://academic.oup.com/jcem/article/109/8/1907/7685305,,EndoSoc,restricted-cds,lab_endocrinology,high
+IOF-VITD-001,IOF,IOF position statement vitamin D status assessment,2010,https://link.springer.com/article/10.1007/s00198-010-1285-3,,IOF,restricted-cds,lab_endocrinology,high
+IOF-BTM-001,IOF,IOF IFCC bone turnover markers reference standards,2017,https://link.springer.com/article/10.1007/s00198-017-4102-4,,IOF,restricted-cds,lab_endocrinology,high
+ENDO-PTH-001,EndoSoc,Endocrine Society guideline asymptomatic primary hyperparathyroidism,2014,https://academic.oup.com/jcem/article/99/10/3561/2834877,,EndoSoc,restricted-cds,lab_endocrinology,high
+ISPAD-DIABETES-001,ISPAD,ISPAD clinical practice consensus guidelines diabetes children adolescents,2022,https://www.ispad.org/page/ISPADGuidelines2022,,ISPAD,restricted-cds,lab_endocrinology,high
+ADA-CPEPTIDE-001,ADA,ADA position statement C-peptide insulin antibody testing,2018,https://diabetesjournals.org/care/article/41/Supplement_1/S13/30097,,ADA,restricted-cds,lab_endocrinology,medium
+AHA-CRP-001,AHA,AHA CDC scientific statement markers inflammation cardiovascular hsCRP,2003,https://www.ahajournals.org/doi/10.1161/01.CIR.0000052939.59093.45,,AHA,restricted-cds,lab_inflammation,high
+SSC-PCT-001,SSC,Surviving Sepsis Campaign procalcitonin antimicrobial stewardship,2021,https://www.sccm.org/SurvivingSepsisCampaign/Guidelines,,SCCM,restricted-cds,lab_inflammation,high
+IDSA-PCT-001,IDSA,IDSA guidance procalcitonin lower respiratory tract infections,2019,https://academic.oup.com/cid/article/68/2/e1/5142606,,IDSA,restricted-cds,lab_inflammation,high
+ICSH-ESR-001,ICSH,ICSH review measurement erythrocyte sedimentation rate,2011,https://onlinelibrary.wiley.com/doi/10.1111/j.1751-553X.2011.01302.x,,ICSH,restricted-cds,lab_inflammation,high
+EULAR-ANA-001,EULAR,EULAR ACR points consider use anti-nuclear antibodies SLE,2020,https://ard.bmj.com/content/79/11/1382,,EULAR,restricted-cds,lab_immunology,high
+ACR-ANA-001,ACR,ACR position statement methodology testing antinuclear antibodies,2019,https://rheumatology.org/position-statements,,ACR,restricted-cds,lab_immunology,high
+ICAP-ANA-001,ICAP,ICAP international consensus ANA pattern nomenclature reporting,2021,https://www.anapatterns.org/,,ICAP,restricted-cds,lab_immunology,high
+EULAR-ENA-001,EULAR,EULAR recommendations testing ENA antibodies systemic autoimmune,2019,https://ard.bmj.com/content/78/9/1167,,EULAR,restricted-cds,lab_immunology,high
+EULAR-ANCA-001,EULAR,EULAR recommendations management ANCA associated vasculitis testing,2022,https://ard.bmj.com/content/82/1/30,,EULAR,restricted-cds,lab_immunology,high
+EULAR-RA-001,EULAR,EULAR ACR classification criteria rheumatoid arthritis anti-CCP RF,2010,https://ard.bmj.com/content/69/9/1580,,EULAR,restricted-cds,lab_immunology,high
+ACR-COMPLEMENT-001,ACR,ACR guidelines complement testing autoimmune disease,2019,https://rheumatology.org/position-statements,,ACR,restricted-cds,lab_immunology,medium
+BSACI-IG-001,BSACI,BSACI guideline investigation hypogammaglobulinaemia immunoglobulin testing,2017,https://onlinelibrary.wiley.com/doi/10.1111/cea.13007,,BSACI,restricted-cds,lab_immunology,high
+EULAR-APS-001,EULAR,EULAR recommendations management antiphospholipid syndrome adults,2019,https://ard.bmj.com/content/78/10/1296,,EULAR,restricted-cds,lab_immunology,high
+ISTH-APS-001,ISTH,ISTH guidance laboratory diagnosis antiphospholipid syndrome,2020,https://onlinelibrary.wiley.com/doi/10.1111/jth.14935,,ISTH,restricted-cds,lab_immunology,high
+APS-SYDNEY-001,APS,Updated Sydney criteria antiphospholipid antibody syndrome,2023,https://onlinelibrary.wiley.com/doi/10.1002/art.42624,,Society,restricted-cds,lab_immunology,high
+BSH-COOMBS-001,BSH,BSH guidelines specifications direct antiglobulin test laboratory,2017,https://b-s-h.org.uk/guidelines/guidelines/the-laboratory-diagnosis-of-haemolytic-anaemia/,,Society,restricted-cds,lab_immunology,high
+EAACI-IGE-001,EAACI,EAACI molecular allergology user guide component resolved diagnosis,2016,https://onlinelibrary.wiley.com/doi/10.1111/pai.12563,,EAACI,restricted-cds,lab_allergy,high
+AAAAI-IGE-001,AAAAI,AAAAI practice parameter allergy diagnostic testing,2008,https://www.jaci-inpractice.org/article/S0091-6749(07)02023-X/fulltext,,AAAAI,restricted-cds,lab_allergy,high
+WHO-MAST-001,WHO,WHO classification mastocytosis serum tryptase criteria,2022,https://tumourclassification.iarc.who.int/,,WHO Open Access,allowed,lab_allergy,high
+AAAAI-TRYPTASE-001,AAAAI,AAAAI practice parameter mast cell disorders tryptase,2021,https://www.jacionline.org/article/S0091-6749(21)00919-X/fulltext,,AAAAI,restricted-cds,lab_allergy,high
+EAACI-SPT-001,EAACI,EAACI position paper skin prick test diagnosis allergic disease,2013,https://onlinelibrary.wiley.com/doi/10.1111/all.12095,,EAACI,restricted-cds,lab_allergy,high
+CDC-HIV-001,CDC,CDC laboratory testing diagnosis HIV infection updated algorithms,2018,https://stacks.cdc.gov/view/cdc/50872,,Public Domain,allowed,lab_microbiology,high
+WHO-HIV-001,WHO,WHO consolidated guidelines HIV testing services,2019,https://www.who.int/publications/i/item/978-92-4-155058-1,,WHO Open Access,allowed,lab_microbiology,high
+EACS-HIV-001,EACS,EACS guidelines HIV monitoring laboratory tests viral load,2023,https://www.eacsociety.org/guidelines/eacs-guidelines/,,EACS,restricted-cds,lab_microbiology,high
+AASLD-HBV-001,AASLD,AASLD guidance prevention diagnosis treatment hepatitis B,2018,https://aasldpubs.onlinelibrary.wiley.com/doi/10.1002/hep.29800,,AASLD,restricted-cds,lab_microbiology,high
+EASL-HBV-001,EASL,EASL clinical practice guidelines management chronic hepatitis B,2017,https://www.journal-of-hepatology.eu/article/S0168-8278(17)30185-X/fulltext,,EASL,restricted-cds,lab_microbiology,high
+APASL-HBV-001,APASL,APASL clinical practice guidelines management hepatitis B,2016,https://link.springer.com/article/10.1007/s12072-015-9675-4,,APASL,restricted-cds,lab_microbiology,high
+AASLD-HCV-001,AASLD,AASLD IDSA recommendations testing managing treating hepatitis C,2023,https://www.hcvguidelines.org/,,AASLD,restricted-cds,lab_microbiology,high
+EASL-HCV-001,EASL,EASL recommendations treatment hepatitis C laboratory testing,2020,https://www.journal-of-hepatology.eu/article/S0168-8278(20)30548-1/fulltext,,EASL,restricted-cds,lab_microbiology,high
+CDC-SYPHILIS-001,CDC,CDC syphilis laboratory diagnosis reverse algorithm treponemal,2018,https://www.cdc.gov/std/syphilis/lab/default.htm,,Public Domain,allowed,lab_microbiology,high
+IUSTI-SYPHILIS-001,IUSTI,IUSTI European guideline management syphilis,2020,https://onlinelibrary.wiley.com/doi/10.1111/jdv.16946,,IUSTI,restricted-cds,lab_microbiology,high
+WHO-MALARIA-001,WHO,WHO guidelines malaria laboratory diagnosis RDT microscopy,2023,https://www.who.int/publications/i/item/guidelines-for-malaria,,WHO Open Access,allowed,lab_microbiology,high
+WHO-DENGUE-001,WHO,WHO dengue guidelines diagnosis treatment laboratory NS1 IgM,2009,https://www.who.int/publications/i/item/9789241547871,,WHO Open Access,allowed,lab_microbiology,high
+WHO-COVID-001,WHO,WHO laboratory testing COVID-19 PCR antigen serology,2022,https://www.who.int/publications/i/item/9789240017740,,WHO Open Access,allowed,lab_microbiology,high
+WHO-TB-001,WHO,WHO operational handbook tuberculosis laboratory diagnosis,2022,https://www.who.int/publications/i/item/9789240046832,,WHO Open Access,allowed,lab_microbiology,high
+ATS-IDSA-TB-001,ATS,ATS IDSA CDC clinical practice guidelines diagnosis tuberculosis,2017,https://www.atsjournals.org/doi/10.1164/rccm.201611-2235PP,,ATS,restricted-cds,lab_microbiology,high
+ECDC-IGRA-001,ECDC,ECDC guidance use IGRA support diagnosis tuberculosis,2018,https://www.ecdc.europa.eu/en/publications-data/use-interferon-gamma-release-assays-support-tb-diagnosis,,ECDC,restricted-cds,lab_microbiology,high
+CDC-TORCH-001,CDC,CDC guidelines TORCH congenital infections serologic screening,2020,https://www.cdc.gov/pregnancy/infections.html,,Public Domain,allowed,lab_microbiology,high
+CDC-LYME-001,CDC,CDC two-tier serologic testing recommendations Lyme disease,2019,https://www.cdc.gov/lyme/healthcare/clinicians-laboratory.html,,Public Domain,allowed,lab_microbiology,high
+IDSA-LYME-001,IDSA,IDSA AAN ACR guidelines prevention diagnosis treatment Lyme,2020,https://academic.oup.com/cid/article/72/1/e1/6035434,,IDSA,restricted-cds,lab_microbiology,high
+ACG-HPYLORI-001,ACG,ACG clinical guideline treatment Helicobacter pylori infection testing,2024,https://journals.lww.com/ajg/Fulltext/2024/09000/ACG_Clinical_Guideline__Treatment_of.10.aspx,,ACG,restricted-cds,lab_microbiology,high
+MAASTRICHT-HP-001,Maastricht,Maastricht VI Florence consensus report Helicobacter pylori,2022,https://gut.bmj.com/content/71/9/1724,,Society,restricted-cds,lab_microbiology,high
+IDSA-CDIFF-001,IDSA,IDSA SHEA clinical practice guidelines C difficile diagnosis testing,2021,https://academic.oup.com/cid/article/73/5/e1029/6298219,,IDSA,restricted-cds,lab_microbiology,high
+ESCMID-CDIFF-001,ESCMID,ESCMID guidelines treatment Clostridioides difficile infection laboratory,2021,https://www.clinicalmicrobiologyandinfection.com/article/S1198-743X(21)00568-4/fulltext,,ESCMID,restricted-cds,lab_microbiology,high
+EUCAST-AST-001,EUCAST,EUCAST clinical breakpoints antimicrobial susceptibility testing,2024,https://www.eucast.org/clinical_breakpoints/,,EUCAST,restricted-cds,lab_microbiology,high
+CLSI-AST-001,CLSI,CLSI M100 performance standards antimicrobial susceptibility testing,2024,https://clsi.org/standards/products/microbiology/documents/m100/,,CLSI,restricted,lab_microbiology,high
+CLSI-BC-001,CLSI,CLSI M47 principles procedures blood cultures,2022,https://clsi.org/standards/products/microbiology/documents/m47/,,CLSI,restricted,lab_microbiology,high
+IDSA-BC-001,IDSA,IDSA ASM guidelines utilization microbiology laboratory diagnosis infections,2018,https://academic.oup.com/cid/article/67/6/e1/5046039,,IDSA,restricted-cds,lab_microbiology,high
+IDSA-UTI-001,IDSA,IDSA guidelines diagnosis treatment asymptomatic bacteriuria urine culture,2019,https://academic.oup.com/cid/article/68/10/e83/5407612,,IDSA,restricted-cds,lab_microbiology,high
+ESCMID-UTI-001,ESCMID,ESCMID EAU guidelines urinary tract infections diagnosis,2022,https://uroweb.org/guidelines/urological-infections,,ESCMID,restricted-cds,lab_microbiology,high
+IDSA-CSF-001,IDSA,IDSA practice guidelines management bacterial meningitis CSF analysis,2017,https://academic.oup.com/cid/article/64/6/e34/2965845,,IDSA,restricted-cds,lab_microbiology,high
+IDSA-STOOL-001,IDSA,IDSA clinical practice guidelines diagnosis management infectious diarrhea,2017,https://academic.oup.com/cid/article/65/12/e45/4557073,,IDSA,restricted-cds,lab_microbiology,high
+ASCCP-HPV-001,ASCCP,ASCCP risk based management consensus guidelines HPV testing,2020,https://www.asccp.org/management-guidelines,,ASCCP,restricted-cds,lab_molecular,high
+WHO-HPV-001,WHO,WHO guideline screening treatment cervical pre-cancer HPV testing,2021,https://www.who.int/publications/i/item/9789240030824,,WHO Open Access,allowed,lab_molecular,high
+ELN-JAK2-001,ELN,ELN recommendations diagnosis MPN JAK2 CALR MPL testing,2018,https://www.nature.com/articles/s41375-018-0077-1,,ELN,restricted-cds,lab_molecular,high
+ELN-BCRABL-001,ELN,ELN recommendations management CML BCR-ABL monitoring,2020,https://www.nature.com/articles/s41375-020-0776-2,,ELN,restricted-cds,lab_molecular,high
+NCCN-BRCA-001,NCCN,NCCN guidelines genetic familial high risk assessment breast ovarian BRCA,2024,https://www.nccn.org/guidelines/guidelines-detail?category=2&id=1503,,NCCN,restricted,lab_molecular,high
+ASCO-BRCA-001,ASCO,ASCO endorsement germline mutation testing breast cancer BRCA,2022,https://ascopubs.org/doi/10.1200/JCO.22.01058,,ASCO,restricted-cds,lab_molecular,high
+ESHG-BRCA-001,ESHG,ESHG genetic testing inherited cancer susceptibility BRCA,2019,https://www.nature.com/articles/s41431-019-0479-1,,ESHG,restricted-cds,lab_molecular,high
+NCCN-LYNCH-001,NCCN,NCCN guidelines genetic familial high risk colorectal Lynch MSI MMR,2024,https://www.nccn.org/guidelines/guidelines-detail?category=2&id=1436,,NCCN,restricted,lab_molecular,high
+ESHG-LYNCH-001,ESHG,ESHG European guidelines clinical management Lynch syndrome,2019,https://www.nature.com/articles/s41431-018-0309-x,,ESHG,restricted-cds,lab_molecular,high
+ESMO-NGS-001,ESMO,ESMO recommendations use NGS metastatic cancers,2020,https://www.annalsofoncology.org/article/S0923-7534(20)39971-3/fulltext,,ESMO Open Access,allowed,lab_molecular,high
+AMP-NGS-001,AMP,AMP ASCO CAP standards interpretation reporting sequence variants cancer,2017,https://www.jmdjournal.org/article/S1525-1578(16)30223-9/fulltext,,AMP,restricted-cds,lab_molecular,high
+ACMG-VARIANT-001,ACMG,ACMG AMP standards interpretation sequence variants Richards 2015,2015,https://www.nature.com/articles/gim201530,,ACMG,restricted-cds,lab_molecular,high
+ACMG-VARIANT-002,ACMG,ACMG ClinGen update variant classification framework,2024,https://www.gimjournal.org/article/S1098-3600(23)00103-2/fulltext,,ACMG,restricted-cds,lab_molecular,high
+CPIC-CYP2C19-001,CPIC,CPIC guideline CYP2C19 clopidogrel pharmacogenomics,2022,https://cpicpgx.org/guidelines/guideline-for-clopidogrel-and-cyp2c19/,,CPIC,restricted-cds,lab_molecular,high
+CPIC-TPMT-001,CPIC,CPIC guideline TPMT NUDT15 thiopurine dosing,2018,https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/,,CPIC,restricted-cds,lab_molecular,high
+CPIC-DPYD-001,CPIC,CPIC guideline DPYD fluoropyrimidine dosing,2017,https://cpicpgx.org/guidelines/guideline-for-fluoropyrimidines-and-dpyd/,,CPIC,restricted-cds,lab_molecular,high
+CPIC-UGT1A1-001,CPIC,CPIC guideline UGT1A1 atazanavir irinotecan dosing,2015,https://cpicpgx.org/guidelines/guideline-for-atazanavir-and-ugt1a1/,,CPIC,restricted-cds,lab_molecular,high
+CPIC-HLAB57-001,CPIC,CPIC guideline HLA-B5701 abacavir hypersensitivity,2014,https://cpicpgx.org/guidelines/guideline-for-abacavir-and-hla-b/,,CPIC,restricted-cds,lab_molecular,high
+CPIC-CYP2D6-001,CPIC,CPIC guideline CYP2D6 codeine opioid dosing,2021,https://cpicpgx.org/guidelines/guideline-for-codeine-and-cyp2d6/,,CPIC,restricted-cds,lab_molecular,high
+CPIC-VKORC1-001,CPIC,CPIC guideline CYP2C9 VKORC1 warfarin dosing,2017,https://cpicpgx.org/guidelines/guideline-for-warfarin-and-cyp2c9-and-vkorc1/,,CPIC,restricted-cds,lab_molecular,high
+AUA-PSA-001,AUA,AUA early detection prostate cancer guideline PSA testing,2023,https://www.auanet.org/guidelines-and-quality/guidelines/early-detection-of-prostate-cancer-guidelines,,AUA,restricted-cds,lab_tumor_markers,high
+NCCN-PSA-001,NCCN,NCCN guidelines prostate cancer early detection PSA,2024,https://www.nccn.org/guidelines/guidelines-detail?category=2&id=1460,,NCCN,restricted,lab_tumor_markers,high
+EAU-PSA-001,EAU,EAU guidelines prostate cancer PSA based screening,2024,https://uroweb.org/guidelines/prostate-cancer,,EAU,restricted-cds,lab_tumor_markers,high
+NACB-TUMOR-001,NACB,NACB laboratory medicine practice guidelines tumor markers,2008,https://academic.oup.com/clinchem/article/54/12/e11/5630232,,NACB,restricted-cds,lab_tumor_markers,high
+EGTM-TUMOR-001,EGTM,EGTM recommendations CEA CA19-9 CA125 CA15-3 use,2021,https://www.tumormarkersgroup.com/,,EGTM,restricted-cds,lab_tumor_markers,high
+AASLD-AFP-001,AASLD,AASLD practice guidance hepatocellular carcinoma AFP surveillance,2023,https://aasldpubs.onlinelibrary.wiley.com/doi/10.1097/HEP.0000000000000466,,AASLD,restricted-cds,lab_tumor_markers,high
+NACB-HCG-001,NACB,NACB practice guidelines hCG testing pregnancy malignancy,2008,https://academic.oup.com/clinchem/article/54/12/e11/5630232,,NACB,restricted-cds,lab_tumor_markers,medium
+ATA-CALCITONIN-001,ATA,ATA guidelines management medullary thyroid carcinoma calcitonin,2015,https://www.liebertpub.com/doi/10.1089/thy.2014.0335,,ATA,restricted-cds,lab_tumor_markers,high
+ENETS-CGA-001,ENETS,ENETS consensus guidelines biomarkers neuroendocrine tumors chromogranin A,2017,https://www.karger.com/Article/FullText/471488,,ENETS,restricted-cds,lab_tumor_markers,high
+ASHP-VANCO-001,ASHP-IDSA,ASHP IDSA PIDS SIDP consensus vancomycin AUC therapeutic monitoring,2020,https://academic.oup.com/ajhp/article/77/11/835/5810200,,ASHP,restricted-cds,lab_tdm,high
+BSAC-AMINO-001,BSAC,BSAC working party report aminoglycoside therapeutic monitoring,2017,https://academic.oup.com/jac/article/72/1/i1/2702305,,BSAC,restricted-cds,lab_tdm,high
+ILAE-AED-001,ILAE,ILAE position paper antiepileptic drug therapeutic monitoring,2018,https://onlinelibrary.wiley.com/doi/10.1111/epi.14082,,ILAE,restricted-cds,lab_tdm,high
+IATDMCT-AED-001,IATDMCT,IATDMCT consensus antiepileptic drug therapeutic monitoring,2020,https://journals.lww.com/drug-monitoring/Fulltext/2020/06000/Therapeutic_Drug_Monitoring_of_Antiepileptic.4.aspx,,IATDMCT,restricted-cds,lab_tdm,high
+IATDMCT-TAC-001,IATDMCT,IATDMCT consensus tacrolimus therapeutic drug monitoring,2019,https://journals.lww.com/drug-monitoring/Fulltext/2019/06000/Therapeutic_Drug_Monitoring_of_Tacrolimus.1.aspx,,IATDMCT,restricted-cds,lab_tdm,high
+IATDMCT-CYA-001,IATDMCT,IATDMCT consensus cyclosporine therapeutic drug monitoring,2020,https://journals.lww.com/drug-monitoring/abstract/2020/02000/Therapeutic_Drug_Monitoring_of_Cyclosporine.1.aspx,,IATDMCT,restricted-cds,lab_tdm,high
+IATDMCT-MTOR-001,IATDMCT,IATDMCT consensus sirolimus everolimus therapeutic monitoring,2019,https://journals.lww.com/drug-monitoring/Fulltext/2019/04000/Therapeutic_Drug_Monitoring_of_Sirolimus.1.aspx,,IATDMCT,restricted-cds,lab_tdm,high
+IATDMCT-LITHIUM-001,IATDMCT,Lithium therapeutic drug monitoring consensus recommendations,2018,https://journals.lww.com/drug-monitoring/abstract/2018/04000/Therapeutic_Drug_Monitoring_of_Lithium.1.aspx,,IATDMCT,restricted-cds,lab_tdm,high
+IATDMCT-DIGOXIN-001,IATDMCT,Digoxin therapeutic drug monitoring guideline,2017,https://www.iatdmct.org/publications/best-practice-guidelines.html,,IATDMCT,restricted-cds,lab_tdm,medium
+SAMHSA-DOA-001,SAMHSA,SAMHSA mandatory guidelines federal workplace drug testing programs,2023,https://www.samhsa.gov/workplace/resources/drug-testing,,Public Domain,allowed,lab_toxicology,high
+CDC-DOA-001,CDC,CDC laboratory analyses screening drugs abuse confirmation,2020,https://www.cdc.gov/labs/index.html,,Public Domain,allowed,lab_toxicology,medium
+RUMACK-APAP-001,Rumack,Rumack-Matthew nomogram acetaminophen toxicity assessment,2023,https://www.acmt.net/_Library/Practice_Guidelines/Acetaminophen_PG.pdf,,ACMT,restricted-cds,lab_toxicology,high
+EXTRIP-SALICYLATE-001,EXTRIP,EXTRIP recommendations extracorporeal treatment salicylate poisoning,2015,https://www.extrip-workgroup.org/salicylate,,EXTRIP,restricted-cds,lab_toxicology,high
+EXTRIP-METHANOL-001,EXTRIP,EXTRIP recommendations extracorporeal treatment methanol poisoning,2015,https://www.extrip-workgroup.org/methanol,,EXTRIP,restricted-cds,lab_toxicology,high
+EXTRIP-LITHIUM-001,EXTRIP,EXTRIP recommendations extracorporeal treatment lithium poisoning,2015,https://www.extrip-workgroup.org/lithium,,EXTRIP,restricted-cds,lab_toxicology,high
+CDC-LEAD-001,CDC,CDC blood lead reference value adults children,2021,https://www.cdc.gov/nceh/lead/data/blood-lead-reference-value.htm,,Public Domain,allowed,lab_toxicology,high
+CDC-MERCURY-001,CDC,CDC ATSDR mercury toxicity case studies environmental medicine,2014,https://www.atsdr.cdc.gov/csem/mercury/,,Public Domain,allowed,lab_toxicology,medium
+CDC-CO-001,CDC,CDC carbon monoxide poisoning carboxyhemoglobin testing,2018,https://www.cdc.gov/co/guidelines.htm,,Public Domain,allowed,lab_toxicology,high
+NICE-URINE-001,NICE,NICE guideline urinary tract infection testing dipstick adults,2018,https://www.nice.org.uk/guidance/ng109,,Open Government,allowed,lab_urinalysis,high
+EAU-URINE-001,EAU,EAU guidelines urological infections urine dipstick microscopy,2024,https://uroweb.org/guidelines/urological-infections,,EAU,restricted-cds,lab_urinalysis,high
+KDIGO-PROTEIN-001,KDIGO,KDIGO clinical practice guideline glomerular diseases ACR PCR,2021,https://kdigo.org/guidelines/gd/,,KDIGO,restricted-cds,lab_urinalysis,high
+ESCO-SEDIMENT-001,ESCO,European urinalysis guidelines automated sediment analysis,2021,https://www.degruyter.com/document/doi/10.1515/cclm-2020-1521/html,,Society,restricted-cds,lab_urinalysis,medium
+CLSI-URINE-001,CLSI,CLSI GP16 urinalysis approved guideline routine,2016,https://clsi.org/standards/products/clinical-chemistry-and-toxicology/documents/gp16/,,CLSI,restricted,lab_urinalysis,high
+NCS-CSF-001,NCS,UK Neurological Society guidelines CSF analysis xanthochromia,2020,https://onlinelibrary.wiley.com/doi/10.1002/acn3.51168,,Society,restricted-cds,lab_body_fluids,high
+ATS-PLEURAL-001,ATS,ATS ERS guidelines investigation pleural effusion Light criteria,2023,https://www.atsjournals.org/doi/10.1164/rccm.202309-1789ST,,ATS,restricted-cds,lab_body_fluids,high
+ERS-PLEURAL-001,ERS,ERS statement pleural effusion adult diagnostic approach,2018,https://erj.ersjournals.com/content/52/1/1800349,,ERS,restricted-cds,lab_body_fluids,high
+AASLD-ASCITES-001,AASLD,AASLD practice guidance ascites cirrhosis SAAG,2021,https://aasldpubs.onlinelibrary.wiley.com/doi/10.1002/hep.31884,,AASLD,restricted-cds,lab_body_fluids,high
+EASL-ASCITES-001,EASL,EASL clinical practice guidelines decompensated cirrhosis ascites,2018,https://www.journal-of-hepatology.eu/article/S0168-8278(18)31966-4/fulltext,,EASL,restricted-cds,lab_body_fluids,high
+EULAR-SYNOVIAL-001,EULAR,EULAR recommendations synovial fluid analysis arthritis,2017,https://ard.bmj.com/content/77/2/188,,EULAR,restricted-cds,lab_body_fluids,high
+ACR-SYNOVIAL-001,ACR,ACR guideline gout management synovial fluid crystal analysis,2020,https://onlinelibrary.wiley.com/doi/10.1002/art.41247,,ACR,restricted-cds,lab_body_fluids,high
+ACOG-CARRIER-001,ACOG,ACOG committee opinion carrier screening genetic conditions,2017,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2017/03/carrier-screening-for-genetic-conditions,,ACOG,restricted-cds,lab_genetics,high
+ACMG-CARRIER-001,ACMG,ACMG practice resource expanded carrier screening reproductive,2021,https://www.gimjournal.org/article/S1098-3600(21)00819-1/fulltext,,ACMG,restricted-cds,lab_genetics,high
+ACMG-NBS-001,ACMG,ACMG newborn screening ACT sheet algorithms RUSP,2022,https://www.acmg.net/ACMG/Medical-Genetics-Practice-Resources/ACT_Sheets_and_Algorithms.aspx,,ACMG,restricted-cds,lab_genetics,high
+ACMG-IEM-001,ACMG,ACMG practice guideline laboratory diagnosis inborn errors metabolism,2019,https://www.gimjournal.org/article/S1098-3600(19)32175-X/fulltext,,ACMG,restricted-cds,lab_genetics,high
+NCCN-HEREDITARY-001,NCCN,NCCN guidelines hereditary cancer testing criteria comprehensive,2024,https://www.nccn.org/guidelines/category_2,,NCCN,restricted,lab_genetics,high
+HRS-CARDIOGEN-001,HRS,HRS EHRA APHRS expert consensus genetic testing channelopathies cardiomyopathies,2022,https://www.heartrhythmjournal.com/article/S1547-5271(22)01874-7/fulltext,,HRS,restricted-cds,lab_genetics,high
+CALIPER-PED-001,CALIPER,CALIPER pediatric reference intervals project clinical chemistry,2022,https://www.caliperdatabase.org/,,Society,restricted-cds,lab_pediatric,high
+ACOG-PREG-001,ACOG,ACOG practice bulletin laboratory tests pregnancy screening,2020,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,lab_pediatric,high
+ISUOG-NIPT-001,ISUOG,ISUOG practice guidelines invasive prenatal diagnostic procedures cfDNA,2022,https://obgyn.onlinelibrary.wiley.com/doi/10.1002/uog.24888,,ISUOG,restricted-cds,lab_pediatric,high
+ACOG-NIPT-001,ACOG,ACOG SMFM committee opinion cfDNA prenatal screening,2020,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2020/10/screening-for-fetal-chromosomal-abnormalities,,ACOG,restricted-cds,lab_pediatric,high
+CLSI-POCT-001,CLSI,CLSI POCT04 essential tools implementing point of care testing,2020,https://clsi.org/standards/products/point-of-care-testing/documents/poct04/,,CLSI,restricted,lab_poct,high
+IFCC-POCT-001,IFCC,IFCC task force POCT recommendations clinical application,2020,https://www.ifcc.org/ifcc-emerging-technologies-division/etd-task-forces/tf-poct/,,IFCC,restricted-cds,lab_poct,high
+CLSI-POCT-GLUCOSE-001,CLSI,CLSI POCT12 point of care blood glucose testing,2013,https://clsi.org/standards/products/point-of-care-testing/documents/poct12/,,CLSI,restricted,lab_poct,high
+CLSI-POCT-INR-001,CLSI,CLSI POCT14 point of care monitoring INR self testing,2018,https://clsi.org/standards/products/point-of-care-testing/documents/poct14/,,CLSI,restricted,lab_poct,medium
+WHO-RDT-001,WHO,WHO target product profiles infectious disease rapid diagnostic tests,2022,https://www.who.int/teams/health-product-policy-and-standards/diagnostics-laboratory,,WHO Open Access,allowed,lab_poct,high
+CLSI-PHLEB-001,CLSI,CLSI GP41 collection diagnostic venous blood specimens,2017,https://clsi.org/standards/products/general-laboratory/documents/gp41/,,CLSI,restricted,lab_quality,high
+WHO-PHLEB-001,WHO,WHO guidelines drawing blood best practices phlebotomy,2010,https://www.who.int/publications/i/item/9789241599221,,WHO Open Access,allowed,lab_quality,high
+EFLM-PREANALYTICAL-001,EFLM,EFLM working group preanalytical phase recommendations,2021,https://www.eflm.eu/site/page/a/1188,,EFLM,restricted-cds,lab_quality,high
+CLSI-EP28-001,CLSI,CLSI EP28 defining establishing verifying reference intervals,2010,https://clsi.org/standards/products/method-evaluation/documents/ep28/,,CLSI,restricted,lab_quality,high
+IFCC-RI-001,IFCC,IFCC recommendations reference interval studies,2020,https://www.ifcc.org/ifcc-scientific-division/sd-committees/c-rids/,,IFCC,restricted-cds,lab_quality,high
+ISO-15189-001,ISO,ISO 15189 medical laboratories requirements quality competence,2022,https://www.iso.org/standard/76677.html,,ISO,restricted,lab_quality,high
+CLSI-QC-001,CLSI,CLSI C24 statistical quality control quantitative measurement,2016,https://clsi.org/standards/products/method-evaluation/documents/c24/,,CLSI,restricted,lab_quality,high
+CLSI-CRITICAL-001,CLSI,CLSI GP47 management critical results notification,2015,https://clsi.org/standards/products/general-laboratory/documents/gp47/,,CLSI,restricted,lab_quality,high
+AACC-MS-001,AACC,AACC ADLM consensus mass spectrometry clinical laboratory,2018,https://academic.oup.com/clinchem/article/64/8/1140/5608886,,AACC,restricted-cds,lab_quality,high
+CLSI-MS-001,CLSI,CLSI C62 liquid chromatography mass spectrometry methods,2014,https://clsi.org/standards/products/clinical-chemistry-and-toxicology/documents/c62/,,CLSI,restricted,lab_quality,high
+ISCN-CYTO-001,ISCN,ISCN international system human cytogenomic nomenclature,2020,https://www.karger.com/Book/Home/278826,,Karger,restricted,lab_genetics,high
+CLSI-FISH-001,CLSI,CLSI MM07 fluorescence in situ hybridization clinical practice,2013,https://clsi.org/standards/products/molecular-diagnostics/documents/mm07/,,CLSI,restricted,lab_molecular,high
+ESMO-CFDNA-001,ESMO,ESMO recommendations use circulating tumor DNA assays,2022,https://www.annalsofoncology.org/article/S0923-7534(22)01746-X/fulltext,,ESMO Open Access,allowed,lab_molecular,high
+AMP-CFDNA-001,AMP,AMP CAP best practice guidelines circulating tumor DNA testing,2021,https://www.jmdjournal.org/article/S1525-1578(20)30630-1/fulltext,,AMP,restricted-cds,lab_molecular,high
+EFI-HLA-001,EFI,EFI standards histocompatibility immunogenetics testing,2023,https://www.efi-web.org/committees/standards-committee.html,,EFI,restricted-cds,lab_transfusion,high
+ASHI-CROSSMATCH-001,ASHI,ASHI standards crossmatch HLA antibody testing,2022,https://www.ashi-hla.org/page/Standards,,ASHI,restricted-cds,lab_transfusion,high
+FACT-JACIE-001,FACT-JACIE,FACT JACIE international standards cellular therapy laboratory,2021,https://www.factglobal.org/standards/cellular-therapy/,,FACT,restricted-cds,lab_transfusion,high
+AABB-TRANSFUSION-001,AABB,AABB technical manual transfusion medicine standards,2023,https://www.aabb.org/standards-accreditation/standards,,AABB,restricted,lab_transfusion,high
+ISBT-TRANSFUSION-001,ISBT,ISBT guidelines validation laboratory blood group serology,2020,https://www.isbtweb.org/resources/working-parties.html,,ISBT,restricted-cds,lab_transfusion,high
+FDA-DONOR-001,FDA,FDA guidance industry donor screening testing requirements,2020,https://www.fda.gov/regulatory-information/search-fda-guidance-documents,,Public Domain,allowed,lab_transfusion,high
+AABB-DONOR-001,AABB,AABB standards blood banks transfusion services donor screening,2024,https://www.aabb.org/standards-accreditation,,AABB,restricted,lab_transfusion,high
+BSH-AIHA-001,BSH,BSH guidelines management warm autoimmune haemolytic anaemia,2017,https://b-s-h.org.uk/guidelines/guidelines/the-diagnosis-and-management-of-primary-autoimmune-haemolytic-anaemia/,,Society,restricted-cds,lab_hematology,high
+BSH-MDS-001,BSH,BSH guidelines diagnosis management myelodysplastic syndromes,2021,https://b-s-h.org.uk/guidelines/guidelines/myelodysplastic-syndromes/,,Society,restricted-cds,lab_hematology,high
+ISTH-DIC-001,ISTH,ISTH SSC scoring system disseminated intravascular coagulation,2018,https://onlinelibrary.wiley.com/doi/10.1111/jth.14154,,ISTH,restricted-cds,lab_coagulation,high
+ISTH-HIT-001,ISTH,ISTH guidance heparin induced thrombocytopenia laboratory testing,2018,https://onlinelibrary.wiley.com/doi/10.1111/jth.14143,,ISTH,restricted-cds,lab_coagulation,high
+ESPEN-ELECTROLYTES-001,ESPEN,ESPEN guideline clinical nutrition electrolyte disturbances,2023,https://www.espen.org/guidelines-home,,ESPEN,restricted-cds,lab_chemistry,high
+KDIGO-MINERAL-001,KDIGO,KDIGO clinical practice guideline CKD-MBD calcium phosphate,2017,https://kdigo.org/guidelines/ckd-mbd/,,KDIGO,restricted-cds,lab_chemistry,high
+ENDO-HYPONA-001,EndoSoc,Endocrine Society European guideline diagnosis hyponatraemia,2014,https://academic.oup.com/ejendo/article/170/3/G1/6661124,,EndoSoc,restricted-cds,lab_chemistry,high
+NACB-CARDIAC-001,NACB,NACB practice guidelines biomarkers acute coronary syndromes heart failure,2007,https://academic.oup.com/clinchem/article/53/4/547/5627286,,NACB,restricted-cds,lab_cardiac_markers,high
+ATA-TG-001,ATA,ATA guideline thyroglobulin measurement differentiated thyroid cancer,2015,https://www.liebertpub.com/doi/10.1089/thy.2014.0018,,ATA,restricted-cds,lab_endocrinology,high
+EULAR-SLE-001,EULAR,EULAR recommendations SLE management laboratory monitoring,2024,https://ard.bmj.com/content/early/2024/01/02/ard-2023-224762,,EULAR,restricted-cds,lab_immunology,high
+EAACI-FOOD-001,EAACI,EAACI guideline food allergy diagnosis IgE component testing,2023,https://onlinelibrary.wiley.com/doi/10.1111/all.15902,,EAACI,restricted-cds,lab_allergy,high
+WHO-WB-001,WHO,WHO recommendations diagnostic testing influenza nucleic acid amplification,2023,https://www.who.int/teams/global-influenza-programme/laboratory-network,,WHO Open Access,allowed,lab_microbiology,high
+IDSA-FUNGAL-001,IDSA,IDSA clinical practice guideline diagnosis management aspergillosis,2016,https://academic.oup.com/cid/article/63/4/e1/2389864,,IDSA,restricted-cds,lab_microbiology,high
+IDSA-CANDIDA-001,IDSA,IDSA clinical practice guideline management candidiasis laboratory,2016,https://academic.oup.com/cid/article/62/4/e1/2462830,,IDSA,restricted-cds,lab_microbiology,high
+ECIL-FUNGAL-001,ECIL,ECIL guidelines diagnosis invasive fungal disease haematology,2019,https://www.ecil-leukaemia.com/,,ECIL,restricted-cds,lab_microbiology,high
+NCCN-MSI-001,NCCN,NCCN guidelines colon cancer MSI MMR testing,2024,https://www.nccn.org/guidelines/guidelines-detail?category=1&id=1428,,NCCN,restricted,lab_molecular,high
+CAP-NGS-001,CAP,CAP molecular pathology next generation sequencing checklist,2023,https://www.cap.org/laboratory-improvement/accreditation/laboratory-accreditation-program,,CAP,restricted,lab_molecular,high
+ASCO-CAP-HER2-001,ASCO,ASCO CAP HER2 testing breast cancer guideline update,2023,https://ascopubs.org/doi/10.1200/JCO.22.02864,,ASCO,restricted-cds,lab_molecular,high
+ASCO-CAP-ER-001,ASCO,ASCO CAP estrogen progesterone receptor testing breast cancer,2020,https://ascopubs.org/doi/10.1200/JCO.19.02309,,ASCO,restricted-cds,lab_molecular,high
+NACB-PSA-001,NACB,NACB laboratory medicine practice guidelines PSA measurement,2010,https://academic.oup.com/clinchem/article/56/8/e36/5621305,,NACB,restricted-cds,lab_tumor_markers,high
+IATDMCT-VANCO-001,IATDMCT,IATDMCT consensus vancomycin therapeutic drug monitoring revised,2022,https://journals.lww.com/drug-monitoring/Fulltext/2022/12000/Therapeutic_Drug_Monitoring_of_Vancomycin.4.aspx,,IATDMCT,restricted-cds,lab_tdm,high
+IATDMCT-BETA-001,IATDMCT,IATDMCT position paper beta lactam therapeutic drug monitoring critically ill,2019,https://journals.lww.com/drug-monitoring/Fulltext/2019/06000/Beta_Lactam_TDM.6.aspx,,IATDMCT,restricted-cds,lab_tdm,high
+IATDMCT-VORICONAZOLE-001,IATDMCT,IATDMCT consensus voriconazole therapeutic monitoring,2018,https://academic.oup.com/jac/article/74/3/543/5224692,,IATDMCT,restricted-cds,lab_tdm,high
+SAMHSA-OPIOID-001,SAMHSA,SAMHSA clinical drug testing primary care opioid management,2017,https://store.samhsa.gov/product/Clinical-Drug-Testing-in-Primary-Care/SMA12-4668,,Public Domain,allowed,lab_toxicology,high
+ACMT-OPIOID-001,ACMT,ACMT position statement urine drug screening interpretation,2018,https://www.acmt.net/Position_Statements.html,,ACMT,restricted-cds,lab_toxicology,medium
+KDIGO-AKI-001,KDIGO,KDIGO clinical practice guideline acute kidney injury biomarkers,2012,https://kdigo.org/guidelines/acute-kidney-injury/,,KDIGO,restricted-cds,lab_chemistry,high
+EFLM-EGFR-001,EFLM,EFLM recommendations reporting eGFR clinical laboratories,2021,https://www.degruyter.com/document/doi/10.1515/cclm-2021-0144/html,,EFLM,restricted-cds,lab_chemistry,high
+BSH-MM-001,BSH,BSH guidelines diagnosis monitoring multiple myeloma free light chains,2021,https://b-s-h.org.uk/guidelines/guidelines/diagnosis-and-management-of-multiple-myeloma/,,Society,restricted-cds,lab_chemistry,high
+IMWG-FLC-001,IMWG,IMWG guidelines serum free light chain analysis multiple myeloma,2014,https://www.nature.com/articles/leu2014313,,IMWG,restricted-cds,lab_chemistry,high
+EULAR-PMR-001,EULAR,EULAR ACR recommendations management polymyalgia rheumatica laboratory,2015,https://ard.bmj.com/content/74/10/1799,,EULAR,restricted-cds,lab_inflammation,high
+EULAR-IIM-001,EULAR,EULAR ACR classification idiopathic inflammatory myopathies myositis antibodies,2017,https://ard.bmj.com/content/76/12/1955,,EULAR,restricted-cds,lab_immunology,high
+ACR-SS-001,ACR,ACR EULAR classification criteria primary Sjogren syndrome anti-SSA,2017,https://onlinelibrary.wiley.com/doi/10.1002/art.39859,,ACR,restricted-cds,lab_immunology,high
+ACR-SCLERODERMA-001,ACR,ACR EULAR classification criteria systemic sclerosis ANA Scl70,2013,https://ard.bmj.com/content/72/11/1747,,ACR,restricted-cds,lab_immunology,high
+EULAR-AAV-001,EULAR,EULAR diagnostic classification ANCA-associated vasculitis,2022,https://ard.bmj.com/content/81/3/315,,EULAR,restricted-cds,lab_immunology,high
+ESMO-LIQUIDBIOPSY-001,ESMO,ESMO precision medicine working group circulating tumor DNA,2022,https://www.annalsofoncology.org/article/S0923-7534(21)02333-7/fulltext,,ESMO Open Access,allowed,lab_molecular,high
+WHO-VL-001,WHO,WHO consolidated guidelines HIV viral load monitoring,2021,https://www.who.int/publications/i/item/9789240031593,,WHO Open Access,allowed,lab_molecular,high
+ELN-AML-001,ELN,ELN recommendations diagnosis management AML molecular markers,2022,https://ashpublications.org/blood/article/140/12/1345/485825,,ELN,restricted-cds,lab_molecular,high
+ELN-MRD-001,ELN,ELN consensus measurable residual disease AML molecular,2021,https://ashpublications.org/blood/article/138/26/2753/477748,,ELN,restricted-cds,lab_molecular,high
+WHO-HAEM-001,WHO,WHO classification haematolymphoid tumours laboratory diagnosis,2022,https://tumourclassification.iarc.who.int/,,WHO Open Access,allowed,lab_hematology,high
+ICCS-MRD-001,ICCS,ICCS guidelines flow cytometry minimal residual disease detection,2018,https://onlinelibrary.wiley.com/doi/10.1002/cyto.b.21617,,ICCS,restricted-cds,lab_hematology,high
+NACB-HCG-002,NACB,NACB practice guidelines pregnancy hCG quantitative interpretation,2010,https://academic.oup.com/clinchem/article/56/12/e36/5621305,,NACB,restricted-cds,lab_tumor_markers,medium
+WHO-NEWBORN-001,WHO,WHO neonatal screening newborn dried blood spot guidelines,2020,https://www.who.int/publications/i/item/9789240013650,,WHO Open Access,allowed,lab_pediatric,high
+EASL-NAFLD-001,EASL,EASL clinical practice guideline NAFLD MAFLD biomarkers,2024,https://www.journal-of-hepatology.eu/article/S0168-8278(24)00329-9/fulltext,,EASL,restricted-cds,lab_chemistry,high
+AASLD-NAFLD-001,AASLD,AASLD practice guidance NAFLD non-invasive tests fibrosis,2023,https://aasldpubs.onlinelibrary.wiley.com/doi/10.1097/HEP.0000000000000323,,AASLD,restricted-cds,lab_chemistry,high
+KDIGO-DKD-001,KDIGO,KDIGO clinical practice guideline diabetes management CKD,2022,https://kdigo.org/guidelines/diabetes-ckd/,,KDIGO,restricted-cds,lab_chemistry,high
+ESC-LDL-001,ESC,ESC consensus statement Lp(a) lipoprotein lipid diagnostics,2022,https://academic.oup.com/eurheartj/article/43/39/3925/6701855,,ESC,restricted-cds,lab_chemistry,medium
+EFLM-IQC-001,EFLM,EFLM recommendations internal quality control practical implementation,2020,https://www.degruyter.com/document/doi/10.1515/cclm-2019-1146/html,,EFLM,restricted-cds,lab_quality,high
+CLSI-EQA-001,CLSI,CLSI GP27 using proficiency testing improve laboratory,2007,https://clsi.org/standards/products/general-laboratory/documents/gp27/,,CLSI,restricted,lab_quality,high
+CLSI-VERIFICATION-001,CLSI,CLSI EP15 verification precision trueness laboratory methods,2014,https://clsi.org/standards/products/method-evaluation/documents/ep15/,,CLSI,restricted,lab_quality,high
+IFCC-COMMUTABILITY-001,IFCC,IFCC working group commutability reference materials,2019,https://www.ifcc.org/ifcc-scientific-division/sd-working-groups/commutability/,,IFCC,restricted-cds,lab_quality,medium
+ATA-TFT-PREG-001,ATA,ATA guidelines thyroid disease pregnancy postpartum laboratory,2017,https://www.liebertpub.com/doi/10.1089/thy.2016.0457,,ATA,restricted-cds,lab_endocrinology,high
+ESHRE-PCOS-001,ESHRE,ESHRE international evidence based guideline PCOS biochemical,2023,https://www.eshre.eu/Guidelines-and-Legal/Guidelines/Polycystic-Ovary-Syndrome,,ESHRE,restricted-cds,lab_endocrinology,high
+WHO-SEMEN-001,WHO,WHO laboratory manual examination processing human semen,2021,https://www.who.int/publications/i/item/9789240030787,,WHO Open Access,allowed,lab_endocrinology,high
+EAU-INFERTILITY-001,EAU,EAU guidelines sexual reproductive health male infertility hormonal,2024,https://uroweb.org/guidelines/sexual-and-reproductive-health,,EAU,restricted-cds,lab_endocrinology,high
+EULAR-CRYO-001,EULAR,EULAR recommendations cryoglobulinaemic vasculitis testing,2018,https://ard.bmj.com/content/77/9/1259,,EULAR,restricted-cds,lab_immunology,medium
