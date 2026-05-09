@@ -1,0 +1,497 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+KDIGO-CKD-001,KDIGO,KDIGO 2024 Clinical Practice Guideline for Evaluation and Management of CKD,2024,https://kdigo.org/guidelines/ckd-evaluation-and-management/,,KDIGO,restricted-cds,nephrology_ckd,high
+KDIGO-CKD-002,KDIGO,KDIGO 2012 Clinical Practice Guideline for Evaluation and Management of CKD,2013,https://kdigo.org/guidelines/ckd-evaluation-and-management/,,KDIGO,restricted-cds,nephrology_ckd,high
+KDOQI-CKD-001,KDOQI,KDOQI Clinical Practice Guideline for Nutrition in CKD 2020 Update,2020,https://www.kidney.org/professionals/guidelines/guidelines_commentaries/nutrition-ckd,,KDOQI,restricted-cds,nephrology_ckd,high
+KDOQI-CKD-002,KDOQI,KDOQI Commentary on KDIGO CKD Evaluation and Management Guideline,2014,https://www.kidney.org/professionals/guidelines/guidelines_commentaries,,KDOQI,restricted-cds,nephrology_ckd,high
+NICE-CKD-001,NICE,NICE NG203 Chronic kidney disease assessment and management,2021,https://www.nice.org.uk/guidance/ng203,,NICE,restricted-cds,nephrology_ckd,high
+KDIGO-ANEMIA-001,KDIGO,KDIGO Clinical Practice Guideline for Anemia in CKD,2012,https://kdigo.org/guidelines/anemia-in-ckd/,,KDIGO,restricted-cds,nephrology_ckd,high
+KDOQI-ANEMIA-001,KDOQI,KDOQI Commentary on Anemia Management in CKD Updated,2013,https://www.kidney.org/professionals/guidelines/guidelines_commentaries/anemia,,KDOQI,restricted-cds,nephrology_ckd,high
+KDIGO-MBD-001,KDIGO,KDIGO 2017 CKD-MBD Update Guideline,2017,https://kdigo.org/guidelines/ckd-mbd/,,KDIGO,restricted-cds,nephrology_ckd,high
+KDIGO-MBD-002,KDIGO,KDIGO Clinical Practice Guideline CKD Mineral and Bone Disorder,2009,https://kdigo.org/guidelines/ckd-mbd/,,KDIGO,restricted-cds,nephrology_ckd,medium
+KDIGO-DM-001,KDIGO,KDIGO 2022 Clinical Practice Guideline for Diabetes Management in CKD,2022,https://kdigo.org/guidelines/diabetes-ckd/,,KDIGO,restricted-cds,nephrology_ckd,high
+ADA-CKD-001,ADA,ADA Standards of Care Diabetes Chronic Kidney Disease and Risk Management,2024,https://diabetesjournals.org/care/issue/47/Supplement_1,,ADA,restricted-cds,nephrology_ckd,high
+KDIGO-HTN-001,KDIGO,KDIGO 2021 Clinical Practice Guideline for Management of Blood Pressure in CKD,2021,https://kdigo.org/guidelines/blood-pressure-in-ckd/,,KDIGO,restricted-cds,nephrology_ckd,high
+KDIGO-LIPID-001,KDIGO,KDIGO Clinical Practice Guideline for Lipid Management in CKD,2013,https://kdigo.org/guidelines/lipids/,,KDIGO,restricted-cds,nephrology_ckd,medium
+ESPEN-CKD-001,ESPEN,ESPEN Guideline on Clinical Nutrition Hospitalized Patients with Acute or Chronic Kidney Disease,2021,https://www.espen.org/guidelines-home,,ESPEN,restricted-cds,nephrology_ckd,medium
+KDIGO-GN-001,KDIGO,KDIGO 2021 Clinical Practice Guideline for the Management of Glomerular Diseases,2021,https://kdigo.org/guidelines/gd/,,KDIGO,restricted-cds,nephrology_glomerular,high
+KDIGO-LN-001,KDIGO,KDIGO Lupus Nephritis Recommendations within GD Guideline,2021,https://kdigo.org/guidelines/gd/,,KDIGO,restricted-cds,nephrology_glomerular,high
+EULAR-LN-001,EULAR,EULAR ERA-EDTA recommendations for the management of lupus nephritis,2024,https://ard.bmj.com/,,EULAR,restricted-cds,nephrology_glomerular,high
+KDIGO-AAV-001,KDIGO,KDIGO Recommendations for ANCA-associated Vasculitis Renal Disease,2021,https://kdigo.org/guidelines/gd/,,KDIGO,restricted-cds,nephrology_glomerular,high
+KDIGO-IGA-001,KDIGO,KDIGO IgA Nephropathy and IgA Vasculitis Recommendations,2021,https://kdigo.org/guidelines/gd/,,KDIGO,restricted-cds,nephrology_glomerular,high
+KDIGO-MN-001,KDIGO,KDIGO Membranous Nephropathy Recommendations within GD Guideline,2021,https://kdigo.org/guidelines/gd/,,KDIGO,restricted-cds,nephrology_glomerular,high
+KDIGO-MCD-001,KDIGO,KDIGO Minimal Change Disease and FSGS Recommendations,2021,https://kdigo.org/guidelines/gd/,,KDIGO,restricted-cds,nephrology_glomerular,high
+KDIGO-DKD-001,KDIGO,KDIGO Diabetic Kidney Disease Specific Recommendations,2022,https://kdigo.org/guidelines/diabetes-ckd/,,KDIGO,restricted-cds,nephrology_glomerular,high
+KDIGO-AKI-001,KDIGO,KDIGO Clinical Practice Guideline for Acute Kidney Injury,2012,https://kdigo.org/guidelines/acute-kidney-injury/,,KDIGO,restricted-cds,nephrology_aki,high
+ADQI-AKI-001,ADQI,ADQI Consensus on Persistent AKI and AKI to CKD Transition,2017,https://www.adqi.org/consensus-conferences,,ADQI,restricted-cds,nephrology_aki,high
+ADQI-CRS-001,ADQI,ADQI Consensus on Cardiorenal Syndromes Definition Classification,2010,https://www.adqi.org/consensus-conferences,,ADQI,restricted-cds,nephrology_aki,high
+AASLD-HRS-001,AASLD,AASLD Practice Guidance Diagnosis Evaluation and Management of Ascites HRS,2021,https://www.aasld.org/practice-guidelines,,AASLD,restricted-cds,nephrology_aki,high
+EASL-HRS-001,EASL,EASL Clinical Practice Guidelines for the Management of Patients with Decompensated Cirrhosis,2018,https://easl.eu/publication/easl-clinical-practice-guidelines-decompensated-cirrhosis/,,EASL,restricted-cds,nephrology_aki,high
+ESUR-CIN-001,ESUR,ESUR Guidelines on Contrast Agents v10.0,2018,https://www.esur.org/guidelines/,,ESUR,restricted-cds,nephrology_aki,high
+ACR-CIN-001,ACR,ACR Manual on Contrast Media Contrast-Induced Nephropathy,2024,https://www.acr.org/Clinical-Resources/Contrast-Manual,,ACR,restricted-cds,nephrology_aki,high
+SSC-AKI-001,SSC,Surviving Sepsis Campaign Sepsis-Associated AKI Recommendations,2021,https://www.sccm.org/SurvivingSepsisCampaign/Guidelines,,SSC,restricted-cds,nephrology_aki,high
+KDOQI-HD-001,KDOQI,KDOQI Clinical Practice Guideline for Hemodialysis Adequacy 2015 Update,2015,https://www.kidney.org/professionals/guidelines/guidelines_commentaries/hemodialysis-adequacy,,KDOQI,restricted-cds,nephrology_dialysis,high
+ISPD-PD-001,ISPD,ISPD Recommendations Adequacy Targets in Peritoneal Dialysis,2020,https://ispd.org/guidelines/,,ISPD,restricted-cds,nephrology_dialysis,high
+ISPD-PERIT-001,ISPD,ISPD Peritonitis Guideline Recommendations 2022 Update,2022,https://ispd.org/guidelines/,,ISPD,restricted-cds,nephrology_dialysis,high
+ISPD-CATHET-001,ISPD,ISPD Catheter-Related Infection Recommendations,2017,https://ispd.org/guidelines/,,ISPD,restricted-cds,nephrology_dialysis,high
+KDOQI-PD-001,KDOQI,KDOQI Commentary on ISPD PD Adequacy Recommendations,2021,https://www.kidney.org/professionals/guidelines/guidelines_commentaries/peritoneal-dialysis,,KDOQI,restricted-cds,nephrology_dialysis,high
+KDOQI-VA-001,KDOQI,KDOQI Clinical Practice Guideline for Vascular Access 2019 Update,2020,https://www.ajkd.org/article/S0272-6386(19)31137-0/,,KDOQI,restricted-cds,nephrology_dialysis,high
+KDIGO-CONSERV-001,KDIGO,KDIGO Controversies Conference on Supportive Care in CKD,2015,https://kdigo.org/conferences/supportive-care/,,KDIGO,restricted-cds,nephrology_dialysis,medium
+KDIGO-INIT-001,KDIGO,KDIGO Controversies Conference on Dialysis Initiation Modality and Outcomes,2019,https://kdigo.org/conferences/,,KDIGO,restricted-cds,nephrology_dialysis,high
+KDIGO-TX-001,KDIGO,KDIGO Clinical Practice Guideline on the Evaluation and Management of Candidates for Kidney Transplantation,2020,https://kdigo.org/guidelines/transplant-candidate/,,KDIGO,restricted-cds,nephrology_transplant,high
+KDIGO-TX-002,KDIGO,KDIGO Clinical Practice Guideline for the Care of Kidney Transplant Recipients,2009,https://kdigo.org/guidelines/care-of-the-kidney-transplant-recipient/,,KDIGO,restricted-cds,nephrology_transplant,high
+KDIGO-LD-001,KDIGO,KDIGO Clinical Practice Guideline on the Evaluation and Care of Living Kidney Donors,2017,https://kdigo.org/guidelines/living-kidney-donor/,,KDIGO,restricted-cds,nephrology_transplant,high
+AST-TX-001,AST,AST American Society of Transplantation Practice Guidelines for Kidney Transplant,2022,https://www.myast.org/practice-management/clinical-practice-guidelines,,AST,restricted-cds,nephrology_transplant,high
+KDIGO-TX-IS-001,KDIGO,KDIGO Recommendations for Immunosuppression in Kidney Transplant,2009,https://kdigo.org/guidelines/care-of-the-kidney-transplant-recipient/,,KDIGO,restricted-cds,nephrology_transplant,high
+KDIGO-TX-RECUR-001,KDIGO,KDIGO Controversies Conference on Recurrent Glomerular Disease after Transplant,2017,https://kdigo.org/conferences/,,KDIGO,restricted-cds,nephrology_transplant,medium
+KDIGO-TX-BKV-001,KDIGO,KDIGO Recommendations on BK Polyomavirus in Transplant,2024,https://kdigo.org/guidelines/,,KDIGO,restricted-cds,nephrology_transplant,medium
+ENDO-NA-001,Endocrine Society,Diagnosis Evaluation and Treatment of Hyponatremia Expert Panel Recommendations,2013,https://www.amjmed.com/,,Endocrine Society,restricted-cds,nephrology_electrolyte,high
+ERA-NA-001,ERA-EDTA,Clinical Practice Guideline on Diagnosis and Treatment of Hyponatremia,2014,https://academic.oup.com/ndt/,,ERA-EDTA,restricted-cds,nephrology_electrolyte,high
+KDIGO-K-001,KDIGO,KDIGO Controversies Conference on Potassium Management in CKD,2020,https://kdigo.org/conferences/,,KDIGO,restricted-cds,nephrology_electrolyte,high
+KDIGO-CA-001,KDIGO,KDIGO Calcium and Phosphate Recommendations CKD-MBD,2017,https://kdigo.org/guidelines/ckd-mbd/,,KDIGO,restricted-cds,nephrology_electrolyte,high
+ESH-HYPER-001,ESH,European Society of Hypertension Guidelines for Hypertension Management,2023,https://www.eshonline.org/guidelines/,,ESH,restricted-cds,nephrology_electrolyte,high
+KDIGO-ADPKD-001,KDIGO,KDIGO Controversies Conference on ADPKD,2015,https://kdigo.org/conferences/adpkd/,,KDIGO,restricted-cds,nephrology_ckd,high
+NICE-PREG-CKD-001,NICE,NICE Hypertension in pregnancy diagnosis and management NG133,2019,https://www.nice.org.uk/guidance/ng133,,NICE,restricted-cds,nephrology_ckd,high
+ISH-PREG-001,ISH,International Society of Hypertension Pregnancy Hypertension Recommendations,2020,https://ish-world.com/guidelines/,,ISH,restricted-cds,nephrology_ckd,medium
+AUA-STONE-001,AUA,AUA Surgical Management of Stones AUA-Endourological Society Guideline,2016,https://www.auanet.org/guidelines/guidelines/kidney-stones-surgical-management-guideline,,AUA,restricted-cds,urology_stones,high
+AUA-STONE-002,AUA,AUA Medical Management of Kidney Stones Guideline,2014,https://www.auanet.org/guidelines/guidelines/medical-management-of-kidney-stones-guideline,,AUA,restricted-cds,urology_stones,high
+EAU-STONE-001,EAU,EAU Guidelines on Urolithiasis,2024,https://uroweb.org/guidelines/urolithiasis/,,EAU,restricted-cds,urology_stones,high
+EAU-PED-STONE-001,EAU,EAU ESPU Guidelines on Paediatric Urolithiasis,2024,https://uroweb.org/guidelines/paediatric-urology/,,EAU,restricted-cds,urology_stones,high
+ESPN-STONE-001,ESPN,ESPN Recommendations on Pediatric Urolithiasis Diagnosis and Management,2020,https://www.espn-online.org/,,ESPN,restricted-cds,urology_stones,medium
+KDIGO-STONE-001,KDIGO,KDIGO Controversies Conference on Stone Disease,2024,https://kdigo.org/conferences/,,KDIGO,restricted-cds,urology_stones,medium
+AUA-BPH-001,AUA,AUA Guideline on Management of Lower Urinary Tract Symptoms BPH,2023,https://www.auanet.org/guidelines/guidelines/benign-prostatic-hyperplasia-(bph)-guideline,,AUA,restricted-cds,urology_bph,high
+EAU-BPH-001,EAU,EAU Guidelines on Management of Non-Neurogenic Male LUTS BPH,2024,https://uroweb.org/guidelines/management-of-non-neurogenic-male-luts/,,EAU,restricted-cds,urology_bph,high
+NICE-BPH-001,NICE,NICE CG97 Lower urinary tract symptoms in men management,2010,https://www.nice.org.uk/guidance/cg97,,NICE,restricted-cds,urology_bph,high
+AUA-OAB-001,AUA,AUA SUFU Guideline Diagnosis and Treatment of Non-Neurogenic Overactive Bladder,2024,https://www.auanet.org/guidelines/guidelines/overactive-bladder-(oab)-guideline,,AUA,restricted-cds,urology_bph,high
+EAU-OAB-001,EAU,EAU Guidelines on Non-neurogenic Female LUTS Overactive Bladder,2024,https://uroweb.org/guidelines/non-neurogenic-female-luts/,,EAU,restricted-cds,urology_bph,high
+ICS-OAB-001,ICS,ICS Standardisation Lower Urinary Tract Function Overactive Bladder,2019,https://www.ics.org/Documents/,,ICS,restricted-cds,urology_bph,medium
+AUA-MUI-001,AUA,AUA Incontinence after Prostate Treatment Guideline,2019,https://www.auanet.org/guidelines/guidelines/incontinence-after-prostate-treatment,,AUA,restricted-cds,urology_bph,high
+ISSM-ED-001,ISSM,ISSM Process of Care Model for Sexual Dysfunction Erectile Dysfunction,2018,https://www.issm.info/educational-resources/,,ISSM,restricted-cds,urology_andrology,high
+AUA-ED-001,AUA,AUA Guideline on the Diagnosis and Treatment of Erectile Dysfunction,2018,https://www.auanet.org/guidelines/guidelines/erectile-dysfunction-(ed)-guideline,,AUA,restricted-cds,urology_andrology,high
+EAU-ED-001,EAU,EAU Guidelines on Sexual and Reproductive Health Erectile Dysfunction,2024,https://uroweb.org/guidelines/sexual-and-reproductive-health/,,EAU,restricted-cds,urology_andrology,high
+ISSM-PE-001,ISSM,ISSM Guidelines for the Diagnosis and Treatment of Premature Ejaculation,2020,https://www.issm.info/educational-resources/,,ISSM,restricted-cds,urology_andrology,medium
+AUA-PEY-001,AUA,AUA Peyronie Disease Guideline,2015,https://www.auanet.org/guidelines/guidelines/peyronies-disease-guideline,,AUA,restricted-cds,urology_andrology,high
+EAU-PEY-001,EAU,EAU Guidelines on Sexual and Reproductive Health Peyronie Disease,2024,https://uroweb.org/guidelines/sexual-and-reproductive-health/,,EAU,restricted-cds,urology_andrology,high
+AUA-HYPO-001,AUA,AUA Guideline on the Evaluation and Management of Testosterone Deficiency,2018,https://www.auanet.org/guidelines/guidelines/testosterone-deficiency-guideline,,AUA,restricted-cds,urology_andrology,high
+ENDO-HYPO-001,Endocrine Society,Endocrine Society Clinical Practice Guideline Testosterone Therapy in Men with Hypogonadism,2018,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,urology_andrology,high
+EAU-HYPO-001,EAU,EAU Guidelines on Sexual and Reproductive Health Male Hypogonadism,2024,https://uroweb.org/guidelines/sexual-and-reproductive-health/,,EAU,restricted-cds,urology_andrology,high
+AUA-INFERT-001,AUA,AUA ASRM Diagnosis and Treatment of Infertility in Men Guideline,2024,https://www.auanet.org/guidelines/guidelines/male-infertility,,AUA,restricted-cds,urology_andrology,high
+ASRM-INFERT-001,ASRM,ASRM Diagnostic Evaluation of the Infertile Male Committee Opinion,2021,https://www.asrm.org/practice-guidance/practice-committee-documents/,,ASRM,restricted-cds,urology_andrology,high
+EAU-INFERT-001,EAU,EAU Guidelines on Sexual and Reproductive Health Male Infertility,2024,https://uroweb.org/guidelines/sexual-and-reproductive-health/,,EAU,restricted-cds,urology_andrology,high
+AUA-VAS-001,AUA,AUA Vasectomy Guideline,2015,https://www.auanet.org/guidelines/guidelines/vasectomy-guideline,,AUA,restricted-cds,urology_andrology,high
+AUA-SUI-001,AUA,AUA SUFU Surgical Treatment of Female Stress Urinary Incontinence,2023,https://www.auanet.org/guidelines/guidelines/incontinence-stress-urinary-(suii)-guideline,,AUA,restricted-cds,urology_female,high
+EAU-SUI-001,EAU,EAU Guidelines on Urinary Incontinence in Adults,2024,https://uroweb.org/guidelines/urinary-incontinence/,,EAU,restricted-cds,urology_female,high
+AUGS-SUI-001,AUGS,AUGS SUFU Best Practice Statement on Stress Urinary Incontinence,2020,https://www.augs.org/clinical-resources/,,AUGS,restricted-cds,urology_female,high
+AUGS-POP-001,AUGS,AUGS IUGA Joint Report on Pelvic Organ Prolapse Surgery,2020,https://www.augs.org/clinical-resources/,,AUGS,restricted-cds,urology_female,high
+IUGA-POP-001,IUGA,IUGA Best Practice Statement on Surgical Treatment of POP,2022,https://www.iuga.org/publications/guidelines,,IUGA,restricted-cds,urology_female,high
+AUA-RUTI-001,AUA,AUA CUA SUFU Recurrent Uncomplicated UTI in Women Guideline,2022,https://www.auanet.org/guidelines/guidelines/recurrent-uti,,AUA,restricted-cds,urology_female,high
+AUA-IC-001,AUA,AUA Guideline on Diagnosis and Treatment of Interstitial Cystitis Bladder Pain Syndrome,2022,https://www.auanet.org/guidelines/guidelines/diagnosis-and-treatment-interstitial-of-cystitis/bladder-pain-syndrome,,AUA,restricted-cds,urology_female,high
+EAU-IC-001,EAU,EAU Guidelines on Chronic Pelvic Pain,2024,https://uroweb.org/guidelines/chronic-pelvic-pain/,,EAU,restricted-cds,urology_female,high
+ESSIC-IC-001,ESSIC,ESSIC Diagnostic Criteria and Classification Bladder Pain Syndrome,2008,https://www.essic.eu/,,ESSIC,restricted-cds,urology_female,medium
+AUA-VUR-001,AUA,AUA Management Screening Diagnosis of Primary Vesicoureteral Reflux Children,2010,https://www.auanet.org/guidelines/guidelines/vesicoureteral-reflux-guideline,,AUA,restricted-cds,urology_pediatric,high
+EAU-VUR-001,EAU,EAU ESPU Guidelines on Paediatric Urology Vesicoureteral Reflux,2024,https://uroweb.org/guidelines/paediatric-urology/,,EAU,restricted-cds,urology_pediatric,high
+ESPU-VUR-001,ESPU,ESPU Hydronephrosis Antenatal Postnatal Recommendations,2020,https://www.espu.org/,,ESPU,restricted-cds,urology_pediatric,high
+AUA-CRYPTO-001,AUA,AUA Evaluation and Treatment of Cryptorchidism Guideline,2018,https://www.auanet.org/guidelines/guidelines/cryptorchidism-guideline,,AUA,restricted-cds,urology_pediatric,high
+EAU-CRYPTO-001,EAU,EAU ESPU Paediatric Urology Cryptorchidism Recommendations,2024,https://uroweb.org/guidelines/paediatric-urology/,,EAU,restricted-cds,urology_pediatric,high
+EAU-HYPOSP-001,EAU,EAU ESPU Paediatric Urology Hypospadias Recommendations,2024,https://uroweb.org/guidelines/paediatric-urology/,,EAU,restricted-cds,urology_pediatric,high
+EAU-PUV-001,EAU,EAU ESPU Paediatric Urology Posterior Urethral Valves Recommendations,2024,https://uroweb.org/guidelines/paediatric-urology/,,EAU,restricted-cds,urology_pediatric,high
+ICCS-ENUR-001,ICCS,ICCS Standardization Document on Enuresis Update,2020,https://i-c-c-s.org/i-c-c-s-publications/,,ICCS,restricted-cds,urology_pediatric,high
+AUA-ENUR-001,AUA,AUA Guideline on Nocturnal Enuresis Pediatric,2020,https://www.auanet.org/guidelines/guidelines,,AUA,restricted-cds,urology_pediatric,medium
+AUA-RTRAUM-001,AUA,AUA Urotrauma Guideline 2020 Amendment,2020,https://www.auanet.org/guidelines/guidelines/urotrauma-guideline,,AUA,restricted-cds,urology_trauma,high
+EAU-TRAUM-001,EAU,EAU Guidelines on Urological Trauma,2024,https://uroweb.org/guidelines/urological-trauma/,,EAU,restricted-cds,urology_trauma,high
+AUA-PRIA-001,AUA,AUA Guideline on the Management of Priapism,2022,https://www.auanet.org/guidelines/guidelines/priapism-guideline,,AUA,restricted-cds,urology_trauma,high
+EAU-PRIA-001,EAU,EAU Guidelines on Sexual and Reproductive Health Priapism,2024,https://uroweb.org/guidelines/sexual-and-reproductive-health/,,EAU,restricted-cds,urology_trauma,high
+EAU-FOURN-001,EAU,EAU Guidelines on Urological Infections Fournier Gangrene,2024,https://uroweb.org/guidelines/urological-infections/,,EAU,restricted-cds,urology_trauma,high
+WSES-FOURN-001,WSES,WSES Consensus on Diagnosis Management of Necrotizing Soft Tissue Infections,2018,https://wjes.biomedcentral.com/,,WSES,restricted-cds,urology_trauma,high
+AUA-UTI-001,AUA,AUA Recurrent Uncomplicated UTI in Adult Women Guideline,2022,https://www.auanet.org/guidelines/guidelines/recurrent-uti,,AUA,restricted-cds,urology_infection,high
+IDSA-UTI-001,IDSA,IDSA Guidelines for the Treatment of Uncomplicated Cystitis Pyelonephritis,2011,https://www.idsociety.org/practice-guideline/,,IDSA,restricted-cds,urology_infection,high
+EAU-UTI-001,EAU,EAU Guidelines on Urological Infections,2024,https://uroweb.org/guidelines/urological-infections/,,EAU,restricted-cds,urology_infection,high
+AUA-PROST-001,AUA,AUA Best Practice Statement on Chronic Prostatitis Pelvic Pain Syndrome,2014,https://www.auanet.org/guidelines/guidelines,,AUA,restricted-cds,urology_infection,medium
+EAU-PROST-001,EAU,EAU Guidelines on Urological Infections Prostatitis,2024,https://uroweb.org/guidelines/urological-infections/,,EAU,restricted-cds,urology_infection,high
+EAU-EPIDID-001,EAU,EAU Guidelines on Urological Infections Epididymo-orchitis,2024,https://uroweb.org/guidelines/urological-infections/,,EAU,restricted-cds,urology_infection,high
+USPSTF-PHE-001,USPSTF,USPSTF A and B Recommendations Adult Periodic Health Examination,2024,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation-topics,,USPSTF,public-domain,internal_medicine_general,high
+ACP-PHE-001,ACP,ACP High Value Care for Adult Periodic Health Exam,2017,https://www.acponline.org/clinical-information/clinical-guidelines-recommendations,,ACP,restricted-cds,internal_medicine_general,medium
+CTFPHC-PHE-001,CTFPHC,CTFPHC Periodic Health Examination Recommendations,2023,https://canadiantaskforce.ca/guidelines/,,CTFPHC,restricted-cds,internal_medicine_general,medium
+ACIP-IMM-001,ACIP,ACIP Adult Immunization Schedule,2024,https://www.cdc.gov/vaccines/hcp/imz-schedules/index.html,,ACIP,public-domain,internal_medicine_general,high
+IDSA-IMM-001,IDSA,IDSA Clinical Practice Guideline for Vaccination of the Immunocompromised Host,2014,https://www.idsociety.org/practice-guideline/,,IDSA,restricted-cds,internal_medicine_general,high
+CDC-TRAVEL-001,CDC,CDC Yellow Book Health Information for International Travel,2024,https://wwwnc.cdc.gov/travel/page/yellowbook-home,,CDC,public-domain,internal_medicine_general,high
+ISTM-TRAVEL-001,ISTM,ISTM Recommendations for Pre-Travel Consultation,2018,https://www.istm.org/,,ISTM,restricted-cds,internal_medicine_general,medium
+USPSTF-PREV-001,USPSTF,USPSTF Recommendations on Aspirin for Primary Prevention CVD,2022,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/aspirin-to-prevent-cardiovascular-disease-preventive-medication,,USPSTF,public-domain,internal_medicine_general,high
+USPSTF-CANCER-001,USPSTF,USPSTF Cancer Screening Recommendations Combined,2024,https://www.uspreventiveservicestaskforce.org/uspstf/topic_search_results?topic_status=P,,USPSTF,public-domain,internal_medicine_general,high
+AGS-GERI-001,AGS,AGS Comprehensive Geriatric Assessment Recommendations,2018,https://www.americangeriatrics.org/clinical-resources,,AGS,restricted-cds,internal_medicine_geriatric,high
+ICOPE-001,ICOPE,WHO ICOPE Integrated Care for Older People Guidelines,2019,https://www.who.int/publications/i/item/9789241550109,,WHO,restricted-cds,internal_medicine_geriatric,high
+ICFSR-FRAILTY-001,ICFSR,ICFSR International Clinical Practice Guidelines for Frailty,2019,https://link.springer.com/journal/12603,,ICFSR,restricted-cds,internal_medicine_geriatric,high
+FRAILTY-CONSEN-001,Frailty Consensus,Asia Pacific Clinical Practice Guidelines for the Management of Frailty,2017,https://www.jamda.com/,,Frailty Consensus,restricted-cds,internal_medicine_geriatric,medium
+AGS-BEERS-001,AGS,AGS Beers Criteria for Potentially Inappropriate Medication Use in Older Adults,2023,https://www.americangeriatrics.org/clinical-resources/beers-criteria,,AGS,restricted-cds,internal_medicine_geriatric,high
+STOPP-START-001,STOPP/START,STOPP START Criteria for Potentially Inappropriate Prescribing in Older Adults Version 3,2023,https://academic.oup.com/ageing/,,STOPP/START,restricted-cds,internal_medicine_geriatric,high
+AGS-FALLS-001,AGS,AGS BGS Clinical Practice Guideline Prevention of Falls in Older Persons,2011,https://www.americangeriatrics.org/clinical-resources,,AGS,restricted-cds,internal_medicine_geriatric,high
+NICE-FALLS-001,NICE,NICE CG161 Falls in older people assessing risk and prevention,2013,https://www.nice.org.uk/guidance/cg161,,NICE,restricted-cds,internal_medicine_geriatric,high
+WORLD-FALLS-001,World Falls Guidelines,World Guidelines for Falls Prevention and Management for Older Adults,2022,https://academic.oup.com/ageing/,,World Falls,restricted-cds,internal_medicine_geriatric,high
+AGS-DELIR-001,AGS,AGS Clinical Practice Guideline for Postoperative Delirium in Older Adults,2014,https://www.americangeriatrics.org/clinical-resources,,AGS,restricted-cds,internal_medicine_geriatric,high
+NICE-DELIR-001,NICE,NICE CG103 Delirium prevention diagnosis and management,2023,https://www.nice.org.uk/guidance/cg103,,NICE,restricted-cds,internal_medicine_geriatric,high
+SCCM-DELIR-001,SCCM,SCCM PADIS Pain Agitation Delirium ICU Guidelines,2018,https://www.sccm.org/clinical-resources/guidelines,,SCCM,restricted-cds,internal_medicine_critical_care,high
+USPSTF-COG-001,USPSTF,USPSTF Recommendation Statement Screening for Cognitive Impairment in Older Adults,2020,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/cognitive-impairment-in-older-adults-screening,,USPSTF,public-domain,internal_medicine_geriatric,high
+NICE-COG-001,NICE,NICE NG97 Dementia assessment management and support,2018,https://www.nice.org.uk/guidance/ng97,,NICE,restricted-cds,internal_medicine_geriatric,high
+ADA-T2DM-001,ADA,ADA Standards of Care in Diabetes 2024,2024,https://diabetesjournals.org/care/issue/47/Supplement_1,,ADA,restricted-cds,internal_medicine_endocrine,high
+EASD-T2DM-001,EASD,ADA EASD Consensus Report on Management of Hyperglycemia in Type 2 Diabetes,2022,https://www.easd.org/publications.html,,EASD,restricted-cds,internal_medicine_endocrine,high
+NICE-T2DM-001,NICE,NICE NG28 Type 2 diabetes in adults management,2022,https://www.nice.org.uk/guidance/ng28,,NICE,restricted-cds,internal_medicine_endocrine,high
+ISPAD-T1DM-001,ISPAD,ISPAD Clinical Practice Consensus Guidelines Type 1 Diabetes,2022,https://www.ispad.org/page/ISPADGuidelines2022,,ISPAD,restricted-cds,internal_medicine_endocrine,high
+ADA-T1DM-001,ADA,ADA Standards of Care Type 1 Diabetes Children and Adults,2024,https://diabetesjournals.org/care/,,ADA,restricted-cds,internal_medicine_endocrine,high
+ENDO-HYPO-002,Endocrine Society,Endocrine Society Clinical Practice Guideline Evaluation and Management of Hypoglycemia in Adults,2009,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+JBDS-DKA-001,JBDS,JBDS Joint British Diabetes Societies Inpatient Guideline DKA,2023,https://abcd.care/joint-british-diabetes-societies-jbds-inpatient-care-group,,JBDS,restricted-cds,internal_medicine_endocrine,high
+JBDS-HHS-001,JBDS,JBDS Hyperosmolar Hyperglycemic State Inpatient Guideline,2022,https://abcd.care/joint-british-diabetes-societies-jbds-inpatient-care-group,,JBDS,restricted-cds,internal_medicine_endocrine,high
+ADA-GDM-001,ADA,ADA Standards of Care Management of Diabetes in Pregnancy,2024,https://diabetesjournals.org/care/,,ADA,restricted-cds,internal_medicine_endocrine,high
+ACOG-GDM-001,ACOG,ACOG Practice Bulletin Gestational Diabetes Mellitus,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2018/02/gestational-diabetes-mellitus,,ACOG,restricted-cds,internal_medicine_endocrine,high
+NICE-GDM-001,NICE,NICE NG3 Diabetes in pregnancy management before to after birth,2020,https://www.nice.org.uk/guidance/ng3,,NICE,restricted-cds,internal_medicine_endocrine,high
+ENDO-CUSH-001,Endocrine Society,Endocrine Society Clinical Practice Guideline Treatment of Cushing Syndrome,2015,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+ENDO-PHEO-001,Endocrine Society,Endocrine Society Clinical Practice Guideline Pheochromocytoma and Paraganglioma,2014,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+ENDO-ALDO-001,Endocrine Society,Endocrine Society Clinical Practice Guideline Management of Primary Aldosteronism,2016,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+ENDO-ADREN-001,Endocrine Society,Endocrine Society Clinical Practice Guideline Diagnosis and Treatment of Primary Adrenal Insufficiency,2016,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+ENDO-ACROM-001,Endocrine Society,Endocrine Society Clinical Practice Guideline Acromegaly,2014,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+ENDO-PRL-001,Endocrine Society,Endocrine Society Clinical Practice Guideline Diagnosis and Treatment of Hyperprolactinemia,2011,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+AE-PCOS-001,AE-PCOS Society,International Evidence-Based Guideline for the Assessment and Management of PCOS,2023,https://www.monash.edu/medicine/mchri/pcos,,AE-PCOS,restricted-cds,internal_medicine_endocrine,high
+ESHRE-PCOS-001,ESHRE,ESHRE International PCOS Guideline Update,2023,https://www.eshre.eu/Guidelines-and-Legal/Guidelines,,ESHRE,restricted-cds,internal_medicine_endocrine,high
+ENDO-PCOS-001,Endocrine Society,Endocrine Society Clinical Practice Guideline Diagnosis and Treatment of PCOS,2013,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+ATA-GRAVES-001,ATA,ATA Guidelines for the Diagnosis and Management of Hyperthyroidism Graves Disease,2016,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,internal_medicine_endocrine,high
+ATA-HASHI-001,ATA,ATA Guidelines for the Treatment of Hypothyroidism,2014,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,internal_medicine_endocrine,high
+ATA-NODULE-001,ATA,ATA Management Guidelines for Adult Patients with Thyroid Nodules and DTC,2016,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,internal_medicine_endocrine,high
+ETA-NODULE-001,ETA,ETA Guideline on the Use of Image-Guided Ablation in Benign Thyroid Nodules,2020,https://www.eurothyroid.com/guidelines.html,,ETA,restricted-cds,internal_medicine_endocrine,high
+NICE-THYROID-001,NICE,NICE NG145 Thyroid disease assessment and management,2019,https://www.nice.org.uk/guidance/ng145,,NICE,restricted-cds,internal_medicine_endocrine,high
+ENDO-OSTEO-001,Endocrine Society,Endocrine Society Pharmacological Management of Osteoporosis in Postmenopausal Women,2020,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+BSH-ANEMIA-001,BSH,BSH Guidelines for the Diagnosis and Management of Adult Anaemia,2021,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,internal_medicine_hematology,high
+ASH-ANEMIA-001,ASH,ASH Anaemia Pathway and Recommendations,2020,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,high
+BSH-IDA-001,BSH,BSH Guidelines for Diagnosis and Management of Iron Deficiency Anaemia,2021,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,internal_medicine_hematology,high
+AGA-IDA-001,AGA,AGA Clinical Practice Update Diagnosis and Management of Iron Deficiency Anemia,2020,https://gastro.org/clinical-guidance/,,AGA,restricted-cds,internal_medicine_hematology,high
+BSH-B12-001,BSH,BSH Guidelines for the Diagnosis and Treatment of Cobalamin and Folate Disorders,2014,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,internal_medicine_hematology,high
+TIF-THAL-001,TIF,Thalassaemia International Federation Guidelines for Management of Transfusion Dependent Thalassaemia,2021,https://thalassaemia.org.cy/publications/tif-publications/,,TIF,restricted-cds,internal_medicine_hematology,high
+NHF-SCD-001,NHF,National Hemophilia Foundation Guidelines for Hemophilia Care,2022,https://www.hemophilia.org/healthcare-professionals,,NHF,restricted-cds,internal_medicine_hematology,high
+NHLBI-SCD-001,NHLBI,NHLBI Evidence-Based Management of Sickle Cell Disease Expert Panel Report,2014,https://www.nhlbi.nih.gov/health-topics/evidence-based-management-sickle-cell-disease,,NHLBI,public-domain,internal_medicine_hematology,high
+ASH-SCD-001,ASH,ASH 2020 Guidelines for Sickle Cell Disease Management of Acute Chronic Pain,2020,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,high
+ASH-SCD-002,ASH,ASH 2020 Guidelines for Sickle Cell Disease Cerebrovascular Disease Prevention,2020,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,high
+BSH-SCD-001,BSH,BSH Guideline on Sickle Cell Disease in Pregnancy,2021,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,internal_medicine_hematology,medium
+ASH-ITP-001,ASH,ASH 2019 Guidelines for Immune Thrombocytopenia,2019,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,high
+IWG-ITP-001,IWG,IWG International Consensus Report on the Diagnosis and Management of ITP,2019,https://ashpublications.org/bloodadvances/,,IWG,restricted-cds,internal_medicine_hematology,high
+ISTH-TTP-001,ISTH,ISTH Guidelines for the Diagnosis and Treatment of Thrombotic Thrombocytopenic Purpura,2020,https://www.isth.org/page/RecommendationsGuidelines,,ISTH,restricted-cds,internal_medicine_hematology,high
+ASH-TTP-001,ASH,ASH 2020 Guidelines for the Management of Immune-Mediated TTP,2020,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,high
+WFH-HEMO-001,WFH,WFH Guidelines for the Management of Hemophilia 3rd Edition,2020,https://www.wfh.org/en/resources/wfh-treatment-guidelines,,WFH,restricted-cds,internal_medicine_hematology,high
+NHF-VWD-001,NHF,NHF ASH WFH ISTH 2021 Guidelines on the Diagnosis and Management of VWD,2021,https://ashpublications.org/bloodadvances/,,NHF,restricted-cds,internal_medicine_hematology,high
+ISTH-VWD-001,ISTH,ISTH Guidelines for the Diagnosis of von Willebrand Disease,2021,https://www.isth.org/page/RecommendationsGuidelines,,ISTH,restricted-cds,internal_medicine_hematology,high
+ASH-VTE-001,ASH,ASH 2020 Guidelines for Management of Venous Thromboembolism,2020,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,high
+ACCP-VTE-001,ACCP,ACCP Antithrombotic Therapy for VTE Disease CHEST Guideline 2021,2021,https://journal.chestnet.org/article/S0012-3692(21)01506-3/,,ACCP,restricted-cds,internal_medicine_hematology,high
+ESC-VTE-001,ESC,ESC Guidelines for the Diagnosis and Management of Acute Pulmonary Embolism,2019,https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines,,ESC,restricted-cds,internal_medicine_hematology,high
+ASH-ANTICOAG-001,ASH,ASH 2018 Guidelines for the Management of Anticoagulant Reversal,2018,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,high
+BSH-BLEED-001,BSH,BSH Guidelines on the Investigation of a Patient with Bleeding,2020,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,internal_medicine_hematology,high
+WAO-ANAPHY-001,WAO,WAO Anaphylaxis Guidance 2020,2020,https://www.worldallergy.org/UserFiles/file/WAO-Anaphylaxis-Guidance-2020.pdf,,WAO,restricted-cds,internal_medicine_immunology,high
+EAACI-ANAPHY-001,EAACI,EAACI Guidelines on Anaphylaxis 2021 Update,2021,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,internal_medicine_immunology,high
+AAAAI-ANAPHY-001,AAAAI,AAAAI Anaphylaxis Practice Parameter Update,2020,https://www.aaaai.org/practice-resources/practice-tools/practice-parameters,,AAAAI,restricted-cds,internal_medicine_immunology,high
+EAACI-DRUG-001,EAACI,EAACI Position Paper on Drug Hypersensitivity General Principles,2019,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,internal_medicine_immunology,high
+AAAAI-DRUG-001,AAAAI,AAAAI Drug Allergy Practice Parameter Update,2022,https://www.aaaai.org/practice-resources/practice-tools/practice-parameters,,AAAAI,restricted-cds,internal_medicine_immunology,high
+HAEI-HAE-001,HAEi,HAEi WAO EAACI Hereditary Angioedema International Consensus,2022,https://haei.org/,,HAEi,restricted-cds,internal_medicine_immunology,high
+WAO-HAE-001,WAO,WAO Hereditary Angioedema Guidelines Updated,2021,https://www.worldallergy.org/,,WAO,restricted-cds,internal_medicine_immunology,high
+AAAAI-MAST-001,AAAAI,AAAAI Mastocytosis Diagnosis and Management Practice Parameter,2024,https://www.aaaai.org/practice-resources/practice-tools/practice-parameters,,AAAAI,restricted-cds,internal_medicine_immunology,medium
+ESID-PID-001,ESID,ESID Registry Working Definitions Primary Immunodeficiency,2019,https://esid.org/Working-Parties/Registry,,ESID,restricted-cds,internal_medicine_immunology,high
+USIDNET-PID-001,USIDNET,USIDNET Practice Parameters for the Diagnosis Management of PID,2023,https://usidnet.org/,,USIDNET,restricted-cds,internal_medicine_immunology,medium
+JM-PID-001,JM Foundation,JM Jeffrey Modell Foundation 10 Warning Signs PID,2022,https://info4pi.org/,,JM,restricted-cds,internal_medicine_immunology,medium
+SSC-SEPSIS-001,SSC,Surviving Sepsis Campaign International Guidelines for Management of Sepsis Septic Shock,2021,https://www.sccm.org/SurvivingSepsisCampaign/Guidelines,,SSC,restricted-cds,internal_medicine_critical_care,high
+SSC-PEDS-001,SSC,Surviving Sepsis Campaign Pediatric Sepsis Guidelines,2020,https://www.sccm.org/SurvivingSepsisCampaign/Guidelines,,SSC,restricted-cds,internal_medicine_critical_care,high
+SCCM-SHOCK-001,SCCM,SCCM Hemodynamic Monitoring and Management Shock States,2014,https://www.sccm.org/clinical-resources/guidelines,,SCCM,restricted-cds,internal_medicine_critical_care,high
+ESICM-SHOCK-001,ESICM,ESICM Consensus on Circulatory Shock and Hemodynamic Monitoring,2014,https://www.esicm.org/resources/guidelines/,,ESICM,restricted-cds,internal_medicine_critical_care,high
+ESICM-ARDS-001,ESICM,ESICM Guidelines on Acute Respiratory Distress Syndrome,2023,https://www.esicm.org/resources/guidelines/,,ESICM,restricted-cds,internal_medicine_critical_care,high
+ATS-ARDS-001,ATS,ATS ESICM SCCM Guideline on the Management of ARDS in Adults,2024,https://www.thoracic.org/statements/,,ATS,restricted-cds,internal_medicine_critical_care,high
+ISTH-DIC-001,ISTH,ISTH Guidance on the Diagnosis and Management of DIC,2018,https://www.isth.org/page/RecommendationsGuidelines,,ISTH,restricted-cds,internal_medicine_critical_care,high
+ASPEN-ICU-001,ASPEN,ASPEN SCCM Guidelines Provision and Assessment Nutrition Support Therapy ICU,2022,https://www.nutritioncare.org/Guidelines_and_Clinical_Resources/,,ASPEN,restricted-cds,internal_medicine_critical_care,high
+ESPEN-ICU-001,ESPEN,ESPEN Guideline on Clinical Nutrition in the Intensive Care Unit,2023,https://www.espen.org/guidelines-home,,ESPEN,restricted-cds,internal_medicine_critical_care,high
+PADIS-001,SCCM,SCCM PADIS Pain Agitation Sedation Delirium Immobility Sleep ICU Guideline,2018,https://www.sccm.org/clinical-resources/guidelines,,SCCM,restricted-cds,internal_medicine_critical_care,high
+SCCM-FAMILY-001,SCCM,SCCM Family-Centered Care in the ICU Guideline,2017,https://www.sccm.org/clinical-resources/guidelines,,SCCM,restricted-cds,internal_medicine_critical_care,high
+EAST-MTP-001,EAST,EAST Practice Management Guideline Massive Transfusion in Hemorrhagic Shock,2014,https://www.east.org/education-resources/practice-management-guidelines,,EAST,restricted-cds,internal_medicine_critical_care,high
+ATLS-001,ATLS,ATLS Advanced Trauma Life Support Recommendations 10th Edition,2018,https://www.facs.org/quality-programs/trauma/atls,,ATLS,restricted-cds,internal_medicine_critical_care,high
+IDSA-FUO-001,IDSA,IDSA Practice Guidelines for Evaluation of Fever of Unknown Origin,2020,https://www.idsociety.org/practice-guideline/,,IDSA,restricted-cds,internal_medicine_id,high
+DHHS-HIV-001,DHHS,DHHS Adult and Adolescent HIV Treatment Guidelines,2024,https://clinicalinfo.hiv.gov/en/guidelines/adult-and-adolescent-arv,,DHHS,public-domain,internal_medicine_id,high
+IAS-HIV-001,IAS-USA,IAS-USA Antiretroviral Drugs for Treatment and Prevention of HIV in Adults,2022,https://www.iasusa.org/,,IAS-USA,restricted-cds,internal_medicine_id,high
+EACS-HIV-001,EACS,EACS European AIDS Clinical Society Guidelines,2024,https://www.eacsociety.org/guidelines/,,EACS,restricted-cds,internal_medicine_id,high
+CDC-LTBI-001,CDC,CDC ATS IDSA Guideline for Treatment of Latent TB Infection,2020,https://www.cdc.gov/mmwr/volumes/69/rr/rr6901a1.htm,,CDC,public-domain,internal_medicine_id,high
+ATS-LTBI-001,ATS,ATS IDSA Diagnosis of Tuberculosis in Adults and Children,2017,https://www.thoracic.org/statements/,,ATS,restricted-cds,internal_medicine_id,high
+WHO-TB-001,WHO,WHO Consolidated Guidelines on Tuberculosis Treatment,2022,https://www.who.int/publications/i/item/9789240048126,,WHO,restricted-cds,internal_medicine_id,high
+IDSA-LYME-001,IDSA,IDSA AAN ACR Guidelines for Prevention Diagnosis Treatment of Lyme Disease,2020,https://www.idsociety.org/practice-guideline/,,IDSA,restricted-cds,internal_medicine_id,high
+IDSA-ENDOC-001,IDSA,IDSA Practice Guidelines on Infective Endocarditis Diagnosis Treatment,2023,https://www.idsociety.org/practice-guideline/,,IDSA,restricted-cds,internal_medicine_id,high
+APA-DEPRESS-001,APA,APA Practice Guideline for the Treatment of Patients with Major Depressive Disorder,2010,https://psychiatryonline.org/guidelines,,APA,restricted-cds,internal_medicine_psychiatric,high
+NICE-DEPRESS-001,NICE,NICE NG222 Depression in adults treatment and management,2022,https://www.nice.org.uk/guidance/ng222,,NICE,restricted-cds,internal_medicine_psychiatric,high
+APA-ANXIETY-001,APA,APA Practice Guideline for the Treatment of Patients with Panic Disorder Anxiety,2009,https://psychiatryonline.org/guidelines,,APA,restricted-cds,internal_medicine_psychiatric,medium
+NICE-GAD-001,NICE,NICE CG113 Generalised anxiety disorder and panic disorder in adults,2020,https://www.nice.org.uk/guidance/cg113,,NICE,restricted-cds,internal_medicine_psychiatric,high
+APA-PTSD-001,APA,APA Clinical Practice Guideline for the Treatment of PTSD,2017,https://www.apa.org/ptsd-guideline,,APA,restricted-cds,internal_medicine_psychiatric,high
+NICE-PTSD-001,NICE,NICE NG116 Post-traumatic stress disorder,2018,https://www.nice.org.uk/guidance/ng116,,NICE,restricted-cds,internal_medicine_psychiatric,high
+APA-SUICIDE-001,APA,APA Practice Guideline Assessment and Treatment of Suicidal Behaviors,2003,https://psychiatryonline.org/guidelines,,APA,restricted-cds,internal_medicine_psychiatric,medium
+CDC-SUICIDE-001,CDC,CDC Suicide Prevention Resource for Action,2022,https://www.cdc.gov/suicide/resources/prevention.html,,CDC,public-domain,internal_medicine_psychiatric,medium
+USPSTF-TOB-001,USPSTF,USPSTF Recommendation Statement Tobacco Smoking Cessation in Adults,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/tobacco-use-in-adults-and-pregnant-women-counseling-and-interventions,,USPSTF,public-domain,internal_medicine_general,high
+NICE-TOB-001,NICE,NICE NG209 Tobacco preventing uptake promoting quitting,2021,https://www.nice.org.uk/guidance/ng209,,NICE,restricted-cds,internal_medicine_general,high
+ATS-TOB-001,ATS,ATS Initiating Pharmacologic Treatment in Tobacco-Dependent Adults Guideline,2020,https://www.thoracic.org/statements/,,ATS,restricted-cds,internal_medicine_general,high
+APA-AUD-001,APA,APA Practice Guideline for the Pharmacological Treatment of Patients With AUD,2018,https://psychiatryonline.org/guidelines,,APA,restricted-cds,internal_medicine_psychiatric,high
+NICE-AUD-001,NICE,NICE CG115 Alcohol-use disorders diagnosis and clinical management,2011,https://www.nice.org.uk/guidance/cg115,,NICE,restricted-cds,internal_medicine_psychiatric,high
+NIAAA-AUD-001,NIAAA,NIAAA Treatment for Alcohol Use Disorder Clinician Guide,2023,https://www.niaaa.nih.gov/health-professionals-communities/core-resource-on-alcohol,,NIAAA,public-domain,internal_medicine_psychiatric,high
+ACOG-HYST-001,ACOG,ACOG Choosing the Route of Hysterectomy for Benign Disease Committee Opinion,2017,https://www.acog.org/clinical/clinical-guidance/committee-opinion,,ACOG,restricted-cds,gynecologic_surgery_uterine,high
+RCOG-HYST-001,RCOG,RCOG Greentop Guideline Heavy Menstrual Bleeding and Hysterectomy,2020,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_uterine,high
+AAGL-HYST-001,AAGL,AAGL Position Statement on Route of Hysterectomy for Benign Disease,2019,https://www.aagl.org/practice-statements/,,AAGL,restricted-cds,gynecologic_surgery_uterine,high
+ACOG-MYO-001,ACOG,ACOG Management of Symptomatic Uterine Leiomyomas Practice Bulletin,2021,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_uterine,high
+AAGL-MYO-001,AAGL,AAGL Practice Report on the Management of Hysteroscopic Distending Media,2013,https://www.aagl.org/practice-statements/,,AAGL,restricted-cds,gynecologic_surgery_uterine,high
+ESHRE-MYO-001,ESHRE,ESHRE Endometrial Polyps and Myomas Recommendations,2024,https://www.eshre.eu/Guidelines-and-Legal/Guidelines,,ESHRE,restricted-cds,gynecologic_surgery_uterine,medium
+ACOG-ENDO-001,ACOG,ACOG Practice Bulletin Management of Endometriosis,2010,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_uterine,high
+ESHRE-ENDO-001,ESHRE,ESHRE Guideline on the Management of Endometriosis,2022,https://www.eshre.eu/Guidelines-and-Legal/Guidelines/Endometriosis-guideline,,ESHRE,restricted-cds,gynecologic_surgery_uterine,high
+RCOG-ENDO-001,RCOG,RCOG Endometriosis Investigation and Management Guideline,2024,https://www.rcog.org.uk/guidance/browse-all-guidance/,,RCOG,restricted-cds,gynecologic_surgery_uterine,high
+ASRM-ENDO-001,ASRM,ASRM Endometriosis and Infertility Practice Committee Document,2012,https://www.asrm.org/practice-guidance/,,ASRM,restricted-cds,gynecologic_surgery_uterine,high
+ACOG-ADNEXA-001,ACOG,ACOG Evaluation and Management of Adnexal Masses Practice Bulletin,2016,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_oncologic,high
+ESGO-ADNEXA-001,ESGO,ESGO Guidelines for the Management of Adnexal Masses,2020,https://www.esgo.org/explore/guidelines/,,ESGO,restricted-cds,gynecologic_surgery_oncologic,high
+ACOG-POP-001,ACOG,ACOG AUGS Joint Practice Bulletin Pelvic Organ Prolapse,2019,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_pelvic_floor,high
+AUGS-POP-002,AUGS,AUGS Best Practice Statement Mesh Use in Female Pelvic Floor Reconstruction,2019,https://www.augs.org/clinical-resources/,,AUGS,restricted-cds,gynecologic_surgery_pelvic_floor,high
+IUGA-MESH-001,IUGA,IUGA Position Statement on Mid-Urethral Slings for Stress Urinary Incontinence,2018,https://www.iuga.org/publications/guidelines,,IUGA,restricted-cds,gynecologic_surgery_pelvic_floor,high
+ACOG-MESH-001,ACOG,ACOG AUGS Committee Opinion Vaginal Mesh Complications,2019,https://www.acog.org/clinical/clinical-guidance/committee-opinion,,ACOG,restricted-cds,gynecologic_surgery_pelvic_floor,high
+ACOG-CS-001,ACOG,ACOG Practice Bulletin Cesarean Delivery on Maternal Request,2019,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_obstetric,high
+RCOG-CS-001,RCOG,RCOG Greentop Guideline Caesarean Section,2024,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,high
+NICE-CS-001,NICE,NICE NG192 Caesarean birth,2021,https://www.nice.org.uk/guidance/ng192,,NICE,restricted-cds,gynecologic_surgery_obstetric,high
+ACOG-VBAC-001,ACOG,ACOG Practice Bulletin Vaginal Birth After Cesarean Delivery,2019,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_obstetric,high
+NICE-VBAC-001,NICE,NICE Intrapartum Care for Women with Existing Medical Conditions,2019,https://www.nice.org.uk/guidance/ng121,,NICE,restricted-cds,gynecologic_surgery_obstetric,high
+ACOG-OPER-001,ACOG,ACOG Practice Bulletin Operative Vaginal Birth,2020,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_obstetric,high
+RCOG-OPER-001,RCOG,RCOG Greentop Guideline Operative Vaginal Delivery,2020,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,high
+ACOG-PPH-001,ACOG,ACOG Practice Bulletin Postpartum Hemorrhage,2017,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_obstetric,high
+RCOG-PPH-001,RCOG,RCOG Greentop Guideline Prevention and Management of Postpartum Haemorrhage,2017,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,high
+FIGO-PPH-001,FIGO,FIGO Recommendations on the Management of Postpartum Hemorrhage,2022,https://www.figo.org/figo-statements,,FIGO,restricted-cds,gynecologic_surgery_obstetric,high
+RCOG-SEPSIS-001,RCOG,RCOG Greentop Guideline Bacterial Sepsis in Pregnancy,2012,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,high
+FIGO-SEPSIS-001,FIGO,FIGO Recommendations on Maternal Sepsis,2021,https://www.figo.org/figo-statements,,FIGO,restricted-cds,gynecologic_surgery_obstetric,high
+ACOG-ECTOP-001,ACOG,ACOG Practice Bulletin Tubal Ectopic Pregnancy,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_obstetric,high
+RCOG-ECTOP-001,RCOG,RCOG Greentop Guideline Diagnosis and Management of Ectopic Pregnancy,2016,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,high
+ACOG-MISC-001,ACOG,ACOG Practice Bulletin Early Pregnancy Loss,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_obstetric,high
+NICE-MISC-001,NICE,NICE NG126 Ectopic pregnancy and miscarriage diagnosis and management,2023,https://www.nice.org.uk/guidance/ng126,,NICE,restricted-cds,gynecologic_surgery_obstetric,high
+RCOG-MISC-001,RCOG,RCOG Greentop Guideline Management of Recurrent Miscarriage,2023,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,high
+RCOG-TOP-001,RCOG,RCOG Best Practice in Comprehensive Abortion Care,2022,https://www.rcog.org.uk/guidance/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,high
+WHO-TOP-001,WHO,WHO Abortion Care Guideline,2022,https://www.who.int/publications/i/item/9789240039483,,WHO,restricted-cds,gynecologic_surgery_obstetric,high
+ACOG-IUD-001,ACOG,ACOG Practice Bulletin Long-Acting Reversible Contraception Implants and IUDs,2017,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_reproductive,high
+FSRH-IUD-001,FSRH,FSRH Clinical Guideline Intrauterine Contraception,2023,https://www.fsrh.org/standards-and-guidance/,,FSRH,restricted-cds,gynecologic_surgery_reproductive,high
+ACOG-STER-001,ACOG,ACOG Practice Bulletin Sterilization of Women,2019,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_reproductive,high
+RCOG-STER-001,RCOG,RCOG Male and Female Sterilisation Evidence-Based Clinical Guideline,2016,https://www.rcog.org.uk/guidance/,,RCOG,restricted-cds,gynecologic_surgery_reproductive,high
+ACOG-VULVAR-001,ACOG,ACOG Committee Opinion Diagnosis and Management of Vulvar Skin Disorders,2020,https://www.acog.org/clinical/clinical-guidance/committee-opinion,,ACOG,restricted-cds,gynecologic_surgery_uterine,medium
+ESGO-VULVAR-001,ESGO,ESGO Guidelines for the Management of Patients with Vulvar Cancer,2023,https://www.esgo.org/explore/guidelines/,,ESGO,restricted-cds,gynecologic_surgery_oncologic,high
+CDC-PID-001,CDC,CDC Sexually Transmitted Infections Treatment Guidelines PID,2021,https://www.cdc.gov/std/treatment-guidelines/,,CDC,public-domain,gynecologic_surgery_uterine,high
+IUSTI-PID-001,IUSTI,IUSTI European PID Guideline,2017,https://iusti.org/treatment-guidelines/,,IUSTI,restricted-cds,gynecologic_surgery_uterine,high
+IDSA-PID-001,IDSA,IDSA Guidelines on Pelvic Inflammatory Disease,2021,https://www.idsociety.org/practice-guideline/,,IDSA,restricted-cds,gynecologic_surgery_uterine,medium
+ERAS-GYN-001,ERAS Society,ERAS Society Guidelines for Perioperative Care in Gynecologic Oncology Surgery,2023,https://erassociety.org/guidelines/,,ERAS Society,restricted-cds,gynecologic_surgery_oncologic,high
+ACOG-POSTOP-001,ACOG,ACOG Committee Opinion Postoperative Care after Gynecologic Surgery,2021,https://www.acog.org/clinical/clinical-guidance/committee-opinion,,ACOG,restricted-cds,gynecologic_surgery_uterine,high
+ASRM-TUBAL-001,ASRM,ASRM Role of Tubal Surgery Reanastomosis Practice Committee Opinion,2021,https://www.asrm.org/practice-guidance/,,ASRM,restricted-cds,gynecologic_surgery_reproductive,high
+ASRM-IVF-001,ASRM,ASRM Practice Committee Performing the Embryo Transfer Document,2017,https://www.asrm.org/practice-guidance/,,ASRM,restricted-cds,gynecologic_surgery_reproductive,high
+ESHRE-IVF-001,ESHRE,ESHRE Guideline on Ovarian Stimulation for IVF ICSI,2019,https://www.eshre.eu/Guidelines-and-Legal/Guidelines,,ESHRE,restricted-cds,gynecologic_surgery_reproductive,high
+NICE-IVF-001,NICE,NICE CG156 Fertility problems assessment and treatment,2017,https://www.nice.org.uk/guidance/cg156,,NICE,restricted-cds,gynecologic_surgery_reproductive,high
+ESHRE-RIF-001,ESHRE,ESHRE Recurrent Implantation Failure Recommendations,2023,https://www.eshre.eu/Guidelines-and-Legal/Guidelines,,ESHRE,restricted-cds,gynecologic_surgery_reproductive,medium
+ASRM-RPL-001,ASRM,ASRM Evaluation and Treatment of Recurrent Pregnancy Loss Practice Committee Opinion,2020,https://www.asrm.org/practice-guidance/,,ASRM,restricted-cds,gynecologic_surgery_reproductive,high
+KDIGO-AIN-001,KDIGO,KDIGO Acute Interstitial Nephritis Recommendations,2021,https://kdigo.org/guidelines/gd/,,KDIGO,restricted-cds,nephrology_glomerular,medium
+KDIGO-CV-001,KDIGO,KDIGO Cardiovascular Disease in CKD Controversies Conference,2018,https://kdigo.org/conferences/,,KDIGO,restricted-cds,nephrology_ckd,high
+KDIGO-PROG-001,KDIGO,KDIGO 2024 Guidance on CKD Progression and Risk Stratification,2024,https://kdigo.org/guidelines/ckd-evaluation-and-management/,,KDIGO,restricted-cds,nephrology_ckd,high
+KDOQI-AAV-001,KDOQI,KDOQI Commentary on KDIGO ANCA Vasculitis Recommendations,2021,https://www.kidney.org/professionals/guidelines/guidelines_commentaries,,KDOQI,restricted-cds,nephrology_glomerular,medium
+ACR-LN-001,ACR,ACR Guideline for Screening Treatment Management Lupus Nephritis,2024,https://rheumatology.org/clinical-practice-guidelines,,ACR,restricted-cds,nephrology_glomerular,high
+EAU-PED-URO-001,EAU,EAU ESPU Paediatric Urology Guidelines Comprehensive,2024,https://uroweb.org/guidelines/paediatric-urology/,,EAU,restricted-cds,urology_pediatric,high
+ESPU-PED-001,ESPU,ESPU Consensus Statement on Pediatric Urology Management,2022,https://www.espu.org/,,ESPU,restricted-cds,urology_pediatric,medium
+AUA-TESTIS-001,AUA,AUA Diagnosis and Treatment of Testicular Torsion Best Practice,2019,https://www.auanet.org/guidelines/guidelines,,AUA,restricted-cds,urology_trauma,high
+EAU-TESTIS-001,EAU,EAU Guidelines on Sexual and Reproductive Health Acute Scrotum,2024,https://uroweb.org/guidelines/sexual-and-reproductive-health/,,EAU,restricted-cds,urology_trauma,high
+ASH-TXVTE-001,ASH,ASH 2018 Guidelines for VTE Prevention in Surgical Hospitalized Patients,2018,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,high
+ASH-MEDPATIENT-001,ASH,ASH 2018 Guidelines for VTE Prevention in Medical Patients,2018,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,high
+ESC-ENDOC-001,ESC,ESC Guidelines for the Management of Endocarditis,2023,https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines,,ESC,restricted-cds,internal_medicine_id,high
+ATS-CAP-001,ATS,ATS IDSA Diagnosis and Treatment of Adults with Community-acquired Pneumonia,2019,https://www.thoracic.org/statements/,,ATS,restricted-cds,internal_medicine_id,high
+NICE-DEMENTIA-001,NICE,NICE NG97 Dementia assessment management and support for people living with dementia,2018,https://www.nice.org.uk/guidance/ng97,,NICE,restricted-cds,internal_medicine_geriatric,high
+ENDO-OB-001,Endocrine Society,Endocrine Society Pharmacological Management of Obesity Clinical Practice Guideline,2015,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+ENDO-LIPID-001,Endocrine Society,Endocrine Society Clinical Practice Guideline Management of Hypertriglyceridemia,2012,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,medium
+ENDO-VITD-001,Endocrine Society,Endocrine Society Vitamin D for the Prevention of Disease Clinical Practice Guideline,2024,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+ENDO-DI-001,Endocrine Society,Endocrine Society Working Group on Renaming Diabetes Insipidus,2022,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,medium
+ATA-PREG-001,ATA,ATA Guidelines for Diagnosis and Management of Thyroid Disease During Pregnancy,2017,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,internal_medicine_endocrine,high
+ATA-MTC-001,ATA,ATA Revised Guidelines for the Management of Medullary Thyroid Carcinoma,2015,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,internal_medicine_endocrine,medium
+NHF-VTEPED-001,NHF,NHF and ASH Guidelines for Pediatric VTE Diagnosis and Management,2018,https://ashpublications.org/bloodadvances/,,NHF,restricted-cds,internal_medicine_hematology,medium
+ISTH-APS-001,ISTH,ISTH Guidance on Diagnosis and Management of Antiphospholipid Syndrome,2023,https://www.isth.org/page/RecommendationsGuidelines,,ISTH,restricted-cds,internal_medicine_hematology,high
+EAACI-FOOD-001,EAACI,EAACI Food Allergy and Anaphylaxis Guidelines,2014,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,internal_medicine_immunology,high
+AAAAI-IGE-001,AAAAI,AAAAI ACAAI Atopic Dermatitis Update Practice Parameter Allergic Conditions,2023,https://www.aaaai.org/practice-resources/practice-tools/practice-parameters,,AAAAI,restricted-cds,internal_medicine_immunology,medium
+SCCM-NUTRI-001,SCCM,SCCM Nutrition Therapy Guideline for Adult Critically Ill Patients,2022,https://www.sccm.org/clinical-resources/guidelines,,SCCM,restricted-cds,internal_medicine_critical_care,high
+ESICM-VENT-001,ESICM,ESICM Guideline on Mechanical Ventilation Weaning,2017,https://www.esicm.org/resources/guidelines/,,ESICM,restricted-cds,internal_medicine_critical_care,high
+ATS-WEAN-001,ATS,ATS ACCP Liberation from Mechanical Ventilation in Critically Ill Adults,2017,https://www.thoracic.org/statements/,,ATS,restricted-cds,internal_medicine_critical_care,high
+SCCM-PEDS-CC-001,SCCM,SCCM Pediatric Critical Care Resuscitation Guidelines,2020,https://www.sccm.org/clinical-resources/guidelines,,SCCM,restricted-cds,internal_medicine_critical_care,medium
+EAU-PCA-001,EAU,EAU Guidelines on Sexual and Reproductive Health Lifestyle Andrology,2024,https://uroweb.org/guidelines/sexual-and-reproductive-health/,,EAU,restricted-cds,urology_andrology,medium
+AUA-STD-001,AUA,AUA SUFU Best Practice Statement on Urinary Tract Infection in Adults,2023,https://www.auanet.org/guidelines/guidelines,,AUA,restricted-cds,urology_infection,medium
+ICS-NEUR-001,ICS,ICS Standardisation Lower Urinary Tract Function Neurological Conditions,2018,https://www.ics.org/Documents/,,ICS,restricted-cds,urology_female,medium
+EAU-NEURO-001,EAU,EAU Guidelines on Neuro-urology,2024,https://uroweb.org/guidelines/neuro-urology/,,EAU,restricted-cds,urology_female,high
+AUGS-VOID-001,AUGS,AUGS Best Practice Statement Evaluation of Voiding Dysfunction Female,2020,https://www.augs.org/clinical-resources/,,AUGS,restricted-cds,urology_female,medium
+AAGL-LAPAR-001,AAGL,AAGL Practice Guidelines for the Diagnosis and Management of Submucosal Leiomyomas,2012,https://www.aagl.org/practice-statements/,,AAGL,restricted-cds,gynecologic_surgery_uterine,medium
+AAGL-MORC-001,AAGL,AAGL Position Statement on Power Morcellation of Uterine Tissue,2014,https://www.aagl.org/practice-statements/,,AAGL,restricted-cds,gynecologic_surgery_uterine,high
+RCOG-FETAL-001,RCOG,RCOG Greentop Guideline The Investigation and Management of Stillbirth,2010,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,medium
+ACOG-PRETERM-001,ACOG,ACOG Practice Bulletin Management of Preterm Labor,2016,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_obstetric,high
+RCOG-PRETERM-001,RCOG,RCOG Greentop Guideline Care of Women Presenting with Preterm Prelabour Rupture,2019,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,high
+NICE-PRETERM-001,NICE,NICE NG25 Preterm labour and birth,2022,https://www.nice.org.uk/guidance/ng25,,NICE,restricted-cds,gynecologic_surgery_obstetric,high
+ACOG-MULT-001,ACOG,ACOG Practice Bulletin Multifetal Gestations Twin Pregnancy Management,2021,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_obstetric,medium
+NICE-MULT-001,NICE,NICE NG137 Twin and triplet pregnancy,2019,https://www.nice.org.uk/guidance/ng137,,NICE,restricted-cds,gynecologic_surgery_obstetric,medium
+ACOG-PREEC-001,ACOG,ACOG Practice Bulletin Gestational Hypertension and Preeclampsia,2020,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_obstetric,high
+NICE-PREEC-001,NICE,NICE NG133 Hypertension in pregnancy diagnosis and management,2023,https://www.nice.org.uk/guidance/ng133,,NICE,restricted-cds,gynecologic_surgery_obstetric,high
+RCOG-PREEC-001,RCOG,RCOG Greentop Guideline Management of Pre-eclampsia,2022,https://www.rcog.org.uk/guidance/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,high
+KDIGO-PEDCKD-001,KDIGO,KDIGO Pediatric CKD Recommendations within Evaluation Guideline,2024,https://kdigo.org/guidelines/ckd-evaluation-and-management/,,KDIGO,restricted-cds,nephrology_ckd,medium
+KDOQI-PEDHD-001,KDOQI,KDOQI Pediatric Hemodialysis Adequacy Recommendations,2015,https://www.kidney.org/professionals/guidelines/guidelines_commentaries,,KDOQI,restricted-cds,nephrology_dialysis,medium
+ISPD-PEDPD-001,ISPD,ISPD Pediatric Peritoneal Dialysis Recommendations,2020,https://ispd.org/guidelines/,,ISPD,restricted-cds,nephrology_dialysis,medium
+ISN-CKD-001,ISN,ISN Global Kidney Health Atlas Recommendations,2023,https://www.theisn.org/initiatives/global-kidney-health-atlas/,,ISN,restricted-cds,nephrology_ckd,medium
+ISN-AKI-001,ISN,ISN 0by25 Acute Kidney Injury Initiative Recommendations,2017,https://www.theisn.org/initiatives/aki/,,ISN,restricted-cds,nephrology_aki,medium
+EAU-LUTS-001,EAU,EAU Guidelines on Non-neurogenic Female LUTS,2024,https://uroweb.org/guidelines/non-neurogenic-female-luts/,,EAU,restricted-cds,urology_female,high
+AUA-NMI-001,AUA,AUA Diagnosis and Treatment of Non-Muscle Invasive Bladder Cancer Surgery Guideline,2024,https://www.auanet.org/guidelines/guidelines/non-muscle-invasive-bladder-cancer-(nmibc)-guideline,,AUA,restricted-cds,urology_bph,high
+ENDO-MENO-001,Endocrine Society,Endocrine Society Treatment of Symptoms of the Menopause Clinical Practice Guideline,2015,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+ACOG-MENO-001,ACOG,ACOG Practice Bulletin Management of Menopausal Symptoms,2014,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,internal_medicine_endocrine,high
+NAMS-MENO-001,NAMS,NAMS Position Statement on Hormone Therapy 2022 Update,2022,https://www.menopause.org/professional-resources,,NAMS,restricted-cds,internal_medicine_endocrine,high
+AGS-MULTI-001,AGS,AGS Guiding Principles for the Care of Older Adults With Multimorbidity,2019,https://www.americangeriatrics.org/clinical-resources,,AGS,restricted-cds,internal_medicine_geriatric,medium
+USPSTF-OBS-001,USPSTF,USPSTF Recommendation Obesity in Adults Behavioral Interventions,2018,https://www.uspreventiveservicestaskforce.org/uspstf/,,USPSTF,public-domain,internal_medicine_general,high
+USPSTF-HTN-001,USPSTF,USPSTF Recommendation Statement Screening for Hypertension in Adults,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/hypertension-in-adults-screening,,USPSTF,public-domain,internal_medicine_general,high
+USPSTF-CHOL-001,USPSTF,USPSTF Recommendation Statin Use Primary Prevention CVD,2022,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/statin-use-in-adults-preventive-medication,,USPSTF,public-domain,internal_medicine_general,high
+USPSTF-DM-001,USPSTF,USPSTF Recommendation Statement Screening for Prediabetes Type 2 Diabetes,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/screening-for-prediabetes-and-type-2-diabetes,,USPSTF,public-domain,internal_medicine_endocrine,high
+ACP-HTN-001,ACP,ACP AAFP Clinical Guideline Pharmacologic Treatment of Hypertension Adults Older,2017,https://www.acpjournals.org/journal/aim,,ACP,restricted-cds,internal_medicine_general,high
+ACP-DM-001,ACP,ACP Clinical Guideline Hemoglobin A1c Targets Pharmacologic Treatment of Type 2 Diabetes,2018,https://www.acpjournals.org/journal/aim,,ACP,restricted-cds,internal_medicine_endocrine,high
+ACP-LDL-001,ACP,ACP Clinical Guideline Lipid Management for the Prevention of CVD,2024,https://www.acpjournals.org/journal/aim,,ACP,restricted-cds,internal_medicine_general,high
+NICE-MULTI-001,NICE,NICE NG56 Multimorbidity clinical assessment and management,2016,https://www.nice.org.uk/guidance/ng56,,NICE,restricted-cds,internal_medicine_geriatric,high
+NICE-OBESITY-001,NICE,NICE CG189 Obesity identification assessment and management,2014,https://www.nice.org.uk/guidance/cg189,,NICE,restricted-cds,internal_medicine_general,high
+ESHRE-RECUR-001,ESHRE,ESHRE Guideline Recurrent Pregnancy Loss,2022,https://www.eshre.eu/Guidelines-and-Legal/Guidelines,,ESHRE,restricted-cds,gynecologic_surgery_reproductive,high
+ESHRE-FERT-001,ESHRE,ESHRE Recommendations on Female Fertility Preservation,2020,https://www.eshre.eu/Guidelines-and-Legal/Guidelines,,ESHRE,restricted-cds,gynecologic_surgery_reproductive,high
+ASRM-FERT-001,ASRM,ASRM Fertility Preservation in Patients with Cancer Practice Committee Opinion,2019,https://www.asrm.org/practice-guidance/,,ASRM,restricted-cds,gynecologic_surgery_reproductive,high
+RCOG-VTE-PREG-001,RCOG,RCOG Greentop Guideline Reducing Risk of VTE during Pregnancy and Puerperium,2015,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,high
+ACOG-VTE-PREG-001,ACOG,ACOG Practice Bulletin Thromboembolism in Pregnancy,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_obstetric,high
+KDOQI-LIPID-001,KDOQI,KDOQI Commentary on Dyslipidemia in CKD Recommendations,2014,https://www.kidney.org/professionals/guidelines/guidelines_commentaries,,KDOQI,restricted-cds,nephrology_ckd,medium
+KDIGO-CMV-001,KDIGO,KDIGO Recommendations on Cytomegalovirus in Kidney Transplant,2009,https://kdigo.org/guidelines/care-of-the-kidney-transplant-recipient/,,KDIGO,restricted-cds,nephrology_transplant,medium
+AST-INFECT-001,AST,AST American Society of Transplantation Infectious Diseases Community of Practice Guidelines,2023,https://www.myast.org/practice-management/clinical-practice-guidelines,,AST,restricted-cds,nephrology_transplant,high
+EAU-RCC-001,EAU,EAU Guidelines on Renal Cell Carcinoma Surgical Management,2024,https://uroweb.org/guidelines/renal-cell-carcinoma/,,EAU,restricted-cds,urology_stones,medium
+AUA-RCC-001,AUA,AUA Localized Renal Mass Surgical Management Guideline,2017,https://www.auanet.org/guidelines/guidelines/renal-mass-and-localized-renal-cancer-evaluation-management-and-follow-up,,AUA,restricted-cds,urology_stones,medium
+ACR-RENAL-001,ACR,ACR Appropriateness Criteria Renal Failure Imaging,2023,https://www.acr.org/Clinical-Resources/ACR-Appropriateness-Criteria,,ACR,restricted-cds,nephrology_aki,medium
+ACR-HEMA-001,ACR,ACR Appropriateness Criteria Hematuria Imaging,2022,https://www.acr.org/Clinical-Resources/ACR-Appropriateness-Criteria,,ACR,restricted-cds,urology_infection,medium
+NICE-PREG-001,NICE,NICE NG201 Antenatal care,2021,https://www.nice.org.uk/guidance/ng201,,NICE,restricted-cds,gynecologic_surgery_obstetric,high
+RCOG-ANC-001,RCOG,RCOG Greentop Guidelines Antepartum Care Comprehensive,2024,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,medium
+ACOG-ANC-001,ACOG,ACOG Routine Prenatal Care Practice Recommendations,2022,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_obstetric,high
+AGS-ALCOHOL-001,AGS,AGS Position Statement Substance Use Disorders Older Adults,2020,https://www.americangeriatrics.org/clinical-resources,,AGS,restricted-cds,internal_medicine_geriatric,medium
+NICE-ANXIETY-001,NICE,NICE CG113 Generalised Anxiety Disorder Treatment Pathway,2020,https://www.nice.org.uk/guidance/cg113,,NICE,restricted-cds,internal_medicine_psychiatric,medium
+APA-DEMENTIA-001,APA,APA Practice Guideline Use of Antipsychotics in Patients With Dementia,2016,https://psychiatryonline.org/guidelines,,APA,restricted-cds,internal_medicine_psychiatric,high
+ASH-MDS-001,ASH,ASH Clinical Practice Guidelines on Higher and Lower Risk MDS,2023,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,medium
+BSH-MDS-001,BSH,BSH Guidelines on Diagnosis and Management of Adult Myelodysplastic Syndromes,2021,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,internal_medicine_hematology,medium
+ESPEN-CRIT-001,ESPEN,ESPEN Practical Guideline Clinical Nutrition in Surgery,2021,https://www.espen.org/guidelines-home,,ESPEN,restricted-cds,internal_medicine_critical_care,medium
+EAU-MIBC-001,EAU,EAU Guidelines on Muscle-invasive Metastatic Bladder Cancer Surgical Aspects,2024,https://uroweb.org/guidelines/muscle-invasive-and-metastatic-bladder-cancer/,,EAU,restricted-cds,urology_bph,medium
+ICS-PFM-001,ICS,ICS Standardisation of Female Pelvic Floor Symptoms and Conditions,2018,https://www.ics.org/Documents/,,ICS,restricted-cds,urology_female,medium
+IUGA-PFM-001,IUGA,IUGA ICS Joint Report on Terminology for Female Pelvic Floor Dysfunction,2010,https://www.iuga.org/publications/guidelines,,IUGA,restricted-cds,urology_female,medium
+AUGS-FECAL-001,AUGS,AUGS Position Statement Fecal Incontinence Female,2021,https://www.augs.org/clinical-resources/,,AUGS,restricted-cds,urology_female,medium
+ACOG-BPH-WOMEN-001,ACOG,ACOG Committee Opinion Urinary Incontinence in Women,2017,https://www.acog.org/clinical/clinical-guidance/committee-opinion,,ACOG,restricted-cds,urology_female,medium
+NICE-IUI-001,NICE,NICE CG171 Urinary incontinence in women management,2019,https://www.nice.org.uk/guidance/cg171,,NICE,restricted-cds,urology_female,high
+ACOG-BARTH-001,ACOG,ACOG Committee Opinion Vulvovaginitis Bartholin Cyst Management,2020,https://www.acog.org/clinical/clinical-guidance/committee-opinion,,ACOG,restricted-cds,gynecologic_surgery_uterine,medium
+ESGO-BARTH-001,ESGO,ESGO Recommendations on Vulvar Surgery and Bartholin Procedures,2022,https://www.esgo.org/explore/guidelines/,,ESGO,restricted-cds,gynecologic_surgery_oncologic,medium
+KDIGO-LIVING-DONOR-002,KDIGO,KDIGO Living Donor Long Term Care Recommendations,2017,https://kdigo.org/guidelines/living-kidney-donor/,,KDIGO,restricted-cds,nephrology_transplant,medium
+AAFP-PHE-001,AAFP,AAFP Clinical Recommendations Adult Periodic Health Examinations,2023,https://www.aafp.org/family-physician/patient-care/clinical-recommendations.html,,AAFP,restricted-cds,internal_medicine_general,medium
+AAFP-PREV-001,AAFP,AAFP Recommendations for Clinical Preventive Services,2024,https://www.aafp.org/family-physician/patient-care/clinical-recommendations.html,,AAFP,restricted-cds,internal_medicine_general,medium
+CDC-IMM-002,CDC,CDC General Best Practice Guidelines for Immunization,2023,https://www.cdc.gov/vaccines/hcp/acip-recs/general-recs/index.html,,CDC,public-domain,internal_medicine_general,high
+NHLBI-VTE-001,NHLBI,NHLBI Clinical Practice Guideline VTE Prophylaxis Hospitalized Patients,2018,https://www.nhlbi.nih.gov/,,NHLBI,public-domain,internal_medicine_hematology,medium
+ENDO-PIT-001,Endocrine Society,Endocrine Society Clinical Practice Guideline Pituitary Incidentaloma,2011,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+ENDO-CONGADREN-001,Endocrine Society,Endocrine Society Congenital Adrenal Hyperplasia Practice Guideline,2018,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,medium
+ESHRE-PREMOV-001,ESHRE,ESHRE Guideline on Premature Ovarian Insufficiency,2024,https://www.eshre.eu/Guidelines-and-Legal/Guidelines,,ESHRE,restricted-cds,internal_medicine_endocrine,high
+ENDO-KLINE-001,Endocrine Society,Endocrine Society Klinefelter Syndrome Diagnosis and Treatment Recommendations,2020,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,urology_andrology,medium
+ENDO-DSD-001,Endocrine Society,Endocrine Society Disorders of Sex Development Clinical Practice Guideline,2018,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,urology_andrology,medium
+KDIGO-PEDAKI-001,KDIGO,KDIGO Pediatric AKI Recommendations within AKI Guideline,2012,https://kdigo.org/guidelines/acute-kidney-injury/,,KDIGO,restricted-cds,nephrology_aki,medium
+ESPN-CKDPED-001,ESPN,ESPN European Society Pediatric Nephrology Pediatric CKD Recommendations,2022,https://www.espn-online.org/,,ESPN,restricted-cds,nephrology_ckd,medium
+AUA-NEUROCONT-001,AUA,AUA Adult Neurogenic Lower Urinary Tract Dysfunction Guideline,2021,https://www.auanet.org/guidelines/guidelines/adult-neurogenic-lower-urinary-tract-dysfunction,,AUA,restricted-cds,urology_female,high
+AUA-MICROHEM-001,AUA,AUA Microhematuria Diagnosis Evaluation Follow-up Guideline,2020,https://www.auanet.org/guidelines/guidelines/microhematuria-guideline,,AUA,restricted-cds,urology_infection,high
+ENDO-TRANS-001,Endocrine Society,Endocrine Society Endocrine Treatment of Gender-Dysphoric Persons,2017,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,medium
+APA-OCD-001,APA,APA Practice Guideline OCD Treatment,2007,https://psychiatryonline.org/guidelines,,APA,restricted-cds,internal_medicine_psychiatric,medium
+APA-BPD-001,APA,APA Practice Guideline Borderline Personality Disorder,2010,https://psychiatryonline.org/guidelines,,APA,restricted-cds,internal_medicine_psychiatric,medium
+APA-EATING-001,APA,APA Practice Guideline Eating Disorders,2023,https://psychiatryonline.org/guidelines,,APA,restricted-cds,internal_medicine_psychiatric,medium
+APA-BIPOLAR-001,APA,APA Practice Guideline Bipolar Disorder,2002,https://psychiatryonline.org/guidelines,,APA,restricted-cds,internal_medicine_psychiatric,medium
+NICE-BIPOLAR-001,NICE,NICE CG185 Bipolar disorder assessment and management,2020,https://www.nice.org.uk/guidance/cg185,,NICE,restricted-cds,internal_medicine_psychiatric,high
+APA-SCHIZ-001,APA,APA Practice Guideline Schizophrenia 3rd Edition,2020,https://psychiatryonline.org/guidelines,,APA,restricted-cds,internal_medicine_psychiatric,high
+NICE-SCHIZ-001,NICE,NICE CG178 Psychosis and schizophrenia in adults,2014,https://www.nice.org.uk/guidance/cg178,,NICE,restricted-cds,internal_medicine_psychiatric,high
+SCCM-PROCED-001,SCCM,SCCM Clinical Practice Guideline Prevention and Management of Procedural Pain ICU,2014,https://www.sccm.org/clinical-resources/guidelines,,SCCM,restricted-cds,internal_medicine_critical_care,medium
+SSC-FLUID-001,SSC,Surviving Sepsis Campaign Fluid Resuscitation Recommendations,2021,https://www.sccm.org/SurvivingSepsisCampaign/Guidelines,,SSC,restricted-cds,internal_medicine_critical_care,high
+SCCM-VAP-001,SCCM,SCCM IDSA Management of Adults with HAP and VAP,2016,https://www.idsociety.org/practice-guideline/,,SCCM,restricted-cds,internal_medicine_critical_care,high
+ATS-NTM-001,ATS,ATS IDSA Treatment of Nontuberculous Mycobacterial Pulmonary Disease,2020,https://www.thoracic.org/statements/,,ATS,restricted-cds,internal_medicine_id,medium
+IDSA-CDIFF-001,IDSA,IDSA SHEA Clinical Practice Guideline Clostridioides difficile Infection,2021,https://www.idsociety.org/practice-guideline/,,IDSA,restricted-cds,internal_medicine_id,high
+IDSA-CANDIDA-001,IDSA,IDSA Clinical Practice Guideline for the Management of Candidiasis,2016,https://www.idsociety.org/practice-guideline/,,IDSA,restricted-cds,internal_medicine_id,high
+IDSA-ASPER-001,IDSA,IDSA Practice Guidelines for the Diagnosis Management of Aspergillosis,2016,https://www.idsociety.org/practice-guideline/,,IDSA,restricted-cds,internal_medicine_id,medium
+IDSA-MRSA-001,IDSA,IDSA Clinical Practice Guidelines for Treatment of MRSA Infections,2011,https://www.idsociety.org/practice-guideline/,,IDSA,restricted-cds,internal_medicine_id,high
+IDSA-SKIN-001,IDSA,IDSA Practice Guidelines for the Diagnosis Management of Skin Soft Tissue Infections,2014,https://www.idsociety.org/practice-guideline/,,IDSA,restricted-cds,internal_medicine_id,high
+EAU-NEPHCANCER-001,EAU,EAU Guidelines on Renal Cell Carcinoma Comprehensive,2024,https://uroweb.org/guidelines/renal-cell-carcinoma/,,EAU,restricted-cds,urology_stones,medium
+NICE-LUTS-001,NICE,NICE NG209 Urinary tract infections lower antimicrobial prescribing,2018,https://www.nice.org.uk/guidance/ng109,,NICE,restricted-cds,urology_infection,high
+NICE-PYEL-001,NICE,NICE NG111 Pyelonephritis acute antimicrobial prescribing,2018,https://www.nice.org.uk/guidance/ng111,,NICE,restricted-cds,urology_infection,high
+NICE-PROST-001,NICE,NICE NG110 Prostatitis acute antimicrobial prescribing,2018,https://www.nice.org.uk/guidance/ng110,,NICE,restricted-cds,urology_infection,medium
+KDIGO-HEPB-001,KDIGO,KDIGO 2018 Clinical Practice Guideline for Prevention Diagnosis Treatment Hep B in CKD,2018,https://kdigo.org/guidelines/hepatitis-b/,,KDIGO,restricted-cds,nephrology_ckd,medium
+KDIGO-HEPC-001,KDIGO,KDIGO 2022 Clinical Practice Guideline for Prevention Diagnosis Treatment HCV in CKD,2022,https://kdigo.org/guidelines/hepatitis-c/,,KDIGO,restricted-cds,nephrology_ckd,medium
+KDOQI-CKDPED-001,KDOQI,KDOQI Pediatric Nutrition Recommendations CKD,2008,https://www.kidney.org/professionals/guidelines/guidelines_commentaries,,KDOQI,restricted-cds,nephrology_ckd,medium
+ICOPE-DEMENTIA-001,ICOPE,WHO ICOPE Cognitive Decline Care Pathway,2019,https://www.who.int/publications/i/item/9789241550109,,WHO,restricted-cds,internal_medicine_geriatric,medium
+ESC-HTN-001,ESC,ESC ESH Guidelines for the management of arterial hypertension,2024,https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines,,ESC,restricted-cds,internal_medicine_general,high
+ACC-HTN-001,ACC,ACC AHA Guideline for the Prevention Detection Evaluation Management of HBP,2017,https://www.acc.org/guidelines,,ACC,restricted-cds,internal_medicine_general,high
+NICE-HTN-001,NICE,NICE NG136 Hypertension in adults diagnosis and management,2023,https://www.nice.org.uk/guidance/ng136,,NICE,restricted-cds,internal_medicine_general,high
+EAACI-VENOM-001,EAACI,EAACI Guidelines on Allergen Immunotherapy Hymenoptera Venom Allergy,2018,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,internal_medicine_immunology,medium
+AAAAI-RHIN-001,AAAAI,AAAAI ACAAI Allergic Rhinitis Practice Parameter Update,2023,https://www.aaaai.org/practice-resources/practice-tools/practice-parameters,,AAAAI,restricted-cds,internal_medicine_immunology,high
+EAACI-ASTHMA-001,EAACI,EAACI Guidelines on Allergen Immunotherapy in Allergic Asthma,2019,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,internal_medicine_immunology,medium
+ESPN-ENURESIS-001,ESPN,ESPN Recommendations on Daytime Lower Urinary Tract Conditions Children,2020,https://www.espn-online.org/,,ESPN,restricted-cds,urology_pediatric,medium
+ICCS-VOIDING-001,ICCS,ICCS Standardization Document Voiding Dysfunction Pediatric,2016,https://i-c-c-s.org/i-c-c-s-publications/,,ICCS,restricted-cds,urology_pediatric,medium
+AUA-PEDLUTS-001,AUA,AUA Pediatric Lower Urinary Tract Symptoms Recommendations,2022,https://www.auanet.org/guidelines/guidelines,,AUA,restricted-cds,urology_pediatric,medium
+ACOG-CONTRA-001,ACOG,ACOG Practice Bulletin Contraception Selected Practice Recommendations,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_reproductive,high
+FSRH-CONTRA-001,FSRH,FSRH Clinical Guideline UK Medical Eligibility Criteria for Contraceptive Use,2024,https://www.fsrh.org/standards-and-guidance/,,FSRH,restricted-cds,gynecologic_surgery_reproductive,high
+RCOG-AUB-001,RCOG,RCOG Greentop Guideline Heavy Menstrual Bleeding,2018,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_uterine,high
+ACOG-AUB-001,ACOG,ACOG Practice Bulletin Diagnosis Abnormal Uterine Bleeding Reproductive-Aged Women,2012,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_uterine,high
+NICE-AUB-001,NICE,NICE NG88 Heavy menstrual bleeding assessment and management,2021,https://www.nice.org.uk/guidance/ng88,,NICE,restricted-cds,gynecologic_surgery_uterine,high
+ACR-RHEUM-LN-001,ACR,ACR EULAR Classification Criteria for Lupus Nephritis,2019,https://rheumatology.org/clinical-practice-guidelines,,ACR,restricted-cds,nephrology_glomerular,medium
+EULAR-AAV-001,EULAR,EULAR Recommendations for the Management of ANCA-associated Vasculitis,2022,https://www.eular.org/recommendations,,EULAR,restricted-cds,nephrology_glomerular,high
+NHF-VWD-PEDS-001,NHF,NHF Pediatric VWD Diagnosis Recommendations,2021,https://ashpublications.org/bloodadvances/,,NHF,restricted-cds,internal_medicine_hematology,medium
+ASH-PEDS-VTE-001,ASH,ASH 2018 Guidelines Pediatric Venous Thromboembolism,2018,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,medium
+SCCM-PEDS-SEPSIS-001,SCCM,SCCM Pediatric Sepsis Recognition Resuscitation Recommendations,2020,https://www.sccm.org/clinical-resources/guidelines,,SCCM,restricted-cds,internal_medicine_critical_care,medium
+ATS-COPD-001,ATS,ATS Pharmacologic Management of COPD Recommendations,2020,https://www.thoracic.org/statements/,,ATS,restricted-cds,internal_medicine_general,high
+NICE-COPD-001,NICE,NICE NG115 Chronic obstructive pulmonary disease management,2019,https://www.nice.org.uk/guidance/ng115,,NICE,restricted-cds,internal_medicine_general,high
+ATS-AECOPD-001,ATS,ATS European Respiratory Society Management of COPD Exacerbations,2017,https://www.thoracic.org/statements/,,ATS,restricted-cds,internal_medicine_general,high
+NICE-CHF-001,NICE,NICE NG106 Chronic heart failure in adults,2018,https://www.nice.org.uk/guidance/ng106,,NICE,restricted-cds,internal_medicine_general,high
+ESC-HF-001,ESC,ESC Guidelines for the Diagnosis Treatment of Acute Chronic Heart Failure,2023,https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines,,ESC,restricted-cds,internal_medicine_general,high
+NICE-CKID-PED-001,NICE,NICE NG203 Pediatric CKD Recommendations within Adult Guideline,2021,https://www.nice.org.uk/guidance/ng203,,NICE,restricted-cds,nephrology_ckd,medium
+KDIGO-COVID-001,KDIGO,KDIGO Recommendations on COVID-19 Care for Kidney Patients,2022,https://kdigo.org/guidelines/,,KDIGO,restricted-cds,nephrology_ckd,medium
+SSC-COVID-001,SSC,Surviving Sepsis Campaign COVID-19 Critical Care Guideline,2021,https://www.sccm.org/SurvivingSepsisCampaign/Guidelines,,SSC,restricted-cds,internal_medicine_critical_care,medium
+WHO-COVID-001,WHO,WHO Living Guidance for the Clinical Management of COVID-19,2023,https://www.who.int/publications/i/item/WHO-2019-nCoV-clinical-2023.2,,WHO,restricted-cds,internal_medicine_critical_care,medium
+RCOG-DIA-PREG-001,RCOG,RCOG Diabetes in Pregnancy Greentop Guideline,2018,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,medium
+ACOG-DIA-PREG-001,ACOG,ACOG Practice Bulletin Pregestational Diabetes Mellitus,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_obstetric,high
+ICOPE-FALLS-001,ICOPE,WHO ICOPE Falls Care Pathway,2019,https://www.who.int/publications/i/item/9789241550109,,WHO,restricted-cds,internal_medicine_geriatric,medium
+ICOPE-NUTRI-001,ICOPE,WHO ICOPE Nutrition Recommendations Older Adults,2019,https://www.who.int/publications/i/item/9789241550109,,WHO,restricted-cds,internal_medicine_geriatric,medium
+ICOPE-MOBIL-001,ICOPE,WHO ICOPE Mobility Loss Care Pathway,2019,https://www.who.int/publications/i/item/9789241550109,,WHO,restricted-cds,internal_medicine_geriatric,medium
+ENDO-MEN-001,Endocrine Society,Endocrine Society Multiple Endocrine Neoplasia Type 1 Guideline,2012,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,medium
+ENDO-OSTEOPED-001,Endocrine Society,Endocrine Society Pediatric Osteoporosis Bone Health Recommendations,2020,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,medium
+ATA-PEDTHY-001,ATA,ATA Guidelines for the Management of Differentiated Thyroid Cancer Pediatric,2015,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,internal_medicine_endocrine,medium
+ASH-MM-001,ASH,ASH Guidelines on Multiple Myeloma Risk Stratification,2022,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,medium
+BSH-PV-001,BSH,BSH Guidelines on Diagnosis and Treatment of Polycythaemia Vera,2019,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,internal_medicine_hematology,medium
+BSH-AML-001,BSH,BSH Diagnosis and Management of Adult AML Guideline,2022,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,internal_medicine_hematology,medium
+NICE-CDIFF-001,NICE,NICE NG199 Clostridioides difficile infection antimicrobial prescribing,2021,https://www.nice.org.uk/guidance/ng199,,NICE,restricted-cds,internal_medicine_id,high
+NICE-CAP-001,NICE,NICE CG191 Pneumonia in adults diagnosis and management,2019,https://www.nice.org.uk/guidance/cg191,,NICE,restricted-cds,internal_medicine_id,high
+NICE-SEPSIS-001,NICE,NICE NG51 Sepsis recognition diagnosis and early management,2024,https://www.nice.org.uk/guidance/ng51,,NICE,restricted-cds,internal_medicine_critical_care,high
+NICE-AKI-001,NICE,NICE NG148 Acute kidney injury prevention detection and management,2019,https://www.nice.org.uk/guidance/ng148,,NICE,restricted-cds,nephrology_aki,high
+NICE-DIAL-001,NICE,NICE NG107 Renal replacement therapy and conservative management,2018,https://www.nice.org.uk/guidance/ng107,,NICE,restricted-cds,nephrology_dialysis,high
+NICE-TRANS-001,NICE,NICE TA481 Immunosuppressive therapy for kidney transplant in adults,2017,https://www.nice.org.uk/guidance/ta481,,NICE,restricted-cds,nephrology_transplant,medium
+ENDO-LIVING-DONOR-001,KDIGO,KDIGO Living Donor Glomerular Filtration Rate Recommendations,2017,https://kdigo.org/guidelines/living-kidney-donor/,,KDIGO,restricted-cds,nephrology_transplant,medium
+KDIGO-PED-TRANS-001,KDIGO,KDIGO Pediatric Kidney Transplantation Recommendations,2020,https://kdigo.org/guidelines/transplant-candidate/,,KDIGO,restricted-cds,nephrology_transplant,medium
+EAU-FEMALE-LUTS-002,EAU,EAU Guidelines on Female Voiding Dysfunction,2024,https://uroweb.org/guidelines/non-neurogenic-female-luts/,,EAU,restricted-cds,urology_female,medium
+ACOG-PCOS-001,ACOG,ACOG Practice Bulletin Polycystic Ovary Syndrome,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,internal_medicine_endocrine,high
+ASRM-PCOS-001,ASRM,ASRM Practice Committee Polycystic Ovary Syndrome and Infertility,2017,https://www.asrm.org/practice-guidance/,,ASRM,restricted-cds,internal_medicine_endocrine,medium
+ESHRE-OHSS-001,ESHRE,ESHRE Recommendations on the Diagnosis and Management of OHSS,2016,https://www.eshre.eu/Guidelines-and-Legal/Guidelines,,ESHRE,restricted-cds,gynecologic_surgery_reproductive,medium
+ASRM-OHSS-001,ASRM,ASRM Prevention and Treatment of Moderate Severe Ovarian Hyperstimulation Syndrome,2016,https://www.asrm.org/practice-guidance/,,ASRM,restricted-cds,gynecologic_surgery_reproductive,medium
+ASRM-FERTPRES-001,ASRM,ASRM Fertility Preservation in Women Cancer Practice Committee,2019,https://www.asrm.org/practice-guidance/,,ASRM,restricted-cds,gynecologic_surgery_reproductive,medium
+NHLBI-HTN-001,NHLBI,NHLBI Clinical Practice Guidelines for Hypertension in Pregnancy,2020,https://www.nhlbi.nih.gov/,,NHLBI,public-domain,gynecologic_surgery_obstetric,medium
+ACOG-MAT-MORT-001,ACOG,ACOG Reducing Maternal Mortality Practice Recommendations,2023,https://www.acog.org/clinical/clinical-guidance/committee-opinion,,ACOG,restricted-cds,gynecologic_surgery_obstetric,high
+RCOG-MAT-001,RCOG,RCOG Greentop Guideline Maternal Collapse in Pregnancy,2019,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,gynecologic_surgery_obstetric,medium
+WHO-MAT-001,WHO,WHO Recommendations on Maternal Health Care,2022,https://www.who.int/publications/,,WHO,restricted-cds,gynecologic_surgery_obstetric,medium
+NICE-FETAL-001,NICE,NICE NG201 Antenatal care comprehensive,2021,https://www.nice.org.uk/guidance/ng201,,NICE,restricted-cds,gynecologic_surgery_obstetric,high
+ESPU-PED-INFECT-001,ESPU,ESPU Recommendations on Pediatric UTI Diagnosis Management,2021,https://www.espu.org/,,ESPU,restricted-cds,urology_infection,medium
+AAP-UTI-001,AAP,AAP Clinical Practice Guideline for the Diagnosis Management of Initial UTI Children,2016,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,urology_infection,high
+AAP-VUR-001,AAP,AAP Clinical Practice Guideline Vesicoureteral Reflux Children,2016,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,urology_pediatric,medium
+NICE-PEDUTI-001,NICE,NICE NG224 Urinary tract infection in under 16s,2022,https://www.nice.org.uk/guidance/ng224,,NICE,restricted-cds,urology_pediatric,high
+ICOPE-DEPRESS-001,ICOPE,WHO ICOPE Depression Care Pathway,2019,https://www.who.int/publications/i/item/9789241550109,,WHO,restricted-cds,internal_medicine_geriatric,medium
+ICOPE-VISION-001,ICOPE,WHO ICOPE Vision Loss Care Pathway,2019,https://www.who.int/publications/i/item/9789241550109,,WHO,restricted-cds,internal_medicine_geriatric,medium
+ICOPE-HEARING-001,ICOPE,WHO ICOPE Hearing Loss Care Pathway,2019,https://www.who.int/publications/i/item/9789241550109,,WHO,restricted-cds,internal_medicine_geriatric,medium
+ENDO-PEDDM-001,Endocrine Society,Endocrine Society Pediatric Type 2 Diabetes Recommendations,2017,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,medium
+ENDO-CGM-001,Endocrine Society,Endocrine Society Continuous Glucose Monitoring in Adults Practice Guideline,2024,https://www.endocrine.org/clinical-practice-guidelines,,Endocrine Society,restricted-cds,internal_medicine_endocrine,high
+KDIGO-DM-CKD-002,KDIGO,KDIGO Diabetes CKD Pharmacologic Therapy Recommendations,2022,https://kdigo.org/guidelines/diabetes-ckd/,,KDIGO,restricted-cds,nephrology_ckd,high
+KDOQI-CKDDIET-001,KDOQI,KDOQI Nutrition Energy Protein Recommendations CKD,2020,https://www.kidney.org/professionals/guidelines/guidelines_commentaries/nutrition-ckd,,KDOQI,restricted-cds,nephrology_ckd,high
+ESPEN-DIAL-001,ESPEN,ESPEN Practical Guideline Clinical Nutrition in Hospitalized Patients on Dialysis,2021,https://www.espen.org/guidelines-home,,ESPEN,restricted-cds,nephrology_dialysis,medium
+KDIGO-PEDDIAL-001,KDIGO,KDIGO Pediatric Dialysis Recommendations,2017,https://kdigo.org/guidelines/,,KDIGO,restricted-cds,nephrology_dialysis,medium
+BSH-NEUTRO-001,BSH,BSH Guidelines on the Investigation Management of Neutropenia,2014,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,internal_medicine_hematology,medium
+ASH-LEUKO-001,ASH,ASH Practice Recommendations Leukocyte Disorders Diagnosis,2020,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,ASH,restricted-cds,internal_medicine_hematology,medium
+APA-INSOMNIA-001,APA,APA Clinical Practice Guideline for the Treatment of Chronic Insomnia,2017,https://psychiatryonline.org/guidelines,,APA,restricted-cds,internal_medicine_psychiatric,medium
+NICE-INSOM-001,NICE,NICE NG40 Insomnia in adults,2024,https://www.nice.org.uk/guidance/,,NICE,restricted-cds,internal_medicine_psychiatric,medium
+AGS-PAIN-001,AGS,AGS Pharmacological Management of Persistent Pain in Older Persons,2019,https://www.americangeriatrics.org/clinical-resources,,AGS,restricted-cds,internal_medicine_geriatric,high
+EAU-CHRONICPAIN-001,EAU,EAU Guidelines on Chronic Pelvic Pain Comprehensive,2024,https://uroweb.org/guidelines/chronic-pelvic-pain/,,EAU,restricted-cds,urology_female,medium
+ACOG-CHRONICPAIN-001,ACOG,ACOG Practice Bulletin Chronic Pelvic Pain,2020,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,gynecologic_surgery_uterine,high
+NICE-PELVPAIN-001,NICE,NICE NG73 Endometriosis diagnosis and management,2024,https://www.nice.org.uk/guidance/ng73,,NICE,restricted-cds,gynecologic_surgery_uterine,high
+ACR-AKI-001,ACR,ACR Appropriateness Criteria Acute Kidney Injury Imaging Workup,2022,https://www.acr.org/Clinical-Resources/ACR-Appropriateness-Criteria,,ACR,restricted-cds,nephrology_aki,medium
+ACR-CKD-001,ACR,ACR Appropriateness Criteria Chronic Kidney Disease Imaging,2023,https://www.acr.org/Clinical-Resources/ACR-Appropriateness-Criteria,,ACR,restricted-cds,nephrology_ckd,medium
+EAU-INFERT-002,EAU,EAU Guidelines Sexual Reproductive Health Varicocele Management,2024,https://uroweb.org/guidelines/sexual-and-reproductive-health/,,EAU,restricted-cds,urology_andrology,medium
+AUA-VARI-001,AUA,AUA ASRM Varicocele Diagnosis and Management Best Practice,2014,https://www.auanet.org/guidelines/guidelines,,AUA,restricted-cds,urology_andrology,medium
+ASRM-VARI-001,ASRM,ASRM Varicocele and Male Infertility Practice Committee Document,2014,https://www.asrm.org/practice-guidance/,,ASRM,restricted-cds,urology_andrology,medium
