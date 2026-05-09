@@ -1,0 +1,433 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+ADA-T2D-001,ADA,ADA Standards of Care in Diabetes 2025 pharmacologic approaches to glycemic treatment,2025,https://diabetesjournals.org/care/issue/48/Supplement_1,,ADA,restricted-cds,endocrinology_diabetes,high
+ADA-T2D-002,ADA,ADA Standards of Care 2025 classification and diagnosis of diabetes,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S27/,,ADA,restricted-cds,endocrinology_diabetes,high
+ADA-T2D-003,ADA,ADA Standards of Care 2025 glycemic targets,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S111/,,ADA,restricted-cds,endocrinology_diabetes,high
+ADA-T2D-004,ADA,ADA Standards of Care 2025 prevention or delay of diabetes and associated comorbidities,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S50/,,ADA,restricted-cds,endocrinology_diabetes,high
+ADA-T2D-005,ADA,ADA Standards of Care 2025 facilitating positive health behaviors and well-being,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S86/,,ADA,restricted-cds,endocrinology_diabetes,high
+ADA-EASD-T2D-001,ADA-EASD,ADA EASD consensus report management of hyperglycemia in type 2 diabetes,2022,https://diabetesjournals.org/care/article/45/11/2753/,,ADA,restricted-cds,endocrinology_diabetes,high
+EASD-T2D-001,EASD,EASD position statement on tight glycemic control in critically ill patients,2024,https://link.springer.com/journal/125,,EASD,restricted-cds,endocrinology_diabetes,medium
+NICE-T2D-001,NICE,NICE NG28 type 2 diabetes in adults management,2022,https://www.nice.org.uk/guidance/ng28,,NICE,restricted-cds,endocrinology_diabetes,high
+NICE-T1D-001,NICE,NICE NG17 type 1 diabetes in adults diagnosis and management,2022,https://www.nice.org.uk/guidance/ng17,,NICE,restricted-cds,endocrinology_diabetes,high
+NICE-T1D-002,NICE,NICE NG18 diabetes type 1 and type 2 in children and young people,2023,https://www.nice.org.uk/guidance/ng18,,NICE,restricted-cds,endocrinology_diabetes,high
+ADA-T1D-001,ADA,ADA standards of care 2025 type 1 diabetes pediatric and adult,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S233/,,ADA,restricted-cds,endocrinology_diabetes,high
+ISPAD-T1D-001,ISPAD,ISPAD clinical practice consensus guidelines 2022 introduction,2022,https://www.ispad.org/page/ISPADGuidelines2022,,ISPAD,restricted-cds,endocrinology_diabetes,high
+ISPAD-T1D-002,ISPAD,ISPAD 2022 management of T1D in children and adolescents,2022,https://onlinelibrary.wiley.com/journal/13995448,,ISPAD,restricted-cds,endocrinology_pediatric,high
+ISPAD-DKA-001,ISPAD,ISPAD 2022 diabetic ketoacidosis and hyperglycemic hyperosmolar state in children,2022,https://onlinelibrary.wiley.com/doi/10.1111/pedi.13406,,ISPAD,restricted-cds,endocrinology_diabetes,high
+ISPAD-MODY-001,ISPAD,ISPAD 2022 the diagnosis and management of monogenic diabetes in children and adolescents,2022,https://onlinelibrary.wiley.com/doi/10.1111/pedi.13449,,ISPAD,restricted-cds,endocrinology_diabetes,high
+ISPAD-INSULIN-001,ISPAD,ISPAD 2022 insulin treatment in children and adolescents with diabetes,2022,https://onlinelibrary.wiley.com/doi/10.1111/pedi.13442,,ISPAD,restricted-cds,endocrinology_diabetes,high
+ISPAD-CGM-001,ISPAD,ISPAD 2022 diabetes technologies CGM in children and adolescents,2022,https://onlinelibrary.wiley.com/doi/10.1111/pedi.13417,,ISPAD,restricted-cds,endocrinology_diabetes,high
+ISPAD-NUT-001,ISPAD,ISPAD 2022 nutritional management in children and adolescents with diabetes,2022,https://onlinelibrary.wiley.com/doi/10.1111/pedi.13428,,ISPAD,restricted-cds,endocrinology_pediatric,medium
+ATTD-CGM-001,ATTD,ATTD international consensus on use of continuous glucose monitoring,2023,https://diabetesjournals.org/care/article/46/12/2295/,,ATTD,restricted-cds,endocrinology_diabetes,high
+ATTD-TIR-001,ATTD,ATTD clinical targets for continuous glucose monitoring data interpretation time in range,2019,https://diabetesjournals.org/care/article/42/8/1593/,,ATTD,restricted-cds,endocrinology_diabetes,high
+ATTD-PUMP-001,ATTD,ATTD international consensus on insulin pump therapy and AID systems,2023,https://www.attd.kenes.com/,,ATTD,restricted-cds,endocrinology_diabetes,high
+ENDO-HYPOGLY-001,ENDO-Society,Endocrine Society evaluation and management of adult hypoglycemic disorders,2009,https://academic.oup.com/jcem/article/94/3/709/2596308,,ENDO,restricted-cds,endocrinology_diabetes,high
+ADA-HYPOGLY-001,ADA,ADA standards of care 2025 hypoglycemia,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S128/,,ADA,restricted-cds,endocrinology_diabetes,high
+JBDS-DKA-001,JBDS,JBDS-IP management of DKA in adults,2023,https://abcd.care/joint-british-diabetes-societies-jbds-inpatient-care-group,,JBDS,restricted-cds,endocrinology_diabetes,high
+JBDS-HHS-001,JBDS,JBDS-IP management of hyperosmolar hyperglycemic state in adults,2022,https://abcd.care/joint-british-diabetes-societies-jbds-inpatient-care-group,,JBDS,restricted-cds,endocrinology_diabetes,high
+JBDS-INPATIENT-001,JBDS,JBDS-IP management of glycemic control in hospital inpatients,2022,https://abcd.care/joint-british-diabetes-societies-jbds-inpatient-care-group,,JBDS,restricted-cds,endocrinology_diabetes,high
+ADA-PREG-001,ADA,ADA standards of care 2025 management of diabetes in pregnancy,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S306/,,ADA,restricted-cds,endocrinology_diabetes,high
+ACOG-GDM-001,ACOG,ACOG practice bulletin 190 gestational diabetes mellitus,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,endocrinology_diabetes,high
+ACOG-PREGEST-001,ACOG,ACOG practice bulletin 201 pregestational diabetes,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,endocrinology_diabetes,high
+NICE-PREG-001,NICE,NICE NG3 diabetes in pregnancy management from preconception to postnatal,2020,https://www.nice.org.uk/guidance/ng3,,NICE,restricted-cds,endocrinology_diabetes,high
+IDF-GDM-001,IDF,IDF GDM model of care,2015,https://idf.org/our-activities/care-prevention/gdm.html,,IDF,restricted-cds,endocrinology_diabetes,medium
+KDIGO-DKD-001,KDIGO,KDIGO clinical practice guideline for diabetes management in CKD,2022,https://kdigo.org/guidelines/diabetes-ckd/,,KDIGO,restricted-cds,endocrinology_diabetes,high
+ADA-CKD-001,ADA,ADA standards of care 2025 chronic kidney disease and risk management,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S239/,,ADA,restricted-cds,endocrinology_diabetes,high
+AAO-DR-001,AAO,AAO preferred practice pattern diabetic retinopathy,2019,https://www.aao.org/preferred-practice-pattern/diabetic-retinopathy-ppp,,AAO,restricted-cds,endocrinology_diabetes,high
+ADA-NEURO-001,ADA,ADA position statement diabetic neuropathy,2017,https://diabetesjournals.org/care/article/40/1/136/,,ADA,restricted-cds,endocrinology_diabetes,high
+AAN-DPN-001,AAN,AAN evidence-based guideline treatment of painful diabetic neuropathy,2022,https://www.aan.com/Guidelines/home/GuidelineDetail/1078,,AAN,restricted-cds,endocrinology_diabetes,high
+IWGDF-FOOT-001,IWGDF,IWGDF guidelines on prevention and management of diabetes-related foot disease,2023,https://iwgdfguidelines.org/guidelines-2023/,,IWGDF,restricted-cds,endocrinology_diabetes,high
+IWGDF-INFECT-001,IWGDF,IWGDF guideline on diagnosis and treatment of foot infection in persons with diabetes,2023,https://iwgdfguidelines.org/infection-guideline-2023/,,IWGDF,restricted-cds,endocrinology_diabetes,high
+IWGDF-OFFLOAD-001,IWGDF,IWGDF guideline on offloading foot ulcers in persons with diabetes,2023,https://iwgdfguidelines.org/offloading-guideline-2023/,,IWGDF,restricted-cds,endocrinology_diabetes,high
+ADA-CV-001,ADA,ADA standards of care 2025 cardiovascular disease and risk management,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S207/,,ADA,restricted-cds,endocrinology_diabetes,high
+ESC-DM-001,ESC,ESC guidelines on management of cardiovascular disease in patients with diabetes,2023,https://academic.oup.com/eurheartj/article/44/39/4043/,,ESC,restricted-cds,endocrinology_diabetes,high
+NICE-PREDM-001,NICE,NICE PH38 type 2 diabetes prevention in people at high risk,2017,https://www.nice.org.uk/guidance/ph38,,NICE,restricted-cds,endocrinology_diabetes,high
+IDF-PREDM-001,IDF,IDF clinical practice recommendations on the prevention of type 2 diabetes,2017,https://idf.org/our-activities/care-prevention/prevention.html,,IDF,restricted-cds,endocrinology_diabetes,medium
+ENDO-INPAT-001,ENDO-Society,Endocrine Society management of hyperglycemia in hospitalized patients in non-critical care setting,2022,https://academic.oup.com/jcem/article/107/8/2101/,,ENDO,restricted-cds,endocrinology_diabetes,high
+AGS-ELDERLY-DM-001,AGS,AGS choosing wisely diabetes management in older adults,2019,https://www.americangeriatrics.org/,,AGS,restricted-cds,endocrinology_diabetes,medium
+ADA-OLD-001,ADA,ADA standards of care 2025 older adults,2025,https://diabetesjournals.org/care/article/48/Supplement_1/S266/,,ADA,restricted-cds,endocrinology_diabetes,medium
+ENDO-LIPO-001,ENDO-Society,Endocrine Society diagnosis and management of lipodystrophy syndromes,2016,https://academic.oup.com/jcem/article/101/12/4500/,,ENDO,restricted-cds,endocrinology_obesity,medium
+ATA-HYPER-001,ATA,ATA guidelines for diagnosis and management of hyperthyroidism,2016,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,endocrinology_thyroid,high
+ATA-HYPO-001,ATA,ATA guidelines for treatment of hypothyroidism,2014,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,endocrinology_thyroid,high
+ATA-PREG-001,ATA,ATA guidelines for diagnosis and management of thyroid disease during pregnancy and the postpartum,2017,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,endocrinology_thyroid,high
+ATA-NODULE-001,ATA,ATA management guidelines for adult patients with thyroid nodules and differentiated thyroid cancer,2015,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,endocrinology_thyroid,high
+ATA-PED-001,ATA,ATA guidelines for management of thyroid nodules and differentiated thyroid cancer in children,2015,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,endocrinology_pediatric,high
+ETA-HYPO-001,ETA,ETA guideline 2024 management of subclinical hypothyroidism,2024,https://www.eurothyroid.com/guidelines/eta-guidelines.html,,ETA,restricted-cds,endocrinology_thyroid,high
+ETA-AMIO-001,ETA,ETA 2018 guidelines for management of amiodarone-associated thyroid dysfunction,2018,https://www.eurothyroid.com/guidelines/eta-guidelines.html,,ETA,restricted-cds,endocrinology_thyroid,medium
+ETA-LT4-001,ETA,ETA guidelines on use of LT4 in management of hypothyroidism,2012,https://www.eurothyroid.com/guidelines/eta-guidelines.html,,ETA,restricted-cds,endocrinology_thyroid,medium
+AACE-THYROID-001,AACE,AACE clinical practice guidelines for hypothyroidism in adults,2012,https://pro.aace.com/clinical-guidance/,,AACE,restricted-cds,endocrinology_thyroid,medium
+BTF-HYPER-001,BTF,British Thyroid Foundation guidance on graves disease,2024,https://www.btf-thyroid.org/medical-guidelines,,BTF,restricted-cds,endocrinology_thyroid,medium
+EUGOGO-TED-001,EUGOGO,EUGOGO 2021 clinical practice guidelines for medical management of Graves orbitopathy,2021,https://www.eugogo.eu/guidelines/,,EUGOGO,restricted-cds,endocrinology_thyroid,high
+ATA-STORM-001,ATA,ATA management of thyroid storm consensus,2016,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,endocrinology_thyroid,high
+ATA-MYXEDEMA-001,ATA,ATA myxedema coma management,2014,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,endocrinology_thyroid,high
+ATA-PPT-001,ATA,ATA postpartum thyroiditis statement within thyroid pregnancy guideline,2017,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,endocrinology_thyroid,medium
+PES-CHILD-THY-001,PES,Pediatric Endocrine Society guidelines for evaluation and management of pediatric thyroid disease,2020,https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/,,PES,restricted-cds,endocrinology_pediatric,medium
+ENDO-CUSHING-001,ENDO-Society,Endocrine Society treatment of cushing syndrome,2015,https://academic.oup.com/jcem/article/100/8/2807/,,ENDO,restricted-cds,endocrinology_adrenal,high
+ENDO-CUSHDX-001,ENDO-Society,Endocrine Society diagnosis of cushing syndrome,2008,https://academic.oup.com/jcem/article/93/5/1526/,,ENDO,restricted-cds,endocrinology_adrenal,high
+ENDO-ADREN-001,ENDO-Society,Endocrine Society diagnosis and treatment of primary adrenal insufficiency,2016,https://academic.oup.com/jcem/article/101/2/364/,,ENDO,restricted-cds,endocrinology_adrenal,high
+ENDO-PHEO-001,ENDO-Society,Endocrine Society pheochromocytoma and paraganglioma management,2014,https://academic.oup.com/jcem/article/99/6/1915/,,ENDO,restricted-cds,endocrinology_adrenal,high
+ENDO-ALDO-001,ENDO-Society,Endocrine Society management of primary aldosteronism case detection diagnosis and treatment,2016,https://academic.oup.com/jcem/article/101/5/1889/,,ENDO,restricted-cds,endocrinology_adrenal,high
+ESE-INC-001,ESE,ESE-ENSAT clinical practice guideline on management of adrenal incidentalomas,2023,https://academic.oup.com/ejendo/article/189/1/G1/,,ESE,restricted-cds,endocrinology_adrenal,high
+ENDO-CAH-001,ENDO-Society,Endocrine Society congenital adrenal hyperplasia due to steroid 21-hydroxylase deficiency,2018,https://academic.oup.com/jcem/article/103/11/4043/,,ENDO,restricted-cds,endocrinology_adrenal,high
+PES-CAH-001,PES,Pediatric Endocrine Society CAH consensus newborn screening and management,2018,https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/,,PES,restricted-cds,endocrinology_pediatric,high
+ENDO-ACRO-001,ENDO-Society,Endocrine Society acromegaly clinical practice guideline,2014,https://academic.oup.com/jcem/article/99/11/3933/,,ENDO,restricted-cds,endocrinology_pituitary,high
+AACE-ACRO-001,AACE,AACE disease state clinical review acromegaly,2011,https://pro.aace.com/clinical-guidance/,,AACE,restricted-cds,endocrinology_pituitary,medium
+ENDO-CUSHD-001,ENDO-Society,Endocrine Society treatment of cushing disease consensus,2021,https://academic.oup.com/jcem/article/106/12/3531/,,ENDO,restricted-cds,endocrinology_pituitary,high
+ENDO-PRL-001,ENDO-Society,Endocrine Society diagnosis and treatment of hyperprolactinemia,2011,https://academic.oup.com/jcem/article/96/2/273/,,ENDO,restricted-cds,endocrinology_pituitary,high
+ENDO-HYPOPIT-001,ENDO-Society,Endocrine Society hormonal replacement in hypopituitarism in adults,2016,https://academic.oup.com/jcem/article/101/11/3888/,,ENDO,restricted-cds,endocrinology_pituitary,high
+ENDO-DI-001,ENDO-Society,Working group on diagnosis and management of diabetes insipidus,2022,https://academic.oup.com/jcem/article/107/11/2956/,,ENDO,restricted-cds,endocrinology_pituitary,high
+ERA-SIADH-001,ERA-EDTA,ERA-EDTA SIADH and hyponatremia diagnosis and treatment guideline,2014,https://www.era-online.org/en/education/clinical-practice-guidelines/,,ERA,restricted-cds,endocrinology_pituitary,high
+SE-APOPLEXY-001,SE,UK Society for Endocrinology emergency endocrine guidelines pituitary apoplexy,2023,https://www.endocrinology.org/clinical-practice/clinical-guidance/,,SE,restricted-cds,endocrinology_pituitary,medium
+ENDO-AGHD-001,ENDO-Society,Endocrine Society evaluation and treatment of adult growth hormone deficiency,2011,https://academic.oup.com/jcem/article/96/6/1587/,,ENDO,restricted-cds,endocrinology_pituitary,high
+PES-GHD-001,PES,Pediatric Endocrine Society GH research society GH deficiency in childhood,2019,https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/,,PES,restricted-cds,endocrinology_pediatric,high
+GHRS-SHORT-001,GHRS,GH research society consensus on diagnosis and management of short stature,2020,https://www.ghresearchsociety.org/,,GHRS,restricted-cds,endocrinology_pediatric,medium
+ESHRE-PCOS-001,ESHRE,ESHRE 2023 international evidence-based guideline for assessment and management of PCOS,2023,https://www.eshre.eu/Guidelines-and-Legal/Guidelines/Polycystic-Ovary-Syndrome,,ESHRE,restricted-cds,endocrinology_reproductive,high
+AEPCOS-001,AE-PCOS,AE-PCOS Society criteria for definition of PCOS,2018,https://www.ae-society.org/,,AEPCOS,restricted-cds,endocrinology_reproductive,medium
+ENDO-PCOS-001,ENDO-Society,Endocrine Society diagnosis and treatment of PCOS,2013,https://academic.oup.com/jcem/article/98/12/4565/,,ENDO,restricted-cds,endocrinology_reproductive,high
+ACOG-PCOS-001,ACOG,ACOG practice bulletin 194 polycystic ovary syndrome,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,endocrinology_reproductive,medium
+NICE-PCOS-001,NICE,NICE CKS polycystic ovary syndrome,2024,https://cks.nice.org.uk/topics/polycystic-ovary-syndrome/,,NICE,restricted-cds,endocrinology_reproductive,medium
+ENDO-HYPOG-001,ENDO-Society,Endocrine Society testosterone therapy in men with hypogonadism,2018,https://academic.oup.com/jcem/article/103/5/1715/,,ENDO,restricted-cds,endocrinology_reproductive,high
+AUA-HYPOG-001,AUA,AUA guideline evaluation and management of testosterone deficiency,2024,https://www.auanet.org/guidelines-and-quality/guidelines,,AUA,restricted-cds,endocrinology_reproductive,high
+EAU-HYPOG-001,EAU,EAU guidelines on sexual and reproductive health male hypogonadism,2024,https://uroweb.org/guidelines/sexual-and-reproductive-health,,EAU,restricted-cds,endocrinology_reproductive,medium
+ESHRE-POI-001,ESHRE,ESHRE guideline management of women with premature ovarian insufficiency,2024,https://www.eshre.eu/Guidelines-and-Legal/Guidelines/Female-Fertility-Preservation,,ESHRE,restricted-cds,endocrinology_reproductive,high
+NAMS-MENO-001,NAMS,NAMS 2022 hormone therapy position statement,2022,https://www.menopause.org/professional-resources/position-statements,,NAMS,restricted-cds,endocrinology_reproductive,high
+IMS-MENO-001,IMS,IMS recommendations on women's midlife health and menopause hormone therapy,2024,https://www.imsociety.org/recommendations/,,IMS,restricted-cds,endocrinology_reproductive,high
+BMS-HRT-001,BMS,British Menopause Society 2024 consensus on HRT prescribing,2024,https://thebms.org.uk/publications/consensus-statements/,,BMS,restricted-cds,endocrinology_reproductive,high
+NICE-MENO-001,NICE,NICE NG23 menopause diagnosis and management,2024,https://www.nice.org.uk/guidance/ng23,,NICE,restricted-cds,endocrinology_reproductive,high
+ACOG-MENO-001,ACOG,ACOG practice bulletin 141 management of menopausal symptoms,2014,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,endocrinology_reproductive,medium
+ENDO-HIRSUTE-001,ENDO-Society,Endocrine Society evaluation and treatment of hirsutism in premenopausal women,2018,https://academic.oup.com/jcem/article/103/4/1233/,,ENDO,restricted-cds,endocrinology_reproductive,medium
+ENDO-DSD-001,ENDO-Society,Endocrine Society and PES consensus DSD evaluation and management,2018,https://academic.oup.com/jcem/article/103/3/E1503/,,ENDO,restricted-cds,endocrinology_reproductive,medium
+ENDO-GENDER-001,ENDO-Society,Endocrine Society endocrine treatment of gender-dysphoric gender-incongruent persons,2017,https://academic.oup.com/jcem/article/102/11/3869/,,ENDO,restricted-cds,endocrinology_reproductive,high
+WPATH-SOC-001,WPATH,WPATH standards of care for the health of transgender and gender diverse people version 8,2022,https://www.wpath.org/publications/soc,,WPATH,restricted-cds,endocrinology_reproductive,high
+PES-TURNER-001,PES,PES turner syndrome international clinical practice guidelines,2017,https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/,,PES,restricted-cds,endocrinology_pediatric,medium
+ENDO-KLINE-001,ENDO-Society,Endocrine Society management of klinefelter syndrome,2020,https://academic.oup.com/jcem/article/105/6/e1747/,,ENDO,restricted-cds,endocrinology_reproductive,medium
+ENDO-PHPT-001,ENDO-Society,Endocrine Society 5th international workshop primary hyperparathyroidism diagnosis and management,2022,https://academic.oup.com/jcem/article/107/12/3225/,,ENDO,restricted-cds,endocrinology_bone,high
+AAES-PHPT-001,AAES,AAES guidelines for definitive management of primary hyperparathyroidism,2016,https://www.endocrinesurgery.org/practice-quality-initiatives/,,AAES,restricted-cds,endocrinology_bone,high
+ENDO-HYPOPT-001,ENDO-Society,Endocrine Society management of chronic hypoparathyroidism,2022,https://academic.oup.com/jcem/article/108/10/2586/,,ENDO,restricted-cds,endocrinology_bone,high
+ENDO-VITD-001,ENDO-Society,Endocrine Society 2024 guideline vitamin D for the prevention of disease,2024,https://academic.oup.com/jcem/article/109/8/1907/,,ENDO,restricted-cds,endocrinology_bone,high
+IOF-VITD-001,IOF,IOF position statement vitamin D requirements globally,2010,https://www.osteoporosis.foundation/educational-hub/topic/vitamin-d,,IOF,restricted-cds,endocrinology_bone,medium
+ENDO-HYPERCA-001,ENDO-Society,Endocrine Society treatment of hypercalcemia of malignancy in adults,2023,https://academic.oup.com/jcem/article/108/3/507/,,ENDO,restricted-cds,endocrinology_bone,high
+ENDO-PAGET-001,ENDO-Society,Endocrine Society paget disease of bone diagnosis and management,2014,https://academic.oup.com/jcem/article/99/12/4408/,,ENDO,restricted-cds,endocrinology_bone,medium
+ENDO-HYPOPHOS-001,ENDO-Society,Endocrine Society hypophosphatasia clinical management,2019,https://academic.oup.com/jcem/article/104/9/3920/,,ENDO,restricted-cds,endocrinology_bone,low
+AACE-OBES-001,AACE,AACE-ACE comprehensive clinical practice guidelines for medical care of patients with obesity,2016,https://pro.aace.com/clinical-guidance/,,AACE,restricted-cds,endocrinology_obesity,high
+ENDO-OBES-001,ENDO-Society,Endocrine Society pharmacological management of obesity,2015,https://academic.oup.com/jcem/article/100/2/342/,,ENDO,restricted-cds,endocrinology_obesity,high
+EASO-OBES-001,EASO,EASO European guidelines for obesity management in adults,2024,https://easo.org/clinical-guidance/,,EASO,restricted-cds,endocrinology_obesity,high
+NICE-OBES-001,NICE,NICE CG189 obesity identification assessment and management,2023,https://www.nice.org.uk/guidance/cg189,,NICE,restricted-cds,endocrinology_obesity,high
+OMA-OBES-001,OMA,Obesity Medicine Association obesity algorithm,2024,https://obesitymedicine.org/resources/obesity-algorithm/,,OMA,restricted-cds,endocrinology_obesity,high
+AAP-OBES-001,AAP,AAP clinical practice guideline for evaluation and treatment of children with obesity,2023,https://publications.aap.org/pediatrics/article/151/2/e2022060640/,,AAP,restricted-cds,endocrinology_pediatric,high
+OMA-PED-OBES-001,OMA,OMA pediatric obesity algorithm,2024,https://obesitymedicine.org/resources/obesity-algorithm/pediatric/,,OMA,restricted-cds,endocrinology_pediatric,medium
+NICE-FH-001,NICE,NICE CG71 familial hypercholesterolemia identification and management,2019,https://www.nice.org.uk/guidance/cg71,,NICE,restricted-cds,endocrinology_obesity,high
+EAS-FH-001,EAS,EAS consensus statement on FH children adolescents and adults,2023,https://www.eas-society.org/page/EASconsensus,,EAS,restricted-cds,endocrinology_obesity,high
+AHA-FH-001,AHA,AHA scientific statement familial hypercholesterolemia screening and treatment,2020,https://www.ahajournals.org/journal/circ,,AHA,restricted-cds,endocrinology_obesity,high
+ENDO-HTG-001,ENDO-Society,Endocrine Society evaluation and treatment of hypertriglyceridemia,2012,https://academic.oup.com/jcem/article/97/9/2969/,,ENDO,restricted-cds,endocrinology_obesity,high
+NLA-DYSLIP-001,NLA,NLA recommendations for patient-centered management of dyslipidemia,2022,https://www.lipidjournal.com/,,NLA,restricted-cds,endocrinology_obesity,high
+ENDO-MEN1-001,ENDO-Society,Endocrine Society multiple endocrine neoplasia type 1 management,2012,https://academic.oup.com/jcem/article/97/9/2990/,,ENDO,restricted-cds,endocrinology_pituitary,medium
+ATA-MTC-001,ATA,ATA medullary thyroid carcinoma management revised guidelines,2015,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,endocrinology_thyroid,high
+ENETS-CARC-001,ENETS,ENETS consensus guidelines for carcinoid syndrome,2023,https://www.enets.org/guidelines.html,,ENETS,restricted-cds,endocrinology_pituitary,medium
+ENDO-PEDHTN-001,ENDO-Society,Endocrine Society endocrine causes of pediatric hypertension,2014,https://academic.oup.com/jcem/article/99/9/3201/,,ENDO,restricted-cds,endocrinology_pediatric,low
+ASH-IDA-001,ASH,ASH guidelines on diagnosis and management of iron deficiency anemia,2024,https://ashpublications.org/bloodadvances/issue,,ASH,restricted-cds,hematology_anemia,high
+BSH-IDA-001,BSH,BSH guideline for laboratory diagnosis of iron deficiency,2021,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,high
+BSH-IRON-001,BSH,BSH guideline for management of iron deficiency in pregnancy,2020,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,high
+AGA-IDA-001,AGA,AGA clinical practice guideline gastrointestinal evaluation of iron deficiency anemia,2020,https://gastro.org/clinical-guidance/,,AGA,restricted-cds,hematology_anemia,high
+BSH-B12-001,BSH,BSH guidelines for diagnosis and treatment of cobalamin and folate disorders,2014,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,high
+BSH-AIHA-001,BSH,BSH guidelines on management of warm autoimmune haemolytic anaemia,2017,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,high
+ASH-AIHA-001,ASH,ASH 2020 guideline on first-line treatment of warm AIHA,2020,https://ashpublications.org/bloodadvances/article/4/14/3296/,,ASH,restricted-cds,hematology_anemia,high
+BSH-G6PD-001,BSH,BSH guidelines for laboratory diagnosis of G6PD deficiency,2017,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,medium
+BSH-PK-001,BSH,BSH guideline pyruvate kinase deficiency,2020,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,low
+NHLBI-SCD-001,NHLBI,NHLBI evidence-based management of sickle cell disease expert panel report,2014,https://www.nhlbi.nih.gov/health-topics/evidence-based-management-sickle-cell-disease,,NHLBI,restricted-cds,hematology_anemia,high
+ASH-SCD-001,ASH,ASH 2020 guidelines for sickle cell disease cerebrovascular disease,2020,https://ashpublications.org/bloodadvances/article/4/8/1554/,,ASH,restricted-cds,hematology_anemia,high
+ASH-SCD-002,ASH,ASH 2020 guidelines for sickle cell disease management of acute and chronic pain,2020,https://ashpublications.org/bloodadvances/article/4/12/2656/,,ASH,restricted-cds,hematology_anemia,high
+ASH-SCD-003,ASH,ASH 2020 guidelines for sickle cell disease cardiopulmonary and kidney disease,2020,https://ashpublications.org/bloodadvances/article/4/16/3862/,,ASH,restricted-cds,hematology_anemia,high
+ASH-SCD-004,ASH,ASH 2020 guidelines for sickle cell disease transfusion support,2020,https://ashpublications.org/bloodadvances/article/4/2/327/,,ASH,restricted-cds,hematology_anemia,high
+ASH-SCD-005,ASH,ASH 2021 guidelines for sickle cell disease stem cell transplantation,2021,https://ashpublications.org/bloodadvances/article/5/18/3668/,,ASH,restricted-cds,hematology_anemia,high
+BSH-SCD-001,BSH,BSH standards for clinical care of adults and older children with sickle cell disease,2018,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,high
+TIF-THAL-001,TIF,Thalassaemia International Federation guidelines for management of transfusion-dependent thalassaemia,2021,https://thalassaemia.org.cy/publications/,,TIF,restricted-cds,hematology_anemia,high
+TIF-NTDT-001,TIF,TIF guidelines for management of non-transfusion dependent thalassaemia,2017,https://thalassaemia.org.cy/publications/,,TIF,restricted-cds,hematology_anemia,medium
+BSH-THAL-001,BSH,BSH significant haemoglobinopathies guidelines for screening and diagnosis,2010,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,medium
+ASH-PNH-001,ASH,ASH paroxysmal nocturnal hemoglobinuria diagnosis and management,2021,https://ashpublications.org/blood,,ASH,restricted-cds,hematology_anemia,high
+BSH-PNH-001,BSH,BSH guidelines for diagnosis and management of paroxysmal nocturnal haemoglobinuria,2024,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,high
+BSH-AA-001,BSH,BSH guidelines for diagnosis and management of adult aplastic anaemia,2016,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,high
+AAMDS-AA-001,AAMDS,AAMDS international foundation aplastic anemia consensus,2020,https://www.aamds.org/,,AAMDS,restricted-cds,hematology_anemia,medium
+BSH-PRCA-001,BSH,BSH guidelines on diagnosis and treatment of pure red cell aplasia,2016,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,medium
+BSH-HDFN-001,BSH,BSH guidelines for prevention and management of hemolytic disease of fetus and newborn,2016,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_pediatric,medium
+WFH-HEMA-001,WFH,WFH guidelines for management of hemophilia 3rd edition,2020,https://www1.wfh.org/publications/,,WFH,restricted-cds,hematology_bleeding,high
+NHF-MASAC-001,NHF,NHF MASAC recommendations on care models and standards for hemophilia,2024,https://www.hemophilia.org/healthcare-professionals/guidelines-on-care/,,NHF,restricted-cds,hematology_bleeding,high
+ISTH-VWD-001,ISTH,ISTH ASH NHF WFH 2021 guidelines on diagnosis of von Willebrand disease,2021,https://ashpublications.org/bloodadvances/article/5/1/280/,,ISTH,restricted-cds,hematology_bleeding,high
+ISTH-VWD-002,ISTH,ISTH ASH NHF WFH 2021 guidelines on management of von Willebrand disease,2021,https://ashpublications.org/bloodadvances/article/5/1/301/,,ISTH,restricted-cds,hematology_bleeding,high
+ISTH-RBD-001,ISTH,ISTH guidance for diagnosis and management of rare inherited coagulation disorders,2014,https://www.isth.org/page/Guidance,,ISTH,restricted-cds,hematology_bleeding,medium
+ISTH-PLT-001,ISTH,ISTH SSC guidance on inherited platelet function disorders diagnosis,2021,https://www.isth.org/page/Guidance,,ISTH,restricted-cds,hematology_bleeding,medium
+ASH-ITP-001,ASH,ASH 2019 guidelines for immune thrombocytopenia,2019,https://ashpublications.org/bloodadvances/article/3/23/3829/,,ASH,restricted-cds,hematology_bleeding,high
+IWG-ITP-001,IWG,International consensus report on investigation and management of primary immune thrombocytopenia,2019,https://ashpublications.org/bloodadvances/article/3/22/3780/,,IWG,restricted-cds,hematology_bleeding,high
+ISTH-TTP-001,ISTH,ISTH guidelines for diagnosis and treatment of thrombotic thrombocytopenic purpura,2020,https://www.isth.org/page/Guidance,,ISTH,restricted-cds,hematology_bleeding,high
+ASH-TTP-001,ASH,ASH 2020 guidelines for management of immune-mediated TTP,2020,https://ashpublications.org/bloodadvances/article/4/24/6232/,,ASH,restricted-cds,hematology_bleeding,high
+BSH-TMA-001,BSH,BSH guidelines on diagnosis and management of thrombotic microangiopathies,2023,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_bleeding,high
+ISTH-DIC-001,ISTH,ISTH guidance for diagnosis and treatment of disseminated intravascular coagulation,2013,https://www.isth.org/page/Guidance,,ISTH,restricted-cds,hematology_bleeding,high
+ASH-HIT-001,ASH,ASH 2018 guidelines for management of heparin-induced thrombocytopenia,2018,https://ashpublications.org/bloodadvances/article/2/22/3360/,,ASH,restricted-cds,hematology_bleeding,high
+ISTH-HIT-001,ISTH,ISTH guidance on diagnosis and treatment of heparin-induced thrombocytopenia,2024,https://www.isth.org/page/Guidance,,ISTH,restricted-cds,hematology_bleeding,high
+ISTH-LIVER-001,ISTH,ISTH coagulation in liver disease consensus,2021,https://www.isth.org/page/Guidance,,ISTH,restricted-cds,hematology_bleeding,high
+AASLD-COAG-001,AASLD,AASLD vascular liver disorders portal vein thrombosis and procedural bleeding,2021,https://www.aasld.org/practice-guidelines,,AASLD,restricted-cds,hematology_bleeding,high
+ESICM-COAG-001,ESICM,ESICM clinical practice guideline coagulopathy in critically ill patients,2023,https://www.esicm.org/resources/guidelines-overview/,,ESICM,restricted-cds,hematology_bleeding,high
+AABB-MTP-001,AABB,AABB clinical practice guidelines red blood cell transfusion thresholds and storage,2023,https://www.aabb.org/standards-accreditation/clinical-practice-guidelines,,AABB,restricted-cds,hematology_transfusion,high
+EAST-MTP-001,EAST,EAST guidelines for transfusion in trauma massive transfusion,2024,https://www.east.org/education-resources/practice-management-guidelines,,EAST,restricted-cds,hematology_transfusion,high
+RCOG-PPH-001,RCOG,RCOG green-top guideline 52 prevention and management of postpartum haemorrhage,2017,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,hematology_bleeding,high
+ASH-VTE-001,ASH,ASH 2020 guidelines for management of venous thromboembolism treatment,2020,https://ashpublications.org/bloodadvances/article/4/19/4693/,,ASH,restricted-cds,hematology_thrombosis,high
+ASH-VTE-002,ASH,ASH 2018 guidelines for VTE prophylaxis hospitalized medical patients,2018,https://ashpublications.org/bloodadvances/article/2/22/3198/,,ASH,restricted-cds,hematology_thrombosis,high
+ASH-VTE-003,ASH,ASH 2019 guidelines for VTE prophylaxis surgical patients,2019,https://ashpublications.org/bloodadvances/article/3/23/3898/,,ASH,restricted-cds,hematology_thrombosis,high
+ASH-VTE-004,ASH,ASH 2018 guidelines for management of VTE in pregnancy,2018,https://ashpublications.org/bloodadvances/article/2/22/3317/,,ASH,restricted-cds,hematology_thrombosis,high
+ASH-VTE-005,ASH,ASH 2018 guidelines optimal management of anticoagulation therapy,2018,https://ashpublications.org/bloodadvances/article/2/22/3257/,,ASH,restricted-cds,hematology_thrombosis,high
+ASH-VTE-006,ASH,ASH 2018 guidelines diagnosis of VTE,2018,https://ashpublications.org/bloodadvances/article/2/22/3226/,,ASH,restricted-cds,hematology_thrombosis,high
+ASH-VTE-007,ASH,ASH 2018 guidelines for VTE in pediatric population,2018,https://ashpublications.org/bloodadvances/article/2/22/3292/,,ASH,restricted-cds,hematology_pediatric,high
+ACCP-VTE-001,ACCP,ACCP CHEST antithrombotic therapy for VTE disease 2nd update,2021,https://journal.chestnet.org/article/S0012-3692(21)01506-3/,,ACCP,restricted-cds,hematology_thrombosis,high
+ESC-VTE-001,ESC,ESC guidelines on diagnosis and management of acute pulmonary embolism,2019,https://academic.oup.com/eurheartj/article/41/4/543/,,ESC,restricted-cds,hematology_thrombosis,high
+NICE-VTE-001,NICE,NICE NG158 venous thromboembolic diseases diagnosis management thrombophilia testing,2023,https://www.nice.org.uk/guidance/ng158,,NICE,restricted-cds,hematology_thrombosis,high
+ITAC-CAT-001,ITAC,International initiative on thrombosis and cancer ITAC 2022 guidelines,2022,https://www.itaccme.com/cme/initiative,,ITAC,restricted-cds,hematology_thrombosis,high
+ASH-CAT-001,ASH,ASH 2021 guidelines for VTE in patients with cancer,2021,https://ashpublications.org/bloodadvances/article/5/4/927/,,ASH,restricted-cds,hematology_thrombosis,high
+RCOG-VTE-PREG-001,RCOG,RCOG green-top guideline 37a thromboembolic disease in pregnancy management,2015,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,hematology_thrombosis,high
+RCOG-VTE-PREG-002,RCOG,RCOG green-top guideline 37b thrombosis in pregnancy reducing risk,2015,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,hematology_thrombosis,high
+ANZICS-REVERSAL-001,ANZICS,ANZICS clinical practice guideline anticoagulant reversal in critical care,2022,https://www.anzics.com.au/clinical-resources-2/,,ANZICS,restricted-cds,hematology_thrombosis,medium
+BSH-THROMBOPHIL-001,BSH,BSH guideline on investigation and management of heritable thrombophilia,2010,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_thrombosis,medium
+ASH-THROMBOPHIL-001,ASH,ASH choosing wisely thrombophilia testing recommendations,2020,https://ashpublications.org/blood,,ASH,restricted-cds,hematology_thrombosis,medium
+APS-SAPPORO-001,APS,Updated Sapporo classification criteria for antiphospholipid syndrome,2023,https://onlinelibrary.wiley.com/journal/15410528,,APS,restricted-cds,hematology_thrombosis,high
+EULAR-APS-001,EULAR,EULAR recommendations for management of antiphospholipid syndrome in adults,2019,https://www.eular.org/recommendations,,EULAR,restricted-cds,hematology_thrombosis,high
+AHA-CVT-001,AHA,AHA scientific statement diagnosis and management of cerebral venous thrombosis,2024,https://www.ahajournals.org/journal/str,,AHA,restricted-cds,hematology_thrombosis,high
+AASLD-PVT-001,AASLD,AASLD vascular liver disorders splanchnic vein thrombosis,2021,https://www.aasld.org/practice-guidelines,,AASLD,restricted-cds,hematology_thrombosis,high
+ACCP-BRIDGING-001,ACCP,ACCP CHEST perioperative management of antithrombotic therapy bridging,2022,https://journal.chestnet.org/,,ACCP,restricted-cds,hematology_thrombosis,high
+ASH-BRIDGING-001,ASH,ASH 2022 guidelines perioperative management of antithrombotic therapy,2022,https://ashpublications.org/bloodadvances/article/6/17/4812/,,ASH,restricted-cds,hematology_thrombosis,high
+ESMO-AML-001,ESMO,ESMO clinical practice guidelines acute myeloid leukaemia in adult patients,2020,https://www.esmo.org/guidelines/guidelines-by-topic/haematological-malignancies,,ESMO,restricted-cds,hematology_malignancy,high
+ESMO-MDS-001,ESMO,ESMO clinical practice guidelines myelodysplastic syndromes diagnosis and treatment,2021,https://www.esmo.org/guidelines/guidelines-by-topic/haematological-malignancies,,ESMO,restricted-cds,hematology_malignancy,high
+ELN-MDS-001,ELN,ELN 2022 international consensus classification of MDS and risk stratification,2022,https://ashpublications.org/blood,,ELN,restricted-cds,hematology_malignancy,high
+ELN-AML-001,ELN,ELN 2022 recommendations for diagnosis and management of AML in adults,2022,https://ashpublications.org/blood/article/140/12/1345/,,ELN,restricted-cds,hematology_malignancy,high
+ESMO-MPN-001,ESMO,ESMO clinical practice guidelines philadelphia-negative chronic myeloproliferative neoplasms,2024,https://www.esmo.org/guidelines/guidelines-by-topic/haematological-malignancies,,ESMO,restricted-cds,hematology_malignancy,high
+ESMO-CLL-001,ESMO,ESMO clinical practice guidelines chronic lymphocytic leukaemia,2024,https://www.esmo.org/guidelines/guidelines-by-topic/haematological-malignancies,,ESMO,restricted-cds,hematology_malignancy,high
+ESMO-CML-001,ESMO,ESMO clinical practice guidelines chronic myeloid leukaemia,2017,https://www.esmo.org/guidelines/guidelines-by-topic/haematological-malignancies,,ESMO,restricted-cds,hematology_malignancy,high
+ESMO-MM-001,ESMO,ESMO clinical practice guidelines multiple myeloma diagnosis treatment and follow-up,2021,https://www.esmo.org/guidelines/guidelines-by-topic/haematological-malignancies,,ESMO,restricted-cds,hematology_malignancy,high
+ESMO-DLBCL-001,ESMO,ESMO clinical practice guidelines diffuse large B-cell lymphoma,2015,https://www.esmo.org/guidelines/guidelines-by-topic/haematological-malignancies,,ESMO,restricted-cds,hematology_malignancy,high
+ESMO-HL-001,ESMO,ESMO clinical practice guidelines Hodgkin lymphoma,2018,https://www.esmo.org/guidelines/guidelines-by-topic/haematological-malignancies,,ESMO,restricted-cds,hematology_malignancy,high
+CDCN-CASTLE-001,CDCN,CDCN international consensus diagnostic criteria for HHV-8 negative idiopathic multicentric Castleman disease,2017,https://www.castlemannetwork.org/,,CDCN,restricted-cds,hematology_malignancy,medium
+HSF-LCH-001,HSF,Histiocyte Society LCH evaluation and treatment guidelines,2022,https://histiocytesociety.org/Treatment-Plans-Studies,,HSF,restricted-cds,hematology_malignancy,medium
+ECNM-MAST-001,ECNM,ECNM consensus on diagnosis and treatment of mastocytosis,2022,https://www.ecnm.eu/,,ECNM,restricted-cds,hematology_malignancy,high
+AAAAI-MAST-001,AAAAI,AAAAI mastocytosis and mast cell activation syndrome work group consensus,2020,https://www.aaaai.org/practice-resources/practice-tools,,AAAAI,restricted-cds,allergology_pid,high
+ECNM-EOS-001,ECNM,ECNM consensus criteria and classification of eosinophilic disorders,2023,https://www.ecnm.eu/,,ECNM,restricted-cds,hematology_malignancy,medium
+BSH-CCUS-001,BSH,BSH guideline diagnosis and management of clonal cytopenia of undetermined significance CHIP and CCUS,2024,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_malignancy,medium
+EBMT-INDIC-001,EBMT,EBMT indications for haematopoietic cell transplantation in adult and pediatric disease,2022,https://www.ebmt.org/ebmt/news/ebmt-haematopoietic-cell-transplantation-indications,,EBMT,restricted-cds,hematology_transplant,high
+ASTCT-INDIC-001,ASTCT,ASTCT current indications for autologous and allogeneic HSCT,2020,https://www.astct.org/connect/astct-publications,,ASTCT,restricted-cds,hematology_transplant,high
+EBMT-GVHD-001,EBMT,EBMT NIH consensus development project criteria chronic GVHD,2020,https://www.ebmt.org/handbooks-and-guidelines,,EBMT,restricted-cds,hematology_transplant,high
+ASTCT-GVHD-001,ASTCT,ASTCT consensus on graft-versus-host disease prevention,2024,https://www.astct.org/connect/astct-publications,,ASTCT,restricted-cds,hematology_transplant,high
+EBMT-COND-001,EBMT,EBMT recommendations on conditioning regimens classification,2021,https://www.ebmt.org/handbooks-and-guidelines,,EBMT,restricted-cds,hematology_transplant,medium
+EBMT-COMP-001,EBMT,EBMT post-transplant complications and long-term follow-up,2023,https://www.ebmt.org/handbooks-and-guidelines,,EBMT,restricted-cds,hematology_transplant,high
+EBMT-CART-001,EBMT,EBMT EHA recommendations for management of CAR-T cell therapy in adults,2022,https://www.ebmt.org/handbooks-and-guidelines,,EBMT,restricted-cds,hematology_transplant,high
+ASTCT-CRS-001,ASTCT,ASTCT consensus grading for cytokine release syndrome and ICANS,2019,https://www.astct.org/,,ASTCT,restricted-cds,hematology_transplant,high
+FACT-JACIE-001,FACT-JACIE,FACT-JACIE international standards for hematopoietic cellular therapy,2021,https://www.factwebsite.org/standards/,,FACT,restricted-cds,hematology_transplant,medium
+ASH-PED-IDA-001,ASH,ASH pediatric iron deficiency anemia management guidance,2022,https://ashpublications.org/blood,,ASH,restricted-cds,hematology_pediatric,high
+BSH-PED-COAG-001,BSH,BSH guideline on use of recombinant FVIIa and prothrombin complex in pediatrics,2018,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_pediatric,medium
+ISTH-PED-VTE-001,ISTH,ISTH SSC pediatric VTE management,2022,https://www.isth.org/page/Guidance,,ISTH,restricted-cds,hematology_pediatric,high
+WFH-PED-HEMA-001,WFH,WFH treatment guidelines for hemophilia in pediatric patients,2020,https://www1.wfh.org/publications/,,WFH,restricted-cds,hematology_pediatric,high
+ASH-PED-ITP-001,ASH,ASH pediatric ITP management within 2019 ITP guidelines,2019,https://ashpublications.org/bloodadvances/article/3/23/3829/,,ASH,restricted-cds,hematology_pediatric,high
+AABB-RBC-001,AABB,AABB red blood cell transfusion thresholds clinical practice guidelines,2023,https://www.aabb.org/standards-accreditation/clinical-practice-guidelines,,AABB,restricted-cds,hematology_transfusion,high
+AABB-PLT-001,AABB,AABB platelet transfusion clinical practice guidelines,2015,https://www.aabb.org/standards-accreditation/clinical-practice-guidelines,,AABB,restricted-cds,hematology_transfusion,high
+ISBT-PLAS-001,ISBT,ISBT guidelines for plasma cryoprecipitate and pathogen-reduced products,2021,https://www.isbtweb.org/resources/guidelines.html,,ISBT,restricted-cds,hematology_transfusion,medium
+AABB-RXN-001,AABB,AABB transfusion reaction recognition evaluation and treatment,2021,https://www.aabb.org/standards-accreditation/clinical-practice-guidelines,,AABB,restricted-cds,hematology_transfusion,high
+SABM-PBM-001,SABM,SABM administrative and clinical standards for patient blood management,2024,https://sabm.org/publications/,,SABM,restricted-cds,hematology_transfusion,high
+NATA-PBM-001,NATA,NATA international consensus statement on perioperative anemia and blood management,2017,https://www.nataonline.com/np/,,NATA,restricted-cds,hematology_transfusion,medium
+ISBT-CROSS-001,ISBT,ISBT guidelines for blood typing and pretransfusion testing,2022,https://www.isbtweb.org/resources/guidelines.html,,ISBT,restricted-cds,hematology_transfusion,medium
+ASFA-APH-001,ASFA,ASFA 9th edition guidelines on use of therapeutic apheresis in clinical practice,2023,https://onlinelibrary.wiley.com/journal/10982825,,ASFA,restricted-cds,hematology_transfusion,high
+WAO-ANA-001,WAO,WAO anaphylaxis guidance 2020,2020,https://www.worldallergy.org/education-and-programs/education/waoanaphylaxisguidelines,,WAO,restricted-cds,allergology_anaphylaxis,high
+EAACI-ANA-001,EAACI,EAACI guidelines anaphylaxis 2021 update,2021,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_anaphylaxis,high
+AAAAI-ANA-001,AAAAI,AAAAI Joint Task Force anaphylaxis 2023 practice parameter update,2023,https://www.aaaai.org/practice-resources/statements-and-practice-parameters,,AAAAI,restricted-cds,allergology_anaphylaxis,high
+RCEM-ANA-001,RCEM,RCEM best practice guideline anaphylaxis in emergency departments,2022,https://rcem.ac.uk/clinical-guidelines/,,RCEM,restricted-cds,allergology_anaphylaxis,high
+BSACI-ANA-001,BSACI,BSACI guideline emergency treatment of anaphylactic reactions,2021,https://www.bsaci.org/guidelines/,,BSACI,restricted-cds,allergology_anaphylaxis,high
+EAACI-FOOD-001,EAACI,EAACI guidelines food allergy diagnosis,2023,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_food,high
+EAACI-FOOD-002,EAACI,EAACI guidelines IgE-mediated food allergy management,2024,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_food,high
+AAAAI-FOOD-001,AAAAI,AAAAI Joint Task Force food allergy practice parameter,2023,https://www.aaaai.org/practice-resources/statements-and-practice-parameters,,AAAAI,restricted-cds,allergology_food,high
+BSACI-FOOD-001,BSACI,BSACI guideline diagnosis and management of food allergy in children and adults,2021,https://www.bsaci.org/guidelines/,,BSACI,restricted-cds,allergology_food,high
+NICE-FOOD-001,NICE,NICE CG116 food allergy in under 19s assessment and diagnosis,2018,https://www.nice.org.uk/guidance/cg116,,NICE,restricted-cds,allergology_food,high
+DRACMA-CMA-001,DRACMA,DRACMA WAO diagnosis and rationale for action against cow milk allergy,2022,https://www.worldallergy.org/dracma,,DRACMA,restricted-cds,allergology_food,high
+ESPGHAN-CMA-001,ESPGHAN,ESPGHAN diagnostic approach and management of cow milk allergy in infants and children,2023,https://www.espghan.org/knowledge-center/publications,,ESPGHAN,restricted-cds,allergology_food,high
+EAACI-EGG-001,EAACI,EAACI position paper egg allergy,2020,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_food,medium
+EAACI-PEANUT-001,EAACI,EAACI peanut allergy diagnosis and management,2022,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_food,high
+NIAID-PEANUT-001,NIAID,NIAID addendum guidelines for prevention of peanut allergy in infants,2017,https://www.niaid.nih.gov/diseases-conditions/peanut-allergy-prevention,,NIAID,restricted-cds,allergology_food,high
+BSACI-LATEX-001,BSACI,BSACI guideline diagnosis and management of latex allergy,2014,https://www.bsaci.org/guidelines/,,BSACI,restricted-cds,allergology_drug,medium
+AAAAI-LATEX-001,AAAAI,AAAAI Joint Task Force latex allergy practice parameter,2014,https://www.aaaai.org/practice-resources/statements-and-practice-parameters,,AAAAI,restricted-cds,allergology_drug,medium
+EAACI-VENOM-001,EAACI,EAACI guidelines on allergen immunotherapy hymenoptera venom allergy,2018,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_immunotherapy,high
+AAAAI-VENOM-001,AAAAI,AAAAI Joint Task Force stinging insect hypersensitivity practice parameter,2017,https://www.aaaai.org/practice-resources/statements-and-practice-parameters,,AAAAI,restricted-cds,allergology_immunotherapy,high
+ARIA-RHIN-001,ARIA,ARIA 2024 care pathways for allergic rhinitis,2024,https://aria-guidelines.eu/,,ARIA,restricted-cds,allergology_food,high
+EAACI-RHIN-001,EAACI,EAACI guideline on allergen immunotherapy allergic rhinitis,2018,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_immunotherapy,high
+EAACI-AD-001,EAACI,EAACI ETFAD position paper management of atopic dermatitis,2022,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_dermatologic,high
+BAD-AD-001,BAD,BAD guidelines for management of atopic eczema in adults,2023,https://www.bad.org.uk/clinical-services/guidelines,,BAD,restricted-cds,allergology_dermatologic,high
+AAD-AD-001,AAD,AAD guidelines of care for management of atopic dermatitis,2024,https://www.aad.org/member/clinical-quality/guidelines,,AAD,restricted-cds,allergology_dermatologic,high
+EAACI-AIT-001,EAACI,EAACI guidelines on allergen immunotherapy general principles,2022,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_immunotherapy,high
+AAAAI-AIT-001,AAAAI,AAAAI Joint Task Force allergen immunotherapy practice parameter update,2024,https://www.aaaai.org/practice-resources/statements-and-practice-parameters,,AAAAI,restricted-cds,allergology_immunotherapy,high
+WAO-AIT-001,WAO,WAO position paper sublingual immunotherapy for allergic respiratory diseases,2024,https://www.worldallergy.org/,,WAO,restricted-cds,allergology_immunotherapy,high
+EAACI-DRUG-001,EAACI,EAACI position paper drug hypersensitivity general management,2020,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_drug,high
+AAAAI-DRUG-001,AAAAI,AAAAI Joint Task Force drug allergy practice parameter update,2022,https://www.aaaai.org/practice-resources/statements-and-practice-parameters,,AAAAI,restricted-cds,allergology_drug,high
+EAACI-BLAC-001,EAACI,EAACI position paper diagnosis and management of beta-lactam hypersensitivity,2020,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_drug,high
+AAAAI-PEN-001,AAAAI,AAAAI penicillin allergy evaluation guidance for clinicians,2022,https://www.aaaai.org/practice-resources/statements-and-practice-parameters,,AAAAI,restricted-cds,allergology_drug,high
+EAACI-NSAID-001,EAACI,EAACI position paper NSAID hypersensitivity diagnosis,2019,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_drug,high
+ESUR-CONTRAST-001,ESUR,ESUR guidelines on contrast media hypersensitivity reactions,2024,https://www.esur.org/guidelines/,,ESUR,restricted-cds,allergology_drug,high
+ACR-CONTRAST-001,ACR,ACR manual on contrast media adverse reactions including hypersensitivity,2024,https://www.acr.org/Clinical-Resources/Contrast-Manual,,ACR,restricted-cds,allergology_drug,high
+BSACI-PERI-001,BSACI,BSACI suspected perioperative anaphylaxis investigation and management,2017,https://www.bsaci.org/guidelines/,,BSACI,restricted-cds,allergology_drug,high
+EAACI-DPT-001,EAACI,EAACI guideline drug provocation testing general considerations,2019,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_drug,medium
+HAEi-HAE-001,HAEi,HAEi WAO global guideline for hereditary angioedema,2021,https://www.haei.org/our-work/medical-resources/,,HAEi,restricted-cds,allergology_pid,high
+WAO-HAE-001,WAO,WAO EAACI guideline for management of hereditary angioedema,2021,https://www.worldallergy.org/,,WAO,restricted-cds,allergology_pid,high
+EAACI-URTI-001,EAACI,EAACI GA2LEN EDF WAO guideline for definition classification and diagnosis of urticaria,2021,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_dermatologic,high
+EAACI-URTI-002,EAACI,EAACI GA2LEN EDF WAO guideline for management of chronic urticaria,2021,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_dermatologic,high
+BSACI-URTI-001,BSACI,BSACI guideline for management of chronic urticaria and angioedema,2021,https://www.bsaci.org/guidelines/,,BSACI,restricted-cds,allergology_dermatologic,high
+NICE-URTI-001,NICE,NICE CKS urticaria,2024,https://cks.nice.org.uk/topics/urticaria/,,NICE,restricted-cds,allergology_dermatologic,medium
+BAD-URTI-001,BAD,BAD guidelines for management of chronic urticaria,2022,https://www.bad.org.uk/clinical-services/guidelines,,BAD,restricted-cds,allergology_dermatologic,medium
+EAACI-EOE-001,EAACI,EAACI clinical practice guidelines for eosinophilic esophagitis,2024,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_food,high
+ECNM-MCAS-001,ECNM,ECNM AIM diagnostic criteria and consensus on mast cell activation syndrome,2019,https://www.ecnm.eu/,,ECNM,restricted-cds,allergology_pid,high
+EAACI-DRESS-001,EAACI,EAACI position paper severe cutaneous adverse reactions DRESS SJS TEN,2022,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_drug,high
+IUIS-PID-001,IUIS,IUIS 2022 update phenotypic classification of human inborn errors of immunity,2022,https://link.springer.com/article/10.1007/s10875-022-01289-3,,IUIS,restricted-cds,allergology_pid,high
+ESID-CRIT-001,ESID,ESID registry working definitions for clinical diagnosis of inborn errors of immunity,2019,https://esid.org/Working-Parties/Registry-Working-Party/Diagnosis-criteria,,ESID,restricted-cds,allergology_pid,high
+USIDNET-CVID-001,USIDNET,USIDNET consensus on diagnosis and management of CVID,2020,https://usidnet.org/clinical-resources/,,USIDNET,restricted-cds,allergology_pid,high
+ESID-CVID-001,ESID,ESID guidelines for diagnosis and treatment of common variable immunodeficiency,2023,https://esid.org/Working-Parties/Clinical-Working-Party,,ESID,restricted-cds,allergology_pid,high
+USIDNET-XLA-001,USIDNET,USIDNET consensus on management of X-linked agammaglobulinemia,2019,https://usidnet.org/clinical-resources/,,USIDNET,restricted-cds,allergology_pid,medium
+ESID-SCID-001,ESID,ESID newborn screening and management of severe combined immunodeficiency,2022,https://esid.org/Working-Parties/Clinical-Working-Party,,ESID,restricted-cds,allergology_pid,high
+USIDNET-CGD-001,USIDNET,USIDNET consensus on chronic granulomatous disease management,2018,https://usidnet.org/clinical-resources/,,USIDNET,restricted-cds,allergology_pid,medium
+ESID-IGAD-001,ESID,ESID position paper selective IgA deficiency,2020,https://esid.org/Working-Parties/Clinical-Working-Party,,ESID,restricted-cds,allergology_pid,medium
+USIDNET-HIES-001,USIDNET,USIDNET consensus on hyper-IgE syndrome,2018,https://usidnet.org/clinical-resources/,,USIDNET,restricted-cds,allergology_pid,low
+ESID-DG-001,ESID,ESID 22q11.2 deletion syndrome immunology consensus,2023,https://esid.org/Working-Parties/Clinical-Working-Party,,ESID,restricted-cds,allergology_pid,medium
+ACMG-SCID-001,ACMG,ACMG newborn screening for SCID position statement,2017,https://www.acmg.net/ACMG/Medical-Genetics-Practice-Resources/Practice-Guidelines.aspx,,ACMG,restricted-cds,allergology_pid,high
+USIDNET-IG-001,USIDNET,USIDNET consensus immunoglobulin replacement therapy in primary immunodeficiency,2022,https://usidnet.org/clinical-resources/,,USIDNET,restricted-cds,allergology_pid,high
+ESID-IG-001,ESID,ESID guideline on immunoglobulin replacement therapy,2023,https://esid.org/Working-Parties/Clinical-Working-Party,,ESID,restricted-cds,allergology_pid,high
+USIDNET-SAD-001,USIDNET,USIDNET consensus on specific antibody deficiency diagnosis,2020,https://usidnet.org/clinical-resources/,,USIDNET,restricted-cds,allergology_pid,medium
+USIDNET-COMP-001,USIDNET,USIDNET consensus complement deficiencies diagnosis and management,2018,https://usidnet.org/clinical-resources/,,USIDNET,restricted-cds,allergology_pid,medium
+AACT-DECON-001,AACT,AACT EAPCCT position paper single-dose activated charcoal,2005,https://www.clintox.org/position-statements,,AACT,restricted-cds,toxicology_acute,high
+AACT-DECON-002,AACT,AACT EAPCCT position paper gastric lavage,2013,https://www.clintox.org/position-statements,,AACT,restricted-cds,toxicology_acute,high
+AACT-DECON-003,AACT,AACT EAPCCT position paper whole bowel irrigation,2015,https://www.clintox.org/position-statements,,AACT,restricted-cds,toxicology_acute,high
+AACT-DECON-004,AACT,AACT EAPCCT position paper multiple-dose activated charcoal,1999,https://www.clintox.org/position-statements,,AACT,restricted-cds,toxicology_acute,medium
+AACT-DECON-005,AACT,AACT EAPCCT position paper urinary alkalinization,2004,https://www.clintox.org/position-statements,,AACT,restricted-cds,toxicology_acute,medium
+ACMT-INIT-001,ACMT,ACMT position statement initial approach to the poisoned patient,2023,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_acute,high
+AAPCC-001,AAPCC,AAPCC NPDS annual report and clinical practice guidance,2023,https://www.aapcc.org/national-poison-data-system,,AAPCC,restricted-cds,toxicology_acute,medium
+EAPCCT-CONS-001,EAPCCT,EAPCCT consensus on poisons centre operating standards,2019,https://www.eapcct.org/,,EAPCCT,restricted-cds,toxicology_acute,medium
+EXTRIP-METHANOL-001,EXTRIP,EXTRIP recommendations for extracorporeal treatment for methanol poisoning,2015,https://www.extrip-workgroup.org/,,EXTRIP,restricted-cds,toxicology_specific,high
+EXTRIP-LITHIUM-001,EXTRIP,EXTRIP recommendations for extracorporeal treatment of lithium poisoning,2015,https://www.extrip-workgroup.org/,,EXTRIP,restricted-cds,toxicology_specific,high
+EXTRIP-SAL-001,EXTRIP,EXTRIP recommendations for extracorporeal treatment of salicylate poisoning,2015,https://www.extrip-workgroup.org/,,EXTRIP,restricted-cds,toxicology_specific,high
+EXTRIP-EG-001,EXTRIP,EXTRIP recommendations for extracorporeal treatment of ethylene glycol poisoning,2017,https://www.extrip-workgroup.org/,,EXTRIP,restricted-cds,toxicology_specific,high
+EXTRIP-VPA-001,EXTRIP,EXTRIP recommendations for extracorporeal treatment for valproic acid poisoning,2015,https://www.extrip-workgroup.org/,,EXTRIP,restricted-cds,toxicology_specific,high
+EXTRIP-METFORMIN-001,EXTRIP,EXTRIP recommendations for extracorporeal treatment of metformin poisoning,2015,https://www.extrip-workgroup.org/,,EXTRIP,restricted-cds,toxicology_specific,high
+EXTRIP-CARBAMAZ-001,EXTRIP,EXTRIP recommendations for extracorporeal treatment of carbamazepine poisoning,2014,https://www.extrip-workgroup.org/,,EXTRIP,restricted-cds,toxicology_specific,medium
+EXTRIP-PHENYTOIN-001,EXTRIP,EXTRIP recommendations for extracorporeal treatment of phenytoin poisoning,2016,https://www.extrip-workgroup.org/,,EXTRIP,restricted-cds,toxicology_specific,medium
+ACMT-APAP-001,ACMT,ACMT position statement IV N-acetylcysteine for acetaminophen poisoning,2021,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,high
+AASLD-APAP-001,AASLD,AASLD acute liver failure including acetaminophen toxicity guidance,2023,https://www.aasld.org/practice-guidelines,,AASLD,restricted-cds,toxicology_specific,high
+NPIS-APAP-001,NPIS,NPIS UK national poisons information service paracetamol overdose guideline,2024,https://www.npis.org/,,NPIS,restricted-cds,toxicology_specific,high
+ACMT-SAL-001,ACMT,ACMT position statement guidance on salicylate poisoning,2024,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,high
+ACMT-METHANOL-001,ACMT,ACMT position statement on management of toxic alcohol poisoning fomepizole,2023,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,high
+ACMT-TCA-001,ACMT,ACMT position statement use of sodium bicarbonate in tricyclic antidepressant poisoning,2017,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,high
+ACMT-CCB-001,ACMT,ACMT consensus on management of severe calcium channel blocker poisoning,2017,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,high
+ACMT-BB-001,ACMT,ACMT recommendations for management of beta-blocker overdose,2017,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,high
+ACMT-DIG-001,ACMT,ACMT position statement digoxin immune fab use in cardiac glycoside poisoning,2021,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,high
+ESC-DIG-001,ESC,ESC heart failure guidelines digoxin therapy and toxicity,2021,https://academic.oup.com/eurheartj,,ESC,restricted-cds,toxicology_specific,medium
+ACMT-LITH-001,ACMT,ACMT consensus on management of acute and chronic lithium toxicity,2020,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,high
+ACMT-WARF-001,ACMT,ACMT consensus on warfarin and direct oral anticoagulant overdose,2021,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,high
+ACMT-BENZO-001,ACMT,ACMT position statement on flumazenil for benzodiazepine overdose,2018,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,medium
+CDC-OPIOID-001,CDC,CDC clinical practice guideline for prescribing opioids for pain,2022,https://www.cdc.gov/mmwr/volumes/71/rr/rr7103a1.htm,,CDC,allowed,toxicology_substance_use,high
+ACMT-OPIOID-001,ACMT,ACMT position statement on naloxone use in opioid poisoning,2022,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_substance_use,high
+NIDA-OPIOID-001,NIH-NIDA,NIDA principles of drug addiction treatment opioid use disorder,2024,https://nida.nih.gov/publications/principles-drug-addiction-treatment,,NIDA,allowed,toxicology_substance_use,high
+ASAM-OUD-001,ASAM,ASAM national practice guideline for treatment of opioid use disorder,2020,https://www.asam.org/quality-care/clinical-guidelines/national-practice-guideline,,ASAM,restricted-cds,toxicology_substance_use,high
+ACMT-COCAINE-001,ACMT,ACMT clinical guidance management of cocaine and amphetamine toxicity,2022,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,high
+ASAM-AWS-001,ASAM,ASAM clinical practice guideline on alcohol withdrawal management,2020,https://www.asam.org/quality-care/clinical-guidelines,,ASAM,restricted-cds,toxicology_substance_use,high
+AAFP-AWS-001,AAFP,AAFP outpatient management of alcohol withdrawal syndrome,2021,https://www.aafp.org/family-physician/patient-care/clinical-recommendations.html,,AAFP,restricted-cds,toxicology_substance_use,high
+ACMT-CANN-001,ACMT,ACMT position statement clinical effects of cannabis intoxication,2020,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,medium
+ACMT-KET-001,ACMT,ACMT position statement on use of ketamine and dissociative drug toxicity,2021,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_specific,medium
+CDC-LEAD-001,CDC,CDC blood lead reference value and management of lead exposure children,2021,https://www.cdc.gov/nceh/lead/,,CDC,allowed,toxicology_metals,high
+AAP-LEAD-001,AAP,AAP policy statement prevention of childhood lead toxicity,2016,https://publications.aap.org/pediatrics/article/138/1/e20161493/,,AAP,restricted-cds,toxicology_metals,high
+ACMT-LEAD-001,ACMT,ACMT position statement chelation therapy for adult lead poisoning,2018,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_metals,high
+CDC-MERC-001,CDC,CDC ATSDR mercury exposure assessment and clinical management,2022,https://www.atsdr.cdc.gov/toxprofiles/tp.asp?id=115&tid=24,,CDC,allowed,toxicology_metals,medium
+ACMT-MERC-001,ACMT,ACMT position statement on chelation for mercury poisoning,2017,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_metals,medium
+CDC-AS-001,CDC,CDC ATSDR arsenic exposure clinical guidance,2022,https://www.atsdr.cdc.gov/toxprofiles/tp.asp?id=22&tid=3,,CDC,allowed,toxicology_metals,medium
+ACMT-AS-001,ACMT,ACMT position statement arsenic poisoning chelation,2018,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_metals,medium
+CDC-CD-001,CDC,CDC ATSDR cadmium exposure assessment guidance,2021,https://www.atsdr.cdc.gov/toxprofiles/tp.asp?id=48&tid=15,,CDC,allowed,toxicology_metals,low
+ACMT-CO-001,ACMT,ACMT position statement on hyperbaric oxygen for carbon monoxide poisoning,2017,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_chemicals,high
+UHMS-CO-001,UHMS,UHMS hyperbaric oxygen therapy indications carbon monoxide poisoning,2023,https://www.uhms.org/resources/hbo-indications.html,,UHMS,restricted-cds,toxicology_chemicals,high
+ACMT-H2S-001,ACMT,ACMT position statement on hydrogen sulfide poisoning management,2019,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_chemicals,medium
+ACMT-CN-001,ACMT,ACMT consensus on cyanide poisoning antidote use hydroxocobalamin,2018,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_chemicals,high
+WHO-OP-001,WHO,WHO guidelines for the management of acute pesticide poisoning,2020,https://www.who.int/publications/i/item/9789240010260,,WHO,allowed,toxicology_chemicals,high
+ACMT-OP-001,ACMT,ACMT position statement organophosphate poisoning atropine and pralidoxime use,2018,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_chemicals,high
+ACMT-CAUST-001,ACMT,ACMT clinical guidance on caustic ingestion management,2021,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_chemicals,high
+ACMT-HF-001,ACMT,ACMT position statement on hydrofluoric acid exposure calcium therapy,2019,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_chemicals,high
+WHO-SNAKE-001,WHO,WHO guidelines for management of snakebites in South-East Asia and Africa,2017,https://www.who.int/publications/i/item/9789290225300,,WHO,allowed,toxicology_envenomation,high
+ACMT-SNAKE-001,ACMT,ACMT clinical practice statement on management of pit viper envenomation,2020,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_envenomation,high
+ACMT-MARINE-001,ACMT,ACMT position statement management of marine envenomations,2019,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_envenomation,medium
+WHO-MARINE-001,WHO,WHO guidance on marine envenomation tropical regions,2018,https://www.who.int/publications/,,WHO,allowed,toxicology_envenomation,medium
+ACMT-SPIDER-001,ACMT,ACMT position statement on management of black widow and brown recluse spider bites,2020,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_envenomation,medium
+WHO-SCORPION-001,WHO,WHO regional guidance on scorpion envenomation management,2018,https://www.who.int/publications/,,WHO,allowed,toxicology_envenomation,medium
+ACMT-MUSH-001,ACMT,ACMT consensus on mushroom poisoning amatoxin management,2021,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_envenomation,medium
+NAMA-MUSH-001,NAMA,NAMA mushroom poisoning syndromes clinical guidance,2022,https://namyco.org/toxicology/,,NAMA,restricted-cds,toxicology_envenomation,medium
+ACMT-PLANT-001,ACMT,ACMT position statement on plant toxicity exposures,2019,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_envenomation,low
+SAMHSA-MAT-001,SAMHSA,SAMHSA TIP 63 medications for opioid use disorder,2021,https://store.samhsa.gov/product/tip-63-medications-opioid-use-disorder/,,SAMHSA,allowed,toxicology_substance_use,high
+ASAM-BUP-001,ASAM,ASAM buprenorphine clinical practice guideline,2024,https://www.asam.org/quality-care/clinical-guidelines,,ASAM,restricted-cds,toxicology_substance_use,high
+ASAM-METH-001,ASAM,ASAM methadone induction and dosing clinical recommendations,2024,https://www.asam.org/quality-care/clinical-guidelines,,ASAM,restricted-cds,toxicology_substance_use,high
+USPSTF-TOB-001,USPSTF,USPSTF recommendation tobacco smoking cessation in adults,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/tobacco-use-in-adults-and-pregnant-women-counseling-and-interventions,,USPSTF,allowed,toxicology_substance_use,high
+SCCM-GLU-001,SCCM,SCCM guidelines for glycemic control in critically ill adults,2024,https://www.sccm.org/Clinical-Resources/Guidelines,,SCCM,restricted-cds,endocrinology_diabetes,high
+ENDO-PED-DM-001,ENDO-Society,Endocrine Society inpatient pediatric hyperglycemia consensus,2022,https://academic.oup.com/jcem,,ENDO,restricted-cds,endocrinology_pediatric,medium
+BDA-DIET-001,BDA,BDA dietetic guidelines for management of hypoglycemia in diabetes,2022,https://www.bda.uk.com/practice-and-education/professional-guidance.html,,BDA,restricted-cds,endocrinology_diabetes,medium
+ESPEN-DM-001,ESPEN,ESPEN guideline clinical nutrition in diabetes,2023,https://www.espen.org/guidelines-home/espen-guidelines,,ESPEN,restricted-cds,endocrinology_diabetes,high
+EAACI-INSECT-001,EAACI,EAACI insect venom hypersensitivity diagnosis,2018,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_anaphylaxis,medium
+NICE-ANA-001,NICE,NICE CG134 anaphylaxis assessment and referral,2020,https://www.nice.org.uk/guidance/cg134,,NICE,restricted-cds,allergology_anaphylaxis,high
+GINA-ALL-001,GINA,GINA strategy report severe allergic asthma management overlap,2024,https://ginasthma.org/reports/,,GINA,restricted-cds,allergology_food,medium
+ATA-PEDHYPER-001,ATA,ATA management of hyperthyroidism in pediatric population guidelines,2024,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,endocrinology_pediatric,medium
+ENDO-LIPIDS-001,ENDO-Society,Endocrine Society lipid management to reduce ASCVD risk in patients with endocrinopathies,2020,https://academic.oup.com/jcem/article/105/12/3613/,,ENDO,restricted-cds,endocrinology_obesity,high
+NICE-LIPID-001,NICE,NICE NG238 cardiovascular disease risk assessment lipid modification,2023,https://www.nice.org.uk/guidance/ng238,,NICE,restricted-cds,endocrinology_obesity,high
+AABB-MTPROT-001,AABB,AABB consensus conference massive transfusion protocol implementation,2019,https://www.aabb.org/standards-accreditation/clinical-practice-guidelines,,AABB,restricted-cds,hematology_transfusion,high
+ISTH-PPHCOAG-001,ISTH,ISTH SSC postpartum hemorrhage coagulopathy management consensus,2022,https://www.isth.org/page/Guidance,,ISTH,restricted-cds,hematology_bleeding,high
+EBMT-LATEFOLLOW-001,EBMT,EBMT recommendations on long-term follow-up after stem cell transplantation,2021,https://www.ebmt.org/handbooks-and-guidelines,,EBMT,restricted-cds,hematology_transplant,medium
+ENDO-PEDLDD-001,ENDO-Society,Endocrine Society lipid disorders in childhood evaluation and management,2017,https://academic.oup.com/jcem,,ENDO,restricted-cds,endocrinology_pediatric,medium
+ENDO-PED-OBES-001,ENDO-Society,Endocrine Society pediatric obesity assessment treatment and prevention,2017,https://academic.oup.com/jcem/article/102/3/709/,,ENDO,restricted-cds,endocrinology_pediatric,high
+ASTCT-FUNGAL-001,ASTCT,ASTCT consensus on antifungal prophylaxis in HSCT recipients,2020,https://www.astct.org/connect/astct-publications,,ASTCT,restricted-cds,hematology_transplant,medium
+EBMT-INFECT-001,EBMT,EBMT recommendations on prevention and management of infections after HSCT,2022,https://www.ebmt.org/handbooks-and-guidelines,,EBMT,restricted-cds,hematology_transplant,high
+NEHRP-NBS-001,NEHRP,NEHRP newborn screening for severe combined immunodeficiency programmatic guidance,2023,https://newbornscreening.hrsa.gov/,,NEHRP,allowed,allergology_pid,medium
+EAACI-LATEX-001,EAACI,EAACI position paper natural rubber latex allergy,2022,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_drug,low
+ISTH-PEDIATRIC-001,ISTH,ISTH SSC pediatric and neonatal coagulation consensus statements,2021,https://www.isth.org/page/Guidance,,ISTH,restricted-cds,hematology_pediatric,medium
+ASH-PED-VTE-001,ASH,ASH 2018 guidelines for management of pediatric VTE,2018,https://ashpublications.org/bloodadvances/article/2/22/3292/,,ASH,restricted-cds,hematology_pediatric,medium
+NAMS-OSTEO-001,NAMS,NAMS position statement osteoporosis management,2021,https://www.menopause.org/professional-resources/position-statements,,NAMS,restricted-cds,endocrinology_bone,medium
+ENDO-FRACTURE-001,ENDO-Society,Endocrine Society pharmacological management of osteoporosis in postmenopausal women,2020,https://academic.oup.com/jcem/article/105/3/587/,,ENDO,restricted-cds,endocrinology_bone,high
+AACE-LIPID-001,AACE,AACE clinical practice guideline lipid disorders for prevention of cardiovascular disease,2017,https://pro.aace.com/clinical-guidance/,,AACE,restricted-cds,endocrinology_obesity,high
+AACE-DM-001,AACE,AACE comprehensive type 2 diabetes management algorithm,2024,https://pro.aace.com/clinical-guidance/,,AACE,restricted-cds,endocrinology_diabetes,high
+ENDO-DRUG-DM-001,ENDO-Society,Endocrine Society pharmacologic management of glucocorticoid-induced diabetes,2024,https://academic.oup.com/jcem,,ENDO,restricted-cds,endocrinology_diabetes,medium
+ATS-CRIT-DM-001,ATS,ATS critical care society management of hyperglycemia in critically ill patients,2022,https://www.thoracic.org/statements/,,ATS,restricted-cds,endocrinology_diabetes,medium
+ENDO-T3C-001,ENDO-Society,Endocrine Society position on diabetes secondary to pancreatic disease type 3c,2023,https://academic.oup.com/jcem,,ENDO,restricted-cds,endocrinology_diabetes,medium
+ENDO-ELDERLY-001,ENDO-Society,Endocrine Society treatment of diabetes in older adults,2019,https://academic.oup.com/jcem/article/104/5/1520/,,ENDO,restricted-cds,endocrinology_diabetes,medium
+ISPAD-ADOL-001,ISPAD,ISPAD 2022 adolescent transition from pediatric to adult diabetes care,2022,https://onlinelibrary.wiley.com/journal/13995448,,ISPAD,restricted-cds,endocrinology_pediatric,medium
+ENDO-INSRES-001,ENDO-Society,Endocrine Society clinical evaluation of insulin resistance syndromes,2021,https://academic.oup.com/jcem,,ENDO,restricted-cds,endocrinology_obesity,low
+ENDO-EMPTY-001,ENDO-Society,Endocrine Society approach to incidental empty sella syndrome,2022,https://academic.oup.com/jcem,,ENDO,restricted-cds,endocrinology_pituitary,low
+ATA-DRUG-THY-001,ATA,ATA position statement on drug-induced thyroid dysfunction,2020,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,endocrinology_thyroid,medium
+ENDO-AAES-MEN2-001,ENDO-Society,Endocrine Society MEN2 medical management consensus,2015,https://academic.oup.com/jcem,,ENDO,restricted-cds,endocrinology_pituitary,medium
+ATA-MEN2-001,ATA,ATA management of MEN2 and medullary thyroid cancer,2015,https://www.thyroid.org/professionals/ata-professional-guidelines/,,ATA,restricted-cds,endocrinology_thyroid,high
+SE-EMERGENCY-001,SE,Society for Endocrinology emergency management of adrenal crisis,2023,https://www.endocrinology.org/clinical-practice/clinical-guidance/,,SE,restricted-cds,endocrinology_adrenal,high
+SE-DI-001,SE,Society for Endocrinology emergency management hyponatremia and DI,2023,https://www.endocrinology.org/clinical-practice/clinical-guidance/,,SE,restricted-cds,endocrinology_pituitary,medium
+EAACI-SLIT-001,EAACI,EAACI position paper sublingual immunotherapy current standards,2023,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_immunotherapy,high
+NICE-IMMUNO-001,NICE,NICE evidence summary allergen immunotherapy for allergic rhinitis,2023,https://www.nice.org.uk/guidance,,NICE,restricted-cds,allergology_immunotherapy,medium
+ASH-ANEM-CHRONIC-001,ASH,ASH guidance management of anemia of chronic inflammation,2023,https://ashpublications.org/blood,,ASH,restricted-cds,hematology_anemia,high
+BSH-ACD-001,BSH,BSH guideline diagnosis and management of anemia of chronic disease,2020,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,medium
+KDIGO-ANEM-001,KDIGO,KDIGO clinical practice guideline anemia in CKD,2012,https://kdigo.org/guidelines/anemia-in-ckd/,,KDIGO,restricted-cds,hematology_anemia,high
+BSH-EVAL-001,BSH,BSH guideline evaluation and management of unexplained anemia,2021,https://b-s-h.org.uk/guidelines/,,BSH,restricted-cds,hematology_anemia,medium
+ESC-DOAC-001,ESC,ESC EHRA practical guide on use of NOACs in atrial fibrillation,2021,https://academic.oup.com/europace,,ESC,restricted-cds,hematology_thrombosis,high
+EUGOGO-MILD-001,EUGOGO,EUGOGO management of mild Graves orbitopathy consensus,2008,https://www.eugogo.eu/guidelines/,,EUGOGO,restricted-cds,endocrinology_thyroid,medium
+ENDO-HHC-001,ENDO-Society,Endocrine Society hereditary hemochromatosis evaluation,2023,https://academic.oup.com/jcem,,ENDO,restricted-cds,endocrinology_obesity,low
+WAO-FOOD-001,WAO,WAO white book on food allergy management,2020,https://www.worldallergy.org/wao-white-book-on-allergy,,WAO,restricted-cds,allergology_food,medium
+EAACI-COW-001,EAACI,EAACI guideline diagnosis and management of cow milk allergy,2023,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_food,high
+NICE-COW-001,NICE,NICE CKS cow milk allergy infants and children,2023,https://cks.nice.org.uk/topics/cows-milk-allergy-in-children/,,NICE,restricted-cds,allergology_food,medium
+ACMT-NICOTINE-001,ACMT,ACMT position statement on nicotine and e-cigarette toxicity,2020,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_substance_use,medium
+ACMT-RADIATION-001,ACMT,ACMT consensus on radiation exposure and acute radiation syndrome,2019,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_chemicals,medium
+WHO-CHEM-001,WHO,WHO IPCS clinical management of acute chemical incidents,2021,https://www.who.int/publications/i/item/9789240026445,,WHO,allowed,toxicology_chemicals,medium
+ACMT-WITHDRAW-001,ACMT,ACMT position statement management of severe alcohol withdrawal in ICU,2021,https://www.acmt.net/cgi/page.cgi/Position_Statements,,ACMT,restricted-cds,toxicology_substance_use,medium
+ENDO-OSTEO-MEN-001,ENDO-Society,Endocrine Society osteoporosis in men diagnosis and treatment,2012,https://academic.oup.com/jcem/article/97/6/1802/,,ENDO,restricted-cds,endocrinology_bone,medium
+IOF-OSTEO-001,IOF,IOF ESCEO European guidance for diagnosis and management of osteoporosis in postmenopausal women,2019,https://www.osteoporosis.foundation/health-professionals/about-osteoporosis,,IOF,restricted-cds,endocrinology_bone,high
+PES-PUB-001,PES,Pediatric Endocrine Society evaluation and management of pubertal disorders,2021,https://www.pedsendo.org/clinical-resources/clinical-practice-guidelines/,,PES,restricted-cds,endocrinology_pediatric,medium
+ENDO-PRECOC-001,ENDO-Society,Endocrine Society management of central precocious puberty,2009,https://academic.oup.com/jcem/article/94/9/3203/,,ENDO,restricted-cds,endocrinology_pediatric,medium
+ENDO-DELAYED-001,ENDO-Society,Endocrine Society evaluation of delayed puberty,2017,https://academic.oup.com/jcem,,ENDO,restricted-cds,endocrinology_pediatric,low
+NIDA-CRITERIA-001,NIH-NIDA,NIDA standard criteria for substance use disorders DSM-5 in clinical practice,2023,https://nida.nih.gov/publications,,NIDA,allowed,toxicology_substance_use,medium
+ASAM-AUDC-001,ASAM,ASAM clinical practice guideline alcohol use disorder pharmacotherapy,2024,https://www.asam.org/quality-care/clinical-guidelines,,ASAM,restricted-cds,toxicology_substance_use,high
+WAO-ASTHMA-001,WAO,WAO position paper on severe asthma allergic phenotype management,2023,https://www.worldallergy.org/,,WAO,restricted-cds,allergology_food,medium
+EAACI-OAS-001,EAACI,EAACI position paper oral allergy syndrome diagnosis and management,2023,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_food,medium
+AABB-NEONATE-001,AABB,AABB neonatal and pediatric transfusion guidelines,2022,https://www.aabb.org/standards-accreditation/clinical-practice-guidelines,,AABB,restricted-cds,hematology_pediatric,high
+ASH-NEONATE-001,ASH,ASH neonatal hematology consensus guidance,2022,https://ashpublications.org/blood,,ASH,restricted-cds,hematology_pediatric,medium
+EAACI-IDIO-001,EAACI,EAACI position paper idiopathic anaphylaxis evaluation,2022,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_anaphylaxis,medium
+ENDO-DM-CV-001,ENDO-Society,Endocrine Society primary prevention of ASCVD diabetes mellitus,2020,https://academic.oup.com/jcem,,ENDO,restricted-cds,endocrinology_diabetes,high
+NICE-OUD-001,NICE,NICE NG215 opioid use disorder treatment with medications,2023,https://www.nice.org.uk/guidance,,NICE,restricted-cds,toxicology_substance_use,high
+NICE-AUD-001,NICE,NICE CG115 alcohol use disorders diagnosis assessment and management,2024,https://www.nice.org.uk/guidance/cg115,,NICE,restricted-cds,toxicology_substance_use,high
+ASH-MM-SUPP-001,ASH,ASH supportive care recommendations in multiple myeloma and hematologic malignancy,2022,https://ashpublications.org/bloodadvances,,ASH,restricted-cds,hematology_malignancy,medium
+EAACI-INFECT-DRUG-001,EAACI,EAACI position paper drug allergy in infectious diseases,2024,https://www.eaaci.org/resources/guidelines.html,,EAACI,restricted-cds,allergology_drug,medium
+WAO-IDIO-001,WAO,WAO position on idiopathic urticaria management,2022,https://www.worldallergy.org/,,WAO,restricted-cds,allergology_dermatologic,medium
+ESHRE-FERT-001,ESHRE,ESHRE guideline female fertility preservation,2020,https://www.eshre.eu/Guidelines-and-Legal/Guidelines,,ESHRE,restricted-cds,endocrinology_reproductive,medium
+NAMS-GSM-001,NAMS,NAMS position statement genitourinary syndrome of menopause,2020,https://www.menopause.org/professional-resources/position-statements,,NAMS,restricted-cds,endocrinology_reproductive,high
