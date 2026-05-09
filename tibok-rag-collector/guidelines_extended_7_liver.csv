@@ -1,0 +1,16 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+AASLD-HCC-001,AASLD,AASLD practice guidance prevention diagnosis treatment hepatocellular carcinoma,2023,https://journals.lww.com/hep/fulltext/2023/12000/aasld_practice_guidance_on_prevention,,AASLD,restricted-cds,oncology_liver,high
+AASLD-HCC-002,AASLD,AASLD guidelines surveillance hepatocellular carcinoma,2023,https://journals.lww.com/hep/fulltext/2023/06000/screening_diagnosis_and_staging_of,,AASLD,restricted-cds,oncology_liver,high
+EASL-HCC-001,EASL,EASL Clinical Practice Guidelines management hepatocellular carcinoma,2018,https://www.journal-of-hepatology.eu/article/S0168-8278(18)30215-0/fulltext,,EASL Open Access,allowed,oncology_liver,high
+EASL-HCC-002,EASL,EASL Clinical Practice Guidelines management hepatocellular carcinoma update,2024,https://www.journal-of-hepatology.eu/article/S0168-8278(24)00220-4/fulltext,,EASL Open Access,allowed,oncology_liver,high
+APASL-HCC-001,APASL,Asian Pacific clinical practice guidelines management hepatocellular carcinoma,2017,https://link.springer.com/article/10.1007/s12072-017-9799-9,,APASL,restricted-cds,oncology_liver,high
+BCLC-HCC-001,BCLC,Barcelona Clinic Liver Cancer BCLC strategy 2022 update systemic therapy,2022,https://www.journal-of-hepatology.eu/article/S0168-8278(21)02223-0/fulltext,,BCLC,restricted-cds,oncology_liver,high
+ESMO-HCC-002,ESMO,Hepatocellular carcinoma ESMO Clinical Practice Guideline living update,2024,https://www.esmo.org/guidelines/gastrointestinal-cancers/hepatocellular-carcinoma,,ESMO Open Access,allowed,oncology_liver,high
+NCCN-HCC-001,NCCN,NCCN Guidelines Hepatobiliary Cancers,2024,https://www.nccn.org/guidelines/category_1,,NCCN,restricted,oncology_liver,high
+ILCA-LIVER-TX,ILCA,Consensus liver transplantation hepatocellular carcinoma extended criteria,2022,https://www.journal-of-hepatology.eu/article/S0168-8278(21)02257-6/fulltext,,ILCA,restricted-cds,oncology_liver,high
+EASL-CCA-001,EASL,EASL ILCA Clinical Practice Guidelines diagnosis treatment intrahepatic cholangiocarcinoma,2023,https://www.journal-of-hepatology.eu/article/S0168-8278(23)00200-3/fulltext,,EASL Open Access,allowed,oncology_liver,high
+COG-HEPATO-001,COG,Children Oncology Group hepatoblastoma treatment protocol,2023,https://childrensoncologygroup.org/index.php/hepatoblastoma,,COG,restricted,oncology_liver_pediatric,high
+SIOP-LIVER-001,SIOPEL,SIOPEL international guidelines pediatric hepatocellular carcinoma hepatoblastoma,2022,https://siopel.org/,,SIOPEL,restricted-cds,oncology_liver_pediatric,high
+ESMO-FIBROLAM,ESMO,Fibrolamellar hepatocellular carcinoma rare cancer recommendations,2023,https://www.esmo.org/guidelines/gastrointestinal-cancers/hepatocellular-carcinoma,,ESMO Open Access,allowed,oncology_liver,medium
+SIRT-HCC-001,IRA,International recommendations selective internal radiation therapy SIRT HCC,2022,https://www.thelancet.com/journals/lanonc/article/PIIS1470-2045(21)00686-2/fulltext,,IRA,restricted-cds,oncology_liver,medium
+TACE-HCC-001,JSH,Japanese Society Hepatology consensus transarterial chemoembolization HCC,2021,https://onlinelibrary.wiley.com/doi/10.1111/hepr.13670,,JSH,restricted-cds,oncology_liver,medium
