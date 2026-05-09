@@ -1,18 +1,18 @@
 {
  "source": "WPATH",
- "generated_at": "2026-05-09T13:25:38Z",
+ "generated_at": "2026-05-09T13:32:41Z",
  "total_documents": 1,
  "documents": [
   {
-   "id": "WPATH-SOC-001",
+   "id": "WPATH-GD-001",
    "source": "WPATH",
    "title": "WPATH standards of care for the health of transgender and gender diverse people version 8",
    "year": "2022",
-   "page_url": "https://www.wpath.org/publications/soc",
+   "page_url": "https://www.wpath.org/soc8",
    "pdf_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=11087993",
    "license": "WPATH",
    "commercial_use": "restricted-cds",
-   "clinical_domain": "endocrinology_reproductive",
+   "clinical_domain": "psychiatry_personality",
    "priority": "high",
    "sha256": "6a50d70ee95a4dc4b1d18d76b0484d52a0fa0f61df47890fce4bc6821d152cba",
    "size_bytes": 32164,
@@ -20,7 +20,7 @@
    "pmcid": "PMC11087993",
    "char_count": 32119,
    "chunk_count": 8,
-   "extracted_at": "2026-05-09T13:25:38Z",
+   "extracted_at": "2026-05-09T13:32:41Z",
    "chunks": [
     {
      "chunk_index": 0,
