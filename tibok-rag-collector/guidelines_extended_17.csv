@@ -1,0 +1,542 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+AAD-AD-001,AAD,AAD guidelines of care for the management of atopic dermatitis topical therapies,2023,https://www.jaad.org/article/S0190-9622(22)03296-2/fulltext,,AAD,restricted-cds,dermatology_inflammatory,high
+AAD-AD-002,AAD,AAD guidelines of care for the management of atopic dermatitis phototherapy and systemic therapies,2023,https://www.jaad.org/article/S0190-9622(23)03238-7/fulltext,,AAD,restricted-cds,dermatology_inflammatory,high
+AAD-AD-003,AAD,AAD guidelines of care for the management of atopic dermatitis with systemic therapies,2014,https://www.jaad.org/article/S0190-9622(13)01272-0/fulltext,,AAD,restricted-cds,dermatology_inflammatory,medium
+AAD-AD-PED-001,AAD,AAD guidelines of care for atopic dermatitis pediatric considerations,2023,https://www.jaad.org/,,AAD,restricted-cds,dermatology_pediatric,high
+EUROGUIDERM-AD-001,EUROGUIDERM,EuroGuiDerm guideline on atopic eczema part 1 systemic treatment,2022,https://www.guidelines.edf.one/guidelines/atopic-eczema,,EUROGUIDERM,restricted-cds,dermatology_inflammatory,high
+EUROGUIDERM-AD-002,EUROGUIDERM,EuroGuiDerm guideline on atopic eczema part 2 non-systemic treatments and treatment recommendations,2022,https://www.guidelines.edf.one/guidelines/atopic-eczema,,EUROGUIDERM,restricted-cds,dermatology_inflammatory,high
+BAD-AD-001,BAD,BAD guidelines for biologic therapy for atopic eczema in adults,2024,https://www.bad.org.uk/clinical-guidelines/,,BAD,restricted-cds,dermatology_inflammatory,high
+BAD-AD-PED-001,BAD,BAD guidelines for the management of atopic eczema in children,2018,https://www.bad.org.uk/clinical-guidelines/,,BAD,restricted-cds,dermatology_pediatric,medium
+NICE-AD-001,NICE,NICE CG57 atopic eczema in under 12s diagnosis and management,2007,https://www.nice.org.uk/guidance/cg57,,NICE,restricted-cds,dermatology_pediatric,high
+NICE-AD-002,NICE,NICE TA814 dupilumab for treating moderate to severe atopic dermatitis in children,2022,https://www.nice.org.uk/guidance/ta814,,NICE,restricted-cds,dermatology_pediatric,medium
+ETFAD-AD-001,ETFAD,ETFAD EADV position paper management of atopic dermatitis,2020,https://onlinelibrary.wiley.com/doi/10.1111/jdv.16893,,ETFAD,restricted-cds,dermatology_inflammatory,high
+EAACI-AD-001,EAACI,EAACI guidelines on allergen immunotherapy atopic dermatitis,2021,https://onlinelibrary.wiley.com/doi/10.1111/all.14690,,EAACI,restricted-cds,dermatology_inflammatory,medium
+AAD-PSO-001,AAD,AAD-NPF guidelines of care for the management of psoriasis with biologics,2019,https://www.jaad.org/article/S0190-9622(18)32835-7/fulltext,,AAD,restricted-cds,dermatology_inflammatory,high
+AAD-PSO-002,AAD,AAD-NPF guidelines of care for the management of psoriasis with topical therapy and alternative medicine,2020,https://www.jaad.org/,,AAD,restricted-cds,dermatology_inflammatory,high
+AAD-PSO-003,AAD,AAD-NPF guidelines of care for the management of psoriasis with phototherapy,2019,https://www.jaad.org/,,AAD,restricted-cds,dermatology_inflammatory,high
+AAD-PSO-004,AAD,AAD-NPF guidelines of care for the management of psoriasis with systemic non-biologic therapies,2020,https://www.jaad.org/,,AAD,restricted-cds,dermatology_inflammatory,high
+AAD-PSO-005,AAD,AAD-NPF guidelines of care for the management of psoriasis pediatric,2020,https://www.jaad.org/,,AAD,restricted-cds,dermatology_pediatric,high
+AAD-PSO-006,AAD,AAD-NPF guidelines of care for the management of psoriasis with comorbid conditions,2019,https://www.jaad.org/,,AAD,restricted-cds,dermatology_inflammatory,medium
+EUROGUIDERM-PSO-001,EUROGUIDERM,EuroGuiDerm guideline on the systemic treatment of psoriasis vulgaris part 1 treatment and monitoring recommendations,2020,https://www.guidelines.edf.one/guidelines/psoriasis-vulgaris,,EUROGUIDERM,restricted-cds,dermatology_inflammatory,high
+EUROGUIDERM-PSO-002,EUROGUIDERM,EuroGuiDerm guideline on the systemic treatment of psoriasis vulgaris part 2 specific clinical and comorbid situations,2021,https://www.guidelines.edf.one/guidelines/psoriasis-vulgaris,,EUROGUIDERM,restricted-cds,dermatology_inflammatory,high
+BAD-PSO-001,BAD,BAD guidelines for biologic therapy for psoriasis,2020,https://www.bad.org.uk/clinical-guidelines/,,BAD,restricted-cds,dermatology_inflammatory,high
+NICE-PSO-001,NICE,NICE CG153 psoriasis assessment and management,2017,https://www.nice.org.uk/guidance/cg153,,NICE,restricted-cds,dermatology_inflammatory,high
+IPC-PSO-001,IPC,IPC International Psoriasis Council consensus on treat-to-target,2020,https://www.psoriasiscouncil.org/,,IPC,restricted-cds,dermatology_inflammatory,medium
+NPF-PSO-001,NPF,NPF treat-to-target consensus statement plaque psoriasis,2017,https://www.psoriasis.org/,,NPF,restricted-cds,dermatology_inflammatory,medium
+AAD-SEB-001,AAD,AAD guidelines for seborrheic dermatitis,2020,https://www.jaad.org/,,AAD,restricted-cds,dermatology_inflammatory,medium
+AAD-CD-001,AAD,AAD guidelines for the diagnosis and management of contact dermatitis,2021,https://www.jaad.org/,,AAD,restricted-cds,dermatology_inflammatory,high
+ESCD-CD-001,ESCD,ESCD European Society of Contact Dermatitis guideline diagnostic patch testing,2015,https://onlinelibrary.wiley.com/doi/10.1111/cod.12432,,ESCD,restricted-cds,dermatology_inflammatory,high
+ICDRG-CD-001,ICDRG,ICDRG International Contact Dermatitis Research Group baseline series,2019,https://www.icdrg.org/,,ICDRG,restricted-cds,dermatology_inflammatory,medium
+AAD-LP-001,AAD,AAD guidelines lichen planus management,2020,https://www.jaad.org/,,AAD,restricted-cds,dermatology_inflammatory,medium
+BAD-LP-001,BAD,BAD guidelines for the management of lichen planus,2020,https://onlinelibrary.wiley.com/doi/10.1111/bjd.18819,,BAD,restricted-cds,dermatology_inflammatory,medium
+BAD-LS-001,BAD,BAD guidelines for the management of lichen sclerosus,2018,https://onlinelibrary.wiley.com/doi/10.1111/bjd.16241,,BAD,restricted-cds,dermatology_inflammatory,medium
+AAD-LS-001,AAD,AAD guidelines lichen sclerosus,2020,https://www.jaad.org/,,AAD,restricted-cds,dermatology_inflammatory,medium
+AAD-PR-001,AAD,AAD guidelines pityriasis rosea management,2018,https://www.jaad.org/,,AAD,restricted-cds,dermatology_inflammatory,low
+AAD-CLE-001,AAD,AAD guidelines for the management of cutaneous lupus erythematosus,2021,https://www.jaad.org/,,AAD,restricted-cds,dermatology_inflammatory,high
+EADV-CLE-001,EADV,EADV consensus on cutaneous lupus erythematosus management,2017,https://onlinelibrary.wiley.com/doi/10.1111/jdv.14044,,EADV,restricted-cds,dermatology_inflammatory,medium
+AAD-DM-001,AAD,AAD guidelines dermatomyositis cutaneous management,2021,https://www.jaad.org/,,AAD,restricted-cds,dermatology_inflammatory,medium
+BAD-VIT-001,BAD,BAD guidelines for the diagnosis and management of vitiligo,2022,https://onlinelibrary.wiley.com/doi/10.1111/bjd.21001,,BAD,restricted-cds,dermatology_inflammatory,high
+AAD-VIT-001,AAD,AAD guidelines for the management of vitiligo,2017,https://www.jaad.org/,,AAD,restricted-cds,dermatology_inflammatory,high
+VITF-VIT-001,VITF,Vitiligo Working Group consensus on diagnosis and treatment of vitiligo,2017,https://www.jaad.org/article/S0190-9622(16)31137-8/fulltext,,VITF,restricted-cds,dermatology_inflammatory,medium
+IDSA-SSTI-001,IDSA,IDSA practice guidelines for the diagnosis and management of skin and soft tissue infections,2014,https://academic.oup.com/cid/article/59/2/e10/2895845,,IDSA,restricted-cds,dermatology_infectious,high
+BAD-CELL-001,BAD,BAD guidelines for the management of cellulitis in adults,2018,https://onlinelibrary.wiley.com/doi/10.1111/bjd.16847,,BAD,restricted-cds,dermatology_infectious,high
+WSES-NSTI-001,WSES,WSES global clinical pathways for the management of necrotizing soft tissue infections,2022,https://wjes.biomedcentral.com/articles/10.1186/s13017-022-00406-2,,WSES,restricted-cds,dermatology_infectious,high
+IDSA-IMPETIGO-001,IDSA,IDSA guidelines impetigo management,2014,https://academic.oup.com/cid/article/59/2/e10/2895845,,IDSA,restricted-cds,dermatology_infectious,high
+BAD-HS-001,BAD,BAD guidelines for the management of hidradenitis suppurativa,2018,https://onlinelibrary.wiley.com/doi/10.1111/bjd.16768,,BAD,restricted-cds,dermatology_inflammatory,high
+AAD-HS-001,AAD,AAD guidelines of care for the management and treatment of hidradenitis suppurativa,2019,https://www.jaad.org/article/S0190-9622(19)30368-5/fulltext,,AAD,restricted-cds,dermatology_inflammatory,high
+EHSF-HS-001,EHSF,EHSF European Hidradenitis Suppurativa Foundation S2k guideline,2015,https://onlinelibrary.wiley.com/doi/10.1111/jdv.12966,,EHSF,restricted-cds,dermatology_inflammatory,medium
+BAD-TINEA-001,BAD,BAD guidelines for the management of tinea capitis,2014,https://onlinelibrary.wiley.com/doi/10.1111/bjd.13196,,BAD,restricted-cds,dermatology_infectious,medium
+AAD-TINEA-001,AAD,AAD guidelines tinea management,2014,https://www.jaad.org/,,AAD,restricted-cds,dermatology_infectious,medium
+BAD-ONYCHO-001,BAD,BAD guidelines for the management of onychomycosis,2014,https://onlinelibrary.wiley.com/doi/10.1111/bjd.13358,,BAD,restricted-cds,dermatology_infectious,medium
+AAD-CAND-001,AAD,AAD guidelines cutaneous candidiasis management,2018,https://www.jaad.org/,,AAD,restricted-cds,dermatology_infectious,low
+CDC-SCABIES-001,CDC,CDC guidelines for scabies treatment,2022,https://www.cdc.gov/parasites/scabies/health_professionals/meds.html,,CDC,allowed,dermatology_infectious,high
+IDSA-SCABIES-001,IDSA,IDSA recommendations on scabies management,2014,https://academic.oup.com/cid/,,IDSA,restricted-cds,dermatology_infectious,medium
+AAD-SCABIES-001,AAD,AAD guidelines scabies treatment,2020,https://www.jaad.org/,,AAD,restricted-cds,dermatology_infectious,medium
+CDC-PEDIC-001,CDC,CDC guidelines pediculosis treatment head lice,2022,https://www.cdc.gov/parasites/lice/head/treatment.html,,CDC,allowed,dermatology_infectious,medium
+AAP-PEDIC-001,AAP,AAP clinical report head lice diagnosis and treatment,2022,https://publications.aap.org/pediatrics/article/150/4/e2022059282/,,AAP,restricted-cds,dermatology_pediatric,medium
+AAD-HSV-001,AAD,AAD guidelines herpes simplex virus management,2021,https://www.jaad.org/,,AAD,restricted-cds,dermatology_infectious,medium
+AAD-ZOSTER-001,AAD,AAD guidelines herpes zoster management,2017,https://www.jaad.org/,,AAD,restricted-cds,dermatology_infectious,medium
+IDSA-ZOSTER-001,IDSA,IDSA practice guidelines varicella zoster,2007,https://www.idsociety.org/,,IDSA,restricted-cds,dermatology_infectious,medium
+AAD-MOLLUSCUM-001,AAD,AAD guidelines molluscum contagiosum management,2018,https://www.jaad.org/,,AAD,restricted-cds,dermatology_infectious,low
+BAD-WARTS-001,BAD,BAD guidelines for the management of cutaneous warts,2014,https://onlinelibrary.wiley.com/doi/10.1111/bjd.13310,,BAD,restricted-cds,dermatology_infectious,medium
+AAD-WARTS-001,AAD,AAD guidelines cutaneous warts HPV management,2017,https://www.jaad.org/,,AAD,restricted-cds,dermatology_infectious,low
+AAD-PV-001,AAD,AAD guidelines pemphigus vulgaris management,2020,https://www.jaad.org/,,AAD,restricted-cds,dermatology_blistering,high
+EADV-PV-001,EADV,EADV S2 guideline on pemphigus,2020,https://onlinelibrary.wiley.com/doi/10.1111/jdv.16752,,EADV,restricted-cds,dermatology_blistering,high
+AAD-BP-001,AAD,AAD guidelines bullous pemphigoid management,2021,https://www.jaad.org/,,AAD,restricted-cds,dermatology_blistering,high
+EADV-BP-001,EADV,EADV S3 guidelines on bullous pemphigoid management,2022,https://onlinelibrary.wiley.com/doi/10.1111/jdv.17297,,EADV,restricted-cds,dermatology_blistering,high
+AAD-DH-001,AAD,AAD guidelines dermatitis herpetiformis management,2020,https://www.jaad.org/,,AAD,restricted-cds,dermatology_blistering,medium
+BAD-DH-001,BAD,BAD guidelines for the management of dermatitis herpetiformis,2021,https://onlinelibrary.wiley.com/doi/10.1111/bjd.20566,,BAD,restricted-cds,dermatology_blistering,medium
+AAD-LIGAD-001,AAD,AAD guidelines linear IgA bullous dermatosis,2020,https://www.jaad.org/,,AAD,restricted-cds,dermatology_blistering,low
+AAD-ACNE-001,AAD,AAD guidelines of care for the management of acne vulgaris,2024,https://www.jaad.org/article/S0190-9622(23)03389-7/fulltext,,AAD,restricted-cds,dermatology_acne,high
+BAD-ACNE-001,BAD,BAD guidelines for the management of acne vulgaris,2021,https://onlinelibrary.wiley.com/doi/10.1111/bjd.20633,,BAD,restricted-cds,dermatology_acne,high
+GAA-ACNE-001,GAA,Global Alliance to Improve Outcomes in Acne management of acne update,2018,https://www.jaad.org/article/S0190-9622(17)32412-0/fulltext,,GAA,restricted-cds,dermatology_acne,medium
+NICE-ACNE-001,NICE,NICE NG198 acne vulgaris management,2021,https://www.nice.org.uk/guidance/ng198,,NICE,restricted-cds,dermatology_acne,high
+AAD-ROSACEA-001,AAD,AAD guidelines of care for the management of rosacea,2024,https://www.jaad.org/,,AAD,restricted-cds,dermatology_acne,high
+BAD-ROSACEA-001,BAD,BAD guidelines for the management of rosacea,2021,https://onlinelibrary.wiley.com/doi/10.1111/bjd.20571,,BAD,restricted-cds,dermatology_acne,medium
+NRS-ROSACEA-001,NRS,National Rosacea Society standard classification of rosacea update,2018,https://www.rosacea.org/,,NRS,restricted-cds,dermatology_acne,low
+AAD-AA-001,AAD,AAD guidelines for the management of alopecia areata,2024,https://www.jaad.org/,,AAD,restricted-cds,dermatology_acne,high
+BAD-AA-001,BAD,BAD guidelines for the management of alopecia areata,2012,https://onlinelibrary.wiley.com/doi/10.1111/bjd.12039,,BAD,restricted-cds,dermatology_acne,medium
+NAAF-AA-001,NAAF,NAAF National Alopecia Areata Foundation treatment consensus,2022,https://www.naaf.org/,,NAAF,restricted-cds,dermatology_acne,medium
+AAD-AGA-001,AAD,AAD guidelines androgenetic alopecia,2017,https://www.jaad.org/,,AAD,restricted-cds,dermatology_acne,medium
+AAD-MELASMA-001,AAD,AAD guidelines melasma management,2017,https://www.jaad.org/,,AAD,restricted-cds,dermatology_acne,medium
+AAD-PIH-001,AAD,AAD guidelines post-inflammatory hyperpigmentation,2017,https://www.jaad.org/,,AAD,restricted-cds,dermatology_acne,low
+AAP-DIAPER-001,AAP,AAP guidance diaper dermatitis evaluation and management,2014,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,dermatology_pediatric,medium
+ISSVA-VAS-001,ISSVA,ISSVA classification of vascular anomalies,2018,https://www.issva.org/classification,,ISSVA,restricted-cds,dermatology_pediatric,high
+AAP-IH-001,AAP,AAP clinical practice guideline for the management of infantile hemangiomas,2019,https://publications.aap.org/pediatrics/article/143/1/e20183475/,,AAP,restricted-cds,dermatology_pediatric,high
+AAD-IH-001,AAD,AAD guidelines infantile hemangioma management,2019,https://www.jaad.org/,,AAD,restricted-cds,dermatology_pediatric,medium
+NF1-CONSENSUS-001,NF1,NF1 consensus diagnostic criteria for neurofibromatosis type 1 revised international consensus,2021,https://www.nature.com/articles/s41436-021-01170-5,,NF1,restricted-cds,dermatology_genodermatosis,high
+REGISCAR-SCAR-001,REGISCAR,RegiSCAR criteria for severe cutaneous adverse reactions DRESS,2019,https://www.jaad.org/,,REGISCAR,restricted-cds,dermatology_drug,high
+AAD-SJSTEN-001,AAD,AAD guidelines Stevens-Johnson syndrome and toxic epidermal necrolysis management,2020,https://www.jaad.org/,,AAD,restricted-cds,dermatology_drug,high
+EADV-SJSTEN-001,EADV,EADV-EADV consensus on management of SJS-TEN,2020,https://onlinelibrary.wiley.com/doi/10.1111/jdv.16678,,EADV,restricted-cds,dermatology_drug,high
+AAD-DRESS-001,AAD,AAD guidelines DRESS syndrome management,2020,https://www.jaad.org/,,AAD,restricted-cds,dermatology_drug,high
+AAD-AGEP-001,AAD,AAD guidelines acute generalized exanthematous pustulosis,2018,https://www.jaad.org/,,AAD,restricted-cds,dermatology_drug,medium
+AAD-FDE-001,AAD,AAD guidelines fixed drug eruption,2017,https://www.jaad.org/,,AAD,restricted-cds,dermatology_drug,low
+DEBRA-EB-001,DEBRA,DEBRA International clinical practice guidelines epidermolysis bullosa wound care,2017,https://www.debra-international.org/,,DEBRA,restricted-cds,dermatology_genodermatosis,high
+EUROGUIDERM-EB-001,EUROGUIDERM,EuroGuiDerm guideline epidermolysis bullosa,2021,https://www.guidelines.edf.one/,,EUROGUIDERM,restricted-cds,dermatology_genodermatosis,medium
+PFIC-ICHTHYOSIS-001,PFIC,Foundation for Ichthyosis and Related Skin Types consensus management,2010,https://www.firstskinfoundation.org/,,PFIC,restricted-cds,dermatology_genodermatosis,medium
+AAP-NF1-001,AAP,AAP health supervision for children with neurofibromatosis type 1,2019,https://publications.aap.org/pediatrics/article/143/5/e20190660/,,AAP,restricted-cds,dermatology_genodermatosis,high
+AAP-TSC-001,AAP,AAP health supervision for children with tuberous sclerosis complex,2014,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,dermatology_genodermatosis,medium
+AAD-XP-001,AAD,AAD guidelines xeroderma pigmentosum management,2018,https://www.jaad.org/,,AAD,restricted-cds,dermatology_genodermatosis,low
+BAD-PRURITUS-001,BAD,BAD guidelines management of chronic pruritus,2018,https://onlinelibrary.wiley.com/doi/10.1111/bjd.16953,,BAD,restricted-cds,dermatology_pruritus,high
+EADV-PRURITUS-001,EADV,EADV S2k European guideline on chronic pruritus,2019,https://onlinelibrary.wiley.com/doi/10.1111/jdv.15327,,EADV,restricted-cds,dermatology_pruritus,high
+EWMA-WOUND-001,EWMA,EWMA European Wound Management Association position document chronic wounds,2019,https://ewma.org/,,EWMA,restricted-cds,dermatology_pruritus,medium
+NPUAP-PI-001,NPUAP,NPUAP-EPUAP-PPPIA international clinical practice guideline prevention and treatment of pressure ulcers/injuries,2019,https://www.epuap.org/,,NPUAP,restricted-cds,dermatology_pruritus,high
+EPUAP-PI-001,EPUAP,EPUAP clinical practice guideline pressure injuries quick reference,2019,https://www.epuap.org/,,EPUAP,restricted-cds,dermatology_pruritus,high
+IUSTI-STI-001,IUSTI,IUSTI European guideline on the management of sexually transmitted infections,2020,https://iusti.org/,,IUSTI,restricted-cds,dermatology_infectious,medium
+APA-MDD-001,APA,APA practice guideline for the treatment of patients with major depressive disorder third edition,2010,https://psychiatryonline.org/guidelines,,APA,restricted-cds,psychiatry_mood,high
+APA-MDD-002,APA,APA clinical practice guideline for the treatment of depression across three age cohorts,2019,https://www.apa.org/depression-guideline,,APA,restricted-cds,psychiatry_mood,high
+NICE-MDD-001,NICE,NICE NG222 depression in adults treatment and management,2022,https://www.nice.org.uk/guidance/ng222,,NICE,restricted-cds,psychiatry_mood,high
+CANMAT-MDD-001,CANMAT,CANMAT 2016 clinical guidelines for the management of major depressive disorder in adults,2016,https://journals.sagepub.com/doi/10.1177/0706743716659417,,CANMAT,restricted-cds,psychiatry_mood,high
+RANZCP-MDD-001,RANZCP,RANZCP clinical practice guidelines for mood disorders,2021,https://www.ranzcp.org/clinical-guidelines-publications,,RANZCP,restricted-cds,psychiatry_mood,high
+BAP-MDD-001,BAP,BAP British Association for Psychopharmacology evidence-based guidelines treating depressive disorders with antidepressants,2015,https://journals.sagepub.com/doi/10.1177/0269881115581093,,BAP,restricted-cds,psychiatry_mood,high
+WFSBP-MDD-001,WFSBP,WFSBP World Federation guidelines for biological treatment of unipolar depressive disorders,2013,https://www.tandfonline.com/doi/full/10.3109/15622975.2013.804195,,WFSBP,restricted-cds,psychiatry_mood,medium
+APA-BP-001,APA,APA practice guideline for the treatment of patients with bipolar disorder,2002,https://psychiatryonline.org/guidelines,,APA,restricted-cds,psychiatry_mood,high
+NICE-BP-001,NICE,NICE CG185 bipolar disorder assessment and management,2020,https://www.nice.org.uk/guidance/cg185,,NICE,restricted-cds,psychiatry_mood,high
+CANMAT-BP-001,CANMAT,CANMAT 2018 ISBD guidelines for the management of patients with bipolar disorder,2018,https://onlinelibrary.wiley.com/doi/10.1111/bdi.12609,,CANMAT,restricted-cds,psychiatry_mood,high
+ISBD-BP-001,ISBD,ISBD International Society for Bipolar Disorders maintenance treatment guidelines,2020,https://www.isbd.org/,,ISBD,restricted-cds,psychiatry_mood,medium
+APA-TRD-001,APA,APA treatment-resistant depression review and recommendations,2019,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_mood,medium
+CANMAT-TRD-001,CANMAT,CANMAT recommendations on treatment-resistant depression,2017,https://journals.sagepub.com/,,CANMAT,restricted-cds,psychiatry_mood,medium
+ACOG-PPD-001,ACOG,ACOG Committee Opinion screening for perinatal depression,2018,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2018/11/screening-for-perinatal-depression,,ACOG,restricted-cds,psychiatry_mood,high
+APA-PPD-001,APA,APA position statement on postpartum depression,2018,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_mood,medium
+RCOG-PPD-001,RCOG,RCOG Green-top guideline management of women with mental health issues during pregnancy and postnatal,2017,https://www.rcog.org.uk/,,RCOG,restricted-cds,psychiatry_mood,high
+APA-SUICIDE-001,APA,APA practice guideline for the assessment and treatment of patients with suicidal behaviors,2003,https://psychiatryonline.org/guidelines,,APA,restricted-cds,psychiatry_mood,high
+NICE-SUICIDE-001,NICE,NICE NG225 self-harm assessment management and preventing recurrence,2022,https://www.nice.org.uk/guidance/ng225,,NICE,restricted-cds,psychiatry_mood,high
+CDC-SUICIDE-001,CDC,CDC suicide prevention strategic direction,2022,https://www.cdc.gov/suicide/index.html,,CDC,allowed,psychiatry_mood,medium
+APA-GAD-001,APA,APA practice guideline anxiety disorders,2010,https://psychiatryonline.org/guidelines,,APA,restricted-cds,psychiatry_anxiety,high
+NICE-GAD-001,NICE,NICE CG113 generalised anxiety disorder and panic disorder in adults management,2020,https://www.nice.org.uk/guidance/cg113,,NICE,restricted-cds,psychiatry_anxiety,high
+BAP-ANX-001,BAP,BAP evidence-based pharmacological treatment of anxiety disorders post-traumatic stress disorder and obsessive-compulsive disorder,2014,https://journals.sagepub.com/doi/10.1177/0269881114525674,,BAP,restricted-cds,psychiatry_anxiety,high
+APA-PANIC-001,APA,APA practice guideline panic disorder,2009,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_anxiety,medium
+NICE-OCD-001,NICE,NICE CG31 obsessive-compulsive disorder and body dysmorphic disorder treatment,2005,https://www.nice.org.uk/guidance/cg31,,NICE,restricted-cds,psychiatry_anxiety,high
+APA-OCD-001,APA,APA practice guideline for the treatment of patients with obsessive-compulsive disorder,2007,https://psychiatryonline.org/guidelines,,APA,restricted-cds,psychiatry_anxiety,high
+APA-PTSD-001,APA,APA clinical practice guideline for the treatment of posttraumatic stress disorder in adults,2017,https://www.apa.org/ptsd-guideline,,APA,restricted-cds,psychiatry_anxiety,high
+NICE-PTSD-001,NICE,NICE NG116 post-traumatic stress disorder management,2018,https://www.nice.org.uk/guidance/ng116,,NICE,restricted-cds,psychiatry_anxiety,high
+ISTSS-PTSD-001,ISTSS,ISTSS prevention and treatment of PTSD guidelines,2018,https://istss.org/clinical-resources/treating-trauma/new-istss-prevention-and-treatment-guidelines,,ISTSS,restricted-cds,psychiatry_anxiety,high
+VADOD-PTSD-001,VADOD,VA-DoD clinical practice guideline for the management of posttraumatic stress disorder and acute stress disorder,2023,https://www.healthquality.va.gov/guidelines/MH/ptsd/,,VADOD,allowed,psychiatry_anxiety,high
+APA-SCZ-001,APA,APA practice guideline for the treatment of patients with schizophrenia third edition,2020,https://psychiatryonline.org/guidelines,,APA,restricted-cds,psychiatry_psychosis,high
+NICE-SCZ-001,NICE,NICE CG178 psychosis and schizophrenia in adults prevention and management,2014,https://www.nice.org.uk/guidance/cg178,,NICE,restricted-cds,psychiatry_psychosis,high
+WFSBP-SCZ-001,WFSBP,WFSBP guidelines for the biological treatment of schizophrenia,2013,https://www.tandfonline.com/,,WFSBP,restricted-cds,psychiatry_psychosis,medium
+RANZCP-SCZ-001,RANZCP,RANZCP clinical practice guidelines for the management of schizophrenia and related disorders,2016,https://www.ranzcp.org/clinical-guidelines-publications,,RANZCP,restricted-cds,psychiatry_psychosis,high
+NICE-FEP-001,NICE,NICE CG155 psychosis and schizophrenia in children and young people recognition and management,2013,https://www.nice.org.uk/guidance/cg155,,NICE,restricted-cds,psychiatry_psychosis,high
+APA-FEP-001,APA,APA recommendations early intervention first-episode psychosis,2020,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_psychosis,medium
+APA-ASD-001,APA,APA position statement autism spectrum disorder diagnosis and management,2018,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_neurodev,high
+NICE-ASD-001,NICE,NICE CG170 autism spectrum disorder in adults diagnosis and management,2021,https://www.nice.org.uk/guidance/cg142,,NICE,restricted-cds,psychiatry_neurodev,high
+AAP-ASD-001,AAP,AAP clinical report identification evaluation and management of children with autism spectrum disorder,2020,https://publications.aap.org/pediatrics/article/145/1/e20193447/,,AAP,restricted-cds,psychiatry_neurodev,high
+APA-ADHD-001,APA,APA position statement attention-deficit/hyperactivity disorder,2019,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_neurodev,high
+AAP-ADHD-001,AAP,AAP clinical practice guideline for the diagnosis evaluation and treatment of ADHD in children and adolescents,2019,https://publications.aap.org/pediatrics/article/144/4/e20192528/,,AAP,restricted-cds,psychiatry_neurodev,high
+NICE-ADHD-001,NICE,NICE NG87 attention deficit hyperactivity disorder diagnosis and management,2018,https://www.nice.org.uk/guidance/ng87,,NICE,restricted-cds,psychiatry_neurodev,high
+CADDRA-ADHD-001,CADDRA,CADDRA Canadian ADHD practice guidelines fourth edition,2020,https://www.caddra.ca/,,CADDRA,restricted-cds,psychiatry_neurodev,high
+AACAP-ADHD-001,AACAP,AACAP practice parameter assessment and treatment of children with ADHD,2007,https://www.aacap.org/,,AACAP,restricted-cds,psychiatry_pediatric,high
+APA-AN-001,APA,APA practice guideline for the treatment of patients with eating disorders,2023,https://psychiatryonline.org/doi/book/10.1176/appi.books.9780890424865,,APA,restricted-cds,psychiatry_eating,high
+NICE-ED-001,NICE,NICE NG69 eating disorders recognition and treatment,2020,https://www.nice.org.uk/guidance/ng69,,NICE,restricted-cds,psychiatry_eating,high
+AED-AN-001,AED,AED Academy for Eating Disorders critical points for early recognition and medical risk management,2021,https://www.aedweb.org/,,AED,restricted-cds,psychiatry_eating,high
+ACUTE-AN-001,ACUTE,ACUTE consensus medical care of patients with severe anorexia nervosa,2020,https://www.acute.org/,,ACUTE,restricted-cds,psychiatry_eating,high
+RANZCP-ED-001,RANZCP,RANZCP clinical practice guidelines for the treatment of eating disorders,2014,https://www.ranzcp.org/,,RANZCP,restricted-cds,psychiatry_eating,medium
+AAP-ED-001,AAP,AAP clinical report identification and management of eating disorders in children and adolescents,2021,https://publications.aap.org/pediatrics/article/147/1/e2020040279/,,AAP,restricted-cds,psychiatry_pediatric,high
+ASAM-AUD-001,ASAM,ASAM clinical practice guideline alcohol withdrawal management,2020,https://www.asam.org/quality-care/clinical-guidelines/alcohol-withdrawal-management-guideline,,ASAM,restricted-cds,psychiatry_substance,high
+APA-AUD-001,APA,APA practice guideline for the pharmacological treatment of patients with alcohol use disorder,2018,https://psychiatryonline.org/doi/book/10.1176/appi.books.9781615371969,,APA,restricted-cds,psychiatry_substance,high
+NIAAA-AUD-001,NIAAA,NIAAA helping patients who drink too much clinician guide,2021,https://www.niaaa.nih.gov/publications,,NIAAA,allowed,psychiatry_substance,high
+NICE-AUD-001,NICE,NICE CG115 alcohol-use disorders diagnosis and management,2011,https://www.nice.org.uk/guidance/cg115,,NICE,restricted-cds,psychiatry_substance,high
+ASAM-OUD-001,ASAM,ASAM National practice guideline for the treatment of opioid use disorder,2020,https://www.asam.org/quality-care/clinical-guidelines/national-practice-guideline,,ASAM,restricted-cds,psychiatry_substance,high
+SAMHSA-OUD-001,SAMHSA,SAMHSA TIP 63 medications for opioid use disorder,2021,https://store.samhsa.gov/product/TIP-63-Medications-for-Opioid-Use-Disorder-Full-Document/PEP21-02-01-002,,SAMHSA,allowed,psychiatry_substance,high
+NICE-OUD-001,NICE,NICE CG52 drug misuse in over 16s opioid detoxification,2007,https://www.nice.org.uk/guidance/cg52,,NICE,restricted-cds,psychiatry_substance,medium
+ASAM-STIM-001,ASAM,ASAM clinical practice guideline stimulant use disorder,2023,https://www.asam.org/quality-care/clinical-guidelines/stimulant-use-disorder-guideline,,ASAM,restricted-cds,psychiatry_substance,high
+ASAM-WD-001,ASAM,ASAM clinical practice guideline benzodiazepine withdrawal management,2024,https://www.asam.org/,,ASAM,restricted-cds,psychiatry_substance,medium
+APA-CANN-001,APA,APA position statement cannabis use disorder treatment,2019,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_substance,medium
+AASM-INSOMNIA-001,AASM,AASM clinical practice guideline for the pharmacologic treatment of chronic insomnia in adults,2017,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,AASM,restricted-cds,psychiatry_sleep,high
+ACP-INSOMNIA-001,ACP,ACP management of chronic insomnia disorder in adults clinical practice guideline,2016,https://www.acpjournals.org/doi/10.7326/M15-2175,,ACP,restricted-cds,psychiatry_sleep,high
+APA-INSOMNIA-001,APA,APA recommendations on insomnia treatment,2017,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_sleep,medium
+NICE-INSOMNIA-001,NICE,NICE NG237 insomnia treatment in adults,2023,https://www.nice.org.uk/guidance/ng237,,NICE,restricted-cds,psychiatry_sleep,medium
+AASM-NARCO-001,AASM,AASM clinical practice guideline treatment of central disorders of hypersomnolence,2021,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,AASM,restricted-cds,psychiatry_sleep,high
+APA-LATELIFE-001,APA,APA clinical practice guideline depression in older adults,2019,https://www.apa.org/,,APA,restricted-cds,psychiatry_geriatric,high
+AGS-BPSD-001,AGS,AGS American Geriatrics Society guidance on behavioral and psychological symptoms of dementia,2021,https://www.americangeriatrics.org/,,AGS,restricted-cds,psychiatry_geriatric,high
+AGS-BEERS-001,AGS,AGS Beers Criteria for potentially inappropriate medication use in older adults,2023,https://agsjournals.onlinelibrary.wiley.com/doi/10.1111/jgs.18372,,AGS,restricted-cds,psychiatry_geriatric,high
+AACAP-DEP-001,AACAP,AACAP practice parameter for the assessment and treatment of children and adolescents with depressive disorders,2007,https://www.aacap.org/,,AACAP,restricted-cds,psychiatry_pediatric,high
+AACAP-ANX-001,AACAP,AACAP practice parameter for the assessment and treatment of children and adolescents with anxiety disorders,2020,https://www.aacap.org/,,AACAP,restricted-cds,psychiatry_pediatric,high
+AACAP-BP-001,AACAP,AACAP practice parameter for the assessment and treatment of children and adolescents with bipolar disorder,2007,https://www.aacap.org/,,AACAP,restricted-cds,psychiatry_pediatric,medium
+AACAP-PTSD-001,AACAP,AACAP practice parameter for the assessment and treatment of children and adolescents with posttraumatic stress disorder,2010,https://www.aacap.org/,,AACAP,restricted-cds,psychiatry_pediatric,high
+AACAP-CD-001,AACAP,AACAP practice parameter for the assessment and treatment of children and adolescents with conduct disorder,2018,https://www.aacap.org/,,AACAP,restricted-cds,psychiatry_pediatric,medium
+AACAP-SUICIDE-001,AACAP,AACAP practice parameter for the assessment and treatment of children and adolescents with suicidal behavior,2001,https://www.aacap.org/,,AACAP,restricted-cds,psychiatry_pediatric,high
+NICE-BPD-001,NICE,NICE CG78 borderline personality disorder recognition and management,2009,https://www.nice.org.uk/guidance/cg78,,NICE,restricted-cds,psychiatry_personality,high
+APA-BPD-001,APA,APA practice guideline for the treatment of patients with borderline personality disorder,2001,https://psychiatryonline.org/guidelines,,APA,restricted-cds,psychiatry_personality,medium
+NHMRC-BPD-001,NHMRC,NHMRC Australian clinical practice guideline for borderline personality disorder,2012,https://www.nhmrc.gov.au/,,NHMRC,restricted-cds,psychiatry_personality,medium
+WPATH-GD-001,WPATH,WPATH standards of care for the health of transgender and gender diverse people version 8,2022,https://www.wpath.org/soc8,,WPATH,restricted-cds,psychiatry_personality,high
+APA-GD-001,APA,APA practice guideline gender dysphoria,2018,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_personality,medium
+ISPMD-PMDD-001,ISPMD,ISPMD consensus on premenstrual disorders diagnosis and management,2017,https://link.springer.com/article/10.1007/s00737-017-0720-2,,ISPMD,restricted-cds,psychiatry_personality,medium
+RCPSYCH-PERINATAL-001,RCPSYCH,RCPsych perinatal mental health services recommendations,2021,https://www.rcpsych.ac.uk/,,RCPSYCH,restricted-cds,psychiatry_mood,medium
+ASA-PREOP-001,ASA,ASA practice advisory for preanesthesia evaluation,2012,https://pubs.asahq.org/anesthesiology/,,ASA,restricted-cds,anesthesia_general,high
+ESAIC-PREOP-001,ESAIC,ESAIC pre-operative evaluation of adults undergoing elective non-cardiac surgery,2018,https://journals.lww.com/ejanaesthesiology/,,ESAIC,restricted-cds,anesthesia_general,high
+ASA-DA-001,ASA,ASA practice guidelines for management of the difficult airway,2022,https://pubs.asahq.org/anesthesiology/article/136/1/31/117931/,,ASA,restricted-cds,anesthesia_general,high
+DAS-DA-001,DAS,DAS Difficult Airway Society guidelines for management of unanticipated difficult intubation in adults,2015,https://associationofanaesthetists-publications.onlinelibrary.wiley.com/doi/10.1111/anae.13260,,DAS,restricted-cds,anesthesia_general,high
+DAS-DA-002,DAS,DAS guidelines for awake tracheal intubation,2020,https://associationofanaesthetists-publications.onlinelibrary.wiley.com/doi/10.1111/anae.14904,,DAS,restricted-cds,anesthesia_general,high
+DAS-DA-EXT-001,DAS,DAS guidelines for tracheal extubation,2012,https://associationofanaesthetists-publications.onlinelibrary.wiley.com/doi/10.1111/j.1365-2044.2012.07075.x,,DAS,restricted-cds,anesthesia_general,medium
+NAP4-AIRWAY-001,NAP4,NAP4 Royal College of Anaesthetists 4th National Audit Project major complications of airway management in the UK,2011,https://www.rcoa.ac.uk/research/research-projects/national-audit-projects-naps/nap4,,NAP4,restricted-cds,anesthesia_general,high
+ASA-FASTING-001,ASA,ASA practice guidelines for preoperative fasting and use of pharmacologic agents to reduce risk of pulmonary aspiration,2023,https://pubs.asahq.org/anesthesiology/article/138/2/132/137500/,,ASA,restricted-cds,anesthesia_general,high
+ASA-MONITOR-001,ASA,ASA standards for basic anesthetic monitoring,2020,https://www.asahq.org/standards-and-guidelines/standards-for-basic-anesthetic-monitoring,,ASA,restricted-cds,anesthesia_general,high
+AAGBI-MONITOR-001,AAGBI,AAGBI recommendations for standards of monitoring during anaesthesia and recovery,2016,https://associationofanaesthetists-publications.onlinelibrary.wiley.com/doi/10.1111/anae.13316,,AAGBI,restricted-cds,anesthesia_general,high
+MHAUS-MH-001,MHAUS,MHAUS Malignant Hyperthermia Association of the United States recommendations for the management of malignant hyperthermia,2022,https://www.mhaus.org/healthcare-professionals/be-prepared/managing-an-mh-crisis/,,MHAUS,restricted-cds,anesthesia_general,high
+EMHG-MH-001,EMHG,EMHG European Malignant Hyperthermia Group guidelines diagnostic of MH susceptibility,2015,https://academic.oup.com/bja/article/115/4/531/239820,,EMHG,restricted-cds,anesthesia_general,medium
+NAP5-AWARE-001,NAP5,NAP5 5th National Audit Project on accidental awareness during general anaesthesia,2014,https://www.rcoa.ac.uk/research/research-projects/national-audit-projects-naps/nap5,,NAP5,restricted-cds,anesthesia_general,high
+ESAIC-PONV-001,ESAIC,ESAIC consensus guidelines on management of postoperative nausea and vomiting,2020,https://journals.lww.com/ejanaesthesiology/,,ESAIC,restricted-cds,anesthesia_general,high
+ASER-PONV-001,ASER,Fourth consensus guidelines for the management of postoperative nausea and vomiting,2020,https://journals.lww.com/anesthesia-analgesia/Fulltext/2020/08000/Fourth_Consensus_Guidelines_for_the_Management_of.30.aspx,,ASER,restricted-cds,anesthesia_general,high
+APA-PED-001,APA-PED,APA Association of Paediatric Anaesthetists guidelines on pediatric perioperative care,2020,https://www.apagbi.org.uk/guidelines,,APA-PED,restricted-cds,anesthesia_pediatric,high
+ESPA-PED-001,ESPA,ESPA European Society for Paediatric Anaesthesiology consensus statement perioperative fluid therapy in children,2017,https://onlinelibrary.wiley.com/doi/10.1111/pan.13134,,ESPA,restricted-cds,anesthesia_pediatric,high
+AAGBI-GERIA-001,AAGBI,AAGBI guidelines peri-operative care of the elderly,2014,https://associationofanaesthetists-publications.onlinelibrary.wiley.com/doi/10.1111/anae.12524,,AAGBI,restricted-cds,anesthesia_general,medium
+ESAIC-GERIA-001,ESAIC,ESAIC guideline on peri-operative care of older patients,2017,https://journals.lww.com/ejanaesthesiology/,,ESAIC,restricted-cds,anesthesia_general,medium
+OAA-OBS-001,OAA,OAA Obstetric Anaesthetists Association guidelines anaesthetic management labour and delivery,2020,https://www.oaa-anaes.ac.uk/,,OAA,restricted-cds,anesthesia_obstetric,high
+SOAP-OBS-001,SOAP,SOAP Society for Obstetric Anesthesia and Perinatology consensus statement enhanced recovery after cesarean,2021,https://www.soap.org/,,SOAP,restricted-cds,anesthesia_obstetric,high
+ASA-OBS-001,ASA,ASA practice guidelines for obstetric anesthesia,2016,https://pubs.asahq.org/anesthesiology/,,ASA,restricted-cds,anesthesia_obstetric,high
+BADS-DAY-001,BADS,BADS British Association of Day Surgery directory of procedures,2022,https://daysurgeryuk.net/,,BADS,restricted-cds,anesthesia_general,medium
+SAMBA-DAY-001,SAMBA,SAMBA Society for Ambulatory Anesthesia consensus statement on perioperative management,2020,https://samba.memberclicks.net/,,SAMBA,restricted-cds,anesthesia_general,medium
+ASRA-PNB-001,ASRA,ASRA practice advisory peripheral nerve blocks regional anesthesia,2018,https://rapm.bmj.com/,,ASRA,restricted-cds,anesthesia_regional,high
+ESRA-PNB-001,ESRA,ESRA European Society of Regional Anaesthesia consensus on peripheral nerve blocks,2020,https://esraeurope.org/,,ESRA,restricted-cds,anesthesia_regional,high
+ASRA-NEURAX-001,ASRA,ASRA practice advisory regional anesthesia in the patient receiving antithrombotic or thrombolytic therapy,2018,https://rapm.bmj.com/content/43/3/263,,ASRA,restricted-cds,anesthesia_regional,high
+ESRA-NEURAX-001,ESRA,ESRA-ASRA joint guidelines on regional anaesthesia in patients on antithrombotics,2022,https://esraeurope.org/,,ESRA,restricted-cds,anesthesia_regional,high
+ASRA-LAST-001,ASRA,ASRA practice advisory on local anesthetic systemic toxicity,2020,https://rapm.bmj.com/content/46/1/81,,ASRA,restricted-cds,anesthesia_regional,high
+ASRA-USREG-001,ASRA,ASRA evidence-based recommendations for ultrasound-guided regional anesthesia,2016,https://rapm.bmj.com/,,ASRA,restricted-cds,anesthesia_regional,medium
+ESRA-ACUTE-001,ESRA,ESRA-ASRA Joint procedure-specific postoperative pain management PROSPECT working group recommendations,2021,https://esraeurope.org/prospect/,,ESRA,restricted-cds,anesthesia_pain,high
+ANZCA-PAIN-001,ANZCA,ANZCA acute pain management scientific evidence fifth edition,2020,https://www.anzca.edu.au/resources/college-publications/acute-pain-management-scientific-evidence,,ANZCA,restricted-cds,anesthesia_pain,high
+ASRA-MULTIMODAL-001,ASRA,ASRA-ESRA recommendations multimodal analgesia perioperative,2021,https://rapm.bmj.com/,,ASRA,restricted-cds,anesthesia_pain,high
+ASA-OPIOID-001,ASA,ASA practice guidelines opioid stewardship perioperative,2020,https://pubs.asahq.org/,,ASA,restricted-cds,anesthesia_pain,high
+CDC-OPIOID-001,CDC,CDC clinical practice guideline for prescribing opioids for pain,2022,https://www.cdc.gov/mmwr/volumes/71/rr/rr7103a1.htm,,CDC,allowed,anesthesia_pain,high
+SCCM-PADIS-001,SCCM,SCCM clinical practice guidelines for prevention and management of pain agitation/sedation delirium immobility and sleep disruption in adult ICU patients PADIS,2018,https://journals.lww.com/ccmjournal/Fulltext/2018/09000/Clinical_Practice_Guidelines_for_the_Prevention.29.aspx,,SCCM,restricted-cds,anesthesia_critical_care,high
+ESICM-VENT-001,ESICM,ESICM clinical practice guidelines mechanical ventilation,2017,https://link.springer.com/article/10.1007/s00134-017-4683-6,,ESICM,restricted-cds,anesthesia_critical_care,high
+ATS-VENT-001,ATS,ATS-ACCP-SCCM clinical practice guideline mechanical ventilation in adults with ARDS,2017,https://www.atsjournals.org/doi/10.1164/rccm.201703-0548ST,,ATS,restricted-cds,anesthesia_critical_care,high
+SCCM-DELIRIUM-001,SCCM,SCCM ICU delirium prevention and management,2018,https://www.sccm.org/,,SCCM,restricted-cds,anesthesia_critical_care,high
+ESPEN-ICU-001,ESPEN,ESPEN guideline on clinical nutrition in the intensive care unit,2019,https://www.espen.org/files/ESPEN-Guidelines/ESPEN_guideline_on_clinical_nutrition_in_the_intensive_care_unit.pdf,,ESPEN,restricted-cds,anesthesia_critical_care,high
+ASPEN-ICU-001,ASPEN,ASPEN-SCCM guidelines for the provision of nutrition support therapy in the adult critically ill patient,2016,https://onlinelibrary.wiley.com/doi/10.1002/jpen.10772,,ASPEN,restricted-cds,anesthesia_critical_care,high
+SCCM-FAMILY-001,SCCM,SCCM guidelines for family-centered care in neonatal pediatric and adult ICU,2017,https://journals.lww.com/ccmjournal/,,SCCM,restricted-cds,anesthesia_critical_care,medium
+SCA-CARDIAC-001,SCA,SCA Society of Cardiovascular Anesthesiologists guidelines transesophageal echocardiography intraoperative,2013,https://www.scahq.org/,,SCA,restricted-cds,anesthesia_general,medium
+EACTA-CARDIAC-001,EACTA,EACTA European Association of Cardiothoracic Anaesthesiology guidelines cardiac surgery anesthesia,2019,https://www.eacta.org/,,EACTA,restricted-cds,anesthesia_general,medium
+OAA-LABOR-001,OAA,OAA-AAGBI guidelines on the provision of obstetric anaesthesia services,2020,https://www.oaa-anaes.ac.uk/,,OAA,restricted-cds,anesthesia_obstetric,high
+ACOG-PPH-ANES-001,ACOG,ACOG practice bulletin postpartum hemorrhage anesthetic management,2017,https://www.acog.org/,,ACOG,restricted-cds,anesthesia_obstetric,high
+AHA-MCA-001,AHA,AHA scientific statement cardiac arrest in pregnancy,2015,https://www.ahajournals.org/doi/10.1161/CIR.0000000000000300,,AHA,restricted-cds,anesthesia_obstetric,high
+AHA-ACLS-001,AHA,AHA 2020 guidelines for cardiopulmonary resuscitation and emergency cardiovascular care advanced cardiac life support,2020,https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines,,AHA,restricted-cds,emergency_resuscitation,high
+ERC-ACLS-001,ERC,ERC European Resuscitation Council guidelines 2021 adult advanced life support,2021,https://www.erc.edu/guidelines,,ERC,restricted-cds,emergency_resuscitation,high
+ILCOR-RES-001,ILCOR,ILCOR International Liaison Committee on Resuscitation 2020 international consensus on CPR and emergency cardiovascular care science with treatment recommendations,2020,https://www.ilcor.org/,,ILCOR,restricted-cds,emergency_resuscitation,high
+AHA-BLS-001,AHA,AHA 2020 guidelines basic life support adult,2020,https://cpr.heart.org/,,AHA,restricted-cds,emergency_resuscitation,high
+ERC-BLS-001,ERC,ERC guidelines 2021 basic life support,2021,https://www.erc.edu/,,ERC,restricted-cds,emergency_resuscitation,high
+AAP-PALS-001,AAP,AAP-AHA Pediatric Advanced Life Support PALS guidelines,2020,https://cpr.heart.org/,,AAP,restricted-cds,emergency_pediatric,high
+AHA-PALS-001,AHA,AHA 2020 guidelines for cardiopulmonary resuscitation pediatric advanced life support,2020,https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines,,AHA,restricted-cds,emergency_pediatric,high
+ERC-PALS-001,ERC,ERC guidelines 2021 paediatric life support,2021,https://www.erc.edu/,,ERC,restricted-cds,emergency_pediatric,high
+AAP-NRP-001,AAP,AAP-AHA neonatal resuscitation program NRP eighth edition,2021,https://www.aap.org/en/learning/neonatal-resuscitation-program/,,AAP,restricted-cds,neonatology_resuscitation,high
+AHA-NRP-001,AHA,AHA 2020 guidelines neonatal resuscitation,2020,https://cpr.heart.org/,,AHA,restricted-cds,neonatology_resuscitation,high
+AHA-PCA-001,AHA,AHA 2020 guidelines post-cardiac arrest care,2020,https://cpr.heart.org/,,AHA,restricted-cds,emergency_resuscitation,high
+NCS-PCA-001,NCS,Neurocritical Care Society guidelines for the management of post-cardiac arrest brain injury,2023,https://www.neurocriticalcare.org/,,NCS,restricted-cds,emergency_resuscitation,high
+ILCOR-TTM-001,ILCOR,ILCOR consensus on targeted temperature management after cardiac arrest,2021,https://www.ilcor.org/,,ILCOR,restricted-cds,emergency_resuscitation,high
+ATLS-TRAUMA-001,ATLS,ATLS Advanced Trauma Life Support 10th edition student course manual,2018,https://www.facs.org/quality-programs/trauma/education/advanced-trauma-life-support/,,ATLS,restricted-cds,emergency_trauma,high
+EAST-TRAUMA-001,EAST,EAST Eastern Association for the Surgery of Trauma practice management guidelines hemorrhagic shock,2022,https://www.east.org/education-resources/practice-management-guidelines,,EAST,restricted-cds,emergency_trauma,high
+WSES-HS-001,WSES,WSES World Society of Emergency Surgery guidelines hemorrhagic shock and bleeding from severe pelvic fractures,2017,https://wjes.biomedcentral.com/,,WSES,restricted-cds,emergency_trauma,high
+BTF-TBI-001,BTF,Brain Trauma Foundation guidelines for the management of severe traumatic brain injury 4th edition,2017,https://www.braintrauma.org/coma/guidelines,,BTF,restricted-cds,emergency_trauma,high
+ASIA-SCI-001,ASIA,ASIA International Standards for Neurological Classification of Spinal Cord Injury,2019,https://asia-spinalinjury.org/,,ASIA,restricted-cds,emergency_trauma,high
+ABA-BURN-001,ABA,ABA American Burn Association advanced burn life support course manual,2018,https://ameriburn.org/education/abls-program/,,ABA,restricted-cds,emergency_trauma,high
+ISBI-BURN-001,ISBI,ISBI International Society for Burn Injuries practice guidelines for burn care,2016,https://www.worldburn.org/,,ISBI,restricted-cds,emergency_trauma,high
+EBA-BURN-001,EBA,EBA European Burns Association practice guidelines for burn care,2017,https://www.euroburn.org/,,EBA,restricted-cds,emergency_trauma,medium
+FEMA-MCI-001,FEMA,FEMA mass casualty incidents healthcare facility planning,2021,https://www.fema.gov/,,FEMA,allowed,emergency_trauma,medium
+WHO-MCI-001,WHO,WHO mass casualty management systems strategies and guidelines,2007,https://www.who.int/publications/i/item/9241596053,,WHO,allowed,emergency_trauma,medium
+NDMS-START-001,NDMS,NDMS START SALT triage system mass casualty triage,2020,https://www.phe.gov/preparedness/responders/ndms/,,NDMS,allowed,emergency_trauma,medium
+EAST-PEN-001,EAST,EAST practice management guideline penetrating neck trauma,2020,https://www.east.org/,,EAST,restricted-cds,emergency_trauma,medium
+ACMT-TOX-001,ACMT,ACMT American College of Medical Toxicology position statement antidotes recommendations,2018,https://www.acmt.net/Position_Statements.html,,ACMT,restricted-cds,emergency_environmental,high
+AACT-TOX-001,AACT,AACT American Academy of Clinical Toxicology position statement gastrointestinal decontamination,2013,https://www.tandfonline.com/journals/ictx20,,AACT,restricted-cds,emergency_environmental,medium
+GOLD-COPDEX-001,GOLD,GOLD global strategy for diagnosis management and prevention of COPD acute exacerbation,2024,https://goldcopd.org/2024-gold-report/,,GOLD,restricted-cds,emergency_cardiopulm,high
+NCS-SE-001,NCS,Neurocritical Care Society guideline status epilepticus evaluation and management,2012,https://www.neurocriticalcare.org/,,NCS,restricted-cds,emergency_neuro,high
+ILAE-SE-001,ILAE,ILAE classification and definition of status epilepticus,2015,https://www.ilae.org/,,ILAE,restricted-cds,emergency_neuro,high
+RCOG-PPH-001,RCOG,RCOG Green-top guideline 52 prevention and management of postpartum haemorrhage,2016,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/,,RCOG,restricted-cds,emergency_obstetric,high
+ACOG-PPH-001,ACOG,ACOG practice bulletin postpartum hemorrhage,2017,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,ACOG,restricted-cds,emergency_obstetric,high
+RCOG-ECLAMPSIA-001,RCOG,RCOG Green-top guideline severe pre-eclampsia and eclampsia management,2010,https://www.rcog.org.uk/,,RCOG,restricted-cds,emergency_obstetric,high
+ACOG-ECLAMPSIA-001,ACOG,ACOG practice bulletin gestational hypertension and preeclampsia,2020,https://www.acog.org/,,ACOG,restricted-cds,emergency_obstetric,high
+ISSHP-HBP-001,ISSHP,ISSHP International Society for the Study of Hypertension in Pregnancy classification diagnosis and management,2021,https://www.isshp.org/,,ISSHP,restricted-cds,emergency_obstetric,high
+RCOG-CORD-001,RCOG,RCOG Green-top guideline 50 umbilical cord prolapse,2014,https://www.rcog.org.uk/,,RCOG,restricted-cds,emergency_obstetric,medium
+RCOG-SD-001,RCOG,RCOG Green-top guideline 42 shoulder dystocia,2012,https://www.rcog.org.uk/,,RCOG,restricted-cds,emergency_obstetric,high
+AAP-NAT-001,AAP,AAP clinical report evaluation of suspected child physical abuse,2015,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_protection,high
+AAP-CROUP-001,AAP,AAP clinical report croup management,2017,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,emergency_pediatric,medium
+AAP-BRONCH-001,AAP,AAP clinical practice guideline diagnosis management and prevention of bronchiolitis,2014,https://publications.aap.org/pediatrics/article/134/5/e1474/,,AAP,restricted-cds,emergency_pediatric,high
+ERC-HYPO-001,ERC,ERC guidelines 2021 cardiac arrest in special circumstances hypothermia,2021,https://www.erc.edu/,,ERC,restricted-cds,emergency_environmental,high
+WMS-HYPO-001,WMS,WMS Wilderness Medical Society clinical practice guidelines for the out-of-hospital evaluation and treatment of accidental hypothermia,2019,https://www.wms.org/research/clinical-practice-guidelines,,WMS,restricted-cds,emergency_environmental,high
+ERC-DROWN-001,ERC,ERC guidelines 2021 drowning,2021,https://www.erc.edu/,,ERC,restricted-cds,emergency_environmental,high
+WMS-DROWN-001,WMS,WMS clinical practice guidelines for the prevention and treatment of drowning,2016,https://www.wms.org/,,WMS,restricted-cds,emergency_environmental,medium
+WMS-LIGHTNING-001,WMS,WMS practice guidelines for the prevention and treatment of lightning injuries,2014,https://www.wms.org/,,WMS,restricted-cds,emergency_environmental,low
+WMS-ALTITUDE-001,WMS,WMS clinical practice guidelines for the prevention and treatment of acute altitude illness,2024,https://www.wms.org/,,WMS,restricted-cds,emergency_environmental,medium
+UHMS-DCI-001,UHMS,UHMS Undersea and Hyperbaric Medical Society indications for hyperbaric oxygen therapy decompression illness,2019,https://www.uhms.org/resources/hbo-indications.html,,UHMS,restricted-cds,emergency_environmental,medium
+WMS-HEAT-001,WMS,WMS practice guidelines for the prevention and treatment of heat illness,2019,https://www.wms.org/,,WMS,restricted-cds,emergency_environmental,medium
+ACEP-PROCSED-001,ACEP,ACEP clinical policy procedural sedation and analgesia in the emergency department,2014,https://www.acep.org/patient-care/clinical-policies/,,ACEP,restricted-cds,emergency_resuscitation,high
+AAEM-PROCSED-001,AAEM,AAEM American Academy of Emergency Medicine clinical practice statement procedural sedation,2017,https://www.aaem.org/,,AAEM,restricted-cds,emergency_resuscitation,medium
+AAP-PROCSED-001,AAP,AAP clinical practice guideline pediatric procedural sedation and analgesia,2019,https://publications.aap.org/pediatrics/article/143/6/e20191000/,,AAP,restricted-cds,emergency_pediatric,high
+ACEP-MIGRAINE-001,ACEP,ACEP clinical policy critical issues acute headache,2019,https://www.acep.org/,,ACEP,restricted-cds,emergency_neuro,medium
+ACEP-RENAL-001,ACEP,ACEP clinical policy critical issues acute renal colic,2019,https://www.acep.org/,,ACEP,restricted-cds,emergency_cardiopulm,medium
+AAP-BRIGHT-001,AAP,AAP Bright Futures recommendations for preventive pediatric health care periodicity schedule,2024,https://www.aap.org/en/practice-management/bright-futures/bright-futures-recommendations-and-tools/,,AAP,restricted-cds,pediatrics_well_child,high
+AAP-PERIOD-001,AAP,AAP recommendations for preventive pediatric health care periodicity schedule,2023,https://publications.aap.org/pediatrics/article/153/4/e2023065138/,,AAP,restricted-cds,pediatrics_well_child,high
+AAP-DEVSCREEN-001,AAP,AAP clinical report promoting optimal development screening for behavioral and emotional problems,2015,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_well_child,high
+USPSTF-DEVSCREEN-001,USPSTF,USPSTF screening for speech and language delay and disorders in children recommendation,2015,https://www.uspreventiveservicestaskforce.org/,,USPSTF,allowed,pediatrics_well_child,medium
+WHO-GROWTH-001,WHO,WHO child growth standards methods and development,2006,https://www.who.int/tools/child-growth-standards,,WHO,allowed,pediatrics_well_child,high
+CDC-GROWTH-001,CDC,CDC growth charts for the United States,2002,https://www.cdc.gov/growthcharts/,,CDC,allowed,pediatrics_well_child,high
+AAP-FTT-001,AAP,AAP clinical report failure to thrive,2016,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_common_problems,medium
+AAP-INFANTNUT-001,AAP,AAP clinical report nutrition for infants and young children,2019,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_well_child,high
+ESPGHAN-INFANTNUT-001,ESPGHAN,ESPGHAN committee on nutrition complementary feeding position paper,2017,https://onlinelibrary.wiley.com/doi/10.1097/MPG.0000000000001454,,ESPGHAN,restricted-cds,pediatrics_well_child,high
+WHO-COMP-001,WHO,WHO guiding principles for complementary feeding of the breastfed child,2003,https://www.who.int/publications/i/item/9275124604,,WHO,allowed,pediatrics_well_child,high
+WHO-BF-001,WHO,WHO guideline counselling of women to improve breastfeeding practices,2018,https://www.who.int/publications/i/item/9789241550468,,WHO,allowed,neonatology_breastfeeding,high
+AAP-BF-001,AAP,AAP policy statement breastfeeding and the use of human milk,2022,https://publications.aap.org/pediatrics/article/150/1/e2022057988/,,AAP,restricted-cds,neonatology_breastfeeding,high
+ABM-BF-001,ABM,ABM Academy of Breastfeeding Medicine clinical protocol breastfeeding initiation,2022,https://www.bfmed.org/protocols,,ABM,restricted-cds,neonatology_breastfeeding,high
+ACIP-VAX-001,ACIP,ACIP recommended immunization schedule for children and adolescents United States,2024,https://www.cdc.gov/vaccines/hcp/imz-schedules/child-adolescent-age.html,,ACIP,allowed,pediatrics_well_child,high
+CDC-VAX-001,CDC,CDC general best practice guidelines for immunization,2023,https://www.cdc.gov/vaccines/hcp/acip-recs/general-recs/,,CDC,allowed,pediatrics_well_child,high
+AAP-VAX-001,AAP,AAP recommendations on immunization,2024,https://www.aap.org/en/patient-care/immunizations/,,AAP,restricted-cds,pediatrics_well_child,high
+WHO-VAX-001,WHO,WHO recommendations for routine immunization summary tables,2024,https://www.who.int/teams/immunization-vaccines-and-biologicals/policies/who-recommendations-for-routine-immunization,,WHO,allowed,pediatrics_well_child,high
+ACIP-CATCHUP-001,ACIP,ACIP catch-up immunization schedule by age and dose interval,2024,https://www.cdc.gov/vaccines/hcp/imz-schedules/catch-up.html,,ACIP,allowed,pediatrics_well_child,medium
+AAP-TRAVEL-001,AAP,AAP Red Book international travel pediatric vaccinations,2024,https://redbook.solutions.aap.org/,,AAP,restricted-cds,pediatrics_well_child,medium
+CDC-TRAVEL-001,CDC,CDC Yellow Book health information for international travel children,2024,https://wwwnc.cdc.gov/travel/page/yellowbook-home,,CDC,allowed,pediatrics_well_child,medium
+SAHM-ADOL-001,SAHM,SAHM Society for Adolescent Health and Medicine position paper confidentiality and adolescent health care,2016,https://www.adolescenthealth.org/Resources/Position-Papers.aspx,,SAHM,restricted-cds,pediatrics_adolescent,high
+AAP-ADOL-001,AAP,AAP clinical report achieving quality health services for adolescents,2019,https://publications.aap.org/pediatrics/article/145/2/e20193487/,,AAP,restricted-cds,pediatrics_adolescent,high
+AAP-SPORTS-001,AAP,AAP preparticipation physical evaluation fifth edition,2019,https://publications.aap.org/aapbooks/book/642/,,AAP,restricted-cds,pediatrics_adolescent,medium
+AAP-LGBTQ-001,AAP,AAP policy statement office-based care for LGBTQ youth,2018,https://publications.aap.org/pediatrics/article/142/4/e20182162/,,AAP,restricted-cds,pediatrics_adolescent,high
+SAHM-LGBTQ-001,SAHM,SAHM position paper recommendations for promoting the health and well-being of LGBTQ adolescents,2019,https://www.adolescenthealth.org/,,SAHM,restricted-cds,pediatrics_adolescent,medium
+AAP-CONTRA-001,AAP,AAP clinical report contraception for adolescents,2014,https://publications.aap.org/pediatrics/article/134/4/e1244/,,AAP,restricted-cds,pediatrics_adolescent,high
+USPSTF-MH-ADOL-001,USPSTF,USPSTF recommendation screening for depression and suicide risk in children and adolescents,2022,https://www.uspreventiveservicestaskforce.org/,,USPSTF,allowed,pediatrics_adolescent,high
+AAP-MH-ADOL-001,AAP,AAP recommendations on adolescent mental health screening,2018,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_adolescent,high
+AAP-SUBS-ADOL-001,AAP,AAP clinical report substance use screening brief intervention and referral to treatment for pediatricians,2016,https://publications.aap.org/pediatrics/article/138/1/e20161210/,,AAP,restricted-cds,pediatrics_adolescent,high
+AAP-FEVER-001,AAP,AAP clinical practice guideline evaluation and management of well-appearing febrile infants 8 to 60 days old,2021,https://publications.aap.org/pediatrics/article/148/2/e2021052228/,,AAP,restricted-cds,pediatrics_common_problems,high
+NICE-FEVER-001,NICE,NICE NG143 fever in under 5s assessment and initial management,2021,https://www.nice.org.uk/guidance/ng143,,NICE,restricted-cds,pediatrics_common_problems,high
+AAP-PHARYNG-001,AAP,AAP guidance acute pharyngitis management,2013,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_infectious,medium
+IDSA-PHARYNG-001,IDSA,IDSA practice guideline for the diagnosis and management of group A streptococcal pharyngitis,2012,https://academic.oup.com/cid/article/55/10/e86/321183,,IDSA,restricted-cds,pediatrics_infectious,high
+NICE-BRONCH-001,NICE,NICE NG9 bronchiolitis in children diagnosis and management,2021,https://www.nice.org.uk/guidance/ng9,,NICE,restricted-cds,pediatrics_common_problems,high
+NASPGHAN-CONST-001,NASPGHAN,NASPGHAN evaluation and treatment of functional constipation in infants and children,2014,https://journals.lww.com/jpgn/fulltext/2014/02000/Evaluation_and_Treatment_of_Functional.16.aspx,,NASPGHAN,restricted-cds,pediatrics_common_problems,high
+ESPGHAN-CONST-001,ESPGHAN,ESPGHAN-NASPGHAN evaluation and treatment of functional constipation in infants and children,2014,https://onlinelibrary.wiley.com/doi/,,ESPGHAN,restricted-cds,pediatrics_common_problems,high
+AAP-UTI-001,AAP,AAP clinical practice guideline urinary tract infection in febrile infants and young children,2016,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_common_problems,high
+NICE-UTI-001,NICE,NICE CG54 urinary tract infection in under 16s diagnosis and management,2018,https://www.nice.org.uk/guidance/cg54,,NICE,restricted-cds,pediatrics_common_problems,high
+AAP-SLEEP-001,AAP,AAP clinical practice guideline sleep problems in children and adolescents,2019,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_common_problems,medium
+NASPGHAN-FAP-001,NASPGHAN,NASPGHAN-Rome IV criteria functional abdominal pain disorders in children,2018,https://journals.lww.com/jpgn/,,NASPGHAN,restricted-cds,pediatrics_common_problems,medium
+ICCS-ENURESIS-001,ICCS,ICCS International Children's Continence Society standardization document on enuresis,2020,https://www.i-c-c-s.org/,,ICCS,restricted-cds,pediatrics_common_problems,high
+AAP-ENURESIS-001,AAP,AAP clinical report enuresis evaluation and management,2014,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_common_problems,medium
+AAP-ENCOPRESIS-001,AAP,AAP clinical report functional fecal incontinence,2014,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_common_problems,medium
+AAP-REDBOOK-001,AAP,AAP Red Book report of the committee on infectious diseases 2024,2024,https://redbook.solutions.aap.org/,,AAP,restricted-cds,pediatrics_infectious,high
+AAP-SEPSIS-001,AAP,AAP clinical practice guideline neonatal early-onset sepsis evaluation and management,2018,https://publications.aap.org/pediatrics/article/142/6/e20182894/,,AAP,restricted-cds,neonatology_screening,high
+CDC-TORCH-001,CDC,CDC congenital infections screening TORCH recommendations,2022,https://www.cdc.gov/,,CDC,allowed,pediatrics_infectious,medium
+AAP-HSV-NEO-001,AAP,AAP clinical report guidance on management of asymptomatic neonates born to women with active genital herpes,2013,https://publications.aap.org/pediatrics/article/131/2/e635/,,AAP,restricted-cds,pediatrics_infectious,high
+AAP-PERTUSSIS-001,AAP,AAP guidance pertussis prevention and management,2024,https://redbook.solutions.aap.org/,,AAP,restricted-cds,pediatrics_infectious,medium
+CDC-PERTUSSIS-001,CDC,CDC pertussis whooping cough clinical guidance,2022,https://www.cdc.gov/pertussis/clinical/index.html,,CDC,allowed,pediatrics_infectious,medium
+PIDS-CAP-001,PIDS,PIDS-IDSA clinical practice guidelines management of community-acquired pneumonia in infants and children,2011,https://academic.oup.com/cid/article/53/7/e25/424286,,PIDS,restricted-cds,pediatrics_infectious,high
+IDSA-PEDCAP-001,IDSA,IDSA practice guidelines pneumonia in pediatric patients,2011,https://academic.oup.com/cid/,,IDSA,restricted-cds,pediatrics_infectious,high
+RCPCH-CAB-001,RCPCH,RCPCH child protection companion safeguarding children and young people roles and competences,2019,https://www.rcpch.ac.uk/resources/child-protection-companion,,RCPCH,restricted-cds,pediatrics_protection,high
+AAP-CHILD-NEGLECT-001,AAP,AAP clinical report recognition and management of medical neglect,2020,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_protection,high
+AAP-SEXABUSE-001,AAP,AAP clinical report evaluation of children in the primary care setting when sexual abuse is suspected,2013,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_protection,high
+SAHM-HEEADSSS-001,SAHM,SAHM HEEADSSS adolescent psychosocial assessment guideline,2014,https://www.adolescenthealth.org/,,SAHM,restricted-cds,pediatrics_adolescent,medium
+ESPNIC-PREM-001,ESPNIC,ESPNIC consensus management of premature infants in the NICU,2020,https://www.espnic.eu/,,ESPNIC,restricted-cds,neonatology_premature,high
+ESPGHAN-RDS-001,ESPGHAN,European consensus guidelines on the management of respiratory distress syndrome 2022 update,2023,https://www.karger.com/Article/Fulltext/528914,,ESPGHAN,restricted-cds,neonatology_premature,high
+AAP-SURF-001,AAP,AAP clinical report surfactant replacement therapy for preterm and term neonates with respiratory distress,2014,https://publications.aap.org/pediatrics/article/133/1/156/,,AAP,restricted-cds,neonatology_premature,high
+AAP-BPD-001,AAP,AAP recommendations bronchopulmonary dysplasia outpatient management,2008,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,neonatology_premature,medium
+ATS-BPD-001,ATS,ATS clinical practice guideline outpatient respiratory management of infants children and adolescents with post-prematurity respiratory disease,2021,https://www.atsjournals.org/,,ATS,restricted-cds,neonatology_premature,high
+AAP-APNEA-001,AAP,AAP clinical report apnea of prematurity,2016,https://publications.aap.org/pediatrics/article/137/1/e20153757/,,AAP,restricted-cds,neonatology_premature,high
+AAP-NEC-001,AAP,AAP clinical report necrotizing enterocolitis,2022,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,neonatology_premature,high
+ESPGHAN-NEC-001,ESPGHAN,ESPGHAN position paper necrotizing enterocolitis prevention and management,2018,https://onlinelibrary.wiley.com/doi/,,ESPGHAN,restricted-cds,neonatology_premature,high
+AAP-JAUNDICE-001,AAP,AAP clinical practice guideline revision management of hyperbilirubinemia in the newborn infant 35 or more weeks of gestation,2022,https://publications.aap.org/pediatrics/article/150/3/e2022058859/,,AAP,restricted-cds,neonatology_jaundice,high
+NICE-JAUNDICE-001,NICE,NICE CG98 jaundice in newborn babies under 28 days,2023,https://www.nice.org.uk/guidance/cg98,,NICE,restricted-cds,neonatology_jaundice,high
+NICE-NEONATAL-SEP-001,NICE,NICE NG195 neonatal infection antibiotics for prevention and treatment,2021,https://www.nice.org.uk/guidance/ng195,,NICE,restricted-cds,neonatology_screening,high
+AAP-HIE-001,AAP,AAP clinical report hypoxic-ischemic encephalopathy and therapeutic hypothermia,2014,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,neonatology_resuscitation,high
+ICN-HIE-001,ICN,International Cooling Network consensus on neonatal therapeutic hypothermia,2020,https://www.icnneonatal.org/,,ICN,restricted-cds,neonatology_resuscitation,medium
+PES-HYPO-001,PES,Pediatric Endocrine Society recommendations from the PES on the evaluation and management of persistent hypoglycemia in neonates,2015,https://www.jpeds.com/article/S0022-3476(15)00220-0/fulltext,,PES,restricted-cds,neonatology_premature,high
+RUSP-NBS-001,RUSP,RUSP Recommended Uniform Screening Panel newborn screening,2024,https://www.hrsa.gov/advisory-committees/heritable-disorders/rusp,,RUSP,allowed,neonatology_screening,high
+ACMG-NBS-001,ACMG,ACMG newborn screening ACT sheets and confirmatory algorithms,2022,https://www.acmg.net/ACMG/Medical-Genetics-Practice-Resources/ACT_Sheets_and_Algorithms.aspx,,ACMG,restricted-cds,genetics_screening,high
+JCIH-HEARING-001,JCIH,JCIH Joint Committee on Infant Hearing position statement principles and guidelines for early hearing detection,2019,https://www.jcih.org/,,JCIH,restricted-cds,neonatology_screening,high
+AAP-CCHD-001,AAP,AAP recommendations strategies for implementing screening for critical congenital heart disease,2011,https://publications.aap.org/pediatrics/article/128/5/e1259/,,AAP,restricted-cds,neonatology_screening,high
+AHA-CCHD-001,AHA,AHA scientific statement role of pulse oximetry in examining newborns for congenital heart disease,2019,https://www.ahajournals.org/,,AHA,restricted-cds,neonatology_screening,medium
+AAO-ROP-001,AAO,AAO-AAP-AAPOS screening examination of premature infants for retinopathy of prematurity,2018,https://publications.aap.org/pediatrics/article/142/6/e20183061/,,AAO,restricted-cds,neonatology_screening,high
+ACOG-CORDCLAMP-001,ACOG,ACOG Committee Opinion delayed umbilical cord clamping after birth,2020,https://www.acog.org/,,ACOG,restricted-cds,neonatology_resuscitation,high
+WHO-CORDCLAMP-001,WHO,WHO recommendations on optimal timing of cord clamping for the prevention of iron deficiency anemia in infants,2014,https://www.who.int/,,WHO,allowed,neonatology_resuscitation,medium
+AAP-VITK-001,AAP,AAP clinical report controversies concerning vitamin K and the newborn,2003,https://publications.aap.org/pediatrics/article/112/1/191/,,AAP,restricted-cds,neonatology_screening,high
+RCPCH-VITK-001,RCPCH,RCPCH vitamin K prophylaxis in newborn infants,2018,https://www.rcpch.ac.uk/,,RCPCH,restricted-cds,neonatology_screening,medium
+AAP-EYEPRO-001,AAP,AAP recommendations ophthalmia neonatorum prophylaxis,2019,https://publications.aap.org/,,AAP,restricted-cds,neonatology_screening,medium
+USPSTF-EYEPRO-001,USPSTF,USPSTF ocular prophylaxis for gonococcal ophthalmia neonatorum recommendation,2019,https://www.uspreventiveservicestaskforce.org/,,USPSTF,allowed,neonatology_screening,medium
+NSGC-COUNSEL-001,NSGC,NSGC National Society of Genetic Counselors practice guidelines genetic counseling and testing,2023,https://www.nsgc.org/Policy-Research-and-Publications/Practice-Guidelines,,NSGC,restricted-cds,genetics_counseling,high
+ESHG-COUNSEL-001,ESHG,ESHG European Society of Human Genetics recommendations professional ethics and counseling,2022,https://www.eshg.org/,,ESHG,restricted-cds,genetics_counseling,high
+ACMG-COUNSEL-001,ACMG,ACMG clinical genetics evaluation in identifying the etiology of autism spectrum disorder,2013,https://www.acmg.net/,,ACMG,restricted-cds,genetics_counseling,medium
+ACOG-CARRIER-001,ACOG,ACOG Committee Opinion 690 carrier screening for genetic conditions,2017,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2017/03/carrier-screening-for-genetic-conditions,,ACOG,restricted-cds,genetics_screening,high
+ACMG-CARRIER-001,ACMG,ACMG screening for autosomal recessive and X-linked conditions during pregnancy and preconception,2021,https://www.acmg.net/,,ACMG,restricted-cds,genetics_screening,high
+ACMG-NIPT-001,ACMG,ACMG noninvasive prenatal screening for fetal aneuploidy and microdeletions practice resource,2023,https://www.acmg.net/,,ACMG,restricted-cds,genetics_screening,high
+ACOG-NIPT-001,ACOG,ACOG practice bulletin screening for fetal chromosomal abnormalities,2020,https://www.acog.org/,,ACOG,restricted-cds,genetics_screening,high
+ISPD-NIPT-001,ISPD,ISPD International Society for Prenatal Diagnosis position statement noninvasive prenatal testing,2020,https://ispdhome.org/,,ISPD,restricted-cds,genetics_screening,medium
+ACMG-PRENATAL-001,ACMG,ACMG practice guideline prenatal genetic diagnostic testing,2016,https://www.acmg.net/,,ACMG,restricted-cds,genetics_screening,high
+ISUOG-PRENATAL-001,ISUOG,ISUOG practice guidelines invasive procedures for prenatal diagnosis,2016,https://www.isuog.org/,,ISUOG,restricted-cds,genetics_screening,medium
+ABMGG-PED-001,ABMGG,ABMGG American Board of Medical Genetics evaluation of pediatric patient core competencies,2022,https://www.abmgg.org/,,ABMGG,restricted-cds,genetics_counseling,medium
+ACMG-PED-001,ACMG,ACMG points to consider in the clinical application of genomic sequencing,2012,https://www.acmg.net/,,ACMG,restricted-cds,genetics_counseling,high
+SIMD-IEM-001,SIMD,SIMD Society for Inherited Metabolic Disorders consensus on inborn errors of metabolism diagnosis,2018,https://www.simd.org/,,SIMD,restricted-cds,genetics_metabolic,high
+ACMG-PKU-001,ACMG,ACMG phenylalanine hydroxylase deficiency diagnosis and management guideline,2014,https://www.acmg.net/,,ACMG,restricted-cds,genetics_metabolic,high
+ACMG-GAL-001,ACMG,ACMG diagnosis and management of classic galactosemia practice guideline,2017,https://www.acmg.net/,,ACMG,restricted-cds,genetics_metabolic,medium
+ACMG-MSUD-001,ACMG,ACMG maple syrup urine disease diagnosis and management,2014,https://www.acmg.net/,,ACMG,restricted-cds,genetics_metabolic,medium
+UCDC-UCD-001,UCDC,UCDC Urea Cycle Disorders Consortium consensus diagnosis and management of urea cycle disorders,2019,https://www.rarediseasesnetwork.org/cms/ucdc,,UCDC,restricted-cds,genetics_metabolic,high
+ACMG-UCD-001,ACMG,ACMG suggested guidelines for the diagnosis and management of urea cycle disorders,2013,https://www.acmg.net/,,ACMG,restricted-cds,genetics_metabolic,high
+MMS-MITO-001,MMS,Mitochondrial Medicine Society consensus recommendations for mitochondrial disease patient care,2017,https://www.mitosoc.org/,,MMS,restricted-cds,genetics_metabolic,high
+ACMG-LSD-001,ACMG,ACMG diagnosis and management of lysosomal storage diseases practice resource,2020,https://www.acmg.net/,,ACMG,restricted-cds,genetics_metabolic,high
+ICMG-MARFAN-001,ICMG,Revised Ghent nosology for the Marfan syndrome,2010,https://jmg.bmj.com/content/47/7/476,,ICMG,restricted-cds,genetics_connective,high
+AHA-MARFAN-001,AHA,AHA scientific statement diagnosis and management of Marfan syndrome,2022,https://www.ahajournals.org/,,AHA,restricted-cds,genetics_connective,high
+EDS-CONS-001,EDS,2017 international classification of the Ehlers-Danlos syndromes,2017,https://onlinelibrary.wiley.com/doi/10.1002/ajmg.c.31552,,EDS,restricted-cds,genetics_connective,high
+HRS-LQTS-001,HRS,HRS-EHRA-APHRS expert consensus statement on the diagnosis and management of patients with inherited primary arrhythmia syndromes,2013,https://www.hrsonline.org/,,HRS,restricted-cds,genetics_cardiac,high
+HRS-HCM-001,HRS,HRS expert consensus statement on the genetic evaluation of cardiomyopathy,2024,https://www.hrsonline.org/,,HRS,restricted-cds,genetics_cardiac,high
+NCCN-HEREDITARY-001,NCCN,NCCN clinical practice guidelines in oncology genetic familial high-risk assessment breast ovarian and pancreatic,2024,https://www.nccn.org/guidelines/guidelines-detail?category=2&id=1503,,NCCN,restricted-cds,genetics_cancer,high
+NCCN-LYNCH-001,NCCN,NCCN clinical practice guidelines genetic familial high-risk assessment colorectal,2024,https://www.nccn.org/,,NCCN,restricted-cds,genetics_cancer,high
+ACMG-BRCA-001,ACMG,ACMG points to consider for individuals at increased risk of hereditary breast and ovarian cancer syndromes,2021,https://www.acmg.net/,,ACMG,restricted-cds,genetics_cancer,high
+ACMG-LYNCH-001,ACMG,ACMG technical standard and guidelines for hereditary nonpolyposis colon cancer Lynch syndrome,2014,https://www.acmg.net/,,ACMG,restricted-cds,genetics_cancer,high
+ESHG-CANCER-001,ESHG,ESHG joint statement on hereditary breast and ovarian cancer testing,2019,https://www.eshg.org/,,ESHG,restricted-cds,genetics_cancer,medium
+CPIC-PGX-001,CPIC,CPIC Clinical Pharmacogenetics Implementation Consortium guideline overview,2024,https://cpicpgx.org/guidelines/,,CPIC,allowed,genetics_pharmacogenomic,high
+ACMG-VARIANT-001,ACMG,ACMG-AMP standards and guidelines for the interpretation of sequence variants,2015,https://www.acmg.net/PDFLibrary/Variant-Classification-Standards.pdf,,ACMG,restricted-cds,genetics_counseling,high
+ACMG-WES-001,ACMG,ACMG points to consider in the clinical application of whole exome and whole genome sequencing,2021,https://www.acmg.net/,,ACMG,restricted-cds,genetics_counseling,high
+ESHG-WES-001,ESHG,ESHG whole-genome sequencing in health care recommendations,2018,https://www.eshg.org/,,ESHG,restricted-cds,genetics_counseling,medium
+ESHRE-PGT-001,ESHRE,ESHRE good practice recommendations on add-ons in reproductive medicine and PGT,2023,https://www.eshre.eu/Guidelines-and-Legal,,ESHRE,restricted-cds,genetics_screening,high
+ASRM-PGT-001,ASRM,ASRM committee opinion preimplantation genetic testing recommendations,2020,https://www.asrm.org/practice-guidance/,,ASRM,restricted-cds,genetics_screening,high
+AHA-STROKE-REHAB-001,AHA,AHA-ASA guidelines for adult stroke rehabilitation and recovery,2016,https://www.ahajournals.org/doi/10.1161/STR.0000000000000098,,AHA,restricted-cds,pmr_stroke,high
+ESO-STROKE-REHAB-001,ESO,ESO European Stroke Organisation guidelines for stroke rehabilitation,2021,https://eso-stroke.org/guidelines/,,ESO,restricted-cds,pmr_stroke,high
+WSO-STROKE-001,WSO,WSO World Stroke Organization roadmap for quality stroke care,2020,https://www.world-stroke.org/,,WSO,restricted-cds,pmr_stroke,medium
+BSRM-SPAS-001,BSRM,BSRM British Society of Rehabilitation Medicine guidelines for the management of adults with spasticity,2018,https://www.bsrm.org.uk/publications,,BSRM,restricted-cds,pmr_stroke,high
+AAN-SPAS-001,AAN,AAN practice guideline summary botulinum neurotoxin for the treatment of spasticity in adults and children,2016,https://www.aan.com/Guidelines,,AAN,restricted-cds,pmr_stroke,high
+AHA-APHASIA-001,AHA,AHA scientific statement aphasia and stroke,2016,https://www.ahajournals.org/,,AHA,restricted-cds,pmr_stroke,medium
+ASIA-REHAB-001,ASIA,ASIA international standards for the classification of spinal cord injury and rehabilitation,2019,https://asia-spinalinjury.org/,,ASIA,restricted-cds,pmr_sci,high
+SCI-BOWELBLAD-001,SCI,Consortium for Spinal Cord Medicine clinical practice guideline bladder management for adults with spinal cord injury,2020,https://www.pva.org/research-resources/publications/clinical-practice-guidelines/,,SCI,restricted-cds,pmr_sci,high
+SCI-AD-001,SCI,Consortium for Spinal Cord Medicine clinical practice guideline acute management of autonomic dysreflexia,2020,https://www.pva.org/,,SCI,restricted-cds,pmr_sci,high
+AAN-CONCUSSION-001,AAN,AAN practice guideline summary evaluation and management of concussion in sports,2019,https://www.aan.com/Guidelines/,,AAN,restricted-cds,pmr_tbi,high
+CISG-CONCUSSION-001,CISG,Consensus statement on concussion in sport sixth international conference,2023,https://bjsm.bmj.com/content/57/11/695,,CISG,restricted-cds,pmr_tbi,high
+BTF-TBI-REHAB-001,BTF,BTF guidelines for the rehabilitation of traumatic brain injury,2020,https://www.braintrauma.org/,,BTF,restricted-cds,pmr_tbi,medium
+AAPMR-AMPUT-001,AAPMR,AAPM&R clinical practice guideline lower limb amputation rehabilitation,2020,https://www.aapmr.org/,,AAPMR,restricted-cds,pmr_amputation,high
+AAPMR-PHANTOM-001,AAPMR,AAPM&R consensus phantom limb pain management,2019,https://www.aapmr.org/,,AAPMR,restricted-cds,pmr_amputation,medium
+AAPMR-PROSTH-001,AAPMR,AAPM&R prosthetic prescription clinical guidance,2021,https://www.aapmr.org/,,AAPMR,restricted-cds,pmr_amputation,medium
+AACVPR-CARDIAC-001,AACVPR,AACVPR cardiopulmonary rehabilitation guidelines fifth edition,2020,https://www.aacvpr.org/,,AACVPR,restricted-cds,pmr_cardiac,high
+ESC-CARDIAC-REHAB-001,ESC,ESC secondary prevention and rehabilitation guidelines,2021,https://www.escardio.org/Guidelines,,ESC,restricted-cds,pmr_cardiac,high
+ATS-PULMRH-001,ATS,ATS-ERS official statement key concepts and advances in pulmonary rehabilitation,2013,https://www.atsjournals.org/doi/10.1164/rccm.201309-1634ST,,ATS,restricted-cds,pmr_pulmonary,high
+ERS-PULMRH-001,ERS,ERS pulmonary rehabilitation in COPD position paper,2018,https://erj.ersjournals.com/,,ERS,restricted-cds,pmr_pulmonary,high
+ASCO-SURVIVOR-001,ASCO,ASCO survivorship care guidelines overview,2021,https://www.asco.org/practice-patients/guidelines/survivorship,,ASCO,restricted-cds,pmr_cancer,high
+AACPDM-CP-001,AACPDM,AACPDM American Academy for Cerebral Palsy and Developmental Medicine care pathway cerebral palsy,2020,https://www.aacpdm.org/publications/care-pathways,,AACPDM,restricted-cds,pmr_pediatric,high
+BSRM-CP-001,BSRM,BSRM clinical guidelines for the management of children with cerebral palsy,2018,https://www.bsrm.org.uk/,,BSRM,restricted-cds,pmr_pediatric,medium
+SBA-SB-001,SBA,Spina Bifida Association guidelines for the care of people with spina bifida,2018,https://www.spinabifidaassociation.org/guidelines/,,SBA,restricted-cds,pmr_pediatric,high
+IASP-CP-001,IASP,IASP International Association for the Study of Pain clinical recommendations chronic pain rehabilitation,2020,https://www.iasp-pain.org/,,IASP,restricted-cds,pmr_pain,high
+AAPMR-CP-001,AAPMR,AAPM&R clinical guidance chronic pain rehabilitation interdisciplinary,2021,https://www.aapmr.org/,,AAPMR,restricted-cds,pmr_pain,high
+AAPMR-MSK-001,AAPMR,AAPM&R clinical practice guideline musculoskeletal rehabilitation,2020,https://www.aapmr.org/,,AAPMR,restricted-cds,pmr_msk,high
+ESPRM-MSK-001,ESPRM,ESPRM European Society of Physical and Rehabilitation Medicine evidence-based recommendations,2020,https://www.esprm.net/,,ESPRM,restricted-cds,pmr_msk,medium
+AAPMR-SPINE-001,AAPMR,AAPM&R consensus low back pain rehabilitation,2020,https://www.aapmr.org/,,AAPMR,restricted-cds,pmr_msk,high
+AAPMR-GERIA-001,AAPMR,AAPM&R clinical practice geriatric rehabilitation,2019,https://www.aapmr.org/,,AAPMR,restricted-cds,pmr_msk,medium
+BSRM-VEST-001,BSRM,BSRM consensus statement vestibular rehabilitation,2020,https://www.bsrm.org.uk/,,BSRM,restricted-cds,pmr_msk,medium
+BSRM-BOWEL-001,BSRM,BSRM clinical guidelines bowel and bladder rehabilitation,2018,https://www.bsrm.org.uk/,,BSRM,restricted-cds,pmr_msk,medium
+AAD-PHOTO-001,AAD,AAD guidelines photoallergic and phototoxic reactions,2018,https://www.jaad.org/,,AAD,restricted-cds,dermatology_drug,low
+AAD-FOL-001,AAD,AAD guidelines folliculitis and furunculosis management,2017,https://www.jaad.org/,,AAD,restricted-cds,dermatology_infectious,low
+AAD-BEDBUG-001,AAD,AAD guidelines bedbugs identification and management,2017,https://www.jaad.org/,,AAD,restricted-cds,dermatology_infectious,low
+AAD-TELOGEN-001,AAD,AAD guidelines telogen effluvium evaluation,2017,https://www.jaad.org/,,AAD,restricted-cds,dermatology_acne,low
+APA-DISSOC-001,APA,APA practice guidance dissociative disorders,2018,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_personality,low
+APA-SOMATIC-001,APA,APA practice guidance somatic symptom and related disorders,2019,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_personality,medium
+APA-FND-001,APA,APA practice guidance functional neurological disorder management,2021,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_personality,medium
+NICE-LATELIFE-DEP-001,NICE,NICE NG222 depression in adults treatment in older adults,2022,https://www.nice.org.uk/guidance/ng222,,NICE,restricted-cds,psychiatry_geriatric,medium
+NICE-LATELIFE-ANX-001,NICE,NICE recommendations late-life anxiety,2019,https://www.nice.org.uk/,,NICE,restricted-cds,psychiatry_geriatric,medium
+ESAIC-PEDS-001,ESAIC,ESAIC consensus pediatric perioperative care airway,2018,https://journals.lww.com/ejanaesthesiology/,,ESAIC,restricted-cds,anesthesia_pediatric,medium
+ANZICS-FAMILY-001,ANZICS,ANZICS Australian and New Zealand Intensive Care Society family support guidelines,2020,https://www.anzics.com.au/,,ANZICS,restricted-cds,anesthesia_critical_care,medium
+EAST-POLY-001,EAST,EAST practice management guideline polytrauma,2020,https://www.east.org/,,EAST,restricted-cds,emergency_trauma,medium
+ESC-ACS-001,ESC,ESC guidelines for the management of acute coronary syndromes,2023,https://www.escardio.org/Guidelines,,ESC,restricted-cds,emergency_cardiopulm,high
+AHA-STROKE-001,AHA,AHA-ASA guidelines for the early management of patients with acute ischemic stroke,2019,https://www.ahajournals.org/doi/10.1161/STR.0000000000000211,,AHA,restricted-cds,emergency_neuro,high
+GINA-EMERG-001,GINA,GINA Global Strategy for Asthma Management and Prevention severe asthma exacerbation,2024,https://ginasthma.org/,,GINA,restricted-cds,emergency_cardiopulm,high
+BTS-PNEUMOTHORAX-001,BTS,BTS pleural disease guideline pneumothorax management,2023,https://www.brit-thoracic.org.uk/,,BTS,restricted-cds,emergency_cardiopulm,high
+IDSA-MENINGITIS-001,IDSA,IDSA practice guidelines for the management of bacterial meningitis,2017,https://academic.oup.com/cid/,,IDSA,restricted-cds,emergency_neuro,high
+BAD-CHILD-AD-001,BAD,BAD guidelines pediatric atopic dermatitis biologic therapy,2024,https://www.bad.org.uk/,,BAD,restricted-cds,dermatology_pediatric,medium
+AAP-CHILD-AD-001,AAP,AAP clinical report management of atopic dermatitis in children,2014,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,dermatology_pediatric,high
+EWMA-DFU-001,EWMA,EWMA position document hard-to-heal wounds diabetic foot,2018,https://ewma.org/,,EWMA,restricted-cds,dermatology_pruritus,medium
+EWMA-VLU-001,EWMA,EWMA position document venous leg ulcers,2016,https://ewma.org/,,EWMA,restricted-cds,dermatology_pruritus,medium
+NICE-PRESS-001,NICE,NICE CG179 pressure ulcers prevention and management,2014,https://www.nice.org.uk/guidance/cg179,,NICE,restricted-cds,dermatology_pruritus,high
+WUWHS-WOUND-001,WUWHS,WUWHS World Union of Wound Healing Societies consensus document on wound exudate,2019,https://wuwhs2020.com/,,WUWHS,restricted-cds,dermatology_pruritus,medium
+AAD-SUN-001,AAD,AAD guidelines sun protection,2022,https://www.aad.org/,,AAD,restricted-cds,dermatology_pruritus,medium
+RCPSYCH-PERINATAL-002,RCPSYCH,RCPsych perinatal mental health competency framework,2018,https://www.rcpsych.ac.uk/,,RCPSYCH,restricted-cds,psychiatry_pediatric,medium
+APA-CHILD-TRAUMA-001,APA,APA position child trauma assessment and treatment,2020,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_pediatric,medium
+AACAP-DBD-001,AACAP,AACAP practice parameter for the assessment and treatment of children and adolescents with disruptive behavior disorders,2019,https://www.aacap.org/,,AACAP,restricted-cds,psychiatry_pediatric,medium
+AAP-DBD-001,AAP,AAP clinical report management of disruptive behavior disorders in primary care,2018,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,psychiatry_pediatric,medium
+AACAP-TIC-001,AACAP,AACAP practice parameter for the assessment and treatment of children and adolescents with tic disorders,2013,https://www.aacap.org/,,AACAP,restricted-cds,psychiatry_neurodev,medium
+APA-TIC-001,APA,APA practice guidance tic disorders treatment,2019,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_neurodev,medium
+AAD-DRUGERUPT-001,AAD,AAD guidelines drug eruption diagnostic approach,2019,https://www.jaad.org/,,AAD,restricted-cds,dermatology_drug,medium
+EADV-DRUGERUPT-001,EADV,EADV consensus on cutaneous adverse drug reactions evaluation,2018,https://onlinelibrary.wiley.com/,,EADV,restricted-cds,dermatology_drug,medium
+NHMRC-DEP-001,NHMRC,NHMRC clinical practice guidelines for depression,2020,https://www.nhmrc.gov.au/,,NHMRC,restricted-cds,psychiatry_mood,medium
+ESPGHAN-PREMNUT-001,ESPGHAN,ESPGHAN enteral nutrition for preterm infants commentary on recommendations,2022,https://onlinelibrary.wiley.com/,,ESPGHAN,restricted-cds,neonatology_premature,high
+AAP-NICU-DISCHARGE-001,AAP,AAP clinical report hospital discharge of the high-risk neonate,2008,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,neonatology_premature,medium
+AAP-NEWBORN-001,AAP,AAP guidelines for perinatal care eighth edition newborn transition,2017,https://www.aap.org/,,AAP,restricted-cds,neonatology_resuscitation,high
+AHA-CCHD-002,AHA,AHA scientific statement screening for critical congenital heart disease pulse oximetry implementation,2020,https://www.ahajournals.org/,,AHA,restricted-cds,neonatology_screening,medium
+ABM-PROTOCOL-LATCH-001,ABM,ABM clinical protocol breastfeeding initiation supporting maternal milk supply,2023,https://www.bfmed.org/protocols,,ABM,restricted-cds,neonatology_breastfeeding,high
+APA-MALEAN-001,APA,APA position statement preanesthetic evaluation core principles,2018,https://psychiatryonline.org/,,APA,restricted-cds,anesthesia_general,low
+ASA-CARDIAC-001,ASA,ASA guidelines perioperative management of patients with cardiac implantable electronic devices,2020,https://pubs.asahq.org/anesthesiology/,,ASA,restricted-cds,anesthesia_general,medium
+ESAIC-PERIOP-CV-001,ESAIC,ESAIC perioperative cardiovascular evaluation guideline,2022,https://journals.lww.com/ejanaesthesiology/,,ESAIC,restricted-cds,anesthesia_general,high
+ANZCA-OPIOID-001,ANZCA,ANZCA position statement on the use of slow-release opioids in acute pain,2022,https://www.anzca.edu.au/,,ANZCA,restricted-cds,anesthesia_pain,high
+IASP-NEUROPATHIC-001,IASP,IASP NeuPSIG recommendations on the pharmacological treatment of neuropathic pain,2015,https://www.iasp-pain.org/,,IASP,restricted-cds,anesthesia_pain,high
+ERAS-COLON-001,ERAS,ERAS Society guidelines for perioperative care in elective colorectal surgery,2018,https://erassociety.org/guidelines/,,ERAS,restricted-cds,anesthesia_pain,high
+IDSA-NSTI-002,IDSA,IDSA guidance necrotizing fasciitis surgical and antimicrobial management,2014,https://academic.oup.com/cid/,,IDSA,restricted-cds,dermatology_infectious,high
+BAD-NF-001,BAD,BAD guidelines for the management of necrotizing fasciitis,2022,https://www.bad.org.uk/,,BAD,restricted-cds,dermatology_infectious,medium
+AAP-INFANT-FEEDING-001,AAP,AAP policy statement breastfeeding and the use of human milk,2022,https://publications.aap.org/pediatrics/article/150/1/e2022057988/,,AAP,restricted-cds,neonatology_breastfeeding,high
+ABM-FORMULA-001,ABM,ABM clinical protocol supplementary feedings in the healthy term breastfed neonate,2017,https://www.bfmed.org/protocols,,ABM,restricted-cds,neonatology_breastfeeding,medium
+NICE-MAT-MH-001,NICE,NICE CG192 antenatal and postnatal mental health clinical management and service guidance,2020,https://www.nice.org.uk/guidance/cg192,,NICE,restricted-cds,psychiatry_mood,high
+AAP-CHILD-PSYCH-001,AAP,AAP clinical report mental health competencies for pediatric practice,2019,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,psychiatry_pediatric,high
+AAP-WELLCHILD-001,AAP,AAP Bright Futures guidelines for health supervision of infants children and adolescents fourth edition,2017,https://brightfutures.aap.org/,,AAP,restricted-cds,pediatrics_well_child,high
+BSRM-AMPUT-001,BSRM,BSRM amputee and prosthetic rehabilitation standards,2018,https://www.bsrm.org.uk/,,BSRM,restricted-cds,pmr_amputation,medium
+ESPRM-CARDIAC-001,ESPRM,ESPRM clinical recommendations cardiac rehabilitation evidence-based practice,2019,https://www.esprm.net/,,ESPRM,restricted-cds,pmr_cardiac,medium
+AAPMR-VEST-001,AAPMR,AAPM&R consensus vestibular rehabilitation,2019,https://www.aapmr.org/,,AAPMR,restricted-cds,pmr_msk,low
+AAPMR-CANCER-001,AAPMR,AAPM&R cancer rehabilitation clinical practice consensus,2021,https://www.aapmr.org/,,AAPMR,restricted-cds,pmr_cancer,high
+AAPMR-LYMPH-001,AAPMR,AAPM&R clinical practice guidance lymphedema rehabilitation,2020,https://www.aapmr.org/,,AAPMR,restricted-cds,pmr_cancer,medium
+AHA-DYSPHAGIA-001,AHA,AHA scientific statement post-stroke dysphagia management,2018,https://www.ahajournals.org/,,AHA,restricted-cds,pmr_stroke,medium
+AAP-CATCHUP-001,AAP,AAP guidance catch-up immunization for children new to the United States,2024,https://redbook.solutions.aap.org/,,AAP,restricted-cds,pediatrics_well_child,medium
+ACOG-ADOLCONTRA-001,ACOG,ACOG committee opinion adolescent contraception confidentiality,2020,https://www.acog.org/,,ACOG,restricted-cds,pediatrics_adolescent,medium
+WHO-LEPROSY-001,WHO,WHO guidelines for the diagnosis treatment and prevention of leprosy,2018,https://www.who.int/publications/i/item/9789290226383,,WHO,allowed,dermatology_infectious,high
+CDC-SYPHILIS-001,CDC,CDC sexually transmitted infections treatment guidelines syphilis,2021,https://www.cdc.gov/std/treatment-guidelines/syphilis.htm,,CDC,allowed,dermatology_infectious,high
+AAP-NICU-FOLLOWUP-001,AAP,AAP clinical report follow-up care of high-risk infants neurodevelopmental,2020,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,neonatology_premature,medium
+ACMG-CONNECTIVE-001,ACMG,ACMG points to consider for the application of clinical genetic testing for hereditary connective tissue disorders,2020,https://www.acmg.net/,,ACMG,restricted-cds,genetics_connective,medium
+AAP-DELIRIUM-001,AAP,AAP clinical guidance pediatric delirium ICU,2019,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,emergency_pediatric,medium
+SCCM-SEDATION-001,SCCM,SCCM ICU pain agitation sedation update,2018,https://journals.lww.com/ccmjournal/,,SCCM,restricted-cds,anesthesia_critical_care,high
+KDIGO-RRT-001,KDIGO,KDIGO clinical practice guideline acute kidney injury and renal replacement therapy ICU,2012,https://kdigo.org/guidelines/acute-kidney-injury/,,KDIGO,restricted-cds,anesthesia_critical_care,high
+AAP-CHILDABUSE-IMG-001,AAP,AAP clinical report diagnostic imaging of child abuse,2015,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,pediatrics_protection,high
+AAP-INFANT-SAFE-SLEEP-001,AAP,AAP policy statement sleep-related infant deaths updated 2022 recommendations for reducing infant deaths in the sleep environment,2022,https://publications.aap.org/pediatrics/article/150/1/e2022057990/,,AAP,restricted-cds,pediatrics_well_child,high
+ASRA-PERIOPCAR-001,ASRA,ASRA-ESRA recommendations perioperative pain management cardiac surgery,2022,https://rapm.bmj.com/,,ASRA,restricted-cds,anesthesia_regional,medium
+ESA-PEDS-FAST-001,ESA,European Society of Anaesthesiology guideline preoperative fasting in children,2022,https://journals.lww.com/ejanaesthesiology/,,ESA,restricted-cds,anesthesia_pediatric,high
+APA-CHILD-PED-001,APA-PED,APA Association of Paediatric Anaesthetists guidelines pediatric procedural sedation,2020,https://www.apagbi.org.uk/guidelines,,APA-PED,restricted-cds,anesthesia_pediatric,medium
+ANZCA-PEDIATRIC-001,ANZCA,ANZCA professional document pediatric anaesthesia practice,2021,https://www.anzca.edu.au/,,ANZCA,restricted-cds,anesthesia_pediatric,medium
+AHA-CORDCLAMP-001,AHA,AHA scientific statement umbilical cord management at delivery,2017,https://www.ahajournals.org/,,AHA,restricted-cds,neonatology_resuscitation,medium
+ACMG-MITO-001,ACMG,ACMG mitochondrial disease laboratory diagnosis points to consider,2015,https://www.acmg.net/,,ACMG,restricted-cds,genetics_metabolic,medium
+ESHG-PRENATAL-001,ESHG,ESHG recommendations on prenatal genetic testing,2021,https://www.eshg.org/,,ESHG,restricted-cds,genetics_screening,medium
+CPIC-PGX-002,CPIC,CPIC guideline for CYP2C19 and clopidogrel and other antiplatelet agents,2022,https://cpicpgx.org/guidelines/,,CPIC,allowed,genetics_pharmacogenomic,high
+CPIC-PGX-003,CPIC,CPIC guideline for CYP2D6 and codeine tramadol,2021,https://cpicpgx.org/guidelines/,,CPIC,allowed,genetics_pharmacogenomic,high
+CPIC-PGX-004,CPIC,CPIC guideline for HLA-B and abacavir HLA-B and carbamazepine HLA-B and allopurinol,2021,https://cpicpgx.org/guidelines/,,CPIC,allowed,genetics_pharmacogenomic,high
+AAP-VAX-SPECIAL-001,AAP,AAP recommendations immunization in special clinical circumstances,2024,https://redbook.solutions.aap.org/,,AAP,restricted-cds,pediatrics_well_child,medium
+SCCM-ARDS-001,SCCM,SCCM-ESICM guidelines on acute respiratory distress syndrome management,2023,https://www.sccm.org/Clinical-Resources/Guidelines/Guidelines/Acute-Respiratory-Distress-Syndrome,,SCCM,restricted-cds,anesthesia_critical_care,high
+SCCM-SEPSIS-001,SCCM,SCCM Surviving Sepsis Campaign international guidelines for management of sepsis and septic shock,2021,https://www.sccm.org/SurvivingSepsisCampaign/Guidelines,,SCCM,restricted-cds,anesthesia_critical_care,high
+AAP-NEWBORN-EXAM-001,AAP,AAP clinical report routine evaluation of the term newborn,2017,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,neonatology_resuscitation,medium
+NICE-NEONATAL-JAUN-001,NICE,NICE quality standard 57 jaundice in newborn babies,2014,https://www.nice.org.uk/guidance/qs57,,NICE,restricted-cds,neonatology_jaundice,medium
+AAP-NEONATAL-HYPO-001,AAP,AAP clinical report postnatal glucose homeostasis in late-preterm and term infants,2011,https://publications.aap.org/pediatrics/article/127/3/575/,,AAP,restricted-cds,neonatology_premature,high
+ACOG-PERINATAL-MH-001,ACOG,ACOG clinical practice guideline screening and diagnosis of mental health conditions during pregnancy and postpartum,2023,https://www.acog.org/,,ACOG,restricted-cds,psychiatry_mood,high
+NICE-EATING-PED-001,NICE,NICE NG69 eating disorders recognition and treatment in children and young people,2020,https://www.nice.org.uk/guidance/ng69,,NICE,restricted-cds,psychiatry_pediatric,high
+APA-PEDED-001,APA,APA practice recommendations eating disorders in children and adolescents,2023,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_pediatric,medium
+SCCM-PEDS-SEPSIS-001,SCCM,SCCM Surviving Sepsis Campaign international guidelines for the management of septic shock and sepsis-associated organ dysfunction in children,2020,https://www.sccm.org/SurvivingSepsisCampaign/Guidelines/Pediatric,,SCCM,restricted-cds,emergency_pediatric,high
+AAP-PEDS-DKA-001,AAP,AAP clinical report DKA diabetic ketoacidosis pediatric management,2020,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,emergency_pediatric,high
+AAP-FOREIGN-AIRWAY-001,AAP,AAP clinical guidance pediatric foreign body airway obstruction,2018,https://publications.aap.org/pediatrics/,,AAP,restricted-cds,emergency_pediatric,medium
+ESPNIC-FAMILY-001,ESPNIC,ESPNIC family-centered care recommendations pediatric ICU,2020,https://www.espnic.eu/,,ESPNIC,restricted-cds,anesthesia_critical_care,medium
+RCPCH-CONFIDEN-001,RCPCH,RCPCH guidance on confidentiality consent and child rights in pediatric practice,2019,https://www.rcpch.ac.uk/,,RCPCH,restricted-cds,pediatrics_adolescent,medium
+SAMHSA-METHADONE-001,SAMHSA,SAMHSA federal guidelines for opioid treatment programs,2023,https://store.samhsa.gov/,,SAMHSA,allowed,psychiatry_substance,high
+SAMHSA-BUP-001,SAMHSA,SAMHSA TIP 40 clinical guidelines for the use of buprenorphine in the treatment of opioid addiction,2021,https://store.samhsa.gov/,,SAMHSA,allowed,psychiatry_substance,high
+ASAM-NALTREXONE-001,ASAM,ASAM clinical guidance extended-release naltrexone,2020,https://www.asam.org/,,ASAM,restricted-cds,psychiatry_substance,medium
+USPSTF-TOBACCO-001,USPSTF,USPSTF interventions for tobacco smoking cessation in adults including pregnant women recommendation,2021,https://www.uspreventiveservicestaskforce.org/,,USPSTF,allowed,psychiatry_substance,high
+NICE-TOBACCO-001,NICE,NICE NG209 tobacco preventing uptake promoting quitting and treating dependence,2021,https://www.nice.org.uk/guidance/ng209,,NICE,restricted-cds,psychiatry_substance,medium
+EUROGUIDERM-PV-001,EUROGUIDERM,EuroGuiDerm guideline pemphigus vulgaris and foliaceus,2022,https://www.guidelines.edf.one/,,EUROGUIDERM,restricted-cds,dermatology_blistering,medium
+EUROGUIDERM-BP-001,EUROGUIDERM,EuroGuiDerm guideline bullous pemphigoid,2022,https://www.guidelines.edf.one/,,EUROGUIDERM,restricted-cds,dermatology_blistering,medium
+EUROGUIDERM-HS-001,EUROGUIDERM,EuroGuiDerm guideline hidradenitis suppurativa,2024,https://www.guidelines.edf.one/,,EUROGUIDERM,restricted-cds,dermatology_inflammatory,medium
+EUROGUIDERM-ROSACEA-001,EUROGUIDERM,EuroGuiDerm guideline rosacea management,2023,https://www.guidelines.edf.one/,,EUROGUIDERM,restricted-cds,dermatology_acne,medium
+EUROGUIDERM-VIT-001,EUROGUIDERM,EuroGuiDerm guideline vitiligo management,2023,https://www.guidelines.edf.one/,,EUROGUIDERM,restricted-cds,dermatology_inflammatory,medium
+EADV-MELASMA-001,EADV,EADV consensus on melasma diagnosis and management,2020,https://onlinelibrary.wiley.com/,,EADV,restricted-cds,dermatology_acne,low
+EADV-ROSACEA-001,EADV,EADV S2k guideline rosacea management,2020,https://onlinelibrary.wiley.com/doi/10.1111/jdv.16760,,EADV,restricted-cds,dermatology_acne,medium
+ICN-NEONATAL-001,ICN,International Cooling Network neonatal therapeutic hypothermia practice consensus,2021,https://www.icnneonatal.org/,,ICN,restricted-cds,neonatology_resuscitation,medium
+NEHRP-NBS-001,NEHRP,NEHRP newborn screening expanded panel implementation,2022,https://www.hrsa.gov/,,NEHRP,allowed,neonatology_screening,medium
+GAP-BPD-001,GAP,Group for the Advancement of Psychiatry consensus borderline personality disorder management,2018,https://ourgap.org/,,GAP,restricted-cds,psychiatry_personality,medium
+NIH-NIDA-OUD-001,NIH-NIDA,NIDA principles of drug addiction treatment a research-based guide,2020,https://nida.nih.gov/publications/principles-drug-addiction-treatment-research-based-guide-third-edition,,NIH-NIDA,allowed,psychiatry_substance,high
+APA-COLLAB-001,APA,APA collaborative care model in mental health,2022,https://psychiatryonline.org/,,APA,restricted-cds,psychiatry_mood,medium
