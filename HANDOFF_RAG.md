@@ -1,32 +1,50 @@
-# 📋 Handoff RAG — Reprise de travaux
+# 📋 Handoff RAG — Reprise de travaux (v2 — expansion massive)
 
 **Pour** : Le développeur qui reprend l'intégration RAG d'AI-DOCTOR
-**État** : 984 guidelines médicaux extraits, prêts à ingérer dans Supabase
+**État** : **3094 guidelines médicaux extraits**, prêts à ingérer dans Supabase
 **Branche** : `claude/medical-assistant-transparency-dv5S9`
 
 ---
 
-## 🎯 Ce qui a été fait (que tu n'avais probablement pas)
+## 🎯 Ce qui a été fait (v1 + v2 expansion massive)
 
-### Données : 984 guidelines médicaux internationaux extraits
+### Données : 3094 guidelines médicaux internationaux extraits
 
-**Localisation** : `tibok-rag-collector/extracted/` (126 fichiers JSON)
+**Localisation** : `tibok-rag-collector/extracted/` (394 fichiers JSON)
 
 Sur GitHub : https://github.com/stefbach/AI-DOCTOR/tree/claude/medical-assistant-transparency-dv5S9/tibok-rag-collector/extracted
 
-| Métrique | Valeur |
-|---|---|
-| **Documents extraits** | 984 |
-| **Sources internationales** | 126 |
-| **Volume texte chunké** | 66.5 MB |
-| **Couverture spécialités** | 40+ |
-| **Médecine tropicale** | 63 docs dédiés (priorité Maurice) |
-| **Soins primaires** | 45 docs (AAFP, RACGP, CFPC, ACP) |
-| **Maladies rares** | 25 docs (NORD, Orphanet) |
-| **Cochrane Reviews** | 50 docs |
-| **Humanitaire/catastrophe** | 15 docs (MSF, ICRC, Sphere) |
-| **Maurice/Océan Indien** | 4 docs (MUS-MOH, SOMI) |
-| **Afrique** | 9 docs (NDOH-SA, KEN, GHA, NIG, AFRO) |
+| Métrique | v1 (984) | v2 actuel | Δ |
+|---|---|---|---|
+| **Documents extraits** | 984 | **3094** | +2110 |
+| **Sources internationales** | 126 | **394** | +268 |
+| **Volume texte chunké** | 66.5 MB | ~200 MB | +3× |
+| **Couverture spécialités** | 40+ | **60+** | +50% |
+
+### Top 30 sources par volume documentaire (v2)
+
+```
+NICE 198 · ACR 150 · WHO 139 · ESC 89 · ATS 68 · KDIGO 60 · EULAR 58
+USPSTF 56 · ESMO 53 · ACC 52 · Cochrane 50 · AAN 48 · IDSA 48 · EAU 46
+AHA 44 · EASL 43 · ACOG 43 · ERS 40 · AUA 39 · ASCO 37 · CDC 36
+ASH 31 · ACG 31 · CIRSE 30 · AAOS 29 · AASLD 28 · AGA 26 · SVS 25
+HRS 23 · Endocrine Society 22 · …
+```
+
+### Spécialités couvertes (v2)
+
+| Catalogue | Spécialité | Entrées catalogue | Coverage extraction |
+|---|---|---|---|
+| extended_2-6 (v1) | Tropical, humanitaire, pédiatrique, soins primaires, Cochrane, maladies rares | 984 docs | déjà ingérés |
+| **extended_7** | **Oncologie** (16 organes + foie élargi) | 137 | **123 (90%)** |
+| **extended_8** | **Neurologie / neurodégénératif** | 232 | **223 (96%)** |
+| **extended_9** | **Biologie / lab medicine** | 276 | **234 (85%)** |
+| **extended_10** | **Rhumatologie + Orthopédie** | 221 | **181 (84%)** |
+| **extended_11** | **Cardio + Pulm + CT + Vasc surgery** | 475 | **449 (94%)** |
+| **extended_12** | **Gastro + Dig surg + Endo surg** | 351 | **289 (85%)** |
+| **extended_13** | **Nephro + Uro + IM + Gyn surgery** | 496 | **435 (88%)** |
+| **extended_14** | **Radiologie** (modalités + interventionnelle) | 350 | **325 (93%)** |
+| **TOTAL v2 nouveau** | | **2538** | **2259 (89%)** |
 
 ### Sources couvertes (les 126)
 
