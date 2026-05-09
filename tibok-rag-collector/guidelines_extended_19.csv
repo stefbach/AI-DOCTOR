@@ -1,0 +1,411 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+ASPS-BREAST-001,ASPS,Evidence-Based Clinical Practice Guideline Breast Reconstruction with Expanders and Implants,2022,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy/evidence-based-guidelines-practice-parameters,,Proprietary,restricted-cds,plastic_reconstruction,high
+ASPS-BREAST-002,ASPS,Evidence-Based Clinical Practice Guideline Autologous Breast Reconstruction with DIEP or Pedicled TRAM,2023,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy/evidence-based-guidelines-practice-parameters,,Proprietary,restricted-cds,plastic_reconstruction,high
+ASPS-BREAST-003,ASPS,Practice Parameter for Reduction Mammoplasty,2022,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy/evidence-based-guidelines-practice-parameters,,Proprietary,restricted-cds,plastic_reconstruction,high
+ASPS-BREAST-004,ASPS,Genetic Testing for BRCA1 BRCA2 in Breast Reconstruction Candidates,2021,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_reconstruction,medium
+ASPS-BREAST-005,ASPS,Acellular Dermal Matrix in Breast Reconstruction Practice Advisory,2020,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_reconstruction,medium
+ASPS-BIA-ALCL-001,ASPS,BIA-ALCL Breast Implant Associated Anaplastic Large Cell Lymphoma Resources,2023,https://www.plasticsurgery.org/patient-safety/breast-implant-safety/bia-alcl-physician-resources,,Proprietary,restricted-cds,plastic_reconstruction,high
+ASPS-AESTHETIC-001,ASPS,Practice Advisory on Liposuction,2022,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_aesthetic,high
+ASPS-AESTHETIC-002,ASPS,Patient Safety Practice Advisory on Abdominoplasty,2021,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_aesthetic,high
+ASPS-AESTHETIC-003,ASPS,Practice Advisory on Body Contouring Following Massive Weight Loss,2020,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_aesthetic,high
+ASPS-AESTHETIC-004,ASPS,Practice Parameter for Augmentation Mammoplasty,2022,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_aesthetic,high
+ASPS-AESTHETIC-005,ASPS,Practice Advisory on Gluteal Fat Grafting,2023,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_aesthetic,high
+ASPS-AESTHETIC-006,ASPS,Practice Advisory on Rhytidectomy Facelift,2021,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_aesthetic,medium
+ASPS-AESTHETIC-007,ASPS,Practice Advisory on Blepharoplasty,2020,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_aesthetic,medium
+ASPS-VTE-001,ASPS,Venous Thromboembolism Prophylaxis Recommendations in Plastic Surgery,2022,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_reconstruction,high
+ASPS-MICRO-001,ASPS,Evidence-Based Practice Parameter for Microsurgical Free Flap Reconstruction,2022,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_reconstruction,high
+ASPS-LE-001,ASPS,Practice Parameter for Lower Extremity Reconstruction,2021,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_reconstruction,medium
+ASPS-PEDS-001,ASPS,Pediatric Plastic Surgery Practice Advisory Cleft and Craniofacial,2023,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_pediatric,high
+ASPS-FACIAL-001,ASPS,Facial Reanimation Practice Advisory,2022,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_reconstruction,medium
+ASAPS-AESTHETIC-001,ASAPS,Aesthetic Society Position on Cosmetic Medicine Patient Safety,2022,https://www.theaestheticsociety.org/medical-professionals/practice-resources,,Proprietary,restricted,plastic_aesthetic,medium
+ASAPS-MEMBER-001,ASAPS,Aesthetic Surgery Journal Best Practices in Mommy Makeover,2021,https://academic.oup.com/asj,,Proprietary,restricted,plastic_aesthetic,medium
+ISAPS-GLOBAL-001,ISAPS,International Society of Aesthetic Plastic Surgery Global Survey on Aesthetic Procedures,2023,https://www.isaps.org/discover/about-isaps/global-statistics/,,Proprietary,restricted,plastic_aesthetic,medium
+ISAPS-SAFETY-001,ISAPS,ISAPS Patient Safety Standards in Aesthetic Surgery,2022,https://www.isaps.org/medical-professionals/isaps-standards/,,Proprietary,restricted,plastic_aesthetic,medium
+BAPRAS-TRAUMA-001,BAPRAS,Standards for Management of Open Lower Limb Fractures BOAST,2020,https://www.bapras.org.uk/professionals/clinical-guidance,,Proprietary,restricted-cds,plastic_reconstruction,high
+BAPRAS-HAND-001,BAPRAS,BAPRAS Standards for Hand Trauma Care,2021,https://www.bapras.org.uk/professionals/clinical-guidance,,Proprietary,restricted-cds,plastic_reconstruction,high
+BAPRAS-MELANOMA-001,BAPRAS,UK Guidelines for Management of Cutaneous Melanoma BAPRAS BAD,2022,https://www.bapras.org.uk/professionals/clinical-guidance,,Proprietary,restricted-cds,plastic_reconstruction,high
+BAPRAS-RECON-001,BAPRAS,National Plastic Surgery Outcomes for Microsurgical Breast Reconstruction,2021,https://www.bapras.org.uk/professionals/audit-research,,Proprietary,restricted-cds,plastic_reconstruction,medium
+BAAPS-COSMETIC-001,BAAPS,BAAPS Cosmetic Surgery Safety Guidelines,2022,https://baaps.org.uk/professionals/professional_guidelines.aspx,,Proprietary,restricted,plastic_aesthetic,medium
+ASRM-MICRO-001,ASRM,American Society for Reconstructive Microsurgery Position Statement on Free Flap Monitoring,2021,https://www.microsurg.org/clinical-resources/,,Proprietary,restricted-cds,plastic_reconstruction,high
+ASRM-MICRO-002,ASRM,ASRM Recommendations on Antithrombotic Therapy in Microsurgery,2022,https://www.microsurg.org/clinical-resources/,,Proprietary,restricted-cds,plastic_reconstruction,high
+ASRM-LYMPH-001,ASRM,ASRM Position on Lymphedema Microsurgical Treatment LVA and VLNT,2023,https://www.microsurg.org/clinical-resources/,,Proprietary,restricted-cds,plastic_reconstruction,high
+AAHS-HAND-001,AAHS,American Association for Hand Surgery Clinical Recommendations,2022,https://handsurgery.org/clinical-practice/,,Proprietary,restricted-cds,plastic_reconstruction,medium
+ASBRS-RECON-001,ASBRS,Consensus Guideline on Breast Reconstruction Following Mastectomy,2021,https://www.breastsurgeons.org/resources/statements,,Proprietary,restricted-cds,plastic_reconstruction,high
+ASBRS-RECON-002,ASBRS,Position Statement on Nipple-Sparing Mastectomy,2022,https://www.breastsurgeons.org/resources/statements,,Proprietary,restricted-cds,plastic_reconstruction,high
+EURAPS-CRANIO-001,EURAPS,European Association of Plastic Surgeons Position on Craniofacial Reconstruction,2021,https://www.euraps.org/,,Proprietary,restricted-cds,plastic_pediatric,medium
+ICOMS-CLEFT-001,ICOMS,International Confederation Cleft Lip Palate Standards of Care,2022,https://www.icoms.com/,,Proprietary,restricted-cds,plastic_pediatric,high
+ISCFS-CRANIO-001,ISCFS,International Society of Craniofacial Surgery Standards for Craniosynostosis,2021,https://iscfs.org/,,Proprietary,restricted-cds,plastic_pediatric,high
+ISHRS-HAIR-001,ISHRS,International Society of Hair Restoration Surgery Practice Census Guidelines,2023,https://ishrs.org/,,Proprietary,restricted,plastic_aesthetic,medium
+ISHRS-HAIR-002,ISHRS,ISHRS Position on Black Market Hair Restoration Safety,2022,https://ishrs.org/,,Proprietary,restricted,plastic_aesthetic,medium
+ASDS-FILLER-001,ASDS,Consensus Recommendations for the Use of Soft Tissue Fillers,2021,https://www.asds.net/medical-professionals/clinical-resources,,Proprietary,restricted-cds,plastic_aesthetic,high
+ASDS-BOTOX-001,ASDS,Consensus Recommendations for Botulinum Toxin in Aesthetic Practice,2022,https://www.asds.net/medical-professionals/clinical-resources,,Proprietary,restricted-cds,plastic_aesthetic,high
+ASDS-LASER-001,ASDS,Position on Laser and Energy-Based Devices Safety,2021,https://www.asds.net/medical-professionals/clinical-resources,,Proprietary,restricted-cds,plastic_aesthetic,medium
+AAFPRS-FACE-001,AAFPRS,Position Statements on Facial Plastic Surgery Procedures,2022,https://www.aafprs.org/Medical_Professionals/clinical_resources,,Proprietary,restricted,plastic_aesthetic,medium
+ASLMS-LASER-001,ASLMS,American Society for Laser Medicine and Surgery Standards of Care,2021,https://www.aslms.org/for-professionals,,Proprietary,restricted-cds,plastic_aesthetic,medium
+NPIAP-PI-001,NPIAP,Prevention and Treatment of Pressure Ulcers Injuries Clinical Practice Guideline,2019,https://npiap.com/page/2019Guideline,,Proprietary,restricted-cds,wound_pressure,high
+NPIAP-PI-002,NPIAP,NPIAP Pressure Injury Staging System Updated,2020,https://npiap.com/page/PressureInjuryStages,,Proprietary,restricted-cds,wound_pressure,high
+NPIAP-PI-003,NPIAP,Best Practices for Prevention of Medical Device Related Pressure Injuries,2020,https://npiap.com/page/Resources,,Proprietary,restricted-cds,wound_pressure,medium
+NPIAP-PI-004,NPIAP,Position Statement on Support Surfaces for Pressure Injury Prevention,2021,https://npiap.com/page/Resources,,Proprietary,restricted-cds,wound_pressure,medium
+NPIAP-PI-005,NPIAP,Pressure Injuries in Pediatric and Neonatal Populations Position Paper,2020,https://npiap.com/page/Resources,,Proprietary,restricted-cds,wound_pressure,medium
+NPIAP-PI-006,NPIAP,Unavoidable Pressure Injury Position Paper,2020,https://npiap.com/page/Resources,,Proprietary,restricted-cds,wound_pressure,medium
+NPIAP-PI-007,NPIAP,Pressure Injuries in Patients with Dark Skin Tones Position Paper,2022,https://npiap.com/page/Resources,,Proprietary,restricted-cds,wound_pressure,high
+EPUAP-PI-001,EPUAP,European Pressure Ulcer Advisory Panel International Guideline on Prevention and Treatment,2019,https://www.epuap.org/pu-guidelines/,,Proprietary,restricted-cds,wound_pressure,high
+EPUAP-PI-002,EPUAP,Quick Reference Guide for Pressure Injury Prevention,2019,https://www.epuap.org/pu-guidelines/,,Proprietary,restricted-cds,wound_pressure,high
+PPPIA-PI-001,PPPIA,Pan Pacific Pressure Injury Alliance International Pressure Injury Guideline,2019,https://www.pppia.org/,,Proprietary,restricted-cds,wound_pressure,high
+EWMA-DEBRIDE-001,EWMA,Debridement Document Updated Position on Wound Bed Preparation,2022,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_pressure,high
+EWMA-NPWT-001,EWMA,Negative Pressure Wound Therapy Recommendations Document,2020,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_pressure,high
+EWMA-DFU-001,EWMA,Best Practice for the Management of Diabetic Foot Ulcers,2023,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_diabetic,high
+EWMA-INFECT-001,EWMA,Position Document Wound Infection in Clinical Practice,2022,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_infection,high
+EWMA-BIOFILM-001,EWMA,Position Document Biofilms Made Easy,2017,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_infection,medium
+EWMA-VLU-001,EWMA,Management of Venous Leg Ulcers Best Practice Statement,2021,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_venous,high
+EWMA-COMPRESS-001,EWMA,Compression Therapy Position Document,2020,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_venous,high
+EWMA-AOTI-001,EWMA,Atypical Wounds Position Document,2019,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_pressure,medium
+EWMA-PALL-001,EWMA,Palliative Wound Care Position Document,2021,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_palliative,medium
+EWMA-DEHIS-001,EWMA,Surgical Wound Dehiscence Position Document,2020,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_infection,medium
+EWMA-SKIN-001,EWMA,Position Document on Skin Grafts and Skin Substitutes,2021,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_pressure,medium
+EWMA-PEDS-001,EWMA,Position Document on Pediatric Wound Care,2022,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_pressure,medium
+EWMA-ANTIMIC-001,EWMA,Antimicrobial Stewardship in Wound Management,2020,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_infection,high
+WUWHS-CONSENSUS-001,WUWHS,World Union of Wound Healing Societies Consensus Document on Wound Exudate,2019,https://www.woundsinternational.com/resources/wuwhs-consensus,,Proprietary,restricted-cds,wound_pressure,medium
+WUWHS-CONSENSUS-002,WUWHS,Consensus Document Surgical Site Infection Prevention,2020,https://www.woundsinternational.com/resources/wuwhs-consensus,,Proprietary,restricted-cds,wound_infection,high
+WUWHS-CONSENSUS-003,WUWHS,Consensus Document Closed Surgical Incision Management,2018,https://www.woundsinternational.com/resources/wuwhs-consensus,,Proprietary,restricted-cds,wound_infection,medium
+WUWHS-CONSENSUS-004,WUWHS,Consensus Document Use of Topical Antimicrobials in Wound Care,2021,https://www.woundsinternational.com/resources/wuwhs-consensus,,Proprietary,restricted-cds,wound_infection,medium
+WOCN-NURS-001,WOCN,Wound Ostomy Continence Nurses Society Guideline for Prevention of Pressure Ulcers,2022,https://www.wocn.org/store/,,Proprietary,restricted-cds,wound_pressure,high
+WOCN-NURS-002,WOCN,WOCN Guideline for Management of Wounds in Patients with Lower Extremity Venous Disease,2019,https://www.wocn.org/store/,,Proprietary,restricted-cds,wound_venous,high
+WOCN-NURS-003,WOCN,WOCN Guideline for Management of Wounds in Patients with Lower Extremity Arterial Disease,2021,https://www.wocn.org/store/,,Proprietary,restricted-cds,wound_pressure,high
+WOCN-NURS-004,WOCN,WOCN Guideline for Management of Lower Extremity Neuropathic Disease,2021,https://www.wocn.org/store/,,Proprietary,restricted-cds,wound_diabetic,high
+WOCN-OSTOMY-001,WOCN,WOCN Clinical Guideline for Management of the Adult Patient with a Fecal or Urinary Ostomy,2018,https://www.wocn.org/store/,,Proprietary,restricted-cds,wound_pressure,medium
+WCET-OSTOMY-001,WCET,World Council of Enterostomal Therapists International Ostomy Guidelines,2020,https://wcetn.org/page-1859727,,Proprietary,restricted-cds,wound_pressure,medium
+ICC-COMPRESS-001,ICC,International Compression Club Consensus on Compression for Venous Disease,2018,https://icc-compressionclub.com/,,Proprietary,restricted-cds,wound_venous,medium
+IWGDF-DFU-001,IWGDF,International Working Group on Diabetic Foot IWGDF Guidelines,2023,https://iwgdfguidelines.org/guidelines-2023/,,CC-BY-NC,restricted-cds,wound_diabetic,high
+IWGDF-DFU-002,IWGDF,IWGDF Guideline on Prevention of Foot Ulcers in Persons with Diabetes,2023,https://iwgdfguidelines.org/prevention-guideline-2023/,,CC-BY-NC,restricted-cds,wound_diabetic,high
+IWGDF-DFU-003,IWGDF,IWGDF Guideline on Offloading Foot Ulcers in Persons with Diabetes,2023,https://iwgdfguidelines.org/offloading-guideline-2023/,,CC-BY-NC,restricted-cds,wound_diabetic,high
+IWGDF-DFU-004,IWGDF,IWGDF Guideline on Diagnosis and Treatment of Foot Infection in Persons with Diabetes,2023,https://iwgdfguidelines.org/infection-guideline-2023/,,CC-BY-NC,restricted-cds,wound_infection,high
+IWGDF-DFU-005,IWGDF,IWGDF Guideline on Wound Healing Interventions in Diabetic Foot,2023,https://iwgdfguidelines.org/wound-healing-guideline-2023/,,CC-BY-NC,restricted-cds,wound_diabetic,high
+IWGDF-DFU-006,IWGDF,IWGDF Guideline on Peripheral Artery Disease in Persons with Diabetic Foot Ulcers,2023,https://iwgdfguidelines.org/pad-guideline-2023/,,CC-BY-NC,restricted-cds,wound_diabetic,high
+IWGDF-DFU-007,IWGDF,IWGDF Guideline on Classification of Diabetic Foot Ulcers,2023,https://iwgdfguidelines.org/classification-guideline-2023/,,CC-BY-NC,restricted-cds,wound_diabetic,medium
+ABA-BURN-001,ABA,American Burn Association Practice Guidelines for Burn Care,2022,https://ameriburn.org/resources_factsheets/,,Proprietary,restricted-cds,wound_burn,high
+ABA-BURN-002,ABA,ABA Burn Center Referral Criteria,2020,https://ameriburn.org/resources_factsheets/,,Proprietary,restricted-cds,wound_burn,high
+ABA-BURN-003,ABA,ABA Practice Guideline for Pediatric Burn Care,2021,https://ameriburn.org/resources_factsheets/,,Proprietary,restricted-cds,wound_burn,high
+UHMS-HBO-001,UHMS,UHMS Hyperbaric Oxygen Therapy Indications 14th Edition,2019,https://www.uhms.org/resources/hbo-indications.html,,Proprietary,restricted-cds,diving_hbo,high
+UHMS-HBO-002,UHMS,Hyperbaric Oxygen Therapy for Diabetic Lower Extremity Wounds,2020,https://www.uhms.org/resources/clinical-resources.html,,Proprietary,restricted-cds,diving_hbo,high
+UHMS-HBO-003,UHMS,Hyperbaric Oxygen Therapy for Carbon Monoxide Poisoning,2021,https://www.uhms.org/resources/clinical-resources.html,,Proprietary,restricted-cds,diving_hbo,high
+UHMS-HBO-004,UHMS,Hyperbaric Oxygen Therapy for Decompression Sickness,2019,https://www.uhms.org/resources/clinical-resources.html,,Proprietary,restricted-cds,diving_dcs,high
+UHMS-HBO-005,UHMS,Hyperbaric Oxygen Therapy for Arterial Gas Embolism,2020,https://www.uhms.org/resources/clinical-resources.html,,Proprietary,restricted-cds,diving_dcs,high
+UHMS-HBO-006,UHMS,Hyperbaric Oxygen Therapy for Necrotizing Soft Tissue Infections,2020,https://www.uhms.org/resources/clinical-resources.html,,Proprietary,restricted-cds,diving_hbo,medium
+UHMS-HBO-007,UHMS,Hyperbaric Oxygen Therapy for Acute Hearing Loss,2021,https://www.uhms.org/resources/clinical-resources.html,,Proprietary,restricted-cds,diving_hbo,medium
+UHMS-HBO-008,UHMS,Hyperbaric Oxygen Therapy for Late Effects of Radiation Injury,2020,https://www.uhms.org/resources/clinical-resources.html,,Proprietary,restricted-cds,diving_hbo,medium
+UHMS-HBO-009,UHMS,Hyperbaric Oxygen Therapy for Acute Thermal Burns,2021,https://www.uhms.org/resources/clinical-resources.html,,Proprietary,restricted-cds,wound_burn,medium
+UHMS-HBO-010,UHMS,Hyperbaric Oxygen Therapy for Compromised Grafts and Flaps,2020,https://www.uhms.org/resources/clinical-resources.html,,Proprietary,restricted-cds,diving_hbo,medium
+UHMS-HBO-011,UHMS,Hyperbaric Oxygen Therapy for Crush Injury and Compartment Syndrome,2019,https://www.uhms.org/resources/clinical-resources.html,,Proprietary,restricted-cds,diving_hbo,medium
+ECHM-HBO-001,ECHM,European Committee for Hyperbaric Medicine 10th Consensus Conference Recommendations,2017,https://www.echm.org/echm-conferences.htm,,Proprietary,restricted-cds,diving_hbo,high
+ECHM-HBO-002,ECHM,ECHM Recommendations on HBO for Wound Healing,2020,https://www.echm.org/,,Proprietary,restricted-cds,diving_hbo,medium
+ACSM-EXERCISE-001,ACSM,ACSM Guidelines for Exercise Testing and Prescription 11th Edition,2021,https://www.acsm.org/education-resources/books/exercise-testing-prescription,,Proprietary,restricted-cds,sports_exercise_rx,high
+ACSM-EXERCISE-002,ACSM,ACSM Position Stand on Quantity and Quality of Exercise for Healthy Adults,2019,https://journals.lww.com/acsm-msse/pages/default.aspx,,Proprietary,restricted-cds,sports_exercise_rx,high
+ACSM-EXERCISE-003,ACSM,ACSM Position Stand on Exercise and Type 2 Diabetes,2022,https://journals.lww.com/acsm-msse/pages/default.aspx,,Proprietary,restricted-cds,sports_exercise_rx,high
+ACSM-HEAT-001,ACSM,ACSM Position Stand Exertional Heat Illness,2021,https://journals.lww.com/acsm-msse/pages/default.aspx,,Proprietary,restricted-cds,sports_exercise_rx,high
+ACSM-HYDRO-001,ACSM,ACSM Position Stand on Exercise and Fluid Replacement,2020,https://journals.lww.com/acsm-msse/pages/default.aspx,,Proprietary,restricted-cds,sports_nutrition,high
+ACSM-NUTRITION-001,ACSM,Joint Position Statement of ACSM AND DC on Nutrition and Athletic Performance,2016,https://journals.lww.com/acsm-msse/pages/default.aspx,,Proprietary,restricted-cds,sports_nutrition,high
+ACSM-OLDER-001,ACSM,ACSM Position Stand Exercise and Physical Activity for Older Adults,2019,https://journals.lww.com/acsm-msse/pages/default.aspx,,Proprietary,restricted-cds,sports_exercise_rx,medium
+ACSM-PEDS-001,ACSM,ACSM Position Stand Resistance Training in Children and Adolescents,2019,https://journals.lww.com/acsm-msse/pages/default.aspx,,Proprietary,restricted-cds,sports_pediatric,high
+ACSM-PREG-001,ACSM,ACSM Recommendations Exercise During Pregnancy,2020,https://journals.lww.com/acsm-msse/pages/default.aspx,,Proprietary,restricted-cds,sports_exercise_rx,high
+ACSM-CANCER-001,ACSM,ACSM Position Stand Exercise for People with Cancer,2019,https://journals.lww.com/acsm-msse/pages/default.aspx,,Proprietary,restricted-cds,sports_exercise_rx,high
+ACSM-PE-001,ACSM,ACSM Preparticipation Physical Exam Recommendations,2019,https://www.acsm.org/all-blog-posts/certification-blog/acsm-certified-blog,,Proprietary,restricted-cds,sports_cardiac,medium
+AMSSM-CONCUSS-001,AMSSM,AMSSM Position Statement on Concussion in Sport,2019,https://www.amssm.org/PositionStatements.php,,Proprietary,restricted-cds,sports_concussion,high
+AMSSM-CARDIAC-001,AMSSM,AMSSM Position Statement on Cardiac Preparticipation Screening,2017,https://www.amssm.org/PositionStatements.php,,Proprietary,restricted-cds,sports_cardiac,high
+AMSSM-FEMALE-001,AMSSM,AMSSM Position Statement on Female Athlete Triad and RED-S,2021,https://www.amssm.org/PositionStatements.php,,Proprietary,restricted-cds,sports_nutrition,high
+AMSSM-HEAT-001,AMSSM,AMSSM Position Statement on Exertional Heat Illness,2020,https://www.amssm.org/PositionStatements.php,,Proprietary,restricted-cds,sports_exercise_rx,high
+AMSSM-RTP-001,AMSSM,AMSSM Return to Sport Position Statement,2022,https://www.amssm.org/PositionStatements.php,,Proprietary,restricted-cds,sports_concussion,high
+AMSSM-OVERTRAINING-001,AMSSM,AMSSM Statement on Overtraining Syndrome,2018,https://www.amssm.org/PositionStatements.php,,Proprietary,restricted-cds,sports_exercise_rx,medium
+AMSSM-STRESS-001,AMSSM,AMSSM Position on Bone Stress Injuries in Athletes,2021,https://www.amssm.org/PositionStatements.php,,Proprietary,restricted-cds,sports_exercise_rx,high
+AMSSM-PEDS-001,AMSSM,AMSSM Statement on Pediatric Sports Specialization,2020,https://www.amssm.org/PositionStatements.php,,Proprietary,restricted-cds,sports_pediatric,medium
+AMSSM-MENTAL-001,AMSSM,AMSSM Position Statement on Mental Health in Athletes,2020,https://www.amssm.org/PositionStatements.php,,Proprietary,restricted-cds,sports_exercise_rx,high
+AMSSM-DOPING-001,AMSSM,AMSSM Position on Anti-Doping in Sport,2020,https://www.amssm.org/PositionStatements.php,,Proprietary,restricted-cds,sports_doping,medium
+CISG-CONCUSS-001,CISG,Concussion in Sport Group Consensus Statement Amsterdam 2022,2023,https://bjsm.bmj.com/content/57/11/695,,Proprietary,restricted-cds,sports_concussion,high
+CISG-SCAT6-001,CISG,Sport Concussion Assessment Tool SCAT6 6th Edition,2023,https://bjsm.bmj.com/content/57/11/622,,Proprietary,restricted-cds,sports_concussion,high
+CISG-CHILDSCAT6-001,CISG,Child Sport Concussion Assessment Tool Child SCAT6,2023,https://bjsm.bmj.com/content/57/11/636,,Proprietary,restricted-cds,sports_pediatric,high
+BJSM-RTP-001,BJSM,Consensus Statement on Return to Sport from First World Congress in Sports Physical Therapy,2017,https://bjsm.bmj.com/,,Proprietary,restricted-cds,sports_exercise_rx,medium
+BJSM-OVERTRAIN-001,BJSM,Joint Consensus on Unexplained Underperformance Syndrome Overtraining,2013,https://bjsm.bmj.com/,,Proprietary,restricted-cds,sports_exercise_rx,medium
+IOC-RED-S-001,IOC,IOC Consensus Statement Relative Energy Deficiency in Sport REDs Update,2023,https://www.olympic.org/medical-and-scientific-commission,,Proprietary,restricted-cds,sports_nutrition,high
+IOC-NUTRITION-001,IOC,IOC Consensus Statement on Nutrition for Athletes,2018,https://www.olympic.org/medical-and-scientific-commission,,Proprietary,restricted-cds,sports_nutrition,high
+IOC-MENTAL-001,IOC,IOC Consensus Statement Mental Health in Elite Athletes,2019,https://www.olympic.org/medical-and-scientific-commission,,Proprietary,restricted-cds,sports_exercise_rx,medium
+IOC-PEDS-001,IOC,IOC Consensus Statement on Youth Athletic Development,2015,https://www.olympic.org/medical-and-scientific-commission,,Proprietary,restricted-cds,sports_pediatric,medium
+IOC-INJURY-001,IOC,IOC Consensus Statement Methods for Recording Injuries and Illnesses in Sport,2020,https://www.olympic.org/medical-and-scientific-commission,,Proprietary,restricted-cds,sports_exercise_rx,medium
+IOC-PREG-001,IOC,IOC Expert Group Statement on Pregnancy in Elite Athletes,2017,https://www.olympic.org/medical-and-scientific-commission,,Proprietary,restricted-cds,sports_exercise_rx,medium
+WADA-CODE-001,WADA,World Anti-Doping Code,2021,https://www.wada-ama.org/en/world-anti-doping-code,,Proprietary,restricted,sports_doping,high
+WADA-LIST-001,WADA,WADA Prohibited List,2024,https://www.wada-ama.org/en/prohibited-list,,Proprietary,restricted,sports_doping,high
+WADA-TUE-001,WADA,WADA Therapeutic Use Exemption TUE Standards,2023,https://www.wada-ama.org/en/resources/the-code/international-standard-for-tue,,Proprietary,restricted,sports_doping,high
+NATA-HEAT-001,NATA,NATA Position Statement Exertional Heat Illnesses,2015,https://www.nata.org/about/foundation/research-resources/position-statements,,Proprietary,restricted-cds,sports_exercise_rx,high
+NATA-FLUID-001,NATA,NATA Position Statement Fluid Replacement for the Physically Active,2017,https://www.nata.org/about/foundation/research-resources/position-statements,,Proprietary,restricted-cds,sports_nutrition,high
+NATA-CONCUSS-001,NATA,NATA Position Statement Management of Sport Concussion,2014,https://www.nata.org/about/foundation/research-resources/position-statements,,Proprietary,restricted-cds,sports_concussion,high
+NATA-EAP-001,NATA,NATA Position Statement Emergency Action Planning in Athletics,2019,https://www.nata.org/about/foundation/research-resources/position-statements,,Proprietary,restricted-cds,sports_cardiac,high
+AHA-PPE-001,AHA,AHA Recommendations for Preparticipation Cardiovascular Screening of Young Athletes,2020,https://www.heart.org/en/professional/quality-improvement,,Proprietary,restricted-cds,sports_cardiac,high
+AHA-EXERCISE-001,AHA,AHA Scientific Statement Exercise-Related Acute Cardiovascular Events,2020,https://www.heart.org/en/professional/quality-improvement,,Proprietary,restricted-cds,sports_cardiac,high
+AHA-AED-001,AHA,AHA Statement on Sudden Cardiac Death in the Athlete,2021,https://www.heart.org/en/professional/quality-improvement,,Proprietary,restricted-cds,sports_cardiac,high
+ESC-SPORTS-001,ESC,ESC Guidelines on Sports Cardiology and Exercise in Patients with Cardiovascular Disease,2020,https://www.escardio.org/Guidelines,,Proprietary,restricted-cds,sports_cardiac,high
+ESC-PRE-001,ESC,ESC Position on Pre-Participation Cardiovascular Evaluation in Athletes,2017,https://www.escardio.org/Guidelines,,Proprietary,restricted-cds,sports_cardiac,high
+AAP-PPE-001,AAP,AAP Preparticipation Physical Evaluation 5th Edition,2019,https://www.aap.org/en/patient-care/sports/preparticipation-physical-evaluation/,,Proprietary,restricted-cds,sports_pediatric,high
+AAP-CONCUSS-001,AAP,AAP Clinical Report Sport-Related Concussion in Children and Adolescents,2018,https://publications.aap.org/pediatrics,,Proprietary,restricted-cds,sports_pediatric,high
+AAP-INTENSIVE-001,AAP,AAP Clinical Report Sports Specialization and Intensive Training in Young Athletes,2019,https://publications.aap.org/pediatrics,,Proprietary,restricted-cds,sports_pediatric,high
+AAP-PHYS-001,AAP,AAP Policy Statement on Promotion of Physical Activity in Children,2020,https://publications.aap.org/pediatrics,,Proprietary,restricted-cds,sports_pediatric,medium
+ISSN-NUTRITION-001,ISSN,International Society of Sports Nutrition Position Stand on Protein and Exercise,2017,https://jissn.biomedcentral.com/,,CC-BY,allowed,sports_nutrition,high
+ISSN-NUTRITION-002,ISSN,ISSN Position Stand on Creatine Supplementation,2017,https://jissn.biomedcentral.com/,,CC-BY,allowed,sports_nutrition,high
+ISSN-NUTRITION-003,ISSN,ISSN Position Stand on Caffeine and Exercise Performance,2021,https://jissn.biomedcentral.com/,,CC-BY,allowed,sports_nutrition,medium
+ISSN-NUTRITION-004,ISSN,ISSN Position Stand Diets and Body Composition,2017,https://jissn.biomedcentral.com/,,CC-BY,allowed,sports_nutrition,medium
+FIMS-EXERCISE-001,FIMS,International Federation of Sports Medicine Position Statements,2020,https://www.fims.org/publications/,,Proprietary,restricted-cds,sports_exercise_rx,medium
+ESSKA-TENDON-001,ESSKA,ESSKA Consensus on Achilles Tendinopathy Management,2022,https://www.esska.org/page/Publications,,Proprietary,restricted-cds,sports_exercise_rx,medium
+IMMDA-MARATHON-001,IMMDA,IMMDA Advisory Statement on Marathon Medical Care,2020,https://aimsworldrunning.org/aims-guidelines.html,,Proprietary,restricted-cds,sports_exercise_rx,medium
+AACVPR-CR-001,AACVPR,AACVPR Guidelines for Cardiac Rehabilitation Programs 6th Edition,2021,https://www.aacvpr.org/,,Proprietary,restricted-cds,sports_cardiac,high
+AASM-INSOMNIA-001,AASM,AASM Clinical Practice Guideline for the Pharmacologic Treatment of Chronic Insomnia in Adults,2017,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_insomnia,high
+AASM-INSOMNIA-002,AASM,AASM Clinical Practice Guideline Behavioral and Psychological Treatments for Chronic Insomnia,2021,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_insomnia,high
+AASM-OSA-001,AASM,AASM Clinical Practice Guideline for Diagnostic Testing for Adult Obstructive Sleep Apnea,2017,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_osa,high
+AASM-OSA-002,AASM,AASM Clinical Practice Guideline for Treatment of Adult OSA with PAP,2019,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_osa,high
+AASM-OSA-003,AASM,AASM Clinical Practice Guideline Surgical Modifications of the Upper Airway for OSA,2010,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_osa,medium
+AASM-OAT-001,AASM,AASM AADSM Clinical Practice Guideline for Oral Appliance Therapy in Adult OSA and Snoring,2015,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_osa,high
+AASM-CSA-001,AASM,AASM Clinical Practice Guideline Treatment of Central Sleep Apnea Syndromes in Adults,2012,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_osa,medium
+AASM-NARCO-001,AASM,AASM Clinical Practice Guideline Treatment of Central Disorders of Hypersomnolence,2021,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_narcolepsy,high
+AASM-RLS-001,AASM,AASM Clinical Practice Guideline Treatment of RLS and Periodic Limb Movement Disorder,2012,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_circadian,high
+AASM-CIRCADIAN-001,AASM,AASM Clinical Practice Guideline Treatment of Intrinsic Circadian Rhythm Sleep-Wake Disorders,2015,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_circadian,high
+AASM-PARA-001,AASM,AASM Best Practice Guide for the Treatment of REM Sleep Behavior Disorder,2010,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_circadian,medium
+AASM-PEDS-001,AASM,AASM Practice Parameters for Behavioral Treatment of Bedtime Problems and Night Wakings in Children,2006,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_pediatric,high
+AASM-PEDS-002,AASM,AASM Clinical Practice Guideline for Treatment of Pediatric OSA with PAP,2020,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_pediatric,high
+AASM-PSG-001,AASM,AASM Manual for the Scoring of Sleep and Associated Events,2023,https://aasm.org/clinical-resources/scoring-manual/,,Proprietary,restricted,sleep_osa,high
+AASM-HSAT-001,AASM,AASM Position Statement on Home Sleep Apnea Testing,2017,https://aasm.org/clinical-resources/practice-standards/,,Proprietary,restricted-cds,sleep_osa,high
+AASM-CPAP-001,AASM,AASM Practice Parameters for the Use of Auto-Titrating CPAP Devices,2008,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_osa,medium
+AASM-DRIVING-001,AASM,AASM Position Paper on Drowsy Driving,2018,https://aasm.org/clinical-resources/practice-standards/,,Proprietary,restricted-cds,sleep_circadian,medium
+AASM-SHIFT-001,AASM,AASM Practice Parameters for Treatment of Shift Work Disorder and Jet Lag,2007,https://aasm.org/clinical-resources/practice-standards/,,Proprietary,restricted-cds,sleep_circadian,medium
+AASM-DENTAL-001,AASM,AASM Position Statement on Dental Sleep Medicine,2017,https://aasm.org/clinical-resources/practice-standards/,,Proprietary,restricted-cds,sleep_osa,medium
+ATS-OSA-001,ATS,ATS Statement on Diagnosis and Management of Obesity Hypoventilation Syndrome,2019,https://www.thoracic.org/statements/,,Proprietary,restricted-cds,sleep_osa,high
+ATS-NIV-001,ATS,ATS Clinical Practice Guideline on Long-term Noninvasive Ventilation in Stable COPD,2020,https://www.thoracic.org/statements/,,Proprietary,restricted-cds,sleep_osa,medium
+ERS-OSA-001,ERS,ERS Statement on Long-term Mechanical Ventilation Adults Including Sleep Disorders,2019,https://www.ersnet.org/guidelines-and-publications/,,Proprietary,restricted-cds,sleep_osa,high
+ERS-OSA-002,ERS,ERS Position Paper on Cardiovascular Consequences of OSA,2021,https://www.ersnet.org/guidelines-and-publications/,,Proprietary,restricted-cds,sleep_osa,high
+ESRS-CATAL-001,ESRS,European Sleep Research Society Sleep Medicine Textbook 2nd Edition,2021,https://esrs.eu/sleep-medicine-textbook/,,Proprietary,restricted,sleep_osa,medium
+ESRS-EDU-001,ESRS,ESRS European Sleep Medicine Catalog of Knowledge and Skills,2021,https://esrs.eu/,,Proprietary,restricted,sleep_osa,low
+WASM-INSOMNIA-001,WASM,WASM Recommendations for the Diagnosis and Treatment of Insomnia,2019,https://wasmonline.org/,,Proprietary,restricted-cds,sleep_insomnia,medium
+AADSM-OSA-001,AADSM,AADSM Standards for Practice in the Management of Adult OSA with Oral Appliance Therapy,2019,https://www.aadsm.org/treatment_protocol_and_resources.php,,Proprietary,restricted-cds,sleep_osa,high
+IRLSSG-RLS-001,IRLSSG,IRLSSG Diagnostic Criteria for Restless Legs Syndrome Updated,2014,https://www.irlssg.org/diagnostic-criteria,,Proprietary,restricted-cds,sleep_circadian,high
+IRLSSG-RLS-002,IRLSSG,IRLSSG Algorithm for Iron Treatment in Restless Legs Syndrome,2018,https://www.irlssg.org/,,Proprietary,restricted-cds,sleep_circadian,high
+ISSM-ED-001,ISSM,International Society for Sexual Medicine Standards for Diagnosis and Treatment of Erectile Dysfunction,2019,https://www.issm.info/sexual-health-headlines/issm-publications-guidelines,,Proprietary,restricted-cds,sexual_male,high
+ISSM-PE-001,ISSM,ISSM Guideline for the Diagnosis and Treatment of Premature Ejaculation,2020,https://www.issm.info/sexual-health-headlines/issm-publications-guidelines,,Proprietary,restricted-cds,sexual_male,high
+ISSM-DE-001,ISSM,ISSM Position on Delayed Ejaculation and Anejaculation,2018,https://www.issm.info/sexual-health-headlines/issm-publications-guidelines,,Proprietary,restricted-cds,sexual_male,medium
+ISSM-PEYRON-001,ISSM,ISSM Recommendations on Peyronie Disease Diagnosis and Treatment,2019,https://www.issm.info/sexual-health-headlines/issm-publications-guidelines,,Proprietary,restricted-cds,sexual_male,high
+ISSM-WOMEN-001,ISSM,ISSM Standards for Women Sexual Health Diagnosis and Management,2019,https://www.issm.info/sexual-health-headlines/issm-publications-guidelines,,Proprietary,restricted-cds,sexual_female,high
+ISSM-AGING-001,ISSM,ISSM Recommendations on Sexual Health in Aging,2020,https://www.issm.info/sexual-health-headlines/issm-publications-guidelines,,Proprietary,restricted-cds,sexual_male,medium
+ISSWSH-FSD-001,ISSWSH,ISSWSH Process of Care for Management of Hypoactive Sexual Desire Disorder in Women,2018,https://www.isswsh.org/resources,,Proprietary,restricted-cds,sexual_female,high
+ISSWSH-FSD-002,ISSWSH,ISSWSH Clinical Pathway for Female Sexual Interest Arousal Disorder,2017,https://www.isswsh.org/resources,,Proprietary,restricted-cds,sexual_female,high
+ISSWSH-GPPPD-001,ISSWSH,ISSWSH Process of Care for Genitopelvic Pain Penetration Disorder,2020,https://www.isswsh.org/resources,,Proprietary,restricted-cds,sexual_female,high
+ISSWSH-VULVO-001,ISSWSH,ISSWSH Consensus Vulvodynia Diagnosis and Management,2019,https://www.isswsh.org/resources,,Proprietary,restricted-cds,sexual_female,high
+ISSWSH-TESTO-001,ISSWSH,ISSWSH Position Testosterone Therapy in Women,2021,https://www.isswsh.org/resources,,Proprietary,restricted-cds,sexual_female,medium
+AUA-ED-001,AUA,AUA Guideline on Erectile Dysfunction,2018,https://www.auanet.org/guidelines-and-quality/guidelines/erectile-dysfunction,,Proprietary,restricted-cds,sexual_male,high
+AUA-PEYRON-001,AUA,AUA Guideline on Peyronie Disease,2015,https://www.auanet.org/guidelines-and-quality/guidelines/peyronies-disease-guideline,,Proprietary,restricted-cds,sexual_male,high
+AUA-PRIAPISM-001,AUA,AUA Guideline on the Management of Priapism,2022,https://www.auanet.org/guidelines-and-quality/guidelines/priapism,,Proprietary,restricted-cds,sexual_male,high
+AUA-TESTO-001,AUA,AUA Guideline on Evaluation and Management of Testosterone Deficiency,2018,https://www.auanet.org/guidelines-and-quality/guidelines/testosterone-deficiency-guideline,,Proprietary,restricted-cds,sexual_male,high
+EAU-MALE-001,EAU,EAU Guidelines on Male Sexual and Reproductive Health,2023,https://uroweb.org/guidelines/sexual-and-reproductive-health,,Proprietary,restricted-cds,sexual_male,high
+EAU-PRIAPISM-001,EAU,EAU Guideline on Priapism,2023,https://uroweb.org/guidelines/sexual-and-reproductive-health,,Proprietary,restricted-cds,sexual_male,high
+WPATH-SOC8-001,WPATH,WPATH Standards of Care for the Health of Transgender and Gender Diverse People Version 8,2022,https://www.wpath.org/publications/soc,,Proprietary,restricted-cds,sexual_lgbtq,high
+ACOG-CONTRA-001,ACOG,ACOG Practice Bulletin on Long-Acting Reversible Contraception,2017,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,Proprietary,restricted-cds,sexual_contraception,high
+ACOG-EMER-001,ACOG,ACOG Practice Bulletin on Emergency Contraception,2019,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,Proprietary,restricted-cds,sexual_contraception,high
+ACOG-VULVO-001,ACOG,ACOG Committee Opinion on Persistent Vulvar Pain,2016,https://www.acog.org/clinical/clinical-guidance,,Proprietary,restricted-cds,sexual_female,medium
+ACOG-FSD-001,ACOG,ACOG Practice Bulletin on Female Sexual Dysfunction,2019,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,Proprietary,restricted-cds,sexual_female,high
+FSRH-CONTRA-001,FSRH,FSRH Clinical Effectiveness Unit UK Medical Eligibility Criteria for Contraceptive Use UKMEC,2016,https://www.fsrh.org/standards-and-guidance/uk-medical-eligibility-criteria-for-contraceptive-use-ukmec/,,CC-BY-NC-ND,restricted-cds,sexual_contraception,high
+FSRH-EMER-001,FSRH,FSRH Guideline on Emergency Contraception,2023,https://www.fsrh.org/standards-and-guidance/documents/ceu-clinical-guidance-emergency-contraception/,,CC-BY-NC-ND,restricted-cds,sexual_contraception,high
+FSRH-COC-001,FSRH,FSRH Guideline on Combined Hormonal Contraception,2019,https://www.fsrh.org/standards-and-guidance/,,CC-BY-NC-ND,restricted-cds,sexual_contraception,high
+FSRH-PROG-001,FSRH,FSRH Guideline on Progestogen-Only Pills,2022,https://www.fsrh.org/standards-and-guidance/,,CC-BY-NC-ND,restricted-cds,sexual_contraception,high
+FSRH-IUC-001,FSRH,FSRH Guideline on Intrauterine Contraception,2023,https://www.fsrh.org/standards-and-guidance/,,CC-BY-NC-ND,restricted-cds,sexual_contraception,high
+WHO-MEC-001,WHO,WHO Medical Eligibility Criteria for Contraceptive Use 5th Edition,2015,https://www.who.int/publications/i/item/9789241549158,,CC-BY-NC-SA,restricted-cds,sexual_contraception,high
+WHO-CONTRA-001,WHO,WHO Selected Practice Recommendations for Contraceptive Use,2016,https://www.who.int/publications/i/item/9789241565400,,CC-BY-NC-SA,restricted-cds,sexual_contraception,high
+ASCO-SEX-001,ASCO,ASCO Guideline on Interventions to Address Sexual Problems in People with Cancer,2018,https://ascopubs.org/doi/10.1200/JCO.2017.75.8995,,Proprietary,restricted-cds,sexual_oncology,high
+IUSTI-STI-001,IUSTI,IUSTI European Guideline on the Management of Sexually Transmitted Infections,2023,https://iusti.org/treatment-guidelines/,,Proprietary,restricted-cds,sexual_contraception,high
+ENDO-TESTO-001,ENDO,Endocrine Society Clinical Practice Guideline Testosterone Therapy in Men with Hypogonadism,2018,https://www.endocrine.org/clinical-practice-guidelines,,Proprietary,restricted-cds,sexual_male,high
+ENDO-TRANS-001,ENDO,Endocrine Society Clinical Practice Guideline Endocrine Treatment of Gender Dysphoric Persons,2017,https://www.endocrine.org/clinical-practice-guidelines,,Proprietary,restricted-cds,sexual_lgbtq,high
+ISTM-PRACTICE-001,ISTM,ISTM Body of Knowledge for the Practice of Travel Medicine,2017,https://www.istm.org/bodyofknowledge,,Proprietary,restricted,travel_pretravel,high
+ISTM-PRETRAVEL-001,ISTM,ISTM Practice Guidelines for Pretravel Consultation,2020,https://www.istm.org/practiceguidelines,,Proprietary,restricted-cds,travel_pretravel,high
+ISTM-PEDS-001,ISTM,ISTM Recommendations for Pediatric Travelers,2019,https://www.istm.org/practiceguidelines,,Proprietary,restricted-cds,travel_special_pop,high
+ISTM-PREG-001,ISTM,ISTM Recommendations for Pregnant Travelers,2018,https://www.istm.org/practiceguidelines,,Proprietary,restricted-cds,travel_special_pop,high
+ISTM-IMMUNO-001,ISTM,ISTM Recommendations for the Immunocompromised Traveler,2022,https://www.istm.org/practiceguidelines,,Proprietary,restricted-cds,travel_special_pop,high
+ISTM-DIARRHEA-001,ISTM,ISTM Expert Panel Recommendations for Travelers Diarrhea,2017,https://www.istm.org/practiceguidelines,,Proprietary,restricted-cds,travel_diarrhea,high
+ISTM-DVT-001,ISTM,ISTM Recommendations on Travel-Related Venous Thromboembolism,2019,https://www.istm.org/practiceguidelines,,Proprietary,restricted-cds,travel_pretravel,medium
+ISTM-RETURN-001,ISTM,ISTM Recommendations for the Returning Traveler with Fever,2020,https://www.istm.org/practiceguidelines,,Proprietary,restricted-cds,travel_returning,high
+CDC-YELLOW-001,CDC,CDC Yellow Book Health Information for International Travel,2024,https://wwwnc.cdc.gov/travel/page/yellowbook-home,,Public Domain,allowed,travel_pretravel,high
+CDC-MALARIA-001,CDC,CDC Yellow Book Chapter on Malaria,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/malaria,,Public Domain,allowed,travel_malaria,high
+CDC-DIARRHEA-001,CDC,CDC Yellow Book Chapter on Travelers Diarrhea,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/travelers-diarrhea,,Public Domain,allowed,travel_diarrhea,high
+CDC-YF-001,CDC,CDC Yellow Book Chapter on Yellow Fever Vaccine,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/yellow-fever-vaccine,,Public Domain,allowed,travel_pretravel,high
+CDC-RABIES-001,CDC,CDC Recommendations for Animal Bite Management and Rabies Postexposure Prophylaxis,2022,https://www.cdc.gov/mmwr/volumes/71/rr/rr7102a1.htm,,Public Domain,allowed,travel_returning,high
+CDC-VFR-001,CDC,CDC Yellow Book Chapter on VFR Travelers Visiting Friends and Relatives,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/family-travel/vfrs,,Public Domain,allowed,travel_special_pop,medium
+CDC-CRUISE-001,CDC,CDC Vessel Sanitation Program Operations Manual,2018,https://www.cdc.gov/nceh/vsp/,,Public Domain,allowed,travel_pretravel,low
+WHO-ITH-001,WHO,WHO International Travel and Health,2022,https://www.who.int/publications/i/item/9789240050853,,CC-BY-NC-SA,restricted-cds,travel_pretravel,high
+WHO-MALARIA-001,WHO,WHO Guidelines for Malaria,2023,https://www.who.int/publications/i/item/guidelines-for-malaria,,CC-BY-NC-SA,restricted-cds,travel_malaria,high
+WHO-YF-001,WHO,WHO Position Paper on Yellow Fever Vaccination,2013,https://www.who.int/publications/i/item/who-wer8827,,CC-BY-NC-SA,restricted-cds,travel_pretravel,high
+WHO-RABIES-001,WHO,WHO Expert Consultation on Rabies Third Report,2018,https://www.who.int/publications/i/item/WHO-TRS-1012,,CC-BY-NC-SA,restricted-cds,travel_returning,high
+NATHNAC-COUNTRY-001,NaTHNaC,NaTHNaC Country Information Database TravelHealthPro,2024,https://travelhealthpro.org.uk/countries,,Crown Copyright,restricted-cds,travel_pretravel,high
+NATHNAC-MALARIA-001,NaTHNaC,NaTHNaC Guidelines for Malaria Prevention in Travellers from the UK,2023,https://travelhealthpro.org.uk/factsheet/49/malaria,,Crown Copyright,restricted-cds,travel_malaria,high
+NATHNAC-YF-001,NaTHNaC,NaTHNaC Yellow Fever Centre Standards,2022,https://nathnacyfzone.org.uk/,,Crown Copyright,restricted-cds,travel_pretravel,medium
+NICE-MALARIA-001,NICE,NICE CKS Malaria Prophylaxis Recommendations,2023,https://cks.nice.org.uk/topics/malaria-prophylaxis/,,OGL,restricted-cds,travel_malaria,high
+NICE-PRETRAVEL-001,NICE,NICE CKS Travel Health Pre-Travel Advice,2023,https://cks.nice.org.uk/topics/immunizations-travel/,,OGL,restricted-cds,travel_pretravel,high
+ACCP-VTE-001,ACCP,ACCP Antithrombotic Therapy and Prevention of Long-Distance Travel VTE,2018,https://www.chestnet.org/Guidelines-and-Resources,,Proprietary,restricted-cds,travel_pretravel,medium
+WMS-HYPO-001,WMS,WMS Clinical Practice Guidelines for the Out-of-Hospital Evaluation and Treatment of Accidental Hypothermia,2019,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,high
+WMS-FROSTBITE-001,WMS,WMS Clinical Practice Guidelines for the Prevention and Treatment of Frostbite,2019,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,high
+WMS-HEAT-001,WMS,WMS Clinical Practice Guidelines for the Prevention and Treatment of Heat-Related Illness,2019,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,high
+WMS-DROWN-001,WMS,WMS Clinical Practice Guidelines for the Treatment and Prevention of Drowning,2019,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,high
+WMS-LIGHT-001,WMS,WMS Clinical Practice Guidelines for the Prevention and Treatment of Lightning Injuries,2014,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,medium
+WMS-SNAKE-001,WMS,WMS Clinical Practice Guidelines for the Treatment of Pit Viper Envenomations in the United States,2015,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_envenomation,high
+WMS-SPIDER-001,WMS,WMS Clinical Practice Guidelines for Spider Bites,2017,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_envenomation,medium
+WMS-MARINE-001,WMS,WMS Clinical Practice Guidelines for the Treatment and Prevention of Marine Envenomations,2018,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_envenomation,medium
+WMS-AMS-001,WMS,WMS Clinical Practice Guidelines for the Prevention and Treatment of Acute Altitude Illness,2024,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_altitude,high
+WMS-AVALANCHE-001,WMS,WMS Clinical Practice Guidelines for Avalanche and Nonavalanche Snow Burial Resuscitation,2023,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,high
+WMS-EAR-001,WMS,WMS Clinical Practice Guidelines for the Prevention and Treatment of Ear Injuries,2017,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,low
+WMS-EYE-001,WMS,WMS Clinical Practice Guidelines for the Prevention and Treatment of Eye Injuries and Illness in the Wilderness,2017,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,medium
+WMS-DENTAL-001,WMS,WMS Clinical Practice Guidelines for the Wilderness Dental Emergencies,2018,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,low
+WMS-WATER-001,WMS,WMS Clinical Practice Guidelines for Water Disinfection for Wilderness International Travel and Austere Situations,2020,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,medium
+WMS-DIABETES-001,WMS,WMS Practice Guidelines on the Management of Diabetes in the Wilderness,2014,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,medium
+WMS-BURN-001,WMS,WMS Clinical Practice Guidelines for Wilderness Burn Care,2017,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wound_burn,medium
+WMS-PEDS-001,WMS,WMS Practice Guidelines for Pediatric Wilderness Medicine,2021,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_pediatric,medium
+WMS-PREG-001,WMS,WMS Position on the Pregnant Wilderness Traveler,2020,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_pediatric,low
+WMS-TICK-001,WMS,WMS Clinical Practice Guidelines for the Prevention and Treatment of Tick-Borne Illness,2019,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_envenomation,medium
+WMS-ALLERGY-001,WMS,WMS Position on Anaphylaxis in the Wilderness,2018,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_envenomation,medium
+ICAR-AVALANCHE-001,ICAR,ICAR-MEDCOM Recommendations on Avalanche Burial Management,2018,https://alpine-rescue.org/xCMS5/WebObjects/nexus5.woa/wa/icar?menuid=1078,,Proprietary,restricted-cds,wilderness_altitude,high
+ICAR-HYPO-001,ICAR,ICAR-MEDCOM Recommendations on the Triage and Treatment of Avalanche Victims and Hypothermia,2017,https://alpine-rescue.org/,,Proprietary,restricted-cds,wilderness_thermal,high
+ICAR-MOUNTAIN-001,ICAR,ICAR-MEDCOM Recommendations on Mountain Rescue Resuscitation,2020,https://alpine-rescue.org/,,Proprietary,restricted-cds,wilderness_altitude,medium
+ISMM-AMS-001,ISMM,International Society for Mountain Medicine Consensus Statement on Acute Altitude Illness,2018,https://www.ismmed.org/,,Proprietary,restricted-cds,wilderness_altitude,high
+ISMM-CHRONIC-001,ISMM,ISMM Consensus on Chronic Mountain Sickness,2014,https://www.ismmed.org/,,Proprietary,restricted-cds,wilderness_altitude,medium
+UIAA-MED-001,UIAA,UIAA Medical Commission Recommendations on Altitude Illness,2019,https://www.theuiaa.org/mountaineering/medical-advice/,,Proprietary,restricted-cds,wilderness_altitude,high
+UIAA-MED-002,UIAA,UIAA Recommendation on Pre-Existing Conditions and Mountaineering,2020,https://www.theuiaa.org/mountaineering/medical-advice/,,Proprietary,restricted-cds,wilderness_altitude,medium
+UIAA-MED-003,UIAA,UIAA Recommendation on Children at Altitude,2008,https://www.theuiaa.org/mountaineering/medical-advice/,,Proprietary,restricted-cds,wilderness_pediatric,medium
+TCCC-001,TCCC,Tactical Combat Casualty Care Guidelines for Medical Personnel,2024,https://deployedmedicine.com/market/11/content/40,,Public Domain,allowed,wilderness_tactical,high
+TCCC-002,TCCC,TCCC All Service Members Guidelines,2024,https://deployedmedicine.com/market/11,,Public Domain,allowed,wilderness_tactical,high
+TCCC-MARCH-001,TCCC,TCCC MARCH PAWS Algorithm for Combat Trauma,2024,https://deployedmedicine.com/,,Public Domain,allowed,wilderness_tactical,high
+ILS-DROWN-001,ILS,ILS Position Statement on Drowning Prevention and Resuscitation,2021,https://www.ilsf.org/medical/,,Proprietary,restricted-cds,wilderness_thermal,high
+ERC-DROWN-001,ERC,ERC Guidelines on Drowning Resuscitation,2021,https://cprguidelines.eu/special-circumstances,,Proprietary,restricted-cds,wilderness_thermal,high
+ERC-HYPO-001,ERC,ERC Guidelines on Cardiac Arrest in Special Circumstances Hypothermia,2021,https://cprguidelines.eu/special-circumstances,,Proprietary,restricted-cds,wilderness_thermal,high
+ERC-AVALANCHE-001,ERC,ERC Guidelines on Avalanche Burial Resuscitation,2021,https://cprguidelines.eu/special-circumstances,,Proprietary,restricted-cds,wilderness_altitude,medium
+ASMA-INFLIGHT-001,AsMA,Aerospace Medical Association Medical Guidelines for Airline Travel,2022,https://www.asma.org/publications/medical-publications-for-airline-travel,,Proprietary,restricted-cds,aviation_inflight,high
+ASMA-CABIN-001,AsMA,AsMA Medical Guidelines for the Cabin Crew First Aid,2020,https://www.asma.org/publications/,,Proprietary,restricted-cds,aviation_inflight,medium
+ASMA-FATIGUE-001,AsMA,AsMA Position on Fatigue in Aviation,2019,https://www.asma.org/publications/,,Proprietary,restricted-cds,aviation_certification,medium
+ASMA-RADIATION-001,AsMA,AsMA Position on Cosmic Radiation Exposure in Aircrew,2021,https://www.asma.org/publications/,,Proprietary,restricted-cds,aviation_space,medium
+ASMA-DCS-001,AsMA,AsMA Position on Decompression Sickness in High Altitude Aviation,2020,https://www.asma.org/publications/,,Proprietary,restricted-cds,aviation_inflight,medium
+FAA-MED-001,FAA,FAA Guide for Aviation Medical Examiners,2024,https://www.faa.gov/about/office_org/headquarters_offices/avs/offices/aam/ame/guide,,Public Domain,allowed,aviation_certification,high
+FAA-PSYCH-001,FAA,FAA Pilot Mental Health and Aviation Safety,2023,https://www.faa.gov/pilots/safety/pilotsafetybrochures,,Public Domain,allowed,aviation_certification,high
+FAA-FATIGUE-001,FAA,FAA Pilot Fatigue Risk Management,2022,https://www.faa.gov/regulations_policies/handbooks_manuals/aviation,,Public Domain,allowed,aviation_certification,medium
+EASA-MED-001,EASA,EASA Part-MED Medical Requirements for Pilots,2023,https://www.easa.europa.eu/en/document-library/regulations,,Proprietary,restricted-cds,aviation_certification,high
+ICAO-MED-001,ICAO,ICAO Manual of Civil Aviation Medicine 3rd Edition,2012,https://www.icao.int/publications/Documents/8984_cons_en.pdf,,Proprietary,restricted-cds,aviation_certification,high
+ICAO-INFLIGHT-001,ICAO,ICAO Annex 1 Personnel Licensing Medical Provisions,2018,https://www.icao.int/Pages/default.aspx,,Proprietary,restricted-cds,aviation_certification,medium
+ESAM-MED-001,ESAM,European Society of Aerospace Medicine Position Papers,2021,https://www.esam.aero/,,Proprietary,restricted-cds,aviation_certification,medium
+NASA-HUMAN-001,NASA,NASA Human Research Program Evidence Reports,2023,https://humanresearchroadmap.nasa.gov/Evidence/,,Public Domain,allowed,aviation_space,medium
+NASA-LONG-001,NASA,NASA Long-Duration Spaceflight Health Standards,2022,https://www.nasa.gov/hrp/,,Public Domain,allowed,aviation_space,medium
+NASA-CMO-001,NASA,NASA Crew Medical Officer Procedures,2021,https://www.nasa.gov/,,Public Domain,allowed,aviation_space,low
+ESA-SPACE-001,ESA,ESA Astronaut Medical Care and Selection,2021,https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Astronauts,,Proprietary,restricted-cds,aviation_space,low
+DAN-DIVE-001,DAN,DAN Diving Emergency Management Guidelines,2023,https://dan.org/health-medicine/health-resources/,,Proprietary,restricted-cds,diving_dcs,high
+DAN-FITNESS-001,DAN,DAN Medical Examination of Diver Form Standards,2020,https://dan.org/diver-medical-exam/,,Proprietary,restricted-cds,diving_fitness,high
+DAN-DIABETES-001,DAN,DAN UHMS Consensus on Diabetes and Recreational Diving,2005,https://dan.org/health-medicine/,,Proprietary,restricted-cds,diving_fitness,medium
+DAN-ASTHMA-001,DAN,DAN Position on Asthma and Recreational Diving,2010,https://dan.org/health-medicine/,,Proprietary,restricted-cds,diving_fitness,medium
+DAN-CARDIO-001,DAN,DAN Position on Cardiovascular Disease and Diving,2015,https://dan.org/health-medicine/,,Proprietary,restricted-cds,diving_fitness,medium
+DAN-PREG-001,DAN,DAN Position on Diving in Pregnancy,2018,https://dan.org/health-medicine/,,Proprietary,restricted-cds,diving_fitness,medium
+DAN-PEDS-001,DAN,DAN Position on Children and Diving,2019,https://dan.org/health-medicine/,,Proprietary,restricted-cds,diving_fitness,medium
+EUBS-DCS-001,EUBS,EUBS Recommendations on Treatment of Decompression Illness,2018,https://www.eubs.org/,,Proprietary,restricted-cds,diving_dcs,high
+EUBS-FITNESS-001,EUBS,EUBS Diving Medical Examination Recommendations,2019,https://www.eubs.org/,,Proprietary,restricted-cds,diving_fitness,medium
+BSAC-FITNESS-001,BSAC,BSAC UK Sport Diving Medical Standards,2023,https://www.bsac.com/safety-and-incidents/medical-matters/,,Proprietary,restricted-cds,diving_fitness,medium
+APA-INSOMNIA-001,APA,APA Clinical Practice Guideline for Treatment of Posttraumatic Stress Disorder Sleep Considerations,2017,https://www.apa.org/ptsd-guideline,,Proprietary,restricted-cds,sleep_psychiatric,medium
+APA-PSYCH-001,APA,APA Position on Insomnia in Psychiatric Patients,2020,https://www.psychiatry.org/psychiatrists/practice/clinical-practice-guidelines,,Proprietary,restricted-cds,sleep_psychiatric,medium
+DHHS-HIV-001,DHHS,DHHS Guidelines on Sexual Health Concerns in HIV Patients,2023,https://clinicalinfo.hiv.gov/en/guidelines,,Public Domain,allowed,sexual_lgbtq,medium
+AAO-HNS-OSA-001,AAO-HNS,AAO-HNS Clinical Practice Guideline on Improving Sleep Quality with Surgical Therapy,2018,https://www.entnet.org/quality-practice/quality-products/clinical-practice-guidelines/,,Proprietary,restricted-cds,sleep_osa,high
+AAO-HNS-OSA-002,AAO-HNS,AAO-HNS Position Statement on Pediatric Adenotonsillectomy for OSA,2019,https://www.entnet.org/quality-practice/quality-products/clinical-practice-guidelines/,,Proprietary,restricted-cds,sleep_pediatric,high
+ACEP-AIR-001,ACEP,ACEP Position on In-Flight Medical Emergencies for Emergency Physicians,2017,https://www.acep.org/patient-care/policy-statements/,,Proprietary,restricted-cds,aviation_inflight,medium
+ICRP-RAD-001,ICRP,ICRP Recommendations on Radiation Protection in Aviation and Space,2016,https://www.icrp.org/,,Proprietary,restricted-cds,aviation_space,medium
+ASLMS-LASER-002,ASLMS,ASLMS Position on Tattoo Removal Laser Standards,2020,https://www.aslms.org/for-professionals,,Proprietary,restricted-cds,plastic_aesthetic,low
+ASLMS-LASER-003,ASLMS,ASLMS Position on Photoaging Treatment with Laser and Light Devices,2022,https://www.aslms.org/for-professionals,,Proprietary,restricted-cds,plastic_aesthetic,low
+ABA-BURN-004,ABA,ABA Position on Outpatient Management of Minor Burns,2023,https://ameriburn.org/resources_factsheets/,,Proprietary,restricted-cds,wound_burn,medium
+ABA-BURN-005,ABA,ABA Burn Resuscitation Practice Guideline,2020,https://ameriburn.org/resources_factsheets/,,Proprietary,restricted-cds,wound_burn,high
+WOCN-NPWT-001,WOCN,WOCN Guidance Document on Negative Pressure Wound Therapy,2020,https://www.wocn.org/,,Proprietary,restricted-cds,wound_pressure,medium
+WOCN-PALL-001,WOCN,WOCN Position on Palliative Wound Care,2017,https://www.wocn.org/,,Proprietary,restricted-cds,wound_palliative,medium
+WOCN-MASD-001,WOCN,WOCN Best Practice Document on Moisture Associated Skin Damage,2018,https://www.wocn.org/,,Proprietary,restricted-cds,wound_pressure,medium
+ISL-LYMPH-001,ISL,International Society of Lymphology Consensus Document on Diagnosis and Treatment of Peripheral Lymphedema,2020,https://www.lympho.org/,,Proprietary,restricted-cds,plastic_reconstruction,high
+ISSVA-VASC-001,ISSVA,ISSVA Classification of Vascular Anomalies,2018,https://www.issva.org/classification,,Proprietary,restricted-cds,plastic_pediatric,medium
+ASRM-NERVE-001,ASRM,ASRM Statement on Peripheral Nerve Repair Microsurgery,2020,https://www.microsurg.org/,,Proprietary,restricted-cds,plastic_reconstruction,medium
+ASSH-HAND-001,ASSH,ASSH Clinical Practice Guideline on Distal Radius Fractures,2020,https://www.assh.org/s/clinical-practice-guidelines,,Proprietary,restricted-cds,plastic_reconstruction,medium
+BSSH-HAND-001,BSSH,BSSH Standards for Hand Surgery,2021,https://www.bssh.ac.uk/professionals/,,Proprietary,restricted-cds,plastic_reconstruction,medium
+ISBI-BURN-001,ISBI,ISBI Practice Guidelines for Burn Care Part 1,2016,https://www.worldburn.org/Practice-Guidelines/,,CC-BY-NC-ND,restricted-cds,wound_burn,high
+ISBI-BURN-002,ISBI,ISBI Practice Guidelines for Burn Care Part 2,2018,https://www.worldburn.org/Practice-Guidelines/,,CC-BY-NC-ND,restricted-cds,wound_burn,high
+EBA-BURN-001,EBA,European Burns Association Practice Guidelines for Burn Care,2017,https://www.euroburn.org/practice-guidelines/,,Proprietary,restricted-cds,wound_burn,high
+NICE-PI-001,NICE,NICE Guideline Pressure Ulcers Prevention and Management,2014,https://www.nice.org.uk/guidance/cg179,,OGL,restricted-cds,wound_pressure,high
+NICE-DFU-001,NICE,NICE Guideline Diabetic Foot Problems Prevention and Management,2019,https://www.nice.org.uk/guidance/ng19,,OGL,restricted-cds,wound_diabetic,high
+NICE-VLU-001,NICE,NICE Guidance on Venous Leg Ulcers,2023,https://cks.nice.org.uk/topics/leg-ulcer-venous/,,OGL,restricted-cds,wound_venous,high
+NICE-INSOMNIA-001,NICE,NICE CKS Insomnia,2022,https://cks.nice.org.uk/topics/insomnia/,,OGL,restricted-cds,sleep_insomnia,high
+NICE-OSA-001,NICE,NICE Guideline Obstructive Sleep Apnoea Hypopnoea Syndrome and Obesity Hypoventilation Syndrome,2021,https://www.nice.org.uk/guidance/ng202,,OGL,restricted-cds,sleep_osa,high
+NICE-ED-001,NICE,NICE CKS Erectile Dysfunction,2023,https://cks.nice.org.uk/topics/erectile-dysfunction/,,OGL,restricted-cds,sexual_male,high
+NICE-CONTRA-001,NICE,NICE CKS Contraception Assessment,2023,https://cks.nice.org.uk/topics/contraception-assessment/,,OGL,restricted-cds,sexual_contraception,high
+ACS-MELAN-001,ACS,ACS Surgical Site Infection and Wound Care Guidelines,2022,https://www.facs.org/quality-programs/,,Proprietary,restricted-cds,wound_infection,medium
+IDSA-DFU-001,IDSA,IDSA Clinical Practice Guideline for the Diagnosis and Treatment of Diabetic Foot Infections,2023,https://www.idsociety.org/practice-guideline/diabetic-foot-infections/,,Proprietary,restricted-cds,wound_infection,high
+IDSA-TRAVEL-001,IDSA,IDSA Practice Guidelines for Travelers Diarrhea,2017,https://www.idsociety.org/practice-guideline/,,Proprietary,restricted-cds,travel_diarrhea,high
+IDSA-IMMIG-001,IDSA,IDSA Guidelines for the Diagnosis and Treatment of Newly Arrived Refugees and Immigrants,2022,https://www.idsociety.org/practice-guideline/,,Proprietary,restricted-cds,travel_returning,medium
+ESC-AF-DIVE-001,ESC,ESC Position on Cardiovascular Disease and Recreational Diving,2020,https://www.escardio.org/Guidelines,,Proprietary,restricted-cds,diving_fitness,medium
+ATS-PEDS-OSA-001,ATS,ATS Clinical Practice Guideline on Polysomnography in Pediatric Sleep,2018,https://www.thoracic.org/statements/,,Proprietary,restricted-cds,sleep_pediatric,high
+AAP-SLEEP-001,AAP,AAP Clinical Practice Guideline on the Diagnosis and Management of Childhood OSA,2012,https://publications.aap.org/pediatrics,,Proprietary,restricted-cds,sleep_pediatric,high
+AAP-SIDS-001,AAP,AAP Policy Statement Safe Sleep Recommendations for Reducing SIDS Risk,2022,https://publications.aap.org/pediatrics,,Proprietary,restricted-cds,sleep_pediatric,high
+EAU-CONTRA-001,EAU,EAU Patient Information on Male Contraception and Vasectomy,2022,https://patients.uroweb.org/,,Proprietary,restricted-cds,sexual_contraception,low
+ENDO-PCOS-001,ENDO,Endocrine Society Guideline on Polycystic Ovary Syndrome and Sexual Health,2018,https://www.endocrine.org/clinical-practice-guidelines,,Proprietary,restricted-cds,sexual_female,medium
+WHO-HEALTHY-001,WHO,WHO Guidelines on Physical Activity and Sedentary Behavior,2020,https://www.who.int/publications/i/item/9789240015128,,CC-BY-NC-SA,restricted-cds,sports_exercise_rx,high
+WHO-VIOLENCE-001,WHO,WHO Sexual Violence Clinical Care Guidelines for Survivors,2019,https://www.who.int/publications/i/item/9789241550147,,CC-BY-NC-SA,restricted-cds,sexual_female,medium
+ACOG-PREGEX-001,ACOG,ACOG Committee Opinion on Physical Activity and Exercise During Pregnancy and the Postpartum Period,2020,https://www.acog.org/clinical/clinical-guidance,,Proprietary,restricted-cds,sports_exercise_rx,high
+WMS-WOUND-001,WMS,WMS Position on Wilderness Wound Management and Infection Prevention,2014,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,medium
+EWMA-VAC-001,EWMA,EWMA Document on Wound Care in the Older Person,2019,https://ewma.org/what-we-do/projects-and-publications/,,CC-BY-NC-ND,restricted-cds,wound_palliative,medium
+WUWHS-LYMPH-001,WUWHS,WUWHS Best Practice Document on Lymphedema and Wound Care,2018,https://www.woundsinternational.com/resources/,,Proprietary,restricted-cds,wound_pressure,medium
+NPIAP-COVID-001,NPIAP,NPIAP Position on Pressure Injuries in COVID-19 Prone Position,2020,https://npiap.com/page/Resources,,Proprietary,restricted-cds,wound_pressure,medium
+ASPS-MIGRAINE-001,ASPS,ASPS Position on Surgical Treatment of Migraine Headaches,2020,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_reconstruction,low
+ASPS-GENDER-001,ASPS,ASPS Recommendations on Gender Affirmation Surgery,2022,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,sexual_lgbtq,high
+ASPS-TRAUMA-001,ASPS,ASPS Practice Advisory on Soft Tissue Reconstruction in Trauma,2021,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_reconstruction,medium
+IOC-FEMALE-001,IOC,IOC Statement on Sex Reassignment in Sport,2015,https://www.olympic.org/medical-and-scientific-commission,,Proprietary,restricted-cds,sports_doping,medium
+NATA-PED-001,NATA,NATA Position Statement on Preventing Sudden Death in Sports,2012,https://www.nata.org/about/foundation/research-resources/position-statements,,Proprietary,restricted-cds,sports_cardiac,high
+AHA-MASTERS-001,AHA,AHA Scientific Statement on Cardiovascular Aspects of Masters Athletes,2020,https://www.heart.org/en/professional/quality-improvement,,Proprietary,restricted-cds,sports_cardiac,medium
+ESC-HCM-001,ESC,ESC Sports Cardiology Position on Hypertrophic Cardiomyopathy and Exercise,2020,https://www.escardio.org/Guidelines,,Proprietary,restricted-cds,sports_cardiac,medium
+AASM-FATIGUE-001,AASM,AASM Position on Sleep and Fatigue Risk Management for Healthcare Workers,2018,https://aasm.org/clinical-resources/practice-standards/,,Proprietary,restricted-cds,sleep_circadian,medium
+AASM-HOMEAPNEA-001,AASM,AASM Quality Measures for Home Sleep Apnea Testing,2022,https://aasm.org/clinical-resources/quality-measures/,,Proprietary,restricted-cds,sleep_osa,medium
+ISTM-RABIES-001,ISTM,ISTM Recommendations on Rabies Postexposure Prophylaxis for Travelers,2021,https://www.istm.org/practiceguidelines,,Proprietary,restricted-cds,travel_returning,medium
+WMS-NUTRITION-001,WMS,WMS Position on Nutrition and Hydration in Wilderness Environments,2018,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,low
+WMS-MENTAL-001,WMS,WMS Position on Mental Health in Wilderness Settings,2022,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_pediatric,low
+TCCC-PEDS-001,TCCC,TCCC Pediatric Trauma Considerations,2023,https://deployedmedicine.com/,,Public Domain,allowed,wilderness_pediatric,medium
+DAN-DCS-001,DAN,DAN Field Management of Decompression Illness,2020,https://dan.org/health-medicine/health-resources/,,Proprietary,restricted-cds,diving_dcs,high
+UHMS-DIVE-FIT-001,UHMS,UHMS Guidelines for Recreational Diving Medical Examinations,2018,https://www.uhms.org/resources/clinical-resources.html,,Proprietary,restricted-cds,diving_fitness,medium
+WHO-PHYSACTIVE-PEDS-001,WHO,WHO Guidelines on Physical Activity for Children and Adolescents,2020,https://www.who.int/publications/i/item/9789240015128,,CC-BY-NC-SA,restricted-cds,sports_pediatric,high
+NICE-WOUND-001,NICE,NICE CKS Surgical Site Infection,2022,https://cks.nice.org.uk/topics/wounds-surgical/,,OGL,restricted-cds,wound_infection,medium
+ISTM-VAX-001,ISTM,ISTM Position on Travel Vaccinations for Special Populations,2020,https://www.istm.org/practiceguidelines,,Proprietary,restricted-cds,travel_pretravel,high
+CDC-DENGUE-001,CDC,CDC Yellow Book Chapter on Dengue Prevention,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/dengue,,Public Domain,allowed,travel_returning,medium
+CDC-ZIKA-001,CDC,CDC Yellow Book Chapter on Zika Virus,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/zika,,Public Domain,allowed,travel_special_pop,medium
+CDC-SCHISTO-001,CDC,CDC Yellow Book Chapter on Schistosomiasis,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/schistosomiasis,,Public Domain,allowed,travel_returning,medium
+CDC-TYPHOID-001,CDC,CDC Yellow Book Chapter on Typhoid Fever,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/infections-diseases/typhoid-paratyphoid-fever,,Public Domain,allowed,travel_pretravel,medium
+CDC-ALTITUDE-001,CDC,CDC Yellow Book Chapter on High Altitude Travel,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/high-elevation-travel,,Public Domain,allowed,travel_altitude,high
+CDC-DIVING-001,CDC,CDC Yellow Book Chapter on Scuba Diving,2024,https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/scuba-diving,,Public Domain,allowed,diving_fitness,medium
+WMS-IMMER-001,WMS,WMS Position on Cold Water Immersion and Submersion,2017,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,medium
+ISSM-CANCER-001,ISSM,ISSM Position on Sexual Function in Cancer Survivors,2018,https://www.issm.info/,,Proprietary,restricted-cds,sexual_oncology,medium
+ESMO-SEX-001,ESMO,ESMO Clinical Practice Guidelines on Sexual Health in Cancer Survivors,2020,https://www.esmo.org/guidelines,,Proprietary,restricted-cds,sexual_oncology,medium
+ASCO-SURVIV-001,ASCO,ASCO Survivorship Guidelines on Sexual Function After Cancer Treatment,2021,https://www.asco.org/guidelines,,Proprietary,restricted-cds,sexual_oncology,high
+AUGS-PROLAPSE-001,AUGS,AUGS Position on Sexual Function in Pelvic Floor Disorders,2019,https://www.augs.org/clinical-resources/,,Proprietary,restricted-cds,sexual_female,medium
+WPATH-ENDOCRINE-001,WPATH,WPATH Position on Hormonal Therapy in Transgender Care,2022,https://www.wpath.org/publications/soc,,Proprietary,restricted-cds,sexual_lgbtq,high
+WHO-FGM-001,WHO,WHO Guidelines on the Management of Health Complications from Female Genital Mutilation,2018,https://www.who.int/publications/i/item/9789241513913,,CC-BY-NC-SA,restricted-cds,sexual_female,medium
+NATHNAC-PREG-001,NaTHNaC,NaTHNaC Pregnant Traveller Factsheet,2023,https://travelhealthpro.org.uk/factsheet/,,Crown Copyright,restricted-cds,travel_special_pop,medium
+NATHNAC-PEDS-001,NaTHNaC,NaTHNaC Children Travelling Factsheet,2023,https://travelhealthpro.org.uk/factsheet/,,Crown Copyright,restricted-cds,travel_special_pop,medium
+NATHNAC-IMMUNO-001,NaTHNaC,NaTHNaC Immunocompromised Travellers Factsheet,2023,https://travelhealthpro.org.uk/factsheet/,,Crown Copyright,restricted-cds,travel_special_pop,medium
+ATS-OSA-PEDS-001,ATS,ATS Statement on Pediatric Obesity Hypoventilation Syndrome,2020,https://www.thoracic.org/statements/,,Proprietary,restricted-cds,sleep_pediatric,medium
+ESC-PRE-PARTIC-001,ESC,ESC Recommendations on Preparticipation Screening with ECG in Athletes,2018,https://www.escardio.org/Guidelines,,Proprietary,restricted-cds,sports_cardiac,high
+NICE-OBESITY-EX-001,NICE,NICE Guidance on Physical Activity Brief Advice for Adults,2014,https://www.nice.org.uk/guidance/ph44,,OGL,restricted-cds,sports_exercise_rx,medium
+WHO-DPP-001,WHO,WHO Recommendations on Physical Activity for Diabetes Prevention,2019,https://www.who.int/publications/i/item/9789241550383,,CC-BY-NC-SA,restricted-cds,sports_exercise_rx,medium
+ISL-LYMPH-002,ISL,ISL Position Statement on Lymphedema Surgery,2017,https://www.lympho.org/,,Proprietary,restricted-cds,plastic_reconstruction,medium
+ASPS-LYMPH-001,ASPS,ASPS Practice Advisory on Lymphedema Surgical Treatment,2022,https://www.plasticsurgery.org/for-medical-professionals/quality-and-health-policy,,Proprietary,restricted-cds,plastic_reconstruction,medium
+ASRM-PEDS-001,ASRM,ASRM Position on Pediatric Microsurgery and Free Flaps,2021,https://www.microsurg.org/,,Proprietary,restricted-cds,plastic_pediatric,medium
+WMS-GENERAL-001,WMS,WMS Wilderness Medical Society Practice Guideline Index,2024,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,medium
+DAN-NEURO-001,DAN,DAN Position on Neurologic Decompression Illness,2018,https://dan.org/health-medicine/,,Proprietary,restricted-cds,diving_dcs,medium
+EUBS-OXYGEN-001,EUBS,EUBS Recommendations on Surface Oxygen for Diving Emergencies,2020,https://www.eubs.org/,,Proprietary,restricted-cds,diving_dcs,medium
+AsMA-CIRC-001,AsMA,AsMA Recommendations on Circadian Disruption and Pilot Sleep,2022,https://www.asma.org/publications/,,Proprietary,restricted-cds,aviation_certification,medium
+ICAO-FATIGUE-001,ICAO,ICAO Doc 9966 Fatigue Management Guide for Airline Operators,2020,https://www.icao.int/safety/fatiguemanagement/Pages/FRMS.aspx,,Proprietary,restricted-cds,aviation_certification,medium
+WADA-ATHLETE-001,WADA,WADA Athlete Biological Passport Operating Guidelines,2023,https://www.wada-ama.org/en/resources,,Proprietary,restricted,sports_doping,medium
+WADA-EDUC-001,WADA,WADA Education and Awareness Resources for Anti-Doping,2024,https://www.wada-ama.org/en/educate,,Proprietary,restricted,sports_doping,low
+ERS-PEDS-OSA-001,ERS,ERS Statement on Pediatric Sleep Disordered Breathing,2017,https://www.ersnet.org/guidelines-and-publications/,,Proprietary,restricted-cds,sleep_pediatric,high
+AASM-CHILDOSA-001,AASM,AASM Practice Parameter for Diagnosis and Management of Childhood OSA,2012,https://aasm.org/clinical-resources/practice-standards/practice-guidelines/,,Proprietary,restricted-cds,sleep_pediatric,high
+NPIAP-DEEP-001,NPIAP,NPIAP Position on Deep Tissue Pressure Injury Identification,2017,https://npiap.com/page/PressureInjuryStages,,Proprietary,restricted-cds,wound_pressure,medium
+EPUAP-EDU-001,EPUAP,EPUAP Educational Curriculum on Pressure Injury Prevention,2021,https://www.epuap.org/,,Proprietary,restricted-cds,wound_pressure,low
+WUWHS-DFU-001,WUWHS,WUWHS Best Practice on Diabetic Foot Wound Healing,2020,https://www.woundsinternational.com/resources/,,Proprietary,restricted-cds,wound_diabetic,medium
+WCET-PEDS-001,WCET,WCET Practice Recommendations for Pediatric Stoma Care,2020,https://wcetn.org/,,Proprietary,restricted-cds,wound_pressure,low
+ABA-BURN-006,ABA,ABA Practice Guideline on Inhalation Injury,2021,https://ameriburn.org/resources_factsheets/,,Proprietary,restricted-cds,wound_burn,high
+EBA-BURN-002,EBA,EBA Position on Burn Wound Excision and Grafting,2019,https://www.euroburn.org/,,Proprietary,restricted-cds,wound_burn,medium
+ASLMS-PEDS-001,ASLMS,ASLMS Position on Laser Treatment in Pediatric Vascular Lesions,2020,https://www.aslms.org/for-professionals,,Proprietary,restricted-cds,plastic_pediatric,low
+ISSM-NONSURG-001,ISSM,ISSM Position on Non-Surgical Penile Augmentation,2019,https://www.issm.info/,,Proprietary,restricted-cds,sexual_male,low
+ISTM-DRUG-001,ISTM,ISTM Position on Drug-Drug Interactions in Travel Medicine,2021,https://www.istm.org/practiceguidelines,,Proprietary,restricted-cds,travel_pretravel,medium
+WMS-COMM-001,WMS,WMS Position on Communication and Telemedicine in Wilderness Settings,2021,https://wms.org/research/practice-guidelines,,CC-BY-NC-ND,restricted-cds,wilderness_thermal,low
