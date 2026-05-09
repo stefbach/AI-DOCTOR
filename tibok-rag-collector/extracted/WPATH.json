@@ -682,15 +682,15 @@
    ]
   },
   {
-   "id": "WPATH-SOC8-001",
+   "id": "WPATH-GA-001",
    "source": "WPATH",
-   "title": "WPATH Standards of Care for the Health of Transgender and Gender Diverse People Version 8",
+   "title": "Standards of Care for Health of Transgender and Gender Diverse People Version 8",
    "year": "2022",
-   "page_url": "https://www.wpath.org/publications/soc",
+   "page_url": "https://www.wpath.org/soc8",
    "pdf_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=11087993",
-   "license": "Proprietary",
-   "commercial_use": "restricted-cds",
-   "clinical_domain": "sexual_lgbtq",
+   "license": "WPATH",
+   "commercial_use": "restricted",
+   "clinical_domain": "ethics_consent",
    "priority": "high",
    "sha256": "6a50d70ee95a4dc4b1d18d76b0484d52a0fa0f61df47890fce4bc6821d152cba",
    "size_bytes": 32164,
@@ -698,7 +698,7 @@
    "pmcid": "PMC11087993",
    "char_count": 32119,
    "chunk_count": 8,
-   "extracted_at": "2026-05-09T16:01:27Z",
+   "extracted_at": "2026-05-09T16:20:45Z",
    "chunks": [
     {
      "chunk_index": 0,
