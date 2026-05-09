@@ -438,7 +438,7 @@ def unpaywall_pdf(doi):
 # ─── Master recovery function ───────────────────────────────────────────────
 def try_recover(row):
     """Try all strategies. Returns (text, sha, pdf_source, pdf_url, pmcid) or None."""
-    src = row["source"]
+    src = row["source"].replace("/", "-").replace("\\", "-")
     title = row["title"]
     year = row["year"]
     page_url = row.get("page_url", "")

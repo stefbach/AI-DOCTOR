@@ -122,7 +122,7 @@ ICOPE-001,ICOPE,WHO ICOPE Integrated Care for Older People Guidelines,2019,https
 ICFSR-FRAILTY-001,ICFSR,ICFSR International Clinical Practice Guidelines for Frailty,2019,https://link.springer.com/journal/12603,,ICFSR,restricted-cds,internal_medicine_geriatric,high
 FRAILTY-CONSEN-001,Frailty Consensus,Asia Pacific Clinical Practice Guidelines for the Management of Frailty,2017,https://www.jamda.com/,,Frailty Consensus,restricted-cds,internal_medicine_geriatric,medium
 AGS-BEERS-001,AGS,AGS Beers Criteria for Potentially Inappropriate Medication Use in Older Adults,2023,https://www.americangeriatrics.org/clinical-resources/beers-criteria,,AGS,restricted-cds,internal_medicine_geriatric,high
-STOPP-START-001,STOPP/START,STOPP START Criteria for Potentially Inappropriate Prescribing in Older Adults Version 3,2023,https://academic.oup.com/ageing/,,STOPP/START,restricted-cds,internal_medicine_geriatric,high
+STOPP-START-001,STOPP-START,STOPP START Criteria for Potentially Inappropriate Prescribing in Older Adults Version 3,2023,https://academic.oup.com/ageing/,,STOPP/START,restricted-cds,internal_medicine_geriatric,high
 AGS-FALLS-001,AGS,AGS BGS Clinical Practice Guideline Prevention of Falls in Older Persons,2011,https://www.americangeriatrics.org/clinical-resources,,AGS,restricted-cds,internal_medicine_geriatric,high
 NICE-FALLS-001,NICE,NICE CG161 Falls in older people assessing risk and prevention,2013,https://www.nice.org.uk/guidance/cg161,,NICE,restricted-cds,internal_medicine_geriatric,high
 WORLD-FALLS-001,World Falls Guidelines,World Guidelines for Falls Prevention and Management for Older Adults,2022,https://academic.oup.com/ageing/,,World Falls,restricted-cds,internal_medicine_geriatric,high

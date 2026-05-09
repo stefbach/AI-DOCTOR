@@ -158,7 +158,7 @@ def main():
     recovered = 0
     by_src_count = {}
     for row in rows:
-        src = row["source"]
+        src = row["source"].replace("/", "-").replace("\\", "-")
         gid = row["id"]
         title = row["title"]
         year = row["year"]
