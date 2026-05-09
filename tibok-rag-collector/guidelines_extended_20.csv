@@ -1,0 +1,485 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+NHPCO-PAL-001,NHPCO,NHPCO Standards of Practice for Hospice Programs,2023,https://www.nhpco.org/standards/,,Restricted,attribution,palliative_general,high
+NHPCO-PAL-002,NHPCO,NHPCO Facts and Figures Hospice Care in America,2023,https://www.nhpco.org/hospice-care-overview/hospice-facts-figures/,,Restricted,attribution,palliative_general,high
+NHPCO-PAL-003,NHPCO,NHPCO Local Coverage Determinations LCDs Hospice Eligibility,2023,https://www.nhpco.org/regulatory/medicare-hospice-regulations/,,Restricted,attribution,palliative_general,high
+NHPCO-PAL-004,NHPCO,NHPCO Pediatric Concurrent Care for Children Implementation Toolkit,2022,https://www.nhpco.org/pediatrics/,,Restricted,attribution,palliative_pediatric,high
+NHPCO-PAL-005,NHPCO,NHPCO Spiritual Caregivers Standards of Practice in Hospice,2022,https://www.nhpco.org/education/tools-and-resources/,,Restricted,attribution,palliative_general,medium
+NHPCO-PAL-006,NHPCO,NHPCO Bereavement Standards of Practice,2022,https://www.nhpco.org/bereavement/,,Restricted,attribution,palliative_eol,medium
+EAPC-PAL-001,EAPC,EAPC White Paper on Standards and Norms for Hospice and Palliative Care in Europe,2010,https://www.eapcnet.eu/publications/white-papers/,,Open,attribution,palliative_general,high
+EAPC-PAL-002,EAPC,EAPC Atlas of Palliative Care in Europe,2019,https://www.eapcnet.eu/publications/atlas-palliative-care-europe/,,Restricted,attribution,palliative_general,medium
+EAPC-PAL-003,EAPC,EAPC Recommended Framework for the Use of Sedation in Palliative Care,2009,https://journals.sagepub.com/doi/10.1177/0269216309107024,,Restricted,attribution,palliative_eol,high
+EAPC-PAL-004,EAPC,EAPC Position Paper on Euthanasia and Physician-Assisted Suicide,2016,https://www.eapcnet.eu/publications/position-papers/,,Open,attribution,palliative_eol,medium
+EAPC-PAL-005,EAPC,EAPC Recommendations Last Days of Life and Care of the Dying Adult,2017,https://www.eapcnet.eu/publications/clinical-recommendations/,,Open,attribution,palliative_eol,high
+EAPC-PAL-006,EAPC,EAPC Use of Opioid Analgesics in the Treatment of Cancer Pain,2012,https://www.thelancet.com/journals/lanonc/article/PIIS1470-2045(12)70040-2/fulltext,,Restricted,attribution,palliative_pain,high
+EAPC-PAL-007,EAPC,EAPC Guidelines on the Pharmacological Management of Breathlessness,2017,https://www.eapcnet.eu/publications/clinical-recommendations/,,Open,attribution,palliative_general,high
+EAPC-PAL-008,EAPC,EAPC Recommendations on Palliative Care for Older People With Dementia,2014,https://journals.sagepub.com/doi/10.1177/0269216313493685,,Restricted,attribution,palliative_eol,high
+EAPC-PAL-009,EAPC,EAPC Core Competencies in Palliative Care,2013,https://www.eapcnet.eu/publications/clinical-recommendations/,,Open,attribution,palliative_general,medium
+EAPC-PAL-010,EAPC,EAPC IMPaCCT Standards for Pediatric Palliative Care in Europe,2007,https://www.eapcnet.eu/publications/clinical-recommendations/,,Open,attribution,palliative_pediatric,high
+IAHPC-PAL-001,IAHPC,IAHPC List of Essential Medicines for Palliative Care,2023,https://hospicecare.com/what-we-do/projects/essential-medicines/,,Open,attribution,palliative_pain,high
+IAHPC-PAL-002,IAHPC,IAHPC Consensus-Based Definition of Palliative Care,2020,https://hospicecare.com/what-we-do/projects/consensus-based-definition-of-palliative-care/,,Open,attribution,palliative_general,high
+IAHPC-PAL-003,IAHPC,IAHPC Pediatric Palliative Care Definition Global Consensus,2022,https://hospicecare.com/what-we-do/projects/,,Open,attribution,palliative_pediatric,high
+WHO-PAL-001,WHO,WHO Integrating Palliative Care and Symptom Relief into Primary Health Care,2018,https://www.who.int/publications/i/item/integrating-palliative-care-and-symptom-relief-into-primary-health-care,,CC BY-NC-SA,attribution,palliative_general,high
+WHO-PAL-002,WHO,WHO Guidelines on the Pharmacological Treatment of Persisting Pain in Children with Medical Illnesses,2012,https://www.who.int/publications/i/item/9789241548120,,CC BY-NC-SA,attribution,palliative_pediatric,high
+WHO-PAL-003,WHO,WHO Pain Ladder for Cancer Pain Relief Adults,1996,https://www.who.int/cancer/palliative/painladder/en/,,CC BY-NC-SA,attribution,palliative_pain,high
+WHO-PAL-004,WHO,WHO Palliative Care Universal Health Coverage Resolution WHA67.19,2014,https://apps.who.int/gb/ebwha/pdf_files/WHA67/A67_R19-en.pdf,,CC BY-NC-SA,attribution,palliative_general,medium
+AAHPM-PAL-001,AAHPM,AAHPM Position Statement on Palliative Sedation,2014,https://aahpm.org/positions/palliative-sedation,,Restricted,attribution,palliative_eol,high
+AAHPM-PAL-002,AAHPM,AAHPM Position Statement Physician-Assisted Dying,2016,https://aahpm.org/positions/pad,,Restricted,attribution,palliative_eol,medium
+AAHPM-PAL-003,AAHPM,AAHPM Choosing Wisely Five Things Physicians and Patients Should Question,2021,https://www.choosingwisely.org/societies/american-academy-of-hospice-and-palliative-medicine/,,Open,attribution,palliative_general,medium
+AAHPM-PAL-004,AAHPM,AAHPM HPM PASS Self-Assessment Pain Symptoms Last Hours of Living,2022,https://aahpm.org/education/hpmpass,,Restricted,attribution,palliative_eol,medium
+AAHPM-PAL-005,AAHPM,AAHPM Primer of Palliative Care Symptom Management,2020,https://aahpm.org/publications/primer,,Restricted,attribution,palliative_pain,high
+ASCO-PAL-001,ASCO,ASCO Integration of Palliative Care into Standard Oncology Care Update,2017,https://ascopubs.org/doi/10.1200/JCO.2016.70.1474,,Restricted,attribution,palliative_general,high
+ASCO-PAL-002,ASCO,ASCO Patient-Clinician Communication Consensus Guideline,2017,https://ascopubs.org/doi/10.1200/JCO.2017.75.2311,,Restricted,attribution,palliative_general,high
+ASCO-PAL-003,ASCO,ASCO Management of Chronic Pain in Survivors of Adult Cancers,2016,https://ascopubs.org/doi/10.1200/JCO.2016.68.5206,,Restricted,attribution,palliative_pain,high
+ASCO-PAL-004,ASCO,ASCO Antiemetics in Patients Receiving Cancer Chemotherapy and Radiotherapy,2020,https://ascopubs.org/doi/10.1200/JCO.20.01296,,Restricted,attribution,palliative_general,high
+ESMO-PAL-001,ESMO,ESMO Cancer Pain Management Clinical Practice Guidelines,2018,https://www.esmo.org/guidelines/supportive-and-palliative-care/cancer-pain,,Restricted,attribution,palliative_pain,high
+ESMO-PAL-002,ESMO,ESMO Management of Refractory Symptoms at the End of Life and Sedation,2014,https://www.esmo.org/guidelines/supportive-and-palliative-care,,Restricted,attribution,palliative_eol,high
+ESMO-PAL-003,ESMO,ESMO Cancer Cachexia in Adult Patients Clinical Practice Guidelines,2021,https://www.esmo.org/guidelines/supportive-and-palliative-care/cachexia,,Restricted,attribution,palliative_general,high
+ESMO-PAL-004,ESMO,ESMO Bone Health in Cancer Patients Clinical Practice Guidelines,2020,https://www.esmo.org/guidelines/supportive-and-palliative-care/bone-health,,Restricted,attribution,palliative_general,medium
+MASCC-PAL-001,MASCC,MASCC ESMO Antiemetic Guidelines,2023,https://mascc.org/resources/antiemetic-guidelines/,,Open,attribution,palliative_general,high
+MASCC-PAL-002,MASCC,MASCC Mucositis Clinical Practice Guidelines,2020,https://mascc.org/mascc-isoo-mucositis-guidelines/,,Open,attribution,palliative_general,medium
+MASCC-PAL-003,MASCC,MASCC Constipation Management in Palliative Care,2008,https://mascc.org/resources/,,Open,attribution,palliative_general,medium
+NICE-PAL-001,NICE,NICE NG31 Care of Dying Adults in the Last Days of Life,2015,https://www.nice.org.uk/guidance/ng31,,OGL,attribution,palliative_eol,high
+NICE-PAL-002,NICE,NICE QS144 End of Life Care for Adults Quality Standard,2017,https://www.nice.org.uk/guidance/qs144,,OGL,attribution,palliative_eol,high
+NICE-PAL-003,NICE,NICE NG142 End of Life Care for Adults Service Delivery,2019,https://www.nice.org.uk/guidance/ng142,,OGL,attribution,palliative_general,high
+NICE-PAL-004,NICE,NICE NG61 End of Life Care for Infants Children and Young People,2016,https://www.nice.org.uk/guidance/ng61,,OGL,attribution,palliative_pediatric,high
+NICE-PAL-005,NICE,NICE CG140 Palliative Care for Adults Strong Opioids,2012,https://www.nice.org.uk/guidance/cg140,,OGL,attribution,palliative_pain,high
+POLST-PAL-001,POLST,POLST National Form Standard Portable Medical Orders for Life-Sustaining Treatment,2023,https://polst.org/form/,,Open,attribution,palliative_eol,high
+POLST-PAL-002,POLST,POLST Program Designation Criteria and Quality Standards,2022,https://polst.org/program-standards/,,Open,attribution,palliative_eol,medium
+AGS-PAL-001,AGS,AGS Position Statement Feeding Tubes in Advanced Dementia,2014,https://agsjournals.onlinelibrary.wiley.com/doi/10.1111/jgs.12924,,Restricted,attribution,palliative_eol,high
+AGS-PAL-002,AGS,AGS Choosing Wisely Five Things to Question Geriatrics End of Life,2023,https://www.choosingwisely.org/societies/american-geriatrics-society/,,Open,attribution,palliative_eol,medium
+ATS-PAL-001,ATS,ATS Palliative Care for Patients with Respiratory Diseases and Critical Illnesses,2008,https://www.atsjournals.org/doi/10.1164/rccm.200605-587ST,,Restricted,attribution,palliative_general,high
+ATS-PAL-002,ATS,ATS Official Statement Dyspnea Mechanisms Assessment and Management,2012,https://www.atsjournals.org/doi/10.1164/rccm.201111-2042ST,,Restricted,attribution,palliative_general,high
+SCCM-PAL-001,SCCM,SCCM ESICM Consensus Comfort Care for Adults Withdrawing Life Support,2008,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,palliative_eol,high
+AAN-PAL-001,AAN,AAN Practice Guideline Palliative Care for Patients with ALS,2009,https://www.aan.com/Guidelines/home/GuidelineDetail/325,,Restricted,attribution,palliative_general,high
+AAP-PAL-001,AAP,AAP Pediatric Palliative Care and Hospice Care Commitments Guidelines and Recommendations,2013,https://publications.aap.org/pediatrics/article/132/5/966/30836,,Restricted,attribution,palliative_pediatric,high
+AAP-PAL-002,AAP,AAP Section on Hospice and Palliative Medicine Perinatal Palliative Care,2017,https://publications.aap.org/pediatrics/article/139/2/e20162804,,Restricted,attribution,palliative_pediatric,high
+HFA-PAL-001,HFA,HFA ESC Position Statement Palliative Care in Heart Failure,2020,https://onlinelibrary.wiley.com/doi/10.1002/ejhf.1994,,Restricted,attribution,palliative_general,high
+SMFM-MFM-001,SMFM,SMFM Consult Series 44 Management of Bleeding in the Late Preterm Period,2018,https://www.smfm.org/publications/229,,Restricted,attribution,mfm_labor,high
+SMFM-MFM-002,SMFM,SMFM Consult Series 45 Mild Fetal Ventriculomegaly Diagnosis Evaluation Management,2018,https://www.smfm.org/publications/230,,Restricted,attribution,mfm_fetal_growth,medium
+SMFM-MFM-003,SMFM,SMFM Consult Series 46 Evaluation and Management of Polyhydramnios,2018,https://www.smfm.org/publications/231,,Restricted,attribution,mfm_fetal_growth,high
+SMFM-MFM-004,SMFM,SMFM Consult Series 52 Diagnosis and Management of Fetal Growth Restriction,2020,https://www.smfm.org/publications/280,,Restricted,attribution,mfm_fetal_growth,high
+SMFM-MFM-005,SMFM,SMFM Consult Series 53 Intrahepatic Cholestasis of Pregnancy,2021,https://www.smfm.org/publications/295,,Restricted,attribution,mfm_chronic_disease,high
+SMFM-MFM-006,SMFM,SMFM Consult Series 54 Management of Pregnancies Complicated by Zika Virus,2021,https://www.smfm.org/publications/296,,Restricted,attribution,mfm_chronic_disease,medium
+SMFM-MFM-007,SMFM,SMFM Consult Series 55 Counseling Patients About Antenatal Corticosteroids,2021,https://www.smfm.org/publications/297,,Restricted,attribution,mfm_preterm,high
+SMFM-MFM-008,SMFM,SMFM Consult Series 56 Hepatitis C in Pregnancy,2021,https://www.smfm.org/publications/325,,Restricted,attribution,mfm_chronic_disease,high
+SMFM-MFM-009,SMFM,SMFM Consult Series 57 Evaluation Management of Isolated Fetal Soft Markers,2021,https://www.smfm.org/publications/326,,Restricted,attribution,mfm_fetal_growth,medium
+SMFM-MFM-010,SMFM,SMFM Consult Series 58 Use of Antenatal Corticosteroids Periviable Birth,2021,https://www.smfm.org/publications/327,,Restricted,attribution,mfm_preterm,high
+SMFM-MFM-011,SMFM,SMFM Consult Series 60 Management of Pregnancies with COVID-19,2022,https://www.smfm.org/publications/350,,Restricted,attribution,mfm_chronic_disease,high
+SMFM-MFM-012,SMFM,SMFM Consult Series 61 Diabetes Insipidus in Pregnancy,2022,https://www.smfm.org/publications/351,,Restricted,attribution,mfm_chronic_disease,medium
+SMFM-MFM-013,SMFM,SMFM Consult Series 62 Best Practices in Equitable Care Delivery in Maternal-Fetal Medicine,2022,https://www.smfm.org/publications/352,,Restricted,attribution,mfm_chronic_disease,medium
+SMFM-MFM-014,SMFM,SMFM Consult Series 63 Cervical Insufficiency and Cerclage,2023,https://www.smfm.org/publications/420,,Restricted,attribution,mfm_preterm,high
+SMFM-MFM-015,SMFM,SMFM Consult Series 64 Sickle Cell Disease in Pregnancy,2023,https://www.smfm.org/publications/421,,Restricted,attribution,mfm_chronic_disease,high
+SMFM-MFM-016,SMFM,SMFM Consult Series 65 Prenatal Care for Twin Pregnancies,2023,https://www.smfm.org/publications/422,,Restricted,attribution,mfm_fetal_growth,high
+SMFM-MFM-017,SMFM,SMFM Consult Series 66 Anesthetic Considerations for Pregnant Patients,2023,https://www.smfm.org/publications/423,,Restricted,attribution,mfm_labor,medium
+SMFM-MFM-018,SMFM,SMFM Diagnosis and Management of Vasa Previa,2015,https://www.smfm.org/publications,,Restricted,attribution,mfm_labor,high
+SMFM-MFM-019,SMFM,SMFM Placenta Accreta Spectrum,2018,https://www.smfm.org/publications,,Restricted,attribution,mfm_labor,high
+SMFM-MFM-020,SMFM,SMFM Stillbirth Workup Recommendations,2020,https://www.smfm.org/publications,,Restricted,attribution,mfm_fetal_growth,high
+ACOG-MFM-001,ACOG,ACOG Practice Bulletin 222 Gestational Hypertension and Preeclampsia,2020,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/06/gestational-hypertension-and-preeclampsia,,Restricted,attribution,mfm_hypertensive,high
+ACOG-MFM-002,ACOG,ACOG Practice Bulletin 203 Chronic Hypertension in Pregnancy,2019,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2019/01/chronic-hypertension-in-pregnancy,,Restricted,attribution,mfm_hypertensive,high
+ACOG-MFM-003,ACOG,ACOG Practice Bulletin 190 Gestational Diabetes Mellitus,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2018/02/gestational-diabetes-mellitus,,Restricted,attribution,mfm_diabetes,high
+ACOG-MFM-004,ACOG,ACOG Practice Bulletin 201 Pregestational Diabetes Mellitus,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2018/12/pregestational-diabetes-mellitus,,Restricted,attribution,mfm_diabetes,high
+ACOG-MFM-005,ACOG,ACOG Committee Opinion 804 Physical Activity and Exercise During Pregnancy,2020,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2020/04/physical-activity-and-exercise-during-pregnancy,,Restricted,attribution,mfm_chronic_disease,medium
+ACOG-MFM-006,ACOG,ACOG Practice Bulletin 234 Prediction Prevention of Spontaneous Preterm Birth,2021,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2021/08/prediction-and-prevention-of-spontaneous-preterm-birth,,Restricted,attribution,mfm_preterm,high
+ACOG-MFM-007,ACOG,ACOG Practice Bulletin 217 Prelabor Rupture of Membranes,2020,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/03/prelabor-rupture-of-membranes,,Restricted,attribution,mfm_preterm,high
+ACOG-MFM-008,ACOG,ACOG Practice Bulletin 230 Obesity in Pregnancy,2021,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2021/06/obesity-in-pregnancy,,Restricted,attribution,mfm_chronic_disease,high
+ACOG-MFM-009,ACOG,ACOG Practice Bulletin 196 Thromboembolism in Pregnancy,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2018/07/thromboembolism-in-pregnancy,,Restricted,attribution,mfm_chronic_disease,high
+ACOG-MFM-010,ACOG,ACOG Practice Bulletin 212 Pregnancy and Heart Disease,2019,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2019/05/pregnancy-and-heart-disease,,Restricted,attribution,mfm_chronic_disease,high
+ACOG-MFM-011,ACOG,ACOG Practice Bulletin 90 Asthma in Pregnancy,2008,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,Restricted,attribution,mfm_chronic_disease,high
+ACOG-MFM-012,ACOG,ACOG Practice Bulletin 226 Screening for Fetal Chromosomal Abnormalities,2020,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/10/screening-for-fetal-chromosomal-abnormalities,,Restricted,attribution,mfm_fetal_growth,high
+ACOG-MFM-013,ACOG,ACOG Practice Bulletin 227 Fetal Anomalies Diagnostic Imaging,2020,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2020/10/indications-for-outpatient-antenatal-fetal-surveillance,,Restricted,attribution,mfm_fetal_growth,high
+ACOG-MFM-014,ACOG,ACOG Practice Bulletin 192 Management of Alloimmunization During Pregnancy,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2018/03/management-of-alloimmunization-during-pregnancy,,Restricted,attribution,mfm_fetal_growth,high
+ACOG-MFM-015,ACOG,ACOG Practice Bulletin 231 Multifetal Gestations Twin Triplet Higher-Order Multiples,2021,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2021/06/multifetal-gestations,,Restricted,attribution,mfm_fetal_growth,high
+ACOG-MFM-016,ACOG,ACOG Practice Bulletin 107 Induction of Labor,2009,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,Restricted,attribution,mfm_labor,high
+ACOG-MFM-017,ACOG,ACOG Practice Bulletin 205 Vaginal Birth After Cesarean Delivery,2019,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2019/02/vaginal-birth-after-cesarean-delivery,,Restricted,attribution,mfm_labor,high
+ACOG-MFM-018,ACOG,ACOG Practice Bulletin 154 Operative Vaginal Birth,2015,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,Restricted,attribution,mfm_labor,high
+ACOG-MFM-019,ACOG,ACOG Practice Bulletin 183 Postpartum Hemorrhage,2017,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2017/10/postpartum-hemorrhage,,Restricted,attribution,mfm_labor,high
+ACOG-MFM-020,ACOG,ACOG Committee Opinion 736 Optimizing Postpartum Care,2018,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2018/05/optimizing-postpartum-care,,Restricted,attribution,mfm_postpartum,high
+ACOG-MFM-021,ACOG,ACOG Committee Opinion 757 Screening for Perinatal Depression,2018,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2018/11/screening-for-perinatal-depression,,Restricted,attribution,mfm_postpartum,high
+ACOG-MFM-022,ACOG,ACOG Practice Bulletin 222 Shoulder Dystocia,2017,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,Restricted,attribution,mfm_labor,high
+ACOG-MFM-023,ACOG,ACOG Practice Bulletin 188 Prelabor Rupture Membranes Update,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,Restricted,attribution,mfm_preterm,high
+ACOG-MFM-024,ACOG,ACOG Practice Bulletin 200 Early Pregnancy Loss,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2018/11/early-pregnancy-loss,,Restricted,attribution,mfm_chronic_disease,high
+ACOG-MFM-025,ACOG,ACOG Practice Bulletin 211 Critical Care in Pregnancy,2019,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2019/05/critical-care-in-pregnancy,,Restricted,attribution,mfm_labor,high
+RCOG-MFM-001,RCOG,RCOG Green-top Guideline 27a Placenta Praevia and Placenta Accreta,2018,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/placenta-praevia-and-placenta-accreta-diagnosis-and-management-green-top-guideline-no-27a/,,Restricted,attribution,mfm_labor,high
+RCOG-MFM-002,RCOG,RCOG Green-top Guideline 37a Reducing Risk of VTE During Pregnancy,2015,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/reducing-the-risk-of-venous-thromboembolism-during-pregnancy-and-the-puerperium-green-top-guideline-no-37a/,,Restricted,attribution,mfm_chronic_disease,high
+RCOG-MFM-003,RCOG,RCOG Green-top Guideline 37b Acute Management of VTE in Pregnancy,2015,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/thromboembolic-disease-in-pregnancy-and-the-puerperium-acute-management-green-top-guideline-no-37b/,,Restricted,attribution,mfm_chronic_disease,high
+RCOG-MFM-004,RCOG,RCOG Green-top Guideline 31 Investigation Management Small for Gestational Age Fetus,2013,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/the-investigation-and-management-of-the-small-for-gestational-age-fetus-green-top-guideline-no-31/,,Restricted,attribution,mfm_fetal_growth,high
+RCOG-MFM-005,RCOG,RCOG Green-top Guideline 55 Late Intrauterine Fetal Death and Stillbirth,2010,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/late-intrauterine-fetal-death-and-stillbirth-green-top-guideline-no-55/,,Restricted,attribution,mfm_fetal_growth,high
+RCOG-MFM-006,RCOG,RCOG Green-top Guideline 47 Blood Transfusion in Obstetrics,2015,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/blood-transfusion-in-obstetrics-green-top-guideline-no-47/,,Restricted,attribution,mfm_labor,medium
+RCOG-MFM-007,RCOG,RCOG Green-top Guideline 52 Prevention Management Postpartum Haemorrhage,2016,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/prevention-and-management-of-postpartum-haemorrhage-green-top-guideline-no-52/,,Restricted,attribution,mfm_labor,high
+RCOG-MFM-008,RCOG,RCOG Green-top Guideline 64a Bacterial Sepsis in Pregnancy,2012,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/bacterial-sepsis-in-pregnancy-green-top-guideline-no-64a/,,Restricted,attribution,mfm_labor,high
+RCOG-MFM-009,RCOG,RCOG Green-top Guideline 64b Bacterial Sepsis Following Pregnancy,2012,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/bacterial-sepsis-following-pregnancy-green-top-guideline-no-64b/,,Restricted,attribution,mfm_postpartum,high
+RCOG-MFM-010,RCOG,RCOG Green-top Guideline 17 Recurrent Miscarriage,2011,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/the-investigation-and-treatment-of-couples-with-recurrent-first-trimester-and-second-trimester-miscarriage-green-top-guideline-no-17/,,Restricted,attribution,mfm_chronic_disease,high
+RCOG-MFM-011,RCOG,RCOG Green-top Guideline 50 Umbilical Cord Prolapse,2014,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/umbilical-cord-prolapse-green-top-guideline-no-50/,,Restricted,attribution,mfm_labor,high
+RCOG-MFM-012,RCOG,RCOG Green-top Guideline 42 Shoulder Dystocia,2012,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/shoulder-dystocia-green-top-guideline-no-42/,,Restricted,attribution,mfm_labor,high
+RCOG-MFM-013,RCOG,RCOG Green-top Guideline 45 Birth After Previous Caesarean Birth,2015,https://www.rcog.org.uk/guidance/browse-all-guidance/green-top-guidelines/birth-after-previous-caesarean-birth-green-top-guideline-no-45/,,Restricted,attribution,mfm_labor,high
+ISSHP-MFM-001,ISSHP,ISSHP Classification Diagnosis Management Hypertensive Disorders of Pregnancy,2018,https://www.isshp.org/guidelines/,,Restricted,attribution,mfm_hypertensive,high
+ISSHP-MFM-002,ISSHP,ISSHP Recommendations on the Management of Acute Severe Hypertension in Pregnancy,2021,https://www.isshp.org/guidelines/,,Restricted,attribution,mfm_hypertensive,high
+NICE-MFM-001,NICE,NICE NG133 Hypertension in Pregnancy Diagnosis Management,2019,https://www.nice.org.uk/guidance/ng133,,OGL,attribution,mfm_hypertensive,high
+NICE-MFM-002,NICE,NICE NG3 Diabetes in Pregnancy Management Preconception to Postnatal,2015,https://www.nice.org.uk/guidance/ng3,,OGL,attribution,mfm_diabetes,high
+NICE-MFM-003,NICE,NICE NG121 Intrapartum Care for Women with Existing Medical Conditions,2019,https://www.nice.org.uk/guidance/ng121,,OGL,attribution,mfm_labor,high
+NICE-MFM-004,NICE,NICE NG201 Antenatal Care,2021,https://www.nice.org.uk/guidance/ng201,,OGL,attribution,mfm_chronic_disease,high
+NICE-MFM-005,NICE,NICE NG192 Postnatal Care,2021,https://www.nice.org.uk/guidance/ng192,,OGL,attribution,mfm_postpartum,high
+NICE-MFM-006,NICE,NICE NG25 Preterm Labour and Birth,2015,https://www.nice.org.uk/guidance/ng25,,OGL,attribution,mfm_preterm,high
+NICE-MFM-007,NICE,NICE CG190 Intrapartum Care for Healthy Women and Babies,2014,https://www.nice.org.uk/guidance/cg190,,OGL,attribution,mfm_labor,high
+NICE-MFM-008,NICE,NICE CG192 Antenatal and Postnatal Mental Health,2014,https://www.nice.org.uk/guidance/cg192,,OGL,attribution,mfm_postpartum,high
+FIGO-MFM-001,FIGO,FIGO Initiative on Gestational Diabetes Mellitus Pragmatic Guide,2015,https://www.figo.org/news/figo-initiative-gestational-diabetes-mellitus,,Restricted,attribution,mfm_diabetes,high
+FIGO-MFM-002,FIGO,FIGO Recommendations Postpartum Hemorrhage Misoprostol,2012,https://www.figo.org/resources,,Restricted,attribution,mfm_labor,high
+FIGO-MFM-003,FIGO,FIGO Consensus Guidelines on Intrapartum Fetal Monitoring,2015,https://www.figo.org/resources,,Restricted,attribution,mfm_labor,high
+ISUOG-MFM-001,ISUOG,ISUOG Practice Guidelines Performance of First-Trimester Fetal Ultrasound Scan,2013,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,Restricted,attribution,mfm_fetal_growth,high
+ISUOG-MFM-002,ISUOG,ISUOG Practice Guidelines Performance of the Routine Mid-Trimester Fetal Ultrasound,2022,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,Restricted,attribution,mfm_fetal_growth,high
+ISUOG-MFM-003,ISUOG,ISUOG Practice Guidelines Sonographic Examination of the Fetal Central Nervous System,2020,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,Restricted,attribution,mfm_fetal_growth,high
+ISUOG-MFM-004,ISUOG,ISUOG Practice Guidelines Fetal Cardiac Screening,2013,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,Restricted,attribution,mfm_fetal_growth,high
+ISUOG-MFM-005,ISUOG,ISUOG Practice Guidelines Diagnosis and Management of Small-for-Gestational-Age Fetus,2020,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,Restricted,attribution,mfm_fetal_growth,high
+ISUOG-MFM-006,ISUOG,ISUOG Practice Guidelines Role of Ultrasound in Twin Pregnancy,2016,https://www.isuog.org/clinical-resources/isuog-guidelines.html,,Restricted,attribution,mfm_fetal_growth,high
+ATA-MFM-001,ATA,ATA Guidelines Diagnosis and Management of Thyroid Disease During Pregnancy and Postpartum,2017,https://www.thyroid.org/professionals/ata-professional-guidelines/,,Restricted,attribution,mfm_chronic_disease,high
+EULAR-MFM-001,EULAR,EULAR Points to Consider for Use of Antirheumatic Drugs Pregnancy Lactation,2016,https://www.eular.org/recommendations,,Restricted,attribution,mfm_chronic_disease,high
+EULAR-MFM-002,EULAR,EULAR Recommendations Management of Antiphospholipid Syndrome in Adults,2019,https://ard.bmj.com/content/78/10/1296,,Restricted,attribution,mfm_chronic_disease,high
+ASH-MFM-001,ASH,ASH 2018 Guidelines Management VTE in Pregnancy,2018,https://ashpublications.org/bloodadvances/article/2/22/3317,,Restricted,attribution,mfm_chronic_disease,high
+ASH-MFM-002,ASH,ASH 2020 Guidelines Sickle Cell Disease Cardiopulmonary and Kidney Disease,2020,https://www.hematology.org/education/clinicians/guidelines-and-quality-care,,Restricted,attribution,mfm_chronic_disease,high
+ESC-MFM-001,ESC,ESC Guidelines for the Management of Cardiovascular Diseases During Pregnancy,2018,https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines/Cardiovascular-Diseases-during-Pregnancy-Management-of,,Restricted,attribution,mfm_chronic_disease,high
+ABM-MFM-001,ABM,ABM Clinical Protocol 7 Model Maternity Policy Supportive Breastfeeding,2018,https://www.bfmed.org/protocols,,Restricted,attribution,mfm_postpartum,medium
+ABM-MFM-002,ABM,ABM Clinical Protocol 22 Guidelines for Management of Jaundice in the Breastfeeding Infant,2017,https://www.bfmed.org/protocols,,Restricted,attribution,mfm_postpartum,medium
+ESHRE-MFM-001,ESHRE,ESHRE Guideline Recurrent Pregnancy Loss,2022,https://www.eshre.eu/Guidelines-and-Legal/Guidelines,,Restricted,attribution,mfm_chronic_disease,high
+ASRM-MFM-001,ASRM,ASRM Definitions of Infertility and Recurrent Pregnancy Loss,2020,https://www.asrm.org/practice-guidance/practice-committee-documents/,,Restricted,attribution,mfm_chronic_disease,high
+SOMANZ-MFM-001,SOMANZ,SOMANZ Guidelines for the Investigation and Management of Sepsis in Pregnancy,2017,https://www.somanz.org/guidelines/,,Open,attribution,mfm_labor,high
+SOMANZ-MFM-002,SOMANZ,SOMANZ Guideline for Hypertension in Pregnancy,2014,https://www.somanz.org/guidelines/,,Open,attribution,mfm_hypertensive,high
+NAFTNet-MFM-001,NAFTNet,NAFTNet Standards for Fetal Treatment Centers,2020,https://www.naftnet.org/,,Open,attribution,mfm_fetal_growth,medium
+ACMG-MFM-001,ACMG,ACMG Position Statement Noninvasive Prenatal Screening,2016,https://www.gimjournal.org/article/S1098-3600(21)00854-8/fulltext,,Restricted,attribution,mfm_fetal_growth,high
+SCCM-PEDS-001,SCCM,SCCM Surviving Sepsis Campaign International Guidelines Children,2020,https://www.sccm.org/SurvivingSepsisCampaign/Guidelines/Pediatric-Patients,,Restricted,attribution,picu_sepsis,high
+SCCM-PEDS-002,SCCM,SCCM ESPNIC Clinical Practice Guideline Hemodynamic Support Septic Shock Pediatric,2020,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,picu_sepsis,high
+SCCM-PEDS-003,SCCM,SCCM Pediatric Pain Agitation Neuromuscular Blockade Delirium Iatrogenic Withdrawal,2022,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,picu_neuro,high
+SCCM-PEDS-004,SCCM,SCCM Family-Centered Care in the Neonatal Pediatric and Adult ICU,2017,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,picu_neuro,medium
+SCCM-PEDS-005,SCCM,SCCM Pediatric Acute Liver Failure Management,2022,https://journals.lww.com/pccmjournal,,Restricted,attribution,picu_neuro,high
+SCCM-PEDS-006,SCCM,SCCM Bedside Pediatric Early Warning Systems,2018,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,picu_resuscitation,medium
+PALICC-PEDS-001,PALICC,PALICC Pediatric Acute Respiratory Distress Syndrome Consensus Recommendations,2015,https://journals.lww.com/pccmjournal/Fulltext/2015/06000/Pediatric_Acute_Respiratory_Distress_Syndrome_.1.aspx,,Restricted,attribution,picu_resuscitation,high
+PALICC-PEDS-002,PALICC,PALICC-2 Second Pediatric Acute Lung Injury Consensus Conference Recommendations,2023,https://journals.lww.com/pccmjournal,,Restricted,attribution,picu_resuscitation,high
+ELSO-PEDS-001,ELSO,ELSO Guidelines for Pediatric Cardiac Failure ECMO Support,2022,https://www.elso.org/ECMO/Guidelines.aspx,,Restricted,attribution,picu_cardiac,high
+ELSO-PEDS-002,ELSO,ELSO Guidelines for Pediatric Respiratory Failure ECMO Support,2022,https://www.elso.org/ECMO/Guidelines.aspx,,Restricted,attribution,picu_resuscitation,high
+ELSO-PEDS-003,ELSO,ELSO Anticoagulation Guidelines Pediatric and Neonatal ECMO,2022,https://www.elso.org/ECMO/Guidelines.aspx,,Restricted,attribution,picu_resuscitation,high
+AHA-PEDS-001,AHA,AHA Pediatric Advanced Life Support PALS Guidelines,2020,https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines,,Restricted,attribution,picu_resuscitation,high
+AHA-PEDS-002,AHA,AHA Pediatric Basic Life Support BLS Guidelines,2020,https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines,,Restricted,attribution,picu_resuscitation,high
+AHA-PEDS-003,AHA,AHA Scientific Statement Pediatric Heart Failure,2018,https://www.ahajournals.org/journal/circ,,Restricted,attribution,picu_cardiac,high
+AHA-PEDS-004,AHA,AHA Scientific Statement Cardiopulmonary Resuscitation in Infants and Children with Cardiac Disease,2018,https://www.ahajournals.org/journal/circ,,Restricted,attribution,picu_cardiac,high
+ERC-PEDS-001,ERC,ERC Guidelines 2021 Paediatric Life Support,2021,https://www.erc.edu/guidelines,,Restricted,attribution,picu_resuscitation,high
+ERC-PEDS-002,ERC,ERC Guidelines 2021 Newborn Resuscitation and Support of Transition,2021,https://www.erc.edu/guidelines,,Restricted,attribution,picu_resuscitation,high
+KDIGO-PEDS-001,KDIGO,KDIGO Acute Kidney Injury Guideline Pediatric Considerations,2012,https://kdigo.org/guidelines/acute-kidney-injury/,,Open,attribution,picu_renal,high
+ESPNIC-PEDS-001,ESPNIC,ESPNIC Clinical Recommendations Pediatric Continuous Renal Replacement Therapy,2020,https://espnic-online.org/Guidelines,,Restricted,attribution,picu_renal,high
+NCS-PEDS-001,NCS,NCS Guideline Treatment of Pediatric Status Epilepticus,2020,https://www.neurocriticalcare.org/clinical-resources/guidelines,,Restricted,attribution,picu_neuro,high
+ILAE-PEDS-001,ILAE,ILAE Definition Classification Status Epilepticus Pediatric,2015,https://www.ilae.org/guidelines/definition-and-classification,,Restricted,attribution,picu_neuro,high
+BTF-PEDS-001,BTF,BTF Guidelines Management of Pediatric Severe Traumatic Brain Injury,2019,https://braintrauma.org/guidelines/pediatric,,Restricted,attribution,picu_neuro,high
+AAN-PEDS-001,AAN,AAN Determination of Brain Death Pediatric Guideline,2011,https://www.aan.com/Guidelines/home/GuidelineDetail/520,,Restricted,attribution,picu_neuro,high
+ABA-PEDS-001,ABA,ABA Pediatric Burn Care Resources,2020,https://ameriburn.org/resources_factsheets/,,Restricted,attribution,picu_trauma,high
+GINA-PEDS-001,GINA,GINA Pocket Guide Asthma Management Children 5 Years and Younger,2024,https://ginasthma.org/pocket-guide-for-asthma-management-and-prevention/,,Restricted,attribution,picu_resuscitation,high
+GINA-PEDS-002,GINA,GINA Strategy for Asthma Management Adolescents 6-11 Years,2024,https://ginasthma.org/2024-report/,,Restricted,attribution,picu_resuscitation,high
+AAP-PEDS-001,AAP,AAP Clinical Report Choking Prevention Children Foreign Body Airway,2010,https://publications.aap.org/pediatrics,,Restricted,attribution,picu_resuscitation,high
+AAP-PEDS-002,AAP,AAP Clinical Report Cardiopulmonary Resuscitation in Infants and Children,2018,https://publications.aap.org/pediatrics,,Restricted,attribution,picu_resuscitation,high
+ATLS-PEDS-001,ATLS,ATLS Pediatric Trauma Chapter Resuscitation Guidelines,2018,https://www.facs.org/quality-programs/trauma/atls,,Restricted,attribution,picu_trauma,high
+WMS-PEDS-001,WMS,WMS Practice Guidelines Drowning,2019,https://www.wemjournal.org/,,Restricted,attribution,picu_resuscitation,medium
+IDSA-PEDS-001,IDSA,IDSA Guidelines Bacterial Meningitis Pediatric,2017,https://www.idsociety.org/practice-guideline/bacterial-meningitis/,,Restricted,attribution,picu_neuro,high
+IDSA-PEDS-002,IDSA,IDSA Encephalitis Management Guideline Pediatric Considerations,2008,https://www.idsociety.org/practice-guideline/encephalitis/,,Restricted,attribution,picu_neuro,high
+ISHLT-PEDS-001,ISHLT,ISHLT Pediatric Heart Failure Practice Guidelines,2014,https://ishlt.org/guidelines-statements,,Restricted,attribution,picu_cardiac,high
+AASLD-PEDS-001,AASLD,AASLD Guidelines Acute Liver Failure Pediatric,2017,https://www.aasld.org/practice-guidelines,,Restricted,attribution,picu_neuro,high
+NAME-FOR-001,NAME,NAME Forensic Autopsy Performance Standards,2017,https://name.memberclicks.net/forensic-autopsy-performance-standards,,Open,attribution,forensic_death,high
+NAME-FOR-002,NAME,NAME Position Paper Investigation of Sudden Unexpected Infant Death,2014,https://name.memberclicks.net/position-papers,,Open,attribution,forensic_pediatric,high
+NAME-FOR-003,NAME,NAME Position Paper Manner of Death Determination,2002,https://name.memberclicks.net/position-papers,,Open,attribution,forensic_death,high
+RCPath-FOR-001,RCPath,RCPath Guidelines on Autopsy Practice,2022,https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html,,Restricted,attribution,forensic_death,high
+RCPath-FOR-002,RCPath,RCPath Guidelines Sudden Unexpected Death in Infancy and Childhood,2016,https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html,,Restricted,attribution,forensic_pediatric,high
+RCPath-FOR-003,RCPath,RCPath Guideline on Sudden Cardiac Death Investigation,2018,https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html,,Restricted,attribution,forensic_death,high
+RCPath-FOR-004,RCPath,RCPath Guidelines Pediatric Autopsy Practice,2019,https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html,,Restricted,attribution,forensic_pediatric,high
+RCPath-FOR-005,RCPath,RCPath Guideline Forensic Neuropathology,2021,https://www.rcpath.org/profession/guidelines/autopsy-guidelines-series.html,,Restricted,attribution,forensic_death,high
+HRS-FOR-001,HRS,HRS EHRA APHRS Expert Consensus on Sudden Cardiac Death Genetic Investigation,2020,https://www.hrsonline.org/guidance/clinical-resources/clinical-guidelines-and-documents,,Restricted,attribution,forensic_death,high
+AAP-FOR-001,AAP,AAP Clinical Report Sudden Unexpected Infant Death and SIDS Investigation,2016,https://publications.aap.org/pediatrics/article/138/5/e20162938,,Restricted,attribution,forensic_pediatric,high
+ASFR-FOR-001,ASFR,ASFR Practice Standards for Postmortem Forensic Imaging,2020,https://www.asfr.org/standards,,Open,attribution,forensic_death,medium
+SOFT-FOR-001,SOFT,SOFT AAFS Forensic Toxicology Laboratory Guidelines,2006,https://www.soft-tox.org/lab_guidelines,,Open,attribution,forensic_toxicology,high
+TIAFT-FOR-001,TIAFT,TIAFT Recommendations Postmortem Toxicology,2022,https://www.tiaft.org/resources,,Open,attribution,forensic_toxicology,high
+ABFO-FOR-001,ABFO,ABFO Standards and Guidelines for Bitemark Analysis,2018,https://abfo.org/standards-guidelines/,,Open,attribution,forensic_violence,medium
+WHO-FOR-001,WHO,WHO Guidelines Medico-Legal Care for Victims of Sexual Violence,2003,https://www.who.int/publications/i/item/924154628X,,CC BY-NC-SA,attribution,forensic_violence,high
+WHO-FOR-002,WHO,WHO Strengthening the Medico-Legal Response to Sexual Violence Toolkit,2015,https://www.who.int/publications/i/item/9789241509596,,CC BY-NC-SA,attribution,forensic_violence,high
+WHO-FOR-003,WHO,WHO Responding to Intimate Partner Violence Sexual Violence Against Women Clinical Policy,2013,https://www.who.int/publications/i/item/9789241548595,,CC BY-NC-SA,attribution,forensic_violence,high
+USDOJ-FOR-001,USDOJ,USDOJ National Protocol for Sexual Assault Medical Forensic Examinations Adults Adolescents,2013,https://www.ncjrs.gov/pdffiles1/ovw/241903.pdf,,Public Domain,allowed,forensic_violence,high
+USDOJ-FOR-002,USDOJ,USDOJ National Protocol for Sexual Assault Medical Forensic Examinations Pediatric,2016,https://www.justice.gov/ovw/page/file/846856/download,,Public Domain,allowed,forensic_violence,high
+RCEM-FOR-001,RCEM,RCEM Best Practice Guideline Sexual Assault in the Emergency Department,2019,https://rcem.ac.uk/best-practice-guidelines/,,Restricted,attribution,forensic_violence,high
+USPSTF-FOR-001,USPSTF,USPSTF Recommendation Screening for Intimate Partner Violence Older Adults Vulnerable Adults,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/intimate-partner-violence-and-abuse-of-elderly-and-vulnerable-adults-screening,,Public Domain,allowed,forensic_violence,high
+AAFP-FOR-001,AAFP,AAFP Position Paper Intimate Partner Violence,2021,https://www.aafp.org/about/policies/all/intimate-partner.html,,Restricted,attribution,forensic_violence,medium
+AGS-FOR-001,AGS,AGS Position Statement Elder Abuse Detection and Reporting,2022,https://www.americangeriatrics.org/policy-advocacy/position-statements,,Restricted,attribution,forensic_violence,high
+NCCHC-FOR-001,NCCHC,NCCHC Standards for Mental Health Services in Correctional Facilities,2015,https://www.ncchc.org/standards,,Restricted,attribution,forensic_violence,medium
+INTERPOL-FOR-001,INTERPOL,Interpol Disaster Victim Identification DVI Guide,2018,https://www.interpol.int/en/How-we-work/Forensics/Disaster-Victim-Identification-DVI,,Open,attribution,forensic_death,high
+APA-FOR-001,APA,APA Practice Guideline Psychiatric Evaluation of Adults Capacity Assessment,2016,https://psychiatryonline.org/guidelines,,Restricted,attribution,forensic_violence,medium
+ISHLT-TX-001,ISHLT,ISHLT Listing Criteria for Heart Transplantation,2016,https://ishlt.org/guidelines-statements,,Restricted,attribution,transplant_heart,high
+ISHLT-TX-002,ISHLT,ISHLT Mechanical Circulatory Support Patient Selection Criteria,2013,https://ishlt.org/guidelines-statements,,Restricted,attribution,transplant_heart,high
+ISHLT-TX-003,ISHLT,ISHLT Consensus Document for Selection of Lung Transplant Candidates,2021,https://ishlt.org/guidelines-statements,,Restricted,attribution,transplant_lung,high
+ISHLT-TX-004,ISHLT,ISHLT Working Formulation Cardiac Allograft Vasculopathy,2010,https://ishlt.org/guidelines-statements,,Restricted,attribution,transplant_heart,high
+ISHLT-TX-005,ISHLT,ISHLT Standardized Definitions Acute Antibody Mediated Rejection in Heart Transplantation,2011,https://ishlt.org/guidelines-statements,,Restricted,attribution,transplant_immunology,high
+ISHLT-TX-006,ISHLT,ISHLT Diagnosis Treatment of Antibody-Mediated Rejection of the Lung,2016,https://ishlt.org/guidelines-statements,,Restricted,attribution,transplant_lung,high
+ISHLT-TX-007,ISHLT,ISHLT Pediatric Heart Transplantation Indications and Outcomes,2020,https://ishlt.org/guidelines-statements,,Restricted,attribution,transplant_heart,high
+ISHLT-TX-008,ISHLT,ISHLT Heart-Lung Transplantation Recipient Selection,2019,https://ishlt.org/guidelines-statements,,Restricted,attribution,transplant_heart,medium
+ISHLT-TX-009,ISHLT,ISHLT Donation After Circulatory Death Heart and Lung,2021,https://ishlt.org/guidelines-statements,,Restricted,attribution,transplant_donor,high
+AST-TX-001,AST,AST Guidelines for Living Kidney Donor Evaluation,2017,https://www.myast.org/practice-resources/professional-society-guidelines,,Restricted,attribution,transplant_donor,high
+AST-TX-002,AST,AST Guidelines Evaluation of Pancreas Transplant Candidates,2019,https://www.myast.org/practice-resources/professional-society-guidelines,,Restricted,attribution,transplant_pancreas,high
+AST-TX-003,AST,AST Standards Practice Multi-Organ Transplantation,2020,https://www.myast.org/practice-resources/professional-society-guidelines,,Restricted,attribution,transplant_kidney,high
+AST-TX-004,AST,AST Pediatric Solid Organ Transplant Recipient Care,2019,https://www.myast.org/practice-resources/professional-society-guidelines,,Restricted,attribution,transplant_kidney,high
+ASTS-TX-001,ASTS,ASTS Guidelines for the Use of Hepatitis C-Positive Donors,2020,https://asts.org/practice-resources,,Restricted,attribution,transplant_liver,high
+ASTS-TX-002,ASTS,ASTS Recommendations Allocation Donor Quality Liver,2019,https://asts.org/practice-resources,,Restricted,attribution,transplant_liver,medium
+ASTS-TX-003,ASTS,ASTS Surgical Standards Living Donor Liver Transplant,2018,https://asts.org/practice-resources,,Restricted,attribution,transplant_donor,high
+AASLD-TX-001,AASLD,AASLD Practice Guideline Evaluation for Liver Transplantation in Adults,2014,https://www.aasld.org/practice-guidelines,,Restricted,attribution,transplant_liver,high
+AASLD-TX-002,AASLD,AASLD Long-Term Management of the Successful Adult Liver Transplant Recipient,2013,https://www.aasld.org/practice-guidelines,,Restricted,attribution,transplant_liver,high
+EASL-TX-001,EASL,EASL Clinical Practice Guidelines Liver Transplantation,2016,https://easl.eu/publication/easl-clinical-practice-guidelines-liver-transplantation/,,Restricted,attribution,transplant_liver,high
+EASL-TX-002,EASL,EASL Clinical Practice Guidelines Management Hepatocellular Carcinoma Including Transplant,2018,https://easl.eu/publications/clinical-practice-guidelines/,,Restricted,attribution,transplant_liver,high
+KDIGO-TX-001,KDIGO,KDIGO Clinical Practice Guideline for the Care of Kidney Transplant Recipients,2009,https://kdigo.org/guidelines/care-of-the-kidney-transplant-recipient/,,Open,attribution,transplant_kidney,high
+KDIGO-TX-002,KDIGO,KDIGO Clinical Practice Guideline on the Evaluation and Care of Living Kidney Donors,2017,https://kdigo.org/guidelines/living-kidney-donor/,,Open,attribution,transplant_donor,high
+KDIGO-TX-003,KDIGO,KDIGO Clinical Practice Guideline on the Evaluation and Management of Candidates for Kidney Transplantation,2020,https://kdigo.org/guidelines/transplant-candidate/,,Open,attribution,transplant_kidney,high
+IPTA-TX-001,IPTA,IPTA Indications and Patient Selection Intestinal Transplantation,2018,https://www.intestinaltransplant.org/,,Restricted,attribution,transplant_kidney,medium
+TID-TX-001,TID,AST IDCOP Guidelines CMV in Solid Organ Transplantation,2019,https://www.myast.org/practice-resources/professional-society-guidelines,,Restricted,attribution,transplant_complications,high
+TID-TX-002,TID,AST IDCOP Guidelines BK Polyomavirus in Kidney Transplantation,2019,https://www.myast.org/practice-resources/professional-society-guidelines,,Restricted,attribution,transplant_complications,high
+TID-TX-003,TID,AST IDCOP Guidelines EBV PTLD in Solid Organ Transplant Recipients,2019,https://www.myast.org/practice-resources/professional-society-guidelines,,Restricted,attribution,transplant_complications,high
+TID-TX-004,TID,AST IDCOP Guidelines Tuberculosis in Solid Organ Transplant Candidates and Recipients,2019,https://www.myast.org/practice-resources/professional-society-guidelines,,Restricted,attribution,transplant_complications,high
+TID-TX-005,TID,AST IDCOP Guidelines Endemic Fungal Infections Solid Organ Transplant,2019,https://www.myast.org/practice-resources/professional-society-guidelines,,Restricted,attribution,transplant_complications,high
+TTS-TX-001,TTS,TTS DICG Consensus Statement DCD Worldwide Practice Guidance,2021,https://tts.org/dicg-resources,,Open,attribution,transplant_donor,high
+ASRT-TX-001,ASRT,ASRT International Consensus Statements on Vascularized Composite Allotransplantation,2020,https://www.asrt.org/,,Restricted,attribution,transplant_kidney,medium
+UNOS-TX-001,UNOS,UNOS OPTN Policies Allocation Standards for Solid Organs,2024,https://optn.transplant.hrsa.gov/policies-bylaws/policies/,,Public Domain,allowed,transplant_donor,high
+UNOS-TX-002,UNOS,UNOS OPTN Kidney Allocation System KAS Policy,2024,https://optn.transplant.hrsa.gov/policies-bylaws/policies/,,Public Domain,allowed,transplant_kidney,high
+UNOS-TX-003,UNOS,UNOS OPTN Heart Allocation Policy,2024,https://optn.transplant.hrsa.gov/policies-bylaws/policies/,,Public Domain,allowed,transplant_heart,high
+UNOS-TX-004,UNOS,UNOS OPTN Liver MELD Allocation Policy,2024,https://optn.transplant.hrsa.gov/policies-bylaws/policies/,,Public Domain,allowed,transplant_liver,high
+EUROTX-TX-001,EUROTX,Eurotransplant Manual Allocation Procedures,2024,https://www.eurotransplant.org/professionals/eurotransplant-manual/,,Restricted,attribution,transplant_donor,medium
+ANZICS-TX-001,ANZICS,ANZICS Statement on Death and Organ Donation,2021,https://www.anzics.com.au/statements-and-guidelines/,,Restricted,attribution,transplant_donor,high
+EBMT-TX-001,EBMT,EBMT Handbook on Hematopoietic Cell Transplantation,2024,https://www.ebmt.org/education/ebmt-handbook,,Restricted,attribution,transplant_hematopoietic,high
+EBMT-TX-002,EBMT,EBMT Indications Allogeneic Autologous Hematopoietic Cell Transplantation,2022,https://www.ebmt.org/registry/indications-htc,,Restricted,attribution,transplant_hematopoietic,high
+EBMT-TX-003,EBMT,EBMT NIH Diagnosis Criteria Acute Chronic Graft-versus-Host Disease,2018,https://www.ebmt.org/education,,Restricted,attribution,transplant_hematopoietic,high
+EBMT-TX-004,EBMT,EBMT Recommendations CMV Management After Hematopoietic Cell Transplantation,2019,https://www.ebmt.org/education,,Restricted,attribution,transplant_complications,high
+EBMT-TX-005,EBMT,EBMT EHA Guideline CAR-T Cell Therapy Toxicity Management,2022,https://www.ebmt.org/education,,Restricted,attribution,transplant_hematopoietic,high
+ASTCT-TX-001,ASTCT,ASTCT Consensus Grading for Cytokine Release Syndrome and Neurotoxicity,2019,https://www.astct.org/,,Restricted,attribution,transplant_hematopoietic,high
+ASTCT-TX-002,ASTCT,ASTCT Indications Hematopoietic Cell Transplantation,2020,https://www.astct.org/,,Restricted,attribution,transplant_hematopoietic,high
+FACT-TX-001,FACT,FACT JACIE International Standards for Hematopoietic Cellular Therapy,2024,https://www.factweb.org/standards,,Restricted,attribution,transplant_hematopoietic,medium
+PIBMTR-TX-001,PIBMTR,PIBMTR CIBMTR Pediatric Hematopoietic Cell Transplant Outcomes,2023,https://www.cibmtr.org/,,Restricted,attribution,transplant_hematopoietic,medium
+EFI-TX-001,EFI,EFI Standards for Histocompatibility and Immunogenetics Testing,2022,https://www.efi-web.org/standards,,Restricted,attribution,transplant_immunology,medium
+ASHI-TX-001,ASHI,ASHI Standards for Accredited Laboratories,2022,https://www.ashi-hla.org/page/Standards,,Restricted,attribution,transplant_immunology,medium
+ECIL-TX-001,ECIL,ECIL Guidelines Diagnosis Treatment Invasive Fungal Disease in Hematology,2019,https://www.ecil-leukaemia.com/,,Open,attribution,transplant_complications,high
+ECIL-TX-002,ECIL,ECIL Guidelines for the Treatment of Invasive Aspergillosis in Hematology,2017,https://www.ecil-leukaemia.com/,,Open,attribution,transplant_complications,high
+ACOEM-OCC-001,ACOEM,ACOEM Practice Guidelines Occupational Medicine,2023,https://acoem.org/Practice-Resources/ACOEM-Guidelines,,Restricted,attribution,occupational_general,high
+ACOEM-OCC-002,ACOEM,ACOEM Guidance on Pre-Placement Examinations,2018,https://acoem.org/Practice-Resources,,Restricted,attribution,occupational_general,high
+ACOEM-OCC-003,ACOEM,ACOEM Position Statement Fitness for Duty,2019,https://acoem.org/Position-Statements,,Restricted,attribution,occupational_general,high
+ACOEM-OCC-004,ACOEM,ACOEM Guidance on Workplace Hearing Conservation,2018,https://acoem.org/Practice-Resources,,Restricted,attribution,occupational_specific_disease,high
+ACOEM-OCC-005,ACOEM,ACOEM Guidance Occupational Asthma Diagnosis Management,2020,https://acoem.org/Practice-Resources,,Restricted,attribution,occupational_specific_disease,high
+ACOEM-OCC-006,ACOEM,ACOEM Position Statement Spirometry in the Occupational Setting,2018,https://acoem.org/Position-Statements,,Restricted,attribution,occupational_specific_disease,medium
+ACOEM-OCC-007,ACOEM,ACOEM Guidance on Workplace Drug Testing,2019,https://acoem.org/Practice-Resources,,Restricted,attribution,occupational_general,medium
+ACOEM-OCC-008,ACOEM,ACOEM Guidance on Shift Work and Health,2022,https://acoem.org/Practice-Resources,,Restricted,attribution,occupational_general,medium
+ACOEM-OCC-009,ACOEM,ACOEM Position Statement Workplace Mental Health,2020,https://acoem.org/Position-Statements,,Restricted,attribution,occupational_general,high
+ACOEM-OCC-010,ACOEM,ACOEM Position Statement Healthcare Worker Vaccination,2019,https://acoem.org/Position-Statements,,Restricted,attribution,occupational_safety,high
+ACOEM-OCC-011,ACOEM,ACOEM Guidance Return to Work Workplace Re-entry,2019,https://acoem.org/Practice-Resources,,Restricted,attribution,occupational_general,high
+ACOEM-OCC-012,ACOEM,ACOEM Position Pregnancy and Reproductive Hazards in the Workplace,2019,https://acoem.org/Position-Statements,,Restricted,attribution,occupational_safety,high
+NIOSH-OCC-001,NIOSH,NIOSH Pocket Guide to Chemical Hazards,2024,https://www.cdc.gov/niosh/npg/,,Public Domain,allowed,occupational_specific_disease,high
+NIOSH-OCC-002,NIOSH,NIOSH Occupational Noise Exposure Recommended Standard,1998,https://www.cdc.gov/niosh/docs/98-126/,,Public Domain,allowed,occupational_specific_disease,high
+NIOSH-OCC-003,NIOSH,NIOSH Lifting Equation Applications Manual Revised,1994,https://www.cdc.gov/niosh/docs/94-110/,,Public Domain,allowed,occupational_general,high
+NIOSH-OCC-004,NIOSH,NIOSH Hierarchy of Controls Workplace Hazard Mitigation,2023,https://www.cdc.gov/niosh/topics/hierarchy/,,Public Domain,allowed,occupational_safety,high
+NIOSH-OCC-005,NIOSH,NIOSH Total Worker Health Approach,2024,https://www.cdc.gov/niosh/twh/,,Public Domain,allowed,occupational_general,medium
+OSHA-OCC-001,OSHA,OSHA Bloodborne Pathogens Standard 29 CFR 1910.1030,2024,https://www.osha.gov/bloodborne-pathogens,,Public Domain,allowed,occupational_safety,high
+OSHA-OCC-002,OSHA,OSHA Occupational Noise Exposure Standard 29 CFR 1910.95,2024,https://www.osha.gov/noise,,Public Domain,allowed,occupational_specific_disease,high
+OSHA-OCC-003,OSHA,OSHA Respiratory Protection Standard 29 CFR 1910.134,2024,https://www.osha.gov/respiratory-protection,,Public Domain,allowed,occupational_safety,high
+OSHA-OCC-004,OSHA,OSHA Hazard Communication Standard 29 CFR 1910.1200,2024,https://www.osha.gov/hazard-communication,,Public Domain,allowed,occupational_safety,high
+OSHA-OCC-005,OSHA,OSHA Personal Protective Equipment Standard,2024,https://www.osha.gov/personal-protective-equipment,,Public Domain,allowed,occupational_safety,high
+OSHA-OCC-006,OSHA,OSHA Recordkeeping and Reporting Occupational Injuries Illnesses,2024,https://www.osha.gov/recordkeeping,,Public Domain,allowed,occupational_safety,medium
+HSE-OCC-001,HSE,HSE Hand Arm Vibration at Work Guidance L140,2019,https://www.hse.gov.uk/pubns/books/l140.htm,,OGL,attribution,occupational_specific_disease,high
+HSE-OCC-002,HSE,HSE Whole Body Vibration Guidance L141,2019,https://www.hse.gov.uk/pubns/books/l141.htm,,OGL,attribution,occupational_specific_disease,high
+HSE-OCC-003,HSE,HSE Control of Substances Hazardous to Health COSHH,2024,https://www.hse.gov.uk/coshh/,,OGL,attribution,occupational_safety,high
+HSE-OCC-004,HSE,HSE Manual Handling Operations Regulations Guidance L23,2016,https://www.hse.gov.uk/pubns/books/l23.htm,,OGL,attribution,occupational_general,high
+FOM-OCC-001,FOM,FOM Guidance on Ethics for Occupational Physicians,2018,https://www.fom.ac.uk/professional-standards-and-policies/,,Restricted,attribution,occupational_general,medium
+FOM-OCC-002,FOM,FOM Guidance Health Surveillance,2019,https://www.fom.ac.uk/professional-standards-and-policies/,,Restricted,attribution,occupational_general,high
+WHO-OCC-001,WHO,WHO Healthy Workplaces Framework and Model,2010,https://www.who.int/occupational_health/publications/healthy_workplaces_model/en/,,CC BY-NC-SA,attribution,occupational_general,medium
+WHO-OCC-002,WHO,WHO ILO Joint Guidance on Mental Health at Work,2022,https://www.who.int/publications/i/item/9789240053052,,CC BY-NC-SA,attribution,occupational_general,high
+WHO-OCC-003,WHO,WHO Burn-out Occupational Phenomenon ICD-11,2019,https://www.who.int/news/item/28-05-2019-burn-out-an-occupational-phenomenon-international-classification-of-diseases,,CC BY-NC-SA,attribution,occupational_general,medium
+ATS-OCC-001,ATS,ATS Occupational Contribution to the Burden of Airway Disease,2019,https://www.atsjournals.org/journal/ajrccm,,Restricted,attribution,occupational_specific_disease,high
+ATS-OCC-002,ATS,ATS ERS Diagnosis Management Work-Related Asthma,2011,https://www.atsjournals.org/journal/ajrccm,,Restricted,attribution,occupational_specific_disease,high
+ATS-OCC-003,ATS,ATS Diagnosis Management of Beryllium Sensitization Chronic Beryllium Disease,2014,https://www.atsjournals.org/journal/ajrccm,,Restricted,attribution,occupational_specific_disease,medium
+ICRP-OCC-001,ICRP,ICRP 103 Recommendations of the International Commission on Radiological Protection,2007,https://www.icrp.org/publication.asp?id=ICRP%20Publication%20103,,Restricted,attribution,occupational_safety,high
+AMA-OCC-001,AMA,AMA Guides to the Evaluation of Permanent Impairment 6th Edition,2008,https://www.ama-assn.org/delivering-care/ethics/ama-guides-evaluation-permanent-impairment,,Restricted,attribution,occupational_general,high
+CDC-OCC-001,CDC,CDC Updated Recommendations for HIV PEP After Occupational Exposure,2013,https://www.cdc.gov/hiv/clinicians/prevention/pep.html,,Public Domain,allowed,occupational_safety,high
+CDC-OCC-002,CDC,CDC Hepatitis B Vaccination of Health Care Personnel,2013,https://www.cdc.gov/mmwr/preview/mmwrhtml/rr6210a1.htm,,Public Domain,allowed,occupational_safety,high
+CDC-OCC-003,CDC,CDC Guidelines for Infection Control in Healthcare Personnel,2019,https://www.cdc.gov/infectioncontrol/guidelines/healthcare-personnel/,,Public Domain,allowed,occupational_safety,high
+AGS-GER-001,AGS,AGS Beers Criteria for Potentially Inappropriate Medication Use in Older Adults,2023,https://agsjournals.onlinelibrary.wiley.com/doi/10.1111/jgs.18372,,Restricted,attribution,geriatric_polypharmacy,high
+AGS-GER-002,AGS,AGS Clinical Practice Guideline Postoperative Delirium in Older Adults,2014,https://www.americangeriatrics.org/sites/default/files/inline-files/AGS%20Clinical%20Practice%20Guideline%20on%20Postoperative%20Delirium.pdf,,Restricted,attribution,geriatric_delirium,high
+AGS-GER-003,AGS,AGS BGS Clinical Practice Guideline for Prevention of Falls in Older Persons,2011,https://www.americangeriatrics.org/sites/default/files/inline-files/Falls_Summary_Guide.pdf,,Restricted,attribution,geriatric_falls,high
+AGS-GER-004,AGS,AGS Position Statement Comprehensive Geriatric Assessment,2017,https://www.americangeriatrics.org/policy-advocacy/position-statements,,Restricted,attribution,geriatric_assessment,high
+AGS-GER-005,AGS,AGS Choosing Wisely Five Things in Geriatrics,2023,https://www.choosingwisely.org/societies/american-geriatrics-society/,,Open,attribution,geriatric_assessment,medium
+AGS-GER-006,AGS,AGS Best Practice Statement Person-Centered Care in Long Term Services,2018,https://agsjournals.onlinelibrary.wiley.com/journal/15325415,,Restricted,attribution,geriatric_assessment,medium
+AGS-GER-007,AGS,AGS Position Statement Aging in Place Home-Based Primary Care,2021,https://www.americangeriatrics.org/policy-advocacy/position-statements,,Restricted,attribution,geriatric_assessment,medium
+AGS-GER-008,AGS,AGS Position Statement Caregiver Support,2021,https://www.americangeriatrics.org/policy-advocacy/position-statements,,Restricted,attribution,geriatric_eol,medium
+AGS-GER-009,AGS,AGS Choosing Wisely on Driving Cognitive Impairment,2021,https://www.americangeriatrics.org/,,Restricted,attribution,geriatric_assessment,medium
+BGS-GER-001,BGS,BGS Comprehensive Geriatric Assessment Toolkit Primary Care,2019,https://www.bgs.org.uk/resources/resource-series/comprehensive-geriatric-assessment-toolkit-for-primary-care-practitioners,,Restricted,attribution,geriatric_assessment,high
+BGS-GER-002,BGS,BGS Falls Bone Health Position Paper,2021,https://www.bgs.org.uk/resources,,Restricted,attribution,geriatric_falls,high
+BGS-GER-003,BGS,BGS Frailty in Older Adults Recognition and Management Guideline,2017,https://www.bgs.org.uk/resources/introduction-to-frailty,,Restricted,attribution,geriatric_assessment,high
+BGS-GER-004,BGS,BGS End of Life Care in Frailty Best Practice Guidance,2020,https://www.bgs.org.uk/resources,,Restricted,attribution,geriatric_eol,high
+NICE-GER-001,NICE,NICE NG56 Multimorbidity Clinical Assessment Management,2016,https://www.nice.org.uk/guidance/ng56,,OGL,attribution,geriatric_polypharmacy,high
+NICE-GER-002,NICE,NICE NG5 Medicines Optimisation,2015,https://www.nice.org.uk/guidance/ng5,,OGL,attribution,geriatric_polypharmacy,high
+NICE-GER-003,NICE,NICE CG161 Falls in Older People Assessment Prevention,2013,https://www.nice.org.uk/guidance/cg161,,OGL,attribution,geriatric_falls,high
+NICE-GER-004,NICE,NICE CG103 Delirium Prevention Diagnosis Management,2010,https://www.nice.org.uk/guidance/cg103,,OGL,attribution,geriatric_delirium,high
+NICE-GER-005,NICE,NICE NG97 Dementia Assessment Management Support for People Living with Dementia,2018,https://www.nice.org.uk/guidance/ng97,,OGL,attribution,geriatric_assessment,high
+EWGSOP-GER-001,EWGSOP,EWGSOP2 Sarcopenia Revised European Consensus Definition Diagnosis,2019,https://academic.oup.com/ageing/article/48/1/16/5126243,,Restricted,attribution,geriatric_assessment,high
+AWGS-GER-001,AWGS,AWGS 2019 Consensus on Sarcopenia Diagnosis Treatment,2020,https://www.jamda.com/article/S1525-8610(19)30872-2/fulltext,,Restricted,attribution,geriatric_assessment,high
+IWGS-GER-001,IWGS,IWGS Recommendations on Sarcopenia Definition Diagnosis,2011,https://www.jamda.com/,,Restricted,attribution,geriatric_assessment,medium
+ICFSR-GER-001,ICFSR,ICFSR International Clinical Practice Guidelines for the Identification Management of Frailty,2019,https://link.springer.com/article/10.1007/s12603-019-1273-z,,Restricted,attribution,geriatric_assessment,high
+SIOG-GER-001,SIOG,SIOG Practical Geriatric Assessment Guidelines for Older Cancer Patients,2014,https://www.siog.org/clinical-guidelines.html,,Restricted,attribution,geriatric_assessment,high
+SIOG-GER-002,SIOG,SIOG Recommendations Comprehensive Geriatric Assessment in Cancer Older Adults,2018,https://www.siog.org/clinical-guidelines.html,,Restricted,attribution,geriatric_assessment,high
+ESC-GER-001,ESC,ESC Position Paper Frailty in Older Adults Cardiovascular Disease,2020,https://www.escardio.org,,Restricted,attribution,geriatric_assessment,medium
+STOPP-GER-001,STOPP,STOPP START Criteria for Potentially Inappropriate Prescribing in Older Adults Version 3,2023,https://academic.oup.com/ageing/article/52/4/afad043/7150925,,Restricted,attribution,geriatric_polypharmacy,high
+NHTSA-GER-001,NHTSA,NHTSA Clinicians Guide to Assessing Counseling Older Drivers,2019,https://www.nhtsa.gov/older-drivers,,Public Domain,allowed,geriatric_assessment,medium
+AAN-GER-001,AAN,AAN Practice Guideline Mild Cognitive Impairment,2018,https://www.aan.com/Guidelines/home/GuidelineDetail/881,,Restricted,attribution,geriatric_assessment,high
+ACIP-GER-001,ACIP,ACIP Recommended Adult Immunization Schedule by Age Older Adults,2024,https://www.cdc.gov/vaccines/schedules/hcp/imz/adult.html,,Public Domain,allowed,geriatric_assessment,high
+ICOPE-GER-001,ICOPE,WHO ICOPE Integrated Care for Older People Guidelines,2017,https://www.who.int/publications/i/item/9789241550109,,CC BY-NC-SA,attribution,geriatric_assessment,high
+ICOPE-GER-002,ICOPE,WHO ICOPE Handbook Guidance for Person-Centred Assessment Care Pathways Primary Care,2019,https://www.who.int/publications/i/item/WHO-FWC-ALC-19.1,,CC BY-NC-SA,attribution,geriatric_assessment,high
+ESPEN-PAL-001,ESPEN,ESPEN Guideline Clinical Nutrition in Cancer Cachexia,2021,https://www.espen.org/guidelines-home,,Restricted,attribution,palliative_general,high
+ACCP-PAL-001,ACCP,ACCP Cough in the Adult Palliative Setting,2018,https://journal.chestnet.org/cough-guidelines,,Restricted,attribution,palliative_general,medium
+APA-PAL-001,APA,APA Practice Guideline Treatment of Patients with Major Depressive Disorder End of Life,2019,https://psychiatryonline.org/guidelines,,Restricted,attribution,palliative_eol,medium
+SCCM-PEDS-007,SCCM,SCCM Pediatric Diabetic Ketoacidosis Cerebral Edema Management,2020,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,picu_neuro,high
+ASPEN-PEDS-001,ASPEN,ASPEN Clinical Guidelines Nutrition Support of Critically Ill Pediatric Patient,2017,https://onlinelibrary.wiley.com/doi/10.1177/0148607117711387,,Restricted,attribution,picu_neuro,medium
+SCCM-PEDS-008,SCCM,SCCM Long-Stay PICU Outcomes Recommendations,2021,https://journals.lww.com/pccmjournal,,Restricted,attribution,picu_neuro,low
+SCCM-PEDS-009,SCCM,SCCM Pediatric Post-Intensive Care Syndrome Rehabilitation,2020,https://journals.lww.com/pccmjournal,,Restricted,attribution,picu_neuro,medium
+PALS-PEDS-001,PALS,PALS Provider Manual Pediatric Advanced Life Support,2020,https://cpr.heart.org/en/courses/pals,,Restricted,attribution,picu_resuscitation,high
+ATS-PEDS-001,ATS,ATS Clinical Practice Guideline Severe Asthma Children,2021,https://www.atsjournals.org/,,Restricted,attribution,picu_resuscitation,high
+ESPGHAN-PEDS-001,ESPGHAN,ESPGHAN Position Paper Acute Liver Failure in Children,2017,https://journals.lww.com/jpgn,,Restricted,attribution,picu_neuro,high
+SCCM-PAL-002,SCCM,SCCM ATS Choosing Wisely End of Life ICU,2020,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,palliative_eol,medium
+NICE-FOR-001,NICE,NICE NG76 Child Abuse and Neglect Recognition Assessment Response,2017,https://www.nice.org.uk/guidance/ng76,,OGL,attribution,forensic_violence,high
+RCPCH-FOR-001,RCPCH,RCPCH Child Protection Companion Guidelines,2020,https://www.rcpch.ac.uk/resources/child-protection-companion,,Restricted,attribution,forensic_violence,high
+USDOJ-FOR-003,USDOJ,USDOJ National Best Practices for Sexual Assault Kits,2017,https://www.ncjrs.gov/pdffiles1/nij/250384.pdf,,Public Domain,allowed,forensic_violence,medium
+ACEP-FOR-001,ACEP,ACEP Policy Domestic Family Violence in the Emergency Department,2019,https://www.acep.org/patient-care/policy-statements/,,Restricted,attribution,forensic_violence,medium
+ACOG-MFM-026,ACOG,ACOG Committee Opinion 825 Caring for Patients Who Have Experienced Trauma,2021,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2021/04/caring-for-patients-who-have-experienced-trauma,,Restricted,attribution,mfm_postpartum,medium
+ACOG-MFM-027,ACOG,ACOG Practice Bulletin 197 Inherited Thrombophilias in Pregnancy,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2018/07/inherited-thrombophilias-in-pregnancy,,Restricted,attribution,mfm_chronic_disease,high
+ACOG-MFM-028,ACOG,ACOG Practice Bulletin 220 Acute Onset Severe Hypertension Pregnancy Postpartum,2017,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2017/06/emergent-therapy-for-acute-onset-severe-hypertension-during-pregnancy-and-the-postpartum-period,,Restricted,attribution,mfm_hypertensive,high
+ACOG-MFM-029,ACOG,ACOG Practice Bulletin 199 Use of Prophylactic Antibiotics in Labor and Delivery,2018,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2018/09/use-of-prophylactic-antibiotics-in-labor-and-delivery,,Restricted,attribution,mfm_labor,high
+ACOG-MFM-030,ACOG,ACOG Committee Opinion 736 Postpartum Pain Management,2018,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2018/07/postpartum-pain-management,,Restricted,attribution,mfm_postpartum,high
+FSRH-MFM-001,FSRH,FSRH Clinical Guideline Contraception After Pregnancy,2020,https://www.fsrh.org/standards-and-guidance/documents/contraception-after-pregnancy-guideline-january-2017/,,Restricted,attribution,mfm_postpartum,high
+FSRH-MFM-002,FSRH,FSRH UK Medical Eligibility Criteria for Contraceptive Use,2016,https://www.fsrh.org/standards-and-guidance/uk-medical-eligibility-criteria-for-contraceptive-use-ukmec/,,Restricted,attribution,mfm_postpartum,high
+ATA-MFM-002,ATA,ATA Postpartum Thyroiditis Diagnosis Management,2017,https://www.thyroid.org/professionals/ata-professional-guidelines/,,Restricted,attribution,mfm_postpartum,high
+SMFM-MFM-021,SMFM,SMFM Consult Series 67 Maternal Mortality Disparities Race Ethnicity,2023,https://www.smfm.org/publications,,Restricted,attribution,mfm_chronic_disease,medium
+SMFM-MFM-022,SMFM,SMFM Consult Series 68 Sleep-Disordered Breathing in Pregnancy,2023,https://www.smfm.org/publications,,Restricted,attribution,mfm_chronic_disease,medium
+SMFM-MFM-023,SMFM,SMFM Antiphospholipid Syndrome and Pregnancy,2018,https://www.smfm.org/publications,,Restricted,attribution,mfm_chronic_disease,high
+SMFM-MFM-024,SMFM,SMFM Twin-Twin Transfusion Syndrome Diagnosis Management,2013,https://www.smfm.org/publications,,Restricted,attribution,mfm_fetal_growth,high
+SMFM-MFM-025,SMFM,SMFM Indicated Late Preterm and Early Term Deliveries,2019,https://www.smfm.org/publications,,Restricted,attribution,mfm_preterm,high
+EAPC-PAL-011,EAPC,EAPC Position Paper Spirituality in Palliative Care,2020,https://www.eapcnet.eu/publications/position-papers/,,Open,attribution,palliative_general,medium
+EAPC-PAL-012,EAPC,EAPC Recommendation Bereavement Care Standards,2020,https://www.eapcnet.eu/publications/clinical-recommendations/,,Open,attribution,palliative_eol,medium
+NHPCO-PAL-007,NHPCO,NHPCO Pediatric Palliative Care Standards Children Hospice International,2019,https://www.nhpco.org/pediatrics/,,Restricted,attribution,palliative_pediatric,high
+NHPCO-PAL-008,NHPCO,NHPCO Death Rattle Terminal Secretions Management,2021,https://www.nhpco.org/education/,,Restricted,attribution,palliative_eol,medium
+AAHPM-PAL-006,AAHPM,AAHPM Existential Suffering Spiritual Care Position,2018,https://aahpm.org/positions,,Restricted,attribution,palliative_general,medium
+AAHPM-PAL-007,AAHPM,AAHPM Pruritus Symptom Management Pearls,2020,https://aahpm.org/education,,Restricted,attribution,palliative_general,low
+ESPNIC-PEDS-002,ESPNIC,ESPNIC Pediatric ARDS Mechanical Ventilation Recommendations,2022,https://espnic-online.org/Guidelines,,Restricted,attribution,picu_resuscitation,high
+ESPNIC-PEDS-003,ESPNIC,ESPNIC Recommendations on Sedation Assessment Critically Ill Children,2018,https://espnic-online.org/Guidelines,,Restricted,attribution,picu_neuro,medium
+SCCM-PEDS-010,SCCM,SCCM Pediatric Postcardiac Arrest Care Guidelines,2019,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,picu_resuscitation,high
+SCCM-PEDS-011,SCCM,SCCM Hemodynamic Monitoring Pediatric Cardiac Patient,2020,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,picu_cardiac,medium
+SCCM-PEDS-012,SCCM,SCCM Pediatric Severe Traumatic Brain Injury Therapy,2019,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,picu_neuro,high
+KDIGO-PEDS-002,KDIGO,KDIGO Pediatric AKI Recommendations Definitions,2012,https://kdigo.org/guidelines/acute-kidney-injury/,,Open,attribution,picu_renal,high
+NAME-FOR-004,NAME,NAME Position Paper Reporting of Heroin Drug-Related Deaths,2014,https://name.memberclicks.net/position-papers,,Open,attribution,forensic_toxicology,medium
+NAME-FOR-005,NAME,NAME Forensic Pathology Guideline Time of Death Estimation,2015,https://name.memberclicks.net/position-papers,,Open,attribution,forensic_death,medium
+NAME-FOR-006,NAME,NAME Position Paper Asphyxial Deaths Investigation,2018,https://name.memberclicks.net/position-papers,,Open,attribution,forensic_death,medium
+RCPath-FOR-006,RCPath,RCPath Guideline on Wound Interpretation Forensic Pathology,2020,https://www.rcpath.org/profession/guidelines,,Restricted,attribution,forensic_violence,medium
+RCPath-FOR-007,RCPath,RCPath Guideline Drowning Investigation Pathology,2019,https://www.rcpath.org/profession/guidelines,,Restricted,attribution,forensic_death,medium
+KDIGO-TX-004,KDIGO,KDIGO Conference Report on Antibody-Mediated Kidney Rejection,2019,https://kdigo.org/conferences/,,Open,attribution,transplant_immunology,high
+KDIGO-TX-005,KDIGO,KDIGO Recommendations Desensitization Highly Sensitized Kidney Transplant,2017,https://kdigo.org/guidelines/,,Open,attribution,transplant_immunology,medium
+EBMT-TX-006,EBMT,EBMT Recommendations Conditioning Regimens Hematopoietic Transplant,2020,https://www.ebmt.org/education,,Restricted,attribution,transplant_hematopoietic,medium
+EBMT-TX-007,EBMT,EBMT Pediatric BMT Best Practices Pediatric Diseases Council,2021,https://www.ebmt.org/education,,Restricted,attribution,transplant_hematopoietic,high
+AST-TX-005,AST,AST Skin Cancer Surveillance in Transplant Recipients,2019,https://www.myast.org/practice-resources,,Restricted,attribution,transplant_complications,medium
+AST-TX-006,AST,AST Cardiovascular Disease in Solid Organ Transplant Recipients,2020,https://www.myast.org/practice-resources,,Restricted,attribution,transplant_complications,high
+AST-TX-007,AST,AST Pregnancy and Solid Organ Transplant Recipients,2018,https://www.myast.org/practice-resources,,Restricted,attribution,transplant_complications,high
+ATS-PAL-003,ATS,ATS Policy Statement Withholding Withdrawing Mechanical Ventilation,2008,https://www.atsjournals.org/journal/ajrccm,,Restricted,attribution,palliative_eol,high
+ESICM-PAL-001,ESICM,ESICM Statement End of Life Care in the ICU,2017,https://www.esicm.org/resources/,,Restricted,attribution,palliative_eol,high
+SCCM-PAL-003,SCCM,SCCM Guidelines for Family-Centered Decision Making End of Life ICU,2017,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,palliative_eol,high
+ACOEM-OCC-013,ACOEM,ACOEM Practice Guideline Travel Medicine for Business Travelers,2018,https://acoem.org/Practice-Resources,,Restricted,attribution,occupational_general,medium
+ACOEM-OCC-014,ACOEM,ACOEM Position Statement Expatriate Health Programs,2020,https://acoem.org/Position-Statements,,Restricted,attribution,occupational_general,medium
+ACOEM-OCC-015,ACOEM,ACOEM Heavy Metal Exposure Diagnosis Management,2017,https://acoem.org/Practice-Resources,,Restricted,attribution,occupational_specific_disease,medium
+NIOSH-OCC-006,NIOSH,NIOSH Healthcare Workers Hazardous Drugs Workplace Solutions,2016,https://www.cdc.gov/niosh/topics/hazdrug/,,Public Domain,allowed,occupational_safety,high
+NIOSH-OCC-007,NIOSH,NIOSH Latex Allergy A Prevention Guide,2015,https://www.cdc.gov/niosh/docs/98-113/,,Public Domain,allowed,occupational_specific_disease,medium
+ATS-OCC-004,ATS,ATS Diagnosis and Initial Management of Asbestos-Associated Lung Disease,2004,https://www.atsjournals.org/journal/ajrccm,,Restricted,attribution,occupational_specific_disease,high
+ATS-OCC-005,ATS,ATS Statement Silicosis Diagnosis Management,2024,https://www.atsjournals.org/journal/ajrccm,,Restricted,attribution,occupational_specific_disease,high
+ERS-OCC-001,ERS,ERS Statement Occupational Lung Disease Burden Prevention,2017,https://erj.ersjournals.com/,,Restricted,attribution,occupational_specific_disease,high
+SCCM-PEDS-013,SCCM,SCCM Pediatric ICU Liberation Bundle ABCDEF,2020,https://www.sccm.org/ICULiberation,,Restricted,attribution,picu_neuro,medium
+ERC-PEDS-003,ERC,ERC Guidelines 2021 Education and Implementation Resuscitation,2021,https://www.erc.edu/guidelines,,Restricted,attribution,picu_resuscitation,medium
+AAP-PEDS-003,AAP,AAP Clinical Report Withdrawal of Life-Sustaining Medical Treatment Pediatric,2017,https://publications.aap.org/pediatrics,,Restricted,attribution,picu_neuro,high
+AAP-PEDS-004,AAP,AAP Policy Statement Pediatric End-of-Life Care,2013,https://publications.aap.org/pediatrics,,Restricted,attribution,palliative_pediatric,high
+ELSO-PEDS-004,ELSO,ELSO Neonatal Respiratory ECMO Indications Management,2022,https://www.elso.org/ECMO/Guidelines.aspx,,Restricted,attribution,picu_resuscitation,medium
+NCS-PEDS-002,NCS,NCS Pediatric Brain Death Determination Recommendations,2023,https://www.neurocriticalcare.org,,Restricted,attribution,picu_neuro,high
+WMS-PEDS-002,WMS,WMS Pediatric Envenomation Practice Recommendations,2019,https://www.wemjournal.org/,,Restricted,attribution,picu_resuscitation,medium
+SOFT-FOR-002,SOFT,SOFT Drug Facilitated Sexual Assault Recommendations,2017,https://www.soft-tox.org/,,Open,attribution,forensic_toxicology,medium
+TIAFT-FOR-002,TIAFT,TIAFT Drug-Related Death Investigation Guidelines,2020,https://www.tiaft.org/resources,,Open,attribution,forensic_toxicology,medium
+ASFR-FOR-002,ASFR,ASFR Postmortem CT MRI Imaging Standards,2021,https://www.asfr.org,,Open,attribution,forensic_death,medium
+NHPCO-PAL-009,NHPCO,NHPCO Goals of Care Conversation Guide,2022,https://www.nhpco.org/education/tools-and-resources/,,Restricted,attribution,palliative_general,high
+NHPCO-PAL-010,NHPCO,NHPCO Surprise Question Prognostication Tool,2021,https://www.nhpco.org/education/tools-and-resources/,,Restricted,attribution,palliative_general,medium
+ACOG-MFM-031,ACOG,ACOG Committee Opinion 779 Importance of Social Determinants of Health Pregnancy,2019,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2019/06/importance-of-social-determinants-of-health,,Restricted,attribution,mfm_chronic_disease,low
+ACOG-MFM-032,ACOG,ACOG Practice Bulletin 218 Chronic Hypertension in Pregnancy Update,2019,https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2019/01/chronic-hypertension-in-pregnancy,,Restricted,attribution,mfm_hypertensive,high
+SMFM-MFM-026,SMFM,SMFM Special Statement Quality Metrics MFM Care,2022,https://www.smfm.org/publications,,Restricted,attribution,mfm_chronic_disease,low
+RCOG-MFM-014,RCOG,RCOG Maternal Cardiac Arrest Guidance,2011,https://www.rcog.org.uk/guidance,,Restricted,attribution,mfm_labor,high
+RCOG-MFM-015,RCOG,RCOG Amniotic Fluid Embolism Diagnosis Management,2020,https://www.rcog.org.uk/guidance,,Restricted,attribution,mfm_labor,high
+SCCM-PEDS-014,SCCM,SCCM Pediatric Severe Sepsis Bundle Implementation,2017,https://www.sccm.org/SurvivingSepsisCampaign,,Restricted,attribution,picu_sepsis,high
+AAP-PEDS-005,AAP,AAP Pediatric Drowning Prevention Treatment Recommendations,2021,https://publications.aap.org/pediatrics,,Restricted,attribution,picu_resuscitation,medium
+NHPCO-PAL-011,NHPCO,NHPCO Pediatric Hospice Eligibility Concurrent Care,2020,https://www.nhpco.org/pediatrics/,,Restricted,attribution,palliative_pediatric,high
+EAPC-PAL-013,EAPC,EAPC Atlas Children Adolescents Palliative Care Europe,2018,https://www.eapcnet.eu/publications,,Open,attribution,palliative_pediatric,medium
+ASPEN-PAL-001,ASPEN,ASPEN Position Artificial Nutrition Hydration End of Life,2009,https://nutritioncare.org/Guidelines_and_Clinical_Resources/,,Restricted,attribution,palliative_eol,medium
+NICE-PAL-006,NICE,NICE NG142 End of Life Care for Adults Service Delivery Update,2019,https://www.nice.org.uk/guidance/ng142,,OGL,attribution,palliative_eol,high
+KDIGO-MFM-001,KDIGO,KDIGO Recommendations CKD Pregnancy Care,2018,https://kdigo.org/conferences/women-kidney-disease/,,Open,attribution,mfm_chronic_disease,high
+ECCO-MFM-001,ECCO,ECCO Guideline Reproductive Health Pregnancy in Inflammatory Bowel Disease,2022,https://www.ecco-ibd.eu/publications/ecco-guidelines.html,,Restricted,attribution,mfm_chronic_disease,high
+AASLD-MFM-001,AASLD,AASLD Guidance Liver Disease in Pregnancy,2020,https://www.aasld.org/practice-guidelines,,Restricted,attribution,mfm_chronic_disease,high
+ESMO-MFM-001,ESMO,ESMO Clinical Practice Guideline Cancer Pregnancy and Lactation,2013,https://www.esmo.org/guidelines,,Restricted,attribution,mfm_chronic_disease,high
+ACR-MFM-001,ACR,ACR Reproductive Health Rheumatic Musculoskeletal Diseases Guideline,2020,https://www.rheumatology.org/Practice-Quality/Clinical-Support/Clinical-Practice-Guidelines/Reproductive-Health,,Restricted,attribution,mfm_chronic_disease,high
+ILAE-MFM-001,ILAE,ILAE Recommendations Pregnancy Women Epilepsy Treatment,2019,https://www.ilae.org/guidelines,,Restricted,attribution,mfm_chronic_disease,high
+ASCO-PAL-005,ASCO,ASCO Patient-Centered Communication Goals of Care Cancer,2019,https://ascopubs.org/doi/10.1200/JCO.2017.75.2311,,Restricted,attribution,palliative_general,medium
+SIOG-GER-003,SIOG,SIOG Recommendations Treatment Decision Making Older Cancer Patients,2017,https://www.siog.org/clinical-guidelines.html,,Restricted,attribution,geriatric_assessment,medium
+AGS-GER-010,AGS,AGS Position Frailty Cardiovascular Disease Older Adults,2022,https://www.americangeriatrics.org/policy-advocacy/position-statements,,Restricted,attribution,geriatric_assessment,medium
+AGS-GER-011,AGS,AGS Hospital at Home Best Practices Older Adults,2022,https://www.americangeriatrics.org/policy-advocacy/position-statements,,Restricted,attribution,geriatric_assessment,medium
+ESAIC-GER-001,ESAIC,ESAIC Guidelines on Postoperative Delirium Older Adult Anesthesia,2017,https://www.esaic.org/guidelines/,,Restricted,attribution,geriatric_delirium,high
+AAGBI-GER-001,AAGBI,AAGBI Peri-operative Care of the Elderly,2014,https://anaesthetists.org/Home/Resources-publications/Guidelines,,Restricted,attribution,geriatric_assessment,medium
+NHPCO-PAL-012,NHPCO,NHPCO Advance Care Planning Standards,2022,https://www.nhpco.org/education/tools-and-resources/,,Restricted,attribution,palliative_general,high
+SMFM-MFM-027,SMFM,SMFM Consult Series 30 Cervical Cerclage,2014,https://www.smfm.org/publications,,Restricted,attribution,mfm_preterm,high
+SMFM-MFM-028,SMFM,SMFM 17 Hydroxyprogesterone Caproate Preterm Birth Prevention,2017,https://www.smfm.org/publications,,Restricted,attribution,mfm_preterm,high
+ACOG-MFM-033,ACOG,ACOG Committee Opinion 714 Obesity Pregnancy Management,2017,https://www.acog.org/clinical/clinical-guidance,,Restricted,attribution,mfm_chronic_disease,medium
+ACOG-MFM-034,ACOG,ACOG Practice Bulletin 235 Erythrocyte Alloimmunization Pregnancy,2021,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,Restricted,attribution,mfm_fetal_growth,high
+ACOG-MFM-035,ACOG,ACOG Committee Opinion 656 Coding Diagnosis Stillbirth,2016,https://www.acog.org/clinical/clinical-guidance,,Restricted,attribution,mfm_fetal_growth,medium
+SCCM-PEDS-015,SCCM,SCCM Pediatric Septic Shock Bundle First Hour Resuscitation,2020,https://www.sccm.org/SurvivingSepsisCampaign,,Restricted,attribution,picu_sepsis,high
+ELSO-PEDS-005,ELSO,ELSO Pediatric Cardiac ECMO Anticoagulation Strategies,2021,https://www.elso.org/ECMO/Guidelines.aspx,,Restricted,attribution,picu_cardiac,medium
+EBMT-TX-008,EBMT,EBMT Late Effects Working Party Long-term Survivor HCT Care,2018,https://www.ebmt.org/late-effects-working-party,,Restricted,attribution,transplant_hematopoietic,medium
+ASTCT-TX-003,ASTCT,ASTCT Standard of Care for Acute GVHD Treatment,2020,https://www.astct.org/,,Restricted,attribution,transplant_hematopoietic,high
+AGS-GER-012,AGS,AGS Inappropriate Hospitalization Older Adults Position,2019,https://www.americangeriatrics.org/policy-advocacy/position-statements,,Restricted,attribution,geriatric_assessment,medium
+BGS-GER-005,BGS,BGS Long-term Care Facility Best Practices Position,2019,https://www.bgs.org.uk/resources,,Restricted,attribution,geriatric_assessment,medium
+ICOPE-GER-003,ICOPE,WHO ICOPE Mobile Application Implementation Older People Care,2020,https://www.who.int/teams/maternal-newborn-child-adolescent-health-and-ageing/ageing-and-health/icope,,CC BY-NC-SA,attribution,geriatric_assessment,medium
+WHO-GER-001,WHO,WHO Decade of Healthy Ageing Action Plan 2021-2030,2020,https://www.who.int/initiatives/decade-of-healthy-ageing,,CC BY-NC-SA,attribution,geriatric_assessment,medium
+WHO-GER-002,WHO,WHO Global Strategy Action Plan on Ageing and Health,2017,https://www.who.int/publications/i/item/9789241513500,,CC BY-NC-SA,attribution,geriatric_assessment,medium
+ASCO-GER-001,ASCO,ASCO Practical Assessment Older Adults Cancer Treatment,2018,https://ascopubs.org/doi/10.1200/JCO.2018.78.8687,,Restricted,attribution,geriatric_assessment,high
+EAPC-PAL-014,EAPC,EAPC Recommendations COPD Palliative Care Approach,2020,https://www.eapcnet.eu/publications,,Open,attribution,palliative_general,high
+NHPCO-PAL-013,NHPCO,NHPCO Heart Failure Hospice Eligibility Guidelines,2020,https://www.nhpco.org/regulatory/medicare-hospice-regulations/,,Restricted,attribution,palliative_general,medium
+ACOG-MFM-036,ACOG,ACOG Committee Opinion 819 Informed Consent and Shared Decision Making in Obstetrics,2021,https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2021/02/informed-consent-and-shared-decision-making-in-obstetrics-and-gynecology,,Restricted,attribution,mfm_chronic_disease,low
+ACOG-MFM-037,ACOG,ACOG Practice Bulletin 233 Cesarean Delivery on Maternal Request,2021,https://www.acog.org/clinical/clinical-guidance/practice-bulletin,,Restricted,attribution,mfm_labor,medium
+NICE-MFM-009,NICE,NICE QS22 Antenatal Care Quality Standard,2012,https://www.nice.org.uk/guidance/qs22,,OGL,attribution,mfm_chronic_disease,medium
+NICE-MFM-010,NICE,NICE NG194 Postnatal Care Quality Standard,2021,https://www.nice.org.uk/guidance/ng194,,OGL,attribution,mfm_postpartum,medium
+SCCM-PEDS-016,SCCM,SCCM Pediatric Cardiac Arrest Outcomes Reporting,2020,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,picu_resuscitation,medium
+EAPC-PAL-015,EAPC,EAPC Recommendations Heart Failure Palliative Care Pathway,2020,https://www.eapcnet.eu/publications,,Open,attribution,palliative_general,medium
+NHPCO-PAL-014,NHPCO,NHPCO Dementia Hospice Eligibility Guidelines FAST Score,2020,https://www.nhpco.org/regulatory,,Restricted,attribution,palliative_eol,high
+RCPath-FOR-008,RCPath,RCPath Fitness Practice Forensic Pathology Standards,2021,https://www.rcpath.org/profession/guidelines,,Restricted,attribution,forensic_death,low
+NAME-FOR-007,NAME,NAME Inspection Accreditation Standards Forensic Programs,2018,https://name.memberclicks.net,,Open,attribution,forensic_death,medium
+HRS-FOR-002,HRS,HRS Genetic Evaluation Inherited Cardiac Disease Sudden Death,2022,https://www.hrsonline.org/guidance,,Restricted,attribution,forensic_death,high
+AGS-GER-013,AGS,AGS Position Telemedicine Geriatrics Older Adults,2021,https://www.americangeriatrics.org/policy-advocacy/position-statements,,Restricted,attribution,geriatric_assessment,medium
+NICE-GER-006,NICE,NICE NG108 Decision Making Mental Capacity,2018,https://www.nice.org.uk/guidance/ng108,,OGL,attribution,geriatric_assessment,medium
+NICE-GER-007,NICE,NICE NG136 Hypertension Adults Diagnosis Management Older,2019,https://www.nice.org.uk/guidance/ng136,,OGL,attribution,geriatric_polypharmacy,medium
+EAPC-PAL-016,EAPC,EAPC Position Statement Medical Assistance in Dying,2022,https://www.eapcnet.eu/publications,,Open,attribution,palliative_eol,medium
+WHO-MFM-001,WHO,WHO Recommendations Antenatal Care Positive Pregnancy Experience,2016,https://www.who.int/publications/i/item/9789241549912,,CC BY-NC-SA,attribution,mfm_chronic_disease,high
+WHO-MFM-002,WHO,WHO Recommendations Intrapartum Care Positive Childbirth Experience,2018,https://www.who.int/publications/i/item/9789241550215,,CC BY-NC-SA,attribution,mfm_labor,high
+WHO-MFM-003,WHO,WHO Recommendations Postnatal Care of Mother and Newborn,2022,https://www.who.int/publications/i/item/9789240045989,,CC BY-NC-SA,attribution,mfm_postpartum,high
+WHO-MFM-004,WHO,WHO Recommendations Prevention Treatment Postpartum Hemorrhage,2012,https://www.who.int/publications/i/item/9789241548502,,CC BY-NC-SA,attribution,mfm_labor,high
+WHO-MFM-005,WHO,WHO Recommendations Prevention Treatment Pre-eclampsia Eclampsia,2011,https://www.who.int/publications/i/item/9789241548335,,CC BY-NC-SA,attribution,mfm_hypertensive,high
+WHO-MFM-006,WHO,WHO Statement Cesarean Section Rates,2015,https://www.who.int/publications/i/item/WHO-RHR-15.02,,CC BY-NC-SA,attribution,mfm_labor,medium
+WHO-MFM-007,WHO,WHO Recommendations Induction of Labour at or Beyond Term,2018,https://www.who.int/publications/i/item/9789241550413,,CC BY-NC-SA,attribution,mfm_labor,medium
+WHO-PEDS-001,WHO,WHO Pocket Book of Hospital Care for Children,2013,https://www.who.int/publications/i/item/978-92-4-154837-3,,CC BY-NC-SA,attribution,picu_resuscitation,high
+WHO-PEDS-002,WHO,WHO Updated Guideline Pediatric Emergency Triage Assessment Treatment ETAT,2016,https://www.who.int/publications/i/item/9789241510219,,CC BY-NC-SA,attribution,picu_resuscitation,high
+WHO-FOR-004,WHO,WHO Mortality Determination Fact-Finding for Deaths in Custody,2017,https://www.who.int/publications,,CC BY-NC-SA,attribution,forensic_death,medium
+WHO-FOR-005,WHO,WHO Investigating Causes of Stillbirth and Neonatal Death Manual,2016,https://www.who.int/publications/i/item/9789241549752,,CC BY-NC-SA,attribution,forensic_pediatric,medium
+WHO-OCC-004,WHO,WHO ILO Estimates of Work-Related Burden of Disease and Injury 2000-2016,2021,https://www.who.int/publications/i/item/9789240034945,,CC BY-NC-SA,attribution,occupational_general,medium
+WHO-OCC-005,WHO,WHO Health Worker Occupational Health Resilience Framework,2022,https://www.who.int/publications/i/item/9789240052369,,CC BY-NC-SA,attribution,occupational_safety,medium
+ELSO-TX-001,ELSO,ELSO Position Statement Bridge to Heart-Lung Transplantation,2020,https://www.elso.org/ECMO/Guidelines.aspx,,Restricted,attribution,transplant_heart,medium
+ISHLT-TX-010,ISHLT,ISHLT Mechanical Circulatory Support Guidelines Patient Selection,2023,https://ishlt.org/guidelines-statements,,Restricted,attribution,transplant_heart,high
+ISHLT-TX-011,ISHLT,ISHLT International Society Pediatric Heart Lung Transplant Listing,2021,https://ishlt.org/guidelines-statements,,Restricted,attribution,transplant_heart,medium
+EASL-TX-003,EASL,EASL Living Donor Liver Transplantation Position,2016,https://easl.eu/publication/,,Restricted,attribution,transplant_donor,medium
+AAP-PEDS-006,AAP,AAP Policy Pediatric Organ Donation Definition Brain Death,2020,https://publications.aap.org/pediatrics,,Restricted,attribution,transplant_donor,high
+ASTS-TX-004,ASTS,ASTS Pediatric Solid Organ Donor Recommendations,2019,https://asts.org/practice-resources,,Restricted,attribution,transplant_donor,medium
+EBMT-TX-009,EBMT,EBMT Pediatric Diseases Working Party HCT Recommendations Pediatric,2022,https://www.ebmt.org/pediatric-diseases-working-party,,Restricted,attribution,transplant_hematopoietic,medium
+SOFT-FOR-003,SOFT,SOFT Recommendations Postmortem Forensic Toxicology Specimen Collection,2019,https://www.soft-tox.org/lab_guidelines,,Open,attribution,forensic_toxicology,medium
+ABFO-FOR-002,ABFO,ABFO Standards Dental Identification Mass Disasters,2020,https://abfo.org/standards-guidelines/,,Open,attribution,forensic_death,medium
+NICE-PAL-007,NICE,NICE NG143 End of Life Care for Adults Cardiac Disease,2019,https://www.nice.org.uk/guidance/ng143,,OGL,attribution,palliative_eol,medium
+ACR-MFM-002,ACR,ACR EULAR Lupus Pregnancy Recommendations,2020,https://www.rheumatology.org/Practice-Quality,,Restricted,attribution,mfm_chronic_disease,high
+NHLBI-MFM-001,NHLBI,NHLBI Sickle Cell Disease Pregnancy Management,2014,https://www.nhlbi.nih.gov/health-topics/evidence-based-management-sickle-cell-disease,,Public Domain,allowed,mfm_chronic_disease,high
+ATS-PAL-004,ATS,ATS Policy Statement Resolving Disputes About Treatment Decisions ICU,2015,https://www.atsjournals.org/journal/ajrccm,,Restricted,attribution,palliative_eol,medium
+SCCM-PAL-004,SCCM,SCCM Statement Limitation Life-Sustaining Therapies ICU,2015,https://www.sccm.org/Clinical-Resources/Guidelines,,Restricted,attribution,palliative_eol,high
