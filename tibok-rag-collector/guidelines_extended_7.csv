@@ -1,0 +1,123 @@
+id,source,title,year,page_url,pdf_url_hint,license,commercial_use,clinical_domain,priority
+ESMO-LUNG-001,ESMO,Early stage NSCLC diagnosis treatment follow up,2023,https://www.esmo.org/guidelines/lung-and-chest-tumours/early-stage-and-locally-advanced-non-small-cell-lung-cancer,,ESMO Open Access,allowed,oncology_lung,high
+ESMO-LUNG-002,ESMO,Metastatic NSCLC treatment ESMO Clinical Practice Living Guideline,2024,https://www.esmo.org/guidelines/lung-and-chest-tumours/metastatic-non-small-cell-lung-cancer,,ESMO Open Access,allowed,oncology_lung,high
+ESMO-LUNG-003,ESMO,Small cell lung cancer ESMO Clinical Practice Guidelines,2021,https://www.esmo.org/guidelines/lung-and-chest-tumours/small-cell-lung-cancer,,ESMO Open Access,allowed,oncology_lung,high
+ESMO-LUNG-004,ESMO,Malignant pleural mesothelioma diagnosis treatment,2022,https://www.esmo.org/guidelines/lung-and-chest-tumours/malignant-pleural-mesothelioma,,ESMO Open Access,allowed,oncology_lung,high
+ESMO-LUNG-005,ESMO,Thymic epithelial tumours diagnosis treatment,2015,https://www.esmo.org/guidelines/lung-and-chest-tumours/thymic-epithelial-tumours,,ESMO Open Access,allowed,oncology_lung,medium
+ASCO-LUNG-001,ASCO,Therapy stage IV NSCLC without driver alterations ASCO living,2024,https://ascopubs.org/doi/10.1200/JCO.23.02744,,ASCO,restricted-cds,oncology_lung,high
+ASCO-LUNG-002,ASCO,Therapy stage IV NSCLC driver alterations ASCO living,2023,https://ascopubs.org/doi/10.1200/JCO.22.02524,,ASCO,restricted-cds,oncology_lung,high
+ASCO-LUNG-003,ASCO,Stage III NSCLC management,2022,https://ascopubs.org/doi/10.1200/JCO.21.02528,,ASCO,restricted-cds,oncology_lung,high
+ASCO-LUNG-004,ASCO,Adjuvant systemic therapy resected NSCLC,2023,https://ascopubs.org/doi/10.1200/JCO.22.02547,,ASCO,restricted-cds,oncology_lung,high
+ASCO-LUNG-005,ASCO,Initial management small cell lung cancer,2021,https://ascopubs.org/doi/10.1200/JCO.20.03364,,ASCO,restricted-cds,oncology_lung,high
+USPSTF-LUNG-001,USPSTF,Screening for lung cancer recommendation statement,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening,,Public Domain,allowed,oncology_lung_screening,high
+ESMO-PANCREAS-001,ESMO,Pancreatic adenocarcinoma ESMO Clinical Practice Guideline,2023,https://www.esmo.org/guidelines/gastrointestinal-cancers/pancreatic-adenocarcinoma,,ESMO Open Access,allowed,oncology_pancreas,high
+ASCO-PANCREAS-001,ASCO,Metastatic pancreatic cancer ASCO clinical practice guideline update,2020,https://ascopubs.org/doi/10.1200/JCO.20.01364,,ASCO,restricted-cds,oncology_pancreas,high
+ASCO-PANCREAS-002,ASCO,Locally advanced unresectable pancreatic cancer,2022,https://ascopubs.org/doi/10.1200/JCO.21.02152,,ASCO,restricted-cds,oncology_pancreas,high
+ASCO-PANCREAS-003,ASCO,Potentially curable pancreatic cancer ASCO,2019,https://ascopubs.org/doi/10.1200/JCO.19.00946,,ASCO,restricted-cds,oncology_pancreas,high
+ENETS-PANCREAS-001,ENETS,ENETS consensus guidelines pancreatic neuroendocrine neoplasms,2023,https://www.neuroendocrine.net/guidelines/,,ENETS,restricted,oncology_pancreas_net,high
+ESMO-PANCREAS-NET,ESMO,Gastroenteropancreatic neuroendocrine neoplasms ESMO,2020,https://www.esmo.org/guidelines/gastrointestinal-cancers/neuroendocrine-gastro-entero-pancreatic-tumours,,ESMO Open Access,allowed,oncology_pancreas_net,high
+ESMO-GASTRIC-001,ESMO,Gastric cancer ESMO Clinical Practice Guideline,2022,https://www.esmo.org/guidelines/gastrointestinal-cancers/gastric-cancer,,ESMO Open Access,allowed,oncology_gastric,high
+ASCO-GASTRIC-001,ASCO,Treatment metastatic gastric cancer ASCO,2023,https://ascopubs.org/doi/10.1200/JCO.22.02331,,ASCO,restricted-cds,oncology_gastric,high
+ASCO-GASTRIC-002,ASCO,Perioperative therapy locally advanced gastric cancer,2022,https://ascopubs.org/doi/10.1200/JCO.22.00069,,ASCO,restricted-cds,oncology_gastric,high
+ESMO-GIST-001,ESMO,Gastrointestinal stromal tumours GIST ESMO,2021,https://www.esmo.org/guidelines/gastrointestinal-cancers/gastrointestinal-stromal-tumours-gist,,ESMO Open Access,allowed,oncology_gastric,high
+JGCA-001,JGCA,Japanese gastric cancer treatment guidelines,2021,https://link.springer.com/article/10.1007/s10120-022-01331-8,,JGCA,restricted-cds,oncology_gastric,medium
+ESMO-COLON-001,ESMO,Localised colon cancer ESMO Clinical Practice Guideline,2020,https://www.esmo.org/guidelines/gastrointestinal-cancers/localised-colon-cancer,,ESMO Open Access,allowed,oncology_colorectal,high
+ESMO-COLON-002,ESMO,Metastatic colorectal cancer ESMO Clinical Practice Guideline,2023,https://www.esmo.org/guidelines/gastrointestinal-cancers/metastatic-colorectal-cancer,,ESMO Open Access,allowed,oncology_colorectal,high
+ESMO-RECTUM-001,ESMO,Rectal cancer ESMO Clinical Practice Guideline,2017,https://www.esmo.org/guidelines/gastrointestinal-cancers/rectal-cancer,,ESMO Open Access,allowed,oncology_colorectal,high
+ESMO-ANAL-001,ESMO,Anal cancer ESMO Clinical Practice Guideline,2021,https://www.esmo.org/guidelines/gastrointestinal-cancers/anal-cancer,,ESMO Open Access,allowed,oncology_colorectal,medium
+ASCO-COLON-001,ASCO,Adjuvant therapy stage II colon cancer,2022,https://ascopubs.org/doi/10.1200/JCO.21.02538,,ASCO,restricted-cds,oncology_colorectal,high
+ASCO-COLON-002,ASCO,Stage IV colorectal cancer ASCO guideline,2023,https://ascopubs.org/doi/10.1200/JCO.22.01690,,ASCO,restricted-cds,oncology_colorectal,high
+ASCO-RECTUM-001,ASCO,Locally advanced rectal cancer ASCO,2020,https://ascopubs.org/doi/10.1200/JCO.19.03114,,ASCO,restricted-cds,oncology_colorectal,high
+USPSTF-COLON-001,USPSTF,Screening for colorectal cancer recommendation statement,2021,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/colorectal-cancer-screening,,Public Domain,allowed,oncology_colorectal_screening,high
+ESMO-PROSTATE-001,ESMO,Prostate cancer ESMO Clinical Practice Guideline,2020,https://www.esmo.org/guidelines/genitourinary-cancers/prostate-cancer,,ESMO Open Access,allowed,oncology_prostate,high
+EAU-PROSTATE-001,EAU,EAU EANM ESTRO ESUR SIOG Guidelines Prostate Cancer,2024,https://uroweb.org/guidelines/prostate-cancer,,EAU,restricted-cds,oncology_prostate,high
+AUA-PROSTATE-001,AUA,Clinically localized prostate cancer AUA ASTRO guideline,2022,https://www.auanet.org/guidelines-and-quality/guidelines/oncology-guidelines/clinically-localized-prostate-cancer,,AUA,restricted-cds,oncology_prostate,high
+AUA-PROSTATE-002,AUA,Advanced prostate cancer AUA ASTRO SUO guideline,2023,https://www.auanet.org/guidelines-and-quality/guidelines/oncology-guidelines/advanced-prostate-cancer,,AUA,restricted-cds,oncology_prostate,high
+ASCO-PROSTATE-001,ASCO,Metastatic castration resistant prostate cancer,2023,https://ascopubs.org/doi/10.1200/JCO.22.02844,,ASCO,restricted-cds,oncology_prostate,high
+ASCO-PROSTATE-002,ASCO,Hormone sensitive metastatic prostate cancer,2022,https://ascopubs.org/doi/10.1200/JCO.21.02489,,ASCO,restricted-cds,oncology_prostate,high
+USPSTF-PROSTATE-001,USPSTF,Screening for prostate cancer recommendation statement,2018,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/prostate-cancer-screening,,Public Domain,allowed,oncology_prostate_screening,high
+ESMO-BREAST-001,ESMO,Early breast cancer ESMO Clinical Practice Guideline,2024,https://www.esmo.org/guidelines/breast-cancer/early-breast-cancer,,ESMO Open Access,allowed,oncology_breast,high
+ESMO-BREAST-002,ESMO,Metastatic breast cancer ESMO Clinical Practice Guideline,2024,https://www.esmo.org/guidelines/breast-cancer/metastatic-breast-cancer,,ESMO Open Access,allowed,oncology_breast,high
+ESMO-BREAST-003,ESMO,Hereditary breast ovarian cancers BRCA ESMO,2023,https://www.esmo.org/guidelines/breast-cancer/hereditary-breast-ovarian-cancers,,ESMO Open Access,allowed,oncology_breast,medium
+STGALLEN-BREAST-001,St-Gallen,St Gallen International Consensus Early Breast Cancer,2023,https://www.annalsofoncology.org/article/S0923-7534(23)00752-7/fulltext,,Annals of Oncology Open Access,allowed,oncology_breast,high
+ASCO-BREAST-001,ASCO,Adjuvant endocrine therapy hormone receptor positive breast,2022,https://ascopubs.org/doi/10.1200/JCO.22.01160,,ASCO,restricted-cds,oncology_breast,high
+ASCO-BREAST-002,ASCO,HER2 positive breast cancer guideline,2022,https://ascopubs.org/doi/10.1200/JCO.22.00069,,ASCO,restricted-cds,oncology_breast,high
+ASCO-BREAST-003,ASCO,Triple negative breast cancer systemic therapy,2023,https://ascopubs.org/doi/10.1200/JCO.22.02175,,ASCO,restricted-cds,oncology_breast,high
+ASCO-BREAST-004,ASCO,Metastatic HR positive HER2 negative breast cancer,2023,https://ascopubs.org/doi/10.1200/JCO.22.02393,,ASCO,restricted-cds,oncology_breast,high
+ASCO-BREAST-005,ASCO,Management ductal carcinoma in situ DCIS,2022,https://ascopubs.org/doi/10.1200/JCO.22.00299,,ASCO,restricted-cds,oncology_breast,medium
+USPSTF-BREAST-001,USPSTF,Screening for breast cancer recommendation statement,2024,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/breast-cancer-screening,,Public Domain,allowed,oncology_breast_screening,high
+ESMO-MELANOMA-001,ESMO,Cutaneous melanoma ESMO Clinical Practice Guideline,2022,https://www.esmo.org/guidelines/melanoma/cutaneous-melanoma,,ESMO Open Access,allowed,oncology_skin_melanoma,high
+ESMO-MELANOMA-002,ESMO,Uveal melanoma ESMO Clinical Practice Guideline,2024,https://www.esmo.org/guidelines/melanoma/uveal-melanoma,,ESMO Open Access,allowed,oncology_skin_melanoma,medium
+ASCO-MELANOMA-001,ASCO,Adjuvant systemic therapy resected melanoma,2020,https://ascopubs.org/doi/10.1200/JCO.20.00198,,ASCO,restricted-cds,oncology_skin_melanoma,high
+ASCO-MELANOMA-002,ASCO,Systemic therapy melanoma ASCO,2024,https://ascopubs.org/doi/10.1200/JCO.23.01136,,ASCO,restricted-cds,oncology_skin_melanoma,high
+AAD-MELANOMA-001,AAD,Guidelines care primary cutaneous melanoma AAD,2019,https://www.jaad.org/article/S0190-9622(18)32856-6/fulltext,,AAD,restricted-cds,oncology_skin_melanoma,high
+USPSTF-SKIN-001,USPSTF,Screening for skin cancer recommendation statement,2023,https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/skin-cancer-screening,,Public Domain,allowed,oncology_skin_screening,high
+ESMO-BCC-001,ESMO,Basal cell carcinoma ESMO EADO EDF clinical practice guideline,2023,https://www.esmo.org/guidelines/skin-cancers/basal-cell-carcinoma,,ESMO Open Access,allowed,oncology_skin_bcc,high
+AAD-BCC-001,AAD,Guidelines care basal cell carcinoma AAD,2018,https://www.jaad.org/article/S0190-9622(17)32942-8/fulltext,,AAD,restricted-cds,oncology_skin_bcc,high
+ESMO-CSCC-001,ESMO,Cutaneous squamous cell carcinoma ESMO EDF EADO,2023,https://www.esmo.org/guidelines/skin-cancers/cutaneous-squamous-cell-carcinoma,,ESMO Open Access,allowed,oncology_skin_scc,high
+AAD-CSCC-001,AAD,Guidelines care cutaneous squamous cell carcinoma,2018,https://www.jaad.org/article/S0190-9622(17)32944-1/fulltext,,AAD,restricted-cds,oncology_skin_scc,high
+EADO-MERKEL-001,EADO,Merkel cell carcinoma diagnosis treatment European consensus,2022,https://www.ejcancer.com/article/S0959-8049(22)00261-0/fulltext,,EADO,restricted-cds,oncology_skin,medium
+ESMO-BILIARY-001,ESMO,Biliary tract cancer ESMO Clinical Practice Guideline,2022,https://www.esmo.org/guidelines/gastrointestinal-cancers/biliary-tract-cancer,,ESMO Open Access,allowed,oncology_biliary,high
+ESMO-HCC-001,ESMO,Hepatocellular carcinoma ESMO Clinical Practice Guideline,2021,https://www.esmo.org/guidelines/gastrointestinal-cancers/hepatocellular-carcinoma,,ESMO Open Access,allowed,oncology_liver,high
+ASCO-BILIARY-001,ASCO,Systemic therapy advanced biliary tract cancers,2023,https://ascopubs.org/doi/10.1200/JCO.22.02272,,ASCO,restricted-cds,oncology_biliary,high
+ASCO-HCC-001,ASCO,Systemic therapy advanced hepatocellular carcinoma,2024,https://ascopubs.org/doi/10.1200/JCO.23.02745,,ASCO,restricted-cds,oncology_liver,high
+ILCA-HCC-001,ILCA,Management hepatocellular carcinoma ILCA,2023,https://www.journal-of-hepatology.eu/article/S0168-8278(23)00194-0/fulltext,,ILCA,restricted-cds,oncology_liver,high
+ESMO-SARCOMA-001,ESMO,Bone sarcomas ESMO PaedCan EURACAN ERN Clinical Practice,2021,https://www.esmo.org/guidelines/sarcoma-and-gist/bone-sarcomas,,ESMO Open Access,allowed,oncology_bone_sarcoma,high
+ESMO-SARCOMA-002,ESMO,Soft tissue sarcomas ESMO EURACAN GENTURIS,2021,https://www.esmo.org/guidelines/sarcoma-and-gist/soft-tissue-sarcomas,,ESMO Open Access,allowed,oncology_soft_tissue,high
+ESMO-EWING-001,ESMO,Ewing sarcoma ESMO EURACAN PaedCan,2021,https://www.esmo.org/guidelines/sarcoma-and-gist/ewing-sarcoma,,ESMO Open Access,allowed,oncology_bone_sarcoma,high
+NCCN-BONE-001,NCCN,NCCN Guidelines Bone Cancer,2024,https://www.nccn.org/guidelines/category_1,,NCCN,restricted,oncology_bone_sarcoma,high
+COG-OSTEOSARCOMA,COG,Children Oncology Group osteosarcoma treatment,2022,https://childrensoncologygroup.org/index.php/osteosarcoma,,COG,restricted,oncology_bone_pediatric,high
+EANO-GLIOMA-001,EANO,EANO guidelines diffuse adult glioma diagnosis treatment,2021,https://www.nature.com/articles/s41571-020-00447-z,,EANO,restricted-cds,oncology_brain,high
+EANO-MENINGIOMA,EANO,EANO guideline diagnosis treatment meningioma,2021,https://www.thelancet.com/journals/lanonc/article/PIIS1470-2045(21)00159-8/fulltext,,EANO,restricted-cds,oncology_brain,high
+EANO-BRAIN-METS,EANO,EANO ESMO Clinical Practice Guideline brain metastases,2021,https://www.esmo.org/guidelines/central-nervous-system-malignancies/brain-metastases,,ESMO Open Access,allowed,oncology_brain,high
+EANO-LEPTOMENINGEAL,EANO,EANO ESMO Clinical Practice leptomeningeal metastasis,2017,https://www.esmo.org/guidelines/central-nervous-system-malignancies/leptomeningeal-metastasis,,ESMO Open Access,allowed,oncology_brain,medium
+EANO-PCNSL-001,EANO,EANO European Hematology Association consensus primary CNS lymphoma,2023,https://www.thelancet.com/journals/lanhae/article/PIIS2352-3026(23)00126-2/fulltext,,EANO,restricted-cds,oncology_brain,high
+ASCO-GLIOMA-001,ASCO,Therapy diffuse astrocytic and oligodendroglial tumors,2022,https://ascopubs.org/doi/10.1200/JCO.21.02036,,ASCO,restricted-cds,oncology_brain,high
+WHO-CNS-001,WHO,WHO Classification Tumours Central Nervous System fifth edition summary,2021,https://academic.oup.com/neuro-oncology/article/23/8/1231/6311214,,WHO IARC Open Access,allowed,oncology_brain,high
+ESMO-MYELOMA-001,ESMO,Multiple myeloma ESMO Clinical Practice Guideline,2021,https://www.esmo.org/guidelines/haematological-malignancies/multiple-myeloma,,ESMO Open Access,allowed,oncology_myeloma,high
+IMWG-MYELOMA-001,IMWG,International Myeloma Working Group consensus diagnosis,2022,https://www.thelancet.com/journals/lanhae/article/PIIS2352-3026(22)00006-7/fulltext,,IMWG,restricted-cds,oncology_myeloma,high
+IMWG-MYELOMA-002,IMWG,IMWG consensus minimal residual disease,2021,https://www.thelancet.com/journals/lanhae/article/PIIS2352-3026(21)00021-X/fulltext,,IMWG,restricted-cds,oncology_myeloma,high
+ASH-MYELOMA-001,ASH,ASH 2022 guidelines management multiple myeloma elderly,2022,https://ashpublications.org/bloodadvances/article/6/13/3915/485544,,ASH,restricted-cds,oncology_myeloma,high
+MSMART-MYELOMA-001,mSMART,Mayo Clinic mSMART consensus multiple myeloma,2023,https://www.mayoclinicproceedings.org/article/S0025-6196(23)00077-X/fulltext,,mSMART,restricted-cds,oncology_myeloma,high
+ESMO-PLASMACYTOMA,ESMO,Solitary plasmacytoma ESMO EHA recommendations,2018,https://www.esmo.org/guidelines/haematological-malignancies/solitary-plasmacytoma,,ESMO Open Access,allowed,oncology_myeloma,medium
+IMWG-AMYLOID,IMWG,IMWG consensus AL amyloidosis,2021,https://www.thelancet.com/journals/lanhae/article/PIIS2352-3026(20)30368-9/fulltext,,IMWG,restricted-cds,oncology_myeloma,medium
+ESMO-HODGKIN-001,ESMO,Hodgkin lymphoma ESMO Clinical Practice Guideline,2018,https://www.esmo.org/guidelines/haematological-malignancies/hodgkin-lymphoma,,ESMO Open Access,allowed,oncology_lymphoma_hodgkin,high
+BSH-HODGKIN-001,BSH,BSH guideline Hodgkin lymphoma,2022,https://onlinelibrary.wiley.com/doi/10.1111/bjh.18266,,BSH,restricted-cds,oncology_lymphoma_hodgkin,high
+ESMO-DLBCL-001,ESMO,Diffuse large B cell lymphoma ESMO Clinical Practice,2024,https://www.esmo.org/guidelines/haematological-malignancies/diffuse-large-b-cell-lymphoma,,ESMO Open Access,allowed,oncology_lymphoma_nh,high
+ESMO-FOLLICULAR-001,ESMO,Newly diagnosed follicular lymphoma ESMO,2021,https://www.esmo.org/guidelines/haematological-malignancies/newly-diagnosed-follicular-lymphoma,,ESMO Open Access,allowed,oncology_lymphoma_nh,high
+ESMO-MANTLE-001,ESMO,Mantle cell lymphoma ESMO Clinical Practice Guideline,2017,https://www.esmo.org/guidelines/haematological-malignancies/mantle-cell-lymphoma,,ESMO Open Access,allowed,oncology_lymphoma_nh,high
+ESMO-MARGINAL-001,ESMO,Marginal zone lymphomas ESMO Clinical Practice,2020,https://www.esmo.org/guidelines/haematological-malignancies/marginal-zone-lymphomas,,ESMO Open Access,allowed,oncology_lymphoma_nh,high
+ESMO-BURKITT-001,ESMO,Burkitt lymphoma ESMO EHA recommendations,2020,https://www.esmo.org/guidelines/haematological-malignancies/burkitt-lymphoma,,ESMO Open Access,allowed,oncology_lymphoma_nh,high
+ESMO-PTCL-001,ESMO,Peripheral T cell lymphomas ESMO Clinical Practice,2022,https://www.esmo.org/guidelines/haematological-malignancies/peripheral-t-cell-lymphomas,,ESMO Open Access,allowed,oncology_lymphoma_nh,high
+ESMO-CTCL-001,ESMO,Primary cutaneous lymphomas ESMO EORTC,2018,https://www.esmo.org/guidelines/haematological-malignancies/primary-cutaneous-lymphomas,,ESMO Open Access,allowed,oncology_lymphoma_nh,high
+ESMO-WALDENSTROM,ESMO,Waldenstrom macroglobulinaemia ESMO,2018,https://www.esmo.org/guidelines/haematological-malignancies/waldenstrom-macroglobulinaemia,,ESMO Open Access,allowed,oncology_lymphoma_nh,medium
+BSH-DLBCL-001,BSH,BSH guideline diagnosis management DLBCL,2022,https://onlinelibrary.wiley.com/doi/10.1111/bjh.18259,,BSH,restricted-cds,oncology_lymphoma_nh,high
+ELN-AML-001,ELN,2022 ELN recommendations diagnosis management AML adults,2022,https://ashpublications.org/blood/article/140/12/1345/485632/,,ELN,restricted-cds,oncology_leukemia_acute,high
+ESMO-AML-001,ESMO,Acute myeloid leukaemia ESMO Clinical Practice Guideline,2020,https://www.esmo.org/guidelines/haematological-malignancies/acute-myeloid-leukaemia,,ESMO Open Access,allowed,oncology_leukemia_acute,high
+ESMO-ALL-001,ESMO,Acute lymphoblastic leukaemia adults ESMO,2024,https://www.esmo.org/guidelines/haematological-malignancies/acute-lymphoblastic-leukaemia,,ESMO Open Access,allowed,oncology_leukemia_acute,high
+ASH-AML-ELDERLY,ASH,ASH 2020 guidelines acute myeloid leukemia older adults,2020,https://ashpublications.org/bloodadvances/article/4/15/3528/461854,,ASH,restricted-cds,oncology_leukemia_acute,high
+NCCN-AML,NCCN,NCCN Guidelines Acute Myeloid Leukemia,2024,https://www.nccn.org/guidelines/category_1,,NCCN,restricted,oncology_leukemia_acute,high
+NCCN-ALL,NCCN,NCCN Guidelines Acute Lymphoblastic Leukemia,2024,https://www.nccn.org/guidelines/category_1,,NCCN,restricted,oncology_leukemia_acute,high
+COG-ALL-001,COG,Children Oncology Group ALL clinical trials,2023,https://childrensoncologygroup.org/index.php/all,,COG,restricted,oncology_leukemia_pediatric,high
+ESMO-CLL-001,ESMO,Chronic lymphocytic leukaemia ESMO Clinical Practice,2020,https://www.esmo.org/guidelines/haematological-malignancies/chronic-lymphocytic-leukaemia,,ESMO Open Access,allowed,oncology_leukemia_chronic,high
+ESMO-CML-001,ESMO,Chronic myeloid leukaemia ESMO Clinical Practice,2020,https://www.esmo.org/guidelines/haematological-malignancies/chronic-myeloid-leukaemia,,ESMO Open Access,allowed,oncology_leukemia_chronic,high
+ELN-CML-001,ELN,2020 European LeukemiaNet recommendations CML,2020,https://www.nature.com/articles/s41375-020-0776-2,,ELN,restricted-cds,oncology_leukemia_chronic,high
+IWCLL-CLL-001,iwCLL,iwCLL guidelines diagnosis treatment chronic lymphocytic leukemia,2018,https://ashpublications.org/blood/article/131/25/2745/37086,,iwCLL,restricted-cds,oncology_leukemia_chronic,high
+ASH-CLL-001,ASH,ASH guidelines CLL treatment,2023,https://ashpublications.org/bloodadvances/article/7/22/7216,,ASH,restricted-cds,oncology_leukemia_chronic,high
+ESMO-MDS-001,ESMO,Myelodysplastic syndromes ESMO Clinical Practice Guideline,2021,https://www.esmo.org/guidelines/haematological-malignancies/myelodysplastic-syndromes,,ESMO Open Access,allowed,oncology_leukemia_chronic,medium
+ESMO-MPN-001,ESMO,Philadelphia negative myeloproliferative neoplasms ESMO,2020,https://www.esmo.org/guidelines/haematological-malignancies/philadelphia-negative-myeloproliferative-neoplasms,,ESMO Open Access,allowed,oncology_leukemia_chronic,medium
+ESMO-CSUPP-001,ESMO,Management cancer pain ESMO Clinical Practice Guideline,2018,https://www.esmo.org/guidelines/supportive-and-palliative-care/management-of-cancer-pain,,ESMO Open Access,allowed,oncology_supportive,high
+ESMO-CSUPP-002,ESMO,Antiemetics ESMO MASCC Clinical Practice Guideline,2024,https://www.esmo.org/guidelines/supportive-and-palliative-care/antiemetics,,ESMO Open Access,allowed,oncology_supportive,high
+ESMO-CSUPP-003,ESMO,Febrile neutropenia ESMO Clinical Practice Guideline,2016,https://www.esmo.org/guidelines/supportive-and-palliative-care/management-of-febrile-neutropenia,,ESMO Open Access,allowed,oncology_supportive,high
+ESMO-CSUPP-004,ESMO,Cancer associated venous thromboembolism ESMO,2023,https://www.esmo.org/guidelines/supportive-and-palliative-care/venous-thromboembolism,,ESMO Open Access,allowed,oncology_supportive,high
+ESMO-CSUPP-005,ESMO,Bone health cancer ESMO Clinical Practice Guideline,2020,https://www.esmo.org/guidelines/supportive-and-palliative-care/bone-health,,ESMO Open Access,allowed,oncology_supportive,high
+ESMO-CSUPP-006,ESMO,Immune related adverse events ESMO Clinical Practice,2022,https://www.esmo.org/guidelines/supportive-and-palliative-care/immune-related-toxicities,,ESMO Open Access,allowed,oncology_supportive,high
+ESMO-CSUPP-007,ESMO,Cancer cardiotoxicity ESMO Clinical Practice Guideline,2020,https://www.esmo.org/guidelines/supportive-and-palliative-care/cardiovascular-toxicity-induced-by-chemotherapy,,ESMO Open Access,allowed,oncology_supportive,high
+WHO-CANCER-PAIN,WHO,WHO guidelines pharmacological management persisting pain adults,2019,https://www.who.int/publications/i/item/9789241550390,,WHO Open Access,allowed,oncology_supportive,high
+WHO-PALLIATIVE,WHO,WHO Integrating palliative care symptom relief primary care,2018,https://www.who.int/publications/i/item/integrating-palliative-care-and-symptom-relief-into-primary-health-care,,WHO Open Access,allowed,oncology_supportive,high
+IARC-PREVENTION,IARC,European Code Against Cancer fourth edition summary,2015,https://cancer-code-europe.iarc.fr/index.php/en/,,IARC Open Access,allowed,oncology_prevention,high
+WHO-CERVIX-001,WHO,WHO guideline screening treatment cervical pre-cancer,2021,https://www.who.int/publications/i/item/9789240030824,,WHO Open Access,allowed,oncology_prevention,high
+WHO-HPV-001,WHO,WHO position paper human papillomavirus vaccines,2022,https://www.who.int/publications/i/item/who-wer9750-645-672,,WHO Open Access,allowed,oncology_prevention,high
+ASCO-FERTILITY,ASCO,Fertility preservation patients with cancer ASCO,2018,https://ascopubs.org/doi/10.1200/JCO.2018.78.1914,,ASCO,restricted-cds,oncology_supportive,medium
+ASCO-SURVIVOR-001,ASCO,Cancer survivorship care ASCO ACS,2020,https://ascopubs.org/doi/10.1200/JCO.20.02540,,ASCO,restricted-cds,oncology_supportive,medium
+EBMT-001,EBMT,EBMT 2024 guidelines hematopoietic cell transplantation indications,2024,https://www.nature.com/articles/s41409-023-02134-w,,EBMT,restricted-cds,oncology_transplant,high
