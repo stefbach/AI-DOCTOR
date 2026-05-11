@@ -933,6 +933,13 @@ export default function DiagnosisForm({
  console.log('📚 [RAG] Frontend received:', {
    rag_used: data.rag_used,
    evidence_references_count: Array.isArray(data.evidence_references) ? data.evidence_references.length : 0,
+   // Flatten rag_metadata so chunks_retrieved / provided_references / cited_references
+   // are visible without expanding the object in the console — critical when comparing
+   // OpenAI vs DeepSeek runs (a 0-chunk retrieval explains a 0-references final).
+   chunks_retrieved: data.rag_metadata?.chunks_retrieved ?? null,
+   provided_references: data.rag_metadata?.provided_references ?? null,
+   cited_references: data.rag_metadata?.cited_references ?? null,
+   avg_similarity: data.rag_metadata?.avg_similarity ?? null,
    rag_metadata: data.rag_metadata,
  })
  
