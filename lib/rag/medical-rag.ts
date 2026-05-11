@@ -146,7 +146,7 @@ export interface RAGContext {
 export interface QueryOptions {
   /** Specialty filter; null = broad search across all specialties. */
   specialty?: SpecialtyCode | null
-  /** Cosine similarity threshold; default 0.30 (validated against real DB: text-embedding-3-small produces sims ~0.30-0.40 for clinically relevant medical content). */
+  /** Cosine similarity threshold; default 0.27 (lowered from 0.30 to bridge the symptoms-vs-guideline embedding gap; text-embedding-3-small puts clinically relevant chunks in the ~0.27-0.40 range when the query is short and symptomatic). */
   threshold?: number
   /** Max chunks to retrieve; default 8 (RPC default). */
   limit?: number
@@ -160,7 +160,7 @@ export interface SecondaryQuery {
   text: string
   /** Specialty filter; null = broad search. */
   specialty?: SpecialtyCode | null
-  /** Cosine similarity threshold; defaults to 0.30. */
+  /** Cosine similarity threshold; defaults to 0.27. */
   threshold?: number
   /** Max chunks to retrieve for this subquery; default 3. */
   limit?: number
@@ -192,7 +192,7 @@ export async function queryMedicalGuidelines(
   if (!trimmedQuery) return EMPTY_CONTEXT
 
   const specialty = opts.specialty ?? null
-  const threshold = opts.threshold ?? 0.30
+  const threshold = opts.threshold ?? 0.27
   const limit = opts.limit ?? 8
 
   const rows = await fetchGuidelineRows(trimmedQuery, { specialty, threshold, limit })
@@ -228,7 +228,7 @@ export async function queryMedicalGuidelinesMulti(
       query: (primaryQuery || '').trim(),
       opts: {
         specialty: primaryOpts.specialty ?? null,
-        threshold: primaryOpts.threshold ?? 0.30,
+        threshold: primaryOpts.threshold ?? 0.27,
         limit: primaryOpts.limit ?? 10,
       },
     },
@@ -237,7 +237,7 @@ export async function queryMedicalGuidelinesMulti(
       query: (q.text || '').trim(),
       opts: {
         specialty: q.specialty ?? null,
-        threshold: q.threshold ?? 0.30,
+        threshold: q.threshold ?? 0.27,
         limit: q.limit ?? 3,
       },
     })),
