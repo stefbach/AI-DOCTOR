@@ -6,7 +6,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { z } from 'zod'
 import { callLLM } from '@/lib/llm-client'
-import { CRITICAL_RULES_BLOCK_QUESTIONS } from '@/lib/critical-rules'
 
 // ==================== CONFIGURATION ====================
 export const runtime = 'nodejs'
@@ -2013,9 +2012,7 @@ export async function POST(request: NextRequest) {
     
     console.log(`Calling ${aiConfig.model} with ${adjustedMode} mode (history-enhanced) with retry mechanism`)
     
-    const systemMessage = `${CRITICAL_RULES_BLOCK_QUESTIONS}
-
-You are an expert physician conducting a thorough clinical assessment with advanced history analysis capabilities. Generate diagnostic questions based on evidence-based medicine. Always respond with valid JSON only. ${processedPatient.isPregnant ? 'IMPORTANT: This patient is pregnant - consider pregnancy-specific conditions and medication safety.' : ''} Pay special attention to history analysis findings when crafting questions.`
+    const systemMessage = `You are an expert physician conducting a thorough clinical assessment with advanced history analysis capabilities. Generate diagnostic questions based on evidence-based medicine. Always respond with valid JSON only. ${processedPatient.isPregnant ? 'IMPORTANT: This patient is pregnant - consider pregnancy-specific conditions and medication safety.' : ''} Pay special attention to history analysis findings when crafting questions.`
     
     const result = await callOpenAIWithRetry(
       apiKey,
