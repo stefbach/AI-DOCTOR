@@ -32,29 +32,28 @@ function validatePatientData(patientName: string, patientData: any): { isValid: 
     return { isValid: false, error: "Patient name is too short (minimum 3 characters)" }
   }
   
-  // Check for valid email if provided
+  // Email and phone are metadata: never block report saving on them.
+  // Patient identity is enforced via patientId / consultationId upstream;
+  // report delivery uses TIBOK's own DB record. Log issues so they can
+  // be investigated, but don't reject the request.
   if (patientData?.email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(patientData.email) || 
-        patientData.email.includes('test') || 
+    if (!emailRegex.test(patientData.email) ||
+        patientData.email.includes('test') ||
         patientData.email.includes('example')) {
-      return { isValid: false, error: "Invalid patient email address" }
+      console.warn('⚠️ Suspicious patient email (saving anyway):', patientData.email)
     }
   }
-  
-  // Check for valid phone if provided
+
   if (patientData?.phone) {
     const digitsOnly = (patientData.phone || '').replace(/\D/g, '')
-    // Only fail if there are NO digits at all
     if (digitsOnly.length === 0) {
-      return { isValid: false, error: "Phone number required" }
-    }
-    // Accept partial numbers but log them
-    if (digitsOnly.length < 7) {
-      console.log('⚠️ Partial phone number accepted:', patientData.phone, `(${digitsOnly.length} digits)`)
+      console.warn('⚠️ Patient phone has no digits (saving anyway):', patientData.phone)
+    } else if (digitsOnly.length < 7) {
+      console.warn('⚠️ Partial patient phone number (saving anyway):', patientData.phone, `(${digitsOnly.length} digits)`)
     }
   }
-  
+
   return { isValid: true }
 }
 

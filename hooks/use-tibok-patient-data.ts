@@ -2,6 +2,7 @@
 // Updated version with Google Translate integration
 
 import { useEffect, useState } from 'react'
+import { normalizeTibokPatientData } from '@/lib/tibok-data-normalizer'
 
 // Complete patient data interface matching what TIBOK sends
 interface PatientData {
@@ -370,8 +371,10 @@ export function useTibokPatientData() {
 
       if (source === 'tibok' && patientDataParam && doctorDataParam) {
         try {
-          // Parse patient data
-          const parsedPatientData = JSON.parse(decodeURIComponent(patientDataParam))
+          // Parse patient data + canonicalize field names (snake_case <-> camelCase)
+          const parsedPatientData = normalizeTibokPatientData(
+            JSON.parse(decodeURIComponent(patientDataParam))
+          )
           console.log('📋 Parsed TIBOK Patient Data (before normalization):', parsedPatientData)
           
           // Apply normalization with translation

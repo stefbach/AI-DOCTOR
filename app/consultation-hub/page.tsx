@@ -11,6 +11,7 @@ import { HubWorkflowSelector } from '@/components/consultation-hub/hub-workflow-
 import { HistoryList, ConsultationDetailModal } from '@/lib/follow-up/shared'
 import type { ConsultationHistoryItem } from '@/lib/follow-up/shared'
 import { fetchTibokConsultationData } from '@/lib/tibok-consultation-service'
+import { normalizeTibokPatientData } from '@/lib/tibok-data-normalizer'
 
 type WorkflowStep = 'search' | 'summary' | 'workflow'
 
@@ -239,7 +240,7 @@ export default function ConsultationHubPage() {
           // Try parsing directly first (in case it's already valid JSON)
           if (decodedPatientData.startsWith('{')) {
             try {
-              tibokPatientInfo = JSON.parse(decodedPatientData)
+              tibokPatientInfo = normalizeTibokPatientData(JSON.parse(decodedPatientData))
               console.log('👤 Parsed patientData directly without decoding')
             } catch {
               console.log('👤 Direct parse failed, will try decoding...')
@@ -262,7 +263,7 @@ export default function ConsultationHubPage() {
                     jsonString = jsonString.substring(0, lastBrace + 1)
                   }
 
-                  tibokPatientInfo = JSON.parse(jsonString)
+                  tibokPatientInfo = normalizeTibokPatientData(JSON.parse(jsonString))
                   console.log(`👤 Successfully parsed patientData after ${attempt} decode(s):`, tibokPatientInfo)
                   break
                 }
