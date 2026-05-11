@@ -2,7 +2,8 @@ import { type NextRequest, NextResponse } from "next/server"
 import { callLLM } from "@/lib/llm-client"
 
 export const runtime = 'nodejs'
-export const maxDuration = 120
+// 300s cap to absorb DeepSeek V4-Pro thinking latency on a 12k-token output.
+export const maxDuration = 300
 
 export async function POST(request: NextRequest) {
   try {
@@ -219,7 +220,7 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
       ],
       maxTokens: 12000,
       reasoningEffort: 'low',
-      timeoutMs: 110_000,
+      timeoutMs: 280_000,
     })
 
     console.log(`✅ Ordonnance experte générée (provider=${result.provider}${result.fallbackUsed ? ' [fallback]' : ''}, ${result.latencyMs}ms)`)

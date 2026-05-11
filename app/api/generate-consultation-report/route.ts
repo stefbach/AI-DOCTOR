@@ -4,7 +4,11 @@ import { callLLM } from "@/lib/llm-client"
 import { buildRefDisplayMap, buildRefSourceYearMap, expandRefsInTree, expandRefsAsSourceYearInTree } from "@/lib/rag/medical-rag"
 
 export const runtime = 'nodejs'
-export const maxDuration = 120 // 120 seconds for GPT-5.5 report generation (increased from 60s to prevent 504 timeouts)
+// 300s: DeepSeek V4-Pro thinking on the 10-section narrative blew through
+// 120s on Vercel with a FUNCTION_INVOCATION_TIMEOUT. 300s is the cap on
+// Vercel Pro and gives enough headroom even when reasoning_effort='low'
+// produces a longer-than-expected response.
+export const maxDuration = 300
 
 // ==================== "HORS GUIDELINE RAG" JARGON SANITISER ====================
 // Internal pipeline vocabulary (the prompt previously asked the LLM to write
@@ -2002,7 +2006,7 @@ export async function POST(request: NextRequest) {
         ],
         maxTokens: 4000,
         reasoningEffort: 'low',
-        timeoutMs: 110_000,
+        timeoutMs: 280_000,
       })
 
       // IMPROVED JSON PARSING WITH BETTER ERROR HANDLING

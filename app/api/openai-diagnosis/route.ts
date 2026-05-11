@@ -2194,8 +2194,9 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
       
       // Diagnostic LLM call routed through the unified wrapper. Provider is
       // selectable per env var LLM_PROVIDER_DIAGNOSIS (defaults to OpenAI).
-      // reasoning_effort=medium is intentional: differential diagnosis +
-      // prescription + investigation strategy benefits from chain-of-thought.
+      // reasoning_effort='low' is the safe default for Vercel: 'medium' on
+      // DeepSeek V4-Pro caused 504 FUNCTION_INVOCATION_TIMEOUT on Vercel.
+      // 'low' still benefits from reasoning but stays well under the 300s cap.
       const completion = await callLLM({
         useCase: 'DIAGNOSIS',
         messages: [
@@ -2244,7 +2245,7 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
           }
         ],
         maxTokens: 32000,
-        reasoningEffort: 'medium',
+        reasoningEffort: 'low',
         responseFormat: 'json_object',
         timeoutMs: 280_000,
       })
