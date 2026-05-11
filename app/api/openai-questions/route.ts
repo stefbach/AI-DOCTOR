@@ -2,12 +2,16 @@
 // - 4 retry attempts with progressive enhancement
 // - Auto-correction on final attempt
 // - 8000 max tokens for all modes
-// - Upgraded models: fast→gpt-5.5, balanced→gpt-5.5, intelligent→gpt-5.5
+// - LLM provider switchable via env var LLM_PROVIDER_QUESTIONS (openai|deepseek)
 import { type NextRequest, NextResponse } from "next/server"
-import OpenAI from 'openai'
+import { z } from 'zod'
+import { callLLM } from '@/lib/llm-client'
 
 // ==================== CONFIGURATION ====================
 export const runtime = 'nodejs'
+// DeepSeek (with reasoning) can take longer than GPT, so raise the function
+// timeout above Vercel's default to avoid 504s on the questions endpoint.
+export const maxDuration = 90
 
 // ==================== INTERFACES & TYPES ====================
 interface PatientData {
@@ -318,41 +322,65 @@ function containsAll(text: string, keywords: string[]): boolean {
   return keywords.every(keyword => normalizedText.includes(normalizeText(keyword)))
 }
 
+// ==================== OUTPUT VALIDATION (Zod) ====================
+// Loose schema: we want resilience to model variations, just enforce the
+// minimal contract used downstream by the questions form.
+const QuestionSchema = z.object({
+  id: z.union([z.string(), z.number()]).optional(),
+  question_id: z.union([z.string(), z.number()]).optional(),
+  question: z.string().min(1),
+}).passthrough()
+
+const QuestionsPayloadSchema = z.object({
+  questions: z.array(QuestionSchema).min(1),
+}).passthrough()
+
 // ==================== RETRY MECHANISM ====================
 async function callOpenAIWithRetry(
-  apiKey: string,
+  _apiKey: string,
   model: string,
   prompt: string,
   systemMessage: string,
   isPregnant: boolean,
   maxRetries: number = 3
 ): Promise<any> {
-  const openai = new OpenAI({ apiKey })
   let lastError: Error | null = null
+  let lastLLMMeta: { provider: string; model: string; latencyMs: number; fallbackUsed: boolean } | null = null
+
+  // Anti-hallucination clause appended once and kept across retries.
+  const antiHallucination = `\n\nANTI-HALLUCINATION RULE (STRICT): Never invent facts. Each question must be grounded in the patient context provided. If the context is too thin to ask N questions, return fewer high-quality questions rather than fabricated ones. Output MUST be valid JSON with the shape { "questions": [{ "id": ..., "question": "..." }, ...] }.`
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1} (model: ${model})`)
+      console.log(`📡 LLM call attempt ${attempt + 1}/${maxRetries + 1} (model hint: ${model})`)
 
-      let enhancedSystemMessage = systemMessage
+      let enhancedSystemMessage = `${systemMessage}${antiHallucination}`
 
       if (attempt === 1) {
-        enhancedSystemMessage = `${systemMessage}\n\nCRITICAL: Questions must be clinically specific, actionable, and evidence-based.${isPregnant ? ' Consider pregnancy safety.' : ''}`
+        enhancedSystemMessage += `\n\nCRITICAL: Questions must be clinically specific, actionable, and evidence-based.${isPregnant ? ' Consider pregnancy safety.' : ''}`
       } else if (attempt >= 2) {
-        enhancedSystemMessage = `${systemMessage}\n\nAll questions must have unique IDs, clear priorities, and be patient-appropriate. Response must be valid JSON.`
+        enhancedSystemMessage += `\n\nAll questions must have unique IDs, clear priorities, and be patient-appropriate. Response must be valid JSON.`
       }
 
-      const completion = await openai.chat.completions.create({
-        model,
+      const llmResult = await callLLM({
+        useCase: 'QUESTIONS',
         messages: [
           { role: 'system', content: enhancedSystemMessage },
-          { role: 'user', content: prompt }
+          { role: 'user', content: prompt },
         ],
-        max_completion_tokens: 8000,
-        response_format: { type: 'json_object' },
+        maxTokens: 8000,
+        responseFormat: 'json_object',
+        reasoningEffort: 'none',
+        timeoutMs: 75_000,
       })
+      lastLLMMeta = {
+        provider: llmResult.provider,
+        model: llmResult.model,
+        latencyMs: llmResult.latencyMs,
+        fallbackUsed: llmResult.fallbackUsed,
+      }
 
-      const content = completion.choices[0]?.message?.content || '{}'
+      const content = llmResult.text || '{}'
 
       let parsed
       try {
@@ -361,7 +389,8 @@ async function callOpenAIWithRetry(
         throw new Error('Invalid JSON response')
       }
 
-      const questions = parsed.questions || []
+      const validation = QuestionsPayloadSchema.safeParse(parsed)
+      const questions = validation.success ? validation.data.questions : (parsed.questions || [])
 
       // Quality validation - minimum 3 questions (fast=3, balanced=5, intelligent=8)
       const hasMinimumQuestions = questions.length >= 3
@@ -382,15 +411,17 @@ async function callOpenAIWithRetry(
         console.log('✅ Auto-correction applied for missing IDs')
       }
 
-      console.log(`✅ Generated ${questions.length} questions (attempt ${attempt + 1})`)
+      console.log(`✅ Generated ${questions.length} questions (attempt ${attempt + 1}, provider=${llmResult.provider}${llmResult.fallbackUsed ? ' [fallback]' : ''})`)
 
       return {
         questions,
         qualityMetrics: {
           attempt: attempt + 1,
           questionsCount: questions.length,
-          allHaveIds
-        }
+          allHaveIds,
+          schemaValid: validation.success,
+        },
+        llm: lastLLMMeta,
       }
 
     } catch (error: any) {
@@ -2028,7 +2059,10 @@ export async function POST(request: NextRequest) {
         compliance: ['GDPR', 'HIPAA']
       },
       metadata: {
-        model: aiConfig.model,
+        model: result.llm?.model ?? aiConfig.model,
+        provider: result.llm?.provider ?? 'openai',
+        fallbackUsed: result.llm?.fallbackUsed ?? false,
+        llmLatencyMs: result.llm?.latencyMs,
         version: '4.0-Professional-Grade-4Retry',
         processingTime: Date.now() - startTime,
         dataCompleteness,
