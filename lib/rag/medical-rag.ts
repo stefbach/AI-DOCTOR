@@ -752,6 +752,38 @@ export function buildSecondaryQueries(input: {
 
   const hasFever = /\bfever\b|\bfièvre\b|febrile|pyrexia|hyperthermia/.test(symptomBlob)
 
+  // ---------- Generic diversification queries (always when a chief complaint is present) ----------
+  // Symptoms-only queries (e.g. "headache fever cough") embed far from the
+  // technical guideline chunks they should match (e.g. "differential
+  // diagnosis of acute febrile illness, evidence-based workup, BNF/NICE
+  // recommendations…"). To bridge that semantic gap without hard-coding
+  // pathology-specific rescue queries, we always run two extra retrievals
+  // built around guideline-style vocabulary, anchored on the patient's
+  // chief complaint. Broad specialty (null) so chunks indexed under any
+  // specialty code (a known issue: "infectious" vs "infectious_diseases",
+  // dengue chunks spread across 12+ codes) remain eligible.
+  const ccTrimmed = cc.trim().slice(0, 200)
+  if (ccTrimmed) {
+    queries.push({
+      label: 'differential_approach',
+      text:
+        `differential diagnosis approach to ${ccTrimmed} ` +
+        'evidence-based clinical evaluation pathophysiology risk stratification ' +
+        'red flags clinical decision rules',
+      specialty: null,
+      limit: 4,
+    })
+    queries.push({
+      label: 'empirical_workup',
+      text:
+        `empirical workup investigation strategy for ${ccTrimmed} ` +
+        'first-line laboratory testing imaging clinical decision rules ' +
+        'guideline-based assessment',
+      specialty: null,
+      limit: 4,
+    })
+  }
+
   // ---------- Malaria — fever + travel to endemic country ----------
   if (hasFever && MALARIA_ENDEMIC_COUNTRIES.some(c => travel.includes(c))) {
     queries.push({
