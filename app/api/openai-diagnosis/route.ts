@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { callLLM, type LLMMessage } from '@/lib/llm-client'
 import { CRITICAL_RULES_BLOCK } from '@/lib/critical-rules'
-import { detectFabricatedExam, FABRICATION_RETRY_INSTRUCTION } from '@/lib/anti-fabrication'
+import { detectFabricatedExam } from '@/lib/anti-fabrication'
 import {
   queryMedicalGuidelines,
   queryMedicalGuidelinesMulti,
@@ -2256,42 +2256,22 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
       const finishReason = 'unknown'
 
       // AI Doctor is a teleconsultation. Inputs never include a real physical
-      // examination, so we hard-code hasExamData=false and ask the model to
-      // redo the response if it invented exam findings. One retry max to avoid
-      // doubling the latency budget.
+      // examination, so we hard-code hasExamData=false. We log when the model
+      // fabricates exam findings (auscultation, palpation, tympanic membrane,
+      // SpO2, etc.) but do NOT retry: the retry costs another full DeepSeek
+      // generation (~150-280s) which blows the Vercel 300s cap on top of the
+      // first call, causing systematic FUNCTION_INVOCATION_TIMEOUT on febrile
+      // cases (where the model almost always emits at least one match).
+      // Findings inventions are a lesser evil than a hard 504 + frontend
+      // placeholder fallback. Re-enable retry only when we move to a longer
+      // execution window or a non-reasoning model fast enough for two passes.
       const fabCheck = detectFabricatedExam(rawContent, /* hasExamData */ false)
       if (fabCheck.fabricationDetected) {
         console.warn(
           `[llm] use=DIAGNOSIS provider=${completion.provider} fabrication_detected=true ` +
-            `patterns=[${fabCheck.patterns.join(',')}] excerpts=${JSON.stringify(fabCheck.excerpts.slice(0, 3))}`,
+            `patterns=[${fabCheck.patterns.join(',')}] excerpts=${JSON.stringify(fabCheck.excerpts.slice(0, 3))} ` +
+            `— retry DISABLED (would exceed Vercel 300s cap), keeping original response`,
         )
-        const retryMessages: LLMMessage[] = [
-          ...diagnosisMessages,
-          { role: 'assistant', content: rawContent },
-          { role: 'user', content: FABRICATION_RETRY_INSTRUCTION },
-        ]
-        const retry = await callLLM({
-          useCase: 'DIAGNOSIS',
-          messages: retryMessages,
-          maxTokens: 32000,
-          reasoningEffort: 'low',
-          responseFormat: 'json_object',
-          timeoutMs: 280_000,
-        })
-        const retryFab = detectFabricatedExam(retry.text || '', false)
-        if (!retryFab.fabricationDetected) {
-          console.log(
-            `[llm] use=DIAGNOSIS retry_after_fabrication=success provider=${retry.provider} ` +
-              `latency=${retry.latencyMs}ms`,
-          )
-          completion = retry
-          rawContent = retry.text || ''
-        } else {
-          console.warn(
-            `[llm] use=DIAGNOSIS retry_after_fabrication=failed patterns=[${retryFab.patterns.join(',')}] ` +
-              `— keeping original response, downstream parsing will still try to use it`,
-          )
-        }
       }
 
       console.log(`🤖 LLM response received (provider=${completion.provider}${completion.fallbackUsed ? ' [fallback]' : ''}, ${completion.latencyMs}ms), length: ${rawContent.length}`)

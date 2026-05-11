@@ -2,7 +2,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { callLLM, type LLMMessage } from "@/lib/llm-client"
 import { CRITICAL_RULES_BLOCK_NARRATIVE } from "@/lib/critical-rules"
-import { detectFabricatedExam, FABRICATION_RETRY_INSTRUCTION } from "@/lib/anti-fabrication"
+import { detectFabricatedExam } from "@/lib/anti-fabrication"
 import { buildRefDisplayMap, buildRefSourceYearMap, expandRefsInTree, expandRefsAsSourceYearInTree } from "@/lib/rag/medical-rag"
 
 export const runtime = 'nodejs'
@@ -2019,38 +2019,19 @@ ANTI-HALLUCINATION RULE (STRICT): Stay strictly within the provided diagnostic a
         timeoutMs: 280_000,
       })
 
-      // Teleconsultation guard: detect fabricated physical-exam findings in
-      // the narrative and ask the model to redo without inventing exam data.
+      // Teleconsultation guard: log fabricated physical-exam findings in the
+      // narrative for observability, but do NOT retry. The retry costs another
+      // full DeepSeek generation (~150-280s) on top of the first call, which
+      // systematically blows the Vercel 300s cap on febrile cases (where the
+      // model almost always emits at least one fabrication pattern). Hard 504
+      // is a worse outcome than letting an invented exam line through.
       const fabCheck = detectFabricatedExam(result.text || '', /* hasExamData */ false)
       if (fabCheck.fabricationDetected) {
         console.warn(
           `[llm] use=REPORT provider=${result.provider} fabrication_detected=true ` +
-            `patterns=[${fabCheck.patterns.join(',')}] excerpts=${JSON.stringify(fabCheck.excerpts.slice(0, 3))}`,
+            `patterns=[${fabCheck.patterns.join(',')}] excerpts=${JSON.stringify(fabCheck.excerpts.slice(0, 3))} ` +
+            `— retry DISABLED (would exceed Vercel 300s cap), keeping original response`,
         )
-        const retryMessages: LLMMessage[] = [
-          ...reportMessages,
-          { role: 'assistant', content: result.text || '' },
-          { role: 'user', content: FABRICATION_RETRY_INSTRUCTION },
-        ]
-        const retry = await callLLM({
-          useCase: 'REPORT',
-          messages: retryMessages,
-          maxTokens: 4000,
-          reasoningEffort: 'low',
-          timeoutMs: 280_000,
-        })
-        const retryFab = detectFabricatedExam(retry.text || '', false)
-        if (!retryFab.fabricationDetected) {
-          console.log(
-            `[llm] use=REPORT retry_after_fabrication=success provider=${retry.provider} latency=${retry.latencyMs}ms`,
-          )
-          result = retry
-        } else {
-          console.warn(
-            `[llm] use=REPORT retry_after_fabrication=failed patterns=[${retryFab.patterns.join(',')}] ` +
-              `— keeping original response, downstream parser will still try to use it`,
-          )
-        }
       }
 
       // IMPROVED JSON PARSING WITH BETTER ERROR HANDLING
