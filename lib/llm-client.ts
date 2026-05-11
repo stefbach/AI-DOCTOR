@@ -11,8 +11,26 @@ export type LLMProvider = 'openai' | 'deepseek'
 export type LLMReasoningEffort = 'none' | 'low' | 'medium' | 'high'
 
 export interface LLMMessage {
-  role: 'system' | 'user' | 'assistant'
+  role: 'system' | 'user' | 'assistant' | 'tool'
   content: string
+  // Required when role === 'tool' (echoing a tool call result back).
+  tool_call_id?: string
+  // Optional name (assistant tool result chaining).
+  name?: string
+}
+
+export interface LLMToolDefinition {
+  // Subset of OpenAI's chat completion tool schema. JSON Schema for parameters.
+  name: string
+  description: string
+  parameters: Record<string, any>
+}
+
+export interface LLMToolCall {
+  id: string
+  name: string
+  // Raw JSON string from the model. Caller is responsible for parsing.
+  argumentsRaw: string
 }
 
 export interface LLMCallParams {
@@ -25,6 +43,8 @@ export interface LLMCallParams {
   frequencyPenalty?: number
   presencePenalty?: number
   timeoutMs?: number
+  tools?: LLMToolDefinition[]
+  toolChoice?: 'auto' | 'none' | 'required' | { type: 'function'; function: { name: string } }
 }
 
 export interface LLMUsage {
@@ -35,6 +55,7 @@ export interface LLMUsage {
 
 export interface LLMResult {
   text: string
+  toolCalls?: LLMToolCall[]
   provider: LLMProvider
   model: string
   usage?: LLMUsage
@@ -89,6 +110,7 @@ function resolveModel(provider: LLMProvider): string {
 
 interface RawCompletion {
   text: string
+  toolCalls?: LLMToolCall[]
   usage?: LLMUsage
 }
 
@@ -117,13 +139,28 @@ async function callProvider(
     ? { response_format: { type: 'json_object' as const } }
     : {}
 
+  const toolsParam = params.tools && params.tools.length > 0
+    ? {
+        tools: params.tools.map((t) => ({
+          type: 'function' as const,
+          function: {
+            name: t.name,
+            description: t.description,
+            parameters: t.parameters,
+          },
+        })),
+        ...(params.toolChoice !== undefined ? { tool_choice: params.toolChoice } : {}),
+      }
+    : {}
+
   const completion = await client.chat.completions.create(
     {
       model,
-      messages: params.messages,
+      messages: params.messages as any,
       ...tokenParam,
       ...reasoningParam,
       ...responseFormatParam,
+      ...toolsParam,
       ...(params.topP !== undefined ? { top_p: params.topP } : {}),
       ...(params.frequencyPenalty !== undefined ? { frequency_penalty: params.frequencyPenalty } : {}),
       ...(params.presencePenalty !== undefined ? { presence_penalty: params.presencePenalty } : {}),
@@ -131,7 +168,19 @@ async function callProvider(
     { timeout: timeoutMs },
   )
 
-  const text = completion.choices[0]?.message?.content ?? ''
+  const choice = completion.choices[0]
+  const text = choice?.message?.content ?? ''
+  const rawToolCalls = (choice?.message as any)?.tool_calls
+  const toolCalls: LLMToolCall[] | undefined = Array.isArray(rawToolCalls) && rawToolCalls.length > 0
+    ? rawToolCalls
+        .filter((tc: any) => tc?.type === 'function' && tc?.function?.name)
+        .map((tc: any) => ({
+          id: tc.id,
+          name: tc.function.name,
+          argumentsRaw: tc.function.arguments ?? '',
+        }))
+    : undefined
+
   const usage: LLMUsage | undefined = completion.usage
     ? {
         promptTokens: completion.usage.prompt_tokens,
@@ -140,7 +189,7 @@ async function callProvider(
       }
     : undefined
 
-  return { text, usage }
+  return { text, toolCalls, usage }
 }
 
 function isRetriableError(err: any): boolean {
@@ -162,11 +211,12 @@ export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
 
   try {
     attempts++
-    const { text, usage } = await callProvider(primaryProvider, primaryModel, params)
+    const { text, toolCalls, usage } = await callProvider(primaryProvider, primaryModel, params)
     const latencyMs = Date.now() - startedAt
-    console.log(`[llm] use=${params.useCase} provider=${primaryProvider} model=${primaryModel} latency=${latencyMs}ms tokens=${usage?.totalTokens ?? 'n/a'}`)
+    console.log(`[llm] use=${params.useCase} provider=${primaryProvider} model=${primaryModel} latency=${latencyMs}ms tokens=${usage?.totalTokens ?? 'n/a'} toolCalls=${toolCalls?.length ?? 0}`)
     return {
       text,
+      toolCalls,
       provider: primaryProvider,
       model: primaryModel,
       usage,
@@ -184,11 +234,12 @@ export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
   // Fallback path: only triggered when primary was DeepSeek and error is retriable.
   const fallbackModel = resolveModel('openai')
   attempts++
-  const { text, usage } = await callProvider('openai', fallbackModel, params)
+  const { text, toolCalls, usage } = await callProvider('openai', fallbackModel, params)
   const latencyMs = Date.now() - startedAt
-  console.log(`[llm] use=${params.useCase} provider=openai(fallback) model=${fallbackModel} latency=${latencyMs}ms tokens=${usage?.totalTokens ?? 'n/a'}`)
+  console.log(`[llm] use=${params.useCase} provider=openai(fallback) model=${fallbackModel} latency=${latencyMs}ms tokens=${usage?.totalTokens ?? 'n/a'} toolCalls=${toolCalls?.length ?? 0}`)
   return {
     text,
+    toolCalls,
     provider: 'openai',
     model: fallbackModel,
     usage,
