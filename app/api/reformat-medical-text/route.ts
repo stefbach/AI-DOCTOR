@@ -1,30 +1,29 @@
-// app/api/reformat-medical-text/route.ts - Reformat medical text with OpenAI
+// app/api/reformat-medical-text/route.ts
+// Reformat voice-transcribed medical text (FR -> EN) using the unified LLM
+// client so the provider (OpenAI / DeepSeek) is selectable per env var.
 import { type NextRequest, NextResponse } from "next/server"
-import OpenAI from "openai"
+import { z } from "zod"
+import { callLLM } from "@/lib/llm-client"
 
-let openaiClient: OpenAI | null = null
+export const maxDuration = 90
 
-function getOpenAIClient(): OpenAI {
-  if (!openaiClient) {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY environment variable is not set')
-    }
-    openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  }
-  return openaiClient
-}
+const RequestSchema = z.object({
+  text: z.string().min(1, "No text provided"),
+  sectionType: z.string().min(1).default("general"),
+  currentContent: z.string().optional(),
+})
 
 export async function POST(req: NextRequest) {
   try {
-    const openai = getOpenAIClient()
-    const { text, sectionType, currentContent } = await req.json()
-
-    if (!text) {
+    const body = await req.json()
+    const parsed = RequestSchema.safeParse(body)
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "No text provided" },
-        { status: 400 }
+        { error: parsed.error.issues[0]?.message ?? "Invalid request" },
+        { status: 400 },
       )
     }
+    const { text, sectionType, currentContent } = parsed.data
 
     const systemPrompt = `You are a medical documentation specialist. Your task is to format voice-transcribed medical text into professional, clear medical documentation IN ENGLISH.
 
@@ -44,40 +43,56 @@ RULES:
 11. DO NOT include any section title or header - the title is already shown separately
 12. Start directly with the content, no headings like "Chief Complaint:" or "**Title**"
 
+ANTI-HALLUCINATION RULE (STRICT):
+- NEVER invent clinical facts, diagnoses, drugs, doses or values that are not explicitly present in the input.
+- If the source text is too unclear, partial or noisy to format reliably, return the input text unchanged with minimal cleanup (punctuation, capitalization). Do NOT fabricate content to fill gaps.
+
 TRANSLATION EXAMPLES:
-- "douleur thoracique" → "chest pain"
-- "fièvre" → "fever"
-- "tension artérielle" → "blood pressure"
-- "antécédents" → "medical history"
-- "Doliprane" → "Paracetamol/Acetaminophen"
-- "ordonnance" → "prescription"
+- "douleur thoracique" -> "chest pain"
+- "fièvre" -> "fever"
+- "tension artérielle" -> "blood pressure"
+- "antécédents" -> "medical history"
+- "Doliprane" -> "Paracetamol/Acetaminophen"
+- "ordonnance" -> "prescription"
 
 ${currentContent ? `EXISTING CONTENT IN THIS SECTION:\n${currentContent}\n\nAppend the new information naturally, avoiding repetition.` : ''}
 
 Return ONLY the formatted medical text as a paragraph IN ENGLISH, nothing else. No titles, no bullet points.`
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-5.5",
+    const result = await callLLM({
+      useCase: 'REFORMAT',
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Please format this voice-transcribed text for the ${sectionType} section:\n\n${text}` }
+        { role: "user", content: `Please format this voice-transcribed text for the ${sectionType} section:\n\n${text}` },
       ],
-      max_completion_tokens: 1000,
+      maxTokens: 1000,
+      reasoningEffort: 'none',
+      timeoutMs: 60_000,
     })
 
-    const formattedText = response.choices[0]?.message?.content?.trim() || text
+    const ResponseSchema = z.string().min(1)
+    const cleaned = (result.text ?? '').trim()
+    const validated = ResponseSchema.safeParse(cleaned)
+    const formattedText = validated.success ? validated.data : text
 
     return NextResponse.json({
       success: true,
       formattedText,
-      originalText: text
+      originalText: text,
+      metadata: {
+        provider: result.provider,
+        model: result.model,
+        latencyMs: result.latencyMs,
+        usage: result.usage,
+        fallbackUsed: result.fallbackUsed,
+        attempts: result.attempts,
+      },
     })
-
   } catch (error: any) {
     console.error("Reformat API Error:", error)
     return NextResponse.json(
       { error: error.message || "Failed to reformat text" },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
