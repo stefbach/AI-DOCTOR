@@ -70,7 +70,7 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
     age: demographicsFromHistory?.age || tibokPatientInfo?.age || '',
     dateOfBirth: demographicsFromHistory?.dateOfBirth || tibokPatientInfo?.date_of_birth || tibokPatientInfo?.dateOfBirth || '',
     gender: demographicsFromHistory?.gender || tibokPatientInfo?.gender || tibokPatientInfo?.sexe || '',
-    phone: demographicsFromHistory?.phone || tibokPatientInfo?.phone || tibokPatientInfo?.telephone || '',
+    phone: demographicsFromHistory?.phone || tibokPatientInfo?.phone || tibokPatientInfo?.phone_number || tibokPatientInfo?.phoneNumber || tibokPatientInfo?.telephone || '',
     email: demographicsFromHistory?.email || tibokPatientInfo?.email || '',
     address: demographicsFromHistory?.address || tibokPatientInfo?.address || tibokPatientInfo?.adresse || '',
   }
@@ -102,7 +102,7 @@ export function HubWorkflowSelector({ patientData, onProceed }: HubWorkflowSelec
         age: historyDemographics?.age || tibokPatientInfo?.age || '',
         dateOfBirth: historyDemographics?.dateOfBirth || tibokPatientInfo?.date_of_birth || tibokPatientInfo?.dateOfBirth || '',
         gender: historyDemographics?.gender || tibokPatientInfo?.gender || tibokPatientInfo?.sexe || '',
-        phone: historyDemographics?.phone || tibokPatientInfo?.phone || tibokPatientInfo?.telephone || '',
+        phone: historyDemographics?.phone || tibokPatientInfo?.phone || tibokPatientInfo?.phone_number || tibokPatientInfo?.phoneNumber || tibokPatientInfo?.telephone || '',
         email: historyDemographics?.email || tibokPatientInfo?.email || '',
         address: historyDemographics?.address || tibokPatientInfo?.address || tibokPatientInfo?.adresse || '',
         weight: historyDemographics?.weight || tibokPatientInfo?.weight || tibokPatientInfo?.poids || '',
