@@ -50,10 +50,14 @@ from postgrest.exceptions import APIError
 # Configuration
 # ============================================================================
 
-INGEST_RUN_ID = "stephane_extraction_984_20260504"
+INGEST_RUN_ID = "stephane_extraction_6295_20260511"
 MEGANE_UUID = "76af3567-4789-4c5e-9d41-2940352e6986"
 
-EXCLUDED_SOURCES = {"ADA", "GINA", "ASCO", "ESMO", "GOLD"}
+# Owner confirmed (2026-05-11): include ADA / GINA / ASCO / ESMO / GOLD.
+# Previous run excluded them for Mauritius legal review; this run includes
+# them with legal_status='gated' (derived from commercial_use) so they can
+# be displayed with a license badge in the runtime.
+EXCLUDED_SOURCES: set[str] = set()
 GATED_SOURCES = {"NICE", "KDIGO", "EASL"}
 
 CLINICAL_DOMAIN_TO_SPECIALTY = {
@@ -161,7 +165,12 @@ def compute_legal_status(source: str, commercial_use: str) -> str:
 
 
 def map_specialty(clinical_domain: str) -> str:
-    return CLINICAL_DOMAIN_TO_SPECIALTY.get(clinical_domain, "general_medicine")
+    # Passthrough: forward the raw clinical_domain (e.g. cardiology_hf,
+    # ophthalmology_anterior) as specialty_code. ensure_specialty() creates
+    # any missing row in guidelines_specialties on the fly, so the 470+
+    # fine-grained domains shipped on this branch do not need to be folded
+    # into the original 50-ish coarse codes.
+    return clinical_domain or "general_medicine"
 
 
 def extract_domain(url: str) -> str:
