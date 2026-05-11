@@ -206,6 +206,10 @@ export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
   const startedAt = Date.now()
   const primaryProvider = resolveProvider(params.useCase)
   const primaryModel = resolveModel(primaryProvider)
+  // When LLM_DISABLE_FALLBACK=true we never silently fall back to OpenAI on
+  // a DeepSeek error. Useful during A/B testing so DeepSeek is judged on its
+  // own merits without the safety net masking outages or timeouts.
+  const fallbackDisabled = process.env.LLM_DISABLE_FALLBACK === 'true'
 
   let attempts = 0
 
@@ -225,7 +229,10 @@ export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
       attempts,
     }
   } catch (err: any) {
-    if (primaryProvider !== 'deepseek' || !isRetriableError(err)) {
+    if (primaryProvider !== 'deepseek' || !isRetriableError(err) || fallbackDisabled) {
+      if (fallbackDisabled && primaryProvider === 'deepseek') {
+        console.warn(`[llm] DeepSeek failed for use=${params.useCase} and fallback is DISABLED (LLM_DISABLE_FALLBACK=true). Propagating error.`)
+      }
       throw err
     }
     console.warn(`[llm] DeepSeek failed for use=${params.useCase}: ${err?.message || err}. Falling back to OpenAI.`)
