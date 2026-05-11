@@ -9,9 +9,10 @@ import { callLLM } from '@/lib/llm-client'
 
 // ==================== CONFIGURATION ====================
 export const runtime = 'nodejs'
-// DeepSeek (with reasoning) can take longer than GPT, so raise the function
-// timeout above Vercel's default to avoid 504s on the questions endpoint.
-export const maxDuration = 90
+// DeepSeek V4-Pro thinking can take ~70s at default reasoning_effort. We
+// raise the function timeout to 120s and brake reasoning to 'low' below to
+// keep latency safely under the limit while preserving JSON quality.
+export const maxDuration = 120
 
 // ==================== INTERFACES & TYPES ====================
 interface PatientData {
@@ -370,8 +371,11 @@ async function callOpenAIWithRetry(
         ],
         maxTokens: 8000,
         responseFormat: 'json_object',
-        reasoningEffort: 'none',
-        timeoutMs: 75_000,
+        // 'low' brakes DeepSeek V4-Pro's reasoning_effort to the minimum;
+        // OpenAI gpt-5.5 also accepts 'low' (mapped to its lowest tier).
+        // Generating 5-8 structured questions does not need deep CoT.
+        reasoningEffort: 'low',
+        timeoutMs: 110_000,
       })
       lastLLMMeta = {
         provider: llmResult.provider,
