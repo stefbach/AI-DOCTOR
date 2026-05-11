@@ -1,15 +1,17 @@
 // app/api/medical-report-assistant/route.ts - AI Assistant for Medical Report Editing v2.0
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
-import { 
-  findLabTest, 
-  findImagingStudy, 
-  validateLabTest, 
+import { callLLM, type LLMToolDefinition } from "@/lib/llm-client"
+import {
+  findLabTest,
+  findImagingStudy,
+  validateLabTest,
   validateImagingStudy,
   LAB_TESTS_NOMENCLATURE,
   IMAGING_NOMENCLATURE
 } from "./nomenclature"
+
+export const runtime = 'nodejs'
+export const maxDuration = 120
 
 // ==================== TYPES ====================
 interface Message {
@@ -58,22 +60,20 @@ export async function POST(request: NextRequest) {
     // Build context summary
     const contextSummary = buildContextSummary(reportContext)
     
-    // Prepare messages for GPT
+    // Prepare messages for the LLM
+    const antiHallucinationClause = `\n\nANTI-HALLUCINATION RULE (STRICT): Only call a tool when you have evidence in the report context, the doctor's message or established medical guidelines. Do NOT fabricate medications, dosages, lab tests, imaging studies or clinical findings. If you cannot justify a change, respond in natural language explaining what additional information is needed rather than calling a tool.`
     const messages: Message[] = [
-      { role: 'system', content: systemPrompt },
+      { role: 'system', content: systemPrompt + antiHallucinationClause },
       { role: 'system', content: `CURRENT REPORT CONTEXT:\n${contextSummary}` },
       ...conversationHistory.slice(-10), // Keep last 10 messages for context
       { role: 'user', content: message }
     ]
 
-    console.log('📡 Calling GPT-5.5 for intelligent assistance...')
+    console.log('📡 Calling LLM (function calling) for intelligent assistance...')
 
-    // Call GPT-5.5 with function calling for structured actions
-    const result = await generateText({
-      model: openai("gpt-5.5", { reasoningEffort: "none" }),
-      messages,
-      maxTokens: 2000,
-      tools: {
+    // Tool definitions kept as a map for readability; converted to the
+    // wrapper's array shape below.
+    const toolsMap: Record<string, { description: string; parameters: any }> = {
         // Tool 1: Modify existing item (medication, test, etc.)
         modifyItem: {
           description: 'Modify an existing medication, lab test, or imaging study',
@@ -332,12 +332,33 @@ export async function POST(request: NextRequest) {
             required: ['testType', 'testName', 'conforms', 'reasoning']
           }
         }
-      }
+    }
+
+    const toolsArray: LLMToolDefinition[] = Object.entries(toolsMap).map(([name, def]) => ({
+      name,
+      description: def.description,
+      parameters: def.parameters,
+    }))
+
+    const result = await callLLM({
+      useCase: 'MEDICAL_REPORT',
+      messages,
+      maxTokens: 2000,
+      reasoningEffort: 'low',
+      timeoutMs: 110_000,
+      tools: toolsArray,
+      toolChoice: 'auto',
     })
 
-    // Extract response and tool calls
+    // Extract response and tool calls. The wrapper returns
+    // toolCalls = [{ id, name, argumentsRaw }]. We shim it back to the
+    // Vercel-AI-SDK shape { toolName, args } that processToolCall expects.
     const responseText = result.text
-    const toolCalls = result.toolCalls || []
+    const toolCalls = (result.toolCalls || []).map((tc) => {
+      let args: any = {}
+      try { args = tc.argumentsRaw ? JSON.parse(tc.argumentsRaw) : {} } catch { args = {} }
+      return { toolName: tc.name, args }
+    })
 
     // Process tool calls and prepare actions
     const actions: AssistantAction[] = []
