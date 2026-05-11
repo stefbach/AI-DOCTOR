@@ -1,7 +1,6 @@
 // app/api/generate-consultation-report/route.ts - VERSION 2.6 WITH PRAGMATIC TRANSLATION AND IMPROVEMENTS
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { callLLM } from "@/lib/llm-client"
 import { buildRefDisplayMap, buildRefSourceYearMap, expandRefsInTree, expandRefsAsSourceYearInTree } from "@/lib/rag/medical-rag"
 
 export const runtime = 'nodejs'
@@ -1995,17 +1994,19 @@ export async function POST(request: NextRequest) {
         userPrompt = createEnhancedUserPrompt(enrichedGPTData)
       }
       
-      const result = await generateText({
-        model: openai("gpt-5.5", { reasoningEffort: "none" }),
+      const result = await callLLM({
+        useCase: 'REPORT',
         messages: [
-          { role: 'system', content: systemPrompt },
+          { role: 'system', content: `${systemPrompt}\n\nANTI-HALLUCINATION RULE (STRICT): Stay strictly within the provided diagnostic analysis. Never invent diagnoses, drugs, doses, lab values or findings absent from the input. If a section has no source data, write a short factual placeholder rather than fabricating content.` },
           { role: 'user', content: userPrompt }
         ],
         maxTokens: 4000,
+        reasoningEffort: 'low',
+        timeoutMs: 110_000,
       })
 
       // IMPROVED JSON PARSING WITH BETTER ERROR HANDLING
-      console.log("🔍 GPT-5.5 raw response length:", result.text.length)
+      console.log(`🔍 LLM raw response length: ${result.text.length} (provider=${result.provider}${result.fallbackUsed ? ' [fallback]' : ''})`)
       console.log("🔍 GPT-5.5 response preview:", result.text.substring(0, 500))
       
       let cleanedText = result.text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()

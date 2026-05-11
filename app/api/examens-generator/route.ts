@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { callLLM } from "@/lib/llm-client"
+
+export const runtime = 'nodejs'
+export const maxDuration = 120
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +20,7 @@ export async function POST(request: NextRequest) {
     // Construction du contexte médical complet pour prescription examens
     const examensContext = `
 PROFIL PATIENT DÉTAILLÉ POUR EXAMENS:
-- Identité: ${patientData.firstName || "N/A"} ${patientData.lastName || "N/A"}
+- Identité: Patient anonymisé (le nom sera réinjecté côté serveur après génération)
 - Âge: ${patientData.age || "N/A"} ans (${patientData.age >= 65 ? "PATIENT ÂGÉE - Adaptations gériatriques nécessaires" : "Adulte standard"})
 - Sexe: ${patientData.gender || "N/A"} ${patientData.gender === "Femme" && patientData.age >= 15 && patientData.age <= 50 ? "(Âge de procréation - Test grossesse si pertinent)" : ""}
 - Poids: ${patientData.weight || "N/A"} kg, Taille: ${patientData.height || "N/A"} cm
@@ -68,9 +70,9 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
       "establishment": "Centre Médical TIBOK - Consultation IA Expert"
     },
     "patient": {
-      "lastName": "${patientData.lastName || "N/A"}",
-      "firstName": "${patientData.firstName || "N/A"}",
-      "birthDate": "${patientData.dateOfBirth || "N/A"}",
+      "lastName": "[FILL_LASTNAME]",
+      "firstName": "[FILL_FIRSTNAME]",
+      "birthDate": "[FILL_BIRTHDATE]",
       "age": "${patientData.age || "N/A"} ans",
       "weight": "${patientData.weight || "N/A"} kg"
     },
@@ -214,15 +216,23 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
 }
 `
 
-    console.log("🧠 Génération ordonnance examens experte avec OpenAI...")
+    console.log("🧠 Génération ordonnance examens experte (LLM)...")
 
-    const result = await generateText({
-      model: openai("gpt-5.5", { reasoningEffort: "none" }),
-      prompt: expertExamensPrompt,
+    const result = await callLLM({
+      useCase: 'EXAMENS',
+      messages: [
+        {
+          role: 'system',
+          content: 'Tu es un médecin expert en médecine diagnostique. ANTI-HALLUCINATION RULE (STRICT): ne prescris que des examens (labo / imagerie / spécialisés) justifiés par les guidelines pour la présentation clinique fournie. Si une donnée nécessaire manque, indique-le explicitement dans la justification plutôt que d\'inventer.'
+        },
+        { role: 'user', content: expertExamensPrompt },
+      ],
       maxTokens: 16000,
+      reasoningEffort: 'low',
+      timeoutMs: 110_000,
     })
 
-    console.log("✅ Ordonnance examens experte générée")
+    console.log(`✅ Ordonnance examens experte générée (provider=${result.provider}${result.fallbackUsed ? ' [fallback]' : ''}, ${result.latencyMs}ms)`)
 
     // Parsing JSON avec gestion d'erreur experte
     let examensData
@@ -242,7 +252,15 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
       
       examensData = JSON.parse(cleanText)
       console.log("✅ JSON examens parsé avec succès")
-      
+
+      // Re-inject patient identity stripped from the LLM prompt for privacy.
+      if (examensData?.prescriptionHeader?.patient) {
+        const p = examensData.prescriptionHeader.patient
+        if (!p.lastName || p.lastName === '[FILL_LASTNAME]') p.lastName = patientData.lastName || "N/A"
+        if (!p.firstName || p.firstName === '[FILL_FIRSTNAME]') p.firstName = patientData.firstName || "N/A"
+        if (!p.birthDate || p.birthDate === '[FILL_BIRTHDATE]') p.birthDate = patientData.dateOfBirth || "N/A"
+      }
+
     } catch (parseError) {
       console.warn("⚠️ Erreur parsing JSON examens, génération fallback expert")
       examensData = generateExpertExamensFallback(patientData, diagnosisData, clinicalData)
