@@ -257,7 +257,7 @@ class Ingester:
         payload = {
             "code": code, "name": code, "full_name": code,
             "country": "?", "base_url": base_url,
-            "description": "", "update_frequency": "on-demand", "is_active": True,
+            "description": "", "update_frequency": "monthly", "is_active": True,
         }
         if self.dry_run:
             print(f"   [dry-run] would insert source: {code}")
