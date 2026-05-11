@@ -1,7 +1,7 @@
 // /app/api/openai-diagnosis/route.ts - VERSION 4.3 MAURITIUS MEDICAL SYSTEM - LOGIQUE COMPLÈTE + DCI PRÉCIS
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import OpenAI from 'openai'
+import { callLLM } from '@/lib/llm-client'
 import {
   queryMedicalGuidelines,
   queryMedicalGuidelinesMulti,
@@ -2192,10 +2192,12 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
         qualityLevel = 3
       }
       
-      const openaiClient = new OpenAI({ apiKey })
-
-      const completion = await openaiClient.chat.completions.create({
-        model: 'gpt-5.5',
+      // Diagnostic LLM call routed through the unified wrapper. Provider is
+      // selectable per env var LLM_PROVIDER_DIAGNOSIS (defaults to OpenAI).
+      // reasoning_effort=medium is intentional: differential diagnosis +
+      // prescription + investigation strategy benefits from chain-of-thought.
+      const completion = await callLLM({
+        useCase: 'DIAGNOSIS',
         messages: [
           {
             role: 'system',
@@ -2228,6 +2230,12 @@ CRITICAL RULES:
 - ALWAYS use UK/Mauritius medical nomenclature
 - MINIMUM 40 characters for each indication field
 
+ANTI-HALLUCINATION RULE (STRICT):
+- Anchor every medication and investigation in BNF / NICE / Mauritius MoH guidelines or in the RAG block when present.
+- NEVER invent drug names, dosages, lab tests or imaging that are not part of established practice for the diagnosis at hand.
+- If patient data essential for a decision is missing (e.g. renal function, allergies), surface it explicitly in the relevant justification field instead of guessing.
+- Preserve "doctor_clinical_notes" hypotheses faithfully when they are provided; never silently discard them.
+
 You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC medical responses.`
           },
           {
@@ -2235,15 +2243,16 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
             content: finalPrompt
           }
         ],
-        max_completion_tokens: 32000,
-        reasoning_effort: 'medium',
-        response_format: { type: "json_object" },
+        maxTokens: 32000,
+        reasoningEffort: 'medium',
+        responseFormat: 'json_object',
+        timeoutMs: 280_000,
       })
 
-      const rawContent = completion.choices[0]?.message?.content || ''
-      const finishReason = completion.choices[0]?.finish_reason || 'unknown'
+      const rawContent = completion.text || ''
+      const finishReason = 'unknown'
 
-      console.log('🤖 GPT-5.5 response received, length:', rawContent.length, 'finish_reason:', finishReason)
+      console.log(`🤖 LLM response received (provider=${completion.provider}${completion.fallbackUsed ? ' [fallback]' : ''}, ${completion.latencyMs}ms), length: ${rawContent.length}`)
       console.log('🔍 Response starts with:', rawContent.substring(0, 100))
       console.log('🔍 Response ends with:', rawContent.substring(Math.max(0, rawContent.length - 100)))
 
