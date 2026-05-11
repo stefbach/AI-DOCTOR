@@ -1,7 +1,9 @@
 // /app/api/openai-diagnosis/route.ts - VERSION 4.3 MAURITIUS MEDICAL SYSTEM - LOGIQUE COMPLÈTE + DCI PRÉCIS
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { callLLM } from '@/lib/llm-client'
+import { callLLM, type LLMMessage } from '@/lib/llm-client'
+import { CRITICAL_RULES_BLOCK } from '@/lib/critical-rules'
+import { detectFabricatedExam, FABRICATION_RETRY_INSTRUCTION } from '@/lib/anti-fabrication'
 import {
   queryMedicalGuidelines,
   queryMedicalGuidelinesMulti,
@@ -2197,12 +2199,9 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
       // reasoning_effort='low' is the safe default for Vercel: 'medium' on
       // DeepSeek V4-Pro caused 504 FUNCTION_INVOCATION_TIMEOUT on Vercel.
       // 'low' still benefits from reasoning but stays well under the 300s cap.
-      const completion = await callLLM({
-        useCase: 'DIAGNOSIS',
-        messages: [
-          {
-            role: 'system',
-            content: `🏥 YOU ARE A COMPLETE MEDICAL ENCYCLOPEDIA - EXPERT PHYSICIAN WITH EXHAUSTIVE KNOWLEDGE
+      const diagnosisSystemPrompt = `${CRITICAL_RULES_BLOCK}
+
+🏥 YOU ARE A COMPLETE MEDICAL ENCYCLOPEDIA - EXPERT PHYSICIAN WITH EXHAUSTIVE KNOWLEDGE
 
 You possess the complete knowledge equivalent to:
 📚 BNF (British National Formulary) - Complete UK pharmaceutical database
@@ -2223,7 +2222,7 @@ FOR EVERY PRESCRIPTION, YOU MUST ACCESS YOUR ENCYCLOPEDIC KNOWLEDGE TO PROVIDE:
 6. DOSE ADJUSTMENTS (renal: eGFR thresholds, hepatic: Child-Pugh)
 7. MONITORING PARAMETERS (clinical and laboratory)
 
-CRITICAL RULES:
+ADDITIONAL RULES:
 - NEVER use generic terms ("Medication", "Treatment", "Investigation")
 - ALWAYS provide specific drug names with exact doses
 - ALWAYS check interactions against current medications
@@ -2238,20 +2237,62 @@ ANTI-HALLUCINATION RULE (STRICT):
 - Preserve "doctor_clinical_notes" hypotheses faithfully when they are provided; never silently discard them.
 
 You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC medical responses.`
-          },
-          {
-            role: 'user',
-            content: finalPrompt
-          }
-        ],
+
+      const diagnosisMessages: LLMMessage[] = [
+        { role: 'system', content: diagnosisSystemPrompt },
+        { role: 'user', content: finalPrompt },
+      ]
+
+      let completion = await callLLM({
+        useCase: 'DIAGNOSIS',
+        messages: diagnosisMessages,
         maxTokens: 32000,
         reasoningEffort: 'low',
         responseFormat: 'json_object',
         timeoutMs: 280_000,
       })
 
-      const rawContent = completion.text || ''
+      let rawContent = completion.text || ''
       const finishReason = 'unknown'
+
+      // AI Doctor is a teleconsultation. Inputs never include a real physical
+      // examination, so we hard-code hasExamData=false and ask the model to
+      // redo the response if it invented exam findings. One retry max to avoid
+      // doubling the latency budget.
+      const fabCheck = detectFabricatedExam(rawContent, /* hasExamData */ false)
+      if (fabCheck.fabricationDetected) {
+        console.warn(
+          `[llm] use=DIAGNOSIS provider=${completion.provider} fabrication_detected=true ` +
+            `patterns=[${fabCheck.patterns.join(',')}] excerpts=${JSON.stringify(fabCheck.excerpts.slice(0, 3))}`,
+        )
+        const retryMessages: LLMMessage[] = [
+          ...diagnosisMessages,
+          { role: 'assistant', content: rawContent },
+          { role: 'user', content: FABRICATION_RETRY_INSTRUCTION },
+        ]
+        const retry = await callLLM({
+          useCase: 'DIAGNOSIS',
+          messages: retryMessages,
+          maxTokens: 32000,
+          reasoningEffort: 'low',
+          responseFormat: 'json_object',
+          timeoutMs: 280_000,
+        })
+        const retryFab = detectFabricatedExam(retry.text || '', false)
+        if (!retryFab.fabricationDetected) {
+          console.log(
+            `[llm] use=DIAGNOSIS retry_after_fabrication=success provider=${retry.provider} ` +
+              `latency=${retry.latencyMs}ms`,
+          )
+          completion = retry
+          rawContent = retry.text || ''
+        } else {
+          console.warn(
+            `[llm] use=DIAGNOSIS retry_after_fabrication=failed patterns=[${retryFab.patterns.join(',')}] ` +
+              `— keeping original response, downstream parsing will still try to use it`,
+          )
+        }
+      }
 
       console.log(`🤖 LLM response received (provider=${completion.provider}${completion.fallbackUsed ? ' [fallback]' : ''}, ${completion.latencyMs}ms), length: ${rawContent.length}`)
       console.log('🔍 Response starts with:', rawContent.substring(0, 100))

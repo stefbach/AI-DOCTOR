@@ -1,6 +1,8 @@
 // app/api/generate-consultation-report/route.ts - VERSION 2.6 WITH PRAGMATIC TRANSLATION AND IMPROVEMENTS
 import { type NextRequest, NextResponse } from "next/server"
-import { callLLM } from "@/lib/llm-client"
+import { callLLM, type LLMMessage } from "@/lib/llm-client"
+import { CRITICAL_RULES_BLOCK_NARRATIVE } from "@/lib/critical-rules"
+import { detectFabricatedExam, FABRICATION_RETRY_INSTRUCTION } from "@/lib/anti-fabrication"
 import { buildRefDisplayMap, buildRefSourceYearMap, expandRefsInTree, expandRefsAsSourceYearInTree } from "@/lib/rag/medical-rag"
 
 export const runtime = 'nodejs'
@@ -1998,16 +2000,58 @@ export async function POST(request: NextRequest) {
         userPrompt = createEnhancedUserPrompt(enrichedGPTData)
       }
       
-      const result = await callLLM({
+      const reportSystemPrompt = `${CRITICAL_RULES_BLOCK_NARRATIVE}
+
+${systemPrompt}
+
+ANTI-HALLUCINATION RULE (STRICT): Stay strictly within the provided diagnostic analysis. Never invent diagnoses, drugs, doses, lab values or findings absent from the input. If a section has no source data, write a short factual placeholder rather than fabricating content.`
+
+      const reportMessages: LLMMessage[] = [
+        { role: 'system', content: reportSystemPrompt },
+        { role: 'user', content: userPrompt },
+      ]
+
+      let result = await callLLM({
         useCase: 'REPORT',
-        messages: [
-          { role: 'system', content: `${systemPrompt}\n\nANTI-HALLUCINATION RULE (STRICT): Stay strictly within the provided diagnostic analysis. Never invent diagnoses, drugs, doses, lab values or findings absent from the input. If a section has no source data, write a short factual placeholder rather than fabricating content.` },
-          { role: 'user', content: userPrompt }
-        ],
+        messages: reportMessages,
         maxTokens: 4000,
         reasoningEffort: 'low',
         timeoutMs: 280_000,
       })
+
+      // Teleconsultation guard: detect fabricated physical-exam findings in
+      // the narrative and ask the model to redo without inventing exam data.
+      const fabCheck = detectFabricatedExam(result.text || '', /* hasExamData */ false)
+      if (fabCheck.fabricationDetected) {
+        console.warn(
+          `[llm] use=REPORT provider=${result.provider} fabrication_detected=true ` +
+            `patterns=[${fabCheck.patterns.join(',')}] excerpts=${JSON.stringify(fabCheck.excerpts.slice(0, 3))}`,
+        )
+        const retryMessages: LLMMessage[] = [
+          ...reportMessages,
+          { role: 'assistant', content: result.text || '' },
+          { role: 'user', content: FABRICATION_RETRY_INSTRUCTION },
+        ]
+        const retry = await callLLM({
+          useCase: 'REPORT',
+          messages: retryMessages,
+          maxTokens: 4000,
+          reasoningEffort: 'low',
+          timeoutMs: 280_000,
+        })
+        const retryFab = detectFabricatedExam(retry.text || '', false)
+        if (!retryFab.fabricationDetected) {
+          console.log(
+            `[llm] use=REPORT retry_after_fabrication=success provider=${retry.provider} latency=${retry.latencyMs}ms`,
+          )
+          result = retry
+        } else {
+          console.warn(
+            `[llm] use=REPORT retry_after_fabrication=failed patterns=[${retryFab.patterns.join(',')}] ` +
+              `— keeping original response, downstream parser will still try to use it`,
+          )
+        }
+      }
 
       // IMPROVED JSON PARSING WITH BETTER ERROR HANDLING
       console.log(`🔍 LLM raw response length: ${result.text.length} (provider=${result.provider}${result.fallbackUsed ? ' [fallback]' : ''})`)
