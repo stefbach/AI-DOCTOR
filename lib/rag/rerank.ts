@@ -14,9 +14,11 @@
 import { callLLM } from '@/lib/llm-client'
 import type { RAGContext, RAGChunk, RAGReference } from './medical-rag'
 
-const DEEPSEEK_FAST_MODEL = 'deepseek-chat'
 const DEFAULT_TOP_K = 8
-const DEFAULT_TIMEOUT_MS = 15_000
+// 30s allows for re-rank on deepseek-v4-pro (the default when DEEPSEEK_MODEL
+// is set to that variant). A leaner model — set via DEEPSEEK_RERANK_MODEL or
+// the `model` option below — typically finishes in 3-8s.
+const DEFAULT_TIMEOUT_MS = 30_000
 const EXCERPT_MAX_CHARS = 600
 
 export interface RerankPatientContext {
@@ -35,9 +37,12 @@ export interface RerankOptions {
   /** Timeout for the re-rank LLM call. Default 15s. */
   timeoutMs?: number
   /**
-   * Override the model used for re-rank. Default 'deepseek-chat' (fast,
-   * non-reasoning, ~3-5s for 12 chunks). Set explicitly if you need to A/B
-   * test a different model without changing the global DEEPSEEK_MODEL.
+   * Override the model used for re-rank. By default we let callLLM resolve
+   * the model from env vars (DEEPSEEK_MODEL when LLM_PROVIDER_RERANK=deepseek,
+   * OPENAI_MODEL otherwise). If the DEEPSEEK_RERANK_MODEL env var is set, it
+   * takes priority — useful when the deployment has access to a faster
+   * variant (e.g. deepseek-chat) for this auxiliary task while diagnosis
+   * stays on the heavier deepseek-v4-pro.
    */
   model?: string
 }
@@ -102,6 +107,13 @@ Rank ALL chunks (do not omit any). "reason" is for audit logs and must be at mos
   const userPrompt = `Patient case:\n${patientSummary}\n\nChunks to rank (${chunkSummaries.length}):\n${JSON.stringify(chunkSummaries, null, 2)}`
 
   try {
+    // Model resolution priority:
+    //   1. explicit opts.model override (per-call)
+    //   2. DEEPSEEK_RERANK_MODEL env var (deployment-wide fast variant)
+    //   3. fall through to callLLM's standard provider/model resolution
+    //      (LLM_PROVIDER_RERANK → DEEPSEEK_MODEL / OPENAI_MODEL)
+    const modelOverride =
+      opts.model ?? process.env.DEEPSEEK_RERANK_MODEL ?? undefined
     const result = await callLLM({
       useCase: 'RERANK',
       messages: [
@@ -112,7 +124,7 @@ Rank ALL chunks (do not omit any). "reason" is for audit logs and must be at mos
       responseFormat: 'json_object',
       reasoningEffort: 'none',
       timeoutMs: opts.timeoutMs ?? DEFAULT_TIMEOUT_MS,
-      model: opts.model ?? DEEPSEEK_FAST_MODEL,
+      ...(modelOverride ? { model: modelOverride } : {}),
     })
 
     let parsed: { ranking?: Array<{ id?: unknown; score?: unknown; reason?: unknown }> }

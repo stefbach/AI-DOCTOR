@@ -10,7 +10,7 @@ export const runtime = 'nodejs'
 // 120s on Vercel with a FUNCTION_INVOCATION_TIMEOUT. 300s is the cap on
 // Vercel Pro and gives enough headroom even when reasoning_effort='low'
 // produces a longer-than-expected response.
-export const maxDuration = 300
+export const maxDuration = 600 // 600s for parity with /api/openai-diagnosis: DeepSeek-V4-Pro on the report LLM with maxTokens=12000 can run 150-250s on rich cases; 600 absorbs variance without timing out mid-JSON (which is what previously triggered the fallback content path)
 
 // ==================== "HORS GUIDELINE RAG" JARGON SANITISER ====================
 // Internal pipeline vocabulary (the prompt previously asked the LLM to write

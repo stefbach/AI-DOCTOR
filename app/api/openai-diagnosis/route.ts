@@ -18,7 +18,7 @@ import {
 import { reRankAndShrinkContext } from '@/lib/rag/rerank'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300 // 300 seconds max for GPT-5.5 diagnosis generation (large prompt)
+export const maxDuration = 600 // 600s: DeepSeek-V4-Pro on the Phase 1 enriched system prompt + Phase 2 boosted RAG context regularly runs 250-350s; 600 gives headroom without burning more compute than the call actually uses (Vercel bills real runtime, not the cap).
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
