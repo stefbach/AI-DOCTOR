@@ -2,8 +2,12 @@ import { type NextRequest, NextResponse } from "next/server"
 import { callLLM } from "@/lib/llm-client"
 
 export const runtime = 'nodejs'
-// 300s cap to absorb DeepSeek V4-Pro thinking latency on a 16k-token output.
-export const maxDuration = 300
+// 600s for parity with /api/openai-diagnosis and report routes. The Phase 5
+// system prompt (senior diagnostician persona + 8 strict quality rules +
+// tropical syndromic mandates + anti-boilerplate list) adds ~1100 prompt
+// tokens and pushes DeepSeek-V4-Pro to 220-340s on a febrile case with full
+// arboviral workup. 300s was tight.
+export const maxDuration = 600
 
 export async function POST(request: NextRequest) {
   try {

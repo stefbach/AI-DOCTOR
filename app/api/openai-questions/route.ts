@@ -12,7 +12,7 @@ export const runtime = 'nodejs'
 // DeepSeek V4-Pro thinking can take ~70s at default reasoning_effort. We
 // raise the function timeout to 120s and brake reasoning to 'low' below to
 // keep latency safely under the limit while preserving JSON quality.
-export const maxDuration = 120
+export const maxDuration = 600 // 600s for parity with /api/openai-diagnosis: DeepSeek-V4-Pro on the Phase-5 enriched question system prompt regularly runs 100-160s (vs ~65-95s under the previous 1-line prompt). 120s was timing out on the questions endpoint after the Phase 5 prompt upgrade.
 
 // ==================== INTERFACES & TYPES ====================
 interface PatientData {
