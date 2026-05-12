@@ -771,7 +771,7 @@ export function buildSecondaryQueries(input: {
         'evidence-based clinical evaluation pathophysiology risk stratification ' +
         'red flags clinical decision rules',
       specialty: null,
-      limit: 4,
+      limit: 6,
     })
     queries.push({
       label: 'empirical_workup',
@@ -780,7 +780,7 @@ export function buildSecondaryQueries(input: {
         'first-line laboratory testing imaging clinical decision rules ' +
         'guideline-based assessment',
       specialty: null,
-      limit: 4,
+      limit: 6,
     })
   }
 
