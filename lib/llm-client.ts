@@ -45,6 +45,14 @@ export interface LLMCallParams {
   timeoutMs?: number
   tools?: LLMToolDefinition[]
   toolChoice?: 'auto' | 'none' | 'required' | { type: 'function'; function: { name: string } }
+  /**
+   * Override the model resolved from env vars for THIS call only. Useful when
+   * a fast/cheap variant of the active provider is preferred for an auxiliary
+   * task (e.g. deepseek-chat for a re-ranker while diagnosis uses
+   * deepseek-v4-pro). When undefined, the default resolution via
+   * DEEPSEEK_MODEL / OPENAI_MODEL env vars applies.
+   */
+  model?: string
 }
 
 export interface LLMUsage {
@@ -205,7 +213,7 @@ function isRetriableError(err: any): boolean {
 export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
   const startedAt = Date.now()
   const primaryProvider = resolveProvider(params.useCase)
-  const primaryModel = resolveModel(primaryProvider)
+  const primaryModel = params.model ?? resolveModel(primaryProvider)
   // When LLM_DISABLE_FALLBACK=true we never silently fall back to OpenAI on
   // a DeepSeek error. Useful during A/B testing so DeepSeek is judged on its
   // own merits without the safety net masking outages or timeouts.

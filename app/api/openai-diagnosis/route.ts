@@ -15,6 +15,7 @@ import {
   type RAGContext,
   type RAGReference,
 } from '@/lib/rag/medical-rag'
+import { reRankAndShrinkContext } from '@/lib/rag/rerank'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300 // 300 seconds max for GPT-5.5 diagnosis generation (large prompt)
@@ -5302,9 +5303,35 @@ export async function POST(request: NextRequest) {
         `📚 [RAG] Retrieved ${ragContext.totalChunks} chunks ` +
           `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
       )
+
+      // Two-stage retrieval: re-rank the cosine-similarity chunks by actual
+      // clinical relevance to this specific patient. Cosine alone surfaces
+      // chunks that share vocabulary with the query but may be from the
+      // wrong age group, geography, or evidence tier. The re-ranker
+      // (deepseek-chat, ~3-8s) weights syndrome fit, source authority
+      // (NICE / CDC / WHO / IDSA / ECDC > paper), Mauritius/tropical
+      // relevance, and recency, then keeps the top 8 chunks with ref-N ids
+      // re-assigned so the diagnostic LLM sees ref-1 = best evidence.
+      // On any failure the original cosine ordering is returned unchanged.
+      if (ragContext.chunks.length > 0) {
+        ragContext = await reRankAndShrinkContext(
+          ragContext,
+          {
+            chiefComplaint: patientContext.chief_complaint || '',
+            age: patientContext.age,
+            sex: patientContext.sex,
+            symptomDuration: patientContext.symptom_duration,
+            keySymptoms: patientContext.symptoms,
+            travelHistory: patientContext.disease_history,
+            comorbidities: patientContext.medical_history,
+          },
+          { topK: 8 },
+        )
+      }
+
       if (ragContext.references.length > 0) {
         console.log(
-          `📚 [RAG] Available citation IDs: ${ragContext.references.map(r => r.ref_id).join(', ')}`
+          `📚 [RAG] Available citation IDs after re-rank: ${ragContext.references.map(r => r.ref_id).join(', ')}`
         )
       }
     } catch (ragErr: any) {
