@@ -31,6 +31,7 @@ on:
           - migrate-only        # Apply Supabase migrations
           - single-source       # Ingest ONE source (specify below)
           - full-ingest         # Full pipeline: migrate + ingest 984 docs
+          - embed-only          # Generate missing embeddings on existing chunks (no new ingestion)
       source:
         description: 'Source code (only for single-source mode, e.g. NICE, GOLD, WHO)'
         type: string
@@ -40,7 +41,7 @@ on:
         description: 'Git branch to use on VPS (default: this branch)'
         type: string
         required: false
-        default: 'claude/medical-assistant-transparency-dv5S9'
+        default: 'claude/switch-deepseek-llm-u2T74'
       resume:
         description: 'Resume mode (skip already-ingested docs by SHA-256)'
         type: boolean
@@ -58,7 +59,10 @@ jobs:
   ingest-via-vps:
     name: 'Ingest via VPS SSH (mode=${{ inputs.mode }})'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 120 min — embed-only mode generates ~56k OpenAI embeddings sequentially
+    # at ~600-800 chunks/min, so total runtime is typically 60-90 min. Other
+    # modes finish in 5-15 min and are unaffected by the higher cap.
+    timeout-minutes: 120
 
     steps:
       - name: Verify SSH secrets
@@ -92,7 +96,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
           envs: MODE,SOURCE,BRANCH,RESUME
-          command_timeout: 25m
+          # 110m — leaves a small buffer below the job timeout (120m) so the
+          # SSH layer surfaces a clean error if the embed-only run overruns
+          # rather than the runner killing everything mid-write.
+          command_timeout: 110m
           script: |
             set -e
             echo "═══════════════════════════════════════════════════════════"
@@ -213,6 +220,26 @@ jobs:
                 echo ""
                 echo "Step 2/2: ingesting all 984 guidelines..."
                 RESUME=$RESUME npm run rag:ingest-extracted -- ALL
+                ;;
+
+              embed-only)
+                # Populate the `embedding` column on every guidelines_chunks
+                # row that currently has NULL. Targets the ~56k chunks that
+                # were ingested but never embedded (cf scripts/rag-ingest/
+                # generate-embeddings.mjs header for the audit context).
+                # ~60-90 min runtime, ~\$0.34 OpenAI cost.
+                echo "🧮 EMBED-ONLY — generating embeddings for chunks with NULL embedding"
+                echo "Expected: ~56k chunks, ~60-90 min runtime, ~\$0.34 OpenAI cost."
+                echo ""
+                if [ ! -f scripts/rag-ingest/generate-embeddings.mjs ]; then
+                  echo "::error::scripts/rag-ingest/generate-embeddings.mjs not found on branch '$BRANCH'."
+                  echo "Make sure the branch you selected actually contains this script."
+                  exit 1
+                fi
+                # The script reads OPENAI_API_KEY, SUPABASE_URL (or
+                # NEXT_PUBLIC_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY from
+                # the environment — already sourced from .env.local above.
+                node scripts/rag-ingest/generate-embeddings.mjs
                 ;;
 
               *)
