@@ -761,6 +761,15 @@ export function buildSecondaryQueries(input: {
   const travel = (input.travelHistory || '').toLowerCase()
 
   const hasFever = /\bfever\b|\bfièvre\b|febrile|pyrexia|hyperthermia/.test(symptomBlob)
+  // Symptom-class detectors used by the syndrome-specific sub-queries below.
+  // Pattern coverage prioritises English (UK and US spelling) plus the
+  // French terms that surface in patient-facing form fields.
+  const hasCough = /\bcough\b|\btoux\b|\bexpectoration\b|\bsputum\b/.test(symptomBlob)
+  const hasDyspnea = /dyspn(o)?ea|shortness of breath|breathless|essoufflement/.test(symptomBlob)
+  const hasHeadache = /\bheadache\b|céphalée|cephalalgia/.test(symptomBlob)
+  const hasAbdominalPain = /abdomen|abdominal|stomach[- ]?ache|stomach[- ]?pain|gastric pain|douleur abdominale|ventre/.test(symptomBlob)
+  const hasJaundice = /jaundice|icter|jaune|yellow(ish)? skin|sclera/.test(symptomBlob)
+  const hasRash = /\brash\b|eruption|exanth|petechi|purpura/.test(symptomBlob)
 
   // ---------- Generic diversification queries (always when a chief complaint is present) ----------
   // Symptoms-only queries (e.g. "headache fever cough") embed far from the
@@ -791,6 +800,106 @@ export function buildSecondaryQueries(input: {
         'guideline-based assessment',
       specialty: null,
       limit: 6,
+    })
+  }
+
+  // ============================================================================
+  // Syndrome-specific diversification (Phase 5 RAG diversity).
+  //
+  // The two generic sub-queries above (differential_approach, empirical_workup)
+  // bridge the symptom-vs-guideline embedding gap but tend to ramp up generic
+  // chunks (asthma, COPD) that are clinically marginal for tropical / acute
+  // febrile cases. The blocks below add narrow, syndrome-anchored queries
+  // that are gated on simple symptom triggers. Each adds 2-3 chunks at most;
+  // the downstream dedup + re-rank step (topK=8) caps total payload to the
+  // diagnostic LLM regardless of how many sub-queries fire.
+  //
+  // Why no travel-history gate on arboviral / lepto: the deployment is in
+  // Mauritius where dengue, chikungunya and leptospirosis are year-round
+  // endemic. A fever case here ALWAYS deserves arbovirus + lepto evidence
+  // surfaced, regardless of whether the patient self-reports travel.
+  // ============================================================================
+
+  // ---------- Arboviral (dengue / chikungunya / zika) — any febrile case ----------
+  if (hasFever) {
+    queries.push({
+      label: 'arboviral_tropical',
+      text:
+        'dengue chikungunya zika arbovirus Aedes mosquito tropical acute febrile illness ' +
+        'NS1 antigen IgM IgG serology RT-PCR platelet count haematocrit thrombocytopenia ' +
+        'warning signs severe dengue avoid NSAIDs paracetamol Indian Ocean Mauritius ECDC WHO outbreak',
+      specialty: null,
+      limit: 3,
+    })
+  }
+
+  // ---------- Acute lower respiratory infection — fever + cough/dyspnea ----------
+  if (hasFever && (hasCough || hasDyspnea)) {
+    queries.push({
+      label: 'respiratory_acute',
+      text:
+        'acute lower respiratory tract infection community-acquired pneumonia influenza ' +
+        'COVID-19 SARS-CoV-2 viral bronchitis empirical antibiotic amoxicillin macrolide ' +
+        'CURB-65 chest X-ray pulse oximetry respiratory rate red flag hospitalisation criteria',
+      specialty: 'pulmonology',
+      limit: 3,
+    })
+  }
+
+  // ---------- CNS red flags — headache with fever (rule out meningitis/encephalitis) ----------
+  if (hasFever && hasHeadache) {
+    queries.push({
+      label: 'cns_red_flag',
+      text:
+        'acute meningitis encephalitis bacterial viral fungal CSF lumbar puncture ' +
+        'neck stiffness Kernig Brudzinski photophobia altered consciousness ' +
+        'meningococcal pneumococcal Listeria empirical ceftriaxone dexamethasone ' +
+        'red flag headache thunderclap subarachnoid',
+      specialty: 'neurology',
+      limit: 2,
+    })
+  }
+
+  // ---------- Leptospirosis — fever (Mauritius is endemic; always relevant) ----------
+  if (hasFever) {
+    queries.push({
+      label: 'leptospirosis',
+      text:
+        'leptospirosis Weil syndrome zoonosis Leptospira interrogans rodent water exposure ' +
+        'fever myalgia calf tenderness conjunctival suffusion jaundice acute renal failure ' +
+        'thrombocytopenia MAT microscopic agglutination IgM PCR doxycycline penicillin ' +
+        'Indian Ocean island tropical',
+      specialty: 'infectious_diseases',
+      limit: 2,
+    })
+  }
+
+  // ---------- Enteric fever (typhoid/paratyphoid) — fever + abdominal pain OR ≥7 days ----------
+  // The bacterial_workup block below catches generic prolonged fever; this one
+  // is enteric-specific (blood culture, Widal limitations, Salmonella sensitivity).
+  // ---------- Hepatitis — fever + jaundice ----------
+  if (hasFever && hasJaundice) {
+    queries.push({
+      label: 'hepatitis_viral',
+      text:
+        'acute viral hepatitis A B C D E HAV HBV HCV jaundice transaminitis ' +
+        'ALT AST bilirubin hepatic encephalopathy fulminant hepatitis serology ' +
+        'HAV IgM HBsAg anti-HBc supportive care notifiable disease',
+      specialty: 'infectious_diseases',
+      limit: 2,
+    })
+  }
+
+  // ---------- Viral exanthem / measles / rubella — fever + rash ----------
+  if (hasFever && hasRash) {
+    queries.push({
+      label: 'febrile_exanthem',
+      text:
+        'febrile exanthem rash differential measles rubella roseola fifth disease ' +
+        'scarlet fever meningococcaemia drug eruption dengue chikungunya ' +
+        'petechiae purpura non-blanching urgent assessment vaccination history',
+      specialty: 'infectious_diseases',
+      limit: 2,
     })
   }
 
