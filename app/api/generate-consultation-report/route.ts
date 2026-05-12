@@ -1589,7 +1589,11 @@ function useRealDataFallback(realData: any, pregnancyInfo: any, clinicalData?: a
     " Systematic symptom assessment was conducted."
   
   return {
-    chiefComplaint: `${chiefComplaint}${pregnancyNote} This consultation follows established medical protocols for teleconsultation assessment and management.`,
+    // Anti-boilerplate (Phase 3 follow-up): "This consultation follows
+    // established medical protocols..." was tacked onto every chief
+    // complaint regardless of content. Drop it. Pregnancy note is kept
+    // only when relevant.
+    chiefComplaint: `${chiefComplaint}${pregnancyNote}`.trim(),
     
     // Anti-boilerplate rewrite (Phase 3): each section now renders the LLM
     // narrative when available, or a short honest "not generated" marker
@@ -2086,7 +2090,13 @@ ANTI-HALLUCINATION RULE (STRICT): Stay strictly within the provided diagnostic a
       let result = await callLLM({
         useCase: 'REPORT',
         messages: reportMessages,
-        maxTokens: 4000,
+        // 4000 tokens was the OpenAI default sized for GPT-5.5. DeepSeek-V4-Pro
+        // produces longer narratives and was being truncated mid-JSON: response
+        // length 3795 chars with no closing `}` → "No valid JSON structure
+        // found" → fallback content kicked in, masking the LLM output entirely.
+        // 12000 gives ~9-10 substantive sections of 300-500 words each plus
+        // JSON overhead, well under deepseek-v4-pro's 16K output cap.
+        maxTokens: 12000,
         reasoningEffort: 'low',
         timeoutMs: 280_000,
       })

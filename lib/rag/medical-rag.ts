@@ -228,7 +228,17 @@ export async function queryMedicalGuidelinesMulti(
       query: (primaryQuery || '').trim(),
       opts: {
         specialty: primaryOpts.specialty ?? null,
-        threshold: primaryOpts.threshold ?? 0.27,
+        // The primary query is the patient's chief complaint phrased in
+        // symptom vocabulary ("headaches associated with body pain, fever
+        // and cough"). Guideline chunks use clinical / disease vocabulary
+        // ("acute febrile illness", "dengue NS1 antigen", "differential of
+        // viral exanthem") — the embedding gap is wide and 0.27 was
+        // returning 0 chunks on a real febrile case despite the corpus
+        // containing relevant ECDC chunks (proven by the diversification
+        // sub-queries which DID find them). 0.20 catches the relevant
+        // long-tail without flooding noise (sub-queries with their own
+        // 0.27 threshold remain the main precision source).
+        threshold: primaryOpts.threshold ?? 0.20,
         limit: primaryOpts.limit ?? 10,
       },
     },

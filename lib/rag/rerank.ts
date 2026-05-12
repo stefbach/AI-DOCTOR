@@ -58,8 +58,13 @@ export async function reRankAndShrinkContext(
 ): Promise<RAGContext> {
   const topK = opts.topK ?? DEFAULT_TOP_K
 
-  // Nothing to rank: <= topK chunks already, or no chunks at all.
-  if (!ctx.chunks || ctx.chunks.length <= topK) {
+  // Skip early only when there's genuinely nothing to do: 0, 1, or 2 chunks.
+  // With 3+ chunks the LLM call is still worth it for REORDERING (placing
+  // the most patient-relevant chunk at ref-1) even when no truncation is
+  // needed. The previous `<= topK` guard was skipping the re-rank whenever
+  // retrieval returned exactly 8 chunks, which is the typical case after
+  // dedup — the re-ranker was essentially never running in production.
+  if (!ctx.chunks || ctx.chunks.length <= 2) {
     return ctx
   }
 
