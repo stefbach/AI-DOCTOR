@@ -231,7 +231,10 @@ EXAMENS PARACLINIQUES:
 - DIABÈTE: Fond d'œil (annuel), ECG (annuel), Examen des pieds, Écho-Doppler artères MI si nécessaire
 - HYPERTENSION: ECG (annuel), Échocardiographie si mal contrôlée, Holter tensionnel si suspicion
 - OBÉSITÉ: Échographie abdominale (stéatose)`
-          const clinicalOrders = await callOpenAI('', call1SystemPrompt, patientContext, 4000)
+          // Call 1 produces a deeply nested JSON (labs + paraclinical exams). DeepSeek
+          // V4-Pro is verbose enough on these to overflow a 4000-token cap mid-string,
+          // so we go to 12000 to leave generous headroom.
+          const clinicalOrders = await callOpenAI('', call1SystemPrompt, patientContext, 12000)
 
           sendSSE('progress', { message: 'Analyses et examens générés, préparation du plan de suivi...', progress: 50 })
 
@@ -302,7 +305,7 @@ CONSULTATIONS selon maladies:
 - DIABÈTE: Ophtalmologue (fond d'œil annuel), Podologue, Cardiologue si complications
 - HYPERTENSION: Cardiologue si mal contrôlée, Néphrologue si atteinte rénale
 - OBÉSITÉ: Diététicien, Endocrinologue`
-          const referralsAndSummary = await callOpenAI('', call2SystemPrompt, patientContext, 3000)
+          const referralsAndSummary = await callOpenAI('', call2SystemPrompt, patientContext, 8000)
 
           sendSSE('progress', { message: 'Finalisation...', progress: 90 })
 
