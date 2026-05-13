@@ -25,6 +25,7 @@ import {
 } from "lucide-react"
 import TibokMedicalAssistant from './tibok-medical-assistant'
 import EvidenceReferencesSection from './rag/evidence-references-section'
+import { renderWithCitations, aggregateReferences, SectionBibliography } from './rag/citation-renderer'
 
 // ==================== HELPER FUNCTIONS ====================
 // Helper function to safely handle DCI fields
@@ -5587,7 +5588,12 @@ const ConsultationReport = () => {
  const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
  const patient = getReportPatient()
  const praticien = getReportPraticien()
- 
+ const evidenceRefs = (diagnosisData?.evidence_references as any[]) || []
+ const prescriptionCitations = aggregateReferences(
+   medications.map((m: any) => (typeof m?.justification === 'string' ? m.justification : '')),
+   evidenceRefs
+ )
+
  if (!includeFullPrescriptions && report?.prescriptionsResume) {
  return (
  <Card>
@@ -5692,7 +5698,7 @@ const ConsultationReport = () => {
  )}
  {med.justification && (
  <p className="mt-1 text-sm text-gray-600">
- <span className="font-medium">Indication:</span> {med.justification}
+ <span className="font-medium">Indication:</span> {prescriptionCitations.nodes[index] || med.justification}
  </p>
  )}
  </div>
@@ -5719,6 +5725,12 @@ const ConsultationReport = () => {
  </div>
  )}
  </div>
+
+ <SectionBibliography
+ references={prescriptionCitations.usedRefs}
+ globalReferences={evidenceRefs}
+ title="Références citées dans cette prescription"
+ />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
  <p className="text-sm text-gray-600 mb-4">
@@ -5760,7 +5772,8 @@ const ConsultationReport = () => {
  const patient = getReportPatient()
  const praticien = getReportPraticien()
  const rapport = getReportRapport()
- 
+ const evidenceRefs = (diagnosisData?.evidence_references as any[]) || []
+
  const categories = [
  { key: 'hematology', label: 'HEMATOLOGY' },
  { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
@@ -5769,6 +5782,28 @@ const ConsultationReport = () => {
  { key: 'endocrinology', label: 'ENDOCRINOLOGY' },
  { key: 'general', label: 'GENERAL LABORATORY' }
  ]
+
+ // Aggregate indications across every test in every category to compute
+ // which refs are cited in this section, and to memoise the rendered nodes
+ // by (category, index) so the iteration below stays cheap.
+ const labCitationsByCategory: Record<string, ReturnType<typeof aggregateReferences>> = {}
+ const labAllUsedRefIds = new Set<string>()
+ for (const { key } of categories) {
+   const tests = analyses[key]
+   if (!Array.isArray(tests) || tests.length === 0) continue
+   const agg = aggregateReferences(
+     tests.map((t: any) => (typeof t?.motifClinique === 'string' ? t.motifClinique : '')),
+     evidenceRefs
+   )
+   labCitationsByCategory[key] = agg
+   agg.usedRefs.forEach((r: any) => {
+     if (r?.ref_id) labAllUsedRefIds.add(r.ref_id)
+     else if (r?.title) labAllUsedRefIds.add(r.title)
+   })
+ }
+ const labUsedRefs = evidenceRefs.filter((r: any) =>
+   labAllUsedRefIds.has(r?.ref_id) || labAllUsedRefIds.has(r?.title)
+ )
  
  if (!includeFullPrescriptions && report?.prescriptionsResume) {
  return (
@@ -5837,7 +5872,9 @@ const ConsultationReport = () => {
  {label}
  </h3>
  <div className="space-y-2">
- {tests.map((test: any, idx: number) => (
+ {tests.map((test: any, idx: number) => {
+ const indicationNode = labCitationsByCategory[key]?.nodes?.[idx]
+ return (
  <div key={`${key}-test-${idx}`} className="prescription-item">
  {editMode && validationStatus !== 'validated' ? (
 <BiologyTestEditForm
@@ -5866,7 +5903,7 @@ const ConsultationReport = () => {
  )}
  {test.motifClinique && (
  <p className="text-sm text-gray-600 mt-1">
- Indication: {test.motifClinique}
+ Indication: {indicationNode || test.motifClinique}
  </p>
  )}
  </div>
@@ -5877,7 +5914,8 @@ const ConsultationReport = () => {
  </div>
  )}
  </div>
- ))}
+ )
+ })}
  </div>
  </div>
  )
@@ -5924,6 +5962,12 @@ const ConsultationReport = () => {
  </div>
  )}
 
+ <SectionBibliography
+ references={labUsedRefs}
+ globalReferences={evidenceRefs}
+ title="Références citées dans cette demande d'analyses"
+ />
+
  <div className="mt-8 pt-6 border-t border-gray-300">
  <p className="text-sm text-gray-600 mb-4">
  Laboratory: {report?.ordonnances?.biologie?.prescription?.laboratoireRecommande || "Any MoH approved laboratory"}
@@ -5961,7 +6005,25 @@ const ConsultationReport = () => {
  const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
  const patient = getReportPatient()
  const praticien = getReportPraticien()
- 
+ const evidenceRefs = (diagnosisData?.evidence_references as any[]) || []
+ // Indications + diagnostic questions both may carry citations.
+ const indicationCitations = aggregateReferences(
+   examens.map((e: any) => (typeof e?.indicationClinique === 'string' ? e.indicationClinique : '')),
+   evidenceRefs
+ )
+ const questionCitations = aggregateReferences(
+   examens.map((e: any) => (typeof e?.questionDiagnostique === 'string' ? e.questionDiagnostique : '')),
+   evidenceRefs
+ )
+ const imagingUsedRefIds = new Set<string>()
+ ;[...indicationCitations.usedRefs, ...questionCitations.usedRefs].forEach((r: any) => {
+   if (r?.ref_id) imagingUsedRefIds.add(r.ref_id)
+   else if (r?.title) imagingUsedRefIds.add(r.title)
+ })
+ const imagingUsedRefs = evidenceRefs.filter((r: any) =>
+   imagingUsedRefIds.has(r?.ref_id) || imagingUsedRefIds.has(r?.title)
+ )
+
  return (
  <div id="prescription-imagerie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
  <div className="border-b-2 border-blue-600 pb-4 mb-6 header">
@@ -6028,7 +6090,7 @@ const ConsultationReport = () => {
  </p>
  )}
  <p className="mt-1">
- <span className="font-medium">Clinical Indication:</span> {exam.indicationClinique}
+ <span className="font-medium">Clinical Indication:</span> {indicationCitations.nodes[index] || exam.indicationClinique}
  </p>
  {exam.contraste && (
  <p className="mt-1 text-blue-600">
@@ -6042,7 +6104,7 @@ const ConsultationReport = () => {
  )}
  {exam.questionDiagnostique && (
  <p className="mt-1 text-sm text-gray-600">
- <span className="font-medium">Clinical Question:</span> {exam.questionDiagnostique}
+ <span className="font-medium">Clinical Question:</span> {questionCitations.nodes[index] || exam.questionDiagnostique}
  </p>
  )}
  </div>
@@ -6062,6 +6124,12 @@ const ConsultationReport = () => {
  )}
  </div>
  )}
+
+ <SectionBibliography
+ references={imagingUsedRefs}
+ globalReferences={evidenceRefs}
+ title="Références citées dans cette demande d'imagerie"
+ />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
  <p className="text-sm text-gray-600 mb-4">
