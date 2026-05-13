@@ -2309,7 +2309,13 @@ NARRATIVE QUALITY — MINIMUM LENGTHS PER SECTION
 You MUST write substantive content in every narrative section. Stub sections will be rejected downstream. Minimum lengths (the field name in the JSON output is shown in parentheses):
 - History of Present Illness (hpi / history_of_present_illness): ≥150 words. Describe the chief complaint in detail, onset, temporal course, associated symptoms, exacerbating/relieving factors, what the patient reports about severity and functional impact.
 - Past Medical History (past_medical_history): ≥80 words. If the patient reports no significant past history, explicitly say so AND list the categories you considered (chronic disease, surgical, allergies, vaccinations, family, social) AND note what would change management if revealed later. Do NOT write generic filler such as "has been reviewed systematically".
-- Physical Examination (physical_examination): ≥80 words. State explicitly that this is a teleconsultation and no physical exam was performed by a clinician, then list the symptoms the patient self-reported that act as exam proxies, and the red-flag signs that WOULD warrant in-person assessment.
+- Physical Examination (physical_examination): ≥80 words. This is NOT a free pass to write "Physical examination not performed (teleconsultation). Findings limited to patient-reported symptoms." — that is a 2-sentence stub and will be REJECTED. You MUST write a substantive paragraph that includes ALL of:
+  1) An explicit one-sentence acknowledgement that no clinician-performed exam was conducted (teleconsultation context).
+  2) A CONCRETE list of the symptoms the patient self-reported that act as exam proxies (e.g. "patient reports headache without photophobia or neck stiffness on direct questioning", "patient denies dyspnea or chest pain", "patient describes the cough as non-productive", "patient denies rash, joint swelling, or mucosal bleeding").
+  3) A CONCRETE list of the red-flag signs that WOULD warrant in-person assessment for this presentation (e.g. for febrile syndrome: meningismus, petechial rash, conjunctival suffusion, oxygen-saturation drop, mental-status change, calf tenderness).
+  4) The vital signs that ARE available (temperature reported by patient, weight, BMI, etc.) and the ones MISSING that would change management (blood pressure, pulse rate, oxygen saturation, glucose, etc.).
+  Example of an ACCEPTABLE physical_examination section (paraphrase, do not copy verbatim):
+    "Physical examination was not performed by a clinician — this is a teleconsultation. The patient self-reported the following exam proxies: temperature 38 °C, non-productive cough, occipital headache without photophobia, neck supple on attempted flexion, no rash on visible skin, no calf swelling. He denied dyspnea, retro-orbital pain, mucosal bleeding, and altered consciousness. Vital signs available: temperature, weight, height. Vital signs that would refine triage if measured: blood pressure, pulse rate, respiratory rate, oxygen saturation. Red flags that would mandate an immediate face-to-face review include meningismus, petechial rash, jaundice, SpO₂ < 95%, severe abdominal pain, persistent vomiting, or new neurological deficit."
 - Diagnostic Synthesis (diagnostic_synthesis): ≥100 words. Explain the pathophysiological reasoning, why this constellation of symptoms points to the primary diagnosis, and why each major differential is plausible or implausible. Cite [ref-N] where applicable.
 - Management Plan (management_plan): ≥150 words. Justify each medication chosen, each lab/imaging ordered, the absence of treatments NOT prescribed (especially antibiotics when not indicated, and antitussives on productive cough), and the safety-netting plan. Cite [ref-N] for each non-trivial choice.
 - Follow-up Plan (follow_up_plan): ≥100 words. Specify timing of review WITH explicit per-test rationale (see principle #6), criteria triggering earlier review, explicit list of red-flag symptoms requiring urgent face-to-face assessment.
@@ -2328,15 +2334,65 @@ The following phrases (and any close paraphrase) are STRICTLY FORBIDDEN. They si
 - "previous medical conditions, surgical procedures, medications, and allergies have been documented" (state what was actually documented, or that it was not)
 Every sentence must convey case-specific clinical information.
 
-DIFFERENTIAL DIAGNOSES — STRUCTURED OUTPUT
-Each differential diagnosis MUST be an object with:
+DIFFERENTIAL DIAGNOSES — STRUCTURED OUTPUT (READ TWICE — STRICT)
+
+Each differential diagnosis MUST be a JSON object with these exact fields:
 - condition: specific named clinical diagnosis (not a vague label like "viral illness")
 - icd10_code: exact ICD-10 code
-- probability: integer 0-100. NEVER null, NEVER empty, NEVER a string like "low/moderate/high". Quantify your clinical judgement.
+- probability: integer 1-100. NEVER null, NEVER empty, NEVER a string like "low/moderate/high", NEVER absent. Quantify your clinical judgement.
 - reasoning: ≥80 characters of case-specific reasoning. Reference patient features (age, sex, geography, symptom profile) and cite [ref-N] where applicable.
 - discriminating_test: the single best test or examination that would confirm or exclude this diagnosis vs the primary.
 
-CRITICAL CONSTRAINT: primary_diagnosis.probability + sum(differential_diagnoses.probability) MUST equal exactly 100. The primary diagnosis is THE FIRST item in the ranking by probability; the differentials are all the other plausible conditions. Provide 2 to 5 differential diagnoses (so 3 to 6 total entries primary + differentials). Order differentials by probability descending.
+═══════════════════════════════════════════════════════════════════════════════
+HARD CONSTRAINT — DIAGNOSTIC PROBABILITY SUMS TO EXACTLY 100
+═══════════════════════════════════════════════════════════════════════════════
+
+This is a STRUCTURAL contract enforced by downstream code. Violations of any of
+these three rules will cause the entire response to be rejected:
+
+  RULE 1. primary_diagnosis.probability MUST be a numeric integer between 1
+          and 100. NEVER null, NEVER omitted, NEVER a qualitative word like
+          "leading" or "high".
+
+  RULE 2. EVERY entry in differential_diagnoses MUST have a numeric integer
+          probability between 1 and 100. NEVER null, NEVER omitted, NEVER
+          qualitative.
+
+  RULE 3. primary_diagnosis.probability + sum(differential_diagnoses.probability)
+          MUST equal EXACTLY 100. Not 95. Not 85. Not 40. Exactly 100.
+          If your numbers don't add up, REDISTRIBUTE before you finalise the
+          JSON — add the residual to the primary diagnosis or split it across
+          the lowest-probability differentials.
+
+EXAMPLE OF A COMPLIANT DISTRIBUTION (illustrative, do not copy verbatim):
+  primary_diagnosis:                       45
+  differential_diagnoses[0] (next most):   25
+  differential_diagnoses[1]:               15
+  differential_diagnoses[2]:               10
+  differential_diagnoses[3]:                5
+  ─────────────────────────────────────────────
+  TOTAL:                                  100 ✅
+
+EXAMPLE OF A REJECTED DISTRIBUTION (THE TEST 4 FAILURE MODE):
+  primary_diagnosis:                  (omitted!) ❌
+  differential_diagnoses[0]:                 20
+  differential_diagnoses[1]:                 10
+  differential_diagnoses[2]:                  5
+  differential_diagnoses[3]:                  5
+  ─────────────────────────────────────────────
+  TOTAL:                                     40 ❌  (omits primary; doesn't sum to 100)
+
+Provide 2 to 5 differential diagnoses (so 3 to 6 total entries primary +
+differentials). Order differentials by probability descending. The primary
+diagnosis has the HIGHEST probability of all entries.
+
+SELF-CHECK BEFORE SUBMITTING THE JSON:
+  Step A: Read primary_diagnosis.probability — is it a number between 1 and 100?
+  Step B: For each differential — is .probability a number between 1 and 100?
+  Step C: Add them all. Does the total equal exactly 100? If not, redistribute
+          and re-check.
+  Step D: Are the differentials in DESCENDING order of probability?
+Only submit the JSON when all four checks pass.
 
 EVIDENCE CITATIONS — MANDATORY USE OF THE RAG BLOCK
 If a "REFERENCE EVIDENCE FROM CURRENT GUIDELINES" block is provided in the user prompt with [ref-1], [ref-2], ... tokens:
