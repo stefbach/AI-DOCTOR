@@ -1,0 +1,112 @@
+name: 🧮 RAG — Embed missing chunks (GitHub-hosted runner)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Manual trigger only.
+#
+# Same job as the embed-only mode in rag-ingest.yml, but runs DIRECTLY on a
+# GitHub-hosted Ubuntu runner instead of SSH-ing to a VPS. Use this when
+# the VPS is unreachable or you don't want to involve it for a one-shot
+# operation.
+#
+# REQUIRED SECRETS (Settings → Secrets and variables → Actions):
+#   - OPENAI_API_KEY                 (your OpenAI key, starts with sk-...)
+#   - SUPABASE_URL                   (https://<project>.supabase.co)
+#       OR NEXT_PUBLIC_SUPABASE_URL  (the script accepts either)
+#   - SUPABASE_SERVICE_ROLE_KEY      (the service-role key from Supabase,
+#                                     NOT the anon key)
+#
+# No SSH access, no VPS, no .env.local — the runner picks up everything
+# from GitHub secrets and runs the same scripts/rag-ingest/generate-
+# embeddings.mjs as the VPS version.
+# ═══════════════════════════════════════════════════════════════════════════
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rag-embed-runner-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  embed:
+    name: Generate missing embeddings
+    runs-on: ubuntu-latest
+    # 120 min for the 56k-chunk one-shot. Typical runtime 60-90 min.
+    timeout-minutes: 120
+
+    steps:
+      - name: Verify secrets are configured
+        env:
+          HAS_OPENAI: ${{ secrets.OPENAI_API_KEY != '' }}
+          HAS_SUPABASE_URL: ${{ secrets.SUPABASE_URL != '' || secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}
+          HAS_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
+        run: |
+          missing=0
+          [ "$HAS_OPENAI" = "true" ] || { echo "::error::OPENAI_API_KEY secret is missing"; missing=1; }
+          [ "$HAS_SUPABASE_URL" = "true" ] || { echo "::error::SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) secret is missing"; missing=1; }
+          [ "$HAS_SERVICE_KEY" = "true" ] || { echo "::error::SUPABASE_SERVICE_ROLE_KEY secret is missing"; missing=1; }
+          if [ $missing -eq 1 ]; then
+            echo ""
+            echo "Add the missing secrets here:"
+            echo "  https://github.com/${{ github.repository }}/settings/secrets/actions"
+            exit 1
+          fi
+          echo "✅ All 3 required secrets are present"
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install minimal dependencies
+        # We don't need the full Next.js dep tree; just the two packages
+        # the script actually imports. This keeps install <30s versus
+        # 3-5 min for a full npm install.
+        run: |
+          mkdir -p /tmp/embed-deps
+          cd /tmp/embed-deps
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund @supabase/supabase-js openai
+          echo "✅ Dependencies installed at /tmp/embed-deps/node_modules"
+
+      - name: Run embedding generation
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Tell Node where to find the deps we installed above.
+          NODE_PATH: /tmp/embed-deps/node_modules
+        run: |
+          echo "🧮 Starting embedding generation on GitHub-hosted runner"
+          echo "   (this typically runs 60-90 min, costs ~\$0.34 OpenAI)"
+          echo ""
+          node scripts/rag-ingest/generate-embeddings.mjs
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## 🧮 RAG Embedding Generation Result"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Status | ${{ job.status }} |"
+            echo "| Branch | \`${{ github.ref_name }}\` |"
+            echo ""
+            echo "**Verification SQL** (run in Supabase SQL editor):"
+            echo '```sql'
+            echo "SELECT"
+            echo "  COUNT(*) AS total_chunks,"
+            echo "  COUNT(embedding) AS chunks_with_embedding,"
+            echo "  ROUND(100.0 * COUNT(embedding) / COUNT(*), 2) AS pct_complete"
+            echo "FROM guidelines_chunks;"
+            echo '```'
+            echo ""
+            echo "Expected after success: ~100% complete (all 56k chunks embedded)."
+          } >> $GITHUB_STEP_SUMMARY
