@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { callLLM } from '@/lib/llm-client';
 
 // === Lazy singletons ===
 let openaiClient: OpenAI | null = null;
@@ -355,9 +356,8 @@ async function transcribeAudio(audioFile: File): Promise<{
 // ============================================
 async function translateToEnglish(frenchText: string): Promise<string> {
   try {
-    const openai = getOpenAIClient();
-    const response = await openai.chat.completions.create({
-      model: 'gpt-5.5',
+    const response = await callLLM({
+      useCase: 'VOICE_TRANSLATE',
       messages: [
         {
           role: 'system',
@@ -370,15 +370,13 @@ RULES:
 4. Keep the same structure and meaning
 5. Return ONLY the translated text, nothing else`
         },
-        {
-          role: 'user',
-          content: frenchText
-        }
+        { role: 'user', content: frenchText }
       ],
-      max_completion_tokens: 2000,
+      maxTokens: 2000,
+      timeoutMs: 60_000,
     });
 
-    return response.choices[0]?.message?.content?.trim() || frenchText;
+    return response.text?.trim() || frenchText;
   } catch (error: any) {
     console.error('❌ Translation failed:', error.message);
     return frenchText;
@@ -393,26 +391,19 @@ async function extractClinicalData(
 ): Promise<ExtractedClinicalData> {
   console.log('🧠 Step 2: Extracting clinical data with GPT-5.5...');
 
-  const openai = getOpenAIClient();
-  const extraction = await openai.chat.completions.create({
-    model: 'gpt-5.5',
+  const extraction = await callLLM({
+    useCase: 'VOICE_EXTRACTION',
     messages: [
-      {
-        role: 'system',
-        content: EXTRACTION_SYSTEM_PROMPT
-      },
-      {
-        role: 'user',
-        content: `Transcription de la dictée médicale:\n\n${transcriptionText}\n\nExtrayez toutes les données cliniques en JSON.`
-      }
+      { role: 'system', content: EXTRACTION_SYSTEM_PROMPT },
+      { role: 'user', content: `Transcription de la dictée médicale:\n\n${transcriptionText}\n\nExtrayez toutes les données cliniques en JSON.` }
     ],
-    max_completion_tokens: 3000,
-    response_format: { type: "json_object" }
+    maxTokens: 3000,
+    responseFormat: 'json_object',
+    timeoutMs: 120_000,
   });
-  
-  const extractedData = JSON.parse(
-    extraction.choices[0].message.content || '{}'
-  );
+  console.log(`[llm] use=VOICE_EXTRACTION provider=${extraction.provider} model=${extraction.model} latency=${extraction.latencyMs}ms`)
+
+  const extractedData = JSON.parse(extraction.text || '{}');
   
   console.log('✅ Clinical data extracted');
   console.log(`   Patient age: ${extractedData.patientInfo?.age || 'not specified'}`);

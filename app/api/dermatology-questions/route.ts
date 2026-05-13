@@ -2,12 +2,12 @@
 // - 4 retry attempts with progressive enhancement
 // - Auto-correction on final attempt
 // - 8000 max tokens for comprehensive questions
-// - Advanced OpenAI parameters
+// - LLM provider switchable via env var LLM_PROVIDER_DERMATOLOGY_QUESTIONS (openai|deepseek)
 export const runtime = 'nodejs'
-export const maxDuration = 120 // 120 seconds for dermatology questions generation
+export const maxDuration = 600 // 600s to absorb DeepSeek V4-Pro latency variance on rich dermatology cases
 
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { callLLM } from '@/lib/llm-client'
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -42,7 +42,7 @@ function anonymizePatientData(patientData: any): {
 
 // ==================== RETRY MECHANISM ====================
 async function callOpenAIWithRetry(
-  openai: OpenAI,
+  _unused: unknown,
   prompt: string,
   systemMessage: string,
   maxRetries: number = 3
@@ -85,23 +85,25 @@ ${systemMessage}
 - All multiple choice options comprehensive`
       }
       
-      const completion = await openai.chat.completions.create({
-        model: "gpt-5.5",
+      const completion = await callLLM({
+        useCase: 'DERMATOLOGY_QUESTIONS',
         messages: [
           { role: "system", content: enhancedSystemMessage },
           { role: "user", content: prompt }
         ],
-        max_completion_tokens: 8000,
-        response_format: { type: "json_object" },
-        top_p: 0.9,
-        frequency_penalty: 0.1,
-        presence_penalty: 0.2
+        maxTokens: 8000,
+        responseFormat: 'json_object',
+        topP: 0.9,
+        frequencyPenalty: 0.1,
+        presencePenalty: 0.2,
+        reasoningEffort: 'low',
+        timeoutMs: 180_000,
       })
+
+      let questionsText = completion.text || '[]'
       
-      let questionsText = completion.choices[0].message.content || '[]'
-      
-      // ========== CRITICAL DEBUG: Log raw GPT-5.5 response ==========
-      console.log('🔍 ========== RAW GPT-5.5 RESPONSE ==========')
+      // ========== CRITICAL DEBUG: Log raw LLM response ==========
+      console.log(`🔍 ========== RAW LLM RESPONSE (provider=${completion.provider}, model=${completion.model}) ==========`)
       console.log('   Raw response length:', questionsText.length)
       console.log('   Raw response preview:', questionsText.substring(0, 500))
       console.log('   Raw response end:', questionsText.substring(Math.max(0, questionsText.length - 200)))
@@ -202,11 +204,6 @@ ${systemMessage}
 
 export async function POST(request: NextRequest) {
   try {
-    // Initialize OpenAI client inside the function to avoid build-time errors
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    })
-
     const body = await request.json()
     const { patientData, imageData, ocrAnalysisData } = body
 
@@ -383,7 +380,7 @@ YOU MUST return a JSON object with "questions" array, NOT a single question!`
 
     const systemMessage = "You are an expert dermatologist. Generate targeted clinical questions in valid JSON format only. CRITICAL: ALL questions MUST be multiple choice format with 4-6 specific answer options. NO open-ended questions allowed."
     
-    const result = await callOpenAIWithRetry(openai, prompt, systemMessage, 3)
+    const result = await callOpenAIWithRetry(null, prompt, systemMessage, 3)
     const questions = result.questions
 
     console.log(`✅ Generated ${questions.length} dermatology questions with retry mechanism`)

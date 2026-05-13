@@ -3,6 +3,7 @@
 // - Call 1: Disease Assessment + Medication Management (reasoning: medium, 16K budget)
 // - Call 2: Meal Plan + Objectives & Follow-up (no reasoning, ~6K budget)
 import { type NextRequest, NextResponse } from "next/server"
+import { callLLM } from '@/lib/llm-client'
 import {
   buildClinicalQuery,
   buildSecondaryQueries,
@@ -51,70 +52,33 @@ function anonymizePatientData(patientData: any): {
 // ==================== HELPER FUNCTIONS ====================
 
 async function callOpenAI(
-  apiKey: string,
+  _apiKey: string,
   systemPrompt: string,
   userPrompt: string,
   maxTokens: number = 2000,
   useReasoning: boolean = false
 ): Promise<any> {
-  // For reasoning models (gpt-5.5), reasoning tokens count toward max_completion_tokens.
-  // With reasoning_effort 'medium', the model may use 6-10K reasoning tokens,
-  // so we need a 16K budget to leave enough room for the actual JSON output.
+  // Reasoning models route reasoning tokens through max_completion_tokens, so
+  // budget a floor of 16k when reasoning is on to leave room for the JSON output.
   const effectiveMaxTokens = useReasoning ? Math.max(maxTokens, 16384) : maxTokens
 
-  const body: any = {
-    model: "gpt-5.5",
+  const llmResult = await callLLM({
+    useCase: 'CHRONIC_DIAGNOSIS',
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt }
     ],
-    max_completion_tokens: effectiveMaxTokens,
-    response_format: { type: "json_object" }
-  }
-
-  if (useReasoning) {
-    body.reasoning_effort = 'medium'
-  } else {
-    body.temperature = 0.3
-  }
-
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(body),
+    maxTokens: effectiveMaxTokens,
+    responseFormat: 'json_object',
+    reasoningEffort: useReasoning ? 'medium' : 'none',
+    timeoutMs: 280_000,
   })
+  console.log(`[llm] use=CHRONIC_DIAGNOSIS provider=${llmResult.provider} model=${llmResult.model} latency=${llmResult.latencyMs}ms tokens=${llmResult.usage?.totalTokens ?? 'n/a'}`)
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
-  }
-
-  const data = await response.json()
-
-  // Log response structure for debugging
-  const choice = data.choices?.[0]
-  console.log(`   📡 OpenAI response - finish_reason: ${choice?.finish_reason}, has content: ${!!choice?.message?.content}, usage: ${JSON.stringify(data.usage || {})}`)
-
-  const content = choice?.message?.content
+  const content = llmResult.text
 
   if (!content) {
-    // Log full response structure when content is missing
-    console.error('❌ No content in OpenAI response. Full response:', JSON.stringify(data, null, 2).substring(0, 500))
-
-    // Check if the model hit the token limit (all tokens consumed by reasoning)
-    if (choice?.finish_reason === 'length') {
-      throw new Error(`OpenAI response truncated - reasoning consumed all ${effectiveMaxTokens} tokens, leaving none for output. Usage: ${JSON.stringify(data.usage || {})}`)
-    }
-
-    throw new Error(`No content in OpenAI response (finish_reason: ${choice?.finish_reason || 'unknown'})`)
-  }
-
-  // Warn if output was truncated (partial JSON) but still try to parse
-  if (choice?.finish_reason === 'length') {
-    console.warn(`⚠️ Response truncated (finish_reason: length) but content exists (${content.length} chars). Attempting parse...`)
+    throw new Error('No content in LLM response')
   }
 
   try {
@@ -126,7 +90,7 @@ async function callOpenAI(
       const cleaned = cleanJsonString(content)
       return JSON.parse(cleaned)
     } catch {
-      throw new Error(`Invalid JSON from OpenAI (finish_reason: ${choice?.finish_reason}). First 200 chars: ${content.substring(0, 200)}`)
+      throw new Error(`Invalid JSON from LLM. First 200 chars: ${content.substring(0, 200)}`)
     }
   }
 }
@@ -174,11 +138,7 @@ function cleanJsonString(jsonStr: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) {
-    return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 })
-  }
-
+  // Credential validation delegated to callLLM (LLM_PROVIDER_CHRONIC_DIAGNOSIS).
   try {
     const { patientData, clinicalData, questionsData } = await req.json()
 
@@ -348,7 +308,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
 }
 Si pas de médicaments à modifier, retourne des tableaux vides pour continue/add/adjust/stop.
 Si le RAG n'a fourni aucune guideline (pas de bloc CONTEXTE GUIDELINES MÉDICALES ci-dessus), retourne evidence_references: [].`
-          const clinicalAnalysis = await callOpenAI(apiKey, call1SystemPrompt, patientContext, 8000, true)
+          const clinicalAnalysis = await callOpenAI('', call1SystemPrompt, patientContext, 8000, true)
 
           sendSSE('progress', { message: 'Évaluation clinique complète, création du plan de suivi...', progress: 50 })
 
@@ -448,7 +408,7 @@ Retourne UNIQUEMENT un JSON valide:
 }
 
 Si une recommandation s'appuie sur une guideline du bloc CONTEXTE GUIDELINES MÉDICALES ci-dessus, cite [ref-N] dans le texte de la recommandation (ex: "viser HbA1c < 7% [ref-1]").`
-          const structuredPlans = await callOpenAI(apiKey, call2SystemPrompt, patientContext, 6000)
+          const structuredPlans = await callOpenAI('', call2SystemPrompt, patientContext, 6000)
 
           sendSSE('progress', { message: 'Finalisation de l\'évaluation...', progress: 90 })
 

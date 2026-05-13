@@ -12,7 +12,7 @@ export const runtime = 'nodejs'
 export const maxDuration = 300 // 300 seconds max for GPT-5.5 dermatology diagnosis generation
 
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { callLLM } from '@/lib/llm-client'
 import {
   buildClinicalQuery,
   queryMedicalGuidelines,
@@ -264,7 +264,7 @@ function validateDermatologyQuality(diagnosis: any): { isValid: boolean; issues:
  * Calls OpenAI with retry mechanism and quality validation
  */
 async function callOpenAIWithRetry(
-  openai: OpenAI,
+  _unused: unknown,
   diagnosticPrompt: string,
   maxRetries: number = 3,
   ragPromptBlock: string = ''
@@ -387,27 +387,23 @@ CLINICAL SUMMARY MUST INCLUDE:
         ? `${ragPromptBlock}\n\n${systemMessage}`
         : systemMessage
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-5.5",
+      const completion = await callLLM({
+        useCase: 'DERMATOLOGY_DIAGNOSIS',
         messages: [
-          {
-            role: "system",
-            content: systemMessageWithRAG
-          },
-          {
-            role: "user",
-            content: diagnosticPrompt
-          }
+          { role: "system", content: systemMessageWithRAG },
+          { role: "user", content: diagnosticPrompt }
         ],
-        max_completion_tokens: 8000,
-        reasoning_effort: 'medium',
-        response_format: { type: "json_object" },
+        maxTokens: 8000,
+        reasoningEffort: 'medium',
+        responseFormat: 'json_object',
+        timeoutMs: 280_000,
       })
-      
-      const content = completion.choices[0]?.message?.content
-      
+
+      const content = completion.text
+      console.log(`[llm] use=DERMATOLOGY_DIAGNOSIS provider=${completion.provider} model=${completion.model} latency=${completion.latencyMs}ms`)
+
       if (!content) {
-        throw new Error('No content received from OpenAI')
+        throw new Error('No content received from LLM')
       }
       
       // Parse JSON response
@@ -528,10 +524,6 @@ CLINICAL SUMMARY MUST INCLUDE:
 
 export async function POST(request: NextRequest) {
   try {
-    // Initialize OpenAI client inside the function to avoid build-time errors
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    })
 
     const body = await request.json()
     const { patientData, imageData, ocrAnalysisData, questionsData } = body
@@ -954,7 +946,7 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     }
 
     // Call OpenAI with retry mechanism and quality validation
-    const result = await callOpenAIWithRetry(openai, diagnosticPrompt, 1, ragPromptBlock)
+    const result = await callOpenAIWithRetry(null, diagnosticPrompt, 1, ragPromptBlock)
     const diagnosisData = result.diagnosis
 
     // DDX likelihood normalisation — ensures primary + differentials = 100.

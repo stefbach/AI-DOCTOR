@@ -1,6 +1,7 @@
 // app/api/chronic-prescription/route.ts - Chronic Disease Medication Prescription API
 // Generates prescriptions for chronic disease medications (antidiabetics, antihypertensives, statins, etc.)
 import { type NextRequest, NextResponse } from "next/server"
+import { callLLM } from '@/lib/llm-client'
 import {
   buildClinicalQuery,
   inferSpecialty,
@@ -381,49 +382,35 @@ Generate the comprehensive chronic disease prescription now.`
       ? `${ragPromptBlock}\n\n${systemPrompt}`
       : systemPrompt
 
-    const apiKey = process.env.OPENAI_API_KEY
-    if (!apiKey) {
-      return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 })
-    }
+    console.log('🤖 Calling LLM (callLLM, JSON mode) for chronic prescription...')
 
-    console.log('🤖 Calling OpenAI API (direct fetch, JSON mode) for chronic prescription...')
-
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-5.5",
+    let llmResult
+    try {
+      llmResult = await callLLM({
+        useCase: 'CHRONIC_PRESCRIPTION',
         messages: [
           { role: "system", content: finalSystemPrompt },
           { role: "user", content: patientContext }
         ],
-        max_completion_tokens: 8000,
-        response_format: { type: "json_object" }
-      }),
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error(`❌ OpenAI API error (${response.status}):`, errorText.substring(0, 300))
+        maxTokens: 8000,
+        responseFormat: 'json_object',
+        timeoutMs: 280_000,
+      })
+    } catch (llmErr: any) {
+      console.error('❌ LLM call failed:', llmErr?.message || llmErr)
       return NextResponse.json(
-        { error: `OpenAI API error (${response.status})`, details: errorText.substring(0, 200) },
+        { error: 'LLM call failed', details: String(llmErr?.message || llmErr).substring(0, 200) },
         { status: 502 }
       )
     }
 
-    const data = await response.json()
-    const choice = data.choices?.[0]
-    const content = choice?.message?.content
-
-    console.log(`📡 OpenAI response - finish_reason: ${choice?.finish_reason}, usage: ${JSON.stringify(data.usage || {})}`)
+    const content = llmResult.text
+    console.log(`[llm] use=CHRONIC_PRESCRIPTION provider=${llmResult.provider} model=${llmResult.model} latency=${llmResult.latencyMs}ms tokens=${llmResult.usage?.totalTokens ?? 'n/a'}`)
 
     if (!content) {
-      console.error('❌ No content in OpenAI response:', JSON.stringify(data, null, 2).substring(0, 500))
+      console.error('❌ No content in LLM response')
       return NextResponse.json(
-        { error: "No content in OpenAI response" },
+        { error: "No content in LLM response" },
         { status: 502 }
       )
     }

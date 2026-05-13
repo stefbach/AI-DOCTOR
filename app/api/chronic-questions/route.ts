@@ -5,6 +5,7 @@
 // - 8000 max tokens for comprehensive questions
 // - Advanced OpenAI parameters
 import { type NextRequest, NextResponse } from "next/server"
+import { callLLM } from '@/lib/llm-client'
 
 // ==================== CONFIGURATION ====================
 export const runtime = 'nodejs'
@@ -240,32 +241,23 @@ ${systemMessage}
 - Response MUST be valid JSON with complete fields`
       }
       
-      const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-5.5',
-          messages: [
-            { role: 'system', content: enhancedSystemMessage },
-            { role: 'user', content: prompt }
-          ],
-          max_completion_tokens: 8000,
-          response_format: { type: 'json_object' },
-          top_p: 0.9,
-          frequency_penalty: 0.1,
-          presence_penalty: 0.2
-        }),
+      const llmResult = await callLLM({
+        useCase: 'CHRONIC_QUESTIONS',
+        messages: [
+          { role: 'system', content: enhancedSystemMessage },
+          { role: 'user', content: prompt }
+        ],
+        maxTokens: 8000,
+        responseFormat: 'json_object',
+        topP: 0.9,
+        frequencyPenalty: 0.1,
+        presencePenalty: 0.2,
+        reasoningEffort: 'low',
+        timeoutMs: 180_000,
       })
-      
-      if (!openaiResponse.ok) {
-        throw new Error(`OpenAI API error: ${openaiResponse.status}`)
-      }
-      
-      const aiData = await openaiResponse.json()
-      const content = aiData.choices[0]?.message?.content || '{}'
+      console.log(`[llm] use=CHRONIC_QUESTIONS provider=${llmResult.provider} model=${llmResult.model} latency=${llmResult.latencyMs}ms`)
+
+      const content = llmResult.text || '{}'
       
       let parsed
       try {
@@ -409,11 +401,8 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now()
   
   try {
-    const apiKey = process.env.OPENAI_API_KEY
-    if (!apiKey || !apiKey.startsWith('sk-')) {
-      throw new Error('Invalid or missing OpenAI API key')
-    }
-    
+    // Credential validation is delegated to callLLM (which resolves the
+    // active provider via LLM_PROVIDER_CHRONIC_QUESTIONS).
     const body = await request.json()
     const { patientData, clinicalData } = body
     
@@ -448,7 +437,7 @@ export async function POST(request: NextRequest) {
     
     const systemMessage = 'You are an expert endocrinologist and diabetologist conducting a chronic disease follow-up assessment. Generate diagnostic questions based on evidence-based medicine. CRITICAL: ALL questions MUST be multiple choice format with EXACTLY 4 specific answer options. NO open-ended questions. Always respond with valid JSON only.'
     
-    const result = await callOpenAIWithRetry(apiKey, prompt, systemMessage, 3)
+    const result = await callOpenAIWithRetry('', prompt, systemMessage, 3)
     const questions = result.questions
     
     console.log(`✅ Generated ${questions.length} chronic disease questions with retry mechanism`)

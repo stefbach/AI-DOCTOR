@@ -1,18 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
-
-// OpenAI client will be initialized inside the function to avoid build-time errors
-
-// Moved inside function - const openai = new OpenAI({
-// Moved inside function -   apiKey: process.env.OPENAI_API_KEY
-// Moved inside function - })
+import { callLLM } from '@/lib/llm-client'
 
 export async function POST(request: NextRequest) {
   try {
-    // Initialize OpenAI client inside the function to avoid build-time errors
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    })
 
     const body = await request.json()
     const { diagnosisText, patientData } = body
@@ -65,22 +55,18 @@ EXAMPLE OUTPUT FORMAT:
   }
 ]`
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-5.5",
+    const completion = await callLLM({
+      useCase: 'EXTRACT_MEDICATIONS',
       messages: [
-        {
-          role: "system",
-          content: "You are a medical assistant specialized in extracting structured medication data from dermatology diagnoses. Always return valid JSON arrays only."
-        },
-        {
-          role: "user",
-          content: extractionPrompt
-        }
+        { role: "system", content: "You are a medical assistant specialized in extracting structured medication data from dermatology diagnoses. Always return valid JSON arrays only." },
+        { role: "user", content: extractionPrompt }
       ],
-      max_completion_tokens: 2000,
+      maxTokens: 2000,
+      timeoutMs: 120_000,
     })
+    console.log(`[llm] use=EXTRACT_MEDICATIONS provider=${completion.provider} model=${completion.model} latency=${completion.latencyMs}ms`)
 
-    const responseText = completion.choices[0].message.content || '[]'
+    const responseText = completion.text || '[]'
     console.log('🤖 AI Response:', responseText)
 
     // Clean up the response to extract JSON

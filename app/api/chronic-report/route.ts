@@ -1,7 +1,7 @@
 // app/api/chronic-report/route.ts - PROFESSIONAL Chronic Disease Report with SAME STRUCTURE as consultation-report
 // Uses EXACT SAME LOGIC as generate-consultation-report for consistency (NO EMOJIS, NO COLORS)
 import { type NextRequest, NextResponse } from "next/server"
-import OpenAI from "openai"
+import { callLLM } from '@/lib/llm-client'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300
@@ -488,8 +488,7 @@ function useChronicDiseaseFallback(extractedData: any, patientData: any) {
 
 // ==================== PROFESSIONAL PRESCRIPTION EXTRACTION ====================
 async function extractMedicationsProfessional(diagnosisData: any, patientData: any): Promise<any[]> {
-  const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  
+
   try {
     const prompt = `Extract ALL medications from chronic disease management data with COMPLETE professional details.
 
@@ -528,19 +527,17 @@ Return format (professional prescription - NO EMOJIS):
 
 CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON medical nomenclature in ENGLISH. NO EMOJIS.`
 
-    const completion = await openaiClient.chat.completions.create({
-      model: "gpt-5.5",
+    const completion = await callLLM({
+      useCase: 'CHRONIC_REPORT_EXTRACT_MEDS',
       messages: [
-        { 
-          role: "system", 
-          content: "You are a clinical pharmacist extracting medication prescriptions. Use professional medical terminology in ENGLISH. NO EMOJIS. Include all safety information." 
-        },
+        { role: "system", content: "You are a clinical pharmacist extracting medication prescriptions. Use professional medical terminology in ENGLISH. NO EMOJIS. Include all safety information." },
         { role: "user", content: prompt }
       ],
-      max_completion_tokens: 3000
+      maxTokens: 3000,
+      timeoutMs: 180_000,
     })
 
-    const text = (completion.choices[0].message.content || '[]').trim()
+    const text = (completion.text || '[]').trim()
     const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '')
     const match = cleaned.match(/\[[\s\S]*\]/)
     return match ? JSON.parse(match[0]) : []
@@ -551,8 +548,7 @@ CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON medical nomenclature in EN
 }
 
 async function extractLabTestsProfessional(diagnosisData: any, patientData: any): Promise<any[]> {
-  const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  
+
   try {
     const prompt = `Extract ALL laboratory tests for chronic disease monitoring with COMPLETE details.
 
@@ -581,19 +577,17 @@ Categories: hematology, clinicalChemistry, immunology, microbiology, endocrinolo
 
 CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON nomenclature. NO EMOJIS.`
 
-    const completion = await openaiClient.chat.completions.create({
-      model: "gpt-5.5",
+    const completion = await callLLM({
+      useCase: 'CHRONIC_REPORT_EXTRACT_LABS',
       messages: [
-        { 
-          role: "system", 
-          content: "You are a clinical pathologist ordering laboratory investigations. Professional medical terminology in ENGLISH. NO EMOJIS." 
-        },
+        { role: "system", content: "You are a clinical pathologist ordering laboratory investigations. Professional medical terminology in ENGLISH. NO EMOJIS." },
         { role: "user", content: prompt }
       ],
-      max_completion_tokens: 3000
+      maxTokens: 3000,
+      timeoutMs: 180_000,
     })
 
-    const text = (completion.choices[0].message.content || '[]').trim()
+    const text = (completion.text || '[]').trim()
     const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '')
     const match = cleaned.match(/\[[\s\S]*\]/)
     return match ? JSON.parse(match[0]) : []
@@ -604,8 +598,7 @@ CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON nomenclature. NO EMOJIS.`
 }
 
 async function extractImagingStudiesProfessional(diagnosisData: any, patientData: any): Promise<any[]> {
-  const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  
+
   try {
     const prompt = `Extract ALL imaging studies for chronic disease complications screening with COMPLETE details.
 
@@ -631,19 +624,17 @@ Return format (professional imaging request - NO EMOJIS):
 
 CRITICAL: Return ONLY the JSON array. Professional terminology. NO EMOJIS.`
 
-    const completion = await openaiClient.chat.completions.create({
-      model: "gpt-5.5",
+    const completion = await callLLM({
+      useCase: 'CHRONIC_REPORT_EXTRACT_IMAGING',
       messages: [
-        { 
-          role: "system", 
-          content: "You are a radiologist ordering imaging studies. Professional medical terminology in ENGLISH. NO EMOJIS." 
-        },
+        { role: "system", content: "You are a radiologist ordering imaging studies. Professional medical terminology in ENGLISH. NO EMOJIS." },
         { role: "user", content: prompt }
       ],
-      max_completion_tokens: 2500
+      maxTokens: 2500,
+      timeoutMs: 180_000,
     })
 
-    const text = (completion.choices[0].message.content || '[]').trim()
+    const text = (completion.text || '[]').trim()
     const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '')
     const match = cleaned.match(/\[[\s\S]*\]/)
     return match ? JSON.parse(match[0]) : []
@@ -704,31 +695,18 @@ export async function POST(req: NextRequest) {
     let narrativeSections: any
     
     try {
-      const narrativeResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-5.5",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-          ],
-          max_completion_tokens: 6000,
-          response_format: { type: "json_object" }
-        }),
+      const narrativeResult = await callLLM({
+        useCase: 'CHRONIC_REPORT_NARRATIVE',
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        maxTokens: 6000,
+        responseFormat: 'json_object',
+        timeoutMs: 280_000,
       })
-
-      if (!narrativeResponse.ok) {
-        const errorText = await narrativeResponse.text()
-        throw new Error(`OpenAI API error (${narrativeResponse.status}): ${errorText.substring(0, 200)}`)
-      }
-
-      const narrativeData = await narrativeResponse.json()
-      const content = narrativeData.choices?.[0]?.message?.content
-      console.log(`📡 Narrative response - finish_reason: ${narrativeData.choices?.[0]?.finish_reason}, usage: ${JSON.stringify(narrativeData.usage || {})}`)
+      const content = narrativeResult.text
+      console.log(`[llm] use=CHRONIC_REPORT_NARRATIVE provider=${narrativeResult.provider} model=${narrativeResult.model} latency=${narrativeResult.latencyMs}ms tokens=${narrativeResult.usage?.totalTokens ?? 'n/a'}`)
 
       if (!content) {
         console.warn("No content in AI response, using fallback")
