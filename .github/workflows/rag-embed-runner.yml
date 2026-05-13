@@ -66,27 +66,29 @@ jobs:
 
       - name: Install minimal dependencies
         # We don't need the full Next.js dep tree; just the two packages
-        # the script actually imports. This keeps install <30s versus
-        # 3-5 min for a full npm install.
+        # the script actually imports. Copy the script into a fresh
+        # /tmp dir with its own node_modules — NODE_PATH does not work
+        # with ES modules, only a local sibling node_modules is found
+        # by Node's ESM resolver.
         run: |
-          mkdir -p /tmp/embed-deps
-          cd /tmp/embed-deps
+          mkdir -p /tmp/embed-run
+          cp scripts/rag-ingest/generate-embeddings.mjs /tmp/embed-run/
+          cd /tmp/embed-run
           npm init -y >/dev/null
           npm install --no-audit --no-fund @supabase/supabase-js openai
-          echo "✅ Dependencies installed at /tmp/embed-deps/node_modules"
+          echo "✅ Script + dependencies prepared at /tmp/embed-run"
 
       - name: Run embedding generation
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          # Tell Node where to find the deps we installed above.
-          NODE_PATH: /tmp/embed-deps/node_modules
+        working-directory: /tmp/embed-run
         run: |
           echo "🧮 Starting embedding generation on GitHub-hosted runner"
           echo "   (this typically runs 60-90 min, costs ~\$0.34 OpenAI)"
           echo ""
-          node scripts/rag-ingest/generate-embeddings.mjs
+          node generate-embeddings.mjs
 
       - name: Job summary
         if: always()

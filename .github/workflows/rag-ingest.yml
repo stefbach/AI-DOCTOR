@@ -303,13 +303,22 @@ jobs:
       - name: '[embed-runner] Install minimal dependencies'
         if: inputs.mode == 'embed-runner'
         # Avoids the multi-minute Next.js npm install. We only need the two
-        # packages the script imports.
+        # packages the script imports. Approach: copy the script into a
+        # fresh /tmp directory with its own node_modules. NODE_PATH does
+        # not work with ES modules — only a local node_modules sibling to
+        # the .mjs file is honoured by Node's ESM resolver.
         run: |
-          mkdir -p /tmp/embed-deps
-          cd /tmp/embed-deps
+          if [ ! -f scripts/rag-ingest/generate-embeddings.mjs ]; then
+            echo "::error::scripts/rag-ingest/generate-embeddings.mjs not found on branch '${{ inputs.branch }}'."
+            echo "Make sure 'Use workflow from' AND 'Git branch to use on VPS' both point to a branch that contains this script."
+            exit 1
+          fi
+          mkdir -p /tmp/embed-run
+          cp scripts/rag-ingest/generate-embeddings.mjs /tmp/embed-run/
+          cd /tmp/embed-run
           npm init -y >/dev/null
           npm install --no-audit --no-fund @supabase/supabase-js openai
-          echo "✅ Dependencies installed at /tmp/embed-deps/node_modules"
+          echo "✅ Script + dependencies prepared at /tmp/embed-run"
 
       - name: '[embed-runner] Run embeddings generation'
         if: inputs.mode == 'embed-runner'
@@ -317,17 +326,12 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          NODE_PATH: /tmp/embed-deps/node_modules
+        working-directory: /tmp/embed-run
         run: |
-          if [ ! -f scripts/rag-ingest/generate-embeddings.mjs ]; then
-            echo "::error::scripts/rag-ingest/generate-embeddings.mjs not found on branch '${{ inputs.branch }}'."
-            echo "Make sure 'Use workflow from' AND 'Git branch to use on VPS' both point to a branch that contains this script."
-            exit 1
-          fi
           echo "🧮 Starting embedding generation on GitHub-hosted runner"
           echo "   (typical: 60-90 min, ~\$0.34 OpenAI cost)"
           echo ""
-          node scripts/rag-ingest/generate-embeddings.mjs
+          node generate-embeddings.mjs
 
       - name: Job summary
         if: always()
