@@ -408,7 +408,12 @@ Retourne UNIQUEMENT un JSON valide:
 }
 
 Si une recommandation s'appuie sur une guideline du bloc CONTEXTE GUIDELINES MÉDICALES ci-dessus, cite [ref-N] dans le texte de la recommandation (ex: "viser HbA1c < 7% [ref-1]").`
-          const structuredPlans = await callOpenAI('', call2SystemPrompt, patientContext, 6000)
+          // Call 2 builds the full meal plan + objectives + follow-up plan in one shot.
+          // DeepSeek-V4-Pro is noticeably more verbose than gpt-5.5 on these deeply
+          // nested JSONs, so the previous 6000-token cap was getting hit mid-string
+          // ("Invalid JSON from LLM" with the response truncated). 16000 leaves
+          // ample headroom without coming close to the model's context cap.
+          const structuredPlans = await callOpenAI('', call2SystemPrompt, patientContext, 16000)
 
           sendSSE('progress', { message: 'Finalisation de l\'évaluation...', progress: 90 })
 

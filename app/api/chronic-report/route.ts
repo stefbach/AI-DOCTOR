@@ -701,7 +701,7 @@ export async function POST(req: NextRequest) {
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        maxTokens: 6000,
+        maxTokens: 12000,
         responseFormat: 'json_object',
         timeoutMs: 280_000,
       })

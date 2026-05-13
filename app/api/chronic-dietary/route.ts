@@ -224,7 +224,7 @@ Generate complete 7-day meal plan with EXACTLY ${Math.round(targetCalories)} kca
           { role: "system", content: systemPrompt },
           { role: "user", content: patientContext }
         ],
-        maxTokens: 10000,
+        maxTokens: 16000,
         responseFormat: 'json_object',
         timeoutMs: 280_000,
       })
