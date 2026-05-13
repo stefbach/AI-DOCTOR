@@ -294,11 +294,17 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
 
-      - name: '[embed-runner] Setup Node 20'
+      - name: '[embed-runner] Setup Node 22'
         if: inputs.mode == 'embed-runner'
+        # Node 22 — needed because @supabase/supabase-js v2.39+ pulls in
+        # @supabase/realtime-js which requires a native WebSocket
+        # constructor. Node 20 doesn't ship one (introduced in Node 21+),
+        # so the SupabaseClient constructor throws at init even when we
+        # never use realtime. Node 22 LTS has globalThis.WebSocket
+        # natively.
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: '[embed-runner] Install minimal dependencies'
         if: inputs.mode == 'embed-runner'

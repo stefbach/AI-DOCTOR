@@ -59,10 +59,16 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Setup Node 22
+        # Node 22 — needed because @supabase/supabase-js v2.39+ pulls in
+        # @supabase/realtime-js which requires a native WebSocket
+        # constructor. Node 20 doesn't ship one (introduced in Node 21+),
+        # so the SupabaseClient constructor throws at init even when we
+        # never use realtime. Node 22 LTS has globalThis.WebSocket
+        # natively.
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install minimal dependencies
         # We don't need the full Next.js dep tree; just the two packages
