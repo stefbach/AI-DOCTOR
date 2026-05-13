@@ -31,7 +31,8 @@ on:
           - migrate-only        # Apply Supabase migrations
           - single-source       # Ingest ONE source (specify below)
           - full-ingest         # Full pipeline: migrate + ingest 984 docs
-          - embed-only          # Generate missing embeddings on existing chunks (no new ingestion)
+          - embed-only          # Generate missing embeddings on existing chunks (via VPS — needs VPS up)
+          - embed-runner        # Same as embed-only but runs on the GitHub-hosted Ubuntu runner (bypasses VPS entirely)
       source:
         description: 'Source code (only for single-source mode, e.g. NICE, GOLD, WHO)'
         type: string
@@ -65,7 +66,12 @@ jobs:
     timeout-minutes: 120
 
     steps:
+      # ─────────────────────────────────────────────────────────────────
+      # VPS path (dry-run, migrate-only, single-source, full-ingest,
+      # embed-only). Skipped when mode = embed-runner.
+      # ─────────────────────────────────────────────────────────────────
       - name: Verify SSH secrets
+        if: inputs.mode != 'embed-runner'
         env:
           HAS_SSH_HOST: ${{ secrets.SSH_HOST != '' }}
           HAS_SSH_USER: ${{ secrets.SSH_USER != '' }}
@@ -84,6 +90,7 @@ jobs:
           echo "✅ SSH secrets present (reusing deploy.prod.yml setup)"
 
       - name: Run RAG operation on VPS via SSH
+        if: inputs.mode != 'embed-runner'
         uses: appleboy/ssh-action@v1.0.3
         env:
           MODE: ${{ inputs.mode }}
@@ -252,6 +259,75 @@ jobs:
             echo "═══════════════════════════════════════════════════════════"
             echo "✅ Operation complete: $MODE"
             echo "═══════════════════════════════════════════════════════════"
+
+      # ─────────────────────────────────────────────────────────────────
+      # Runner-direct path (embed-runner only). Used when the VPS is
+      # unreachable. Runs the embedding backfill script directly on the
+      # GitHub-hosted Ubuntu runner, using GitHub secrets — no SSH, no
+      # VPS, no .env.local. Required secrets:
+      #   - OPENAI_API_KEY
+      #   - SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL)
+      #   - SUPABASE_SERVICE_ROLE_KEY
+      # ─────────────────────────────────────────────────────────────────
+      - name: '[embed-runner] Verify GitHub-secret credentials'
+        if: inputs.mode == 'embed-runner'
+        env:
+          HAS_OPENAI: ${{ secrets.OPENAI_API_KEY != '' }}
+          HAS_SUPABASE_URL: ${{ secrets.SUPABASE_URL != '' || secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}
+          HAS_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
+        run: |
+          missing=0
+          [ "$HAS_OPENAI" = "true" ] || { echo "::error::OPENAI_API_KEY secret missing"; missing=1; }
+          [ "$HAS_SUPABASE_URL" = "true" ] || { echo "::error::SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) secret missing"; missing=1; }
+          [ "$HAS_SERVICE_KEY" = "true" ] || { echo "::error::SUPABASE_SERVICE_ROLE_KEY secret missing"; missing=1; }
+          if [ $missing -eq 1 ]; then
+            echo ""
+            echo "Add the missing secrets at:"
+            echo "https://github.com/${{ github.repository }}/settings/secrets/actions"
+            exit 1
+          fi
+          echo "✅ All 3 required secrets present"
+
+      - name: '[embed-runner] Checkout selected branch'
+        if: inputs.mode == 'embed-runner'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: '[embed-runner] Setup Node 20'
+        if: inputs.mode == 'embed-runner'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: '[embed-runner] Install minimal dependencies'
+        if: inputs.mode == 'embed-runner'
+        # Avoids the multi-minute Next.js npm install. We only need the two
+        # packages the script imports.
+        run: |
+          mkdir -p /tmp/embed-deps
+          cd /tmp/embed-deps
+          npm init -y >/dev/null
+          npm install --no-audit --no-fund @supabase/supabase-js openai
+          echo "✅ Dependencies installed at /tmp/embed-deps/node_modules"
+
+      - name: '[embed-runner] Run embeddings generation'
+        if: inputs.mode == 'embed-runner'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NODE_PATH: /tmp/embed-deps/node_modules
+        run: |
+          if [ ! -f scripts/rag-ingest/generate-embeddings.mjs ]; then
+            echo "::error::scripts/rag-ingest/generate-embeddings.mjs not found on branch '${{ inputs.branch }}'."
+            echo "Make sure 'Use workflow from' AND 'Git branch to use on VPS' both point to a branch that contains this script."
+            exit 1
+          fi
+          echo "🧮 Starting embedding generation on GitHub-hosted runner"
+          echo "   (typical: 60-90 min, ~\$0.34 OpenAI cost)"
+          echo ""
+          node scripts/rag-ingest/generate-embeddings.mjs
 
       - name: Job summary
         if: always()
