@@ -4108,6 +4108,10 @@ export default function ChronicProfessionalReport({
   // Medical report section component
   const MedicalReportSection = () => {
     const { medicalReport } = report
+    // evidenceReferences from the diagnosis are used to convert inline
+    // [ref-N] tokens in the narrative into clickable superscript [N]
+    // matching the global bibliography numbering.
+    const narrativeEvidenceRefs = ((diagnosisData as any)?.evidence_references as any[]) || []
 
     // 🚨 DETECT EMERGENCY SITUATIONS
     // See professional-report.tsx for the rationale on this switch:
@@ -4307,7 +4311,9 @@ export default function ChronicProfessionalReport({
                     placeholder={`Enter ${section.title.toLowerCase()}...`}
                   />
                 ) : content ? (
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {renderWithCitations(content, narrativeEvidenceRefs).node}
+                  </p>
                 ) : (
                   <p className="text-gray-400 italic text-sm">No content - use voice button to add</p>
                 )}
@@ -4587,31 +4593,31 @@ export default function ChronicProfessionalReport({
             {medicalReport.clinicalEvaluation.chiefComplaint && (
               <div className="border-l-4 border-teal-500 pl-4 py-2">
                 <h4 className="font-bold text-lg mb-2 text-teal-900">🔍 CHIEF COMPLAINT</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.chiefComplaint}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{renderWithCitations(medicalReport.clinicalEvaluation.chiefComplaint, narrativeEvidenceRefs).node}</p>
               </div>
             )}
             {medicalReport.clinicalEvaluation.historyOfPresentIllness && (
               <div className="border-l-4 border-blue-500 pl-4 py-2">
                 <h4 className="font-bold text-lg mb-2 text-blue-900">🩺 HISTORY OF PRESENT ILLNESS</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.historyOfPresentIllness}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{renderWithCitations(medicalReport.clinicalEvaluation.historyOfPresentIllness, narrativeEvidenceRefs).node}</p>
               </div>
             )}
             {medicalReport.clinicalEvaluation.reviewOfSystems && (
               <div className="border-l-4 border-purple-500 pl-4 py-2">
                 <h4 className="font-bold text-lg mb-2 text-purple-900">📋 REVIEW OF SYSTEMS</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.reviewOfSystems}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{renderWithCitations(medicalReport.clinicalEvaluation.reviewOfSystems, narrativeEvidenceRefs).node}</p>
               </div>
             )}
             {medicalReport.clinicalEvaluation.physicalExamination && (
               <div className="border-l-4 border-green-500 pl-4 py-2">
                 <h4 className="font-bold text-lg mb-2 text-green-900">👁️ PHYSICAL EXAMINATION</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.physicalExamination}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{renderWithCitations(medicalReport.clinicalEvaluation.physicalExamination, narrativeEvidenceRefs).node}</p>
               </div>
             )}
             {medicalReport.clinicalEvaluation.vitalSignsAnalysis && (
               <div className="border-l-4 border-cyan-500 pl-4 py-2">
                 <h4 className="font-bold text-lg mb-2 text-cyan-900">💓 VITAL SIGNS ANALYSIS</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.vitalSignsAnalysis}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{renderWithCitations(medicalReport.clinicalEvaluation.vitalSignsAnalysis, narrativeEvidenceRefs).node}</p>
               </div>
             )}
           </div>
