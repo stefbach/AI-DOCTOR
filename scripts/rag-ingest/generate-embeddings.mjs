@@ -49,8 +49,12 @@ const BATCH_SIZE = 100
 // Parallel UPDATE writes back to Supabase per batch.
 const MAX_CONCURRENT_UPDATES = 10
 // Safety truncation. text-embedding-3-small has an 8 191 token input
-// limit. ~30 000 chars = ~7 500 tokens, well under cap.
-const MAX_CONTENT_CHARS = 30_000
+// limit. Initially set to 30 000 chars assuming ~4 chars/token, but
+// dense medical / scientific content tokenises closer to ~3 chars per
+// token — a 30 000-char chunk can therefore exceed the 8 192 cap. A
+// failed run at chunk #27 300 confirmed this. 20 000 chars puts us at
+// ~5000-6500 tokens worst case, well under the limit.
+const MAX_CONTENT_CHARS = 20_000
 // OpenAI cost (May 2026 pricing)
 const COST_PER_1M_TOKENS_USD = 0.02
 
@@ -73,15 +77,22 @@ async function countMissingEmbeddings() {
     .from('guidelines_chunks')
     .select('*', { count: 'exact', head: true })
     .is('embedding', null)
+    .or('token_count.is.null,token_count.gte.0')
   if (error) throw new Error(`count failed: ${error.message}`)
   return count || 0
 }
 
 async function fetchNextBatch() {
+  // Skip chunks that have already been marked as un-embeddable (a
+  // previous run set token_count = -1 after they triggered a 4xx from
+  // OpenAI). Without this guard we'd loop forever re-trying the same
+  // bad chunks. token_count = -1 is our private sentinel — the
+  // ingestion pipeline never sets it.
   const { data, error } = await supabase
     .from('guidelines_chunks')
     .select('id, chunk_content')
     .is('embedding', null)
+    .or('token_count.is.null,token_count.gte.0')
     .limit(BATCH_SIZE)
   if (error) throw new Error(`fetch batch failed: ${error.message}`)
   return data || []
@@ -96,6 +107,19 @@ async function callOpenAIEmbeddings(inputs) {
       })
     } catch (err) {
       const msg = err?.message || String(err)
+      const status = err?.status || err?.response?.status
+      // 4xx client errors (bad input length, malformed content, etc.)
+      // will never resolve on retry — fail fast and let the caller skip
+      // this batch instead of looping uselessly. Network / 5xx errors
+      // continue to retry with exponential back-off.
+      const isClientError =
+        status >= 400 && status < 500
+      if (isClientError) {
+        throw Object.assign(new Error(`OpenAI client error (${status}): ${msg}`), {
+          status,
+          isClientError: true,
+        })
+      }
       if (attempt === 4) {
         throw new Error(`OpenAI failed after 4 attempts: ${msg}`)
       }
@@ -141,8 +165,41 @@ async function processBatch() {
     return -1
   }
 
-  // Call OpenAI.
-  const response = await callOpenAIEmbeddings(validInputs)
+  // Call OpenAI. Client-error (4xx) means at least one input in the
+  // batch is malformed (e.g. exceeds the 8 192-token cap even after
+  // truncation, or contains characters OpenAI rejects). Re-trying the
+  // same payload would just fail the same way, and aborting the whole
+  // run when we've already embedded thousands of chunks is wasteful.
+  // Strategy: mark the offending chunks with a sentinel (token_count =
+  // -1) so the WHERE embedding IS NULL filter no longer surfaces them
+  // — they're skipped on this run AND on every future re-run.
+  let response
+  try {
+    response = await callOpenAIEmbeddings(validInputs)
+  } catch (err) {
+    if (err?.isClientError) {
+      console.warn(
+        `  ⚠️  Skipping batch of ${validChunks.length} chunks due to OpenAI client error: ${err.message}`,
+      )
+      // Mark all chunks in this batch with token_count = -1 so they
+      // don't keep being re-fetched. We can't be sure which exact
+      // input was the offender without parsing the error message;
+      // marking the whole batch is the conservative safe path.
+      const skipIds = validChunks.map(c => c.id)
+      const { error: markErr } = await supabase
+        .from('guidelines_chunks')
+        .update({ token_count: -1 })
+        .in('id', skipIds)
+      if (markErr) {
+        console.error(`  ❌ Failed to mark skipped batch: ${markErr.message}`)
+      } else {
+        console.warn(`  ⏭️  Marked ${skipIds.length} chunks with token_count=-1 (skipped permanently)`)
+      }
+      totalSkippedEmpty += validChunks.length
+      return chunks.length
+    }
+    throw err
+  }
   totalTokensUsed += response.usage?.total_tokens || 0
 
   // UPDATE each chunk in parallel with bounded concurrency.
