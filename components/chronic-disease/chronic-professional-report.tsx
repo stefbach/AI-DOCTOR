@@ -17,6 +17,7 @@ import { Progress } from "@/components/ui/progress"
 import { toast } from "@/components/ui/use-toast"
 import TibokMedicalAssistant from '../tibok-medical-assistant'
 import EvidenceReferencesSection from '../rag/evidence-references-section'
+import { renderWithCitations, aggregateReferences, SectionBibliography } from '../rag/citation-renderer'
 import {
   FileText, Download, Printer, CheckCircle, Loader2, Pill, TestTube,
   Scan, AlertTriangle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
@@ -4672,6 +4673,11 @@ export default function ChronicProfessionalReport({
     // Use local state if available, otherwise use report (for display before editing)
     const medicationPrescription = localMedications || report.medicationPrescription
     const medications = medicationPrescription.prescription.medications || []
+    const evidenceRefs = ((diagnosisData as any)?.evidence_references as any[]) || []
+    const prescriptionCitations = aggregateReferences(
+      medications.map((m: any) => (typeof m?.justification === 'string' ? m.justification : '')),
+      evidenceRefs
+    )
 
     const handleAddMedication = () => {
       // Update local state only - no setReport call
@@ -4941,7 +4947,7 @@ export default function ChronicProfessionalReport({
                     )}
                     {med.justification && (
                       <p className="mt-1 text-sm text-gray-600">
-                        <span className="font-medium">Indication:</span> {med.justification}
+                        <span className="font-medium">Indication:</span> {prescriptionCitations.nodes[index] || med.justification}
                       </p>
                     )}
                     {med.surveillanceParticuliere && (
@@ -4978,7 +4984,13 @@ export default function ChronicProfessionalReport({
             </ul>
           </div>
         )}
-        
+
+        <SectionBibliography
+          references={prescriptionCitations.usedRefs}
+          globalReferences={evidenceRefs}
+          title="Références citées dans cette prescription"
+        />
+
         {/* Validity & Signature */}
         <div className="mt-8 pt-6 border-t border-gray-300">
           <p className="text-sm text-gray-600 mb-4">
@@ -5039,6 +5051,26 @@ export default function ChronicProfessionalReport({
       { key: 'endocrinology', label: 'ENDOCRINOLOGY' },
       { key: 'general', label: 'GENERAL LABORATORY' }
     ]
+
+    const labEvidenceRefs = ((diagnosisData as any)?.evidence_references as any[]) || []
+    const labCitationsByCategory: Record<string, ReturnType<typeof aggregateReferences>> = {}
+    const labUsedRefIds = new Set<string>()
+    for (const { key } of categories) {
+      const arr = (tests as any)[key]
+      if (!Array.isArray(arr) || arr.length === 0) continue
+      const agg = aggregateReferences(
+        arr.map((t: any) => (typeof t?.motifClinique === 'string' ? t.motifClinique : '')),
+        labEvidenceRefs
+      )
+      labCitationsByCategory[key] = agg
+      agg.usedRefs.forEach((r: any) => {
+        if (r?.ref_id) labUsedRefIds.add(r.ref_id)
+        else if (r?.title) labUsedRefIds.add(r.title)
+      })
+    }
+    const labUsedRefs = labEvidenceRefs.filter((r: any) =>
+      labUsedRefIds.has(r?.ref_id) || labUsedRefIds.has(r?.title)
+    )
 
     const handleLabTestEdit = (categoryKey: string, testIdx: number, field: string, value: any) => {
       // Update local state only - no setReport call
@@ -5161,7 +5193,9 @@ export default function ChronicProfessionalReport({
                 <div key={category.key} className="border rounded-lg p-4">
                   <h3 className="font-bold text-lg mb-3 text-blue-700">{category.label}</h3>
                   <div className="space-y-3">
-                    {categoryTests.map((test: any, idx: number) => (
+                    {categoryTests.map((test: any, idx: number) => {
+                      const indicationNode = labCitationsByCategory[category.key]?.nodes?.[idx]
+                      return (
                       <div key={idx} className="border-l-4 border-blue-400 pl-4 py-2">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -5225,7 +5259,7 @@ export default function ChronicProfessionalReport({
                                 <p className="font-semibold">{test.nom || test.name}</p>
                                 {test.motifClinique && (
                                   <p className="text-sm text-gray-600 mt-1">
-                                    <span className="font-medium">Indication:</span> {test.motifClinique}
+                                    <span className="font-medium">Indication:</span> {indicationNode || test.motifClinique}
                                   </p>
                                 )}
                                 {test.conditionsPrelevement && (
@@ -5265,7 +5299,8 @@ export default function ChronicProfessionalReport({
                           </div>
                         </div>
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
                   {editMode && (
                     <div className="mt-3">
@@ -5331,6 +5366,12 @@ export default function ChronicProfessionalReport({
           </div>
         )}
         
+        <SectionBibliography
+          references={labUsedRefs}
+          globalReferences={labEvidenceRefs}
+          title="Références citées dans cette demande d'analyses"
+        />
+
         {/* Signature */}
         <div className="mt-8 pt-6 border-t border-gray-300">
           <div className="text-right">
@@ -5378,6 +5419,29 @@ export default function ChronicProfessionalReport({
     // Use local state if available, otherwise use report (for display before editing)
     const paraclinicalExams = localParaclinicalExams || report.paraclinicalExams
     const exams = paraclinicalExams.prescription.exams || []
+    const imagingEvidenceRefs = ((diagnosisData as any)?.evidence_references as any[]) || []
+    const imagingIndicationCitations = aggregateReferences(
+      exams.map((e: any) => {
+        const v = e?.clinicalIndication ?? e?.indicationClinique ?? e?.indication
+        return typeof v === 'string' ? v : ''
+      }),
+      imagingEvidenceRefs
+    )
+    const imagingQuestionCitations = aggregateReferences(
+      exams.map((e: any) => {
+        const v = e?.diagnosticQuestion ?? e?.questionDiagnostique
+        return typeof v === 'string' ? v : ''
+      }),
+      imagingEvidenceRefs
+    )
+    const imagingUsedRefIds = new Set<string>()
+    ;[...imagingIndicationCitations.usedRefs, ...imagingQuestionCitations.usedRefs].forEach((r: any) => {
+      if (r?.ref_id) imagingUsedRefIds.add(r.ref_id)
+      else if (r?.title) imagingUsedRefIds.add(r.title)
+    })
+    const imagingUsedRefs = imagingEvidenceRefs.filter((r: any) =>
+      imagingUsedRefIds.has(r?.ref_id) || imagingUsedRefIds.has(r?.title)
+    )
 
     const handleParaclinicalEdit = (examIdx: number, field: string, value: any) => {
       // Update local state only - no setReport call
@@ -5466,7 +5530,10 @@ export default function ChronicProfessionalReport({
         {/* Exams List */}
         <div className="space-y-6">
           {exams.length > 0 ? (
-            exams.map((exam: any, index: number) => (
+            exams.map((exam: any, index: number) => {
+              const indicationNode = imagingIndicationCitations.nodes[index]
+              const questionNode = imagingQuestionCitations.nodes[index]
+              return (
               <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -5566,12 +5633,12 @@ export default function ChronicProfessionalReport({
                         )}
                         {exam.clinicalIndication && (
                           <p className="mt-2 text-sm text-gray-600">
-                            <span className="font-medium">Clinical Indication:</span> {exam.clinicalIndication}
+                            <span className="font-medium">Clinical Indication:</span> {indicationNode || exam.clinicalIndication}
                           </p>
                         )}
                         {exam.diagnosticQuestion && (
                           <p className="mt-1 text-sm text-gray-600">
-                            <span className="font-medium">Diagnostic Question:</span> {exam.diagnosticQuestion}
+                            <span className="font-medium">Diagnostic Question:</span> {questionNode || exam.diagnosticQuestion}
                           </p>
                         )}
                         {exam.specificProtocol && (
@@ -5594,7 +5661,8 @@ export default function ChronicProfessionalReport({
                   )}
                 </div>
               </div>
-            ))
+              )
+            })
           ) : (
             <div className="text-center py-8 text-gray-500">
               <Scan className="h-12 w-12 mx-auto mb-4 text-gray-300" />
@@ -5630,6 +5698,12 @@ export default function ChronicProfessionalReport({
           </div>
         )}
         
+        <SectionBibliography
+          references={imagingUsedRefs}
+          globalReferences={imagingEvidenceRefs}
+          title="Références citées dans cette demande d'imagerie"
+        />
+
         {/* Signature */}
         <div className="mt-8 pt-6 border-t border-gray-300">
           <div className="text-right">
