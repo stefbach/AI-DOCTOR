@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { callLLM } from '@/lib/llm-client'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300 // 7-day meal plan generation needs time with gpt-5.5
+export const maxDuration = 600 // 600s for DeepSeek-V4-Pro (7-day meal plan can run 200-400s on rich cases)
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {

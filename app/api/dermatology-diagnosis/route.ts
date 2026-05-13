@@ -9,7 +9,7 @@
 // - 8000 max tokens for comprehensive responses
 // - Enhanced context awareness
 export const runtime = 'nodejs'
-export const maxDuration = 300 // 300 seconds max for GPT-5.5 dermatology diagnosis generation
+export const maxDuration = 600 // 600s for DeepSeek-V4-Pro dermatology diagnosis (reasoning_effort=medium can run 200-350s on rich cases)
 
 import { NextRequest, NextResponse } from 'next/server'
 import { callLLM } from '@/lib/llm-client'

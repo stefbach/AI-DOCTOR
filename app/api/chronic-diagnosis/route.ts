@@ -16,7 +16,7 @@ import {
 } from '@/lib/rag/medical-rag'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300
+export const maxDuration = 600 // 600s: chronic-diagnosis runs 2 sequential DeepSeek-V4-Pro reasoning calls (clinical analysis + structured plans). Each can take 150-250s, so the previous 300s cap was tripping FUNCTION_INVOCATION_TIMEOUT mid-stream.
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {

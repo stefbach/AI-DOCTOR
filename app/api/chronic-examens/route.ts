@@ -3,6 +3,7 @@
 // - Call 1: Laboratory Tests + Paraclinical Exams
 // - Call 2: Specialist Referrals + Monitoring Plan + Summary
 import { type NextRequest, NextResponse } from "next/server"
+import { callLLM } from '@/lib/llm-client'
 import {
   buildClinicalQuery,
   inferSpecialty,
@@ -13,7 +14,7 @@ import {
 } from '@/lib/rag/medical-rag'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300
+export const maxDuration = 600 // 600s: 2 sequential DeepSeek calls (labs/imaging + referrals/monitoring) can total 250-500s.
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -49,59 +50,34 @@ function anonymizePatientData(patientData: any): {
 // ==================== HELPER FUNCTIONS ====================
 
 async function callOpenAI(
-  apiKey: string,
+  _apiKey: string,
   systemPrompt: string,
   userPrompt: string,
   maxTokens: number = 2000
 ): Promise<any> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-5.5",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
-      max_completion_tokens: maxTokens,
-      response_format: { type: "json_object" }
-    }),
+  const llmResult = await callLLM({
+    useCase: 'CHRONIC_EXAMENS',
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt }
+    ],
+    maxTokens,
+    responseFormat: 'json_object',
+    timeoutMs: 280_000,
   })
+  console.log(`[llm] use=CHRONIC_EXAMENS provider=${llmResult.provider} model=${llmResult.model} latency=${llmResult.latencyMs}ms tokens=${llmResult.usage?.totalTokens ?? 'n/a'}`)
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
-  }
-
-  const data = await response.json()
-
-  const choice = data.choices?.[0]
-  console.log(`   📡 OpenAI response - finish_reason: ${choice?.finish_reason}, has content: ${!!choice?.message?.content}, usage: ${JSON.stringify(data.usage || {})}`)
-
-  const content = choice?.message?.content
+  const content = llmResult.text
 
   if (!content) {
-    console.error('❌ No content in OpenAI response. Full response:', JSON.stringify(data, null, 2).substring(0, 500))
-
-    if (choice?.finish_reason === 'length') {
-      throw new Error('OpenAI response truncated - model ran out of tokens.')
-    }
-
-    throw new Error(`No content in OpenAI response (finish_reason: ${choice?.finish_reason || 'unknown'})`)
+    throw new Error('No content in LLM response')
   }
 
   return JSON.parse(content)
 }
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) {
-    return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 })
-  }
-
+  // Credential validation is delegated to callLLM (LLM_PROVIDER_CHRONIC_EXAMENS).
   try {
     const { patientData, clinicalData, diagnosisData } = await req.json()
 
@@ -255,7 +231,7 @@ EXAMENS PARACLINIQUES:
 - DIABÈTE: Fond d'œil (annuel), ECG (annuel), Examen des pieds, Écho-Doppler artères MI si nécessaire
 - HYPERTENSION: ECG (annuel), Échocardiographie si mal contrôlée, Holter tensionnel si suspicion
 - OBÉSITÉ: Échographie abdominale (stéatose)`
-          const clinicalOrders = await callOpenAI(apiKey, call1SystemPrompt, patientContext, 4000)
+          const clinicalOrders = await callOpenAI('', call1SystemPrompt, patientContext, 4000)
 
           sendSSE('progress', { message: 'Analyses et examens générés, préparation du plan de suivi...', progress: 50 })
 
@@ -326,7 +302,7 @@ CONSULTATIONS selon maladies:
 - DIABÈTE: Ophtalmologue (fond d'œil annuel), Podologue, Cardiologue si complications
 - HYPERTENSION: Cardiologue si mal contrôlée, Néphrologue si atteinte rénale
 - OBÉSITÉ: Diététicien, Endocrinologue`
-          const referralsAndSummary = await callOpenAI(apiKey, call2SystemPrompt, patientContext, 3000)
+          const referralsAndSummary = await callOpenAI('', call2SystemPrompt, patientContext, 3000)
 
           sendSSE('progress', { message: 'Finalisation...', progress: 90 })
 

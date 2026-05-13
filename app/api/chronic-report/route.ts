@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { callLLM } from '@/lib/llm-client'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300
+export const maxDuration = 600 // 600s: chronic-report fans out to 4 LLM calls (meds/labs/imaging extraction + narrative). DeepSeek total can run 250-500s.
 
 // ==================== HELPER FUNCTIONS ====================
 function getString(value: any): string {

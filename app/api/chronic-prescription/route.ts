@@ -12,7 +12,7 @@ import {
 } from '@/lib/rag/medical-rag'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300
+export const maxDuration = 600 // 600s for DeepSeek-V4-Pro chronic prescription generation
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
