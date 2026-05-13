@@ -160,7 +160,43 @@ Rank ALL chunks (do not omit any). "reason" is for audit logs and must be at mos
       return sb - sa
     })
 
-    const kept = sortedChunks.slice(0, topK)
+    // Source-diversified top-K selection (MMR-lite).
+    //
+    // Cosine-then-rerank can return e.g. 8 chunks all from the same source
+    // (typically ECDC arbovirus on a febrile tropical case) because that
+    // single source happens to have many semantically-similar chunks. The
+    // diagnostic LLM then has only one distinct citation to spread across
+    // the narrative, and the report ends up citing 1-2 refs even when the
+    // corpus has 700+ sources indexed.
+    //
+    // Fix: take the highest-scored chunks first BUT cap each source at
+    // MAX_PER_SOURCE (default 2). When the cap is reached for a given
+    // source, we skip subsequent chunks from it and move down the list,
+    // promoting chunks from other sources into the top-K. If the cap
+    // would leave us below topK (rare), we make a second pass without
+    // the cap to backfill.
+    const MAX_PER_SOURCE = 2
+    const sourceCount = new Map<string, number>()
+    const kept: RAGChunk[] = []
+    const skippedForDiversity: RAGChunk[] = []
+    for (const c of sortedChunks) {
+      if (kept.length >= topK) break
+      const ref = refByRefId.get(c.refId)
+      const source = String(ref?.source ?? 'unknown')
+      const count = sourceCount.get(source) ?? 0
+      if (count >= MAX_PER_SOURCE) {
+        skippedForDiversity.push(c)
+        continue
+      }
+      kept.push(c)
+      sourceCount.set(source, count + 1)
+    }
+    if (kept.length < topK) {
+      for (const c of skippedForDiversity) {
+        if (kept.length >= topK) break
+        kept.push(c)
+      }
+    }
     const droppedCount = ctx.chunks.length - kept.length
 
     // Re-build references: only refs cited by at least one surviving chunk.
@@ -190,9 +226,18 @@ Rank ALL chunks (do not omit any). "reason" is for audit logs and must be at mos
       .map(c => Math.round(scoreById.get(c.refId) ?? -1))
       .join(',')
 
+    // Diversity log: how many distinct sources made it into the top-K?
+    // Higher = the diagnostic LLM has more variety of guidelines to cite.
+    const distinctSources = new Set<string>()
+    for (const c of kept) {
+      const ref = refByRefId.get(c.refId)
+      if (ref?.source) distinctSources.add(String(ref.source))
+    }
+
     console.log(
       `[rerank] use=DIAGNOSIS provider=${result.provider} model=${result.model} ` +
         `input_chunks=${ctx.chunks.length} kept_top_k=${kept.length} dropped=${droppedCount} ` +
+        `distinct_sources_in_topk=${distinctSources.size} ` +
         `top_scores=[${topScoresLog}] latency=${Date.now() - t0}ms`,
     )
 
