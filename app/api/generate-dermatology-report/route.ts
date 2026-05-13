@@ -1,7 +1,9 @@
 // app/api/generate-dermatology-report/route.ts - ADAPTED FROM CONSULTATION REPORT v2.6 FOR DERMATOLOGY
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { callLLM } from "@/lib/llm-client"
+
+export const runtime = 'nodejs'
+export const maxDuration = 600 // 600s for DeepSeek-V4-Pro narrative generation (10-section dermato report)
 import {
   buildRefDisplayMap,
   buildRefSourceYearMap,
@@ -1641,18 +1643,27 @@ export async function POST(request: NextRequest) {
       const systemPrompt = createEnhancedSystemPrompt(getString(patientData?.pregnancyStatus) || '')
       const userPrompt = createEnhancedUserPrompt(enrichedGPTData)
       
-      const result = await generateText({
-        model: openai("gpt-5.5"),
+      const result = await callLLM({
+        useCase: 'DERMATOLOGY_REPORT',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        maxTokens: 4000,
+        // Dermatology narrative report spans ~10 sections of text. gpt-5.5
+        // fit in 4000 tokens; DeepSeek V4-Pro is verbose enough that 4000
+        // overflows mid-string (same pattern as chronic-dietary/chronic-examens).
+        maxTokens: 12000,
+        responseFormat: 'json_object',
+        // Structured narrative re-formatting from an existing analysis —
+        // 'low' reasoning is enough and avoids the long-CoT latency.
+        reasoningEffort: 'low',
+        timeoutMs: 280_000,
       })
+      console.log(`[llm] use=DERMATOLOGY_REPORT provider=${result.provider} model=${result.model} latency=${result.latencyMs}ms tokens=${result.usage?.totalTokens ?? 'n/a'}`)
 
       // IMPROVED JSON PARSING WITH BETTER ERROR HANDLING
-      console.log(" GPT-5.5 raw response length:", result.text.length)
-      console.log(" GPT-5.5 response preview:", result.text.substring(0, 500))
+      console.log(" LLM raw response length:", result.text.length)
+      console.log(" LLM response preview:", result.text.substring(0, 500))
       
       let cleanedText = result.text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
       
