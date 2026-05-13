@@ -443,6 +443,12 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
     }
   }
 
+  const minRefsTarget = Math.min(3, N)
+  const minRefsRule =
+    N >= 3
+      ? `MINIMUM ${minRefsTarget} références distinctes doivent être citées dans le rapport (texte narratif + evidence_references). ${N} refs sont fournies — si tu en utilises moins de ${minRefsTarget}, ton rapport est sous-référencé.`
+      : `Cite au minimum ${minRefsTarget} référence(s) (seulement ${N} disponible(s) dans ce contexte).`
+
   lines.push('=== RÈGLES OBLIGATOIRES POUR LES RÉFÉRENCES ===')
   lines.push(
     `1. Plage de citations VALIDES: ${validRange}. EXACTEMENT ${N} référence(s) disponible(s): ${validIds}.`
@@ -451,7 +457,7 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
     `2. INTERDIT de citer [ref-${N + 1}], [ref-${N + 2}], ou tout [ref-X] avec X > ${N}. Toute référence hors de la plage ${validRange} sera supprimée du rapport (citation invalidée).`
   )
   lines.push(
-    '3. Chaque recommandation diagnostique ou thérapeutique DOIT être attribuée à une référence [ref-N] si elle est supportée par les guidelines ci-dessus.'
+    '3. Chaque recommandation diagnostique ou thérapeutique DOIT être attribuée à une référence [ref-N] si elle est supportée — même partiellement — par les guidelines ci-dessus.'
   )
   lines.push(
     "4. Si aucune guideline du contexte ne supporte une recommandation, termine simplement l'indication par: 'Based on standard clinical practice.' (NE PAS écrire 'hors guideline RAG' — c'est du jargon interne qui ne doit jamais apparaître dans le rapport rendu)."
@@ -460,22 +466,25 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
     '5. POUR CHAQUE MÉDICAMENT prescrit, ET CHAQUE examen complémentaire (lab, imagerie), cite la référence guideline pertinente [ref-N] dans le champ "indication" / "clinical_indication" si disponible dans le contexte ci-dessus (ex: "Symptomatic relief of fever and pain [ref-2]"). En cas de doute entre citer une ref et écrire \'Based on standard clinical practice.\', PRÉFÈRE citer si une ref aborde même partiellement le sujet.'
   )
   lines.push(
-    "6. PERTINENCE STRICTE: ne cite [ref-N] QUE si la guideline correspondante traite DIRECTEMENT du sujet de la recommandation. NE PAS citer une ref simplement parce qu'elle a été fournie. Une ref tangentielle (ex: 'endocardite' citée sur une fièvre arbovirale sans souffle/valve concernée) sera retirée et nuit à la crédibilité du rapport."
+    "6. PERTINENCE UTILE (pas stricte): cite [ref-N] dès qu'une guideline a informé ton raisonnement — même partiellement, même si elle n'aborde qu'un aspect (épidémiologie, monitoring, red flag, contre-indication, alternative diagnostique). Tu n'as pas besoin d'être 100% sûr de la pertinence : si l'info de la ref a façonné une partie de ton rapport, CITE-LA. Mieux vaut citer 5 refs partiellement pertinentes que 2 refs ultra-précises en laissant le reste du rapport non-attribué. SEULE EXCEPTION : ne cite pas une ref qui traite d'un sujet totalement étranger (ex: 'endocardite' sur une fièvre arbovirale sans contexte cardiaque) — ça nuit à la crédibilité."
   )
   lines.push(
-    "7. Liste dans evidence_references UNIQUEMENT les [ref-N] que tu as réellement utilisés dans le texte (champs narratifs, indications). Toute ref listée ici sans apparaître dans le texte sera retirée. Cohérence stricte texte ↔ evidence_references."
+    `7. ${minRefsRule} Couvre ainsi les différents domaines du rapport : diagnostic différentiel, plan d'investigation, traitement pharmaco/non-pharmaco, monitoring, red flags. Si plusieurs sections du rapport utilisent une même ref, la ref reste comptée 1 fois dans evidence_references mais doit être citée à chaque endroit pertinent du texte.`
   )
   lines.push(
-    "8. NE PAS inventer de références: ne cite que les [ref-N] présents ci-dessus."
+    "8. Liste dans evidence_references TOUS les [ref-N] que tu as cités au moins une fois dans le texte (champs narratifs, indications, reasoning). Cohérence stricte texte ↔ evidence_references."
+  )
+  lines.push(
+    "9. NE PAS inventer de références: ne cite que les [ref-N] présents ci-dessus."
   )
   lines.push('')
 
   lines.push('=== CONFIRMATION FINALE OBLIGATOIRE ===')
   lines.push(
-    'Avant de retourner ton JSON, vérifie EXPLICITEMENT que le tableau "evidence_references" contient au moins une entrée par [ref-N] que tu as effectivement utilisé.'
+    `Avant de retourner ton JSON, vérifie EXPLICITEMENT que "evidence_references" contient au moins ${minRefsTarget} entrée(s) distincte(s) ET que chaque [ref-N] listée apparaît au moins une fois dans le texte narratif.`
   )
   lines.push(
-    'Si tu as utilisé ref-1 et ref-2 dans ton raisonnement, "evidence_references" doit contenir au minimum 2 objets. Champ vide = échec de la consigne RAG.'
+    `Si tu as cité moins de ${minRefsTarget} refs, RELIS ton rapport et identifie les sections (diagnostic, traitement, monitoring, red flags…) où une des ${N} refs fournies aurait pu informer ton raisonnement — puis ajoute la citation. Champ < ${minRefsTarget} entrée(s) = échec de la consigne RAG.`
   )
   lines.push('')
 
@@ -1363,6 +1372,37 @@ export function scrubAndEnrichEvidenceRefs(
     }
   }
 
+  // Pass 3 — top-up: enforce minimum citation count when refs are plentiful.
+  // The LLM sometimes under-cites (e.g. cites 2 of 6 available refs). To keep
+  // the rendered report well-attributed we top up to min(3, N) using the
+  // most-relevant refs that weren't cited — but only when the LLM already
+  // engaged with the RAG (at least one valid citation present). If the LLM
+  // produced zero citations, Pass 2 already covered the fallback path.
+  const minRefsTarget = Math.min(3, ragContext.references.length)
+  let topUpAdded = 0
+  if (
+    evidenceReferences.length > 0 &&
+    evidenceReferences.length < minRefsTarget &&
+    ragContext.references.length >= minRefsTarget
+  ) {
+    const alreadyIncluded = new Set(evidenceReferences.map(e => e.ref_id))
+    const candidates = ragContext.references.filter(r => !alreadyIncluded.has(r.ref_id))
+    for (const ref of candidates) {
+      if (evidenceReferences.length >= minRefsTarget) break
+      evidenceReferences.push({
+        ...ref,
+        used_for: 'Référence fournie au modèle, retenue pour atteindre le seuil minimal de citations',
+      })
+      topUpAdded++
+    }
+    if (topUpAdded > 0) {
+      console.log(
+        `${tag} Top-up: added ${topUpAdded} ref(s) to reach min target ${minRefsTarget}/${ragContext.references.length} ` +
+          `(LLM originally cited ${evidenceReferences.length - topUpAdded})`
+      )
+    }
+  }
+
   if (unknownCitedRefs.length > 0) {
     console.error(
       `${tag} LLM cited unknown ref(s): ${unknownCitedRefs.join(', ')} — known: ${ragContext.references.map(r => r.ref_id).join(', ')}`
@@ -1382,4 +1422,108 @@ export function scrubAndEnrichEvidenceRefs(
     unusedRefsFiltered,
     refUsageByPath,
   }
+}
+
+/**
+ * Normalise diagnostic probability distribution so the primary diagnosis
+ * plus differentials sum to exactly 100.
+ *
+ * The LLM (DeepSeek in particular) tends to:
+ *  - omit a probability on the primary diagnosis ("it IS the diagnosis"),
+ *  - or emit partial percentages on differentials that sum to ~50-70.
+ *
+ * This helper mutates the input object in place. Callers pass:
+ *   - the primary diagnosis object (which has a probability/likelihood field)
+ *   - the differentials array (each with a probability/likelihood field)
+ *   - the field name used in the schema ("probability" or "likelihood")
+ *
+ * Strategy:
+ *   1. Coerce all values to finite non-negative numbers (NaN/null → 0).
+ *   2. If sum > 0, scale all values so they sum to 100. The primary's
+ *      probability gets a minimum floor (default 30) when missing/zero so
+ *      it never disappears from the distribution. Differentials are
+ *      capped at the primary's probability − 1 to preserve ordering.
+ *   3. Round to integers, with the rounding residue absorbed by the
+ *      primary diagnosis so the total stays exactly 100.
+ */
+export function normaliseDiagnosticProbabilities(
+  primary: Record<string, any> | null | undefined,
+  differentials: Array<Record<string, any>> | null | undefined,
+  field: 'probability' | 'likelihood' = 'probability',
+  options: { primaryFloor?: number; logPrefix?: string } = {}
+): { adjusted: boolean; primaryProb: number; differentialProbs: number[]; total: number } {
+  const tag = options.logPrefix || '🎯 [DDX-NORM]'
+  const primaryFloor = options.primaryFloor ?? 30
+
+  const toNum = (v: any): number => {
+    const n = typeof v === 'number' ? v : parseFloat(String(v ?? ''))
+    return Number.isFinite(n) && n >= 0 ? n : 0
+  }
+
+  if (!primary || typeof primary !== 'object') {
+    return { adjusted: false, primaryProb: 0, differentialProbs: [], total: 0 }
+  }
+
+  const diffs = Array.isArray(differentials) ? differentials : []
+  const rawPrimary = toNum(primary[field])
+  const rawDiffs = diffs.map(d => toNum(d?.[field]))
+  const rawTotal = rawPrimary + rawDiffs.reduce((a, b) => a + b, 0)
+
+  const tolerance = 0.5
+  const alreadyOk = rawPrimary > 0 && Math.abs(rawTotal - 100) <= tolerance
+
+  let primaryProb = rawPrimary
+  let diffProbs = rawDiffs.slice()
+
+  if (!alreadyOk) {
+    // If primary missing, give it the floor then renormalise.
+    if (primaryProb <= 0) {
+      primaryProb = Math.max(primaryFloor, 100 - rawDiffs.reduce((a, b) => a + b, 0))
+    }
+    const totalNow = primaryProb + diffProbs.reduce((a, b) => a + b, 0)
+    if (totalNow > 0) {
+      const scale = 100 / totalNow
+      primaryProb = primaryProb * scale
+      diffProbs = diffProbs.map(p => p * scale)
+    } else {
+      // Everything zero — assign the floor to primary, spread the rest.
+      primaryProb = primaryFloor
+      const remaining = 100 - primaryFloor
+      const share = diffProbs.length > 0 ? remaining / diffProbs.length : 0
+      diffProbs = diffProbs.map(() => share)
+    }
+  }
+
+  // Round to integers, primary absorbs the residue.
+  let roundedDiffs = diffProbs.map(p => Math.round(p))
+  // Cap each differential below the primary to preserve ordering.
+  const primaryCeilGuard = Math.max(1, Math.floor(primaryProb) - 1)
+  roundedDiffs = roundedDiffs.map(p => Math.min(p, primaryCeilGuard))
+  const diffSum = roundedDiffs.reduce((a, b) => a + b, 0)
+  let roundedPrimary = 100 - diffSum
+  if (roundedPrimary < 1) {
+    // Primary squeezed out — trim the largest differential to make room.
+    const deficit = 1 - roundedPrimary
+    const maxIdx = roundedDiffs.indexOf(Math.max(...roundedDiffs))
+    if (maxIdx >= 0) roundedDiffs[maxIdx] = Math.max(0, roundedDiffs[maxIdx] - deficit)
+    roundedPrimary = 100 - roundedDiffs.reduce((a, b) => a + b, 0)
+  }
+
+  primary[field] = roundedPrimary
+  diffs.forEach((d, i) => {
+    if (d && typeof d === 'object') d[field] = roundedDiffs[i] ?? 0
+  })
+
+  const finalTotal = roundedPrimary + roundedDiffs.reduce((a, b) => a + b, 0)
+  const adjusted = !alreadyOk
+  if (adjusted) {
+    console.log(
+      `${tag} Normalised DDx '${field}': raw total=${rawTotal.toFixed(1)} (primary=${rawPrimary}, diffs=[${rawDiffs.join(', ')}]) → ` +
+        `primary=${roundedPrimary}, diffs=[${roundedDiffs.join(', ')}], total=${finalTotal}`
+    )
+  } else {
+    console.log(`${tag} DDx '${field}' already sums to ${finalTotal} — no adjustment.`)
+  }
+
+  return { adjusted, primaryProb: roundedPrimary, differentialProbs: roundedDiffs, total: finalTotal }
 }

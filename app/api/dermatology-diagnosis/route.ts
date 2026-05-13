@@ -18,6 +18,7 @@ import {
   queryMedicalGuidelines,
   formatGuidelinesForPrompt,
   scrubAndEnrichEvidenceRefs,
+  normaliseDiagnosticProbabilities,
   type RAGContext,
 } from '@/lib/rag/medical-rag'
 
@@ -772,6 +773,7 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
     "name": "Specific dermatological condition name",
     "icd10": "L20.9 (exact ICD-10 code)",
     "confidence": "High|Moderate|Low",
+    "likelihood": 50,
     "keyCriteria": ["criterion 1", "criterion 2", "criterion 3"],
     "presentationType": "Typical|Atypical - with explanation"
   },
@@ -894,6 +896,7 @@ If the RAG context block (CONTEXTE GUIDELINES MÉDICALES) is absent, return evid
 - ALL topical medications must have: specific name with DCI, application frequency, duration, detailed instructions
 - ALL oral medications must have: specific name with DCI, dosage, frequency (OD/BD/TDS), duration, detailed indication (20+ chars)
 - MINIMUM 3 differential diagnoses (preferably 4-5) with likelihood %, supporting features, distinguishing features
+- ⚠️ PROBABILITY DISTRIBUTION: primaryDiagnosis.likelihood + sum(differentialDiagnoses[].likelihood) = exactly 100. The primary diagnosis MUST have a numeric likelihood (typically the highest value). Differentials must be ordered by decreasing likelihood.
 - Clinical summary minimum 50 characters
 - Pathophysiology minimum 50 characters
 - Patient education minimum 100 characters
@@ -953,6 +956,14 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     // Call OpenAI with retry mechanism and quality validation
     const result = await callOpenAIWithRetry(openai, diagnosticPrompt, 1, ragPromptBlock)
     const diagnosisData = result.diagnosis
+
+    // DDX likelihood normalisation — ensures primary + differentials = 100.
+    normaliseDiagnosticProbabilities(
+      diagnosisData?.primaryDiagnosis,
+      diagnosisData?.differentialDiagnoses,
+      'likelihood',
+      { logPrefix: '🎯 [DDX-NORM-DERMA]' }
+    )
 
     // RAG: scrub + Bug-D + Bug-F + Pass-1/2 enrichment (shared helper).
     const ragResult = scrubAndEnrichEvidenceRefs(

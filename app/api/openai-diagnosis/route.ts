@@ -12,6 +12,7 @@ import {
   inferSpecialty,
   buildClinicalQuery,
   scrubAndEnrichEvidenceRefs,
+  normaliseDiagnosticProbabilities,
   type RAGContext,
   type RAGReference,
 } from '@/lib/rag/medical-rag'
@@ -5834,6 +5835,18 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     }
     
     const validation = validateUniversalMedicalAnalysis(finalAnalysis, patientContext)
+
+    // ============ DDX PROBABILITY NORMALISATION ============
+    // DeepSeek (and other LLMs) sometimes emit DDx probabilities that don't
+    // sum to 100 — typically because they refuse to assign a numeric
+    // probability to the primary diagnosis. We re-balance the distribution
+    // so primary.probability + Σ differentials.probability = 100 exactly.
+    normaliseDiagnosticProbabilities(
+      finalAnalysis?.clinical_analysis?.primary_diagnosis,
+      finalAnalysis?.clinical_analysis?.differential_diagnoses,
+      'probability',
+      { logPrefix: '🎯 [DDX-NORM-GEN]' }
+    )
 
     // ============ RAG: scrub + Bug-D + Bug-F + Pass-1/2 enrichment ============
     // Shared with chronic-diagnosis and dermatology-diagnosis via the helper in
