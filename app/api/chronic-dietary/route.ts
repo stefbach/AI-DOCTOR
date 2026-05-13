@@ -226,6 +226,11 @@ Generate complete 7-day meal plan with EXACTLY ${Math.round(targetCalories)} kca
         ],
         maxTokens: 16000,
         responseFormat: 'json_object',
+        // Meal plan generation is structured JSON, not a reasoning task —
+        // 'low' brakes DeepSeek-V4-Pro's CoT to the minimum, cutting latency
+        // from ~10min hangs down to ~90-180s without measurable quality loss
+        // on this kind of templated output.
+        reasoningEffort: 'low',
         timeoutMs: 280_000,
       })
     } catch (llmErr: any) {
