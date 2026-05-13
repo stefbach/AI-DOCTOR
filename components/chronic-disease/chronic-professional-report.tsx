@@ -2793,22 +2793,24 @@ export default function ChronicProfessionalReport({
         })
       }
 
-      // 🚨 Detect emergency status early (used in both save-medical-report and documents payload)
-      const emergencyTextToCheck = [
-        report?.medicalReport?.narrative || '',
-        report?.medicalReport?.patient?.chiefComplaint || '',
-        JSON.stringify(report?.medicalReport?.diagnosis || '')
-      ].join(' ').toUpperCase()
-      const emergencyKeywordsList = [
-        'IMMEDIATE HOSPITAL REFERRAL', 'EMERGENCY REFERRAL', 'EMERGENCY',
-        'URGENT REFERRAL', 'SAMU 114', 'CALL AMBULANCE', 'LIFE-THREATENING',
-        'ACUTE CORONARY SYNDROME', 'ACS', 'STEMI', 'NSTEMI', 'STROKE',
-        'PULMONARY EMBOLISM', 'AORTIC DISSECTION', 'SEPSIS',
-        'DIABETIC KETOACIDOSIS', 'HYPOGLYCEMIC COMA', 'ANAPHYLAXIS',
-        'STATUS EPILEPTICUS', 'HYPERTENSIVE EMERGENCY', 'ACUTE ABDOMEN',
-        'URGENCES', 'URGENCE MÉDICALE', 'ORIENTATION URGENCES'
-      ]
-      const isEmergencyCase = emergencyKeywordsList.some(keyword => emergencyTextToCheck.includes(keyword))
+      // 🚨 Detect emergency status from the LLM's structured triage block.
+      // See professional-report.tsx for the rationale (string-matching the
+      // narrative caused false positives). The chronic-disease flow does
+      // not yet populate triage_assessment (Phase 5 on this endpoint is a
+      // separate sprint). When the field is absent we err on the side of
+      // NO banner — false positives are worse than no banner on chronic
+      // care (which is rarely a true emergency anyway).
+      const isEmergencyCase = (() => {
+        const triage = (report as any)?.medicalReport?.triage_assessment
+        if (!triage || typeof triage !== 'object') return false
+        const severity = String(triage.severity || '').toLowerCase()
+        const disposition = String(triage.disposition || '').toLowerCase()
+        return (
+          severity === 'emergency' ||
+          disposition === 'ambulance_immediate' ||
+          disposition === 'a&e_same_day'
+        )
+      })()
 
       // Save final version to consultation_records table
       const saveResponse = await fetch('/api/save-medical-report', {
@@ -4107,44 +4109,23 @@ export default function ChronicProfessionalReport({
     const { medicalReport } = report
 
     // 🚨 DETECT EMERGENCY SITUATIONS
+    // See professional-report.tsx for the rationale on this switch:
+    // keyword scanning fires false positives ("rule out STROKE", "warning
+    // signs of SEPSIS include…") and we now consume the LLM's structured
+    // triage block instead. Chronic flow will gain its own triage block
+    // when Phase 5 is applied to /api/openai-chronic in a later sprint.
     const detectEmergency = () => {
-      const textToCheck = [
-        medicalReport?.narrative || '',
-        medicalReport?.patient?.chiefComplaint || '',
-        JSON.stringify(medicalReport?.diagnosis || '')
-      ].join(' ').toUpperCase()
-      
-      // Emergency keywords
-      const emergencyKeywords = [
-        'IMMEDIATE HOSPITAL REFERRAL',
-        'EMERGENCY REFERRAL',
-        'EMERGENCY',
-        'URGENT REFERRAL',
-        'SAMU 114',
-        'CALL AMBULANCE',
-        'LIFE-THREATENING',
-        'ACUTE CORONARY SYNDROME',
-        'ACS',
-        'STEMI',
-        'NSTEMI',
-        'STROKE',
-        'PULMONARY EMBOLISM',
-        'AORTIC DISSECTION',
-        'SEPSIS',
-        'DIABETIC KETOACIDOSIS',
-        'HYPOGLYCEMIC COMA',
-        'ANAPHYLAXIS',
-        'STATUS EPILEPTICUS',
-        'HYPERTENSIVE EMERGENCY',
-        'ACUTE ABDOMEN',
-        'URGENCES',
-        'URGENCE MÉDICALE',
-        'ORIENTATION URGENCES'
-      ]
-      
-      return emergencyKeywords.some(keyword => textToCheck.includes(keyword))
+      const triage = (medicalReport as any)?.triage_assessment
+      if (!triage || typeof triage !== 'object') return false
+      const severity = String(triage.severity || '').toLowerCase()
+      const disposition = String(triage.disposition || '').toLowerCase()
+      return (
+        severity === 'emergency' ||
+        disposition === 'ambulance_immediate' ||
+        disposition === 'a&e_same_day'
+      )
     }
-    
+
     const isEmergency = detectEmergency()
 
     // 🏥 CHECK SPECIALIST REFERRAL

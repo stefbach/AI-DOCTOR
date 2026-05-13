@@ -3547,26 +3547,23 @@ const handleSendDocuments = async () => {
  email: (doctorInfo.email || '').includes('[') ? 'doctor@tibok.mu' : doctorInfo.email
  }
 
-// 🚨 Detect emergency status early (used in both save-medical-report and documents payload)
-const rapportForEmergency = getReportRapport()
-const emergencyTextToCheck = [
-  rapportForEmergency?.motifConsultation || '',
-  rapportForEmergency?.syntheseDiagnostique || '',
-  rapportForEmergency?.conclusionDiagnostique || '',
-  rapportForEmergency?.priseEnCharge || '',
-  rapportForEmergency?.surveillance || ''
-].join(' ').toUpperCase()
-const emergencyKeywordsList = [
-  'IMMEDIATE HOSPITAL REFERRAL', 'EMERGENCY REFERRAL', 'EMERGENCY',
-  'URGENT REFERRAL', 'SAMU 114', 'CALL AMBULANCE', 'LIFE-THREATENING',
-  'ACUTE CORONARY SYNDROME', 'ACS', 'STEMI', 'NSTEMI', 'STROKE',
-  'PULMONARY EMBOLISM', 'AORTIC DISSECTION', 'SEPSIS',
-  'DIABETIC KETOACIDOSIS', 'HYPOGLYCEMIC COMA', 'ANAPHYLAXIS',
-  'STATUS EPILEPTICUS', 'HYPERTENSIVE EMERGENCY', 'ACUTE ABDOMEN',
-  'URGENCES', 'URGENCE MÉDICALE', 'ORIENTATION URGENCES',
-  'NECROTIZING FASCIITIS', 'STEVENS-JOHNSON SYNDROME', 'TOXIC EPIDERMAL NECROLYSIS'
-]
-const isEmergencyCase = emergencyKeywordsList.some(keyword => emergencyTextToCheck.includes(keyword))
+// 🚨 Detect emergency status from the LLM's structured triage block. See
+// professional-report.tsx for the rationale on switching away from keyword
+// scanning. Dermato truly emergent conditions (necrotising fasciitis,
+// SJS/TEN, anaphylaxis) will be flagged by the LLM as severity=emergency
+// in the new triage_assessment block. Until Phase 5 reaches the dermato
+// LLM, we default to NO banner rather than risk false positives.
+const isEmergencyCase = (() => {
+  const triage = (diagnosisData as any)?.triage_assessment
+  if (!triage || typeof triage !== 'object') return false
+  const severity = String(triage.severity || '').toLowerCase()
+  const disposition = String(triage.disposition || '').toLowerCase()
+  return (
+    severity === 'emergency' ||
+    disposition === 'ambulance_immediate' ||
+    disposition === 'a&e_same_day'
+  )
+})()
 
 
  console.log(' Saving to database...')
@@ -4909,50 +4906,21 @@ const ConsultationReport = () => {
  const rapport = getReportRapport()
  const metadata = getReportMetadata()
 
- // 🚨 DETECT EMERGENCY SITUATIONS
+ // 🚨 DETECT EMERGENCY SITUATIONS — see professional-report.tsx for the
+ // rationale on consuming triage_assessment from the LLM rather than
+ // string-matching the narrative.
  const detectEmergency = () => {
-   const textToCheck = [
-     rapport?.motifConsultation || '',
-     rapport?.syntheseDiagnostique || '',
-     rapport?.conclusionDiagnostique || '',
-     rapport?.priseEnCharge || '',
-     rapport?.surveillance || ''
-   ].join(' ').toUpperCase()
-   
-   // Emergency keywords
-   const emergencyKeywords = [
-     'IMMEDIATE HOSPITAL REFERRAL',
-     'EMERGENCY REFERRAL',
-     'EMERGENCY',
-     'URGENT REFERRAL',
-     'SAMU 114',
-     'CALL AMBULANCE',
-     'LIFE-THREATENING',
-     'ACUTE CORONARY SYNDROME',
-     'ACS',
-     'STEMI',
-     'NSTEMI',
-     'STROKE',
-     'PULMONARY EMBOLISM',
-     'AORTIC DISSECTION',
-     'SEPSIS',
-     'DIABETIC KETOACIDOSIS',
-     'HYPOGLYCEMIC COMA',
-     'ANAPHYLAXIS',
-     'STATUS EPILEPTICUS',
-     'HYPERTENSIVE EMERGENCY',
-     'ACUTE ABDOMEN',
-     'URGENCES',
-     'URGENCE MÉDICALE',
-     'ORIENTATION URGENCES',
-     'NECROTIZING FASCIITIS',
-     'STEVENS-JOHNSON SYNDROME',
-     'TOXIC EPIDERMAL NECROLYSIS'
-   ]
-   
-   return emergencyKeywords.some(keyword => textToCheck.includes(keyword))
+   const triage = (diagnosisData as any)?.triage_assessment
+   if (!triage || typeof triage !== 'object') return false
+   const severity = String(triage.severity || '').toLowerCase()
+   const disposition = String(triage.disposition || '').toLowerCase()
+   return (
+     severity === 'emergency' ||
+     disposition === 'ambulance_immediate' ||
+     disposition === 'a&e_same_day'
+   )
  }
- 
+
  const isEmergency = detectEmergency()
 
  // 🏥 CHECK SPECIALIST REFERRAL

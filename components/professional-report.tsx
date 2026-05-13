@@ -3704,25 +3704,21 @@ const handleSendDocuments = async () => {
  email: doctorInfo.email.includes('[') ? 'doctor@tibok.mu' : doctorInfo.email
  }
 
- // 🚨 Detect emergency status early (used in both save-medical-report and documents payload)
- const rapportForEmergency = getReportRapport()
- const emergencyTextToCheck = [
-   rapportForEmergency?.motifConsultation || '',
-   rapportForEmergency?.syntheseDiagnostique || '',
-   rapportForEmergency?.conclusionDiagnostique || '',
-   rapportForEmergency?.priseEnCharge || '',
-   rapportForEmergency?.surveillance || ''
- ].join(' ').toUpperCase()
- const emergencyKeywordsList = [
-   'IMMEDIATE HOSPITAL REFERRAL', 'EMERGENCY REFERRAL', 'EMERGENCY',
-   'URGENT REFERRAL', 'SAMU 114', 'CALL AMBULANCE', 'LIFE-THREATENING',
-   'ACUTE CORONARY SYNDROME', 'ACS', 'STEMI', 'NSTEMI', 'STROKE',
-   'PULMONARY EMBOLISM', 'AORTIC DISSECTION', 'SEPSIS',
-   'DIABETIC KETOACIDOSIS', 'HYPOGLYCEMIC COMA', 'ANAPHYLAXIS',
-   'STATUS EPILEPTICUS', 'HYPERTENSIVE EMERGENCY', 'ACUTE ABDOMEN',
-   'URGENCES', 'URGENCE MÉDICALE', 'ORIENTATION URGENCES'
- ]
- const isEmergencyCase = emergencyKeywordsList.some(keyword => emergencyTextToCheck.includes(keyword))
+ // 🚨 Detect emergency status from the LLM's structured triage block
+ // (used in both save-medical-report and documents payload). See the
+ // comment on detectEmergency() below for why we no longer string-match
+ // the narrative.
+ const isEmergencyCase = (() => {
+   const triage = diagnosisData?.triage_assessment
+   if (!triage || typeof triage !== 'object') return false
+   const severity = String(triage.severity || '').toLowerCase()
+   const disposition = String(triage.disposition || '').toLowerCase()
+   return (
+     severity === 'emergency' ||
+     disposition === 'ambulance_immediate' ||
+     disposition === 'a&e_same_day'
+   )
+ })()
 
  console.log('📝 Saving to database...')
 
@@ -4985,46 +4981,37 @@ const ConsultationReport = () => {
  const metadata = getReportMetadata()
 
  // 🚨 DETECT EMERGENCY SITUATIONS
+ //
+ // Reads the structured `triage_assessment` block produced by the
+ // diagnostic LLM (post prompt-v2). The legacy approach of scanning the
+ // narrative text for keywords ("EMERGENCY", "SEPSIS", "ACUTE ABDOMEN",
+ // "STROKE", "ACS"…) caused false-positive banners on benign cases —
+ // any sentence like "rule out acute coronary syndrome" or "warning
+ // signs of severe dengue include..." or "no signs of meningitis"
+ // would trip the keyword check.
+ //
+ // The LLM now emits explicit severity + disposition + criteria. We
+ // raise the banner only when the LLM itself classifies the case as
+ // an emergency requiring same-day hospital care. Anything else
+ // (routine, urgent in 24h, etc.) does NOT show the banner.
+ //
+ // Backward compatibility: reports produced BEFORE prompt v2 will not
+ // have triage_assessment. In that case we treat them as routine —
+ // historic reports are not retroactively banner-flagged (acceptable
+ // per product decision, the case database has very few legacy
+ // reports anyway).
  const detectEmergency = () => {
-   const textToCheck = [
-     rapport?.motifConsultation || '',
-     rapport?.syntheseDiagnostique || '',
-     rapport?.conclusionDiagnostique || '',
-     rapport?.priseEnCharge || '',
-     rapport?.surveillance || ''
-   ].join(' ').toUpperCase()
-   
-   // Emergency keywords
-   const emergencyKeywords = [
-     'IMMEDIATE HOSPITAL REFERRAL',
-     'EMERGENCY REFERRAL',
-     'EMERGENCY',
-     'URGENT REFERRAL',
-     'SAMU 114',
-     'CALL AMBULANCE',
-     'LIFE-THREATENING',
-     'ACUTE CORONARY SYNDROME',
-     'ACS',
-     'STEMI',
-     'NSTEMI',
-     'STROKE',
-     'PULMONARY EMBOLISM',
-     'AORTIC DISSECTION',
-     'SEPSIS',
-     'DIABETIC KETOACIDOSIS',
-     'HYPOGLYCEMIC COMA',
-     'ANAPHYLAXIS',
-     'STATUS EPILEPTICUS',
-     'HYPERTENSIVE EMERGENCY',
-     'ACUTE ABDOMEN',
-     'URGENCES',
-     'URGENCE MÉDICALE',
-     'ORIENTATION URGENCES'
-   ]
-   
-   return emergencyKeywords.some(keyword => textToCheck.includes(keyword))
+   const triage = diagnosisData?.triage_assessment
+   if (!triage || typeof triage !== 'object') return false
+   const severity = String(triage.severity || '').toLowerCase()
+   const disposition = String(triage.disposition || '').toLowerCase()
+   return (
+     severity === 'emergency' ||
+     disposition === 'ambulance_immediate' ||
+     disposition === 'a&e_same_day'
+   )
  }
- 
+
  const isEmergency = detectEmergency()
  
  // 🏥 CHECK SPECIALIST REFERRAL

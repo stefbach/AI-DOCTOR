@@ -225,31 +225,35 @@ export default function ViewReportPage() {
 }
 
 /**
- * Detect emergency status from report content
+ * Detect emergency status from the LLM's structured triage block. Same
+ * rationale as in components/professional-report.tsx: keyword scanning
+ * of the narrative gives false positives ("rule out STROKE", "warning
+ * signs of severe dengue include..."). We now look for an explicit
+ * severity/disposition tag emitted by the diagnostic LLM (prompt v2 and
+ * later). If absent (legacy reports, or a flow that hasn't yet adopted
+ * the new schema), we default to NO banner.
  */
 function detectEmergencyFromReport(report: any): boolean {
-  const textToCheck = [
-    report?.rapport?.motifConsultation || '',
-    report?.rapport?.syntheseDiagnostique || '',
-    report?.rapport?.conclusionDiagnostique || '',
-    report?.rapport?.priseEnCharge || '',
-    report?.rapport?.surveillance || '',
-    report?.medicalReport?.narrative || '',
-    report?.medicalReport?.patient?.chiefComplaint || '',
-    JSON.stringify(report?.medicalReport?.diagnosis || ''),
-    typeof report === 'string' ? report : ''
-  ].join(' ').toUpperCase()
-
-  const emergencyKeywords = [
-    'IMMEDIATE HOSPITAL REFERRAL', 'EMERGENCY REFERRAL', 'EMERGENCY',
-    'URGENT REFERRAL', 'SAMU 114', 'CALL AMBULANCE', 'LIFE-THREATENING',
-    'ACUTE CORONARY SYNDROME', 'ACS', 'STEMI', 'NSTEMI', 'STROKE',
-    'PULMONARY EMBOLISM', 'AORTIC DISSECTION', 'SEPSIS',
-    'DIABETIC KETOACIDOSIS', 'HYPOGLYCEMIC COMA', 'ANAPHYLAXIS',
-    'STATUS EPILEPTICUS', 'HYPERTENSIVE EMERGENCY', 'ACUTE ABDOMEN',
-    'URGENCES', 'URGENCE MÉDICALE', 'ORIENTATION URGENCES'
+  // Triage block may sit at several plausible paths depending on how
+  // the report was persisted. We check each one once.
+  const candidates: any[] = [
+    report?.triage_assessment,
+    report?.rapport?.triage_assessment,
+    report?.medicalReport?.triage_assessment,
+    report?.diagnosis?.triage_assessment,
+    report?.diagnosticReasoning?.triage_assessment,
   ]
-  return emergencyKeywords.some(keyword => textToCheck.includes(keyword))
+  const triage = candidates.find(
+    t => t && typeof t === 'object',
+  )
+  if (!triage) return false
+  const severity = String(triage.severity || '').toLowerCase()
+  const disposition = String(triage.disposition || '').toLowerCase()
+  return (
+    severity === 'emergency' ||
+    disposition === 'ambulance_immediate' ||
+    disposition === 'a&e_same_day'
+  )
 }
 
 /**

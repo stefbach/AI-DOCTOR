@@ -5912,6 +5912,22 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         timestamp: finalAnalysis.universal_validation?.timestamp
       },
       
+      // ========== Triage assessment ==========
+      // Structured emergency signal from the LLM. The frontend reads this
+      // directly to decide whether to render the EMERGENCY banner — no more
+      // string-matching on narrative text (which fired on phrases like
+      // "rule out acute coronary syndrome" or "warning signs of severe
+      // dengue include..." and caused false-positive banners).
+      // Fallback: default to a calm "routine" classification rather than
+      // omit the field — keeps downstream readers safe even if the LLM
+      // forgot to populate the block.
+      triage_assessment: finalAnalysis.triage_assessment || {
+        severity: 'routine',
+        disposition: 'outpatient',
+        criteria_met: [],
+        justification: 'Triage block not produced by the diagnostic LLM — defaulted to routine. Treating clinician should review.',
+      },
+
       // Raisonnement diagnostique
       diagnosticReasoning: finalAnalysis.diagnostic_reasoning || {
         key_findings: {
