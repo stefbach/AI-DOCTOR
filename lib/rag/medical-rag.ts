@@ -1470,7 +1470,10 @@ export function scrubAndEnrichEvidenceRefs(
     for (const ref of fallbackRefs) {
       evidenceReferences.push({
         ...ref,
-        used_for: 'Référence fournie au modèle (mapping détaillé non précisé par le LLM)',
+        // No `used_for` here on purpose — when the LLM didn't explicitly
+        // cite the ref, surfacing an internal "mapping not provided" label
+        // to the doctor/patient just looks like an error. Better to let the
+        // ref stand on its title alone (it still helps audit + RAG QA).
       })
     }
   }
@@ -1494,7 +1497,10 @@ export function scrubAndEnrichEvidenceRefs(
       if (evidenceReferences.length >= minRefsTarget) break
       evidenceReferences.push({
         ...ref,
-        used_for: 'Référence fournie au modèle, retenue pour atteindre le seuil minimal de citations',
+        // No `used_for` here either — see Pass 2 note above. The top-up exists
+        // for QA/audit so the bibliography never looks empty when the RAG
+        // actually fired, but the patient-facing report shouldn't surface our
+        // internal "min seuil" jargon.
       })
       topUpAdded++
     }

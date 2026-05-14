@@ -16,6 +16,7 @@ import { callLLM } from '@/lib/llm-client'
 import {
   buildClinicalQuery,
   queryMedicalGuidelines,
+  queryMedicalGuidelinesMulti,
   formatGuidelinesForPrompt,
   scrubAndEnrichEvidenceRefs,
   normaliseDiagnosticProbabilities,
@@ -934,16 +935,34 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         sex: anonymizedPatient.gender,
         medicalHistory: Array.isArray(anonymizedPatient.medicalHistory) ? anonymizedPatient.medicalHistory : [],
       })
-      console.log(`📚 [RAG-DERMA] Querying guidelines (specialty=dermatology%)`)
+      console.log(`📚 [RAG-DERMA] Querying guidelines (specialty=dermatology% + general_medicine fan-out)`)
       console.log(`📚 [RAG-DERMA] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
-      // Use prefix pattern so the retrieval covers every dermato sub-specialty:
-      // dermatology, dermatology_inflammatory (atopic, contact, eczema —
-      // 128 chunks), dermatology_pruritus, dermatology_acne, dermatology_drug,
-      // dermatology_blistering, dermatology_infectious, dermatology_pediatric,
-      // dermatology_genodermatosis, allergology_dermatologic. Without the
-      // wildcard the call hit only the 97 generic 'dermatology' chunks and
-      // missed the actual disease guidelines (notably atopic dermatitis).
-      ragContext = await queryMedicalGuidelines(ragQuery, { specialty: 'dermatology%', limit: 15 })
+      // Run TWO retrievals in parallel:
+      // (a) dermatology% prefix — captures dermatology, dermatology_inflammatory
+      //     (atopic, contact, eczema), dermatology_acne, dermatology_pruritus,
+      //     dermatology_drug, dermatology_blistering, dermatology_infectious,
+      //     dermatology_pediatric, dermatology_genodermatosis,
+      //     allergology_dermatologic.
+      // (b) general_medicine — paradoxically the corpus indexes a lot of
+      //     gold-standard dermatology guidelines (AAD atopic dermatitis,
+      //     AAP, AAD systemic therapies, AAD contact dermatitis) under
+      //     general_medicine rather than dermatology_inflammatory. Filtering
+      //     only on dermatology% misses those, leaving the retriever to
+      //     return scabies / pediculosis chunks (dermatology_infectious)
+      //     for an atopic dermatitis case. Adding a fan-out into
+      //     general_medicine pulls the right refs back in.
+      ragContext = await queryMedicalGuidelinesMulti(
+        ragQuery,
+        [
+          {
+            label: 'derma_general_medicine',
+            text: ragQuery,
+            specialty: 'general_medicine',
+            limit: 6,
+          },
+        ],
+        { specialty: 'dermatology%', limit: 12 }
+      )
       console.log(
         `📚 [RAG-DERMA] Retrieved ${ragContext.totalChunks} chunks ` +
           `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
