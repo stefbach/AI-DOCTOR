@@ -5061,11 +5061,17 @@ export default function ChronicProfessionalReport({
     const labEvidenceRefs = ((diagnosisData as any)?.evidence_references as any[]) || []
     const labCitationsByCategory: Record<string, ReturnType<typeof aggregateReferences>> = {}
     const labUsedRefIds = new Set<string>()
+    // chronic-examens populates tests with `indication` while the manual-edit
+    // path uses `motifClinique` — fall back across both (and clinicalIndication).
+    const labGetIndication = (t: any): string => {
+      const v = t?.motifClinique ?? t?.indication ?? t?.clinicalIndication
+      return typeof v === 'string' ? v : ''
+    }
     for (const { key } of categories) {
       const arr = (tests as any)[key]
       if (!Array.isArray(arr) || arr.length === 0) continue
       const agg = aggregateReferences(
-        arr.map((t: any) => (typeof t?.motifClinique === 'string' ? t.motifClinique : '')),
+        arr.map(labGetIndication),
         labEvidenceRefs
       )
       labCitationsByCategory[key] = agg
@@ -5263,9 +5269,9 @@ export default function ChronicProfessionalReport({
                             ) : (
                               <>
                                 <p className="font-semibold">{test.nom || test.name}</p>
-                                {test.motifClinique && (
+                                {labGetIndication(test) && (
                                   <p className="text-sm text-gray-600 mt-1">
-                                    <span className="font-medium">Indication:</span> {indicationNode || test.motifClinique}
+                                    <span className="font-medium">Indication:</span> {indicationNode || labGetIndication(test)}
                                   </p>
                                 )}
                                 {test.conditionsPrelevement && (

@@ -699,6 +699,14 @@ export function buildClinicalQuery(input: {
   // ---------- medical history (only meaningful entries) ----------
   const histBits = (input.medicalHistory || []).filter(isMeaningful).map(h => sentence(norm(h)))
 
+  // ---------- vital signs → clinical signals ----------
+  // Raw numbers ("BP 145/95") embed poorly — guidelines describe the *concept*
+  // ("stage 1 hypertension", "tachycardia"), not the number. Translate abnormal
+  // values into the clinical phrasing so the embedding actually matches the
+  // hypertension/diabetes/obesity guidelines instead of falling back to whatever
+  // shares vocabulary with the chief complaint.
+  const vitalBits = extractVitalSignals(input.vitalSigns)
+
   // ---------- assemble ----------
   const segments: string[] = []
   if (cc) segments.push(cc)
@@ -706,12 +714,107 @@ export function buildClinicalQuery(input: {
   if (durationStr) segments.push(durationStr)
   if (travelStr) segments.push(travelStr)
   if (histBits.length) segments.push(`history of ${histBits.join(', ')}`)
+  if (vitalBits.length) segments.push(`vital signs: ${vitalBits.join(', ')}`)
   if (demoBits.length) segments.push(`patient profile: ${demoBits.join(', ')}`)
 
-  // Vitals are intentionally OMITTED unless we can detect a meaningful abnormality.
-  // Numeric vitals dilute the embedding signal and rarely add retrieval value.
-
   return segments.join(' ').replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * Map abnormal vital sign values to the clinical concepts used by the
+ * guideline corpus. Returns the list of detected abnormalities (e.g.
+ * "stage 2 hypertension", "tachycardia", "obesity class I"). Returns []
+ * when all measured values are within normal limits — in that case the
+ * caller skips the segment entirely so we don't dilute the embedding.
+ */
+function extractVitalSignals(vitals?: Record<string, unknown>): string[] {
+  if (!vitals || typeof vitals !== 'object') return []
+  const out: string[] = []
+
+  const num = (v: unknown): number => {
+    if (typeof v === 'number') return Number.isFinite(v) ? v : NaN
+    const m = String(v ?? '').match(/-?\d+(?:\.\d+)?/)
+    return m ? parseFloat(m[0]) : NaN
+  }
+
+  // ---- Blood pressure ----
+  // Accept both `bloodPressure: "145/95"` and `systolic`/`diastolic` numeric fields.
+  let sbp = NaN, dbp = NaN
+  const bpRaw = (vitals as any).bloodPressure ?? (vitals as any).bp ?? (vitals as any).pression_arterielle
+  if (typeof bpRaw === 'string') {
+    const m = bpRaw.match(/(\d{2,3})\s*[/\-]\s*(\d{2,3})/)
+    if (m) { sbp = parseInt(m[1], 10); dbp = parseInt(m[2], 10) }
+  }
+  if (!Number.isFinite(sbp)) sbp = num((vitals as any).systolic ?? (vitals as any).systolicBP ?? (vitals as any).bpSystolic)
+  if (!Number.isFinite(dbp)) dbp = num((vitals as any).diastolic ?? (vitals as any).diastolicBP ?? (vitals as any).bpDiastolic)
+  if (Number.isFinite(sbp) && Number.isFinite(dbp)) {
+    if (sbp >= 180 || dbp >= 120) out.push('hypertensive crisis')
+    else if (sbp >= 160 || dbp >= 100) out.push('stage 2 hypertension')
+    else if (sbp >= 140 || dbp >= 90) out.push('stage 1 hypertension')
+    else if (sbp >= 130 || dbp >= 80) out.push('elevated blood pressure')
+    else if (sbp < 90 || dbp < 60) out.push('hypotension')
+  }
+
+  // ---- Heart rate ----
+  const hr = num((vitals as any).heartRate ?? (vitals as any).hr ?? (vitals as any).pulse ?? (vitals as any).frequence_cardiaque)
+  if (Number.isFinite(hr)) {
+    if (hr > 100) out.push('tachycardia')
+    else if (hr < 60) out.push('bradycardia')
+  }
+
+  // ---- Temperature (°C) ----
+  const temp = num((vitals as any).temperature ?? (vitals as any).temp)
+  if (Number.isFinite(temp)) {
+    if (temp >= 38.0) out.push('fever')
+    else if (temp <= 35.0) out.push('hypothermia')
+  }
+
+  // ---- Respiratory rate ----
+  const rr = num((vitals as any).respiratoryRate ?? (vitals as any).rr)
+  if (Number.isFinite(rr) && (rr > 20 || rr < 12)) {
+    out.push(rr > 20 ? 'tachypnea' : 'bradypnea')
+  }
+
+  // ---- Oxygen saturation ----
+  const spo2 = num((vitals as any).oxygenSaturation ?? (vitals as any).spo2 ?? (vitals as any).sao2)
+  if (Number.isFinite(spo2) && spo2 < 92) out.push('hypoxemia')
+
+  // ---- BMI ----
+  // Most callers pass weight+height separately. If a BMI was already computed
+  // and stored on vitalSigns we honour it. Otherwise compute on the fly.
+  let bmi = num((vitals as any).bmi ?? (vitals as any).BMI)
+  if (!Number.isFinite(bmi)) {
+    const wkg = num((vitals as any).weight ?? (vitals as any).weightKg)
+    const hcm = num((vitals as any).height ?? (vitals as any).heightCm)
+    if (Number.isFinite(wkg) && Number.isFinite(hcm) && hcm > 50) {
+      const m = hcm / 100
+      bmi = wkg / (m * m)
+    }
+  }
+  if (Number.isFinite(bmi)) {
+    if (bmi >= 40) out.push('obesity class III')
+    else if (bmi >= 35) out.push('obesity class II')
+    else if (bmi >= 30) out.push('obesity class I')
+    else if (bmi >= 25) out.push('overweight')
+    else if (bmi < 18.5) out.push('underweight')
+  }
+
+  // ---- Fasting glucose (mg/dL) ----
+  const glucose = num((vitals as any).glucose ?? (vitals as any).fastingGlucose ?? (vitals as any).glycemie)
+  if (Number.isFinite(glucose)) {
+    if (glucose >= 126) out.push('hyperglycemia consistent with diabetes')
+    else if (glucose >= 100) out.push('impaired fasting glucose')
+    else if (glucose < 70) out.push('hypoglycemia')
+  }
+
+  // ---- HbA1c (%) ----
+  const hba1c = num((vitals as any).hba1c ?? (vitals as any).a1c)
+  if (Number.isFinite(hba1c)) {
+    if (hba1c >= 6.5) out.push('hbA1c in diabetes range')
+    else if (hba1c >= 5.7) out.push('hbA1c in prediabetes range')
+  }
+
+  return out
 }
 
 // ============================================================================
