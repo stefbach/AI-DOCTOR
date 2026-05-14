@@ -87,16 +87,19 @@ ${systemMessage}
       
       const completion = await callLLM({
         useCase: 'DERMATOLOGY_QUESTIONS',
+        // Same shift as openai-questions / chronic-questions: 5-8 structured
+        // dermato questions, no reasoning needed.
+        model: 'deepseek-chat',
         messages: [
           { role: "system", content: enhancedSystemMessage },
           { role: "user", content: prompt }
         ],
-        maxTokens: 8000,
+        maxTokens: 4000,
         responseFormat: 'json_object',
         topP: 0.9,
         frequencyPenalty: 0.1,
         presencePenalty: 0.2,
-        reasoningEffort: 'low',
+        reasoningEffort: 'none',
         timeoutMs: 180_000,
       })
 

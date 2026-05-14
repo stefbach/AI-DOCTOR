@@ -365,16 +365,19 @@ async function callOpenAIWithRetry(
 
       const llmResult = await callLLM({
         useCase: 'QUESTIONS',
+        // Same shift applied across the rest of the routes: generating 5-8
+        // structured clinical questions is templated output, not reasoning.
+        // V4-Pro at reasoningEffort 'low' was burning 30-60s of CoT for
+        // the "Generating Questions… 2-3s" step — way past the UI estimate.
+        // deepseek-chat handles this schema in ~5-15s.
+        model: 'deepseek-chat',
         messages: [
           { role: 'system', content: enhancedSystemMessage },
           { role: 'user', content: prompt },
         ],
-        maxTokens: 8000,
+        maxTokens: 4000,
         responseFormat: 'json_object',
-        // 'low' brakes DeepSeek V4-Pro's reasoning_effort to the minimum;
-        // OpenAI gpt-5.5 also accepts 'low' (mapped to its lowest tier).
-        // Generating 5-8 structured questions does not need deep CoT.
-        reasoningEffort: 'low',
+        reasoningEffort: 'none',
         timeoutMs: 110_000,
       })
       lastLLMMeta = {

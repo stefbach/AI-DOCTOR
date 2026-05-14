@@ -243,16 +243,19 @@ ${systemMessage}
       
       const llmResult = await callLLM({
         useCase: 'CHRONIC_QUESTIONS',
+        // Same shift as openai-questions: structured 5-8 question generation,
+        // no CoT needed. Switch to deepseek-chat (v3 non-reasoning).
+        model: 'deepseek-chat',
         messages: [
           { role: 'system', content: enhancedSystemMessage },
           { role: 'user', content: prompt }
         ],
-        maxTokens: 8000,
+        maxTokens: 4000,
         responseFormat: 'json_object',
         topP: 0.9,
         frequencyPenalty: 0.1,
         presencePenalty: 0.2,
-        reasoningEffort: 'low',
+        reasoningEffort: 'none',
         timeoutMs: 180_000,
       })
       console.log(`[llm] use=CHRONIC_QUESTIONS provider=${llmResult.provider} model=${llmResult.model} latency=${llmResult.latencyMs}ms`)
