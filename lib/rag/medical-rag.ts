@@ -348,6 +348,115 @@ async function fetchGuidelineRows(
   }
 }
 
+/**
+ * Fallback retrieval by title pattern when the embedding-based search
+ * fails to surface obvious disease-specific chunks. Use case: dermato's
+ * morphology-only query consistently matches CDC scabies/pediculosis
+ * (high cosine due to shared vocabulary) over AAD atopic dermatitis
+ * (lower cosine because of different vocabulary). When the OCR layer
+ * has already suggested a likely diagnosis ("Atopic dermatitis"), we
+ * can bypass cosine entirely and pull the guideline chunks whose TITLE
+ * matches that diagnosis.
+ *
+ * Returns the raw rows (NOT a RAGContext) so the caller can merge them
+ * with the embedding-based retrieval. Designed to be non-blocking: any
+ * failure returns [] without throwing.
+ */
+export async function fetchGuidelineChunksByTitlePatterns(
+  patterns: readonly string[],
+  opts: { limit?: number } = {}
+): Promise<MatchGuidelinesRow[]> {
+  if (!patterns || patterns.length === 0) return []
+  const limit = opts.limit ?? 6
+  const cleanedPatterns = patterns
+    .map(p => String(p || '').trim())
+    .filter(p => p.length >= 3)
+  if (cleanedPatterns.length === 0) return []
+
+  try {
+    const t0 = Date.now()
+    const { data, error } = await getSupabase().rpc('match_guidelines_by_title', {
+      match_title_patterns: cleanedPatterns,
+      match_count: limit,
+    })
+    if (error) {
+      console.warn(`[RAG] title-pattern retrieval RPC error: ${error.message}`)
+      return []
+    }
+    const rows = (data || []) as MatchGuidelinesRow[]
+    console.log(
+      `[RAG] title-pattern retrieval: ${rows.length} chunks in ${Date.now() - t0}ms ` +
+        `(patterns=${cleanedPatterns.map(p => `"${p}"`).join(', ')})`
+    )
+    return rows
+  } catch (err: any) {
+    console.warn('[RAG] title-pattern fallback failed (non-blocking):', err?.message || err)
+    return []
+  }
+}
+
+/**
+ * Merge title-pattern rows into an existing RAGContext built from an
+ * embedding-based retrieval. Deduplicates by chunk id (synthesised from
+ * the new rows since chunks in RAGContext don't carry their raw id), so
+ * we instead deduplicate by content+ref title. Preserves the existing
+ * ref-N numbering for chunks already in context and appends fresh
+ * ref-N entries for newly-introduced guidelines.
+ */
+export function mergeTitlePatternRowsIntoContext(
+  ctx: RAGContext,
+  rows: MatchGuidelinesRow[]
+): RAGContext {
+  if (!rows || rows.length === 0) return ctx
+  const existingKey = new Set(
+    ctx.chunks.map(c => `${c.refId}::${(c.content || '').slice(0, 80)}`)
+  )
+  // Rebuild from the union of existing rows + new rows. Since the
+  // existing context already has chunks (without raw IDs), we keep the
+  // existing context and append new rows via buildContextFromRows on
+  // the merged list. The original embedding-based chunks were lost when
+  // we mapped to RAGChunk — so we just call buildContextFromRows on the
+  // new rows and merge chunks/references downstream.
+  const titleCtx = buildContextFromRows(rows)
+  if (titleCtx.chunks.length === 0) return ctx
+
+  // Append references, re-numbering to avoid collisions with existing ref-N.
+  const merged: RAGContext = {
+    chunks: [...ctx.chunks],
+    references: [...ctx.references],
+    totalChunks: ctx.totalChunks,
+    avgSimilarity: ctx.avgSimilarity,
+    ragUsed: true,
+  }
+  // Map old title-rag ref_id → new ref_id for the appended chunks.
+  const refIdRemap = new Map<string, string>()
+  for (const r of titleCtx.references) {
+    const alreadyInMerged = merged.references.find(
+      existing => existing.external_id === r.external_id || existing.title === r.title
+    )
+    if (alreadyInMerged) {
+      refIdRemap.set(r.ref_id!, alreadyInMerged.ref_id!)
+    } else {
+      const newRefId = `ref-${merged.references.length + 1}`
+      refIdRemap.set(r.ref_id!, newRefId)
+      merged.references.push({ ...r, ref_id: newRefId })
+    }
+  }
+  for (const c of titleCtx.chunks) {
+    const remappedRefId = refIdRemap.get(c.refId) || c.refId
+    const key = `${remappedRefId}::${(c.content || '').slice(0, 80)}`
+    if (!existingKey.has(key)) {
+      merged.chunks.push({ ...c, refId: remappedRefId })
+      existingKey.add(key)
+    }
+  }
+  merged.totalChunks = merged.chunks.length
+  merged.avgSimilarity = merged.chunks.length > 0
+    ? merged.chunks.reduce((s, c) => s + (c.similarity || 0), 0) / merged.chunks.length
+    : 0
+  return merged
+}
+
 /** Group rows into chunks + dedup references by external_id. */
 function buildContextFromRows(rows: MatchGuidelinesRow[]): RAGContext {
   if (rows.length === 0) return { ...EMPTY_CONTEXT, ragUsed: true }

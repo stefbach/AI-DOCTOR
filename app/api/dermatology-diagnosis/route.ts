@@ -17,6 +17,8 @@ import {
   buildClinicalQuery,
   queryMedicalGuidelines,
   queryMedicalGuidelinesMulti,
+  fetchGuidelineChunksByTitlePatterns,
+  mergeTitlePatternRowsIntoContext,
   formatGuidelinesForPrompt,
   scrubAndEnrichEvidenceRefs,
   normaliseDiagnosticProbabilities,
@@ -1001,7 +1003,50 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         { specialty: 'dermatology%', limit: 12 }
       )
       console.log(
-        `📚 [RAG-DERMA] Retrieved ${ragContext.totalChunks} chunks ` +
+        `📚 [RAG-DERMA] Embedding retrieval: ${ragContext.totalChunks} chunks ` +
+          `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
+      )
+
+      // TITLE-PATTERN BOOST: the embedding-based retrieval has repeatedly
+      // failed to surface disease-specific atopic-dermatitis chunks (AAD,
+      // NICE CG57, BAD, EuroGuiDerm) because their vocabulary doesn't
+      // overlap with the morphology-heavy query — instead the cosine
+      // keeps returning CDC scabies / pediculosis chunks that share the
+      // "pruritic scaly skin" surface vocabulary. When the OCR step has
+      // already labelled the likely diagnoses (e.g. "Atopic dermatitis,
+      // Contact dermatitis"), bypass embedding for those and pull
+      // guideline chunks whose TITLE contains the matching keyword.
+      // Merged on top of the embedding context so the LLM still sees
+      // the broader cosine results too.
+      const titlePatterns: string[] = []
+      for (const dx of ocrDifferentials) {
+        const lower = dx.toLowerCase()
+        if (lower.includes('atopic') || lower.includes('eczema')) titlePatterns.push('atopic', 'eczema')
+        if (lower.includes('contact derm')) titlePatterns.push('contact dermat')
+        if (lower.includes('psoriasis')) titlePatterns.push('psoriasis')
+        if (lower.includes('seborrh')) titlePatterns.push('seborrh')
+        if (lower.includes('tinea') || lower.includes('dermatophyt')) titlePatterns.push('tinea', 'dermatophyt')
+        if (lower.includes('scabies')) titlePatterns.push('scabies')
+        if (lower.includes('rosacea')) titlePatterns.push('rosacea')
+        if (lower.includes('urticaria')) titlePatterns.push('urticaria')
+        if (lower.includes('acne')) titlePatterns.push('acne')
+        if (lower.includes('vitiligo')) titlePatterns.push('vitiligo')
+        if (lower.includes('lichen')) titlePatterns.push('lichen')
+      }
+      const dedupedPatterns = Array.from(new Set(titlePatterns))
+      if (dedupedPatterns.length > 0) {
+        const titleRows = await fetchGuidelineChunksByTitlePatterns(dedupedPatterns, { limit: 8 })
+        if (titleRows.length > 0) {
+          const before = ragContext.totalChunks
+          ragContext = mergeTitlePatternRowsIntoContext(ragContext, titleRows)
+          console.log(
+            `📚 [RAG-DERMA] Title-pattern boost merged: ${ragContext.totalChunks - before} new chunks added ` +
+              `(patterns: ${dedupedPatterns.join(', ')})`
+          )
+        }
+      }
+      console.log(
+        `📚 [RAG-DERMA] Final context: ${ragContext.totalChunks} chunks ` +
           `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
       )
       ragPromptBlock = formatGuidelinesForPrompt(ragContext)
