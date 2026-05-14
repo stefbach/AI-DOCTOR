@@ -1587,39 +1587,13 @@ export function scrubAndEnrichEvidenceRefs(
     }
   }
 
-  // Pass 3 — top-up: enforce minimum citation count when refs are plentiful.
-  // The LLM sometimes under-cites (e.g. cites 2 of 6 available refs). To keep
-  // the rendered report well-attributed we top up to min(3, N) using the
-  // most-relevant refs that weren't cited — but only when the LLM already
-  // engaged with the RAG (at least one valid citation present). If the LLM
-  // produced zero citations, Pass 2 already covered the fallback path.
-  const minRefsTarget = Math.min(3, ragContext.references.length)
-  let topUpAdded = 0
-  if (
-    evidenceReferences.length > 0 &&
-    evidenceReferences.length < minRefsTarget &&
-    ragContext.references.length >= minRefsTarget
-  ) {
-    const alreadyIncluded = new Set(evidenceReferences.map(e => e.ref_id))
-    const candidates = ragContext.references.filter(r => !alreadyIncluded.has(r.ref_id))
-    for (const ref of candidates) {
-      if (evidenceReferences.length >= minRefsTarget) break
-      evidenceReferences.push({
-        ...ref,
-        // No `used_for` here either — see Pass 2 note above. The top-up exists
-        // for QA/audit so the bibliography never looks empty when the RAG
-        // actually fired, but the patient-facing report shouldn't surface our
-        // internal "min seuil" jargon.
-      })
-      topUpAdded++
-    }
-    if (topUpAdded > 0) {
-      console.log(
-        `${tag} Top-up: added ${topUpAdded} ref(s) to reach min target ${minRefsTarget}/${ragContext.references.length} ` +
-          `(LLM originally cited ${evidenceReferences.length - topUpAdded})`
-      )
-    }
-  }
+  // Pass 3 was a min-3 top-up that blindly appended refs the LLM hadn't
+  // cited just to reach a target count. That fabricated attribution and
+  // surfaced wildly off-topic refs (e.g. ACR pancreatic adenocarcinoma
+  // criteria in a pure HTA report). Removed deliberately — a citation must
+  // mean "this ref actually informed the recommendation", so if the LLM
+  // didn't cite a ref it stays out of the patient-facing bibliography.
+  const topUpAdded = 0
 
   if (unknownCitedRefs.length > 0) {
     console.error(

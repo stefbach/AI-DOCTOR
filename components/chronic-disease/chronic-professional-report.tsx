@@ -1081,7 +1081,26 @@ export default function ChronicProfessionalReport({
           // Extract and build follow-up plan from diagnosis data
           if (diagnosisData.followUpPlan || diagnosisData.diseaseAssessment) {
             const followUpData = diagnosisData.followUpPlan || {}
-            const assessment = diagnosisData.diseaseAssessment || {}
+            // chronic-diagnosis returns diseaseAssessment.{diabetes,hypertension,obesity}
+            // with a `present` flag; the conditional blocks below historically
+            // checked .diabetesControl / .hypertensionAssessment / .obesityAssessment,
+            // which never existed in the API payload. Normalise here so the
+            // goal-builders, monitoring parameters, emergency protocol and
+            // educational resources fire only for diseases the patient
+            // actually has.
+            const rawAssessment = diagnosisData.diseaseAssessment || {}
+            const assessment: any = {
+              ...rawAssessment,
+              diabetesControl: (rawAssessment.diabetes && rawAssessment.diabetes.present)
+                ? rawAssessment.diabetes
+                : rawAssessment.diabetesControl || null,
+              hypertensionAssessment: (rawAssessment.hypertension && rawAssessment.hypertension.present)
+                ? rawAssessment.hypertension
+                : rawAssessment.hypertensionAssessment || null,
+              obesityAssessment: (rawAssessment.obesity && rawAssessment.obesity.present)
+                ? rawAssessment.obesity
+                : rawAssessment.obesityAssessment || null,
+            }
             
             // Calculate BMI for follow-up goals
             const weight = parseFloat(patientData.weight) || 0
@@ -1190,8 +1209,37 @@ export default function ChronicProfessionalReport({
               "Side effects monitoring"
             )
             
+            // Detect smoking + alcohol from patient data so lifestyle
+            // recommendations actually reflect modifiable risk factors. For
+            // an HTA case the smoking-cessation line should be the first
+            // intervention — historically the report skipped it entirely.
+            const smokingRaw = (patientData?.smokingStatus || patientData?.tabac || '')
+              .toString()
+              .toLowerCase()
+            const isSmoker = /\b(yes|current|actuel|smoker|fumeur|active|every|daily|occasional)\b/.test(smokingRaw)
+              && !/\b(no|never|non|jamais|former|ex-)\b/.test(smokingRaw)
+            const isFormerSmoker = /\b(former|ex-?smoker|ex-?fumeur|quit|stopped)\b/.test(smokingRaw)
+            const alcoholRaw = (patientData?.alcoholConsumption || patientData?.alcool || '')
+              .toString()
+              .toLowerCase()
+            const drinksAlcohol = alcoholRaw && !/\b(no|never|non|jamais|none)\b/.test(alcoholRaw)
+
+            const substanceUse: string[] = []
+            if (isSmoker) {
+              substanceUse.push(
+                "Smoking cessation — first-line priority for cardiovascular risk reduction",
+                "Offer nicotine replacement therapy / varenicline / behavioural support",
+                "Refer to a smoking cessation programme"
+              )
+            } else if (isFormerSmoker) {
+              substanceUse.push("Maintain smoking cessation — continued abstinence reduces cardiovascular risk")
+            }
+            if (drinksAlcohol) {
+              substanceUse.push("Limit alcohol intake (≤14 units/week, spread across the week, ≥2 alcohol-free days)")
+            }
+
             // Build lifestyle modifications
-            const lifestyleModifications = {
+            const lifestyleModifications: any = {
               physicalActivity: [
                 "30 minutes of moderate exercise 5 days per week",
                 "Walking, swimming, or cycling recommended",
@@ -1219,6 +1267,9 @@ export default function ChronicProfessionalReport({
                 "Limit caffeine after 2 PM",
                 "Avoid heavy meals before bedtime"
               ]
+            }
+            if (substanceUse.length > 0) {
+              lifestyleModifications.substanceUse = substanceUse
             }
             
             // Build emergency protocol
@@ -1274,12 +1325,39 @@ export default function ChronicProfessionalReport({
                 monitoringParameters: monitoringParameters
               },
               lifestyleModifications: lifestyleModifications,
-              educationalResources: followUpData.educationalResources || [
-                "Diabetes education program enrollment recommended",
-                "Nutritional counseling sessions",
-                "Patient support groups",
-                "Online resources: mauritiusdiabetes.org"
-              ],
+              // Disease-aware default — previously this fallback was hardcoded
+              // with diabetes resources, which surfaced "Diabetes education
+              // program enrollment recommended" and "mauritiusdiabetes.org"
+              // in reports for patients who don't have diabetes (e.g. a pure
+              // HTA case).
+              educationalResources: followUpData.educationalResources || (() => {
+                const items: string[] = []
+                if (assessment.diabetesControl) {
+                  items.push(
+                    "Diabetes education programme enrolment recommended",
+                    "Carbohydrate counting and glycaemic index workshops",
+                    "Online resources: mauritiusdiabetes.org",
+                  )
+                }
+                if (assessment.hypertensionAssessment) {
+                  items.push(
+                    "Home blood pressure monitoring training",
+                    "DASH diet education",
+                    "Online resources: NICE NG136 hypertension patient information",
+                  )
+                }
+                if (assessment.obesityAssessment) {
+                  items.push(
+                    "Structured weight-management programme referral",
+                    "Behavioural and dietary counselling",
+                  )
+                }
+                items.push(
+                  "Nutritional counselling sessions",
+                  "Patient support groups",
+                )
+                return items
+              })(),
               emergencyProtocol: emergencyProtocol,
               specialInstructions: followUpData.specialInstructions || [
                 "Keep a health diary: track glucose, BP, weight, medications",
@@ -1698,16 +1776,25 @@ export default function ChronicProfessionalReport({
             
             // Paraclinical exams (imaging, etc.)
             if (examOrders.paraclinicalExams && examOrders.paraclinicalExams.length > 0) {
-              const paraclinicalExams = examOrders.paraclinicalExams.map((exam: any) => ({
-                type: exam.examName || exam.examType || '',
-                modality: exam.category || 'IMAGING',
-                region: exam.technicalSpecifications?.views || '',
-                clinicalIndication: exam.clinicalIndication || '',
-                urgency: exam.urgency === 'URGENT',
-                contrast: exam.preparation?.contrastAllergy !== undefined,
-                specificProtocol: exam.technicalSpecifications?.specificProtocol || '',
-                diagnosticQuestion: exam.expectedFindings?.concerningFindings || ''
-              }))
+              const paraclinicalExams = examOrders.paraclinicalExams.map((exam: any) => {
+                const examLabel = `${exam.examName || exam.examType || ''} ${exam.category || ''}`
+                // Only flag "with contrast" when the modality actually uses
+                // contrast. The previous code checked `preparation.contrastAllergy
+                // !== undefined`, which the LLM fills with placeholders like
+                // "N/A" or "NKA" on every exam — flagging ECGs as "WITH CONTRAST"
+                // which is medically impossible.
+                const usesContrast = /\b(with\s+contrast|gadolinium|angiograph|angiogram|venograph|urograph|cystograph|sialograph|myelograph|cholangiograph|CT\s*PA\b|CTA\b|MRA\b)/i.test(examLabel)
+                return {
+                  type: exam.examName || exam.examType || '',
+                  modality: exam.category || 'IMAGING',
+                  region: exam.technicalSpecifications?.views || '',
+                  clinicalIndication: exam.clinicalIndication || '',
+                  urgency: exam.urgency === 'URGENT',
+                  contrast: usesContrast,
+                  specificProtocol: exam.technicalSpecifications?.specificProtocol || '',
+                  diagnosticQuestion: exam.expectedFindings?.concerningFindings || ''
+                }
+              })
               
               updatedReport.paraclinicalExams = {
                 header: prev.medicalReport.practitioner,
