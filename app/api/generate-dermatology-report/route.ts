@@ -1091,6 +1091,21 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
 
 // ==================== GPT-5.5 DATA PREPARATION ====================
 function prepareEnrichedGPTData(realData: any, patientData: any) {
+  // Coerce + filter medications once so summary.medicationsCount and the
+  // MEDICATIONS list block in the prompt are guaranteed consistent.
+  // Mismatch was the root cause of the LLM writing "no medications were
+  // prescribed" in the Management Plan while the prescription form
+  // contained 2 meds — the count read raw length, the list filtered
+  // them out, the LLM saw "MEDICATIONS (2): <empty>" and hallucinated.
+  const coercedMedications = (Array.isArray(realData.detailedMedications) ? realData.detailedMedications : [])
+    .map((m: any) => {
+      const name = m?.name || m?.medication || m?.drug_name || m?.dci || ''
+      const dosing = m?.dosing || m?.application || m?.dosage || m?.frequency || m?.posology || ''
+      const duration = m?.duration || m?.treatmentDuration || ''
+      const indication = m?.indication || m?.clinicalRationale || m?.reason || ''
+      return { name, dosing, duration, indication }
+    })
+    .filter((m: any) => m.name || m.indication)
   return {
     // Patient info
     patient: {
@@ -1131,15 +1146,7 @@ function prepareEnrichedGPTData(realData: any, patientData: any) {
     // supplied treatment data" inside the management plan.
     treatment: {
       approach: realData.managementPlan,
-      medications: (Array.isArray(realData.detailedMedications) ? realData.detailedMedications : [])
-        .map((m: any) => {
-          const name = m?.name || m?.medication || m?.drug_name || m?.dci || ''
-          const dosing = m?.dosing || m?.application || m?.dosage || m?.frequency || m?.posology || ''
-          const duration = m?.duration || m?.treatmentDuration || ''
-          const indication = m?.indication || m?.clinicalRationale || m?.reason || ''
-          return { name, dosing, duration, indication }
-        })
-        .filter((m: any) => m.name || m.indication),
+      medications: coercedMedications,
       investigationStrategy: realData.investigationStrategy,
       labTests: realData.detailedLabTests,
       imaging: realData.detailedImaging
@@ -1153,9 +1160,10 @@ function prepareEnrichedGPTData(realData: any, patientData: any) {
       patientEducation: realData.patientEducation
     },
 
-    // Summary
+    // Summary — keep count consistent with the coerced list so the LLM
+    // never sees "MEDICATIONS (2)" with an empty list block underneath.
     summary: {
-      medicationsCount: realData.medicationsCount,
+      medicationsCount: coercedMedications.length,
       labTestsCount: realData.labTestsCount,
       imagingCount: realData.imagingStudiesCount
     },
@@ -1269,7 +1277,12 @@ ${(Array.isArray(enrichedData.treatment.medications) && enrichedData.treatment.m
       return `- ${parts.join(' ')}`
     }).filter((line: string) => line.trim() !== '-').join('\n')
   : 'No medications prescribed'}
-NOTE: If the MEDICATIONS line above is "No medications prescribed" or empty, the management plan should explicitly state that NO pharmacotherapy was indicated — do NOT verbalise about missing fields or "undefined" data.
+
+⚠️ HARD CONSTRAINT — MEDICATION COUNT CONSISTENCY:
+- The MEDICATIONS section above is the SINGLE SOURCE OF TRUTH for what was prescribed.
+- If ${enrichedData.summary.medicationsCount} ≥ 1: in the managementPlan you MUST acknowledge each medication BY NAME and describe its role (e.g. "Desonide 0.05% cream was prescribed twice daily for 14 days as a low-potency topical corticosteroid…"). You MUST NOT write "no medications were prescribed", "pharmacotherapy was not indicated", or similar phrasing that contradicts the list.
+- If ${enrichedData.summary.medicationsCount} = 0: the managementPlan must state that no pharmacotherapy was indicated and explain the non-pharmacological rationale. Do NOT invent medications.
+- Never verbalise about missing fields, "undefined" data, or template placeholders — those are not patient-facing concerns.
 
 INVESTIGATIONS (${enrichedData.summary.labTestsCount + enrichedData.summary.imagingCount} total):
 Laboratory Tests (${enrichedData.summary.labTestsCount}):

@@ -11,6 +11,7 @@ import {
   queryMedicalGuidelines,
   formatGuidelinesForPrompt,
   scrubAndEnrichEvidenceRefs,
+  filterEvidenceRefsByTopic,
   type RAGContext,
 } from '@/lib/rag/medical-rag'
 
@@ -396,6 +397,21 @@ CONSULTATIONS selon maladies:
             ragContext,
             { logPrefix: '📚 [RAG-CHRONIC-EXAMENS]' }
           )
+          // Topic-match safety net — same seeds as chronic-prescription.
+          const examsTopicSeeds: string[] = []
+          const examsDA = diagnosisData?.diseaseAssessment || {}
+          if (examsDA.diabetes?.present) examsTopicSeeds.push('diabetes', 'glucose', 'hba1c', 'insulin')
+          if (examsDA.hypertension?.present) examsTopicSeeds.push('hypertension', 'blood pressure', 'ecg', 'electrocardiogram')
+          if (examsDA.obesity?.present) examsTopicSeeds.push('obesity', 'weight', 'bmi')
+          if (Array.isArray(anonymizedPatient.medicalHistory)) {
+            examsTopicSeeds.push(...anonymizedPatient.medicalHistory)
+          }
+          const examsFiltered = filterEvidenceRefsByTopic(
+            ragResult.evidenceReferences,
+            examsTopicSeeds,
+            { logPrefix: '🎯 [TOPIC-FILTER-CHRONIC-EXAMENS]' }
+          )
+          ragResult.evidenceReferences = examsFiltered.kept
 
           // Defensive auto-cite: if a test/exam clinicalIndication doesn't
           // already contain [ref-N] and we have at least one evidence ref,

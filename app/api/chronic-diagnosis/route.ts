@@ -13,6 +13,7 @@ import {
   queryMedicalGuidelinesMulti,
   formatGuidelinesForPrompt,
   scrubAndEnrichEvidenceRefs,
+  filterEvidenceRefsByTopic,
   type RAGContext,
 } from '@/lib/rag/medical-rag'
 
@@ -431,7 +432,25 @@ Si une recommandation s'appuie sur une guideline du bloc CONTEXTE GUIDELINES MÉ
             ragContext,
             { logPrefix: '📚 [RAG-CHRONIC]' }
           )
-          combinedAssessment.evidence_references = ragResult.evidenceReferences
+          // Topic-match safety net (see medical-rag.ts). Seeds: the diseases
+          // the assessment flagged as present + the patient's medical history.
+          // Catches cases like ACR pancreatic adenocarcinoma cited in an
+          // HTA-only chronic report when the prompt rule alone wasn't enough.
+          const chronicTopicSeeds: string[] = []
+          const da = combinedAssessment.diseaseAssessment || {}
+          if (da.diabetes?.present) chronicTopicSeeds.push('diabetes', 'glucose', 'hyperglycemia', 'insulin')
+          if (da.hypertension?.present) chronicTopicSeeds.push('hypertension', 'blood pressure', 'antihypertensive')
+          if (da.obesity?.present) chronicTopicSeeds.push('obesity', 'weight', 'bmi')
+          if (Array.isArray(anonymizedPatient.medicalHistory)) {
+            chronicTopicSeeds.push(...anonymizedPatient.medicalHistory)
+          }
+          if (clinicalData?.chiefComplaint) chronicTopicSeeds.push(clinicalData.chiefComplaint)
+          const topicFiltered = filterEvidenceRefsByTopic(
+            ragResult.evidenceReferences,
+            chronicTopicSeeds,
+            { logPrefix: '🎯 [TOPIC-FILTER-CHRONIC]' }
+          )
+          combinedAssessment.evidence_references = topicFiltered.kept
           combinedAssessment.rag_used = ragContext.ragUsed
           combinedAssessment.rag_metadata = {
             chunks_retrieved: ragContext.totalChunks,

@@ -5934,8 +5934,16 @@ const ConsultationReport = () => {
  )}
  </div>
  <div className="text-sm text-gray-500">
+ {/* Dermoscopy / Wood's lamp / RCM / patch testing / phototesting are
+   bedside clinical procedures with no specimen — hide Tube + TAT lines
+   instead of surfacing the misleading "Tube: As per laboratory protocol"
+   fallback. Detect on test name; lab tests don't match this pattern. */}
+ {!/\b(dermo?scop|dermatoscop|wood'?s\s*lamp|reflect(ance)?\s*confocal|rcm\b|patch\s*test|photo\s*test|phototest|trichoscop|capilloscop)/i.test(String(test.nom || '')) && (
+ <>
  <p>Tube: {test.tubePrelevement}</p>
  <p>TAT: {test.delaiResultat}</p>
+ </>
+ )}
  </div>
  </div>
  )}

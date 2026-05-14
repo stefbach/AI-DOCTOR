@@ -1616,6 +1616,99 @@ export function scrubAndEnrichEvidenceRefs(
   }
 }
 
+// ============================================================================
+// TOPIC-MATCH FILTER (post-scrub safety net)
+// ============================================================================
+// Prompt-level "STRICT TOPIC-MATCH" rules reduced but did not eliminate off-
+// topic citations (e.g. EuroGuiDerm bullous pemphigoid cited for atopic /
+// contact dermatitis, ACR pancreatic cancer cited for HTA). This is a
+// deterministic backup: tokenise the diagnosis topic and each ref title,
+// drop refs whose title shares zero substantive overlap. Generic words
+// (guideline, management, european, society, …) are stripped so they don't
+// produce false matches.
+
+const REF_TITLE_STOPWORDS = new Set([
+  // Article + connector words
+  'a', 'an', 'and', 'or', 'the', 'of', 'for', 'in', 'on', 'to', 'with', 'from',
+  'by', 'as', 'at', 'into', 'about', 'against', 'between', 'after', 'before',
+  // Generic guideline / publication vocabulary
+  'guideline', 'guidelines', 'guidance', 'consensus', 'statement', 'position',
+  'recommendation', 'recommendations', 'management', 'treatment', 'therapy',
+  'evidence', 'evidence-based', 'review', 'update', 'updated', 'practice',
+  'clinical', 'medical', 'health', 'healthcare', 'criteria', 'appropriateness',
+  'edition', 'version', 'volume', 'part', 'series',
+  // Society / publisher names
+  'european', 'british', 'american', 'national', 'international', 'nice',
+  'esc', 'acc', 'aha', 'ada', 'idf', 'ers', 'eular', 'bsr', 'sign', 'who',
+  'who-em', 'haute', 'autorite', 'sante', 'hcsp', 'has', 'cdc', 'idsa',
+  'eular', 'eular-eular', 'efns', 'ean', 'acr', 'aad', 'bad', 'euroguiderm',
+  'association', 'society', 'college', 'academy', 'foundation', 'institute',
+  'task', 'force', 'working', 'group', 'panel', 'committee',
+  // Generic dermatology / system words (both sides usually have them)
+  'skin', 'condition', 'disease', 'disorder', 'disorders', 'syndrome',
+  'patient', 'patients', 'adult', 'adults', 'child', 'children', 'paediatric',
+  'pediatric', 'adolescent', 'elderly',
+])
+
+function tokeniseTitle(raw: string): Set<string> {
+  if (!raw || typeof raw !== 'string') return new Set()
+  return new Set(
+    raw
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '') // strip accents
+      .replace(/[^a-z0-9\s-]/g, ' ')
+      .split(/\s+/)
+      .map(t => t.replace(/^-+|-+$/g, ''))
+      .filter(t => t.length >= 3 && !REF_TITLE_STOPWORDS.has(t))
+  )
+}
+
+export function filterEvidenceRefsByTopic<T extends { title?: string; guideline_title?: string; ref_id?: string }>(
+  refs: T[],
+  topicSeeds: string[],
+  options: { logPrefix?: string; minOverlap?: number } = {},
+): { kept: T[]; dropped: T[] } {
+  const tag = options.logPrefix || '🎯 [TOPIC-FILTER]'
+  const minOverlap = options.minOverlap ?? 1
+  if (!Array.isArray(refs) || refs.length === 0) return { kept: [], dropped: [] }
+
+  const topicTokens = new Set<string>()
+  for (const seed of topicSeeds) {
+    for (const tok of tokeniseTitle(String(seed || ''))) topicTokens.add(tok)
+  }
+  if (topicTokens.size === 0) {
+    // No usable topic seeds — don't drop anything (avoid false positives).
+    return { kept: refs, dropped: [] }
+  }
+
+  const kept: T[] = []
+  const dropped: T[] = []
+  for (const ref of refs) {
+    const title = ref?.title || ref?.guideline_title || ''
+    const titleTokens = tokeniseTitle(title)
+    let overlap = 0
+    for (const t of titleTokens) {
+      if (topicTokens.has(t)) {
+        overlap++
+        if (overlap >= minOverlap) break
+      }
+    }
+    if (overlap >= minOverlap) {
+      kept.push(ref)
+    } else {
+      dropped.push(ref)
+    }
+  }
+
+  if (dropped.length > 0) {
+    console.log(
+      `${tag} Topic-match dropped ${dropped.length} ref(s) with zero overlap vs [${Array.from(topicTokens).slice(0, 10).join(', ')}]:`,
+      dropped.map(r => `${r?.ref_id || '?'} "${(r?.title || '').slice(0, 60)}"`).join(' | ')
+    )
+  }
+  return { kept, dropped }
+}
+
 /**
  * Normalise diagnostic probability distribution so the primary diagnosis
  * plus differentials sum to exactly 100.

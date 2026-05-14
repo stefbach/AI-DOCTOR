@@ -9,6 +9,7 @@ import {
   queryMedicalGuidelines,
   formatGuidelinesForPrompt,
   scrubAndEnrichEvidenceRefs,
+  filterEvidenceRefsByTopic,
   type RAGContext,
 } from '@/lib/rag/medical-rag'
 
@@ -470,6 +471,22 @@ Generate the comprehensive chronic disease prescription now.`
       ragContext,
       { logPrefix: '📚 [RAG-CHRONIC-PRESCRIPTION]' }
     )
+    // Topic-match safety net — seeds derived from the chronic diseases the
+    // upstream diagnosis flagged + the prescribed medication DCIs.
+    const presTopicSeeds: string[] = []
+    const presDA = diagnosisData?.diseaseAssessment || {}
+    if (presDA.diabetes?.present) presTopicSeeds.push('diabetes', 'glucose', 'insulin', 'metformin', 'gliclazide')
+    if (presDA.hypertension?.present) presTopicSeeds.push('hypertension', 'blood pressure', 'antihypertensive', 'ace', 'arb', 'beta-blocker')
+    if (presDA.obesity?.present) presTopicSeeds.push('obesity', 'weight')
+    if (Array.isArray(anonymizedPatient.medicalHistory)) {
+      presTopicSeeds.push(...anonymizedPatient.medicalHistory)
+    }
+    const presFiltered = filterEvidenceRefsByTopic(
+      ragResult.evidenceReferences,
+      presTopicSeeds,
+      { logPrefix: '🎯 [TOPIC-FILTER-CHRONIC-PRESCRIPTION]' }
+    )
+    ragResult.evidenceReferences = presFiltered.kept
 
     // Defensive auto-cite: if a chronicMedication's indication.clinicalRationale
     // doesn't already contain [ref-N] and we have at least one evidence ref,

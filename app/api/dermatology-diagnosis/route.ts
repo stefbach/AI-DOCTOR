@@ -21,6 +21,7 @@ import {
   mergeTitlePatternRowsIntoContext,
   formatGuidelinesForPrompt,
   scrubAndEnrichEvidenceRefs,
+  filterEvidenceRefsByTopic,
   normaliseDiagnosticProbabilities,
   type RAGContext,
 } from '@/lib/rag/medical-rag'
@@ -1108,7 +1109,23 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
       ragContext,
       { logPrefix: '📚 [RAG-DERMA]' }
     )
-    const evidenceReferences = ragResult.evidenceReferences
+    // Topic-match safety net: drop refs whose title has zero substantive
+    // keyword overlap with the primary diagnosis / differentials. Catches
+    // cases the LLM-level STRICT TOPIC-MATCH prompt rule misses (e.g.
+    // EuroGuiDerm bullous pemphigoid cited in a contact dermatitis case).
+    const dermatoTopicSeeds: string[] = [
+      diagnosisData?.primaryDiagnosis?.name || '',
+      diagnosisData?.primaryDiagnosis?.condition || '',
+      ...(Array.isArray(diagnosisData?.differentialDiagnoses)
+        ? diagnosisData.differentialDiagnoses.map((d: any) => d?.condition || d?.name || '')
+        : []),
+    ].filter(s => typeof s === 'string' && s.length > 0)
+    const topicFiltered = filterEvidenceRefsByTopic(
+      ragResult.evidenceReferences,
+      dermatoTopicSeeds,
+      { logPrefix: '🎯 [TOPIC-FILTER-DERMA]' }
+    )
+    const evidenceReferences = topicFiltered.kept
     
     // Generate formatted text for backward compatibility
     const fullTextDiagnosis = generateFormattedDiagnosisText(diagnosisData)
