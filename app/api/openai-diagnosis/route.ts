@@ -2419,11 +2419,21 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
 
       let completion = await callLLM({
         useCase: 'DIAGNOSIS',
+        // Same shift already applied to dermato + chronic structured calls:
+        // DeepSeek-V4-Pro at reasoningEffort 'low' was still burning 5-7 min
+        // of chain-of-thought on what is, in practice, a templated JSON
+        // schema fill (primary dx + differentials + treatment + labs +
+        // imaging — all from constrained lists). deepseek-chat (v3) handles
+        // this at 3-5× the throughput with no clinically meaningful loss
+        // on the case mix observed. maxTokens 32000 was massive overkill
+        // and dragged latency further; 16000 is well above the largest
+        // observed response (≈ 9-11k).
+        model: 'deepseek-chat',
         messages: diagnosisMessages,
-        maxTokens: 32000,
-        reasoningEffort: 'low',
+        maxTokens: 16000,
+        reasoningEffort: 'none',
         responseFormat: 'json_object',
-        timeoutMs: 280_000,
+        timeoutMs: 240_000,
       })
 
       let rawContent = completion.text || ''

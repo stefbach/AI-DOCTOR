@@ -2089,16 +2089,15 @@ ANTI-HALLUCINATION RULE (STRICT): Stay strictly within the provided diagnostic a
 
       let result = await callLLM({
         useCase: 'REPORT',
+        // Narrative re-formatting from already-analyzed data — same pattern
+        // as dermato/chronic report routes. Switch to deepseek-chat (v3
+        // non-reasoning) for 3-5× lower latency. No CoT needed to expand
+        // pre-analyzed sections into 150-200 words each.
+        model: 'deepseek-chat',
         messages: reportMessages,
-        // 4000 tokens was the OpenAI default sized for GPT-5.5. DeepSeek-V4-Pro
-        // produces longer narratives and was being truncated mid-JSON: response
-        // length 3795 chars with no closing `}` → "No valid JSON structure
-        // found" → fallback content kicked in, masking the LLM output entirely.
-        // 12000 gives ~9-10 substantive sections of 300-500 words each plus
-        // JSON overhead, well under deepseek-v4-pro's 16K output cap.
-        maxTokens: 12000,
-        reasoningEffort: 'low',
-        timeoutMs: 280_000,
+        maxTokens: 8000,
+        reasoningEffort: 'none',
+        timeoutMs: 240_000,
       })
 
       // Teleconsultation guard: log fabricated physical-exam findings in the
