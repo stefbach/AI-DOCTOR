@@ -265,28 +265,46 @@ PART 1: produce ONLY days 1-4 plus nutritionalAssessment and practicalGuidance, 
 
 PART 2: produce ONLY days 5-7. Choose distinct menus from each other so the patient sees a variety of dishes within these three days, while respecting the same caloric targets and macro distribution.`
 
-    console.log('🥗 Dietary calls 1/2 + 2/2 running in PARALLEL...')
+    console.log('🥗 Dietary calls 1/2 + 2/2 running in PARALLEL on deepseek-chat...')
+    // deepseek-chat (v3 non-reasoning) is 3-5× faster than deepseek-v4-pro
+    // on this template-filling task. v4-pro is a reasoning model that spends
+    // 200-400s in chain-of-thought BEFORE emitting tokens, which is wasted
+    // budget when the task is "fill a 7-day meal plan template" — no novel
+    // medical reasoning is required (the calorie targets, macro distribution,
+    // and disease-specific constraints are already computed and pinned in
+    // the system prompt). Expected wall time drops from ~10 min → ~1-2 min.
+    const FAST_MODEL = 'deepseek-chat'
     const [call1Settled, call2Settled] = await Promise.allSettled([
       callLLM({
         useCase: 'CHRONIC_DIETARY',
+        model: FAST_MODEL,
         messages: [
           { role: 'system', content: systemPromptCall1 },
           { role: 'user', content: patientContext }
         ],
-        maxTokens: 12000,
+        // deepseek-chat caps output at 8192 tokens. The Part-1 schema
+        // (4 days × 5 meals × 3-5 foods + nutritionalAssessment +
+        // practicalGuidance) fits comfortably under 8k when foods stay
+        // short per the OUTPUT BUDGET RULES in the prompt.
+        maxTokens: 8000,
         responseFormat: 'json_object',
-        reasoningEffort: 'low',
+        // 'none' = no reasoning_effort param sent. deepseek-chat doesn't
+        // support reasoning_effort anyway, and explicitly passing 'low'
+        // would just be ignored (or worse, rejected by the provider).
+        reasoningEffort: 'none',
         timeoutMs: 240_000,
       }),
       callLLM({
         useCase: 'CHRONIC_DIETARY',
+        model: FAST_MODEL,
         messages: [
           { role: 'system', content: systemPromptCall2 },
           { role: 'user', content: part2UserPrompt }
         ],
-        maxTokens: 8000,
+        // Part 2: 3 days × 5 meals, easily fits in 6k tokens.
+        maxTokens: 6000,
         responseFormat: 'json_object',
-        reasoningEffort: 'low',
+        reasoningEffort: 'none',
         timeoutMs: 240_000,
       }),
     ])
