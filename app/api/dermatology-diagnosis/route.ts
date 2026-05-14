@@ -277,7 +277,18 @@ async function callOpenAIWithRetry(
       console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1}`)
 
       // Enhance system message with quality requirements on retry
-      let systemMessage = "You are an expert board-certified dermatologist. Provide comprehensive, evidence-based diagnostic assessments with structured JSON responses."
+      let systemMessage = `You are an expert board-certified dermatologist. Provide comprehensive, evidence-based diagnostic assessments with structured JSON responses.
+
+CITATION REQUIREMENTS — read this BEFORE writing your JSON:
+If a "CONTEXTE GUIDELINES MÉDICALES (RAG)" block has been prepended to this system prompt, the user prompt context contains numbered guideline references like [ref-1], [ref-2], [ref-3]. When ANY part of your reasoning is informed by a guideline in that block — even partially (epidemiology, monitoring threshold, contraindication, alternative diagnosis, differential workup) — embed the corresponding [ref-N] token at the END of the sentence it supports, inside these JSON fields:
+- "clinicalReasoning" (the field on primaryDiagnosis)
+- "pathophysiology"
+- "treatmentPlan.medications[].indication" and "treatmentPlan.medications[].monitoring"
+- "recommendedInvestigations.biopsy" (the indication for biopsy)
+- "differentialDiagnoses[].supportingFeatures" / "distinguishingFeatures" when a guideline informs the rationale
+- "patientEducation" entries when guideline-derived
+Then list the SAME [ref-N] tokens you used in the top-level "evidence_references" array, with a brief "used_for" explanation per ref.
+Cite at MINIMUM 3 distinct [ref-N] tokens when 3 or more refs are available — even if the match is only partial. It is better to cite a partially-relevant ref than to leave the report unattributed. NEVER fabricate a [ref-N] that doesn't appear in the RAG block.`
       
       if (attempt === 1) {
         systemMessage = `🚨 ATTEMPT 2/4 - PREVIOUS RESPONSE HAD QUALITY ISSUES - ENHANCED REQUIREMENTS:
@@ -768,7 +779,8 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
     "confidence": "High|Moderate|Low",
     "likelihood": 50,
     "keyCriteria": ["criterion 1", "criterion 2", "criterion 3"],
-    "presentationType": "Typical|Atypical - with explanation"
+    "presentationType": "Typical|Atypical - with explanation",
+    "clinicalReasoning": "Why this diagnosis fits the clinical picture (minimum 60 characters). Embed [ref-N] tokens at the END of sentences supported by guidelines in the RAG block (e.g. 'Flexural distribution with pruritus and lichenification is characteristic of atopic dermatitis [ref-2].')."
   },
   
   "differentialDiagnoses": [
@@ -792,7 +804,7 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
     }
   ],
   
-  "pathophysiology": "Detailed explanation of underlying disease mechanism (minimum 50 characters)",
+  "pathophysiology": "Detailed explanation of underlying disease mechanism (minimum 50 characters). Embed [ref-N] tokens for mechanism claims supported by the RAG block.",
   
   "recommendedInvestigations": {
     "laboratory": ["CLEAN test name only (e.g., 'Complete Blood Count', 'KOH preparation', 'Patch testing')"],
@@ -832,8 +844,8 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
         "dosage": "100mg",
         "frequency": "BD (twice daily) or OD",
         "duration": "Treatment duration (e.g., 6-12 weeks)",
-        "indication": "Detailed medical indication with mechanism (minimum 20 characters)",
-        "monitoring": "What to monitor during treatment",
+        "indication": "Detailed medical indication with mechanism (minimum 20 characters). Embed [ref-N] when a RAG guideline supports the choice (e.g. 'First-line topical corticosteroid for acute flexural eczema [ref-1].').",
+        "monitoring": "What to monitor during treatment. Embed [ref-N] when monitoring thresholds come from a guideline (e.g. 'Reassess at 2 weeks; reduce frequency if clear [ref-3].').",
         "contraindications": "Key contraindications"
       }
     ],
