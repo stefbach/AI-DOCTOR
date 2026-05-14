@@ -59,16 +59,21 @@ async function callOpenAI(
 ): Promise<any> {
   const llmResult = await callLLM({
     useCase: 'CHRONIC_EXAMENS',
+    // Same shift applied to chronic-report / chronic-prescription / dermato /
+    // general-consultation: V4-Pro at reasoningEffort 'low' was still burning
+    // 3-5 min of CoT on what is structured exam-list generation. deepseek-chat
+    // (v3 non-reasoning) handles the schema 3-5× faster with no quality loss
+    // on this task (picking standard labs + imaging from constrained lists,
+    // writing 1-2 line indications).
+    model: 'deepseek-chat',
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt }
     ],
     maxTokens,
     responseFormat: 'json_object',
-    // Exam list / referral plan is structured output, not reasoning. 'low'
-    // avoids the same 504 timeout pattern that hit chronic-prescription.
-    reasoningEffort: 'low',
-    timeoutMs: 280_000,
+    reasoningEffort: 'none',
+    timeoutMs: 240_000,
   })
   console.log(`[llm] use=CHRONIC_EXAMENS provider=${llmResult.provider} model=${llmResult.model} latency=${llmResult.latencyMs}ms tokens=${llmResult.usage?.totalTokens ?? 'n/a'}`)
 
