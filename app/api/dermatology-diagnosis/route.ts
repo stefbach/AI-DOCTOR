@@ -1123,7 +1123,20 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     const topicFiltered = filterEvidenceRefsByTopic(
       ragResult.evidenceReferences,
       dermatoTopicSeeds,
-      { logPrefix: '🎯 [TOPIC-FILTER-DERMA]' }
+      {
+        logPrefix: '🎯 [TOPIC-FILTER-DERMA]',
+        patientFlags: {
+          isPregnant: /\b(pregn|enceinte|gestational|gravid)/i.test(String(anonymizedPatient.pregnancyStatus || '')),
+          isChild: typeof anonymizedPatient.age === 'number' ? anonymizedPatient.age < 18 :
+            /^(\d+)/.test(String(anonymizedPatient.age || ''))
+              ? parseInt(String(anonymizedPatient.age), 10) < 18
+              : false,
+          hasCancer: Array.isArray(anonymizedPatient.medicalHistory) &&
+            anonymizedPatient.medicalHistory.some((d: string) =>
+              /\b(cancer|carcinoma|melanoma|lymphoma|leukemi|leukaemi|sarcoma|metastat|oncolog|tumou?r|neoplas)/i.test(String(d || ''))
+            ),
+        },
+      }
     )
     const evidenceReferences = topicFiltered.kept
     

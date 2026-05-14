@@ -1666,24 +1666,66 @@ function tokeniseTitle(raw: string): Set<string> {
 export function filterEvidenceRefsByTopic<T extends { title?: string; guideline_title?: string; ref_id?: string }>(
   refs: T[],
   topicSeeds: string[],
-  options: { logPrefix?: string; minOverlap?: number } = {},
+  options: { logPrefix?: string; minOverlap?: number; patientFlags?: { isPregnant?: boolean; isChild?: boolean; hasCancer?: boolean } } = {},
 ): { kept: T[]; dropped: T[] } {
   const tag = options.logPrefix || '🎯 [TOPIC-FILTER]'
   const minOverlap = options.minOverlap ?? 1
+  const flags = options.patientFlags || {}
   if (!Array.isArray(refs) || refs.length === 0) return { kept: [], dropped: [] }
+
+  // Hard-drop patterns: ref titles where the topic is so clearly outside
+  // the patient's clinical context that we drop them even when the title
+  // has zero overlap with the topic seeds AND even when this would empty
+  // the bibliography. The safety fallback below WILL NOT rescue these —
+  // an ADA "Diabetes in Pregnancy" reference attached to a 36-year-old
+  // male with HTA is strictly worse than a missing bibliography.
+  const hardDropPatterns: RegExp[] = []
+  if (!flags.isPregnant) {
+    hardDropPatterns.push(/\b(pregnan|gestational|obstetric|antenatal|postpartum|peripartum|maternal-?fet)/i)
+  }
+  if (!flags.isChild) {
+    hardDropPatterns.push(/\b(p[ae]diatric|neonatal|infant|adolescent|child(ren|hood)?)\b/i)
+  }
+  if (!flags.hasCancer) {
+    hardDropPatterns.push(/\b(cancer|carcinoma|adenocarcinoma|melanoma|lymphoma|leukemia|leukaemia|sarcoma|metastat|oncology|oncologic|tumour|tumor|neoplas|chemother|radioth)/i)
+  }
+  const isHardDrop = (title: string): boolean => {
+    for (const re of hardDropPatterns) {
+      if (re.test(title)) return true
+    }
+    return false
+  }
 
   const topicTokens = new Set<string>()
   for (const seed of topicSeeds) {
     for (const tok of tokeniseTitle(String(seed || ''))) topicTokens.add(tok)
   }
+
+  const hardDropped: T[] = []
+  const survivors: T[] = []
+  for (const ref of refs) {
+    const title = ref?.title || ref?.guideline_title || ''
+    if (isHardDrop(title)) {
+      hardDropped.push(ref)
+    } else {
+      survivors.push(ref)
+    }
+  }
+  if (hardDropped.length > 0) {
+    console.warn(
+      `${tag} Hard-dropped ${hardDropped.length} ref(s) on patient-context mismatch (pregnancy/pediatric/oncology):`,
+      hardDropped.map(r => `${r?.ref_id || '?'} "${(r?.title || '').slice(0, 80)}"`).join(' | ')
+    )
+  }
+
   if (topicTokens.size === 0) {
-    // No usable topic seeds — don't drop anything (avoid false positives).
-    return { kept: refs, dropped: [] }
+    // No usable topic seeds for fine-grained matching — keep all survivors.
+    return { kept: survivors, dropped: hardDropped }
   }
 
   const kept: T[] = []
-  const dropped: T[] = []
-  for (const ref of refs) {
+  const softDropped: T[] = []
+  for (const ref of survivors) {
     const title = ref?.title || ref?.guideline_title || ''
     const titleTokens = tokeniseTitle(title)
     let overlap = 0
@@ -1696,35 +1738,31 @@ export function filterEvidenceRefsByTopic<T extends { title?: string; guideline_
     if (overlap >= minOverlap) {
       kept.push(ref)
     } else {
-      dropped.push(ref)
+      softDropped.push(ref)
     }
   }
 
-  // Safety fallback: if the filter would drop ALL refs, our seeds must be
-  // wrong (too narrow, mistyped, or the corpus uses different vocabulary
-  // than the diagnosis). Dropping everything destroys the bibliography
-  // entirely — including legitimate inline [ref-N] tokens the LLM already
-  // cited, which then render as raw text. The off-topic problem we're
-  // trying to solve (pemphigus in an eczema report) is strictly worse
-  // than the residual risk of an off-topic ref slipping through, but
-  // only when SOME on-topic refs were kept. With zero kept, we have no
-  // signal to discriminate — better to fall back to the LLM-emitted set
-  // and rely on the prompt-level STRICT TOPIC-MATCH rule.
-  if (kept.length === 0 && dropped.length > 0) {
+  // Safety fallback: if the soft filter would drop ALL surviving refs, our
+  // seeds are mismatched against the corpus vocabulary — keep the survivors
+  // and rely on the prompt-level STRICT TOPIC-MATCH rule. The hard-drop
+  // pass above already removed the obvious patient-context mismatches, so
+  // this fallback can't accidentally re-introduce a pregnancy ref into a
+  // non-pregnant report.
+  if (kept.length === 0 && softDropped.length > 0) {
     console.warn(
-      `${tag} Would have dropped all ${dropped.length} ref(s) — falling back to keep-all. ` +
-        `Topic seeds [${Array.from(topicTokens).slice(0, 10).join(', ')}] had zero overlap with any ref title.`
+      `${tag} Soft filter would drop all ${softDropped.length} ref(s) — falling back to survivors. ` +
+        `Seeds [${Array.from(topicTokens).slice(0, 10).join(', ')}] had zero overlap with any title.`
     )
-    return { kept: refs, dropped: [] }
+    return { kept: survivors, dropped: hardDropped }
   }
 
-  if (dropped.length > 0) {
+  if (softDropped.length > 0) {
     console.log(
-      `${tag} Topic-match dropped ${dropped.length} ref(s) with zero overlap vs [${Array.from(topicTokens).slice(0, 10).join(', ')}]:`,
-      dropped.map(r => `${r?.ref_id || '?'} "${(r?.title || '').slice(0, 60)}"`).join(' | ')
+      `${tag} Soft topic-match dropped ${softDropped.length} ref(s) vs seeds [${Array.from(topicTokens).slice(0, 10).join(', ')}]:`,
+      softDropped.map(r => `${r?.ref_id || '?'} "${(r?.title || '').slice(0, 60)}"`).join(' | ')
     )
   }
-  return { kept, dropped }
+  return { kept, dropped: [...hardDropped, ...softDropped] }
 }
 
 /**

@@ -248,10 +248,12 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
     },
     "hypertension": {
       "present": true/false,
-      "stage": "Stage 1/Stage 2/Controlled",
+      "stage": "Stage 1 (140-159/90-99) | Stage 2 (160-179/100-109) | Stage 3 (≥180/110) | Hypertensive urgency/emergency (any SBP ≥180 OR DBP ≥120) | Controlled",
       "currentBP": "valeur",
       "targetBP": "< 130/80 mmHg",
       "cardiovascularRisk": "Low/Moderate/High",
+      "severity": "ROUTINE | URGENT (DBP 110-119 or SBP 180-219, no target organ damage, urgent control within days) | EMERGENCY (DBP ≥120 OR SBP ≥220 OR any acute target organ damage — hospital-level care)",
+      "followUpUrgency": "MUST reflect severity above. ROUTINE → 4-12 weeks. URGENT → 1-2 weeks WITH titration plan. EMERGENCY → same-day/24h escalation, do NOT manage as outpatient at 3-month review.",
       "riskFactors": ["facteur 1"]
     },
     "obesity": {
@@ -371,6 +373,7 @@ Retourne UNIQUEMENT un JSON valide:
     }
   },
   "followUpPlan": {
+    "// SAFETY RULE": "If hypertension severity is URGENT or EMERGENCY, the nextAppointment / first specialist follow-up MUST be within days/hours, not weeks. Do NOT default to 3-month review when BP ≥180/110 or DBP ≥120 — this is an outpatient triage failure. The same rule applies to a glucose ≥3 g/L with osmotic symptoms (hyperglycemic crisis).",
     "specialistConsultations": [
       { "specialty": "Endocrinologue", "frequency": "tous les 3 mois", "rationale": "suivi diabète" },
       { "specialty": "Diététicien", "frequency": "tous les 2 mois", "rationale": "suivi nutritionnel" }
@@ -448,7 +451,20 @@ Si une recommandation s'appuie sur une guideline du bloc CONTEXTE GUIDELINES MÉ
           const topicFiltered = filterEvidenceRefsByTopic(
             ragResult.evidenceReferences,
             chronicTopicSeeds,
-            { logPrefix: '🎯 [TOPIC-FILTER-CHRONIC]' }
+            {
+              logPrefix: '🎯 [TOPIC-FILTER-CHRONIC]',
+              patientFlags: {
+                isPregnant: /\b(pregn|enceinte|gestational|gravid)/i.test(String(anonymizedPatient.pregnancyStatus || '')),
+                isChild: typeof anonymizedPatient.age === 'number' ? anonymizedPatient.age < 18 :
+                  /^(\d+)/.test(String(anonymizedPatient.age || ''))
+                    ? parseInt(String(anonymizedPatient.age), 10) < 18
+                    : false,
+                hasCancer: Array.isArray(anonymizedPatient.medicalHistory) &&
+                  anonymizedPatient.medicalHistory.some((d: string) =>
+                    /\b(cancer|carcinoma|melanoma|lymphoma|leukemi|leukaemi|sarcoma|metastat|oncolog|tumou?r|neoplas)/i.test(String(d || ''))
+                  ),
+              },
+            }
           )
           combinedAssessment.evidence_references = topicFiltered.kept
           combinedAssessment.rag_used = ragContext.ragUsed

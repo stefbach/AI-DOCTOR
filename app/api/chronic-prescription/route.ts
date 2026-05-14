@@ -484,7 +484,20 @@ Generate the comprehensive chronic disease prescription now.`
     const presFiltered = filterEvidenceRefsByTopic(
       ragResult.evidenceReferences,
       presTopicSeeds,
-      { logPrefix: '🎯 [TOPIC-FILTER-CHRONIC-PRESCRIPTION]' }
+      {
+        logPrefix: '🎯 [TOPIC-FILTER-CHRONIC-PRESCRIPTION]',
+        patientFlags: {
+          isPregnant: /\b(pregn|enceinte|gestational|gravid)/i.test(String(anonymizedPatient.pregnancyStatus || '')),
+          isChild: typeof anonymizedPatient.age === 'number' ? anonymizedPatient.age < 18 :
+            /^(\d+)/.test(String(anonymizedPatient.age || ''))
+              ? parseInt(String(anonymizedPatient.age), 10) < 18
+              : false,
+          hasCancer: Array.isArray(anonymizedPatient.medicalHistory) &&
+            anonymizedPatient.medicalHistory.some((d: string) =>
+              /\b(cancer|carcinoma|melanoma|lymphoma|leukemi|leukaemi|sarcoma|metastat|oncolog|tumou?r|neoplas)/i.test(String(d || ''))
+            ),
+        },
+      }
     )
     ragResult.evidenceReferences = presFiltered.kept
 

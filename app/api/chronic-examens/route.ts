@@ -198,7 +198,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
       "lineNumber": 1,
       "category": "BIOCHIMIE|HÉMATOLOGIE|IMMUNOLOGIE",
       "testName": "test name in English",
-      "clinicalIndication": "Why this test for this patient (1-2 sentences). Embed [ref-N] tokens when a RAG guideline supports the choice (e.g. 'HbA1c every 3 months for diabetes monitoring [ref-1].'). STRICT TOPIC-MATCH: only cite refs whose title clearly addresses the same disease/topic as the test (HTA guideline for an ECG ordered for hypertension, diabetes guideline for HbA1c, etc.). NEVER cite an off-topic ref just to attach evidence.",
+      "clinicalIndication": "Why this test for this patient (1-2 sentences). HARD ANTI-HALLUCINATION RULE: the indication MUST be justified by something ACTUALLY in the patient record (declared chronic disease, vital sign value, symptom, current medication, declared family history, age/sex risk). NEVER invent symptoms or history that aren't in the input — e.g. do NOT write 'screening for diabetes in a patient with family history of diabetes' when no family history is declared, do NOT write 'baseline LFT in obesity' when BMI is normal, do NOT write 'evaluation of unexplained weight loss' when no such symptom is reported. If the test is justified by stage-of-disease screening (e.g. baseline workup for newly diagnosed HTA), say so explicitly. Embed [ref-N] tokens when a RAG guideline supports the choice. STRICT TOPIC-MATCH: only cite refs whose title clearly addresses the same disease as the test. NEVER cite an off-topic ref just to attach evidence.",
       "urgency": "URGENT|SEMI-URGENT|ROUTINE",
       "timing": {
         "when": "IMMÉDIAT|DANS 1 MOIS|DANS 3 MOIS",
@@ -224,7 +224,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
       "category": "IMAGERIE|EXPLORATION FONCTIONNELLE",
       "examName": "exam name in English",
       "examType": "specific type",
-      "clinicalIndication": "Why this exam for this patient (1-2 sentences). Embed [ref-N] tokens when a RAG guideline supports the choice (e.g. 'Baseline ECG for hypertension to detect LVH [ref-1].'). STRICT TOPIC-MATCH: only cite refs whose title clearly addresses the same disease/topic as the exam. NEVER cite an off-topic ref (e.g. a cancer staging ref for an HTA workup) just to attach evidence.",
+      "clinicalIndication": "Why this exam for this patient (1-2 sentences). HARD ANTI-HALLUCINATION RULE: the indication MUST be justified by something ACTUALLY in the patient record. NEVER invent comorbidities, symptoms or risk factors that aren't in the input. Example: do NOT write 'baseline echocardiography in a patient with chest pain' when no chest pain is reported. If the test is justified by stage-of-disease workup (e.g. baseline echo + fundoscopy + ABPM in newly-diagnosed HTA), say that explicitly. Embed [ref-N] tokens when a RAG guideline supports the choice. STRICT TOPIC-MATCH: only cite refs whose title clearly addresses the same disease as the exam. NEVER cite an off-topic ref.",
       "urgency": "URGENT|SEMI-URGENT|ROUTINE",
       "timing": {
         "when": "when to perform",
@@ -409,7 +409,20 @@ CONSULTATIONS selon maladies:
           const examsFiltered = filterEvidenceRefsByTopic(
             ragResult.evidenceReferences,
             examsTopicSeeds,
-            { logPrefix: '🎯 [TOPIC-FILTER-CHRONIC-EXAMENS]' }
+            {
+              logPrefix: '🎯 [TOPIC-FILTER-CHRONIC-EXAMENS]',
+              patientFlags: {
+                isPregnant: /\b(pregn|enceinte|gestational|gravid)/i.test(String(anonymizedPatient.pregnancyStatus || '')),
+                isChild: typeof anonymizedPatient.age === 'number' ? anonymizedPatient.age < 18 :
+                  /^(\d+)/.test(String(anonymizedPatient.age || ''))
+                    ? parseInt(String(anonymizedPatient.age), 10) < 18
+                    : false,
+                hasCancer: Array.isArray(anonymizedPatient.medicalHistory) &&
+                  anonymizedPatient.medicalHistory.some((d: string) =>
+                    /\b(cancer|carcinoma|melanoma|lymphoma|leukemi|leukaemi|sarcoma|metastat|oncolog|tumou?r|neoplas)/i.test(String(d || ''))
+                  ),
+              },
+            }
           )
           ragResult.evidenceReferences = examsFiltered.kept
 

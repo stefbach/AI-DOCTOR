@@ -6766,6 +6766,24 @@ export default function ChronicProfessionalReport({
                 </div>
               </div>
             )}
+
+            {/* Substance Use — smoking cessation (first-line in HTA),
+                alcohol moderation. The upstream populates this from
+                patientData.smokingStatus / alcoholConsumption; the
+                previous render block was missing this section entirely so
+                "smoking cessation" never reached the patient-facing report. */}
+            {followUpPlan.lifestyleModifications.substanceUse && followUpPlan.lifestyleModifications.substanceUse.length > 0 && (
+              <div>
+                <h4 className="font-semibold mb-2 text-blue-700">Tobacco & Alcohol:</h4>
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded text-sm">
+                  <ul className="list-disc list-inside space-y-1">
+                    {followUpPlan.lifestyleModifications.substanceUse.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
         )}
         

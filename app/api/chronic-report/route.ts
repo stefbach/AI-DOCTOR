@@ -470,10 +470,16 @@ TASK: Structure this EXISTING analysis into these narrative sections:
 4. physicalExamination - Use clinical examination findings
 5. diagnosticSynthesis - Use disease assessments (diabetes, hypertension, obesity) + complications screening + IF FOLLOW-UP DATA IS AVAILABLE, reference actual measurement statistics (averages, trends, alert counts, adherence) (200+ words)
 6. diagnosticConclusion - Use overall assessment + therapeutic objectives + IF FOLLOW-UP DATA IS AVAILABLE, cite specific measurement trends and control status (150+ words)
-7. managementPlan - Use therapeutic plan + mention ${enrichedData.summary.medicationsCount} medications, ${enrichedData.summary.labTestsCount} lab tests, ${enrichedData.summary.imagingCount} imaging studies + IF FOLLOW-UP DATA IS AVAILABLE, reference adherence and measurement patterns
+7. managementPlan - Use therapeutic plan + mention ${enrichedData.summary.medicationsCount} medications, ${enrichedData.summary.labTestsCount} lab tests, ${enrichedData.summary.imagingCount} imaging studies + IF FOLLOW-UP DATA IS AVAILABLE, reference adherence and measurement patterns.
+   ⚠️ HARD CONSTRAINT — COUNT CONSISTENCY: the counts above are the SINGLE SOURCE OF TRUTH.
+   - If medicationsCount ≥ 1: name the medications and describe their role. Do NOT write "no medications were prescribed".
+   - If labTestsCount ≥ 1: acknowledge the lab workup explicitly. Do NOT write "no laboratory tests are required" or "clinical monitoring approach without diagnostic testing".
+   - If imagingCount ≥ 1: acknowledge the imaging/paraclinical workup. Do NOT write "no imaging studies are required".
+   - If a count is 0: say so honestly and explain the rationale.
+   - NEVER let the management plan contradict the prescription / lab / imaging forms that are attached to this report.
 8. dietaryPlan - Use dietary plan summary (expand to 150+ words)
 9. selfMonitoring - Use self-monitoring instructions (expand to 150+ words)
-10. followUpPlan - Use follow-up schedule + warning signs (expand to 150+ words)
+10. followUpPlan - Use follow-up schedule + warning signs (expand to 150+ words). HARD SAFETY RULE: if the diagnosis flagged hypertension severity as URGENT (DBP 110-119 or SBP 180-219) or EMERGENCY (DBP ≥120 or SBP ≥220 or acute target organ damage), the follow-up MUST be within 1-2 weeks (urgent) or same-day/24h (emergency). NEVER write "review in 3 months" for these cases — that is an outpatient triage failure. Mirror the followUpPlan.severity / followUpUrgency fields from the input.
 11. conclusion - Synthesize the complete chronic disease management plan
 
 IMPORTANT:
