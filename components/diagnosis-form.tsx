@@ -1402,7 +1402,7 @@ export default function DiagnosisForm({
  <ul className="list-disc list-inside text-left max-w-md mx-auto">
  <li>Patient data is complete</li>
  <li>Chief complaint is filled in</li>
- <li>OpenAI API key is configured</li>
+ <li>The AI service is correctly configured</li>
  <li>Your internet connection is stable</li>
  </ul>
  </div>

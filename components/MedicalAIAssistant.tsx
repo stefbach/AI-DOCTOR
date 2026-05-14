@@ -714,7 +714,7 @@ Je suis votre assistant IA spécialisé dans l'amélioration des rapports médic
 **Erreur détaillée:** ${error instanceof Error ? error.message : 'Erreur inconnue'}
 
 **Suggestions de dépannage :**
-• Vérifiez que l'API OpenAI est configurée dans les variables d'environnement
+• Vérifiez que l'IA est correctement configurée dans les variables d'environnement
 • Réessayez avec une demande plus simple
 • Vérifiez votre connexion internet
 • Contactez le support technique si le problème persiste
