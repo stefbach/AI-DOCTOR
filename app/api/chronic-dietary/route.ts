@@ -185,12 +185,13 @@ export async function POST(req: NextRequest) {
       fatPercent = 30
     }
 
-    const systemPrompt = `You are a clinical dietitian specialized in chronic disease management.
+    // ---- Shared system context used by both half-week calls. ----
+    const sharedRules = `You are a clinical dietitian specialized in chronic disease management.
 
 CRITICAL MEDICAL REQUIREMENTS:
 1. BMI: ${bmi.toFixed(1)} kg/m²
 2. BMR (Basal Metabolic Rate): ${Math.round(bmr)} kcal/day
-3. TDEE (Total Daily Energy Expenditure): ${Math.round(tdee)} kcal/day
+3. TDEE: ${Math.round(tdee)} kcal/day
 4. TARGET DAILY CALORIES: ${Math.round(targetCalories)} kcal/day
 5. Caloric Strategy: ${caloricAdjustment}
 
@@ -208,7 +209,23 @@ Macronutrient distribution:
 - Protein: ${proteinPercent}% (${Math.round(targetCalories * proteinPercent / 400)} g)
 - Fat: ${fatPercent}% (${Math.round(targetCalories * fatPercent / 900)} g)
 
-Return ONLY valid JSON with this structure:
+DISEASE-SPECIFIC REQUIREMENTS:
+${hasDiabetes ? '- DIABETES: Low GI foods, complex carbs, 45-60g carbs per meal, avoid simple sugars' : ''}
+${hasHypertension ? '- HYPERTENSION: Low sodium (<2000mg/day), high potassium foods, DASH diet principles' : ''}
+${bmi >= 30 ? '- OBESITY: High protein for satiety, high fiber, portion control emphasis' : ''}
+
+Use Mauritius-appropriate foods (rice, dholl puri, rougaille, fish, tropical fruits).
+
+OUTPUT BUDGET RULES (critical to avoid truncated JSON):
+- Each food entry SHORT: "item" ≤ 4 words, "quantity" ≤ 3 words.
+- Max 5 food items per meal (3-4 ideal). Snacks: 1-2 items.
+- Numbers in "calories" / "totalCalories" are plain integers (no quotes, no units).
+- Output MUST be valid JSON with every brace and bracket closed.`
+
+    // ===== CALL 1: nutritional assessment + days 1-4 + practical guidance =====
+    const systemPromptCall1 = `${sharedRules}
+
+Return ONLY valid JSON with this exact structure (no extra keys):
 {
   "success": true,
   "dietaryProtocol": {
@@ -235,16 +252,15 @@ Return ONLY valid JSON with this structure:
     },
     "weeklyMealPlan": {
       "day1": {
-        "breakfast": {
-          "foods": [{"item": "food", "quantity": "amount", "calories": number}],
-          "totalCalories": ${Math.round(targetCalories * 0.25)}
-        },
+        "breakfast": {"foods": [{"item": "food", "quantity": "amount", "calories": number}], "totalCalories": ${Math.round(targetCalories * 0.25)}},
         "midMorningSnack": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.10)}},
         "lunch": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.35)}},
         "afternoonSnack": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.10)}},
         "dinner": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.20)}}
       },
-      "day2": "<same 5-meal object shape as day1>", "day3": "<same shape>", "day4": "<same shape>", "day5": "<same shape>", "day6": "<same shape>", "day7": "<same shape>"
+      "day2": "<same 5-meal object shape as day1, fully populated>",
+      "day3": "<same shape, fully populated>",
+      "day4": "<same shape, fully populated>"
     },
     "practicalGuidance": {
       "groceryList": {"proteins": [], "vegetables": [], "grains": []},
@@ -254,21 +270,28 @@ Return ONLY valid JSON with this structure:
   }
 }
 
-DISEASE-SPECIFIC REQUIREMENTS:
-${hasDiabetes ? '- DIABETES: Low GI foods, complex carbs, 45-60g carbs per meal, avoid simple sugars' : ''}
-${hasHypertension ? '- HYPERTENSION: Low sodium (<2000mg/day), high potassium foods, DASH diet principles' : ''}
-${bmi >= 30 ? '- OBESITY: High protein for satiety, high fiber, portion control emphasis' : ''}
+PART 1 of 2: Generate ONLY days 1-4. Days 5-7 will be requested in a follow-up call — DO NOT include them here.
+groceryList: max 8 items per category. mealPrepTips: max 5 short bullets. cookingMethods: max 5 each.`
 
-Use Mauritius-appropriate foods (rice, dholl puri, rougaille, fish, tropical fruits).
+    // ===== CALL 2: days 5-7 only =====
+    const systemPromptCall2 = `${sharedRules}
 
-OUTPUT BUDGET RULES (critical to avoid truncated JSON):
-- The full schema must be emitted: 7 days × 5 meals (breakfast, midMorningSnack, lunch, afternoonSnack, dinner) + practicalGuidance.
-- Keep each food entry SHORT: "item" ≤ 4 words, "quantity" ≤ 3 words. Avoid descriptive phrases.
-- Cap each meal at 5 food items (3-4 is ideal). Snacks: 1-2 items.
-- groceryList: max 8 items per category. mealPrepTips: max 5 short bullets. cookingMethods.recommended/avoid: max 5 each.
-- Numbers in "calories" / "totalCalories" must be plain integers (no quotes, no units).
-- Do NOT emit literal "{...}" placeholders or comments — every day must be a fully-populated object with the same 5 meal keys.
-- Output MUST be valid JSON: every opening { needs a matching }, every [ needs a matching ]. Stop emitting content if you risk hitting the token cap mid-string — better to ship 5 complete days than 7 truncated days.`
+PART 2 of 2: Generate ONLY days 5-7 of the 7-day meal plan. Vary the menus from days 1-4 to keep the week interesting while respecting the same caloric targets, macro distribution, and disease-specific constraints.
+
+Return ONLY valid JSON with this exact structure (no nesting under dietaryProtocol, no extra keys):
+{
+  "weeklyMealPlan": {
+    "day5": {
+      "breakfast": {"foods": [{"item": "food", "quantity": "amount", "calories": number}], "totalCalories": ${Math.round(targetCalories * 0.25)}},
+      "midMorningSnack": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.10)}},
+      "lunch": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.35)}},
+      "afternoonSnack": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.10)}},
+      "dinner": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.20)}}
+    },
+    "day6": "<same shape, fully populated>",
+    "day7": "<same shape, fully populated>"
+  }
+}`
 
     // ANONYMIZED patient context - no personal identifiers sent to AI
     const patientContext = `
@@ -284,84 +307,117 @@ VITAL SIGNS:
 - BP: ${clinicalData?.vitalSigns?.bloodPressureSystolic || '?'}/${clinicalData?.vitalSigns?.bloodPressureDiastolic || '?'} mmHg
 - Blood Glucose: ${clinicalData?.vitalSigns?.bloodGlucose || '?'} g/L
 
-Generate complete 7-day meal plan with EXACTLY ${Math.round(targetCalories)} kcal per day.`
+PART 1: produce ONLY days 1-4 plus nutritionalAssessment and practicalGuidance, with daily totals near ${Math.round(targetCalories)} kcal.`
 
-    console.log('🥗 Calling LLM (callLLM, JSON mode) for 7-day dietary protocol...')
+    // Helper: parse JSON with the same repair fallback used previously.
+    const parseLLMJson = (raw: string, label: string): any => {
+      try {
+        return JSON.parse(raw)
+      } catch (e: any) {
+        console.warn(`⚠️ ${label} JSON parse failed (${e.message}). Attempting recovery.`)
+        const recovered = repairTruncatedJson(raw)
+        if (recovered) {
+          try {
+            const parsed = JSON.parse(recovered)
+            console.log(`✅ ${label} JSON recovered after truncation`)
+            return parsed
+          } catch (e2: any) {
+            console.error(`❌ ${label} recovery parse also failed:`, e2.message)
+            console.error('Content tail:', raw.slice(-500))
+            throw e2
+          }
+        }
+        console.error('Content tail:', raw.slice(-500))
+        throw e
+      }
+    }
 
-    let llmResult
+    // ===== CALL 1 (assessment + days 1-4 + practical guidance) =====
+    console.log('🥗 Dietary call 1/2: nutritionalAssessment + days 1-4...')
+    let call1Result
     try {
-      llmResult = await callLLM({
+      call1Result = await callLLM({
         useCase: 'CHRONIC_DIETARY',
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: patientContext }
+          { role: 'system', content: systemPromptCall1 },
+          { role: 'user', content: patientContext }
         ],
-        // 24k headroom: 7 days × 5 meals × ~5 food items each + groceryList
-        // + practicalGuidance can produce ~12-18k tokens of JSON. 16k was
-        // tripping mid-string truncation observed as a 500 ("Failed to
-        // parse dietary protocol"). 24k removes the cap as the bottleneck.
-        maxTokens: 24000,
+        maxTokens: 12000,
         responseFormat: 'json_object',
-        // Meal plan generation is structured JSON, not a reasoning task —
-        // 'low' brakes DeepSeek-V4-Pro's CoT to the minimum, cutting latency
-        // from ~10min hangs down to ~90-180s without measurable quality loss
-        // on this kind of templated output.
         reasoningEffort: 'low',
         timeoutMs: 280_000,
       })
     } catch (llmErr: any) {
-      console.error('❌ LLM call failed:', llmErr?.message || llmErr)
+      console.error('❌ Dietary call 1 failed:', llmErr?.message || llmErr)
       return NextResponse.json(
-        { error: 'LLM call failed', details: String(llmErr?.message || llmErr).substring(0, 200) },
+        { error: 'Dietary call 1 failed', details: String(llmErr?.message || llmErr).substring(0, 200) },
         { status: 502 }
       )
     }
+    console.log(`[llm] use=CHRONIC_DIETARY part=1/2 provider=${call1Result.provider} model=${call1Result.model} latency=${call1Result.latencyMs}ms tokens=${call1Result.usage?.totalTokens ?? 'n/a'}`)
 
-    const content = llmResult.text
-    console.log(`[llm] use=CHRONIC_DIETARY provider=${llmResult.provider} model=${llmResult.model} latency=${llmResult.latencyMs}ms tokens=${llmResult.usage?.totalTokens ?? 'n/a'}`)
-
-    if (!content) {
-      console.error('❌ No content in LLM response')
-      return NextResponse.json(
-        { error: "No content in LLM response" },
-        { status: 502 }
-      )
-    }
-
-    console.log('✅ Dietary protocol response received, length:', content.length)
-
-    let dietaryData
+    let part1: any
     try {
-      dietaryData = JSON.parse(content)
-      console.log('✅ JSON parsed successfully')
+      part1 = parseLLMJson(call1Result.text || '', 'dietary part 1')
     } catch (parseError: any) {
-      console.warn(
-        `⚠️ JSON parse failed (${parseError.message}). Attempting recovery — content length=${content.length}`
+      return NextResponse.json(
+        { error: 'Failed to parse dietary protocol (part 1)', details: parseError.message },
+        { status: 500 }
       )
-      const recovered = repairTruncatedJson(content)
-      if (recovered) {
-        try {
-          dietaryData = JSON.parse(recovered)
-          console.log(
-            `✅ Dietary JSON recovered after truncation (recovered length=${recovered.length})`
-          )
-        } catch (recoverError: any) {
-          console.error("❌ JSON parse error (after recovery attempt):", recoverError.message)
-          console.error("Content tail:", content.slice(-500))
-          return NextResponse.json(
-            { error: "Failed to parse dietary protocol", details: parseError.message },
-            { status: 500 }
-          )
-        }
-      } else {
-        console.error("❌ JSON parse error:", parseError.message)
-        console.error("Content tail:", content.slice(-500))
-        return NextResponse.json(
-          { error: "Failed to parse dietary protocol", details: parseError.message },
-          { status: 500 }
-        )
-      }
     }
+
+    // ===== CALL 2 (days 5-7) =====
+    // Pass the days 1-4 we already have so the model can vary the menus.
+    const days1to4Brief = part1?.dietaryProtocol?.weeklyMealPlan || {}
+    const part2UserPrompt = `${patientContext}
+
+PART 2: produce ONLY days 5-7. Here is the menu emitted for days 1-4 — vary day5/6/7 from these so the patient gets a balanced week without repeating identical dishes:
+
+${JSON.stringify(days1to4Brief, null, 2)}`
+
+    console.log('🥗 Dietary call 2/2: days 5-7...')
+    let call2Result
+    try {
+      call2Result = await callLLM({
+        useCase: 'CHRONIC_DIETARY',
+        messages: [
+          { role: 'system', content: systemPromptCall2 },
+          { role: 'user', content: part2UserPrompt }
+        ],
+        maxTokens: 8000,
+        responseFormat: 'json_object',
+        reasoningEffort: 'low',
+        timeoutMs: 280_000,
+      })
+    } catch (llmErr: any) {
+      console.warn('⚠️ Dietary call 2 failed — returning part 1 only:', llmErr?.message || llmErr)
+      // Graceful degradation: ship days 1-4 even if days 5-7 fail.
+      return NextResponse.json(part1)
+    }
+    console.log(`[llm] use=CHRONIC_DIETARY part=2/2 provider=${call2Result.provider} model=${call2Result.model} latency=${call2Result.latencyMs}ms tokens=${call2Result.usage?.totalTokens ?? 'n/a'}`)
+
+    let part2: any
+    try {
+      part2 = parseLLMJson(call2Result.text || '', 'dietary part 2')
+    } catch {
+      // Same graceful degradation — part 1 alone is still a valid 4-day plan.
+      console.warn('⚠️ Dietary call 2 unparseable — returning part 1 only')
+      return NextResponse.json(part1)
+    }
+
+    // Merge: keep part1's full envelope, append days 5-7 onto weeklyMealPlan.
+    const dietaryData = {
+      ...part1,
+      dietaryProtocol: {
+        ...(part1?.dietaryProtocol || {}),
+        weeklyMealPlan: {
+          ...(part1?.dietaryProtocol?.weeklyMealPlan || {}),
+          ...(part2?.weeklyMealPlan || {}),
+        },
+      },
+    }
+
+    console.log('✅ Dietary protocol assembled (parts 1+2 merged)')
 
     return NextResponse.json(dietaryData)
 
