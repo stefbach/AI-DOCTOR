@@ -222,7 +222,12 @@ function extractChronicDiseaseData(diagnosisData: any, patientData: any, clinica
     imagingStudies,
     medicationsCount: medications.length,
     labTestsCount: labTests.length,
-    imagingStudiesCount: imagingStudies.length
+    imagingStudiesCount: imagingStudies.length,
+    // Pass through the RAG evidence references — the narrative LLM uses
+    // these to know which [ref-N] tokens it is allowed to cite inline.
+    evidenceReferences: Array.isArray(diagnosisData?.evidence_references)
+      ? diagnosisData.evidence_references
+      : []
   }
 }
 
@@ -279,7 +284,16 @@ function prepareChronicDiseaseGPTData(extractedData: any, patientData: any) {
       medicationsCount: extractedData.medicationsCount,
       labTestsCount: extractedData.labTestsCount,
       imagingCount: extractedData.imagingStudiesCount
-    }
+    },
+
+    // RAG-side evidence — passed through so the narrative LLM knows which
+    // [ref-N] tokens are legitimate and can ACTIVELY cite them at the
+    // sentence-level. Without this the LLM only preserves the few [ref-N]
+    // chronic-diagnosis already wrote into its short structured fields, so
+    // a 10-section narrative ends up with one inline citation total.
+    evidenceReferences: Array.isArray((extractedData as any).evidenceReferences)
+      ? (extractedData as any).evidenceReferences
+      : []
   }
 }
 
@@ -300,14 +314,16 @@ IMPORTANT: You are receiving PRE-ANALYZED medical data including:
 
 Your task is to STRUCTURE this existing analysis into narrative form, NOT to re-analyze.
 
-CRITICAL CITATION PRESERVATION RULE:
-The input data may contain in-text citation tokens of the form [ref-1], [ref-2], [ref-3], etc.
-These are MEDICAL GUIDELINE REFERENCES that MUST be preserved verbatim in your output narrative,
-at the same locations where they appear in the input. They are NOT jargon to clean up.
-- DO NOT remove [ref-N] tokens.
-- DO NOT paraphrase, translate, or replace them.
-- DO NOT move them to a different sentence — keep them adjacent to the claim they support.
-- A later pipeline stage will transform them into Vancouver-style numbers ([1], [2]…) and produce a bibliography.
+CRITICAL CITATION RULE:
+The user prompt lists the available [ref-N] tokens with their guideline titles under "EVIDENCE REFERENCES YOU MAY CITE". You must ACTIVELY cite these references inline in your narrative, not just preserve the few [ref-N] tokens already present in the input.
+
+How to cite:
+- Place [ref-N] at the END of the sentence whose claim is supported by that guideline (e.g. "Stage 1 hypertension is defined as a systolic BP of 140-159 mmHg [ref-1].")
+- Cite at MINIMUM 3 distinct [ref-N] when 3 or more refs are listed, distributed across the report (at least one in Diagnostic Synthesis OR Diagnostic Conclusion, at least one in Management Plan, at least one elsewhere — Follow-up, Dietary, Self-Monitoring). The same [ref-N] may be cited more than once at different points.
+- Only cite [ref-N] tokens that appear in the "EVIDENCE REFERENCES YOU MAY CITE" list — NEVER fabricate [ref-N] that aren't on that list.
+- Preserve verbatim any [ref-N] tokens already present in the input data.
+
+Why this matters: the doctor and patient see numbered citations in the final report; an unattributed claim looks like opinion, while an attributed claim looks like evidence-based practice. A later pipeline stage will transform [ref-N] into Vancouver numbers ([1], [2]…) and produce the bibliography.
 
 CRITICAL FORMATTING REQUIREMENTS:
 - Each section must contain minimum 150-200 words
@@ -365,9 +381,26 @@ ${fu.formatted_table}
     }
   }
 
+  // RAG-side evidence: list available [ref-N] tokens with their titles so the
+  // LLM can actively cite them in the narrative instead of producing a 9-section
+  // report with one inline citation total.
+  const evidenceBlock = Array.isArray(enrichedData.evidenceReferences) && enrichedData.evidenceReferences.length > 0
+    ? `=== EVIDENCE REFERENCES YOU MAY CITE ===
+The following guideline references are available. Use the [ref-N] tokens INLINE in your narrative at the END of each sentence whose claim is supported by the corresponding guideline (epidemiology, diagnostic threshold, treatment choice, monitoring interval, target value, etc.).
+Cite at MINIMUM ${Math.min(3, enrichedData.evidenceReferences.length)} distinct [ref-N] across the report. Distribute citations — at least one in Diagnostic Synthesis OR Diagnostic Conclusion, at least one in Management Plan, and at least one elsewhere (Follow-up, Dietary, Self-Monitoring). It is acceptable and encouraged to cite the same [ref-N] more than once.
+
+${enrichedData.evidenceReferences.map((r: any, i: number) => {
+  const refId = r?.ref_id || `ref-${i + 1}`
+  const title = r?.title || r?.guideline_title || 'Untitled guideline'
+  const source = r?.source || ''
+  return `[${refId}] ${title}${source ? ' — ' + source : ''}`
+}).join('\n')}
+
+` : ''
+
   return `Based on this COMPLETE CHRONIC DISEASE ANALYSIS, generate a professional medical report in ENGLISH:
 
-=== PATIENT INFORMATION ===
+${evidenceBlock}=== PATIENT INFORMATION ===
 ${JSON.stringify(enrichedData.patient, null, 2)}
 
 === CLINICAL PRESENTATION ===
