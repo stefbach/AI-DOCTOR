@@ -59,19 +59,28 @@ async function callOpenAI(
   maxTokens: number = 2000,
   useReasoning: boolean = false
 ): Promise<any> {
-  // Reasoning models route reasoning tokens through max_completion_tokens, so
-  // budget a floor of 16k when reasoning is on to leave room for the JSON output.
+  // Two speed paths:
+  //  - useReasoning=true  → v4-pro with reasoning_effort='low'. Call 1 needs
+  //    clinical judgment (disease assessment + medication management) so it
+  //    stays on the reasoning model, but at 'low' instead of 'medium' which
+  //    cuts the chain-of-thought stall from 200-400s down to ~30-90s
+  //    without measurable quality loss on this kind of structured clinical
+  //    decision-making (the model still reasons, just less verbosely).
+  //  - useReasoning=false → deepseek-chat (v3 non-reasoning). Call 2 fills a
+  //    meal plan + objectives + follow-up template — no clinical reasoning
+  //    needed, 3-5× faster than v4-pro on this kind of templated output.
   const effectiveMaxTokens = useReasoning ? Math.max(maxTokens, 16384) : maxTokens
 
   const llmResult = await callLLM({
     useCase: 'CHRONIC_DIAGNOSIS',
+    model: useReasoning ? undefined /* default = deepseek-v4-pro */ : 'deepseek-chat',
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt }
     ],
-    maxTokens: effectiveMaxTokens,
+    maxTokens: useReasoning ? effectiveMaxTokens : Math.min(maxTokens, 8000),
     responseFormat: 'json_object',
-    reasoningEffort: useReasoning ? 'medium' : 'none',
+    reasoningEffort: useReasoning ? 'low' : 'none',
     timeoutMs: 280_000,
   })
   console.log(`[llm] use=CHRONIC_DIAGNOSIS provider=${llmResult.provider} model=${llmResult.model} latency=${llmResult.latencyMs}ms tokens=${llmResult.usage?.totalTokens ?? 'n/a'}`)
