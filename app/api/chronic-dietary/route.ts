@@ -332,11 +332,27 @@ PART 1: produce ONLY days 1-4 plus nutritionalAssessment and practicalGuidance, 
       }
     }
 
-    // ===== CALL 1 (assessment + days 1-4 + practical guidance) =====
-    console.log('🥗 Dietary call 1/2: nutritionalAssessment + days 1-4...')
-    let call1Result
-    try {
-      call1Result = await callLLM({
+    // ===== CALLS 1 & 2 in PARALLEL =====
+    // Vercel serverless has a hard ~300s edge-gateway cap on Pro plan
+    // (independent of maxDuration). Two sequential ~3-min DeepSeek calls
+    // were tripping ERR_CONNECTION_CLOSED in the client. Running them
+    // concurrently keeps wall time at max(call1, call2) ≈ 3 min instead
+    // of 5-6 min, comfortably under the cap.
+    //
+    // Trade-off: call 2 no longer sees call 1's days 1-4 output, so it
+    // can't explicitly "vary from" them. We compensate with a stronger
+    // diversity rule in systemPromptCall2 (\"choose 3 menus that are
+    // distinct from each other and from any common breakfast/lunch
+    // patterns\") and rely on the LLM's variation tendencies — which are
+    // strong enough on a structured generation like this. Worst case a
+    // dish repeats once across the week; a non-blocking issue.
+    const part2UserPrompt = `${patientContext}
+
+PART 2: produce ONLY days 5-7. Choose distinct menus from each other so the patient sees a variety of dishes within these three days, while respecting the same caloric targets and macro distribution.`
+
+    console.log('🥗 Dietary calls 1/2 + 2/2 running in PARALLEL...')
+    const [call1Settled, call2Settled] = await Promise.allSettled([
+      callLLM({
         useCase: 'CHRONIC_DIETARY',
         messages: [
           { role: 'system', content: systemPromptCall1 },
@@ -345,15 +361,29 @@ PART 1: produce ONLY days 1-4 plus nutritionalAssessment and practicalGuidance, 
         maxTokens: 12000,
         responseFormat: 'json_object',
         reasoningEffort: 'low',
-        timeoutMs: 280_000,
-      })
-    } catch (llmErr: any) {
-      console.error('❌ Dietary call 1 failed:', llmErr?.message || llmErr)
+        timeoutMs: 240_000,
+      }),
+      callLLM({
+        useCase: 'CHRONIC_DIETARY',
+        messages: [
+          { role: 'system', content: systemPromptCall2 },
+          { role: 'user', content: part2UserPrompt }
+        ],
+        maxTokens: 8000,
+        responseFormat: 'json_object',
+        reasoningEffort: 'low',
+        timeoutMs: 240_000,
+      }),
+    ])
+
+    if (call1Settled.status === 'rejected') {
+      console.error('❌ Dietary call 1 failed:', call1Settled.reason?.message || call1Settled.reason)
       return NextResponse.json(
-        { error: 'Dietary call 1 failed', details: String(llmErr?.message || llmErr).substring(0, 200) },
+        { error: 'Dietary call 1 failed', details: String(call1Settled.reason?.message || call1Settled.reason).substring(0, 200) },
         { status: 502 }
       )
     }
+    const call1Result = call1Settled.value
     console.log(`[llm] use=CHRONIC_DIETARY part=1/2 provider=${call1Result.provider} model=${call1Result.model} latency=${call1Result.latencyMs}ms tokens=${call1Result.usage?.totalTokens ?? 'n/a'}`)
 
     let part1: any
@@ -366,43 +396,18 @@ PART 1: produce ONLY days 1-4 plus nutritionalAssessment and practicalGuidance, 
       )
     }
 
-    // ===== CALL 2 (days 5-7) =====
-    // Pass the days 1-4 we already have so the model can vary the menus.
-    const days1to4Brief = part1?.dietaryProtocol?.weeklyMealPlan || {}
-    const part2UserPrompt = `${patientContext}
-
-PART 2: produce ONLY days 5-7. Here is the menu emitted for days 1-4 — vary day5/6/7 from these so the patient gets a balanced week without repeating identical dishes:
-
-${JSON.stringify(days1to4Brief, null, 2)}`
-
-    console.log('🥗 Dietary call 2/2: days 5-7...')
-    let call2Result
-    try {
-      call2Result = await callLLM({
-        useCase: 'CHRONIC_DIETARY',
-        messages: [
-          { role: 'system', content: systemPromptCall2 },
-          { role: 'user', content: part2UserPrompt }
-        ],
-        maxTokens: 8000,
-        responseFormat: 'json_object',
-        reasoningEffort: 'low',
-        timeoutMs: 280_000,
-      })
-    } catch (llmErr: any) {
-      console.warn('⚠️ Dietary call 2 failed — returning part 1 only:', llmErr?.message || llmErr)
-      // Graceful degradation: ship days 1-4 even if days 5-7 fail.
-      return NextResponse.json(part1)
-    }
-    console.log(`[llm] use=CHRONIC_DIETARY part=2/2 provider=${call2Result.provider} model=${call2Result.model} latency=${call2Result.latencyMs}ms tokens=${call2Result.usage?.totalTokens ?? 'n/a'}`)
-
-    let part2: any
-    try {
-      part2 = parseLLMJson(call2Result.text || '', 'dietary part 2')
-    } catch {
-      // Same graceful degradation — part 1 alone is still a valid 4-day plan.
-      console.warn('⚠️ Dietary call 2 unparseable — returning part 1 only')
-      return NextResponse.json(part1)
+    // Call 2 result (may have failed — graceful degradation).
+    let part2: any = null
+    if (call2Settled.status === 'fulfilled') {
+      const call2Result = call2Settled.value
+      console.log(`[llm] use=CHRONIC_DIETARY part=2/2 provider=${call2Result.provider} model=${call2Result.model} latency=${call2Result.latencyMs}ms tokens=${call2Result.usage?.totalTokens ?? 'n/a'}`)
+      try {
+        part2 = parseLLMJson(call2Result.text || '', 'dietary part 2')
+      } catch {
+        console.warn('⚠️ Dietary call 2 unparseable — returning part 1 only (days 1-4 + assessment)')
+      }
+    } else {
+      console.warn('⚠️ Dietary call 2 failed — returning part 1 only:', call2Settled.reason?.message || call2Settled.reason)
     }
 
     // Merge: keep part1's full envelope, append days 5-7 onto weeklyMealPlan.
