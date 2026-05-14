@@ -930,7 +930,7 @@ Je suis votre assistant IA spécialisé dans l'amélioration des rapports médic
  </div>
  
  <p className="text-xs text-gray-500 mt-1">
- Standards MCM • Nomenclature UK • DCI Précis • IA GPT-5.5 • Multi-fonctions
+ Standards MCM • Nomenclature UK • DCI Précis • IA by Tibok • Multi-fonctions
  </p>
  </div>
  </div>

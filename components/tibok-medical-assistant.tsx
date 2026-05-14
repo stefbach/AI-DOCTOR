@@ -674,7 +674,7 @@ I will suggest precise improvements that you can review and apply!`,
               <CardTitle className="text-lg sm:text-xl flex items-center gap-2 flex-wrap">
                 Assistant Médical TIBOK
                 <Badge className="bg-white/20 text-white border-0 text-xs">
-                  GPT-5.5 Encyclopédique
+                  IA by Tibok
                 </Badge>
               </CardTitle>
               <p className="text-sm text-teal-100 mt-1">
