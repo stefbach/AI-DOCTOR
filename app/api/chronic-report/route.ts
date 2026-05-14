@@ -736,6 +736,10 @@ export async function POST(req: NextRequest) {
         ],
         maxTokens: 12000,
         responseFormat: 'json_object',
+        // 10-section narrative rewrite is structured re-formatting, not novel
+        // reasoning. 'low' keeps CoT minimal so the 12k output tokens are
+        // delivered in ~3-4 min instead of risking the 600s cap.
+        reasoningEffort: 'low',
         timeoutMs: 280_000,
       })
       const content = narrativeResult.text

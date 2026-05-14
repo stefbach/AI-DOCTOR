@@ -395,6 +395,12 @@ Generate the comprehensive chronic disease prescription now.`
         ],
         maxTokens: 8000,
         responseFormat: 'json_object',
+        // Prescription assembly is structured JSON output, not novel reasoning —
+        // DeepSeek-V4-Pro default 'medium' reasoning was burning 200-500s of
+        // CoT, pushing total time past the 600s cap (observed 504 in prod).
+        // 'low' keeps output quality on this template-filling task while
+        // bringing latency under 2-3 min.
+        reasoningEffort: 'low',
         timeoutMs: 280_000,
       })
     } catch (llmErr: any) {

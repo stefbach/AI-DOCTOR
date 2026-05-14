@@ -63,6 +63,9 @@ async function callOpenAI(
     ],
     maxTokens,
     responseFormat: 'json_object',
+    // Exam list / referral plan is structured output, not reasoning. 'low'
+    // avoids the same 504 timeout pattern that hit chronic-prescription.
+    reasoningEffort: 'low',
     timeoutMs: 280_000,
   })
   console.log(`[llm] use=CHRONIC_EXAMENS provider=${llmResult.provider} model=${llmResult.model} latency=${llmResult.latencyMs}ms tokens=${llmResult.usage?.totalTokens ?? 'n/a'}`)

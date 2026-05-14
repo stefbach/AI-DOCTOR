@@ -406,7 +406,13 @@ CLINICAL SUMMARY MUST INCLUDE:
           { role: "user", content: diagnosticPrompt }
         ],
         maxTokens: 8000,
-        reasoningEffort: 'medium',
+        // Was 'medium' — bumping to 'low' to avoid the same long-CoT timeout
+        // pattern that hit chronic-prescription. Dermato diagnosis fills a
+        // structured JSON schema, the inference itself is straightforward —
+        // we don't need 200-500s of chain-of-thought to label a flexural
+        // eczema or to populate medications.indication. Quality cost on
+        // this kind of templated output is minimal.
+        reasoningEffort: 'low',
         responseFormat: 'json_object',
         timeoutMs: 280_000,
       })
