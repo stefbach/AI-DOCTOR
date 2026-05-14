@@ -1282,10 +1282,39 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
       'Specialised dermatology test'
     )
 
+    // Defensive: if an investigation indication doesn't already cite a
+    // [ref-N], append the first available ref from the diagnosis's
+    // evidence_references list. The LLM sometimes skips citing diagnostic
+    // procedures like dermoscopy (it weighs the ref relevance subjectively),
+    // which leaves an unattributed clinical indication on the request form.
+    // Even a partially-relevant ref is better than leaving the clinician /
+    // patient looking at an unsourced order. Mirrors the min-citation rule
+    // we already apply to evidence_references at scrub time.
+    const availableRefIds = Array.isArray(diagnosisData?.evidence_references)
+      ? (diagnosisData.evidence_references as any[])
+          .map(r => r?.ref_id)
+          .filter((r): r is string => typeof r === 'string' && r.length > 0)
+      : []
+    const ensureRefCited = (item: InvestigationItem): InvestigationItem => {
+      if (availableRefIds.length === 0) return item
+      if (/\[ref-\d+\]/i.test(item.indication)) return item
+      // Append the first available ref at the end of the sentence. Soft
+      // attribution is better than no attribution.
+      const sep = item.indication.trim().endsWith('.') ? ' ' : '. '
+      return {
+        ...item,
+        indication: `${item.indication.trim()}${sep}${availableRefIds[0]
+          .startsWith('ref-') ? `[${availableRefIds[0]}]` : `[ref-${availableRefIds[0]}]`}`,
+      }
+    }
+    const laboratoryInvestigationsCited = laboratoryInvestigations.map(ensureRefCited)
+    const imagingInvestigationsCited = imagingInvestigations.map(ensureRefCited)
+    const specializedInvestigationsCited = specializedInvestigations.map(ensureRefCited)
+
     // Keep the string-only arrays around for legacy callers in this route
     // (logging, downstream extraction structures).
-    const laboratoryTests: string[] = laboratoryInvestigations.map(i => i.name)
-    const imagingTests: string[] = imagingInvestigations.map(i => i.name)
+    const laboratoryTests: string[] = laboratoryInvestigationsCited.map(i => i.name)
+    const imagingTests: string[] = imagingInvestigationsCited.map(i => i.name)
 
     // ⚠️ FILTER OUT "Not indicated" from biopsy recommendation
     const biopsyRaw = investigations.biopsy || ''
@@ -1308,14 +1337,14 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     // the prescription/labo/imagery UI components run renderWithCitations on
     // those fields to convert [ref-N] → clickable [N].
     const allInvestigations = [
-      ...laboratoryInvestigations.map(i => ({
+      ...laboratoryInvestigationsCited.map(i => ({
         examination: i.name,
         category: 'Laboratory',
         urgency: 'routine',
         indication: i.indication,
         rationale: i.indication,
       })),
-      ...imagingInvestigations.map(i => ({
+      ...imagingInvestigationsCited.map(i => ({
         examination: i.name,
         category: 'Imaging',
         urgency: 'routine',
@@ -1329,7 +1358,7 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         indication: 'Tissue diagnosis if diagnosis uncertain',
         rationale: 'Histopathological confirmation'
       })),
-      ...specializedInvestigations.map(i => ({
+      ...specializedInvestigationsCited.map(i => ({
         examination: i.name,
         category: 'Laboratory',
         urgency: 'routine',
