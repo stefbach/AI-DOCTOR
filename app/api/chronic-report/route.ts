@@ -562,11 +562,16 @@ CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON medical nomenclature in EN
 
     const completion = await callLLM({
       useCase: 'CHRONIC_REPORT_EXTRACT_MEDS',
+      // Extraction is structured re-formatting, not clinical reasoning —
+      // deepseek-chat (v3 non-reasoning) emits 3-5× faster than v4-pro
+      // without the long chain-of-thought stall before token 1.
+      model: 'deepseek-chat',
       messages: [
         { role: "system", content: "You are a clinical pharmacist extracting medication prescriptions. Use professional medical terminology in ENGLISH. NO EMOJIS. Include all safety information." },
         { role: "user", content: prompt }
       ],
       maxTokens: 3000,
+      reasoningEffort: 'none',
       timeoutMs: 180_000,
     })
 
@@ -612,11 +617,13 @@ CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON nomenclature. NO EMOJIS.`
 
     const completion = await callLLM({
       useCase: 'CHRONIC_REPORT_EXTRACT_LABS',
+      model: 'deepseek-chat',
       messages: [
         { role: "system", content: "You are a clinical pathologist ordering laboratory investigations. Professional medical terminology in ENGLISH. NO EMOJIS." },
         { role: "user", content: prompt }
       ],
       maxTokens: 3000,
+      reasoningEffort: 'none',
       timeoutMs: 180_000,
     })
 
@@ -659,11 +666,13 @@ CRITICAL: Return ONLY the JSON array. Professional terminology. NO EMOJIS.`
 
     const completion = await callLLM({
       useCase: 'CHRONIC_REPORT_EXTRACT_IMAGING',
+      model: 'deepseek-chat',
       messages: [
         { role: "system", content: "You are a radiologist ordering imaging studies. Professional medical terminology in ENGLISH. NO EMOJIS." },
         { role: "user", content: prompt }
       ],
       maxTokens: 2500,
+      reasoningEffort: 'none',
       timeoutMs: 180_000,
     })
 
@@ -719,52 +728,70 @@ export async function POST(req: NextRequest) {
     console.log("STEP 2: Preparing enriched GPT data...")
     const enrichedData = prepareChronicDiseaseGPTData(extractedData, patientData)
     
-    // ===== STEP 3: GENERATE NARRATIVE REPORT WITH GPT-5.5 (like consultation-report) =====
-    console.log("STEP 3: Generating narrative report with gpt-5.5...")
-    
+    // ===== STEP 3 + 5 in PARALLEL: narrative + prescription extracts =====
+    // The narrative LLM call and the 3 extract LLM calls (medications, labs,
+    // imaging) are all functions of the same diagnosisData input — none of
+    // them depend on each other's output. Running them sequentially used to
+    // take ~5-7 min total wall time on deepseek-v4-pro. With Promise.all on
+    // deepseek-chat (non-reasoning, 3-5× faster) we get max(narrative,
+    // extracts) ≈ 1-2 min total.
+    console.log("STEP 3+5: Generating narrative + extracting prescriptions in PARALLEL on deepseek-chat...")
+
     const systemPrompt = createChronicDiseaseSystemPrompt()
     const userPrompt = createChronicDiseaseUserPrompt(enrichedData, patientData, doctorData, followUpContext)
-    
-    let narrativeSections: any
-    
-    try {
-      const narrativeResult = await callLLM({
-        useCase: 'CHRONIC_REPORT_NARRATIVE',
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        maxTokens: 12000,
-        responseFormat: 'json_object',
-        // 10-section narrative rewrite is structured re-formatting, not novel
-        // reasoning. 'low' keeps CoT minimal so the 12k output tokens are
-        // delivered in ~3-4 min instead of risking the 600s cap.
-        reasoningEffort: 'low',
-        timeoutMs: 280_000,
-      })
-      const content = narrativeResult.text
-      console.log(`[llm] use=CHRONIC_REPORT_NARRATIVE provider=${narrativeResult.provider} model=${narrativeResult.model} latency=${narrativeResult.latencyMs}ms tokens=${narrativeResult.usage?.totalTokens ?? 'n/a'}`)
 
-      if (!content) {
-        console.warn("No content in AI response, using fallback")
-        narrativeSections = useChronicDiseaseFallback(extractedData, patientData)
-      } else {
+    const narrativePromise = (async () => {
+      try {
+        const narrativeResult = await callLLM({
+          useCase: 'CHRONIC_REPORT_NARRATIVE',
+          // Narrative is structured re-formatting of an already-analysed
+          // diagnosis — no novel clinical reasoning needed. deepseek-chat
+          // (v3 non-reasoning) eliminates the chain-of-thought stall and
+          // emits 3-5× faster than v4-pro.
+          model: 'deepseek-chat',
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
+          // Cap at 8k (deepseek-chat's max output) — was 12k on v4-pro.
+          // The 10 narrative sections fit comfortably under 8k.
+          maxTokens: 8000,
+          responseFormat: 'json_object',
+          reasoningEffort: 'none',
+          timeoutMs: 240_000,
+        })
+        const content = narrativeResult.text
+        console.log(`[llm] use=CHRONIC_REPORT_NARRATIVE provider=${narrativeResult.provider} model=${narrativeResult.model} latency=${narrativeResult.latencyMs}ms tokens=${narrativeResult.usage?.totalTokens ?? 'n/a'}`)
+
+        if (!content) {
+          console.warn("No content in AI response, using fallback")
+          return useChronicDiseaseFallback(extractedData, patientData)
+        }
         console.log("AI response received, length:", content.length)
         try {
-          narrativeSections = JSON.parse(content)
+          return JSON.parse(content)
         } catch (parseError: any) {
           console.warn("JSON parse error, using fallback:", parseError.message)
-          narrativeSections = useChronicDiseaseFallback(extractedData, patientData)
+          return useChronicDiseaseFallback(extractedData, patientData)
         }
+      } catch (aiError: any) {
+        console.warn("AI generation error, using fallback:", aiError.message)
+        return useChronicDiseaseFallback(extractedData, patientData)
       }
-    } catch (aiError: any) {
-      console.warn("AI generation error, using fallback:", aiError.message)
-      narrativeSections = useChronicDiseaseFallback(extractedData, patientData)
-    }
-    
+    })()
+
+    const [narrativeSections, medications, labTests, imagingStudies] = await Promise.all([
+      narrativePromise,
+      extractMedicationsProfessional(diagnosisData, patientData),
+      extractLabTestsProfessional(diagnosisData, patientData),
+      extractImagingStudiesProfessional(diagnosisData, patientData),
+    ])
+
+    console.log(`Extracted: ${medications.length} medications, ${labTests.length} lab tests, ${imagingStudies.length} imaging studies`)
+
     // ===== STEP 4: BUILD COMPLETE NARRATIVE TEXT =====
     console.log("STEP 4: Building complete narrative text...")
-    
+
     const fullText = `CHRONIC DISEASE FOLLOW-UP CONSULTATION REPORT
 
 ═══════════════════════════════════════════════════════════════
@@ -854,17 +881,8 @@ Date: ${reportDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long',
 
 ═══════════════════════════════════════════════════════════════`
 
-    // ===== STEP 5: EXTRACT PROFESSIONAL PRESCRIPTIONS =====
-    console.log("STEP 5: Extracting PROFESSIONAL prescriptions...")
-    
-    const [medications, labTests, imagingStudies] = await Promise.all([
-      extractMedicationsProfessional(diagnosisData, patientData),
-      extractLabTestsProfessional(diagnosisData, patientData),
-      extractImagingStudiesProfessional(diagnosisData, patientData)
-    ])
-    
-    console.log(`Extracted: ${medications.length} medications, ${labTests.length} lab tests, ${imagingStudies.length} imaging studies`)
-    
+    // ===== STEP 5 — moved into the Promise.all above (parallel with narrative). =====
+
     // ===== STEP 6: BUILD PROFESSIONAL PRESCRIPTIONS =====
     const examDate = reportDate.toLocaleDateString('en-US', {
       month: '2-digit',
