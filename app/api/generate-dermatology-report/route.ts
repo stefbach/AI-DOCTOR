@@ -849,11 +849,16 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any = {}
     medicationsCount: medications.length,
     labTestsCount: labTests.length,
     imagingStudiesCount: imagingStudies.length,
-    
+
     // Raw data
     rawMedications: medications,
     rawLabTests: labTests,
-    rawImaging: imagingStudies
+    rawImaging: imagingStudies,
+
+    // RAG references — forwarded so the narrative LLM can cite them inline.
+    evidenceReferences: Array.isArray(diagnosisData?.evidence_references)
+      ? diagnosisData.evidence_references
+      : []
   }
 }
 
@@ -1129,7 +1134,16 @@ function prepareEnrichedGPTData(realData: any, patientData: any) {
       medicationsCount: realData.medicationsCount,
       labTestsCount: realData.labTestsCount,
       imagingCount: realData.imagingStudiesCount
-    }
+    },
+
+    // RAG-side evidence references — passed through to the narrative LLM so
+    // it knows which [ref-N] tokens are legitimate and can ACTIVELY cite
+    // them at the sentence level. Without this the LLM produced a 10-section
+    // dermatology report with zero inline citations even when the diagnosis
+    // had refs available.
+    evidenceReferences: Array.isArray(realData.evidenceReferences)
+      ? realData.evidenceReferences
+      : []
   }
 }
 
@@ -1141,12 +1155,12 @@ function createEnhancedSystemPrompt(pregnancyStatus: string): string {
   const breastfeedingNote = (status === 'breastfeeding') ?
     'NOTE: Patient is BREASTFEEDING - Consider medication compatibility.' : ''
 
-  return `You are a medical report writer for Mauritius. 
+  return `You are a medical report writer for Mauritius.
 Write professional medical reports in ENGLISH using the provided COMPLETE ANALYSIS from openai-diagnosis.
 
 IMPORTANT: You are receiving PRE-ANALYZED medical data including:
 - Complete diagnostic reasoning with pathophysiology (200+ words)
-- Full clinical reasoning (150+ words) 
+- Full clinical reasoning (150+ words)
 - Validated treatment plan with medications
 - Investigation strategy with specific indications
 - Differential diagnoses with probabilities
@@ -1155,6 +1169,14 @@ Your task is to STRUCTURE this existing analysis into narrative form, NOT to re-
 
 ${pregnancyNote}
 ${breastfeedingNote}
+
+CITATION RULE (read this BEFORE writing your narrative):
+The user prompt lists the available [ref-N] guideline references under "EVIDENCE REFERENCES YOU MAY CITE". You must ACTIVELY embed [ref-N] tokens inline in your narrative:
+- Place [ref-N] at the END of the sentence whose claim is supported by that guideline (e.g. "Atopic dermatitis is characterised by epidermal barrier dysfunction and Th2-dominant inflammation [ref-1].").
+- Cite at MINIMUM 3 distinct [ref-N] when 3 or more refs are listed, distributed across the report: at least one in diagnosticSynthesis OR diagnosticConclusion, at least one in managementPlan, and at least one elsewhere (pathophysiology, differentialDiagnosis, followUpPlan, patientEducation). The same [ref-N] may be cited more than once.
+- If fewer than 3 refs are available, cite ALL of them at least once.
+- Only cite [ref-N] tokens that appear in the EVIDENCE REFERENCES YOU MAY CITE list — NEVER fabricate one. NEVER replace [ref-N] with prose like "(see reference 1)".
+- Preserve verbatim any [ref-N] tokens already present in the input data (clinicalReasoning, medications.indication, etc.). A later pipeline stage transforms [ref-N] into Vancouver [1]/[2]/[3] for display.
 
 FORMATTING REQUIREMENTS:
 - Each section must contain minimum 150-200 words
@@ -1165,9 +1187,23 @@ FORMATTING REQUIREMENTS:
 }
 
 function createEnhancedUserPrompt(enrichedData: any): string {
+  const evidenceBlock = Array.isArray(enrichedData.evidenceReferences) && enrichedData.evidenceReferences.length > 0
+    ? `=== EVIDENCE REFERENCES YOU MAY CITE ===
+The following guideline references are available. Use these [ref-N] tokens INLINE in your narrative at the END of each sentence whose claim is supported by the corresponding guideline (epidemiology, diagnostic criteria, treatment first-line choice, monitoring threshold, differential reasoning, etc.).
+Cite at MINIMUM ${Math.min(3, enrichedData.evidenceReferences.length)} distinct [ref-N] across the report. Distribute citations across diagnosticSynthesis/diagnosticConclusion, managementPlan, and at least one other section. Same [ref-N] may be reused at multiple points.
+
+${enrichedData.evidenceReferences.map((r: any, i: number) => {
+  const refId = r?.ref_id || `ref-${i + 1}`
+  const title = r?.title || r?.guideline_title || 'Untitled guideline'
+  const source = r?.source || ''
+  return `[${refId}] ${title}${source ? ' — ' + source : ''}`
+}).join('\n')}
+
+` : ''
+
   return `Based on this COMPLETE MEDICAL ANALYSIS from openai-diagnosis, generate a professional medical report in ENGLISH:
 
-=== PATIENT INFORMATION ===
+${evidenceBlock}=== PATIENT INFORMATION ===
 ${JSON.stringify(enrichedData.patient, null, 2)}
 
 === CLINICAL PRESENTATION ===
