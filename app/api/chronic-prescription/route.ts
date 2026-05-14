@@ -367,8 +367,9 @@ Generate the comprehensive chronic disease prescription now.`
         duration: clinicalData?.symptomDuration,
       })
       const inferredSpecialty = inferSpecialty(ragQuery)
-      console.log(`📚 [RAG-CHRONIC-PRESCRIPTION] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
-      ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+      const inferredSpecialtyPattern = inferredSpecialty ? `${inferredSpecialty}%` : null
+      console.log(`📚 [RAG-CHRONIC-PRESCRIPTION] Querying guidelines (specialty=${inferredSpecialtyPattern ?? 'any'})`)
+      ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialtyPattern, limit: 15 })
       console.log(
         `📚 [RAG-CHRONIC-PRESCRIPTION] Retrieved ${ragContext.totalChunks} chunks ` +
           `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`

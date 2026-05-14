@@ -206,7 +206,13 @@ QUESTIONNAIRE: ${JSON.stringify(questionsData, null, 2)}`
             // For chronic, let inferSpecialty decide (often endocrinology for diabetes,
             // cardiology for HTA). Fall back to broad search when scorer is unsure.
             const inferredSpecialty = inferSpecialty(ragQuery)
-            console.log(`📚 [RAG-CHRONIC] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
+            // Use prefix pattern (LIKE 'cardiology%') so we capture sub-rollups
+            // like cardiology_arrhythmia, cardiology_hf, endocrinology_diabetes,
+            // dermatology_inflammatory, etc. The specialty axis in the corpus
+            // is heavily sub-divided — exact-match was missing the relevant
+            // chunks even when the right family was inferred.
+            const inferredSpecialtyPattern = inferredSpecialty ? `${inferredSpecialty}%` : null
+            console.log(`📚 [RAG-CHRONIC] Querying guidelines (specialty=${inferredSpecialtyPattern ?? 'any'})`)
             console.log(`📚 [RAG-CHRONIC] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
 
             // Phase 2.E.4.3: multi-query when secondary topics are detected.
@@ -230,11 +236,11 @@ QUESTIONNAIRE: ${JSON.stringify(questionsData, null, 2)}`
               ragContext = await queryMedicalGuidelinesMulti(
                 ragQuery,
                 secondaryQueries,
-                { specialty: inferredSpecialty, limit: 10 }
+                { specialty: inferredSpecialtyPattern, limit: 10 }
               )
             } else {
               console.log('📚 [RAG-CHRONIC] No secondary queries triggered — running single-query retrieval')
-              ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+              ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialtyPattern, limit: 15 })
             }
             console.log(
               `📚 [RAG-CHRONIC] Retrieved ${ragContext.totalChunks} chunks ` +

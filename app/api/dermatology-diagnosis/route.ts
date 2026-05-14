@@ -794,11 +794,12 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
   "pathophysiology": "Detailed explanation of underlying disease mechanism (minimum 50 characters)",
   
   "recommendedInvestigations": {
-    "laboratory": ["Specific test 1 with rationale", "Specific test 2 with rationale"],
+    "laboratory": ["CLEAN test name only (e.g., 'Complete Blood Count', 'KOH preparation', 'Patch testing')"],
     "biopsy": "EITHER: Specific biopsy type with site (e.g., 'Punch biopsy of affected lesion for histopathological confirmation') OR: 'Not indicated' if biopsy not needed. NEVER use vague terms.",
-    "imaging": ["Imaging study with indication if needed"],
-    "specializedTests": ["Patch testing or other specialized investigations if indicated"]
+    "imaging": ["CLEAN imaging study name only (e.g., 'Dermoscopy', 'Reflectance confocal microscopy')"],
+    "specializedTests": ["CLEAN test name only (e.g., 'Patch testing', 'Phototesting')"]
   },
+  "// HARD RULE FOR ALL FOUR INVESTIGATION ARRAYS ABOVE": "Each entry MUST be a short, clinical test name — like a label on a request form. NEVER write a full sentence, NEVER write conditional language ('if the rash worsens', 'should be considered', 'may be justified', 'if not improving'), NEVER write the rationale inside the name (the rationale belongs in your narrative sections, not here). If no test in a category is clinically indicated, return an empty array [] for that category — do NOT fill it with negative recommendations like 'No routine labs needed' (that gets parsed as a test name and ends up on the lab request form).",
   
   "treatmentPlan": {
     "immediate": {
@@ -933,9 +934,16 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         sex: anonymizedPatient.gender,
         medicalHistory: Array.isArray(anonymizedPatient.medicalHistory) ? anonymizedPatient.medicalHistory : [],
       })
-      console.log(`📚 [RAG-DERMA] Querying guidelines (specialty=dermatology)`)
+      console.log(`📚 [RAG-DERMA] Querying guidelines (specialty=dermatology%)`)
       console.log(`📚 [RAG-DERMA] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
-      ragContext = await queryMedicalGuidelines(ragQuery, { specialty: 'dermatology', limit: 15 })
+      // Use prefix pattern so the retrieval covers every dermato sub-specialty:
+      // dermatology, dermatology_inflammatory (atopic, contact, eczema —
+      // 128 chunks), dermatology_pruritus, dermatology_acne, dermatology_drug,
+      // dermatology_blistering, dermatology_infectious, dermatology_pediatric,
+      // dermatology_genodermatosis, allergology_dermatologic. Without the
+      // wildcard the call hit only the 97 generic 'dermatology' chunks and
+      // missed the actual disease guidelines (notably atopic dermatitis).
+      ragContext = await queryMedicalGuidelines(ragQuery, { specialty: 'dermatology%', limit: 15 })
       console.log(
         `📚 [RAG-DERMA] Retrieved ${ragContext.totalChunks} chunks ` +
           `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
@@ -1066,8 +1074,33 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     
     // ========== EXTRACT INVESTIGATIONS FROM recommendedInvestigations ==========
     const investigations = diagnosisData?.recommendedInvestigations || {}
-    const laboratoryTests = investigations.laboratory || []
-    const imagingTests = investigations.imaging || []
+
+    // Defensive filter: even with the schema-level clean-name rule, DeepSeek
+    // sometimes slips and writes full sentences ("KOH preparation should be
+    // considered if the rash worsens..."). Those entries get rendered raw on
+    // the lab request form, which looks unprofessional and confuses the
+    // pharmacist/lab tech reading the order. Drop entries that contain
+    // conditional language or that read as negative recommendations rather
+    // than test names.
+    const isCleanTestName = (raw: unknown): raw is string => {
+      const s = String(raw ?? '').trim()
+      if (!s) return false
+      // Cap at a reasonable test-name length. Real names ("Total IgE serum
+      // level", "Reflectance confocal microscopy") rarely exceed 70 chars.
+      if (s.length > 90) return false
+      // Reject negative or conditional phrasings.
+      const lower = s.toLowerCase()
+      const banned = [
+        'no routine', 'no laboratory', 'no labs', 'not indicated',
+        'should be considered', 'may be justified', 'may be considered',
+        'if the rash', 'if condition', 'if not improving', 'if it persists',
+        'unless considering', 'unless the patient',
+      ]
+      if (banned.some(b => lower.includes(b))) return false
+      return true
+    }
+    const laboratoryTests: string[] = (investigations.laboratory || []).filter(isCleanTestName)
+    const imagingTests: string[] = (investigations.imaging || []).filter(isCleanTestName)
     
     // ⚠️ FILTER OUT "Not indicated" from biopsy recommendation
     const biopsyRaw = investigations.biopsy || ''
@@ -1077,7 +1110,7 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
       ? [biopsyRaw] 
       : []
     
-    const specializedTests = investigations.specializedTests || []
+    const specializedTests: string[] = (investigations.specializedTests || []).filter(isCleanTestName)
     
     console.log(`🔬 DERMATOLOGY: Filtering investigations`)
     console.log(`   - Biopsy raw: "${biopsyRaw}"`)

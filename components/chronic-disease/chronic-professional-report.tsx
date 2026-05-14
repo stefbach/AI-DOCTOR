@@ -4680,9 +4680,35 @@ export default function ChronicProfessionalReport({
     const medicationPrescription = localMedications || report.medicationPrescription
     const medications = medicationPrescription.prescription.medications || []
     const evidenceRefs = ((diagnosisData as any)?.evidence_references as any[]) || []
+    // The LLM frequently embeds citations not just in the indication but also
+    // in the dosing instructions ("Avoid salt substitutes... [ref-1]") and the
+    // monitoring directive ("Blood pressure, signs of postural hypotension
+    // [ref-1]"). Aggregate across all three so the per-section bibliography
+    // shows up even when the indication is a short phrase like "Hypertension
+    // Stage 1" with no inline ref.
     const prescriptionCitations = aggregateReferences(
       medications.map((m: any) => (typeof m?.justification === 'string' ? m.justification : '')),
       evidenceRefs
+    )
+    const prescriptionInstructionCitations = aggregateReferences(
+      medications.map((m: any) => (typeof m?.instructions === 'string' ? m.instructions : '')),
+      evidenceRefs
+    )
+    const prescriptionMonitoringCitations = aggregateReferences(
+      medications.map((m: any) => (typeof m?.surveillanceParticuliere === 'string' ? m.surveillanceParticuliere : '')),
+      evidenceRefs
+    )
+    const prescriptionAllUsedRefIds = new Set<string>()
+    ;[
+      ...prescriptionCitations.usedRefs,
+      ...prescriptionInstructionCitations.usedRefs,
+      ...prescriptionMonitoringCitations.usedRefs,
+    ].forEach((r: any) => {
+      if (r?.ref_id) prescriptionAllUsedRefIds.add(r.ref_id)
+      else if (r?.title) prescriptionAllUsedRefIds.add(r.title)
+    })
+    const prescriptionAllUsedRefs = evidenceRefs.filter((r: any) =>
+      prescriptionAllUsedRefIds.has(r?.ref_id) || prescriptionAllUsedRefIds.has(r?.title)
     )
 
     const handleAddMedication = () => {
@@ -4948,7 +4974,7 @@ export default function ChronicProfessionalReport({
                     )}
                     {med.instructions && (
                       <p className="mt-2 text-sm text-gray-600 italic">
-                        ℹ️ {med.instructions}
+                        ℹ️ {prescriptionInstructionCitations.nodes[index] || med.instructions}
                       </p>
                     )}
                     {med.justification && (
@@ -4958,7 +4984,7 @@ export default function ChronicProfessionalReport({
                     )}
                     {med.surveillanceParticuliere && (
                       <p className="mt-1 text-sm text-cyan-600">
-                        <span className="font-medium">⚠️ Monitoring:</span> {med.surveillanceParticuliere}
+                        <span className="font-medium">⚠️ Monitoring:</span> {prescriptionMonitoringCitations.nodes[index] || med.surveillanceParticuliere}
                       </p>
                     )}
                   </>
@@ -4992,7 +5018,7 @@ export default function ChronicProfessionalReport({
         )}
 
         <SectionBibliography
-          references={prescriptionCitations.usedRefs}
+          references={prescriptionAllUsedRefs}
           globalReferences={evidenceRefs}
           title="Références citées dans cette prescription"
         />

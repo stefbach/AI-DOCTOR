@@ -5501,6 +5501,21 @@ const ConsultationReport = () => {
    medications.map((m: any) => (typeof m?.justification === 'string' ? m.justification : '')),
    evidenceRefs
  )
+ const prescriptionInstructionCitations = aggregateReferences(
+   medications.map((m: any) => (typeof m?.instructions === 'string' ? m.instructions : '')),
+   evidenceRefs
+ )
+ const prescriptionAllUsedRefIds = new Set<string>()
+ ;[
+   ...prescriptionCitations.usedRefs,
+   ...prescriptionInstructionCitations.usedRefs,
+ ].forEach((r: any) => {
+   if (r?.ref_id) prescriptionAllUsedRefIds.add(r.ref_id)
+   else if (r?.title) prescriptionAllUsedRefIds.add(r.title)
+ })
+ const prescriptionAllUsedRefs = evidenceRefs.filter((r: any) =>
+   prescriptionAllUsedRefIds.has(r?.ref_id) || prescriptionAllUsedRefIds.has(r?.title)
+ )
 
  if (!includeFullPrescriptions && report?.prescriptionsResume) {
  return (
@@ -5602,7 +5617,7 @@ const ConsultationReport = () => {
  )}
  {med.instructions && (
  <p className="mt-2 text-sm text-gray-600 italic">
- ℹ️ {med.instructions}
+ ℹ️ {prescriptionInstructionCitations.nodes[index] || med.instructions}
  </p>
  )}
  {med.justification && (
@@ -5629,7 +5644,7 @@ const ConsultationReport = () => {
  </div>
 
  <SectionBibliography
- references={prescriptionCitations.usedRefs}
+ references={prescriptionAllUsedRefs}
  globalReferences={evidenceRefs}
  title="Références citées dans cette prescription"
  />

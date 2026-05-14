@@ -5589,9 +5589,35 @@ const ConsultationReport = () => {
  const patient = getReportPatient()
  const praticien = getReportPraticien()
  const evidenceRefs = (diagnosisData?.evidence_references as any[]) || []
+ // Aggregate citations across justification + instructions + monitoring so
+ // the per-section bibliography fires even when only the dosing notes carry
+ // the [ref-N] markers (common pattern for chronic-style prescriptions).
  const prescriptionCitations = aggregateReferences(
    medications.map((m: any) => (typeof m?.justification === 'string' ? m.justification : '')),
    evidenceRefs
+ )
+ const prescriptionInstructionCitations = aggregateReferences(
+   medications.map((m: any) => (typeof m?.instructions === 'string' ? m.instructions : '')),
+   evidenceRefs
+ )
+ const prescriptionMonitoringCitations = aggregateReferences(
+   medications.map((m: any) => {
+     const v = m?.surveillanceParticuliere ?? m?.monitoring
+     return typeof v === 'string' ? v : ''
+   }),
+   evidenceRefs
+ )
+ const prescriptionAllUsedRefIds = new Set<string>()
+ ;[
+   ...prescriptionCitations.usedRefs,
+   ...prescriptionInstructionCitations.usedRefs,
+   ...prescriptionMonitoringCitations.usedRefs,
+ ].forEach((r: any) => {
+   if (r?.ref_id) prescriptionAllUsedRefIds.add(r.ref_id)
+   else if (r?.title) prescriptionAllUsedRefIds.add(r.title)
+ })
+ const prescriptionAllUsedRefs = evidenceRefs.filter((r: any) =>
+   prescriptionAllUsedRefIds.has(r?.ref_id) || prescriptionAllUsedRefIds.has(r?.title)
  )
 
  if (!includeFullPrescriptions && report?.prescriptionsResume) {
@@ -5693,7 +5719,7 @@ const ConsultationReport = () => {
  )}
  {med.instructions && (
  <p className="mt-2 text-sm text-gray-600 italic">
- ℹ️ {med.instructions}
+ ℹ️ {prescriptionInstructionCitations.nodes[index] || med.instructions}
  </p>
  )}
  {med.justification && (
@@ -5727,7 +5753,7 @@ const ConsultationReport = () => {
  </div>
 
  <SectionBibliography
- references={prescriptionCitations.usedRefs}
+ references={prescriptionAllUsedRefs}
  globalReferences={evidenceRefs}
  title="Références citées dans cette prescription"
  />

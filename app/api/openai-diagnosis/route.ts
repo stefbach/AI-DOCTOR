@@ -5445,7 +5445,11 @@ export async function POST(request: NextRequest) {
         pregnancyStatus: patientContext.pregnancy_status,
       })
       const inferredSpecialty = inferSpecialty(ragQuery)
-      console.log(`📚 [RAG] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
+      // Use prefix pattern so retrieval picks up sub-specialty rollups
+      // (cardiology_arrhythmia, cardiology_hf, dermatology_inflammatory,
+      // endocrinology_diabetes, etc.) — see medical-rag.ts apply_migration.
+      const inferredSpecialtyPattern = inferredSpecialty ? `${inferredSpecialty}%` : null
+      console.log(`📚 [RAG] Querying guidelines (specialty=${inferredSpecialtyPattern ?? 'any'})`)
       console.log(`📚 [RAG] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
 
       // Bug B (multi-query RAG): when the patient context fits a known scenario
@@ -5466,11 +5470,11 @@ export async function POST(request: NextRequest) {
         ragContext = await queryMedicalGuidelinesMulti(
           ragQuery,
           secondaryQueries,
-          { specialty: inferredSpecialty, limit: 10 }
+          { specialty: inferredSpecialtyPattern, limit: 10 }
         )
       } else {
         console.log('📚 [RAG] No secondary queries triggered — running single-query retrieval')
-        ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+        ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialtyPattern, limit: 15 })
       }
       console.log(
         `📚 [RAG] Retrieved ${ragContext.totalChunks} chunks ` +
