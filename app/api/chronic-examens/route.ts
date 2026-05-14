@@ -197,7 +197,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
       "lineNumber": 1,
       "category": "BIOCHIMIE|HÉMATOLOGIE|IMMUNOLOGIE",
       "testName": "test name in English",
-      "clinicalIndication": "Why this test for this patient (1-2 sentences). Embed [ref-N] tokens when a RAG guideline supports the choice (e.g. 'HbA1c every 3 months for diabetes monitoring [ref-1].'). Cite even partially-relevant refs — this field is what the lab/imaging request form shows as Indication.",
+      "clinicalIndication": "Why this test for this patient (1-2 sentences). Embed [ref-N] tokens when a RAG guideline supports the choice (e.g. 'HbA1c every 3 months for diabetes monitoring [ref-1].'). STRICT TOPIC-MATCH: only cite refs whose title clearly addresses the same disease/topic as the test (HTA guideline for an ECG ordered for hypertension, diabetes guideline for HbA1c, etc.). NEVER cite an off-topic ref just to attach evidence.",
       "urgency": "URGENT|SEMI-URGENT|ROUTINE",
       "timing": {
         "when": "IMMÉDIAT|DANS 1 MOIS|DANS 3 MOIS",
@@ -223,7 +223,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
       "category": "IMAGERIE|EXPLORATION FONCTIONNELLE",
       "examName": "exam name in English",
       "examType": "specific type",
-      "clinicalIndication": "Why this exam for this patient (1-2 sentences). Embed [ref-N] tokens when a RAG guideline supports the choice (e.g. 'Baseline ECG for hypertension to detect LVH [ref-1].'). Cite even partially-relevant refs — this field is what the imaging request form shows as Clinical Indication.",
+      "clinicalIndication": "Why this exam for this patient (1-2 sentences). Embed [ref-N] tokens when a RAG guideline supports the choice (e.g. 'Baseline ECG for hypertension to detect LVH [ref-1].'). STRICT TOPIC-MATCH: only cite refs whose title clearly addresses the same disease/topic as the exam. NEVER cite an off-topic ref (e.g. a cancer staging ref for an HTA workup) just to attach evidence.",
       "urgency": "URGENT|SEMI-URGENT|ROUTINE",
       "timing": {
         "when": "when to perform",

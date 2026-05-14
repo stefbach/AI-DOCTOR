@@ -290,7 +290,15 @@ If a "CONTEXTE GUIDELINES MÉDICALES (RAG)" block has been prepended to this sys
 - "differentialDiagnoses[].supportingFeatures" / "distinguishingFeatures" when a guideline informs the rationale
 - "patientEducation" entries when guideline-derived
 Then list the SAME [ref-N] tokens you used in the top-level "evidence_references" array, with a brief "used_for" explanation per ref.
-Cite at MINIMUM 3 distinct [ref-N] tokens when 3 or more refs are available — even if the match is only partial. It is better to cite a partially-relevant ref than to leave the report unattributed. NEVER fabricate a [ref-N] that doesn't appear in the RAG block.`
+
+STRICT TOPIC-MATCH RULE: A [ref-N] may ONLY be cited when the guideline title clearly addresses the SAME disease family as the primary diagnosis or one of the differential diagnoses. Do NOT cite a ref just because it is the only one available, just because the RAG returned it, or to reach a minimum count. Examples of FORBIDDEN citations:
+- Citing a "bullous pemphigoid" or "pemphigus vulgaris" guideline for atopic dermatitis, contact dermatitis, eczema, psoriasis, or any non-bullous condition.
+- Citing a "psoriasis" guideline for an acne or rosacea case.
+- Citing a melanoma / skin cancer staging guideline for an inflammatory dermatosis.
+- Citing a generic dermatology textbook chunk when a disease-specific guideline is available but on a different topic.
+
+If NO available ref matches the diagnosis topic, return evidence_references: [] and leave the narrative without [ref-N]. A short, honest, unattributed report is better than a fabricated citation chain. Better to cite zero refs than to attach off-topic ones.
+NEVER fabricate a [ref-N] that doesn't appear in the RAG block.`
       
       if (attempt === 1) {
         systemMessage = `🚨 ATTEMPT 2/4 - PREVIOUS RESPONSE HAD QUALITY ISSUES - ENHANCED REQUIREMENTS:
@@ -926,6 +934,13 @@ If the RAG context block (CONTEXTE GUIDELINES MÉDICALES) is absent, return evid
 - MANDATORY: Correlate IMAGE ANALYSIS findings with ALL aspects of your assessment (differentials, confidence, investigations, treatment)
 - ALL topical medications must have: specific name with DCI, application frequency, duration, detailed instructions
 - ALL oral medications must have: specific name with DCI, dosage, frequency (OD/BD/TDS), duration, detailed indication (20+ chars)
+
+⚠️ TOPICAL CORTICOSTEROID POTENCY BY SITE (hard constraint — atrophy & systemic absorption risk):
+- FACE / EYELIDS / GENITALS / NIPPLES: mild only — Hydrocortisone 1% or 2.5%. Never prescribe a moderate/potent/very-potent steroid here. Tacrolimus or pimecrolimus are preferred steroid-sparing options.
+- FLEXURES / SKIN FOLDS (antecubital, popliteal, inguinal, axillary, inframammary, intergluteal, neck folds): mild to moderate maximum — Hydrocortisone 1%, Clobetasone butyrate 0.05%, or Desonide 0.05%. Occlusion by the fold itself effectively upgrades any class — Betamethasone valerate 0.1%, Mometasone furoate 0.1%, Fluticasone propionate 0.05%, Clobetasol propionate 0.05%, Betamethasone dipropionate, and any class III/IV steroid are CONTRAINDICATED in these sites for routine prescription.
+- TRUNK / LIMBS (extensor surfaces): moderate potency acceptable (Betamethasone valerate 0.1%, Mometasone 0.1%, Fluticasone 0.05%) for short courses.
+- PALMS / SOLES / LICHENIFIED PLAQUES: potent or very-potent acceptable (Clobetasol propionate 0.05%, Betamethasone dipropionate) for limited durations.
+If the lesion is in a flexure / fold and a potent steroid would otherwise be your first-line choice, downgrade to the mild/moderate class above AND state the rationale in 'indication'.
 - MINIMUM 3 differential diagnoses (preferably 4-5) with likelihood %, supporting features, distinguishing features
 - ⚠️ PROBABILITY DISTRIBUTION: primaryDiagnosis.likelihood + sum(differentialDiagnoses[].likelihood) = exactly 100. The primary diagnosis MUST have a numeric likelihood (typically the highest value). Differentials must be ordered by decreasing likelihood.
 - Clinical summary minimum 50 characters

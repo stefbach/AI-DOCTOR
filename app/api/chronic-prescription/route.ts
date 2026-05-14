@@ -163,7 +163,7 @@ Return ONLY valid JSON with this EXACT structure:
         "indication": {
           "chronicDisease": "which disease (Diabète type 2, HTA, etc.)",
           "therapeuticGoal": "therapeutic objective",
-          "clinicalRationale": "Full clinical reasoning for prescribing this medication for THIS patient (1-3 sentences). Embed [ref-N] tokens at the END of sentences supported by a guideline in the RAG block (e.g. 'First-line ACEi for stage 1 hypertension in adults under 55 [ref-1].'). Cite even partially-relevant refs — the frontend renders this field as the prescription's Indication and an unattributed prescription looks like personal opinion rather than evidence-based practice.",
+          "clinicalRationale": "Full clinical reasoning for prescribing this medication for THIS patient (1-3 sentences). Embed [ref-N] tokens at the END of sentences supported by a guideline in the RAG block (e.g. 'First-line ACEi for stage 1 hypertension in adults under 55 [ref-1].'). STRICT TOPIC-MATCH: only cite refs whose title clearly addresses the same disease as the prescription (HTA guideline for an antihypertensive, diabetes guideline for an antidiabetic, etc.). NEVER cite an off-topic ref just to attach evidence — an unsourced indication is preferable to a misleading citation.",
           "expectedBenefit": "expected clinical benefit"
         },
         "safetyProfile": {

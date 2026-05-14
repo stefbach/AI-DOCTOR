@@ -1121,10 +1121,25 @@ function prepareEnrichedGPTData(realData: any, patientData: any) {
       pregnancyImpact: realData.pregnancyImpact
     },
 
-    // Detailed treatment  
+    // Detailed treatment
+    // Medication shape coercion: the dermato pipeline emits topical objects
+    // with `medication`/`application` (and oral with `medication`/`dosage`),
+    // but the prompt template reads `name`/`dosing`/`duration`. Without this
+    // mapping, every line in the MEDICATIONS block becomes
+    // "- undefined: ... - undefined (undefined)", and the narrative LLM
+    // verbalises about "medication details recorded as undefined in the
+    // supplied treatment data" inside the management plan.
     treatment: {
       approach: realData.managementPlan,
-      medications: realData.detailedMedications,
+      medications: (Array.isArray(realData.detailedMedications) ? realData.detailedMedications : [])
+        .map((m: any) => {
+          const name = m?.name || m?.medication || m?.drug_name || m?.dci || ''
+          const dosing = m?.dosing || m?.application || m?.dosage || m?.frequency || m?.posology || ''
+          const duration = m?.duration || m?.treatmentDuration || ''
+          const indication = m?.indication || m?.clinicalRationale || m?.reason || ''
+          return { name, dosing, duration, indication }
+        })
+        .filter((m: any) => m.name || m.indication),
       investigationStrategy: realData.investigationStrategy,
       labTests: realData.detailedLabTests,
       imaging: realData.detailedImaging
@@ -1180,12 +1195,12 @@ ${pregnancyNote}
 ${breastfeedingNote}
 
 CITATION RULE (read this BEFORE writing your narrative):
-The user prompt lists the available [ref-N] guideline references under "EVIDENCE REFERENCES YOU MAY CITE". You must ACTIVELY embed [ref-N] tokens inline in your narrative:
+The user prompt lists the available [ref-N] guideline references under "EVIDENCE REFERENCES YOU MAY CITE". You must embed [ref-N] tokens inline in your narrative when — and only when — a ref genuinely supports the sentence:
 - Place [ref-N] at the END of the sentence whose claim is supported by that guideline (e.g. "Atopic dermatitis is characterised by epidermal barrier dysfunction and Th2-dominant inflammation [ref-1].").
-- Cite at MINIMUM 3 distinct [ref-N] when 3 or more refs are listed, distributed across the report: at least one in diagnosticSynthesis OR diagnosticConclusion, at least one in managementPlan, and at least one elsewhere (pathophysiology, differentialDiagnosis, followUpPlan, patientEducation). The same [ref-N] may be cited more than once.
-- If fewer than 3 refs are available, cite ALL of them at least once.
+- STRICT TOPIC-MATCH RULE: a [ref-N] may only be cited when the guideline title clearly addresses the SAME disease family as the primary diagnosis. Citing a "bullous pemphigoid" or "pemphigus" guideline to support recommendations for atopic dermatitis / contact dermatitis / eczema is FORBIDDEN, even when nothing else is available. A short unattributed paragraph is better than an off-topic citation.
+- If no listed ref matches the topic, write the narrative WITHOUT inline [ref-N] — do NOT pad to a minimum count.
 - Only cite [ref-N] tokens that appear in the EVIDENCE REFERENCES YOU MAY CITE list — NEVER fabricate one. NEVER replace [ref-N] with prose like "(see reference 1)".
-- Preserve verbatim any [ref-N] tokens already present in the input data (clinicalReasoning, medications.indication, etc.). A later pipeline stage transforms [ref-N] into Vancouver [1]/[2]/[3] for display.
+- Preserve verbatim any [ref-N] tokens already present in the input data (clinicalReasoning, medications.indication, etc.) — these have already been topic-checked upstream. A later pipeline stage transforms [ref-N] into Vancouver [1]/[2]/[3] for display.
 
 FORMATTING REQUIREMENTS:
 - Each section must contain minimum 150-200 words
@@ -1198,8 +1213,8 @@ FORMATTING REQUIREMENTS:
 function createEnhancedUserPrompt(enrichedData: any): string {
   const evidenceBlock = Array.isArray(enrichedData.evidenceReferences) && enrichedData.evidenceReferences.length > 0
     ? `=== EVIDENCE REFERENCES YOU MAY CITE ===
-The following guideline references are available. Use these [ref-N] tokens INLINE in your narrative at the END of each sentence whose claim is supported by the corresponding guideline (epidemiology, diagnostic criteria, treatment first-line choice, monitoring threshold, differential reasoning, etc.).
-Cite at MINIMUM ${Math.min(3, enrichedData.evidenceReferences.length)} distinct [ref-N] across the report. Distribute citations across diagnosticSynthesis/diagnosticConclusion, managementPlan, and at least one other section. Same [ref-N] may be reused at multiple points.
+The following guideline references are available. Use these [ref-N] tokens INLINE in your narrative ONLY at the END of a sentence whose claim is GENUINELY supported by the corresponding guideline (epidemiology, diagnostic criteria, treatment first-line choice, monitoring threshold, differential reasoning, etc.).
+Skip any ref whose title does not clearly match the primary diagnosis topic — DO NOT pad to a minimum count. Off-topic citations (e.g. a pemphigoid guideline for atopic dermatitis) are FORBIDDEN.
 
 ${enrichedData.evidenceReferences.map((r: any, i: number) => {
   const refId = r?.ref_id || `ref-${i + 1}`
@@ -1244,9 +1259,17 @@ ${enrichedData.diagnosis.pregnancyImpact ? `PREGNANCY IMPACT: ${enrichedData.dia
 Therapeutic Approach: ${enrichedData.treatment.approach}
 
 MEDICATIONS (${enrichedData.summary.medicationsCount}):
-${enrichedData.treatment.medications?.map((med: any) => 
-  `- ${med.name}: ${med.indication} - ${med.dosing} (${med.duration})`
-).join('\n') || 'No medications prescribed'}
+${(Array.isArray(enrichedData.treatment.medications) && enrichedData.treatment.medications.length > 0)
+  ? enrichedData.treatment.medications.map((med: any) => {
+      const parts: string[] = []
+      const head = [med?.name, med?.dosing].filter(Boolean).join(' ').trim()
+      if (head) parts.push(head)
+      if (med?.duration) parts.push(`for ${med.duration}`)
+      if (med?.indication) parts.push(`— ${med.indication}`)
+      return `- ${parts.join(' ')}`
+    }).filter((line: string) => line.trim() !== '-').join('\n')
+  : 'No medications prescribed'}
+NOTE: If the MEDICATIONS line above is "No medications prescribed" or empty, the management plan should explicitly state that NO pharmacotherapy was indicated — do NOT verbalise about missing fields or "undefined" data.
 
 INVESTIGATIONS (${enrichedData.summary.labTestsCount + enrichedData.summary.imagingCount} total):
 Laboratory Tests (${enrichedData.summary.labTestsCount}):

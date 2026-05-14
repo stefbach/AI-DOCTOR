@@ -319,9 +319,10 @@ The user prompt lists the available [ref-N] tokens with their guideline titles u
 
 How to cite:
 - Place [ref-N] at the END of the sentence whose claim is supported by that guideline (e.g. "Stage 1 hypertension is defined as a systolic BP of 140-159 mmHg [ref-1].")
-- Cite at MINIMUM 3 distinct [ref-N] when 3 or more refs are listed, distributed across the report (at least one in Diagnostic Synthesis OR Diagnostic Conclusion, at least one in Management Plan, at least one elsewhere — Follow-up, Dietary, Self-Monitoring). The same [ref-N] may be cited more than once at different points.
+- STRICT TOPIC-MATCH: a [ref-N] may ONLY be cited when its title clearly addresses the same disease family as the diagnosis or recommendation. Examples of FORBIDDEN citations: a pancreatic cancer staging ref for an HTA report, a movement-disorders ref for diabetes, an asthma guideline for hypertension. Off-topic citations are worse than no citation at all.
+- If no listed ref matches a sentence's topic, write the sentence WITHOUT [ref-N] — do NOT pad to a minimum count.
 - Only cite [ref-N] tokens that appear in the "EVIDENCE REFERENCES YOU MAY CITE" list — NEVER fabricate [ref-N] that aren't on that list.
-- Preserve verbatim any [ref-N] tokens already present in the input data.
+- Preserve verbatim any [ref-N] tokens already present in the input data — these have been topic-checked upstream.
 
 Why this matters: the doctor and patient see numbered citations in the final report; an unattributed claim looks like opinion, while an attributed claim looks like evidence-based practice. A later pipeline stage will transform [ref-N] into Vancouver numbers ([1], [2]…) and produce the bibliography.
 
