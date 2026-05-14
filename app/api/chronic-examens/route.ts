@@ -135,6 +135,16 @@ DIAGNOSTIC DATA: ${JSON.stringify(diagnosisData?.diseaseAssessment || {}, null, 
           }
         }
 
+        // HTTP/2 heartbeat — same rationale as chronic-diagnosis: silent
+        // LLM windows long enough to trigger ERR_HTTP2_PING_FAILED.
+        const heartbeat = setInterval(() => {
+          try {
+            controller.enqueue(encoder.encode(`: keepalive ${Date.now()}\n\n`))
+          } catch {
+            // controller may already be closed — silent
+          }
+        }, 15000)
+
         try {
           // ========== Phase 2.E.4.4 — RAG enrichment ==========
           // Same chain as chronic-diagnosis: retrieve once before the LLM
@@ -457,6 +467,7 @@ CONSULTATIONS selon maladies:
             details: error.message
           })
         } finally {
+          clearInterval(heartbeat)
           controller.close()
         }
       }

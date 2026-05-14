@@ -142,6 +142,19 @@ QUESTIONNAIRE: ${JSON.stringify(questionsData, null, 2)}`
           }
         }
 
+        // HTTP/2 heartbeat — DeepSeek calls can stay silent for 1-3 minutes
+        // between progress events, which is long enough for the browser /
+        // Vercel edge to drop the HTTP/2 connection (ERR_HTTP2_PING_FAILED).
+        // A comment line (": ...\n\n") is a valid SSE keepalive that does
+        // not deliver a payload to the EventSource consumer.
+        const heartbeat = setInterval(() => {
+          try {
+            controller.enqueue(encoder.encode(`: keepalive ${Date.now()}\n\n`))
+          } catch {
+            // controller may already be closed — silent
+          }
+        }, 15000)
+
         try {
           // ========== RAG ENRICHMENT (TIBOK guidelines) — best-effort, non-blocking ==========
           let ragContext: RAGContext = {
@@ -449,6 +462,7 @@ Si une recommandation s'appuie sur une guideline du bloc CONTEXTE GUIDELINES MÉ
             details: error.message
           })
         } finally {
+          clearInterval(heartbeat)
           controller.close()
         }
       }
