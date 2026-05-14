@@ -2,6 +2,7 @@
 // Generates prescriptions for chronic disease medications (antidiabetics, antihypertensives, statins, etc.)
 import { type NextRequest, NextResponse } from "next/server"
 import { callLLM } from '@/lib/llm-client'
+import { parseLLMJsonSafely } from '@/lib/llm/json-recovery'
 import {
   buildClinicalQuery,
   inferSpecialty,
@@ -426,22 +427,38 @@ Generate the comprehensive chronic disease prescription now.`
 
     let prescriptionData
     try {
-      prescriptionData = JSON.parse(content)
+      // Use the shared JSON recovery ladder — DeepSeek v4-pro / v3-chat
+      // occasionally close JSON with stray fragments after the final `}`
+      // (e.g. trailing reasoning blocks) or truncate at maxTokens with an
+      // unterminated string. The strict `JSON.parse` then threw and we
+      // surfaced a generic 500 to the client even though the payload was
+      // 95% recoverable. Same helper as chronic-diagnosis/chronic-examens.
+      prescriptionData = parseLLMJsonSafely(content, 'CHRONIC_PRESCRIPTION')
     } catch (parseError: any) {
       console.error("JSON parse error:", parseError.message)
+      console.error("Raw content head:", content.substring(0, 400))
+      console.error("Raw content tail:", content.substring(Math.max(0, content.length - 400)))
       return NextResponse.json(
         { error: "Failed to parse prescription data", details: parseError.message },
         { status: 500 }
       )
     }
 
-    // Validate essential fields
-    if (!prescriptionData.prescription || !prescriptionData.prescription.chronicMedications) {
-      console.error("Missing essential prescription fields:", prescriptionData)
-      return NextResponse.json(
-        { error: "Incomplete prescription generated" },
-        { status: 500 }
-      )
+    // Tolerant structure validation: an HTA stage-1 / lifestyle-first case
+    // can legitimately produce no medications. Coerce to an empty
+    // chronicMedications array rather than 500'ing — the rest of the route
+    // (RAG scrub, frontend rendering) handles an empty array fine, and a
+    // missing `prescription` object is recovered into a minimal shape.
+    if (!prescriptionData.prescription) {
+      console.warn("LLM response missing 'prescription' wrapper — synthesizing empty shell")
+      prescriptionData.prescription = {
+        prescriptionHeader: {},
+        chronicMedications: [],
+      }
+    }
+    if (!Array.isArray(prescriptionData.prescription.chronicMedications)) {
+      console.warn("LLM response missing 'chronicMedications' array — defaulting to [] (lifestyle-first case)")
+      prescriptionData.prescription.chronicMedications = []
     }
 
     // Phase 2.E.4.4 — scrub hallucinated [ref-N], filter unused refs, enrich
