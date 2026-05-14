@@ -193,15 +193,24 @@ function translateFrenchMedicalTerms(text: string): string {
   }
   
   let translatedText = text
-  
-  // Appliquer les traductions (ordre important : phrases longues d'abord)
+
+  // Apply translations longest-first so multi-word phrases beat single
+  // words. Wrap each French term in word boundaries (\b) so we don't
+  // accidentally rewrite substrings of unrelated English words.
+  // Without the boundary, 'mois' → 'month' was rewriting 'moisturizer'
+  // into 'monthturizer' in every dermato report. Same trap would hit
+  // 'jour' inside 'journey', 'sur' inside 'surface', etc.
   Object.entries(translations)
-    .sort((a, b) => b[0].length - a[0].length) // Trier par longueur décroissante
+    .sort((a, b) => b[0].length - a[0].length)
     .forEach(([french, english]) => {
-      const regex = new RegExp(french.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')
-      translatedText = translatedText.replace(regex, english)
+      const escaped = french.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      // Use lookahead/lookbehind word boundaries that work even when the
+      // French term starts/ends with apostrophes or accents (\b only fires
+      // on ASCII word chars). Falls back to plain \b on the simple cases.
+      const regex = new RegExp(`(^|[^\\p{L}\\p{N}])${escaped}(?=[^\\p{L}\\p{N}]|$)`, 'giu')
+      translatedText = translatedText.replace(regex, (_match, prefix) => `${prefix}${english}`)
     })
-  
+
   return translatedText
 }
 
