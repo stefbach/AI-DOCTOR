@@ -4,6 +4,7 @@
 // - Call 2: Meal Plan + Objectives & Follow-up (no reasoning, ~6K budget)
 import { type NextRequest, NextResponse } from "next/server"
 import { callLLM } from '@/lib/llm-client'
+import { parseLLMJsonSafely } from '@/lib/llm/json-recovery'
 import {
   buildClinicalQuery,
   buildSecondaryQueries,
@@ -81,60 +82,10 @@ async function callOpenAI(
     throw new Error('No content in LLM response')
   }
 
-  try {
-    return JSON.parse(content)
-  } catch (parseError) {
-    // If JSON is truncated, try cleaning it first
-    console.warn(`⚠️ JSON parse failed, attempting cleanup. Content starts with: ${content.substring(0, 100)}...`)
-    try {
-      const cleaned = cleanJsonString(content)
-      return JSON.parse(cleaned)
-    } catch {
-      throw new Error(`Invalid JSON from LLM. First 200 chars: ${content.substring(0, 200)}`)
-    }
-  }
-}
-
-// Clean JSON string to fix control characters
-function cleanJsonString(jsonStr: string): string {
-  let result = ''
-  let inString = false
-  let escaped = false
-
-  for (let i = 0; i < jsonStr.length; i++) {
-    const char = jsonStr[i]
-    const charCode = jsonStr.charCodeAt(i)
-
-    if (escaped) {
-      result += char
-      escaped = false
-      continue
-    }
-
-    if (char === '\\' && inString) {
-      escaped = true
-      result += char
-      continue
-    }
-
-    if (char === '"' && !escaped) {
-      inString = !inString
-      result += char
-      continue
-    }
-
-    if (inString && charCode < 32) {
-      if (charCode === 10) result += '\\n'
-      else if (charCode === 13) result += '\\r'
-      else if (charCode === 9) result += '\\t'
-      else result += `\\u${charCode.toString(16).padStart(4, '0')}`
-      continue
-    }
-
-    result += char
-  }
-
-  return result
+  // parseLLMJsonSafely handles direct parse → cleanJsonString → repair
+  // truncation in one ladder. Shared with chronic-examens / chronic-dietary
+  // (see lib/llm/json-recovery.ts).
+  return parseLLMJsonSafely(content, 'chronic-diagnosis')
 }
 
 export async function POST(req: NextRequest) {

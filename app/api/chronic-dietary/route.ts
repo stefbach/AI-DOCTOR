@@ -2,72 +2,10 @@
 // Routes through callLLM (DeepSeek when LLM_PROVIDER_CHRONIC_DIETARY=deepseek)
 import { type NextRequest, NextResponse } from "next/server"
 import { callLLM } from '@/lib/llm-client'
+import { parseLLMJsonSafely } from '@/lib/llm/json-recovery'
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s for DeepSeek-V4-Pro (7-day meal plan can run 200-400s on rich cases)
-
-/**
- * Best-effort recovery for a truncated JSON string from the LLM. If the
- * model hits the token cap mid-output we end up with content like
- *   `{ "weeklyMealPlan": { "day1": {...}, "day3": { "breakfast": { "fo`
- * which JSON.parse rejects. We trim back to the last "complete" boundary
- * and balance the open braces/brackets so the remainder parses to a
- * valid (but partial) tree. The caller can then degrade gracefully on
- * missing days rather than failing the whole request.
- *
- * Returns the repaired JSON string, or null if repair couldn't produce
- * something parseable.
- */
-function repairTruncatedJson(raw: string): string | null {
-  if (typeof raw !== 'string' || !raw) return null
-
-  // Walk the string, tracking string state and brace/bracket balance.
-  let inString = false
-  let escaped = false
-  const stack: string[] = [] // '{' or '['
-  let lastSafeIndex = -1     // last index that was outside a string and at a clean boundary
-
-  for (let i = 0; i < raw.length; i++) {
-    const c = raw[i]
-    if (escaped) { escaped = false; continue }
-    if (c === '\\' && inString) { escaped = true; continue }
-    if (c === '"') { inString = !inString; continue }
-    if (inString) continue
-    if (c === '{' || c === '[') {
-      stack.push(c)
-    } else if (c === '}' || c === ']') {
-      stack.pop()
-      // Reaching a balanced state outside a string is a clean boundary.
-      lastSafeIndex = i
-    } else if (c === ',' && stack.length > 0) {
-      lastSafeIndex = i
-    }
-  }
-
-  if (lastSafeIndex < 0) return null
-
-  // Trim trailing characters past the last safe boundary, then drop a
-  // dangling comma if present, then close any still-open brackets in
-  // reverse order. Re-walk to compute balance from the trimmed prefix.
-  let trimmed = raw.slice(0, lastSafeIndex + 1).replace(/,\s*$/, '')
-
-  inString = false
-  escaped = false
-  const closing: string[] = []
-  for (let i = 0; i < trimmed.length; i++) {
-    const c = trimmed[i]
-    if (escaped) { escaped = false; continue }
-    if (c === '\\' && inString) { escaped = true; continue }
-    if (c === '"') { inString = !inString; continue }
-    if (inString) continue
-    if (c === '{') closing.push('}')
-    else if (c === '[') closing.push(']')
-    else if (c === '}' || c === ']') closing.pop()
-  }
-  while (closing.length > 0) trimmed += closing.pop()
-
-  return trimmed
-}
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -309,29 +247,6 @@ VITAL SIGNS:
 
 PART 1: produce ONLY days 1-4 plus nutritionalAssessment and practicalGuidance, with daily totals near ${Math.round(targetCalories)} kcal.`
 
-    // Helper: parse JSON with the same repair fallback used previously.
-    const parseLLMJson = (raw: string, label: string): any => {
-      try {
-        return JSON.parse(raw)
-      } catch (e: any) {
-        console.warn(`⚠️ ${label} JSON parse failed (${e.message}). Attempting recovery.`)
-        const recovered = repairTruncatedJson(raw)
-        if (recovered) {
-          try {
-            const parsed = JSON.parse(recovered)
-            console.log(`✅ ${label} JSON recovered after truncation`)
-            return parsed
-          } catch (e2: any) {
-            console.error(`❌ ${label} recovery parse also failed:`, e2.message)
-            console.error('Content tail:', raw.slice(-500))
-            throw e2
-          }
-        }
-        console.error('Content tail:', raw.slice(-500))
-        throw e
-      }
-    }
-
     // ===== CALLS 1 & 2 in PARALLEL =====
     // Vercel serverless has a hard ~300s edge-gateway cap on Pro plan
     // (independent of maxDuration). Two sequential ~3-min DeepSeek calls
@@ -388,7 +303,7 @@ PART 2: produce ONLY days 5-7. Choose distinct menus from each other so the pati
 
     let part1: any
     try {
-      part1 = parseLLMJson(call1Result.text || '', 'dietary part 1')
+      part1 = parseLLMJsonSafely(call1Result.text || '', 'dietary part 1')
     } catch (parseError: any) {
       return NextResponse.json(
         { error: 'Failed to parse dietary protocol (part 1)', details: parseError.message },
@@ -402,7 +317,7 @@ PART 2: produce ONLY days 5-7. Choose distinct menus from each other so the pati
       const call2Result = call2Settled.value
       console.log(`[llm] use=CHRONIC_DIETARY part=2/2 provider=${call2Result.provider} model=${call2Result.model} latency=${call2Result.latencyMs}ms tokens=${call2Result.usage?.totalTokens ?? 'n/a'}`)
       try {
-        part2 = parseLLMJson(call2Result.text || '', 'dietary part 2')
+        part2 = parseLLMJsonSafely(call2Result.text || '', 'dietary part 2')
       } catch {
         console.warn('⚠️ Dietary call 2 unparseable — returning part 1 only (days 1-4 + assessment)')
       }

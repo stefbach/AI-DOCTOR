@@ -4,6 +4,7 @@
 // - Call 2: Specialist Referrals + Monitoring Plan + Summary
 import { type NextRequest, NextResponse } from "next/server"
 import { callLLM } from '@/lib/llm-client'
+import { parseLLMJsonSafely } from '@/lib/llm/json-recovery'
 import {
   buildClinicalQuery,
   inferSpecialty,
@@ -76,7 +77,11 @@ async function callOpenAI(
     throw new Error('No content in LLM response')
   }
 
-  return JSON.parse(content)
+  // DeepSeek occasionally emits unescaped newlines inside JSON strings
+  // ("Unterminated string in JSON at position N") or truncates mid-output.
+  // parseLLMJsonSafely runs cleanJsonString + repairTruncatedJson before
+  // giving up so a single emit-quirk doesn't kill the whole exam-orders flow.
+  return parseLLMJsonSafely(content, 'chronic-examens')
 }
 
 export async function POST(req: NextRequest) {
