@@ -937,6 +937,13 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
       // Compact "skin findings" sentence pulled from OCR if available — gives
       // the embedding a description of morphology/distribution to match against.
       const ocrFindings: string[] = []
+      // OCR-suggested diagnoses bias the embedding toward DISEASE-named
+      // guidelines (AAD atopic dermatitis, EuroGuiDerm eczema, ESCD contact
+      // dermatitis) instead of cosine-near-but-irrelevant chunks (CDC scabies,
+      // CDC pediculosis) that shared generic vocabulary like "pruritic skin".
+      // The visual-findings-only query was matching scabies because both
+      // describe "scaly itchy plaques" without naming a disease.
+      const ocrDifferentials: string[] = []
       if (ocrAnalysisData?.analysis) {
         const v = ocrAnalysisData.analysis.visualObservations
         const loc = ocrAnalysisData.analysis.locationAnalysis
@@ -945,16 +952,28 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         if (v?.color) ocrFindings.push(v.color)
         if (v?.distribution) ocrFindings.push(`distribution: ${v.distribution}`)
         if (loc?.primarySite) ocrFindings.push(`site: ${loc.primarySite}`)
+        const ddx = ocrAnalysisData.analysis.differentialDiagnoses
+        if (Array.isArray(ddx)) {
+          for (const d of ddx.slice(0, 3)) {
+            const name = typeof d === 'string' ? d : (d?.diagnosis || d?.condition || '')
+            if (typeof name === 'string' && name.trim()) ocrDifferentials.push(name.trim())
+          }
+        }
       }
-      const ragQuery = buildClinicalQuery({
+
+      let ragQuery = buildClinicalQuery({
         chiefComplaint: questionsData?.chiefComplaint || (questionsData?.answers?.chiefComplaint as string) || 'dermatology consultation',
         symptoms: ocrFindings,
         ageYears: anonymizedPatient.age,
         sex: anonymizedPatient.gender,
         medicalHistory: Array.isArray(anonymizedPatient.medicalHistory) ? anonymizedPatient.medicalHistory : [],
       })
+      if (ocrDifferentials.length > 0) {
+        ragQuery = `${ragQuery} differential diagnoses to consider: ${ocrDifferentials.join(', ')}`
+      }
       console.log(`📚 [RAG-DERMA] Querying guidelines (specialty=dermatology% + general_medicine fan-out)`)
       console.log(`📚 [RAG-DERMA] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
+      console.log(`📚 [RAG-DERMA] OCR differentials injected: ${ocrDifferentials.length > 0 ? ocrDifferentials.join(' | ') : '(none)'}`)
       // Run TWO retrievals in parallel:
       // (a) dermatology% prefix — captures dermatology, dermatology_inflammatory
       //     (atopic, contact, eczema), dermatology_acne, dermatology_pruritus,
@@ -1120,24 +1139,45 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     // conditional language or that read as negative recommendations rather
     // than test names.
     const isCleanTestName = (raw: unknown): raw is string => {
-      const s = String(raw ?? '').trim()
+      let s = String(raw ?? '').trim()
       if (!s) return false
       // Cap at a reasonable test-name length. Real names ("Total IgE serum
       // level", "Reflectance confocal microscopy") rarely exceed 70 chars.
       if (s.length > 90) return false
-      // Reject negative or conditional phrasings.
+      // Strip a trailing parenthetical hedge ("KOH preparation (if
+      // recalcitrant)" → "KOH preparation"). Many LLM outputs sneak the
+      // rationale into a () suffix that bypasses the keyword ban list below.
+      s = s.replace(/\s*\([^)]*\)\s*$/g, '').trim()
+      if (!s) return false
+      // Reject negative or conditional phrasings anywhere in the (now
+      // paren-stripped) name. Cast a wider net than before — anchor on the
+      // tokens that signal a conditional clause rather than just specific
+      // verbatim phrases.
       const lower = s.toLowerCase()
       const banned = [
         'no routine', 'no laboratory', 'no labs', 'not indicated',
         'should be considered', 'may be justified', 'may be considered',
-        'if the rash', 'if condition', 'if not improving', 'if it persists',
-        'unless considering', 'unless the patient',
+        ' if ', 'if recalcitrant', 'if condition', 'if not improving',
+        'if it persists', 'if symptoms', 'unless considering',
+        'unless the patient', 'when clinically', 'when indicated',
+        'recommended only', 'consider if',
       ]
       if (banned.some(b => lower.includes(b))) return false
       return true
     }
-    const laboratoryTests: string[] = (investigations.laboratory || []).filter(isCleanTestName)
-    const imagingTests: string[] = (investigations.imaging || []).filter(isCleanTestName)
+    // After filtering, normalise: strip any trailing parenthetical rationale
+    // so the form shows just the clean test name (e.g. "Patch testing"
+    // rather than "Patch testing (if recalcitrant or contact allergy
+    // suspected)"). The LLM's reasoning belongs in the narrative, not on the
+    // lab request form.
+    const cleanName = (raw: string): string =>
+      raw.replace(/\s*\([^)]*\)\s*$/g, '').trim()
+    const laboratoryTests: string[] = (investigations.laboratory || [])
+      .filter(isCleanTestName)
+      .map(cleanName)
+    const imagingTests: string[] = (investigations.imaging || [])
+      .filter(isCleanTestName)
+      .map(cleanName)
     
     // ⚠️ FILTER OUT "Not indicated" from biopsy recommendation
     const biopsyRaw = investigations.biopsy || ''
@@ -1147,7 +1187,9 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
       ? [biopsyRaw] 
       : []
     
-    const specializedTests: string[] = (investigations.specializedTests || []).filter(isCleanTestName)
+    const specializedTests: string[] = (investigations.specializedTests || [])
+      .filter(isCleanTestName)
+      .map(cleanName)
     
     console.log(`🔬 DERMATOLOGY: Filtering investigations`)
     console.log(`   - Biopsy raw: "${biopsyRaw}"`)
