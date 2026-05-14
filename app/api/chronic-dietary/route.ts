@@ -1,10 +1,73 @@
 // app/api/chronic-dietary/route.ts - Dietary Protocol for Chronic Diseases
-// Uses direct OpenAI fetch with JSON mode for reliability
+// Routes through callLLM (DeepSeek when LLM_PROVIDER_CHRONIC_DIETARY=deepseek)
 import { type NextRequest, NextResponse } from "next/server"
 import { callLLM } from '@/lib/llm-client'
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s for DeepSeek-V4-Pro (7-day meal plan can run 200-400s on rich cases)
+
+/**
+ * Best-effort recovery for a truncated JSON string from the LLM. If the
+ * model hits the token cap mid-output we end up with content like
+ *   `{ "weeklyMealPlan": { "day1": {...}, "day3": { "breakfast": { "fo`
+ * which JSON.parse rejects. We trim back to the last "complete" boundary
+ * and balance the open braces/brackets so the remainder parses to a
+ * valid (but partial) tree. The caller can then degrade gracefully on
+ * missing days rather than failing the whole request.
+ *
+ * Returns the repaired JSON string, or null if repair couldn't produce
+ * something parseable.
+ */
+function repairTruncatedJson(raw: string): string | null {
+  if (typeof raw !== 'string' || !raw) return null
+
+  // Walk the string, tracking string state and brace/bracket balance.
+  let inString = false
+  let escaped = false
+  const stack: string[] = [] // '{' or '['
+  let lastSafeIndex = -1     // last index that was outside a string and at a clean boundary
+
+  for (let i = 0; i < raw.length; i++) {
+    const c = raw[i]
+    if (escaped) { escaped = false; continue }
+    if (c === '\\' && inString) { escaped = true; continue }
+    if (c === '"') { inString = !inString; continue }
+    if (inString) continue
+    if (c === '{' || c === '[') {
+      stack.push(c)
+    } else if (c === '}' || c === ']') {
+      stack.pop()
+      // Reaching a balanced state outside a string is a clean boundary.
+      lastSafeIndex = i
+    } else if (c === ',' && stack.length > 0) {
+      lastSafeIndex = i
+    }
+  }
+
+  if (lastSafeIndex < 0) return null
+
+  // Trim trailing characters past the last safe boundary, then drop a
+  // dangling comma if present, then close any still-open brackets in
+  // reverse order. Re-walk to compute balance from the trimmed prefix.
+  let trimmed = raw.slice(0, lastSafeIndex + 1).replace(/,\s*$/, '')
+
+  inString = false
+  escaped = false
+  const closing: string[] = []
+  for (let i = 0; i < trimmed.length; i++) {
+    const c = trimmed[i]
+    if (escaped) { escaped = false; continue }
+    if (c === '\\' && inString) { escaped = true; continue }
+    if (c === '"') { inString = !inString; continue }
+    if (inString) continue
+    if (c === '{') closing.push('}')
+    else if (c === '[') closing.push(']')
+    else if (c === '}' || c === ']') closing.pop()
+  }
+  while (closing.length > 0) trimmed += closing.pop()
+
+  return trimmed
+}
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -181,7 +244,7 @@ Return ONLY valid JSON with this structure:
         "afternoonSnack": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.10)}},
         "dinner": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.20)}}
       },
-      "day2": {...}, "day3": {...}, "day4": {...}, "day5": {...}, "day6": {...}, "day7": {...}
+      "day2": "<same 5-meal object shape as day1>", "day3": "<same shape>", "day4": "<same shape>", "day5": "<same shape>", "day6": "<same shape>", "day7": "<same shape>"
     },
     "practicalGuidance": {
       "groceryList": {"proteins": [], "vegetables": [], "grains": []},
@@ -196,7 +259,16 @@ ${hasDiabetes ? '- DIABETES: Low GI foods, complex carbs, 45-60g carbs per meal,
 ${hasHypertension ? '- HYPERTENSION: Low sodium (<2000mg/day), high potassium foods, DASH diet principles' : ''}
 ${bmi >= 30 ? '- OBESITY: High protein for satiety, high fiber, portion control emphasis' : ''}
 
-Use Mauritius-appropriate foods (rice, dholl puri, rougaille, fish, tropical fruits).`
+Use Mauritius-appropriate foods (rice, dholl puri, rougaille, fish, tropical fruits).
+
+OUTPUT BUDGET RULES (critical to avoid truncated JSON):
+- The full schema must be emitted: 7 days × 5 meals (breakfast, midMorningSnack, lunch, afternoonSnack, dinner) + practicalGuidance.
+- Keep each food entry SHORT: "item" ≤ 4 words, "quantity" ≤ 3 words. Avoid descriptive phrases.
+- Cap each meal at 5 food items (3-4 is ideal). Snacks: 1-2 items.
+- groceryList: max 8 items per category. mealPrepTips: max 5 short bullets. cookingMethods.recommended/avoid: max 5 each.
+- Numbers in "calories" / "totalCalories" must be plain integers (no quotes, no units).
+- Do NOT emit literal "{...}" placeholders or comments — every day must be a fully-populated object with the same 5 meal keys.
+- Output MUST be valid JSON: every opening { needs a matching }, every [ needs a matching ]. Stop emitting content if you risk hitting the token cap mid-string — better to ship 5 complete days than 7 truncated days.`
 
     // ANONYMIZED patient context - no personal identifiers sent to AI
     const patientContext = `
@@ -224,7 +296,11 @@ Generate complete 7-day meal plan with EXACTLY ${Math.round(targetCalories)} kca
           { role: "system", content: systemPrompt },
           { role: "user", content: patientContext }
         ],
-        maxTokens: 16000,
+        // 24k headroom: 7 days × 5 meals × ~5 food items each + groceryList
+        // + practicalGuidance can produce ~12-18k tokens of JSON. 16k was
+        // tripping mid-string truncation observed as a 500 ("Failed to
+        // parse dietary protocol"). 24k removes the cap as the bottleneck.
+        maxTokens: 24000,
         responseFormat: 'json_object',
         // Meal plan generation is structured JSON, not a reasoning task —
         // 'low' brakes DeepSeek-V4-Pro's CoT to the minimum, cutting latency
@@ -259,12 +335,32 @@ Generate complete 7-day meal plan with EXACTLY ${Math.round(targetCalories)} kca
       dietaryData = JSON.parse(content)
       console.log('✅ JSON parsed successfully')
     } catch (parseError: any) {
-      console.error("❌ JSON parse error:", parseError.message)
-      console.error("Content sample:", content.substring(0, 500))
-      return NextResponse.json(
-        { error: "Failed to parse dietary protocol", details: parseError.message },
-        { status: 500 }
+      console.warn(
+        `⚠️ JSON parse failed (${parseError.message}). Attempting recovery — content length=${content.length}`
       )
+      const recovered = repairTruncatedJson(content)
+      if (recovered) {
+        try {
+          dietaryData = JSON.parse(recovered)
+          console.log(
+            `✅ Dietary JSON recovered after truncation (recovered length=${recovered.length})`
+          )
+        } catch (recoverError: any) {
+          console.error("❌ JSON parse error (after recovery attempt):", recoverError.message)
+          console.error("Content tail:", content.slice(-500))
+          return NextResponse.json(
+            { error: "Failed to parse dietary protocol", details: parseError.message },
+            { status: 500 }
+          )
+        }
+      } else {
+        console.error("❌ JSON parse error:", parseError.message)
+        console.error("Content tail:", content.slice(-500))
+        return NextResponse.json(
+          { error: "Failed to parse dietary protocol", details: parseError.message },
+          { status: 500 }
+        )
+      }
     }
 
     return NextResponse.json(dietaryData)
