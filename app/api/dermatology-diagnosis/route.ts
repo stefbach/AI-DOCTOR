@@ -815,12 +815,27 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
   "pathophysiology": "Detailed explanation of underlying disease mechanism (minimum 50 characters). Embed [ref-N] tokens for mechanism claims supported by the RAG block.",
   
   "recommendedInvestigations": {
-    "laboratory": ["CLEAN test name only (e.g., 'Complete Blood Count', 'KOH preparation', 'Patch testing')"],
+    "laboratory": [
+      {
+        "name": "CLEAN test name only (e.g., 'Complete Blood Count', 'KOH preparation', 'Patch testing'). Short — like a label on a request form.",
+        "indication": "Why this specific test for this patient (1-2 sentences). Embed [ref-N] when a RAG guideline supports the choice (e.g. 'Exclude dermatophyte infection in a scaly plaque [ref-2].'). REQUIRED if the test array is non-empty."
+      }
+    ],
     "biopsy": "EITHER: Specific biopsy type with site (e.g., 'Punch biopsy of affected lesion for histopathological confirmation') OR: 'Not indicated' if biopsy not needed. NEVER use vague terms.",
-    "imaging": ["CLEAN imaging study name only (e.g., 'Dermoscopy', 'Reflectance confocal microscopy')"],
-    "specializedTests": ["CLEAN test name only (e.g., 'Patch testing', 'Phototesting')"]
+    "imaging": [
+      {
+        "name": "CLEAN imaging study name only (e.g., 'Dermoscopy', 'Reflectance confocal microscopy').",
+        "indication": "Why this imaging for this patient (1-2 sentences). Embed [ref-N] when guideline-backed."
+      }
+    ],
+    "specializedTests": [
+      {
+        "name": "CLEAN test name only (e.g., 'Patch testing', 'Phototesting').",
+        "indication": "Why this specialised test (1-2 sentences). Embed [ref-N] when guideline-backed."
+      }
+    ]
   },
-  "// HARD RULE FOR ALL FOUR INVESTIGATION ARRAYS ABOVE": "Each entry MUST be a short, clinical test name — like a label on a request form. NEVER write a full sentence, NEVER write conditional language ('if the rash worsens', 'should be considered', 'may be justified', 'if not improving'), NEVER write the rationale inside the name (the rationale belongs in your narrative sections, not here). If no test in a category is clinically indicated, return an empty array [] for that category — do NOT fill it with negative recommendations like 'No routine labs needed' (that gets parsed as a test name and ends up on the lab request form).",
+  "// HARD RULE FOR ALL THREE INVESTIGATION ARRAYS ABOVE": "Each entry is an object { name, indication }. The 'name' field MUST be a short, clinical test label — like on a request form. NEVER write a full sentence in 'name', NEVER write conditional language ('if the rash worsens', 'should be considered', 'may be justified'), NEVER write the rationale inside 'name' (the rationale belongs in 'indication'). If no test in a category is clinically indicated, return an empty array [] for that category — do NOT fill it with negative recommendations like 'No routine labs needed'.",
   
   "treatmentPlan": {
     "immediate": {
@@ -840,7 +855,9 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
         "dci": "DCI NAME (e.g., Hydrocortisone)",
         "application": "BD (twice daily) or OD (once daily) or TDS",
         "duration": "Treatment duration (e.g., 7-14 days)",
-        "instructions": "Detailed application instructions - where, how, precautions (minimum 15 characters)",
+        "instructions": "Detailed application instructions - where, how, precautions (minimum 15 characters). Embed [ref-N] when a RAG guideline supports the application protocol.",
+        "indication": "Detailed medical indication with mechanism (minimum 20 characters). Embed [ref-N] when a RAG guideline supports the choice (e.g. 'First-line topical corticosteroid for acute flexural eczema [ref-1].'). REQUIRED — even on topical meds.",
+        "monitoring": "What to monitor during treatment (skin atrophy, treatment response, side effects). Embed [ref-N] when monitoring thresholds come from a guideline.",
         "sideEffects": "Common side effects to watch for"
       }
     ],
@@ -1120,6 +1137,19 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     
     const topicalMedications = topicalMedicationsRaw.map((med: any) => {
       console.log(`   📦 Transforming topical med: ${med.medication || 'UNNAMED'}`)
+      // CRITICAL: pull justification from the LLM's "indication" field
+      // (now part of the topical schema — see treatmentPlan above) so the
+      // [ref-N] citations the model embeds actually survive into the UI.
+      // Falling back to the old hardcoded "Topical treatment. ..." string
+      // only when no indication is provided keeps backward compatibility
+      // with older diagnosis payloads but is no longer the primary path.
+      const ind = typeof med.indication === 'string' ? med.indication.trim() : ''
+      const justification = ind
+        ? ind
+        : `Topical treatment. ${med.sideEffects || ''}`.trim()
+      const monitoring = typeof med.monitoring === 'string' && med.monitoring.trim()
+        ? med.monitoring.trim()
+        : (med.sideEffects || '')
       return {
         nom: med.medication || '',
         denominationCommune: med.dci || '',
@@ -1130,8 +1160,8 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         dureeTraitement: med.duration || '',
         quantite: '1 tube',
         instructions: med.instructions || '',
-        justification: `Topical treatment. ${med.sideEffects || ''}`,
-        surveillanceParticuliere: med.sideEffects || '',
+        justification,
+        surveillanceParticuliere: monitoring,
         nonSubstituable: false
       }
     })
@@ -1176,28 +1206,25 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     // ========== EXTRACT INVESTIGATIONS FROM recommendedInvestigations ==========
     const investigations = diagnosisData?.recommendedInvestigations || {}
 
-    // Defensive filter: even with the schema-level clean-name rule, DeepSeek
-    // sometimes slips and writes full sentences ("KOH preparation should be
-    // considered if the rash worsens..."). Those entries get rendered raw on
-    // the lab request form, which looks unprofessional and confuses the
-    // pharmacist/lab tech reading the order. Drop entries that contain
-    // conditional language or that read as negative recommendations rather
-    // than test names.
-    const isCleanTestName = (raw: unknown): raw is string => {
-      let s = String(raw ?? '').trim()
+    // Each investigation entry can be either:
+    //   - a string ("KOH preparation")                 ← legacy LLM output
+    //   - { name: "KOH preparation", indication: "Exclude dermatophyte... [ref-2]" }
+    //
+    // We normalise to { name, indication } and apply the same defensive
+    // hygiene the previous version did on bare strings: strip trailing
+    // parenthetical hedges, reject conditional/negative phrasings, length
+    // cap. The `indication` field is where [ref-N] citations live — that's
+    // what flows to motifClinique on the lab request and indicationClinique
+    // on the imaging request, which the prescription/labo/imagery components
+    // then render with renderWithCitations on the frontend.
+    type InvestigationItem = { name: string; indication: string }
+
+    const isCleanTestName = (rawName: unknown): boolean => {
+      let s = String(rawName ?? '').trim()
       if (!s) return false
-      // Cap at a reasonable test-name length. Real names ("Total IgE serum
-      // level", "Reflectance confocal microscopy") rarely exceed 70 chars.
       if (s.length > 90) return false
-      // Strip a trailing parenthetical hedge ("KOH preparation (if
-      // recalcitrant)" → "KOH preparation"). Many LLM outputs sneak the
-      // rationale into a () suffix that bypasses the keyword ban list below.
       s = s.replace(/\s*\([^)]*\)\s*$/g, '').trim()
       if (!s) return false
-      // Reject negative or conditional phrasings anywhere in the (now
-      // paren-stripped) name. Cast a wider net than before — anchor on the
-      // tokens that signal a conditional clause rather than just specific
-      // verbatim phrases.
       const lower = s.toLowerCase()
       const banned = [
         'no routine', 'no laboratory', 'no labs', 'not indicated',
@@ -1210,51 +1237,90 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
       if (banned.some(b => lower.includes(b))) return false
       return true
     }
-    // After filtering, normalise: strip any trailing parenthetical rationale
-    // so the form shows just the clean test name (e.g. "Patch testing"
-    // rather than "Patch testing (if recalcitrant or contact allergy
-    // suspected)"). The LLM's reasoning belongs in the narrative, not on the
-    // lab request form.
-    const cleanName = (raw: string): string =>
+    const stripParenSuffix = (raw: string): string =>
       raw.replace(/\s*\([^)]*\)\s*$/g, '').trim()
-    const laboratoryTests: string[] = (investigations.laboratory || [])
-      .filter(isCleanTestName)
-      .map(cleanName)
-    const imagingTests: string[] = (investigations.imaging || [])
-      .filter(isCleanTestName)
-      .map(cleanName)
-    
+
+    const normaliseInvestigations = (
+      raw: unknown,
+      defaultIndication: string
+    ): InvestigationItem[] => {
+      const arr = Array.isArray(raw) ? raw : []
+      const out: InvestigationItem[] = []
+      for (const item of arr) {
+        if (typeof item === 'string') {
+          if (!isCleanTestName(item)) continue
+          out.push({ name: stripParenSuffix(item), indication: defaultIndication })
+        } else if (item && typeof item === 'object') {
+          const name = typeof (item as any).name === 'string'
+            ? (item as any).name
+            : typeof (item as any).test === 'string'
+              ? (item as any).test
+              : ''
+          if (!isCleanTestName(name)) continue
+          const indication = typeof (item as any).indication === 'string'
+            ? (item as any).indication.trim()
+            : ''
+          out.push({
+            name: stripParenSuffix(name),
+            indication: indication || defaultIndication,
+          })
+        }
+      }
+      return out
+    }
+
+    const laboratoryInvestigations = normaliseInvestigations(
+      investigations.laboratory,
+      'Dermatology investigation'
+    )
+    const imagingInvestigations = normaliseInvestigations(
+      investigations.imaging,
+      'Dermatology imaging'
+    )
+    const specializedInvestigations = normaliseInvestigations(
+      investigations.specializedTests,
+      'Specialised dermatology test'
+    )
+
+    // Keep the string-only arrays around for legacy callers in this route
+    // (logging, downstream extraction structures).
+    const laboratoryTests: string[] = laboratoryInvestigations.map(i => i.name)
+    const imagingTests: string[] = imagingInvestigations.map(i => i.name)
+
     // ⚠️ FILTER OUT "Not indicated" from biopsy recommendation
     const biopsyRaw = investigations.biopsy || ''
-    const biopsyTest = (biopsyRaw && 
-                        biopsyRaw !== 'Not indicated' && 
-                        !biopsyRaw.toLowerCase().includes('not indicated')) 
-      ? [biopsyRaw] 
+    const biopsyTest = (biopsyRaw &&
+                        biopsyRaw !== 'Not indicated' &&
+                        !biopsyRaw.toLowerCase().includes('not indicated'))
+      ? [biopsyRaw]
       : []
-    
-    const specializedTests: string[] = (investigations.specializedTests || [])
-      .filter(isCleanTestName)
-      .map(cleanName)
+
+    const specializedTests: string[] = specializedInvestigations.map(i => i.name)
     
     console.log(`🔬 DERMATOLOGY: Filtering investigations`)
     console.log(`   - Biopsy raw: "${biopsyRaw}"`)
     console.log(`   - Biopsy filtered: ${biopsyTest.length > 0 ? `"${biopsyTest[0]}"` : 'EXCLUDED (Not indicated)'}`)
     
-    // Combine all investigations into expertAnalysis format (match normal workflow)
+    // Combine all investigations into expertAnalysis format. The `indication`
+    // field now carries the LLM's per-test rationale (which includes [ref-N]
+    // citations when the model has guidelines to back the choice). Downstream
+    // the route reshapes these into motifClinique / indicationClinique, and
+    // the prescription/labo/imagery UI components run renderWithCitations on
+    // those fields to convert [ref-N] → clickable [N].
     const allInvestigations = [
-      ...laboratoryTests.map((test: string) => ({
-        examination: test,
+      ...laboratoryInvestigations.map(i => ({
+        examination: i.name,
         category: 'Laboratory',
         urgency: 'routine',
-        indication: 'Dermatology investigation',
-        rationale: 'Clinical assessment'
+        indication: i.indication,
+        rationale: i.indication,
       })),
-      ...imagingTests.map((test: string) => ({
-        examination: test,
+      ...imagingInvestigations.map(i => ({
+        examination: i.name,
         category: 'Imaging',
         urgency: 'routine',
-        indication: 'Dermatology imaging',
-        rationale: 'Diagnostic imaging'
+        indication: i.indication,
+        rationale: i.indication,
       })),
       ...biopsyTest.map((test: string) => ({
         examination: test,
@@ -1263,13 +1329,13 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         indication: 'Tissue diagnosis if diagnosis uncertain',
         rationale: 'Histopathological confirmation'
       })),
-      ...specializedTests.map((test: string) => ({
-        examination: test,
+      ...specializedInvestigations.map(i => ({
+        examination: i.name,
         category: 'Laboratory',
         urgency: 'routine',
-        indication: 'Specialized dermatology test',
-        rationale: 'Specific diagnostic test'
-      }))
+        indication: i.indication,
+        rationale: i.indication,
+      })),
     ]
     
     console.log(`🔬 DERMATOLOGY: Extracting investigations`)
