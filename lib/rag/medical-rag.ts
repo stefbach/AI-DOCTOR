@@ -1700,6 +1700,24 @@ export function filterEvidenceRefsByTopic<T extends { title?: string; guideline_
     }
   }
 
+  // Safety fallback: if the filter would drop ALL refs, our seeds must be
+  // wrong (too narrow, mistyped, or the corpus uses different vocabulary
+  // than the diagnosis). Dropping everything destroys the bibliography
+  // entirely — including legitimate inline [ref-N] tokens the LLM already
+  // cited, which then render as raw text. The off-topic problem we're
+  // trying to solve (pemphigus in an eczema report) is strictly worse
+  // than the residual risk of an off-topic ref slipping through, but
+  // only when SOME on-topic refs were kept. With zero kept, we have no
+  // signal to discriminate — better to fall back to the LLM-emitted set
+  // and rely on the prompt-level STRICT TOPIC-MATCH rule.
+  if (kept.length === 0 && dropped.length > 0) {
+    console.warn(
+      `${tag} Would have dropped all ${dropped.length} ref(s) — falling back to keep-all. ` +
+        `Topic seeds [${Array.from(topicTokens).slice(0, 10).join(', ')}] had zero overlap with any ref title.`
+    )
+    return { kept: refs, dropped: [] }
+  }
+
   if (dropped.length > 0) {
     console.log(
       `${tag} Topic-match dropped ${dropped.length} ref(s) with zero overlap vs [${Array.from(topicTokens).slice(0, 10).join(', ')}]:`,
