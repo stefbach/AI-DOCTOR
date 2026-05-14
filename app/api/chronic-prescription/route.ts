@@ -163,7 +163,7 @@ Return ONLY valid JSON with this EXACT structure:
         "indication": {
           "chronicDisease": "which disease (Diabète type 2, HTA, etc.)",
           "therapeuticGoal": "therapeutic objective",
-          "clinicalRationale": "why this medication is prescribed",
+          "clinicalRationale": "Full clinical reasoning for prescribing this medication for THIS patient (1-3 sentences). Embed [ref-N] tokens at the END of sentences supported by a guideline in the RAG block (e.g. 'First-line ACEi for stage 1 hypertension in adults under 55 [ref-1].'). Cite even partially-relevant refs — the frontend renders this field as the prescription's Indication and an unattributed prescription looks like personal opinion rather than evidence-based practice.",
           "expectedBenefit": "expected clinical benefit"
         },
         "safetyProfile": {
@@ -453,6 +453,37 @@ Generate the comprehensive chronic disease prescription now.`
       ragContext,
       { logPrefix: '📚 [RAG-CHRONIC-PRESCRIPTION]' }
     )
+
+    // Defensive auto-cite: if a chronicMedication's indication.clinicalRationale
+    // doesn't already contain [ref-N] and we have at least one evidence ref,
+    // append the first one. Same principle as dermato/chronic-examens — the
+    // prescription's Indication field is what the doctor / pharmacist sees;
+    // an unattributed prescription rationale looks like personal opinion.
+    const availableRefIds = Array.isArray(ragResult.evidenceReferences)
+      ? ragResult.evidenceReferences
+          .map((r: any) => r?.ref_id)
+          .filter((r): r is string => typeof r === 'string' && r.length > 0)
+      : []
+    if (availableRefIds.length > 0) {
+      const firstRef = availableRefIds[0].startsWith('ref-')
+        ? `[${availableRefIds[0]}]`
+        : `[ref-${availableRefIds[0]}]`
+      const cite = (raw: unknown): string => {
+        const s = typeof raw === 'string' ? raw : ''
+        if (!s.trim()) return s
+        if (/\[ref-\d+\]/i.test(s)) return s
+        const sep = s.trim().endsWith('.') ? ' ' : '. '
+        return `${s.trim()}${sep}${firstRef}`
+      }
+      const meds = (prescriptionData as any)?.prescription?.chronicMedications
+      if (Array.isArray(meds)) {
+        for (const m of meds) {
+          if (m?.indication && typeof m.indication === 'object') {
+            m.indication.clinicalRationale = cite(m.indication.clinicalRationale)
+          }
+        }
+      }
+    }
 
     return NextResponse.json({
       success: true,

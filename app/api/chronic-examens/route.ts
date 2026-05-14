@@ -187,7 +187,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
       "lineNumber": 1,
       "category": "BIOCHIMIE|HÉMATOLOGIE|IMMUNOLOGIE",
       "testName": "test name in English",
-      "clinicalIndication": "why this test is ordered",
+      "clinicalIndication": "Why this test for this patient (1-2 sentences). Embed [ref-N] tokens when a RAG guideline supports the choice (e.g. 'HbA1c every 3 months for diabetes monitoring [ref-1].'). Cite even partially-relevant refs — this field is what the lab/imaging request form shows as Indication.",
       "urgency": "URGENT|SEMI-URGENT|ROUTINE",
       "timing": {
         "when": "IMMÉDIAT|DANS 1 MOIS|DANS 3 MOIS",
@@ -213,7 +213,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
       "category": "IMAGERIE|EXPLORATION FONCTIONNELLE",
       "examName": "exam name in English",
       "examType": "specific type",
-      "clinicalIndication": "why this exam is ordered",
+      "clinicalIndication": "Why this exam for this patient (1-2 sentences). Embed [ref-N] tokens when a RAG guideline supports the choice (e.g. 'Baseline ECG for hypertension to detect LVH [ref-1].'). Cite even partially-relevant refs — this field is what the imaging request form shows as Clinical Indication.",
       "urgency": "URGENT|SEMI-URGENT|ROUTINE",
       "timing": {
         "when": "when to perform",
@@ -386,6 +386,41 @@ CONSULTATIONS selon maladies:
             ragContext,
             { logPrefix: '📚 [RAG-CHRONIC-EXAMENS]' }
           )
+
+          // Defensive auto-cite: if a test/exam clinicalIndication doesn't
+          // already contain [ref-N] and we have at least one evidence ref,
+          // append the first one. Same principle as dermato's ensureRefCited
+          // — a partially-relevant attribution beats an unsourced order on
+          // the lab/imaging request form.
+          const availableRefIds = Array.isArray(ragResult.evidenceReferences)
+            ? ragResult.evidenceReferences
+                .map((r: any) => r?.ref_id)
+                .filter((r): r is string => typeof r === 'string' && r.length > 0)
+            : []
+          if (availableRefIds.length > 0) {
+            const firstRef = availableRefIds[0].startsWith('ref-')
+              ? `[${availableRefIds[0]}]`
+              : `[ref-${availableRefIds[0]}]`
+            const cite = (raw: unknown): string => {
+              const s = typeof raw === 'string' ? raw : ''
+              if (!s.trim()) return s
+              if (/\[ref-\d+\]/i.test(s)) return s
+              const sep = s.trim().endsWith('.') ? ' ' : '. '
+              return `${s.trim()}${sep}${firstRef}`
+            }
+            const labArr = (combinedExamOrders as any)?.laboratoryTests
+            if (Array.isArray(labArr)) {
+              for (const t of labArr) {
+                if (t && typeof t === 'object') t.clinicalIndication = cite(t.clinicalIndication)
+              }
+            }
+            const paraArr = (combinedExamOrders as any)?.paraclinicalExams
+            if (Array.isArray(paraArr)) {
+              for (const e of paraArr) {
+                if (e && typeof e === 'object') e.clinicalIndication = cite(e.clinicalIndication)
+              }
+            }
+          }
 
           sendSSE('progress', { message: 'Ordonnances générées!', progress: 100 })
 

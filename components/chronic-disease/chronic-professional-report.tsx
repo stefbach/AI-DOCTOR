@@ -1575,7 +1575,15 @@ export default function ChronicProfessionalReport({
               dureeTraitement: med.treatment?.duration || 'Long-term chronic treatment',
               quantite: med.treatment?.totalQuantity || '1 box',
               instructions: med.posology?.specificInstructions || '',
-              justification: med.indication?.chronicDisease || '',
+              // Prefer the LLM's full clinicalRationale (which carries [ref-N]
+              // citations) over the bare chronicDisease label. Falling back to
+              // the disease label is only useful when the rationale is empty —
+              // otherwise we'd be throwing away the per-medication evidence
+              // that the prescription form is supposed to display.
+              justification: med.indication?.clinicalRationale
+                || med.indication?.therapeuticGoal
+                || med.indication?.chronicDisease
+                || '',
               surveillanceParticuliere: med.monitoring?.clinicalMonitoring || '',
               nonSubstituable: false
             }))
