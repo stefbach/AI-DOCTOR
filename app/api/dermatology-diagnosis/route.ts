@@ -824,13 +824,13 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
     "biopsy": "EITHER: Specific biopsy type with site (e.g., 'Punch biopsy of affected lesion for histopathological confirmation') OR: 'Not indicated' if biopsy not needed. NEVER use vague terms.",
     "imaging": [
       {
-        "name": "CLEAN imaging study name only (e.g., 'Dermoscopy', 'Reflectance confocal microscopy').",
+        "name": "CLEAN radiology study name only (e.g., 'Soft tissue ultrasound', 'MRI of the affected region'). RADIOLOGY ONLY — DO NOT put dermoscopy, reflectance confocal microscopy, Wood's lamp, or any bedside dermatology procedure here; those belong in specializedTests.",
         "indication": "Why this imaging for this patient (1-2 sentences). Embed [ref-N] when guideline-backed."
       }
     ],
     "specializedTests": [
       {
-        "name": "CLEAN test name only (e.g., 'Patch testing', 'Phototesting').",
+        "name": "CLEAN test name only. PUT HERE: dermoscopy, reflectance confocal microscopy, Wood's lamp examination, patch testing, phototesting, mycology direct exam, and any other bedside / in-office dermatology procedure. The 'imaging' array is for radiology only.",
         "indication": "Why this specialised test (1-2 sentences). Embed [ref-N] when guideline-backed."
       }
     ]
@@ -1273,14 +1273,34 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
       investigations.laboratory,
       'Dermatology investigation'
     )
-    const imagingInvestigations = normaliseInvestigations(
+    const imagingInvestigationsAll = normaliseInvestigations(
       investigations.imaging,
       'Dermatology imaging'
     )
-    const specializedInvestigations = normaliseInvestigations(
+    const specializedInvestigationsAll = normaliseInvestigations(
       investigations.specializedTests,
       'Specialised dermatology test'
     )
+
+    // Dermoscopy / Wood's lamp / reflectance confocal microscopy / mycology
+    // direct exam etc. are bedside dermatology procedures, NOT radiology.
+    // Even with the schema instruction the LLM still routes them into
+    // recommendedInvestigations.imaging — defensively move them to
+    // specializedTests so they end up on the right request form instead of
+    // the radiology form.
+    const BEDSIDE_DERMATO_PROCEDURE = /\b(dermo?scop|dermatoscop|wood'?s\s*lamp|reflect(ance)?\s*confocal|rcm\b|mycolog|koh\s*prep|tzanck|patch\s*test|photo\s*test|phototest|skin\s*scrap|capilloscop|trichoscop)/i
+    const imagingInvestigations = imagingInvestigationsAll
+      .filter(i => !BEDSIDE_DERMATO_PROCEDURE.test(i.name))
+    const reroutedFromImaging = imagingInvestigationsAll
+      .filter(i => BEDSIDE_DERMATO_PROCEDURE.test(i.name))
+    const specializedInvestigations = [
+      ...specializedInvestigationsAll,
+      ...reroutedFromImaging,
+    ]
+    if (reroutedFromImaging.length > 0) {
+      console.log(`🩺 DERMATOLOGY: Re-routed ${reroutedFromImaging.length} bedside procedure(s) from imaging to specializedTests:`,
+        reroutedFromImaging.map(i => i.name).join(', '))
+    }
 
     // Defensive: if an investigation indication doesn't already cite a
     // [ref-N], append the first available ref from the diagnosis's
