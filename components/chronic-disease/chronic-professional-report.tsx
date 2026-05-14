@@ -132,6 +132,7 @@ interface ChronicProfessionalReportData {
       registrationNumber: string
       date: string
     }
+    evidence_references?: any[]
   }
   laboratoryTests?: {
     header: any
@@ -156,6 +157,7 @@ interface ChronicProfessionalReportData {
       registrationNumber: string
       date: string
     }
+    evidence_references?: any[]
   }
   paraclinicalExams?: {
     header: any
@@ -180,6 +182,7 @@ interface ChronicProfessionalReportData {
       registrationNumber: string
       date: string
     }
+    evidence_references?: any[]
   }
   dietaryProtocol?: {
     header: {
@@ -1611,7 +1614,13 @@ export default function ChronicProfessionalReport({
                 practitionerName: prev.medicalReport.practitioner.name,
                 registrationNumber: prev.medicalReport.practitioner.registrationNumber,
                 date: new Date().toISOString().split('T')[0]
-              }
+              },
+              // chronic-prescription returns its own ref id space — the
+              // [ref-N] embedded in clinicalRationale / instructions /
+              // monitoring resolves against THIS array, not diagnosisData's.
+              evidence_references: Array.isArray(prescriptionData.evidence_references)
+                ? prescriptionData.evidence_references
+                : []
             }
             console.log('💊 Transformed Medications:', transformedMeds.length, 'medications')
           }
@@ -1676,7 +1685,13 @@ export default function ChronicProfessionalReport({
                   practitionerName: prev.medicalReport.practitioner.name,
                   registrationNumber: prev.medicalReport.practitioner.registrationNumber,
                   date: new Date().toISOString().split('T')[0]
-                }
+                },
+                // chronic-examens returns its own ref id space — [ref-N]
+                // embedded in test clinicalIndication resolves against THIS
+                // array, not diagnosisData's.
+                evidence_references: Array.isArray(examensData.evidence_references)
+                  ? examensData.evidence_references
+                  : []
               }
               console.log('🧪 Laboratory Tests Grouped:', Object.keys(groupedTests).map(k => `${k}: ${groupedTests[k].length}`).join(', '))
             }
@@ -1707,7 +1722,13 @@ export default function ChronicProfessionalReport({
                   practitionerName: prev.medicalReport.practitioner.name,
                   registrationNumber: prev.medicalReport.practitioner.registrationNumber,
                   date: new Date().toISOString().split('T')[0]
-                }
+                },
+                // Same source as laboratoryTests above — chronic-examens
+                // returns a single evidence_references array shared by both
+                // forms.
+                evidence_references: Array.isArray(examensData.evidence_references)
+                  ? examensData.evidence_references
+                  : []
               }
               console.log('🏥 Paraclinical Exams:', paraclinicalExams.length, 'exams')
             }
@@ -4687,7 +4708,13 @@ export default function ChronicProfessionalReport({
     // Use local state if available, otherwise use report (for display before editing)
     const medicationPrescription = localMedications || report.medicationPrescription
     const medications = medicationPrescription.prescription.medications || []
-    const evidenceRefs = ((diagnosisData as any)?.evidence_references as any[]) || []
+    // Prefer the prescription-route's own ref id space — the [ref-N] tokens
+    // in clinicalRationale/instructions/monitoring were emitted against
+    // chronic-prescription's RAG context, not chronic-diagnosis's.
+    const sectionRefs = (medicationPrescription as any)?.evidence_references
+    const evidenceRefs = (Array.isArray(sectionRefs) && sectionRefs.length > 0)
+      ? sectionRefs
+      : (((diagnosisData as any)?.evidence_references as any[]) || [])
     // The LLM frequently embeds citations not just in the indication but also
     // in the dosing instructions ("Avoid salt substitutes... [ref-1]") and the
     // monitoring directive ("Blood pressure, signs of postural hypotension
@@ -5092,7 +5119,13 @@ export default function ChronicProfessionalReport({
       { key: 'general', label: 'GENERAL LABORATORY' }
     ]
 
-    const labEvidenceRefs = ((diagnosisData as any)?.evidence_references as any[]) || []
+    // chronic-examens returns its own ref id space; prefer those refs over
+    // the diagnosis-route refs because the [ref-N] tokens inside test
+    // indications were emitted against chronic-examens's RAG context.
+    const labSectionRefs = (laboratoryTests as any)?.evidence_references
+    const labEvidenceRefs = (Array.isArray(labSectionRefs) && labSectionRefs.length > 0)
+      ? labSectionRefs
+      : (((diagnosisData as any)?.evidence_references as any[]) || [])
     const labCitationsByCategory: Record<string, ReturnType<typeof aggregateReferences>> = {}
     const labUsedRefIds = new Set<string>()
     // chronic-examens populates tests with `indication` while the manual-edit
@@ -5465,7 +5498,13 @@ export default function ChronicProfessionalReport({
     // Use local state if available, otherwise use report (for display before editing)
     const paraclinicalExams = localParaclinicalExams || report.paraclinicalExams
     const exams = paraclinicalExams.prescription.exams || []
-    const imagingEvidenceRefs = ((diagnosisData as any)?.evidence_references as any[]) || []
+    // Same rationale as the lab section above — [ref-N] tokens in
+    // clinicalIndication / diagnosticQuestion were emitted by chronic-examens
+    // against its own RAG context.
+    const imagingSectionRefs = (paraclinicalExams as any)?.evidence_references
+    const imagingEvidenceRefs = (Array.isArray(imagingSectionRefs) && imagingSectionRefs.length > 0)
+      ? imagingSectionRefs
+      : (((diagnosisData as any)?.evidence_references as any[]) || [])
     const imagingIndicationCitations = aggregateReferences(
       exams.map((e: any) => {
         const v = e?.clinicalIndication ?? e?.indicationClinique ?? e?.indication
