@@ -411,20 +411,24 @@ CLINICAL SUMMARY MUST INCLUDE:
 
       const completion = await callLLM({
         useCase: 'DERMATOLOGY_DIAGNOSIS',
+        // DeepSeek-V4-Pro even at reasoningEffort 'low' was stretching to
+        // 4-7 min in production — way past the user's tolerance for a
+        // diagnosis step. The dermato JSON schema is structured filling,
+        // not novel reasoning: the LLM is choosing a primary dx + 3-5
+        // differentials + topical/oral meds from a constrained drug list
+        // + 1-2 line indications. deepseek-chat (v3 non-reasoning) handles
+        // this template at 3-5× the throughput. Same shift we already
+        // applied to chronic-report and chronic-prescription's structured
+        // calls.
+        model: 'deepseek-chat',
         messages: [
           { role: "system", content: systemMessageWithRAG },
           { role: "user", content: diagnosticPrompt }
         ],
-        maxTokens: 8000,
-        // Was 'medium' — bumping to 'low' to avoid the same long-CoT timeout
-        // pattern that hit chronic-prescription. Dermato diagnosis fills a
-        // structured JSON schema, the inference itself is straightforward —
-        // we don't need 200-500s of chain-of-thought to label a flexural
-        // eczema or to populate medications.indication. Quality cost on
-        // this kind of templated output is minimal.
-        reasoningEffort: 'low',
+        maxTokens: 6000,
+        reasoningEffort: 'none',
         responseFormat: 'json_object',
-        timeoutMs: 280_000,
+        timeoutMs: 240_000,
       })
 
       const content = completion.text

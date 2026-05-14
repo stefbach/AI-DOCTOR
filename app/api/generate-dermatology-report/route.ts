@@ -1713,19 +1713,20 @@ export async function POST(request: NextRequest) {
       
       const result = await callLLM({
         useCase: 'DERMATOLOGY_REPORT',
+        // 10-section narrative re-formatting from already-analyzed data —
+        // no clinical reasoning needed, just templated text expansion.
+        // DeepSeek-V4-Pro even at 'low' reasoning was the second long step
+        // in the dermato flow (after dermatology-diagnosis). Switch to
+        // deepseek-chat (v3 non-reasoning) for 3-5× lower latency.
+        model: 'deepseek-chat',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        // Dermatology narrative report spans ~10 sections of text. gpt-5.5
-        // fit in 4000 tokens; DeepSeek V4-Pro is verbose enough that 4000
-        // overflows mid-string (same pattern as chronic-dietary/chronic-examens).
-        maxTokens: 12000,
+        maxTokens: 8000,
         responseFormat: 'json_object',
-        // Structured narrative re-formatting from an existing analysis —
-        // 'low' reasoning is enough and avoids the long-CoT latency.
-        reasoningEffort: 'low',
-        timeoutMs: 280_000,
+        reasoningEffort: 'none',
+        timeoutMs: 240_000,
       })
       console.log(`[llm] use=DERMATOLOGY_REPORT provider=${result.provider} model=${result.model} latency=${result.latencyMs}ms tokens=${result.usage?.totalTokens ?? 'n/a'}`)
 
