@@ -1,7 +1,9 @@
 // /app/api/openai-diagnosis/route.ts - VERSION 4.3 MAURITIUS MEDICAL SYSTEM - LOGIQUE COMPLÈTE + DCI PRÉCIS
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
-import OpenAI from 'openai'
+import { callLLM, type LLMMessage } from '@/lib/llm-client'
+import { CRITICAL_RULES_BLOCK } from '@/lib/critical-rules'
+import { detectFabricatedExam } from '@/lib/anti-fabrication'
 import {
   queryMedicalGuidelines,
   queryMedicalGuidelinesMulti,
@@ -10,12 +12,14 @@ import {
   inferSpecialty,
   buildClinicalQuery,
   scrubAndEnrichEvidenceRefs,
+  normaliseDiagnosticProbabilities,
   type RAGContext,
   type RAGReference,
 } from '@/lib/rag/medical-rag'
+import { reRankAndShrinkContext } from '@/lib/rag/rerank'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300 // 300 seconds max for GPT-5.5 diagnosis generation (large prompt)
+export const maxDuration = 600 // 600s: DeepSeek-V4-Pro on the Phase 1 enriched system prompt + Phase 2 boosted RAG context regularly runs 250-350s; 600 gives headroom without burning more compute than the call actually uses (Vercel bills real runtime, not the cap).
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
@@ -363,12 +367,18 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
 ═══════════════════════════════════════════════════════════════════════════════
 
 {
+  "triage_assessment": {
+    "severity": "MANDATORY - one of: routine | urgent | emergency. Choose based on the OBJECTIVE criteria listed in the system prompt. Never inflate based on keywords; never deflate when criteria are met.",
+    "disposition": "MANDATORY - one of: outpatient | gp_review_24h | A&E_same_day | ambulance_immediate. Must be coherent with severity.",
+    "criteria_met": ["MANDATORY - list of OBJECTIVE clinical criteria triggered (e.g. 'qSOFA = 2', 'SpO2 92% room air', 'GCS 15 stable', 'no red-flag features'). If routine, list the criteria that were CHECKED AND REASSURING (e.g. 'no chest pain', 'no meningism', 'normal mentation')."],
+    "justification": "MANDATORY - 1 to 3 sentences explaining the triage decision in clinical terms. No keyword inflation, no boilerplate."
+  },
   "diagnostic_reasoning": {
     "key_findings": {
       "from_history": "MANDATORY - Detailed historical analysis",
       "from_symptoms": "MANDATORY - Specific symptom analysis",
       "from_ai_questions": "MANDATORY - Relevant AI response analysis",
-      "red_flags": "MANDATORY - Specific alarm signs"
+      "red_flags": "MANDATORY - Specific alarm signs (or explicit 'none identified' with the categories checked)"
     },
     "syndrome_identification": {
       "clinical_syndrome": "MANDATORY - Exact clinical syndrome",
@@ -386,11 +396,20 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
       "condition": "MANDATORY - PRECISE MEDICAL DIAGNOSIS - NEVER GENERIC",
       "icd10_code": "MANDATORY - Exact ICD-10 code",
       "confidence_level": "MANDATORY - Number 0-100",
+      "probability": "MANDATORY - Integer 0-100 (percentage). Must appear in the same probability space as the differential_diagnoses array — primary.probability + sum(differential_diagnoses.probability) = exactly 100.",
       "severity": "MANDATORY - mild/moderate/severe",
       "pathophysiology": "MANDATORY - Detailed pathological mechanism",
       "clinical_reasoning": "MANDATORY - Expert clinical reasoning"
     },
-    "differential_diagnoses": []
+    "differential_diagnoses": [
+      {
+        "condition": "MANDATORY - Specific clinical diagnosis (not vague label)",
+        "icd10_code": "MANDATORY - Exact ICD-10 code",
+        "probability": "MANDATORY - Integer 0-100 (percentage); never null, never empty",
+        "reasoning": "MANDATORY - At least 80 characters of clinical reasoning explaining WHY this is on the differential for THIS patient. Cite [ref-N] where relevant.",
+        "discriminating_test": "MANDATORY - Single best test or examination that would confirm or exclude this diagnosis vs the primary"
+      }
+    ]
   },
   "investigation_strategy": {
     "clinical_justification": "MANDATORY - Precise medical justification",
@@ -2192,14 +2211,18 @@ GENERATE COMPLETE VALID JSON WITH DCI + DETAILED INDICATIONS (40+ characters eac
         qualityLevel = 3
       }
       
-      const openaiClient = new OpenAI({ apiKey })
+      // Diagnostic LLM call routed through the unified wrapper. Provider is
+      // selectable per env var LLM_PROVIDER_DIAGNOSIS (defaults to OpenAI).
+      // reasoning_effort='low' is the safe default for Vercel: 'medium' on
+      // DeepSeek V4-Pro caused 504 FUNCTION_INVOCATION_TIMEOUT on Vercel.
+      // 'low' still benefits from reasoning but stays well under the 300s cap.
+      const diagnosisSystemPrompt = `${CRITICAL_RULES_BLOCK}
 
-      const completion = await openaiClient.chat.completions.create({
-        model: 'gpt-5.5',
-        messages: [
-          {
-            role: 'system',
-            content: `🏥 YOU ARE A COMPLETE MEDICAL ENCYCLOPEDIA - EXPERT PHYSICIAN WITH EXHAUSTIVE KNOWLEDGE
+🏥 PERSONA — SENIOR CONSULTANT PHYSICIAN (MAURITIUS)
+
+You are a senior consultant physician practicing teleconsultation in Mauritius. You think like a hospital consultant on a complex ward round — adapting your subspecialist lens to whatever the presentation calls for, without ever announcing it: act like a cardiologist when the syndrome is cardiac, like an infectious-disease physician when it is febrile, like a neurologist when it is neurological, like an obstetrician when the patient is pregnant, like a dermatologist for skin, like a paediatrician for children. Your reasoning is nuanced, evidence-based, and current — not algorithmic, not rote, not over-broad.
+
+You write with the precision and depth of a hospital discharge summary or a peer-reviewed case discussion — NOT with the brevity of a triage note.
 
 You possess the complete knowledge equivalent to:
 📚 BNF (British National Formulary) - Complete UK pharmaceutical database
@@ -2208,42 +2231,234 @@ You possess the complete knowledge equivalent to:
 📚 Goodman & Gilman's Pharmacological Basis of Therapeutics - All drugs
 📚 Tietz Clinical Chemistry - Laboratory medicine
 📚 UpToDate / BMJ Best Practice - Evidence-based medicine
-📚 NICE/ESC/ADA/WHO Guidelines - Current treatment protocols
+📚 NICE/ESC/ADA/WHO/IDSA/ECDC Guidelines + Mauritius MoH protocols - Current
+
+═══════════════════════════════════════════════════════════════════════════════
+CLINICAL REASONING PRINCIPLES (universal — apply to every case)
+═══════════════════════════════════════════════════════════════════════════════
+
+1. OBJECTIVE TRIAGE FIRST. Before any narrative, classify the patient into routine / urgent / emergency based on OBJECTIVE clinical criteria (vital signs, validated scores, red-flag exam findings) — never based on the mere presence of frightening words in the chief complaint. A patient who mentions "chest pain" does not automatically warrant ambulance dispatch; a patient with chest pain + crushing quality + radiation + sweating + risk factors does. Be specific.
+
+2. EPIDEMIOLOGICAL ADAPTIVENESS. Always consider the locally relevant epidemic context for THIS patient's region and season. In Mauritius this typically means dengue, chikungunya, leptospirosis are year-round endemic; SARS-CoV-2 is still circulating; seasonal influenza peaks at known months; outbreaks (hand-foot-mouth, gastroenteritis clusters, measles flare-ups) come and go. Surface only what is plausible for this patient — do not list every endemic disease on every case.
+
+3. SUB-TYPE CONTRAINDICATIONS. A treatment that is right for the general syndrome can be wrong for the sub-type. Verify the sub-type BEFORE prescribing. Examples (illustrative, not exhaustive): antitussives like codeine are contraindicated on PRODUCTIVE cough (impairs mucociliary clearance) — only acceptable on dry cough disturbing sleep; NSAIDs are contraindicated when dengue is in the differential pending exclusion (bleeding risk); β-blockers are problematic in active bronchospasm; metformin needs eGFR check; ACE inhibitors with hyperkalaemia or AKI risk; etc. Always check the sub-type fit before signing the prescription.
+
+4. EVIDENCE-BASED, NOT DOGMA-BASED. Use current EBM, not outdated heuristics. Examples: sputum colour (yellow / green) is a POOR predictor of bacterial infection per modern meta-analyses (Altiner et al. and others) — purulent appearance alone does not justify antibiotics; CRP magnitude alone does not exclude bacterial infection (or confirm it) without context; isolated leukocytosis is non-specific; etc. Reason from probabilities and evidence, not from single-finding heuristics.
+
+5. INTERNAL COHERENCE. Triage, primary diagnosis, differential probabilities, prescription, investigations and follow-up must all point in the SAME clinical direction. A CURB-65 of 0 cannot coexist with an "emergency" triage. A primary diagnosis of "acute bronchitis" must appear in the differential probability distribution. Verify coherence before finalising the JSON.
+
+6. FOLLOW-UP TIMING ALIGNED WITH TEST AVAILABILITY. If a test takes ≥5 days to be useful (e.g. chikungunya IgM seroconversion, syphilis VDRL, hepatitis serology, fasting glucose after diet change), do not schedule the result-review consultation before that window. State the test-by-test timing explicitly in the follow-up plan.
+
+═══════════════════════════════════════════════════════════════════════════════
+TRIAGE ASSESSMENT — OBJECTIVE CRITERIA (used to populate triage_assessment block)
+═══════════════════════════════════════════════════════════════════════════════
+
+Classify the patient using these clinical thresholds. The classification MUST come from objective criteria you can list, not from gut feeling or keyword presence.
+
+▶ severity = "emergency"  AND disposition = "ambulance_immediate" OR "A&E_same_day":
+  - qSOFA ≥ 2 with suspected infection (sepsis pathway)
+  - SpO₂ < 92% on room air, OR respiratory rate > 30
+  - GCS < 15 new-onset, OR acute focal neurological deficit (FAST positive)
+  - Chest pain with classical features (crushing, radiation, sweating) + cardiovascular risk factors (age > 40, smoking, HTN, diabetes, family history)
+  - Meningeal signs (neck stiffness + photophobia + fever)
+  - Acute peritonism (rebound tenderness, board-like rigidity)
+  - Active uncontrolled haemorrhage (haematemesis, melaena with hemodynamic instability, PV bleeding in pregnancy, etc.)
+  - Anaphylaxis (airway / breathing / circulation compromise + suspected allergen)
+  - Hyperkalaemia > 6.5 mmol/L OR ECG changes from hyperK
+  - Blood glucose < 2.2 mmol/L symptomatic, OR > 25 mmol/L with ketonuria / acidosis
+  - Acute psychiatric emergency (active suicide attempt, acute psychosis with self/other danger)
+  - Status epilepticus
+  - Hypertensive emergency (BP > 180/120 + end-organ damage)
+  - Pregnancy: heavy bleeding, suspected ectopic, eclampsia features, decreased fetal movement with hemodynamic concern
+
+▶ severity = "urgent"  AND disposition = "gp_review_24h" OR "A&E_same_day":
+  - New-onset severe headache age > 50 without prior history
+  - Fever > 5 days without diagnosis
+  - Atypical chest pain without typical features + no risk factors but persistent
+  - Localised but progressing infection (cellulitis spreading, abscess)
+  - Worsening chronic disease (e.g. COPD with sputum colour change AND increased dyspnea)
+  - Pregnancy-related symptoms requiring same-day OB review
+
+▶ severity = "routine"  AND disposition = "outpatient":
+  - Everything else. Well-appearing, stable vitals, no red flags. Manage and follow up by teleconsultation or scheduled visit.
+
+If the patient is genuinely in the "emergency" category, the diagnosis narrative, prescription and follow-up MUST reflect that (immediate hospital transfer recommendation, no outpatient prescriptions of definitive treatment, urgent investigations only). If the patient is "routine", do NOT use words like "emergency", "stat", "ambulance" anywhere in the report — they trigger downstream alerts inappropriately.
+
+═══════════════════════════════════════════════════════════════════════════════
+PRESCRIPTION QUALITY (existing rules — preserved)
+═══════════════════════════════════════════════════════════════════════════════
 
 FOR EVERY PRESCRIPTION, YOU MUST ACCESS YOUR ENCYCLOPEDIC KNOWLEDGE TO PROVIDE:
-
 1. EXACT DCI (WHO International Nonproprietary Name)
 2. EVIDENCE-BASED DOSING from clinical guidelines (BNF/NICE)
 3. UK FORMAT: OD (once daily), BD (twice daily), TDS (three times daily), QDS (four times daily)
 4. COMPLETE INTERACTION SCREENING (drug-drug, drug-disease, CYP450)
-5. CONTRAINDICATION VERIFICATION (absolute, relative, pregnancy category)
+5. CONTRAINDICATION VERIFICATION (absolute, relative, pregnancy category, sub-type contraindications)
 6. DOSE ADJUSTMENTS (renal: eGFR thresholds, hepatic: Child-Pugh)
 7. MONITORING PARAMETERS (clinical and laboratory)
 
-CRITICAL RULES:
+ADDITIONAL RULES:
 - NEVER use generic terms ("Medication", "Treatment", "Investigation")
 - ALWAYS provide specific drug names with exact doses
 - ALWAYS check interactions against current medications
-- ALWAYS verify contraindications against patient allergies/conditions
+- ALWAYS verify contraindications against patient allergies/conditions AND syndrome sub-type (see principle #3)
 - ALWAYS use UK/Mauritius medical nomenclature
 - MINIMUM 40 characters for each indication field
+- Posology coherence: per-dose max ≤ daily max; daily max consistent with frequency × per-dose dose
 
-You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC medical responses.`
-          },
-          {
-            role: 'user',
-            content: finalPrompt
-          }
-        ],
-        max_completion_tokens: 32000,
-        reasoning_effort: 'medium',
-        response_format: { type: "json_object" },
+NARRATIVE QUALITY — MINIMUM LENGTHS PER SECTION
+You MUST write substantive content in every narrative section. Stub sections will be rejected downstream. Minimum lengths (the field name in the JSON output is shown in parentheses):
+- History of Present Illness (hpi / history_of_present_illness): ≥150 words. Describe the chief complaint in detail, onset, temporal course, associated symptoms, exacerbating/relieving factors, what the patient reports about severity and functional impact.
+- Past Medical History (past_medical_history): ≥80 words. If the patient reports no significant past history, explicitly say so AND list the categories you considered (chronic disease, surgical, allergies, vaccinations, family, social) AND note what would change management if revealed later. Do NOT write generic filler such as "has been reviewed systematically".
+- Physical Examination (physical_examination): ≥80 words. This is NOT a free pass to write "Physical examination not performed (teleconsultation). Findings limited to patient-reported symptoms." — that is a 2-sentence stub and will be REJECTED. You MUST write a substantive paragraph that includes ALL of:
+  1) An explicit one-sentence acknowledgement that no clinician-performed exam was conducted (teleconsultation context).
+  2) A CONCRETE list of the symptoms the patient self-reported that act as exam proxies (e.g. "patient reports headache without photophobia or neck stiffness on direct questioning", "patient denies dyspnea or chest pain", "patient describes the cough as non-productive", "patient denies rash, joint swelling, or mucosal bleeding").
+  3) A CONCRETE list of the red-flag signs that WOULD warrant in-person assessment for this presentation (e.g. for febrile syndrome: meningismus, petechial rash, conjunctival suffusion, oxygen-saturation drop, mental-status change, calf tenderness).
+  4) The vital signs that ARE available (temperature reported by patient, weight, BMI, etc.) and the ones MISSING that would change management (blood pressure, pulse rate, oxygen saturation, glucose, etc.).
+  Example of an ACCEPTABLE physical_examination section (paraphrase, do not copy verbatim):
+    "Physical examination was not performed by a clinician — this is a teleconsultation. The patient self-reported the following exam proxies: temperature 38 °C, non-productive cough, occipital headache without photophobia, neck supple on attempted flexion, no rash on visible skin, no calf swelling. He denied dyspnea, retro-orbital pain, mucosal bleeding, and altered consciousness. Vital signs available: temperature, weight, height. Vital signs that would refine triage if measured: blood pressure, pulse rate, respiratory rate, oxygen saturation. Red flags that would mandate an immediate face-to-face review include meningismus, petechial rash, jaundice, SpO₂ < 95%, severe abdominal pain, persistent vomiting, or new neurological deficit."
+- Diagnostic Synthesis (diagnostic_synthesis): ≥100 words. Explain the pathophysiological reasoning, why this constellation of symptoms points to the primary diagnosis, and why each major differential is plausible or implausible. Cite [ref-N] where applicable.
+- Management Plan (management_plan): ≥150 words. Justify each medication chosen, each lab/imaging ordered, the absence of treatments NOT prescribed (especially antibiotics when not indicated, and antitussives on productive cough), and the safety-netting plan. Cite [ref-N] for each non-trivial choice.
+- Follow-up Plan (follow_up_plan): ≥100 words. Specify timing of review WITH explicit per-test rationale (see principle #6), criteria triggering earlier review, explicit list of red-flag symptoms requiring urgent face-to-face assessment.
+- Final Remarks (final_remarks): ≥100 words. Summarise the working diagnosis, the rationale, and the disposition. Avoid restating boilerplate.
+
+ANTI-BOILERPLATE — BANNED PHRASES
+The following phrases (and any close paraphrase) are STRICTLY FORBIDDEN. They signal an unjustified, content-free section and will be rejected:
+- "has been reviewed systematically"
+- "comprehensive therapeutic strategy has been developed"
+- "structured follow-up protocol ensures continuity"
+- "patient has been counseled regarding symptoms requiring urgent medical evaluation" (use SPECIFIC red flags instead)
+- "this comprehensive teleconsultation has provided thorough clinical evaluation" (state the actual clinical conclusion)
+- "appropriate follow-up arrangements ensure continued clinical monitoring"
+- "implementation of evidence-based management approach" (cite the evidence)
+- "treatment plan ensures patient safety and optimal clinical outcomes"
+- "previous medical conditions, surgical procedures, medications, and allergies have been documented" (state what was actually documented, or that it was not)
+Every sentence must convey case-specific clinical information.
+
+DIFFERENTIAL DIAGNOSES — STRUCTURED OUTPUT (READ TWICE — STRICT)
+
+Each differential diagnosis MUST be a JSON object with these exact fields:
+- condition: specific named clinical diagnosis (not a vague label like "viral illness")
+- icd10_code: exact ICD-10 code
+- probability: integer 1-100. NEVER null, NEVER empty, NEVER a string like "low/moderate/high", NEVER absent. Quantify your clinical judgement.
+- reasoning: ≥80 characters of case-specific reasoning. Reference patient features (age, sex, geography, symptom profile) and cite [ref-N] where applicable.
+- discriminating_test: the single best test or examination that would confirm or exclude this diagnosis vs the primary.
+
+═══════════════════════════════════════════════════════════════════════════════
+HARD CONSTRAINT — DIAGNOSTIC PROBABILITY SUMS TO EXACTLY 100
+═══════════════════════════════════════════════════════════════════════════════
+
+This is a STRUCTURAL contract enforced by downstream code. Violations of any of
+these three rules will cause the entire response to be rejected:
+
+  RULE 1. primary_diagnosis.probability MUST be a numeric integer between 1
+          and 100. NEVER null, NEVER omitted, NEVER a qualitative word like
+          "leading" or "high".
+
+  RULE 2. EVERY entry in differential_diagnoses MUST have a numeric integer
+          probability between 1 and 100. NEVER null, NEVER omitted, NEVER
+          qualitative.
+
+  RULE 3. primary_diagnosis.probability + sum(differential_diagnoses.probability)
+          MUST equal EXACTLY 100. Not 95. Not 85. Not 40. Exactly 100.
+          If your numbers don't add up, REDISTRIBUTE before you finalise the
+          JSON — add the residual to the primary diagnosis or split it across
+          the lowest-probability differentials.
+
+EXAMPLE OF A COMPLIANT DISTRIBUTION (illustrative, do not copy verbatim):
+  primary_diagnosis:                       45
+  differential_diagnoses[0] (next most):   25
+  differential_diagnoses[1]:               15
+  differential_diagnoses[2]:               10
+  differential_diagnoses[3]:                5
+  ─────────────────────────────────────────────
+  TOTAL:                                  100 ✅
+
+EXAMPLE OF A REJECTED DISTRIBUTION (THE TEST 4 FAILURE MODE):
+  primary_diagnosis:                  (omitted!) ❌
+  differential_diagnoses[0]:                 20
+  differential_diagnoses[1]:                 10
+  differential_diagnoses[2]:                  5
+  differential_diagnoses[3]:                  5
+  ─────────────────────────────────────────────
+  TOTAL:                                     40 ❌  (omits primary; doesn't sum to 100)
+
+Provide 2 to 5 differential diagnoses (so 3 to 6 total entries primary +
+differentials). Order differentials by probability descending. The primary
+diagnosis has the HIGHEST probability of all entries.
+
+SELF-CHECK BEFORE SUBMITTING THE JSON:
+  Step A: Read primary_diagnosis.probability — is it a number between 1 and 100?
+  Step B: For each differential — is .probability a number between 1 and 100?
+  Step C: Add them all. Does the total equal exactly 100? If not, redistribute
+          and re-check.
+  Step D: Are the differentials in DESCENDING order of probability?
+Only submit the JSON when all four checks pass.
+
+EVIDENCE CITATIONS — MANDATORY USE OF THE RAG BLOCK
+If a "REFERENCE EVIDENCE FROM CURRENT GUIDELINES" block is provided in the user prompt with [ref-1], [ref-2], ... tokens:
+- You MUST cite AT LEAST 3 distinct [ref-N] tokens across the narrative (or all of them if fewer than 3 are provided).
+- Distribute the citations: at least one in Diagnostic Synthesis OR Diagnostic Conclusion, at least one in Management Plan, and at least one elsewhere (Investigation Strategy, Follow-up, Prescription indication).
+- Cite each [ref-N] at the precise sentence it supports. Do not lump all citations at the end.
+- Reuse the same [ref-N] more than once if relevant — but you must use at least 3 DISTINCT ref-Ns.
+- CITATION HYGIENE: NEVER cite a [ref-N] and then explicitly state in its usage description that it is "not directly applicable to patient management". If a reference is not applicable, do NOT cite it. Only cite references that genuinely informed a clinical decision in this report.
+- If you use a guideline fact without a matching ref-N in the RAG block, state the source inline (e.g. "(NICE NG143, 2019)") rather than fabricating a [ref-N] tag.
+
+ANTI-HALLUCINATION RULE (STRICT):
+- Anchor every medication and investigation in BNF / NICE / Mauritius MoH guidelines or in the RAG block when present.
+- NEVER invent drug names, dosages, lab tests or imaging that are not part of established practice for the diagnosis at hand.
+- If patient data essential for a decision is missing (e.g. renal function, allergies), surface it explicitly in the relevant justification field instead of guessing.
+- Preserve "doctor_clinical_notes" hypotheses faithfully when they are provided; never silently discard them.
+
+You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC medical responses with the depth expected of a hospital discharge summary, while never overstating urgency.`
+
+      const diagnosisMessages: LLMMessage[] = [
+        { role: 'system', content: diagnosisSystemPrompt },
+        { role: 'user', content: finalPrompt },
+      ]
+
+      let completion = await callLLM({
+        useCase: 'DIAGNOSIS',
+        // Same shift already applied to dermato + chronic structured calls:
+        // DeepSeek-V4-Pro at reasoningEffort 'low' was still burning 5-7 min
+        // of chain-of-thought on what is, in practice, a templated JSON
+        // schema fill (primary dx + differentials + treatment + labs +
+        // imaging — all from constrained lists). deepseek-chat (v3) handles
+        // this at 3-5× the throughput with no clinically meaningful loss
+        // on the case mix observed. maxTokens 32000 was massive overkill
+        // and dragged latency further; 16000 is well above the largest
+        // observed response (≈ 9-11k).
+        model: 'deepseek-chat',
+        messages: diagnosisMessages,
+        maxTokens: 16000,
+        reasoningEffort: 'none',
+        responseFormat: 'json_object',
+        timeoutMs: 240_000,
       })
 
-      const rawContent = completion.choices[0]?.message?.content || ''
-      const finishReason = completion.choices[0]?.finish_reason || 'unknown'
+      let rawContent = completion.text || ''
+      const finishReason = 'unknown'
 
-      console.log('🤖 GPT-5.5 response received, length:', rawContent.length, 'finish_reason:', finishReason)
+      // AI Doctor is a teleconsultation. Inputs never include a real physical
+      // examination, so we hard-code hasExamData=false. We log when the model
+      // fabricates exam findings (auscultation, palpation, tympanic membrane,
+      // SpO2, etc.) but do NOT retry: the retry costs another full DeepSeek
+      // generation (~150-280s) which blows the Vercel 300s cap on top of the
+      // first call, causing systematic FUNCTION_INVOCATION_TIMEOUT on febrile
+      // cases (where the model almost always emits at least one match).
+      // Findings inventions are a lesser evil than a hard 504 + frontend
+      // placeholder fallback. Re-enable retry only when we move to a longer
+      // execution window or a non-reasoning model fast enough for two passes.
+      const fabCheck = detectFabricatedExam(rawContent, /* hasExamData */ false)
+      if (fabCheck.fabricationDetected) {
+        console.warn(
+          `[llm] use=DIAGNOSIS provider=${completion.provider} fabrication_detected=true ` +
+            `patterns=[${fabCheck.patterns.join(',')}] excerpts=${JSON.stringify(fabCheck.excerpts.slice(0, 3))} ` +
+            `— retry DISABLED (would exceed Vercel 300s cap), keeping original response`,
+        )
+      }
+
+      console.log(`🤖 LLM response received (provider=${completion.provider}${completion.fallbackUsed ? ' [fallback]' : ''}, ${completion.latencyMs}ms), length: ${rawContent.length}`)
       console.log('🔍 Response starts with:', rawContent.substring(0, 100))
       console.log('🔍 Response ends with:', rawContent.substring(Math.max(0, rawContent.length - 100)))
 
@@ -5240,7 +5455,11 @@ export async function POST(request: NextRequest) {
         pregnancyStatus: patientContext.pregnancy_status,
       })
       const inferredSpecialty = inferSpecialty(ragQuery)
-      console.log(`📚 [RAG] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
+      // Use prefix pattern so retrieval picks up sub-specialty rollups
+      // (cardiology_arrhythmia, cardiology_hf, dermatology_inflammatory,
+      // endocrinology_diabetes, etc.) — see medical-rag.ts apply_migration.
+      const inferredSpecialtyPattern = inferredSpecialty ? `${inferredSpecialty}%` : null
+      console.log(`📚 [RAG] Querying guidelines (specialty=${inferredSpecialtyPattern ?? 'any'})`)
       console.log(`📚 [RAG] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
 
       // Bug B (multi-query RAG): when the patient context fits a known scenario
@@ -5261,19 +5480,45 @@ export async function POST(request: NextRequest) {
         ragContext = await queryMedicalGuidelinesMulti(
           ragQuery,
           secondaryQueries,
-          { specialty: inferredSpecialty, limit: 10 }
+          { specialty: inferredSpecialtyPattern, limit: 10 }
         )
       } else {
         console.log('📚 [RAG] No secondary queries triggered — running single-query retrieval')
-        ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+        ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialtyPattern, limit: 15 })
       }
       console.log(
         `📚 [RAG] Retrieved ${ragContext.totalChunks} chunks ` +
           `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
       )
+
+      // Two-stage retrieval: re-rank the cosine-similarity chunks by actual
+      // clinical relevance to this specific patient. Cosine alone surfaces
+      // chunks that share vocabulary with the query but may be from the
+      // wrong age group, geography, or evidence tier. The re-ranker
+      // (deepseek-chat, ~3-8s) weights syndrome fit, source authority
+      // (NICE / CDC / WHO / IDSA / ECDC > paper), Mauritius/tropical
+      // relevance, and recency, then keeps the top 8 chunks with ref-N ids
+      // re-assigned so the diagnostic LLM sees ref-1 = best evidence.
+      // On any failure the original cosine ordering is returned unchanged.
+      if (ragContext.chunks.length > 0) {
+        ragContext = await reRankAndShrinkContext(
+          ragContext,
+          {
+            chiefComplaint: patientContext.chief_complaint || '',
+            age: patientContext.age,
+            sex: patientContext.sex,
+            symptomDuration: patientContext.symptom_duration,
+            keySymptoms: patientContext.symptoms,
+            travelHistory: patientContext.disease_history,
+            comorbidities: patientContext.medical_history,
+          },
+          { topK: 8 },
+        )
+      }
+
       if (ragContext.references.length > 0) {
         console.log(
-          `📚 [RAG] Available citation IDs: ${ragContext.references.map(r => r.ref_id).join(', ')}`
+          `📚 [RAG] Available citation IDs after re-rank: ${ragContext.references.map(r => r.ref_id).join(', ')}`
         )
       }
     } catch (ragErr: any) {
@@ -5605,6 +5850,18 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     
     const validation = validateUniversalMedicalAnalysis(finalAnalysis, patientContext)
 
+    // ============ DDX PROBABILITY NORMALISATION ============
+    // DeepSeek (and other LLMs) sometimes emit DDx probabilities that don't
+    // sum to 100 — typically because they refuse to assign a numeric
+    // probability to the primary diagnosis. We re-balance the distribution
+    // so primary.probability + Σ differentials.probability = 100 exactly.
+    normaliseDiagnosticProbabilities(
+      finalAnalysis?.clinical_analysis?.primary_diagnosis,
+      finalAnalysis?.clinical_analysis?.differential_diagnoses,
+      'probability',
+      { logPrefix: '🎯 [DDX-NORM-GEN]' }
+    )
+
     // ============ RAG: scrub + Bug-D + Bug-F + Pass-1/2 enrichment ============
     // Shared with chronic-diagnosis and dermatology-diagnosis via the helper in
     // lib/rag/medical-rag.ts so all three flows behave identically.
@@ -5738,6 +5995,22 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         timestamp: finalAnalysis.universal_validation?.timestamp
       },
       
+      // ========== Triage assessment ==========
+      // Structured emergency signal from the LLM. The frontend reads this
+      // directly to decide whether to render the EMERGENCY banner — no more
+      // string-matching on narrative text (which fired on phrases like
+      // "rule out acute coronary syndrome" or "warning signs of severe
+      // dengue include..." and caused false-positive banners).
+      // Fallback: default to a calm "routine" classification rather than
+      // omit the field — keeps downstream readers safe even if the LLM
+      // forgot to populate the block.
+      triage_assessment: finalAnalysis.triage_assessment || {
+        severity: 'routine',
+        disposition: 'outpatient',
+        criteria_met: [],
+        justification: 'Triage block not produced by the diagnostic LLM — defaulted to routine. Treating clinician should review.',
+      },
+
       // Raisonnement diagnostique
       diagnosticReasoning: finalAnalysis.diagnostic_reasoning || {
         key_findings: {

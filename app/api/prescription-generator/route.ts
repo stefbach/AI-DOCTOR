@@ -1,6 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { callLLM } from "@/lib/llm-client"
+
+export const runtime = 'nodejs'
+// 600s for parity with /api/openai-diagnosis and report routes. The Phase 5
+// system prompt (senior clinical pharmacologist persona + 9 strict quality
+// rules + anti-boilerplate list) adds ~1000 prompt tokens and pushes
+// DeepSeek-V4-Pro to 200-300s on a complex prescription. 300s was tight.
+export const maxDuration = 600
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +24,7 @@ export async function POST(request: NextRequest) {
     // Construction du contexte médical complet pour prescription sécurisée
     const prescriptionContext = `
 PROFIL PATIENT DÉTAILLÉ POUR PRESCRIPTION:
-- Identité: ${patientData.firstName || "N/A"} ${patientData.lastName || "N/A"}
+- Identité: Patient anonymisé (le nom sera réinjecté côté serveur après génération)
 - Âge: ${patientData.age || "N/A"} ans (${patientData.age >= 65 ? "PATIENT ÂGÉE - Précautions posologiques" : "Adulte standard"})
 - Sexe: ${patientData.gender || "N/A"} ${patientData.gender === "Femme" && patientData.age >= 15 && patientData.age <= 50 ? "(Âge de procréation - Vérifier contraception/grossesse)" : ""}
 - Poids: ${patientData.weight || "N/A"} kg, Taille: ${patientData.height || "N/A"} cm
@@ -71,9 +77,9 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
       "establishment": "Centre Médical TIBOK - Consultation IA Expert"
     },
     "patient": {
-      "lastName": "${patientData.lastName || "N/A"}",
-      "firstName": "${patientData.firstName || "N/A"}",
-      "birthDate": "${patientData.dateOfBirth || "N/A"}",
+      "lastName": "[FILL_LASTNAME]",
+      "firstName": "[FILL_FIRSTNAME]",
+      "birthDate": "[FILL_BIRTHDATE]",
       "age": "${patientData.age || "N/A"} ans",
       "weight": "${patientData.weight || "N/A"} kg"
     },
@@ -204,15 +210,57 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
 }
 `
 
-    console.log("🧠 Génération ordonnance experte avec OpenAI...")
+    console.log("🧠 Génération ordonnance experte (LLM)...")
 
-    const result = await generateText({
-      model: openai("gpt-5.5", { reasoningEffort: "none" }),
-      prompt: expertPrescriptionPrompt,
+    const result = await callLLM({
+      useCase: 'PRESCRIPTION',
+      messages: [
+        {
+          role: 'system',
+          content: `PERSONA — SENIOR CLINICAL PHARMACOLOGIST (MAURITIUS / UK STANDARDS)
+
+You are a senior clinical pharmacologist working alongside the consulting physician in Mauritius. You apply UK medical standards (BNF, NICE, BTS/SIGN) plus awareness of locally relevant tropical-disease prescribing (e.g. NSAID avoidance in suspected dengue, doxycycline for leptospirosis, artemether-lumefantrine for malaria). Your output is a finalised, pharmacist-checkable prescription — not a draft.
+
+PRESCRIPTION QUALITY RULES — STRICT
+
+1. EXACT DCI — every drug must use the WHO International Nonproprietary Name (paracetamol, amoxicillin, ibuprofen) not brand names (Doliprane, Augmentin).
+
+2. EVIDENCE-BASED DOSING — dose, frequency and duration must match the BNF or NICE guideline for the prescribed indication. Use UK abbreviations: OD (once daily), BD (twice daily), TDS (three times daily), QDS (four times daily), PRN (as needed).
+
+3. INDICATION FIELD — minimum 40 characters per medication. State (a) which clinical condition the drug treats, (b) why this molecule was chosen over alternatives for this patient, (c) any pertinent contraindication consciously cleared (e.g. "paracetamol chosen over NSAIDs because dengue not yet excluded").
+
+4. INTERACTION SCREENING — before each prescription, mentally check against the patient's currently listed medications and allergies. If a meaningful interaction exists, state it AND the chosen mitigation in the indication.
+
+5. CONTRAINDICATION CHECK — verify against patient comorbidities (renal impairment → eGFR threshold; hepatic → Child-Pugh; pregnancy → BNF pregnancy category) and allergies. If a key data point (eGFR, allergy list, pregnancy status) is missing, state it explicitly in the indication and choose the drug with the safest unknown-state profile.
+
+6. MONITORING — every medication needs an explicit monitoring plan (clinical or lab parameter, timing, action threshold). No "monitor as appropriate" boilerplate.
+
+7. NO ABX UNLESS INDICATED — never prescribe antibiotics for syndromes that are viral by default (acute bronchitis in healthy adults, common cold, viral pharyngitis without modified Centor ≥3). If you skip antibiotics deliberately, state the reasoning in the management justification of the relevant indication.
+
+8. TROPICAL CONTEXT — when fever + arboviral suspicion (Mauritius default), explicitly avoid NSAIDs / aspirin until dengue excluded. Document this clearance in the paracetamol indication.
+
+9. NON-PHARMACOLOGICAL ADVICE — when relevant, include hydration, rest, mosquito-bite prevention, vector control, return-precautions. Pharmacological-only management is rarely complete.
+
+ANTI-BOILERPLATE — BANNED PHRASES
+"Take as directed", "Monitor as appropriate", "Consider clinical context", "Use with caution", "Adjust based on response", "Standard dose for adult patient". Every instruction must be specific.
+
+ANTI-HALLUCINATION (STRICT)
+- Never prescribe a drug absent from BNF / NICE / Mauritius MoH guidelines for the given indication.
+- Never prescribe a drug contraindicated by the patient's listed allergies, comorbidities, or current medications.
+- If a critical data point is missing for safe prescribing, state the gap explicitly in the indication field. Do NOT invent a value.
+- Preserve "doctor_clinical_notes" hypotheses faithfully when provided.
+
+OUTPUT FORMAT — STRICT
+Respond with valid JSON only, matching the schema in the user prompt. No prose outside the JSON.`
+        },
+        { role: 'user', content: expertPrescriptionPrompt },
+      ],
       maxTokens: 12000,
+      reasoningEffort: 'low',
+      timeoutMs: 280_000,
     })
 
-    console.log("✅ Ordonnance experte générée")
+    console.log(`✅ Ordonnance experte générée (provider=${result.provider}${result.fallbackUsed ? ' [fallback]' : ''}, ${result.latencyMs}ms)`)
 
     // Parsing JSON avec gestion d'erreur experte
     let prescriptionData
@@ -232,10 +280,18 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
       
       prescriptionData = JSON.parse(cleanText)
       console.log("✅ JSON ordonnance parsé avec succès")
-      
+
     } catch (parseError) {
       console.warn("⚠️ Erreur parsing JSON ordonnance, génération fallback expert")
       prescriptionData = generateExpertPrescriptionFallback(patientData, diagnosisData, clinicalData)
+    }
+
+    // Re-inject patient identity stripped from the LLM prompt for privacy.
+    if (prescriptionData?.prescriptionHeader?.patient) {
+      const p = prescriptionData.prescriptionHeader.patient
+      if (!p.lastName || p.lastName === '[FILL_LASTNAME]') p.lastName = patientData.lastName || "N/A"
+      if (!p.firstName || p.firstName === '[FILL_FIRSTNAME]') p.firstName = patientData.firstName || "N/A"
+      if (!p.birthDate || p.birthDate === '[FILL_BIRTHDATE]') p.birthDate = patientData.dateOfBirth || "N/A"
     }
 
     // Validation sécuritaire supplémentaire

@@ -146,7 +146,7 @@ export interface RAGContext {
 export interface QueryOptions {
   /** Specialty filter; null = broad search across all specialties. */
   specialty?: SpecialtyCode | null
-  /** Cosine similarity threshold; default 0.30 (validated against real DB: text-embedding-3-small produces sims ~0.30-0.40 for clinically relevant medical content). */
+  /** Cosine similarity threshold; default 0.27 (lowered from 0.30 to bridge the symptoms-vs-guideline embedding gap; text-embedding-3-small puts clinically relevant chunks in the ~0.27-0.40 range when the query is short and symptomatic). */
   threshold?: number
   /** Max chunks to retrieve; default 8 (RPC default). */
   limit?: number
@@ -160,7 +160,7 @@ export interface SecondaryQuery {
   text: string
   /** Specialty filter; null = broad search. */
   specialty?: SpecialtyCode | null
-  /** Cosine similarity threshold; defaults to 0.30. */
+  /** Cosine similarity threshold; defaults to 0.27. */
   threshold?: number
   /** Max chunks to retrieve for this subquery; default 3. */
   limit?: number
@@ -192,7 +192,7 @@ export async function queryMedicalGuidelines(
   if (!trimmedQuery) return EMPTY_CONTEXT
 
   const specialty = opts.specialty ?? null
-  const threshold = opts.threshold ?? 0.30
+  const threshold = opts.threshold ?? 0.27
   const limit = opts.limit ?? 8
 
   const rows = await fetchGuidelineRows(trimmedQuery, { specialty, threshold, limit })
@@ -228,7 +228,17 @@ export async function queryMedicalGuidelinesMulti(
       query: (primaryQuery || '').trim(),
       opts: {
         specialty: primaryOpts.specialty ?? null,
-        threshold: primaryOpts.threshold ?? 0.30,
+        // The primary query is the patient's chief complaint phrased in
+        // symptom vocabulary ("headaches associated with body pain, fever
+        // and cough"). Guideline chunks use clinical / disease vocabulary
+        // ("acute febrile illness", "dengue NS1 antigen", "differential of
+        // viral exanthem") — the embedding gap is wide and 0.27 was
+        // returning 0 chunks on a real febrile case despite the corpus
+        // containing relevant ECDC chunks (proven by the diversification
+        // sub-queries which DID find them). 0.20 catches the relevant
+        // long-tail without flooding noise (sub-queries with their own
+        // 0.27 threshold remain the main precision source).
+        threshold: primaryOpts.threshold ?? 0.20,
         limit: primaryOpts.limit ?? 10,
       },
     },
@@ -237,7 +247,7 @@ export async function queryMedicalGuidelinesMulti(
       query: (q.text || '').trim(),
       opts: {
         specialty: q.specialty ?? null,
-        threshold: q.threshold ?? 0.30,
+        threshold: q.threshold ?? 0.27,
         limit: q.limit ?? 3,
       },
     })),
@@ -338,6 +348,115 @@ async function fetchGuidelineRows(
   }
 }
 
+/**
+ * Fallback retrieval by title pattern when the embedding-based search
+ * fails to surface obvious disease-specific chunks. Use case: dermato's
+ * morphology-only query consistently matches CDC scabies/pediculosis
+ * (high cosine due to shared vocabulary) over AAD atopic dermatitis
+ * (lower cosine because of different vocabulary). When the OCR layer
+ * has already suggested a likely diagnosis ("Atopic dermatitis"), we
+ * can bypass cosine entirely and pull the guideline chunks whose TITLE
+ * matches that diagnosis.
+ *
+ * Returns the raw rows (NOT a RAGContext) so the caller can merge them
+ * with the embedding-based retrieval. Designed to be non-blocking: any
+ * failure returns [] without throwing.
+ */
+export async function fetchGuidelineChunksByTitlePatterns(
+  patterns: readonly string[],
+  opts: { limit?: number } = {}
+): Promise<MatchGuidelinesRow[]> {
+  if (!patterns || patterns.length === 0) return []
+  const limit = opts.limit ?? 6
+  const cleanedPatterns = patterns
+    .map(p => String(p || '').trim())
+    .filter(p => p.length >= 3)
+  if (cleanedPatterns.length === 0) return []
+
+  try {
+    const t0 = Date.now()
+    const { data, error } = await getSupabase().rpc('match_guidelines_by_title', {
+      match_title_patterns: cleanedPatterns,
+      match_count: limit,
+    })
+    if (error) {
+      console.warn(`[RAG] title-pattern retrieval RPC error: ${error.message}`)
+      return []
+    }
+    const rows = (data || []) as MatchGuidelinesRow[]
+    console.log(
+      `[RAG] title-pattern retrieval: ${rows.length} chunks in ${Date.now() - t0}ms ` +
+        `(patterns=${cleanedPatterns.map(p => `"${p}"`).join(', ')})`
+    )
+    return rows
+  } catch (err: any) {
+    console.warn('[RAG] title-pattern fallback failed (non-blocking):', err?.message || err)
+    return []
+  }
+}
+
+/**
+ * Merge title-pattern rows into an existing RAGContext built from an
+ * embedding-based retrieval. Deduplicates by chunk id (synthesised from
+ * the new rows since chunks in RAGContext don't carry their raw id), so
+ * we instead deduplicate by content+ref title. Preserves the existing
+ * ref-N numbering for chunks already in context and appends fresh
+ * ref-N entries for newly-introduced guidelines.
+ */
+export function mergeTitlePatternRowsIntoContext(
+  ctx: RAGContext,
+  rows: MatchGuidelinesRow[]
+): RAGContext {
+  if (!rows || rows.length === 0) return ctx
+  const existingKey = new Set(
+    ctx.chunks.map(c => `${c.refId}::${(c.content || '').slice(0, 80)}`)
+  )
+  // Rebuild from the union of existing rows + new rows. Since the
+  // existing context already has chunks (without raw IDs), we keep the
+  // existing context and append new rows via buildContextFromRows on
+  // the merged list. The original embedding-based chunks were lost when
+  // we mapped to RAGChunk — so we just call buildContextFromRows on the
+  // new rows and merge chunks/references downstream.
+  const titleCtx = buildContextFromRows(rows)
+  if (titleCtx.chunks.length === 0) return ctx
+
+  // Append references, re-numbering to avoid collisions with existing ref-N.
+  const merged: RAGContext = {
+    chunks: [...ctx.chunks],
+    references: [...ctx.references],
+    totalChunks: ctx.totalChunks,
+    avgSimilarity: ctx.avgSimilarity,
+    ragUsed: true,
+  }
+  // Map old title-rag ref_id → new ref_id for the appended chunks.
+  const refIdRemap = new Map<string, string>()
+  for (const r of titleCtx.references) {
+    const alreadyInMerged = merged.references.find(
+      existing => existing.external_id === r.external_id || existing.title === r.title
+    )
+    if (alreadyInMerged) {
+      refIdRemap.set(r.ref_id!, alreadyInMerged.ref_id!)
+    } else {
+      const newRefId = `ref-${merged.references.length + 1}`
+      refIdRemap.set(r.ref_id!, newRefId)
+      merged.references.push({ ...r, ref_id: newRefId })
+    }
+  }
+  for (const c of titleCtx.chunks) {
+    const remappedRefId = refIdRemap.get(c.refId) || c.refId
+    const key = `${remappedRefId}::${(c.content || '').slice(0, 80)}`
+    if (!existingKey.has(key)) {
+      merged.chunks.push({ ...c, refId: remappedRefId })
+      existingKey.add(key)
+    }
+  }
+  merged.totalChunks = merged.chunks.length
+  merged.avgSimilarity = merged.chunks.length > 0
+    ? merged.chunks.reduce((s, c) => s + (c.similarity || 0), 0) / merged.chunks.length
+    : 0
+  return merged
+}
+
 /** Group rows into chunks + dedup references by external_id. */
 function buildContextFromRows(rows: MatchGuidelinesRow[]): RAGContext {
   if (rows.length === 0) return { ...EMPTY_CONTEXT, ragUsed: true }
@@ -433,6 +552,12 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
     }
   }
 
+  const minRefsTarget = Math.min(3, N)
+  const minRefsRule =
+    N >= 3
+      ? `MINIMUM ${minRefsTarget} références distinctes doivent être citées dans le rapport (texte narratif + evidence_references). ${N} refs sont fournies — si tu en utilises moins de ${minRefsTarget}, ton rapport est sous-référencé.`
+      : `Cite au minimum ${minRefsTarget} référence(s) (seulement ${N} disponible(s) dans ce contexte).`
+
   lines.push('=== RÈGLES OBLIGATOIRES POUR LES RÉFÉRENCES ===')
   lines.push(
     `1. Plage de citations VALIDES: ${validRange}. EXACTEMENT ${N} référence(s) disponible(s): ${validIds}.`
@@ -441,7 +566,7 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
     `2. INTERDIT de citer [ref-${N + 1}], [ref-${N + 2}], ou tout [ref-X] avec X > ${N}. Toute référence hors de la plage ${validRange} sera supprimée du rapport (citation invalidée).`
   )
   lines.push(
-    '3. Chaque recommandation diagnostique ou thérapeutique DOIT être attribuée à une référence [ref-N] si elle est supportée par les guidelines ci-dessus.'
+    '3. Chaque recommandation diagnostique ou thérapeutique DOIT être attribuée à une référence [ref-N] si elle est supportée — même partiellement — par les guidelines ci-dessus.'
   )
   lines.push(
     "4. Si aucune guideline du contexte ne supporte une recommandation, termine simplement l'indication par: 'Based on standard clinical practice.' (NE PAS écrire 'hors guideline RAG' — c'est du jargon interne qui ne doit jamais apparaître dans le rapport rendu)."
@@ -450,22 +575,25 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
     '5. POUR CHAQUE MÉDICAMENT prescrit, ET CHAQUE examen complémentaire (lab, imagerie), cite la référence guideline pertinente [ref-N] dans le champ "indication" / "clinical_indication" si disponible dans le contexte ci-dessus (ex: "Symptomatic relief of fever and pain [ref-2]"). En cas de doute entre citer une ref et écrire \'Based on standard clinical practice.\', PRÉFÈRE citer si une ref aborde même partiellement le sujet.'
   )
   lines.push(
-    "6. PERTINENCE STRICTE: ne cite [ref-N] QUE si la guideline correspondante traite DIRECTEMENT du sujet de la recommandation. NE PAS citer une ref simplement parce qu'elle a été fournie. Une ref tangentielle (ex: 'endocardite' citée sur une fièvre arbovirale sans souffle/valve concernée) sera retirée et nuit à la crédibilité du rapport."
+    "6. PERTINENCE UTILE (pas stricte): cite [ref-N] dès qu'une guideline a informé ton raisonnement — même partiellement, même si elle n'aborde qu'un aspect (épidémiologie, monitoring, red flag, contre-indication, alternative diagnostique). Tu n'as pas besoin d'être 100% sûr de la pertinence : si l'info de la ref a façonné une partie de ton rapport, CITE-LA. Mieux vaut citer 5 refs partiellement pertinentes que 2 refs ultra-précises en laissant le reste du rapport non-attribué. SEULE EXCEPTION : ne cite pas une ref qui traite d'un sujet totalement étranger (ex: 'endocardite' sur une fièvre arbovirale sans contexte cardiaque) — ça nuit à la crédibilité."
   )
   lines.push(
-    "7. Liste dans evidence_references UNIQUEMENT les [ref-N] que tu as réellement utilisés dans le texte (champs narratifs, indications). Toute ref listée ici sans apparaître dans le texte sera retirée. Cohérence stricte texte ↔ evidence_references."
+    `7. ${minRefsRule} Couvre ainsi les différents domaines du rapport : diagnostic différentiel, plan d'investigation, traitement pharmaco/non-pharmaco, monitoring, red flags. Si plusieurs sections du rapport utilisent une même ref, la ref reste comptée 1 fois dans evidence_references mais doit être citée à chaque endroit pertinent du texte.`
   )
   lines.push(
-    "8. NE PAS inventer de références: ne cite que les [ref-N] présents ci-dessus."
+    "8. Liste dans evidence_references TOUS les [ref-N] que tu as cités au moins une fois dans le texte (champs narratifs, indications, reasoning). Cohérence stricte texte ↔ evidence_references."
+  )
+  lines.push(
+    "9. NE PAS inventer de références: ne cite que les [ref-N] présents ci-dessus."
   )
   lines.push('')
 
   lines.push('=== CONFIRMATION FINALE OBLIGATOIRE ===')
   lines.push(
-    'Avant de retourner ton JSON, vérifie EXPLICITEMENT que le tableau "evidence_references" contient au moins une entrée par [ref-N] que tu as effectivement utilisé.'
+    `Avant de retourner ton JSON, vérifie EXPLICITEMENT que "evidence_references" contient au moins ${minRefsTarget} entrée(s) distincte(s) ET que chaque [ref-N] listée apparaît au moins une fois dans le texte narratif.`
   )
   lines.push(
-    'Si tu as utilisé ref-1 et ref-2 dans ton raisonnement, "evidence_references" doit contenir au minimum 2 objets. Champ vide = échec de la consigne RAG.'
+    `Si tu as cité moins de ${minRefsTarget} refs, RELIS ton rapport et identifie les sections (diagnostic, traitement, monitoring, red flags…) où une des ${N} refs fournies aurait pu informer ton raisonnement — puis ajoute la citation. Champ < ${minRefsTarget} entrée(s) = échec de la consigne RAG.`
   )
   lines.push('')
 
@@ -680,6 +808,14 @@ export function buildClinicalQuery(input: {
   // ---------- medical history (only meaningful entries) ----------
   const histBits = (input.medicalHistory || []).filter(isMeaningful).map(h => sentence(norm(h)))
 
+  // ---------- vital signs → clinical signals ----------
+  // Raw numbers ("BP 145/95") embed poorly — guidelines describe the *concept*
+  // ("stage 1 hypertension", "tachycardia"), not the number. Translate abnormal
+  // values into the clinical phrasing so the embedding actually matches the
+  // hypertension/diabetes/obesity guidelines instead of falling back to whatever
+  // shares vocabulary with the chief complaint.
+  const vitalBits = extractVitalSignals(input.vitalSigns)
+
   // ---------- assemble ----------
   const segments: string[] = []
   if (cc) segments.push(cc)
@@ -687,12 +823,107 @@ export function buildClinicalQuery(input: {
   if (durationStr) segments.push(durationStr)
   if (travelStr) segments.push(travelStr)
   if (histBits.length) segments.push(`history of ${histBits.join(', ')}`)
+  if (vitalBits.length) segments.push(`vital signs: ${vitalBits.join(', ')}`)
   if (demoBits.length) segments.push(`patient profile: ${demoBits.join(', ')}`)
 
-  // Vitals are intentionally OMITTED unless we can detect a meaningful abnormality.
-  // Numeric vitals dilute the embedding signal and rarely add retrieval value.
-
   return segments.join(' ').replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * Map abnormal vital sign values to the clinical concepts used by the
+ * guideline corpus. Returns the list of detected abnormalities (e.g.
+ * "stage 2 hypertension", "tachycardia", "obesity class I"). Returns []
+ * when all measured values are within normal limits — in that case the
+ * caller skips the segment entirely so we don't dilute the embedding.
+ */
+function extractVitalSignals(vitals?: Record<string, unknown>): string[] {
+  if (!vitals || typeof vitals !== 'object') return []
+  const out: string[] = []
+
+  const num = (v: unknown): number => {
+    if (typeof v === 'number') return Number.isFinite(v) ? v : NaN
+    const m = String(v ?? '').match(/-?\d+(?:\.\d+)?/)
+    return m ? parseFloat(m[0]) : NaN
+  }
+
+  // ---- Blood pressure ----
+  // Accept both `bloodPressure: "145/95"` and `systolic`/`diastolic` numeric fields.
+  let sbp = NaN, dbp = NaN
+  const bpRaw = (vitals as any).bloodPressure ?? (vitals as any).bp ?? (vitals as any).pression_arterielle
+  if (typeof bpRaw === 'string') {
+    const m = bpRaw.match(/(\d{2,3})\s*[/\-]\s*(\d{2,3})/)
+    if (m) { sbp = parseInt(m[1], 10); dbp = parseInt(m[2], 10) }
+  }
+  if (!Number.isFinite(sbp)) sbp = num((vitals as any).systolic ?? (vitals as any).systolicBP ?? (vitals as any).bpSystolic)
+  if (!Number.isFinite(dbp)) dbp = num((vitals as any).diastolic ?? (vitals as any).diastolicBP ?? (vitals as any).bpDiastolic)
+  if (Number.isFinite(sbp) && Number.isFinite(dbp)) {
+    if (sbp >= 180 || dbp >= 120) out.push('hypertensive crisis')
+    else if (sbp >= 160 || dbp >= 100) out.push('stage 2 hypertension')
+    else if (sbp >= 140 || dbp >= 90) out.push('stage 1 hypertension')
+    else if (sbp >= 130 || dbp >= 80) out.push('elevated blood pressure')
+    else if (sbp < 90 || dbp < 60) out.push('hypotension')
+  }
+
+  // ---- Heart rate ----
+  const hr = num((vitals as any).heartRate ?? (vitals as any).hr ?? (vitals as any).pulse ?? (vitals as any).frequence_cardiaque)
+  if (Number.isFinite(hr)) {
+    if (hr > 100) out.push('tachycardia')
+    else if (hr < 60) out.push('bradycardia')
+  }
+
+  // ---- Temperature (°C) ----
+  const temp = num((vitals as any).temperature ?? (vitals as any).temp)
+  if (Number.isFinite(temp)) {
+    if (temp >= 38.0) out.push('fever')
+    else if (temp <= 35.0) out.push('hypothermia')
+  }
+
+  // ---- Respiratory rate ----
+  const rr = num((vitals as any).respiratoryRate ?? (vitals as any).rr)
+  if (Number.isFinite(rr) && (rr > 20 || rr < 12)) {
+    out.push(rr > 20 ? 'tachypnea' : 'bradypnea')
+  }
+
+  // ---- Oxygen saturation ----
+  const spo2 = num((vitals as any).oxygenSaturation ?? (vitals as any).spo2 ?? (vitals as any).sao2)
+  if (Number.isFinite(spo2) && spo2 < 92) out.push('hypoxemia')
+
+  // ---- BMI ----
+  // Most callers pass weight+height separately. If a BMI was already computed
+  // and stored on vitalSigns we honour it. Otherwise compute on the fly.
+  let bmi = num((vitals as any).bmi ?? (vitals as any).BMI)
+  if (!Number.isFinite(bmi)) {
+    const wkg = num((vitals as any).weight ?? (vitals as any).weightKg)
+    const hcm = num((vitals as any).height ?? (vitals as any).heightCm)
+    if (Number.isFinite(wkg) && Number.isFinite(hcm) && hcm > 50) {
+      const m = hcm / 100
+      bmi = wkg / (m * m)
+    }
+  }
+  if (Number.isFinite(bmi)) {
+    if (bmi >= 40) out.push('obesity class III')
+    else if (bmi >= 35) out.push('obesity class II')
+    else if (bmi >= 30) out.push('obesity class I')
+    else if (bmi >= 25) out.push('overweight')
+    else if (bmi < 18.5) out.push('underweight')
+  }
+
+  // ---- Fasting glucose (mg/dL) ----
+  const glucose = num((vitals as any).glucose ?? (vitals as any).fastingGlucose ?? (vitals as any).glycemie)
+  if (Number.isFinite(glucose)) {
+    if (glucose >= 126) out.push('hyperglycemia consistent with diabetes')
+    else if (glucose >= 100) out.push('impaired fasting glucose')
+    else if (glucose < 70) out.push('hypoglycemia')
+  }
+
+  // ---- HbA1c (%) ----
+  const hba1c = num((vitals as any).hba1c ?? (vitals as any).a1c)
+  if (Number.isFinite(hba1c)) {
+    if (hba1c >= 6.5) out.push('hbA1c in diabetes range')
+    else if (hba1c >= 5.7) out.push('hbA1c in prediabetes range')
+  }
+
+  return out
 }
 
 // ============================================================================
@@ -751,6 +982,147 @@ export function buildSecondaryQueries(input: {
   const travel = (input.travelHistory || '').toLowerCase()
 
   const hasFever = /\bfever\b|\bfièvre\b|febrile|pyrexia|hyperthermia/.test(symptomBlob)
+  // Symptom-class detectors used by the syndrome-specific sub-queries below.
+  // Pattern coverage prioritises English (UK and US spelling) plus the
+  // French terms that surface in patient-facing form fields.
+  const hasCough = /\bcough\b|\btoux\b|\bexpectoration\b|\bsputum\b/.test(symptomBlob)
+  const hasDyspnea = /dyspn(o)?ea|shortness of breath|breathless|essoufflement/.test(symptomBlob)
+  const hasHeadache = /\bheadache\b|céphalée|cephalalgia/.test(symptomBlob)
+  const hasAbdominalPain = /abdomen|abdominal|stomach[- ]?ache|stomach[- ]?pain|gastric pain|douleur abdominale|ventre/.test(symptomBlob)
+  const hasJaundice = /jaundice|icter|jaune|yellow(ish)? skin|sclera/.test(symptomBlob)
+  const hasRash = /\brash\b|eruption|exanth|petechi|purpura/.test(symptomBlob)
+
+  // ---------- Generic diversification queries (always when a chief complaint is present) ----------
+  // Symptoms-only queries (e.g. "headache fever cough") embed far from the
+  // technical guideline chunks they should match (e.g. "differential
+  // diagnosis of acute febrile illness, evidence-based workup, BNF/NICE
+  // recommendations…"). To bridge that semantic gap without hard-coding
+  // pathology-specific rescue queries, we always run two extra retrievals
+  // built around guideline-style vocabulary, anchored on the patient's
+  // chief complaint. Broad specialty (null) so chunks indexed under any
+  // specialty code (a known issue: "infectious" vs "infectious_diseases",
+  // dengue chunks spread across 12+ codes) remain eligible.
+  const ccTrimmed = cc.trim().slice(0, 200)
+  if (ccTrimmed) {
+    queries.push({
+      label: 'differential_approach',
+      text:
+        `differential diagnosis approach to ${ccTrimmed} ` +
+        'evidence-based clinical evaluation pathophysiology risk stratification ' +
+        'red flags clinical decision rules',
+      specialty: null,
+      limit: 6,
+    })
+    queries.push({
+      label: 'empirical_workup',
+      text:
+        `empirical workup investigation strategy for ${ccTrimmed} ` +
+        'first-line laboratory testing imaging clinical decision rules ' +
+        'guideline-based assessment',
+      specialty: null,
+      limit: 6,
+    })
+  }
+
+  // ============================================================================
+  // Syndrome-specific diversification (Phase 5 RAG diversity).
+  //
+  // The two generic sub-queries above (differential_approach, empirical_workup)
+  // bridge the symptom-vs-guideline embedding gap but tend to ramp up generic
+  // chunks (asthma, COPD) that are clinically marginal for tropical / acute
+  // febrile cases. The blocks below add narrow, syndrome-anchored queries
+  // that are gated on simple symptom triggers. Each adds 2-3 chunks at most;
+  // the downstream dedup + re-rank step (topK=8) caps total payload to the
+  // diagnostic LLM regardless of how many sub-queries fire.
+  //
+  // Why no travel-history gate on arboviral / lepto: the deployment is in
+  // Mauritius where dengue, chikungunya and leptospirosis are year-round
+  // endemic. A fever case here ALWAYS deserves arbovirus + lepto evidence
+  // surfaced, regardless of whether the patient self-reports travel.
+  // ============================================================================
+
+  // ---------- Arboviral (dengue / chikungunya / zika) — any febrile case ----------
+  if (hasFever) {
+    queries.push({
+      label: 'arboviral_tropical',
+      text:
+        'dengue chikungunya zika arbovirus Aedes mosquito tropical acute febrile illness ' +
+        'NS1 antigen IgM IgG serology RT-PCR platelet count haematocrit thrombocytopenia ' +
+        'warning signs severe dengue avoid NSAIDs paracetamol Indian Ocean Mauritius ECDC WHO outbreak',
+      specialty: null,
+      limit: 3,
+    })
+  }
+
+  // ---------- Acute lower respiratory infection — fever + cough/dyspnea ----------
+  if (hasFever && (hasCough || hasDyspnea)) {
+    queries.push({
+      label: 'respiratory_acute',
+      text:
+        'acute lower respiratory tract infection community-acquired pneumonia influenza ' +
+        'COVID-19 SARS-CoV-2 viral bronchitis empirical antibiotic amoxicillin macrolide ' +
+        'CURB-65 chest X-ray pulse oximetry respiratory rate red flag hospitalisation criteria',
+      specialty: 'pulmonology',
+      limit: 3,
+    })
+  }
+
+  // ---------- CNS red flags — headache with fever (rule out meningitis/encephalitis) ----------
+  if (hasFever && hasHeadache) {
+    queries.push({
+      label: 'cns_red_flag',
+      text:
+        'acute meningitis encephalitis bacterial viral fungal CSF lumbar puncture ' +
+        'neck stiffness Kernig Brudzinski photophobia altered consciousness ' +
+        'meningococcal pneumococcal Listeria empirical ceftriaxone dexamethasone ' +
+        'red flag headache thunderclap subarachnoid',
+      specialty: 'neurology',
+      limit: 2,
+    })
+  }
+
+  // ---------- Leptospirosis — fever (Mauritius is endemic; always relevant) ----------
+  if (hasFever) {
+    queries.push({
+      label: 'leptospirosis',
+      text:
+        'leptospirosis Weil syndrome zoonosis Leptospira interrogans rodent water exposure ' +
+        'fever myalgia calf tenderness conjunctival suffusion jaundice acute renal failure ' +
+        'thrombocytopenia MAT microscopic agglutination IgM PCR doxycycline penicillin ' +
+        'Indian Ocean island tropical',
+      specialty: 'infectious_diseases',
+      limit: 2,
+    })
+  }
+
+  // ---------- Enteric fever (typhoid/paratyphoid) — fever + abdominal pain OR ≥7 days ----------
+  // The bacterial_workup block below catches generic prolonged fever; this one
+  // is enteric-specific (blood culture, Widal limitations, Salmonella sensitivity).
+  // ---------- Hepatitis — fever + jaundice ----------
+  if (hasFever && hasJaundice) {
+    queries.push({
+      label: 'hepatitis_viral',
+      text:
+        'acute viral hepatitis A B C D E HAV HBV HCV jaundice transaminitis ' +
+        'ALT AST bilirubin hepatic encephalopathy fulminant hepatitis serology ' +
+        'HAV IgM HBsAg anti-HBc supportive care notifiable disease',
+      specialty: 'infectious_diseases',
+      limit: 2,
+    })
+  }
+
+  // ---------- Viral exanthem / measles / rubella — fever + rash ----------
+  if (hasFever && hasRash) {
+    queries.push({
+      label: 'febrile_exanthem',
+      text:
+        'febrile exanthem rash differential measles rubella roseola fifth disease ' +
+        'scarlet fever meningococcaemia drug eruption dengue chikungunya ' +
+        'petechiae purpura non-blanching urgent assessment vaccination history',
+      specialty: 'infectious_diseases',
+      limit: 2,
+    })
+  }
 
   // ---------- Malaria — fever + travel to endemic country ----------
   if (hasFever && MALARIA_ENDEMIC_COUNTRIES.some(c => travel.includes(c))) {
@@ -1207,10 +1579,21 @@ export function scrubAndEnrichEvidenceRefs(
     for (const ref of fallbackRefs) {
       evidenceReferences.push({
         ...ref,
-        used_for: 'Référence fournie au modèle (mapping détaillé non précisé par le LLM)',
+        // No `used_for` here on purpose — when the LLM didn't explicitly
+        // cite the ref, surfacing an internal "mapping not provided" label
+        // to the doctor/patient just looks like an error. Better to let the
+        // ref stand on its title alone (it still helps audit + RAG QA).
       })
     }
   }
+
+  // Pass 3 was a min-3 top-up that blindly appended refs the LLM hadn't
+  // cited just to reach a target count. That fabricated attribution and
+  // surfaced wildly off-topic refs (e.g. ACR pancreatic adenocarcinoma
+  // criteria in a pure HTA report). Removed deliberately — a citation must
+  // mean "this ref actually informed the recommendation", so if the LLM
+  // didn't cite a ref it stays out of the patient-facing bibliography.
+  const topUpAdded = 0
 
   if (unknownCitedRefs.length > 0) {
     console.error(
@@ -1231,4 +1614,257 @@ export function scrubAndEnrichEvidenceRefs(
     unusedRefsFiltered,
     refUsageByPath,
   }
+}
+
+// ============================================================================
+// TOPIC-MATCH FILTER (post-scrub safety net)
+// ============================================================================
+// Prompt-level "STRICT TOPIC-MATCH" rules reduced but did not eliminate off-
+// topic citations (e.g. EuroGuiDerm bullous pemphigoid cited for atopic /
+// contact dermatitis, ACR pancreatic cancer cited for HTA). This is a
+// deterministic backup: tokenise the diagnosis topic and each ref title,
+// drop refs whose title shares zero substantive overlap. Generic words
+// (guideline, management, european, society, …) are stripped so they don't
+// produce false matches.
+
+const REF_TITLE_STOPWORDS = new Set([
+  // Article + connector words
+  'a', 'an', 'and', 'or', 'the', 'of', 'for', 'in', 'on', 'to', 'with', 'from',
+  'by', 'as', 'at', 'into', 'about', 'against', 'between', 'after', 'before',
+  // Generic guideline / publication vocabulary
+  'guideline', 'guidelines', 'guidance', 'consensus', 'statement', 'position',
+  'recommendation', 'recommendations', 'management', 'treatment', 'therapy',
+  'evidence', 'evidence-based', 'review', 'update', 'updated', 'practice',
+  'clinical', 'medical', 'health', 'healthcare', 'criteria', 'appropriateness',
+  'edition', 'version', 'volume', 'part', 'series',
+  // Society / publisher names
+  'european', 'british', 'american', 'national', 'international', 'nice',
+  'esc', 'acc', 'aha', 'ada', 'idf', 'ers', 'eular', 'bsr', 'sign', 'who',
+  'who-em', 'haute', 'autorite', 'sante', 'hcsp', 'has', 'cdc', 'idsa',
+  'eular', 'eular-eular', 'efns', 'ean', 'acr', 'aad', 'bad', 'euroguiderm',
+  'association', 'society', 'college', 'academy', 'foundation', 'institute',
+  'task', 'force', 'working', 'group', 'panel', 'committee',
+  // Generic dermatology / system words (both sides usually have them)
+  'skin', 'condition', 'disease', 'disorder', 'disorders', 'syndrome',
+  'patient', 'patients', 'adult', 'adults', 'child', 'children', 'paediatric',
+  'pediatric', 'adolescent', 'elderly',
+])
+
+function tokeniseTitle(raw: string): Set<string> {
+  if (!raw || typeof raw !== 'string') return new Set()
+  return new Set(
+    raw
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '') // strip accents
+      .replace(/[^a-z0-9\s-]/g, ' ')
+      .split(/\s+/)
+      .map(t => t.replace(/^-+|-+$/g, ''))
+      .filter(t => t.length >= 3 && !REF_TITLE_STOPWORDS.has(t))
+  )
+}
+
+export function filterEvidenceRefsByTopic<T extends { title?: string; guideline_title?: string; ref_id?: string }>(
+  refs: T[],
+  topicSeeds: string[],
+  options: { logPrefix?: string; minOverlap?: number; patientFlags?: { isPregnant?: boolean; isChild?: boolean; hasCancer?: boolean } } = {},
+): { kept: T[]; dropped: T[] } {
+  const tag = options.logPrefix || '🎯 [TOPIC-FILTER]'
+  const minOverlap = options.minOverlap ?? 1
+  const flags = options.patientFlags || {}
+  if (!Array.isArray(refs) || refs.length === 0) return { kept: [], dropped: [] }
+
+  // Hard-drop patterns: ref titles where the topic is so clearly outside
+  // the patient's clinical context that we drop them even when the title
+  // has zero overlap with the topic seeds AND even when this would empty
+  // the bibliography. The safety fallback below WILL NOT rescue these —
+  // an ADA "Diabetes in Pregnancy" reference attached to a 36-year-old
+  // male with HTA is strictly worse than a missing bibliography.
+  const hardDropPatterns: RegExp[] = []
+  if (!flags.isPregnant) {
+    hardDropPatterns.push(/\b(pregnan|gestational|obstetric|antenatal|postpartum|peripartum|maternal-?fet)/i)
+  }
+  if (!flags.isChild) {
+    hardDropPatterns.push(/\b(p[ae]diatric|neonatal|infant|adolescent|child(ren|hood)?)\b/i)
+  }
+  if (!flags.hasCancer) {
+    hardDropPatterns.push(/\b(cancer|carcinoma|adenocarcinoma|melanoma|lymphoma|leukemia|leukaemia|sarcoma|metastat|oncology|oncologic|tumour|tumor|neoplas|chemother|radioth)/i)
+  }
+  const isHardDrop = (title: string): boolean => {
+    for (const re of hardDropPatterns) {
+      if (re.test(title)) return true
+    }
+    return false
+  }
+
+  const topicTokens = new Set<string>()
+  for (const seed of topicSeeds) {
+    for (const tok of tokeniseTitle(String(seed || ''))) topicTokens.add(tok)
+  }
+
+  const hardDropped: T[] = []
+  const survivors: T[] = []
+  for (const ref of refs) {
+    const title = ref?.title || ref?.guideline_title || ''
+    if (isHardDrop(title)) {
+      hardDropped.push(ref)
+    } else {
+      survivors.push(ref)
+    }
+  }
+  if (hardDropped.length > 0) {
+    console.warn(
+      `${tag} Hard-dropped ${hardDropped.length} ref(s) on patient-context mismatch (pregnancy/pediatric/oncology):`,
+      hardDropped.map(r => `${r?.ref_id || '?'} "${(r?.title || '').slice(0, 80)}"`).join(' | ')
+    )
+  }
+
+  if (topicTokens.size === 0) {
+    // No usable topic seeds for fine-grained matching — keep all survivors.
+    return { kept: survivors, dropped: hardDropped }
+  }
+
+  const kept: T[] = []
+  const softDropped: T[] = []
+  for (const ref of survivors) {
+    const title = ref?.title || ref?.guideline_title || ''
+    const titleTokens = tokeniseTitle(title)
+    let overlap = 0
+    for (const t of titleTokens) {
+      if (topicTokens.has(t)) {
+        overlap++
+        if (overlap >= minOverlap) break
+      }
+    }
+    if (overlap >= minOverlap) {
+      kept.push(ref)
+    } else {
+      softDropped.push(ref)
+    }
+  }
+
+  // Safety fallback: if the soft filter would drop ALL surviving refs, our
+  // seeds are mismatched against the corpus vocabulary — keep the survivors
+  // and rely on the prompt-level STRICT TOPIC-MATCH rule. The hard-drop
+  // pass above already removed the obvious patient-context mismatches, so
+  // this fallback can't accidentally re-introduce a pregnancy ref into a
+  // non-pregnant report.
+  if (kept.length === 0 && softDropped.length > 0) {
+    console.warn(
+      `${tag} Soft filter would drop all ${softDropped.length} ref(s) — falling back to survivors. ` +
+        `Seeds [${Array.from(topicTokens).slice(0, 10).join(', ')}] had zero overlap with any title.`
+    )
+    return { kept: survivors, dropped: hardDropped }
+  }
+
+  if (softDropped.length > 0) {
+    console.log(
+      `${tag} Soft topic-match dropped ${softDropped.length} ref(s) vs seeds [${Array.from(topicTokens).slice(0, 10).join(', ')}]:`,
+      softDropped.map(r => `${r?.ref_id || '?'} "${(r?.title || '').slice(0, 60)}"`).join(' | ')
+    )
+  }
+  return { kept, dropped: [...hardDropped, ...softDropped] }
+}
+
+/**
+ * Normalise diagnostic probability distribution so the primary diagnosis
+ * plus differentials sum to exactly 100.
+ *
+ * The LLM (DeepSeek in particular) tends to:
+ *  - omit a probability on the primary diagnosis ("it IS the diagnosis"),
+ *  - or emit partial percentages on differentials that sum to ~50-70.
+ *
+ * This helper mutates the input object in place. Callers pass:
+ *   - the primary diagnosis object (which has a probability/likelihood field)
+ *   - the differentials array (each with a probability/likelihood field)
+ *   - the field name used in the schema ("probability" or "likelihood")
+ *
+ * Strategy:
+ *   1. Coerce all values to finite non-negative numbers (NaN/null → 0).
+ *   2. If sum > 0, scale all values so they sum to 100. The primary's
+ *      probability gets a minimum floor (default 30) when missing/zero so
+ *      it never disappears from the distribution. Differentials are
+ *      capped at the primary's probability − 1 to preserve ordering.
+ *   3. Round to integers, with the rounding residue absorbed by the
+ *      primary diagnosis so the total stays exactly 100.
+ */
+export function normaliseDiagnosticProbabilities(
+  primary: Record<string, any> | null | undefined,
+  differentials: Array<Record<string, any>> | null | undefined,
+  field: 'probability' | 'likelihood' = 'probability',
+  options: { primaryFloor?: number; logPrefix?: string } = {}
+): { adjusted: boolean; primaryProb: number; differentialProbs: number[]; total: number } {
+  const tag = options.logPrefix || '🎯 [DDX-NORM]'
+  const primaryFloor = options.primaryFloor ?? 30
+
+  const toNum = (v: any): number => {
+    const n = typeof v === 'number' ? v : parseFloat(String(v ?? ''))
+    return Number.isFinite(n) && n >= 0 ? n : 0
+  }
+
+  if (!primary || typeof primary !== 'object') {
+    return { adjusted: false, primaryProb: 0, differentialProbs: [], total: 0 }
+  }
+
+  const diffs = Array.isArray(differentials) ? differentials : []
+  const rawPrimary = toNum(primary[field])
+  const rawDiffs = diffs.map(d => toNum(d?.[field]))
+  const rawTotal = rawPrimary + rawDiffs.reduce((a, b) => a + b, 0)
+
+  const tolerance = 0.5
+  const alreadyOk = rawPrimary > 0 && Math.abs(rawTotal - 100) <= tolerance
+
+  let primaryProb = rawPrimary
+  let diffProbs = rawDiffs.slice()
+
+  if (!alreadyOk) {
+    // If primary missing, give it the floor then renormalise.
+    if (primaryProb <= 0) {
+      primaryProb = Math.max(primaryFloor, 100 - rawDiffs.reduce((a, b) => a + b, 0))
+    }
+    const totalNow = primaryProb + diffProbs.reduce((a, b) => a + b, 0)
+    if (totalNow > 0) {
+      const scale = 100 / totalNow
+      primaryProb = primaryProb * scale
+      diffProbs = diffProbs.map(p => p * scale)
+    } else {
+      // Everything zero — assign the floor to primary, spread the rest.
+      primaryProb = primaryFloor
+      const remaining = 100 - primaryFloor
+      const share = diffProbs.length > 0 ? remaining / diffProbs.length : 0
+      diffProbs = diffProbs.map(() => share)
+    }
+  }
+
+  // Round to integers, primary absorbs the residue.
+  let roundedDiffs = diffProbs.map(p => Math.round(p))
+  // Cap each differential below the primary to preserve ordering.
+  const primaryCeilGuard = Math.max(1, Math.floor(primaryProb) - 1)
+  roundedDiffs = roundedDiffs.map(p => Math.min(p, primaryCeilGuard))
+  const diffSum = roundedDiffs.reduce((a, b) => a + b, 0)
+  let roundedPrimary = 100 - diffSum
+  if (roundedPrimary < 1) {
+    // Primary squeezed out — trim the largest differential to make room.
+    const deficit = 1 - roundedPrimary
+    const maxIdx = roundedDiffs.indexOf(Math.max(...roundedDiffs))
+    if (maxIdx >= 0) roundedDiffs[maxIdx] = Math.max(0, roundedDiffs[maxIdx] - deficit)
+    roundedPrimary = 100 - roundedDiffs.reduce((a, b) => a + b, 0)
+  }
+
+  primary[field] = roundedPrimary
+  diffs.forEach((d, i) => {
+    if (d && typeof d === 'object') d[field] = roundedDiffs[i] ?? 0
+  })
+
+  const finalTotal = roundedPrimary + roundedDiffs.reduce((a, b) => a + b, 0)
+  const adjusted = !alreadyOk
+  if (adjusted) {
+    console.log(
+      `${tag} Normalised DDx '${field}': raw total=${rawTotal.toFixed(1)} (primary=${rawPrimary}, diffs=[${rawDiffs.join(', ')}]) → ` +
+        `primary=${roundedPrimary}, diffs=[${roundedDiffs.join(', ')}], total=${finalTotal}`
+    )
+  } else {
+    console.log(`${tag} DDx '${field}' already sums to ${finalTotal} — no adjustment.`)
+  }
+
+  return { adjusted, primaryProb: roundedPrimary, differentialProbs: roundedDiffs, total: finalTotal }
 }

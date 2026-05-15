@@ -670,7 +670,7 @@ export default function DiagnosisForm({
  let progress = 0
  
  const messages = [
- { time: 0, msg: "Connecting to GPT 5.5 Medical AI...", progress: 5 },
+ { time: 0, msg: "Connecting to IA by Tibok...", progress: 5 },
  { time: 2000, msg: "Analyzing symptoms and medical history...", progress: 15 },
  { time: 5000, msg: "Identifying clinical syndrome...", progress: 25 },
  { time: 10000, msg: "Formulating diagnostic hypotheses...", progress: 40 },
@@ -933,6 +933,13 @@ export default function DiagnosisForm({
  console.log('📚 [RAG] Frontend received:', {
    rag_used: data.rag_used,
    evidence_references_count: Array.isArray(data.evidence_references) ? data.evidence_references.length : 0,
+   // Flatten rag_metadata so chunks_retrieved / provided_references / cited_references
+   // are visible without expanding the object in the console — critical when comparing
+   // OpenAI vs DeepSeek runs (a 0-chunk retrieval explains a 0-references final).
+   chunks_retrieved: data.rag_metadata?.chunks_retrieved ?? null,
+   provided_references: data.rag_metadata?.provided_references ?? null,
+   cited_references: data.rag_metadata?.cited_references ?? null,
+   avg_similarity: data.rag_metadata?.avg_similarity ?? null,
    rag_metadata: data.rag_metadata,
  })
  
@@ -1309,7 +1316,7 @@ export default function DiagnosisForm({
  <CardHeader className="bg-gradient-to-r from-teal-600 to-blue-600 text-white">
  <CardTitle className="flex items-center justify-center gap-3 text-xl font-bold">
  <Brain className="h-6 w-6 animate-pulse" />
- GPT 5.5 Artificial Intelligence in Action
+ IA by Tibok in Action
  </CardTitle>
  </CardHeader>
  <CardContent className="p-6">
@@ -1325,7 +1332,7 @@ export default function DiagnosisForm({
  </div>
  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
  <Brain className="h-6 w-6 text-blue-600 mx-auto mb-1" />
- <p className="text-xs font-medium text-gray-700">GPT 5.5</p>
+ <p className="text-xs font-medium text-gray-700">IA by Tibok</p>
  </div>
  <div className="text-center p-3 bg-white rounded-lg shadow-sm">
  <Sparkles className="h-6 w-6 text-cyan-600 mx-auto mb-1" />
@@ -1395,7 +1402,7 @@ export default function DiagnosisForm({
  <ul className="list-disc list-inside text-left max-w-md mx-auto">
  <li>Patient data is complete</li>
  <li>Chief complaint is filled in</li>
- <li>OpenAI API key is configured</li>
+ <li>The AI service is correctly configured</li>
  <li>Your internet connection is stable</li>
  </ul>
  </div>
@@ -1596,7 +1603,7 @@ export default function DiagnosisForm({
  Certainty: {diagnosis?.primary?.certaintyLevel || "Moderate"}
  </Badge>
  <Badge className="bg-blue-500 text-white text-xs sm:text-sm">
- GPT 5.5 Enhanced
+ IA by Tibok
  </Badge>
  {documentsGenerated && (
  <Badge className="bg-teal-500 text-white text-xs sm:text-sm">

@@ -9,15 +9,20 @@
 // - 8000 max tokens for comprehensive responses
 // - Enhanced context awareness
 export const runtime = 'nodejs'
-export const maxDuration = 300 // 300 seconds max for GPT-5.5 dermatology diagnosis generation
+export const maxDuration = 600 // 600s for DeepSeek-V4-Pro dermatology diagnosis (reasoning_effort=medium can run 200-350s on rich cases)
 
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { callLLM } from '@/lib/llm-client'
 import {
   buildClinicalQuery,
   queryMedicalGuidelines,
+  queryMedicalGuidelinesMulti,
+  fetchGuidelineChunksByTitlePatterns,
+  mergeTitlePatternRowsIntoContext,
   formatGuidelinesForPrompt,
   scrubAndEnrichEvidenceRefs,
+  filterEvidenceRefsByTopic,
+  normaliseDiagnosticProbabilities,
   type RAGContext,
 } from '@/lib/rag/medical-rag'
 
@@ -263,7 +268,7 @@ function validateDermatologyQuality(diagnosis: any): { isValid: boolean; issues:
  * Calls OpenAI with retry mechanism and quality validation
  */
 async function callOpenAIWithRetry(
-  openai: OpenAI,
+  _unused: unknown,
   diagnosticPrompt: string,
   maxRetries: number = 3,
   ragPromptBlock: string = ''
@@ -275,7 +280,26 @@ async function callOpenAIWithRetry(
       console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1}`)
 
       // Enhance system message with quality requirements on retry
-      let systemMessage = "You are an expert board-certified dermatologist. Provide comprehensive, evidence-based diagnostic assessments with structured JSON responses."
+      let systemMessage = `You are an expert board-certified dermatologist. Provide comprehensive, evidence-based diagnostic assessments with structured JSON responses.
+
+CITATION REQUIREMENTS — read this BEFORE writing your JSON:
+If a "CONTEXTE GUIDELINES MÉDICALES (RAG)" block has been prepended to this system prompt, the user prompt context contains numbered guideline references like [ref-1], [ref-2], [ref-3]. When ANY part of your reasoning is informed by a guideline in that block — even partially (epidemiology, monitoring threshold, contraindication, alternative diagnosis, differential workup) — embed the corresponding [ref-N] token at the END of the sentence it supports, inside these JSON fields:
+- "clinicalReasoning" (the field on primaryDiagnosis)
+- "pathophysiology"
+- "treatmentPlan.medications[].indication" and "treatmentPlan.medications[].monitoring"
+- "recommendedInvestigations.biopsy" (the indication for biopsy)
+- "differentialDiagnoses[].supportingFeatures" / "distinguishingFeatures" when a guideline informs the rationale
+- "patientEducation" entries when guideline-derived
+Then list the SAME [ref-N] tokens you used in the top-level "evidence_references" array, with a brief "used_for" explanation per ref.
+
+STRICT TOPIC-MATCH RULE: A [ref-N] may ONLY be cited when the guideline title clearly addresses the SAME disease family as the primary diagnosis or one of the differential diagnoses. Do NOT cite a ref just because it is the only one available, just because the RAG returned it, or to reach a minimum count. Examples of FORBIDDEN citations:
+- Citing a "bullous pemphigoid" or "pemphigus vulgaris" guideline for atopic dermatitis, contact dermatitis, eczema, psoriasis, or any non-bullous condition.
+- Citing a "psoriasis" guideline for an acne or rosacea case.
+- Citing a melanoma / skin cancer staging guideline for an inflammatory dermatosis.
+- Citing a generic dermatology textbook chunk when a disease-specific guideline is available but on a different topic.
+
+If NO available ref matches the diagnosis topic, return evidence_references: [] and leave the narrative without [ref-N]. A short, honest, unattributed report is better than a fabricated citation chain. Better to cite zero refs than to attach off-topic ones.
+NEVER fabricate a [ref-N] that doesn't appear in the RAG block.`
       
       if (attempt === 1) {
         systemMessage = `🚨 ATTEMPT 2/4 - PREVIOUS RESPONSE HAD QUALITY ISSUES - ENHANCED REQUIREMENTS:
@@ -386,27 +410,33 @@ CLINICAL SUMMARY MUST INCLUDE:
         ? `${ragPromptBlock}\n\n${systemMessage}`
         : systemMessage
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-5.5",
+      const completion = await callLLM({
+        useCase: 'DERMATOLOGY_DIAGNOSIS',
+        // DeepSeek-V4-Pro even at reasoningEffort 'low' was stretching to
+        // 4-7 min in production — way past the user's tolerance for a
+        // diagnosis step. The dermato JSON schema is structured filling,
+        // not novel reasoning: the LLM is choosing a primary dx + 3-5
+        // differentials + topical/oral meds from a constrained drug list
+        // + 1-2 line indications. deepseek-chat (v3 non-reasoning) handles
+        // this template at 3-5× the throughput. Same shift we already
+        // applied to chronic-report and chronic-prescription's structured
+        // calls.
+        model: 'deepseek-chat',
         messages: [
-          {
-            role: "system",
-            content: systemMessageWithRAG
-          },
-          {
-            role: "user",
-            content: diagnosticPrompt
-          }
+          { role: "system", content: systemMessageWithRAG },
+          { role: "user", content: diagnosticPrompt }
         ],
-        max_completion_tokens: 8000,
-        reasoning_effort: 'medium',
-        response_format: { type: "json_object" },
+        maxTokens: 6000,
+        reasoningEffort: 'none',
+        responseFormat: 'json_object',
+        timeoutMs: 240_000,
       })
-      
-      const content = completion.choices[0]?.message?.content
-      
+
+      const content = completion.text
+      console.log(`[llm] use=DERMATOLOGY_DIAGNOSIS provider=${completion.provider} model=${completion.model} latency=${completion.latencyMs}ms`)
+
       if (!content) {
-        throw new Error('No content received from OpenAI')
+        throw new Error('No content received from LLM')
       }
       
       // Parse JSON response
@@ -527,10 +557,6 @@ CLINICAL SUMMARY MUST INCLUDE:
 
 export async function POST(request: NextRequest) {
   try {
-    // Initialize OpenAI client inside the function to avoid build-time errors
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    })
 
     const body = await request.json()
     const { patientData, imageData, ocrAnalysisData, questionsData } = body
@@ -772,8 +798,10 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
     "name": "Specific dermatological condition name",
     "icd10": "L20.9 (exact ICD-10 code)",
     "confidence": "High|Moderate|Low",
+    "likelihood": 50,
     "keyCriteria": ["criterion 1", "criterion 2", "criterion 3"],
-    "presentationType": "Typical|Atypical - with explanation"
+    "presentationType": "Typical|Atypical - with explanation",
+    "clinicalReasoning": "Why this diagnosis fits the clinical picture (minimum 60 characters). Embed [ref-N] tokens at the END of sentences supported by guidelines in the RAG block (e.g. 'Flexural distribution with pruritus and lichenification is characteristic of atopic dermatitis [ref-2].')."
   },
   
   "differentialDiagnoses": [
@@ -797,14 +825,30 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
     }
   ],
   
-  "pathophysiology": "Detailed explanation of underlying disease mechanism (minimum 50 characters)",
+  "pathophysiology": "Detailed explanation of underlying disease mechanism (minimum 50 characters). Embed [ref-N] tokens for mechanism claims supported by the RAG block.",
   
   "recommendedInvestigations": {
-    "laboratory": ["Specific test 1 with rationale", "Specific test 2 with rationale"],
+    "laboratory": [
+      {
+        "name": "CLEAN test name only (e.g., 'Complete Blood Count', 'KOH preparation', 'Patch testing'). Short — like a label on a request form.",
+        "indication": "Why this specific test for this patient (1-2 sentences). Embed [ref-N] when a RAG guideline supports the choice (e.g. 'Exclude dermatophyte infection in a scaly plaque [ref-2].'). REQUIRED if the test array is non-empty."
+      }
+    ],
     "biopsy": "EITHER: Specific biopsy type with site (e.g., 'Punch biopsy of affected lesion for histopathological confirmation') OR: 'Not indicated' if biopsy not needed. NEVER use vague terms.",
-    "imaging": ["Imaging study with indication if needed"],
-    "specializedTests": ["Patch testing or other specialized investigations if indicated"]
+    "imaging": [
+      {
+        "name": "CLEAN radiology study name only (e.g., 'Soft tissue ultrasound', 'MRI of the affected region'). RADIOLOGY ONLY — DO NOT put dermoscopy, reflectance confocal microscopy, Wood's lamp, or any bedside dermatology procedure here; those belong in specializedTests.",
+        "indication": "Why this imaging for this patient (1-2 sentences). Embed [ref-N] when guideline-backed."
+      }
+    ],
+    "specializedTests": [
+      {
+        "name": "CLEAN test name only. PUT HERE: dermoscopy, reflectance confocal microscopy, Wood's lamp examination, patch testing, phototesting, mycology direct exam, and any other bedside / in-office dermatology procedure. The 'imaging' array is for radiology only.",
+        "indication": "Why this specialised test (1-2 sentences). Embed [ref-N] when guideline-backed."
+      }
+    ]
   },
+  "// HARD RULE FOR ALL THREE INVESTIGATION ARRAYS ABOVE": "Each entry is an object { name, indication }. The 'name' field MUST be a short, clinical test label — like on a request form. NEVER write a full sentence in 'name', NEVER write conditional language ('if the rash worsens', 'should be considered', 'may be justified'), NEVER write the rationale inside 'name' (the rationale belongs in 'indication'). If no test in a category is clinically indicated, return an empty array [] for that category — do NOT fill it with negative recommendations like 'No routine labs needed'.",
   
   "treatmentPlan": {
     "immediate": {
@@ -824,7 +868,9 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
         "dci": "DCI NAME (e.g., Hydrocortisone)",
         "application": "BD (twice daily) or OD (once daily) or TDS",
         "duration": "Treatment duration (e.g., 7-14 days)",
-        "instructions": "Detailed application instructions - where, how, precautions (minimum 15 characters)",
+        "instructions": "Detailed application instructions - where, how, precautions (minimum 15 characters). Embed [ref-N] when a RAG guideline supports the application protocol.",
+        "indication": "Detailed medical indication with mechanism (minimum 20 characters). Embed [ref-N] when a RAG guideline supports the choice (e.g. 'First-line topical corticosteroid for acute flexural eczema [ref-1].'). REQUIRED — even on topical meds.",
+        "monitoring": "What to monitor during treatment (skin atrophy, treatment response, side effects). Embed [ref-N] when monitoring thresholds come from a guideline.",
         "sideEffects": "Common side effects to watch for"
       }
     ],
@@ -836,8 +882,8 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
         "dosage": "100mg",
         "frequency": "BD (twice daily) or OD",
         "duration": "Treatment duration (e.g., 6-12 weeks)",
-        "indication": "Detailed medical indication with mechanism (minimum 20 characters)",
-        "monitoring": "What to monitor during treatment",
+        "indication": "Detailed medical indication with mechanism (minimum 20 characters). Embed [ref-N] when a RAG guideline supports the choice (e.g. 'First-line topical corticosteroid for acute flexural eczema [ref-1].').",
+        "monitoring": "What to monitor during treatment. Embed [ref-N] when monitoring thresholds come from a guideline (e.g. 'Reassess at 2 weeks; reduce frequency if clear [ref-3].').",
         "contraindications": "Key contraindications"
       }
     ],
@@ -893,7 +939,15 @@ If the RAG context block (CONTEXTE GUIDELINES MÉDICALES) is absent, return evid
 - MANDATORY: Correlate IMAGE ANALYSIS findings with ALL aspects of your assessment (differentials, confidence, investigations, treatment)
 - ALL topical medications must have: specific name with DCI, application frequency, duration, detailed instructions
 - ALL oral medications must have: specific name with DCI, dosage, frequency (OD/BD/TDS), duration, detailed indication (20+ chars)
+
+⚠️ TOPICAL CORTICOSTEROID POTENCY BY SITE (hard constraint — atrophy & systemic absorption risk):
+- FACE / EYELIDS / GENITALS / NIPPLES: mild only — Hydrocortisone 1% or 2.5%. Never prescribe a moderate/potent/very-potent steroid here. Tacrolimus or pimecrolimus are preferred steroid-sparing options.
+- FLEXURES / SKIN FOLDS (antecubital, popliteal, inguinal, axillary, inframammary, intergluteal, neck folds): mild to moderate maximum — Hydrocortisone 1%, Clobetasone butyrate 0.05%, or Desonide 0.05%. Occlusion by the fold itself effectively upgrades any class — Betamethasone valerate 0.1%, Mometasone furoate 0.1%, Fluticasone propionate 0.05%, Clobetasol propionate 0.05%, Betamethasone dipropionate, and any class III/IV steroid are CONTRAINDICATED in these sites for routine prescription.
+- TRUNK / LIMBS (extensor surfaces): moderate potency acceptable (Betamethasone valerate 0.1%, Mometasone 0.1%, Fluticasone 0.05%) for short courses.
+- PALMS / SOLES / LICHENIFIED PLAQUES: potent or very-potent acceptable (Clobetasol propionate 0.05%, Betamethasone dipropionate) for limited durations.
+If the lesion is in a flexure / fold and a potent steroid would otherwise be your first-line choice, downgrade to the mild/moderate class above AND state the rationale in 'indication'.
 - MINIMUM 3 differential diagnoses (preferably 4-5) with likelihood %, supporting features, distinguishing features
+- ⚠️ PROBABILITY DISTRIBUTION: primaryDiagnosis.likelihood + sum(differentialDiagnoses[].likelihood) = exactly 100. The primary diagnosis MUST have a numeric likelihood (typically the highest value). Differentials must be ordered by decreasing likelihood.
 - Clinical summary minimum 50 characters
 - Pathophysiology minimum 50 characters
 - Patient education minimum 100 characters
@@ -922,6 +976,13 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
       // Compact "skin findings" sentence pulled from OCR if available — gives
       // the embedding a description of morphology/distribution to match against.
       const ocrFindings: string[] = []
+      // OCR-suggested diagnoses bias the embedding toward DISEASE-named
+      // guidelines (AAD atopic dermatitis, EuroGuiDerm eczema, ESCD contact
+      // dermatitis) instead of cosine-near-but-irrelevant chunks (CDC scabies,
+      // CDC pediculosis) that shared generic vocabulary like "pruritic skin".
+      // The visual-findings-only query was matching scabies because both
+      // describe "scaly itchy plaques" without naming a disease.
+      const ocrDifferentials: string[] = []
       if (ocrAnalysisData?.analysis) {
         const v = ocrAnalysisData.analysis.visualObservations
         const loc = ocrAnalysisData.analysis.locationAnalysis
@@ -930,19 +991,99 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         if (v?.color) ocrFindings.push(v.color)
         if (v?.distribution) ocrFindings.push(`distribution: ${v.distribution}`)
         if (loc?.primarySite) ocrFindings.push(`site: ${loc.primarySite}`)
+        const ddx = ocrAnalysisData.analysis.differentialDiagnoses
+        if (Array.isArray(ddx)) {
+          for (const d of ddx.slice(0, 3)) {
+            const name = typeof d === 'string' ? d : (d?.diagnosis || d?.condition || '')
+            if (typeof name === 'string' && name.trim()) ocrDifferentials.push(name.trim())
+          }
+        }
       }
-      const ragQuery = buildClinicalQuery({
+
+      let ragQuery = buildClinicalQuery({
         chiefComplaint: questionsData?.chiefComplaint || (questionsData?.answers?.chiefComplaint as string) || 'dermatology consultation',
         symptoms: ocrFindings,
         ageYears: anonymizedPatient.age,
         sex: anonymizedPatient.gender,
         medicalHistory: Array.isArray(anonymizedPatient.medicalHistory) ? anonymizedPatient.medicalHistory : [],
       })
-      console.log(`📚 [RAG-DERMA] Querying guidelines (specialty=dermatology)`)
+      if (ocrDifferentials.length > 0) {
+        ragQuery = `${ragQuery} differential diagnoses to consider: ${ocrDifferentials.join(', ')}`
+      }
+      console.log(`📚 [RAG-DERMA] Querying guidelines (specialty=dermatology% + general_medicine fan-out)`)
       console.log(`📚 [RAG-DERMA] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
-      ragContext = await queryMedicalGuidelines(ragQuery, { specialty: 'dermatology', limit: 15 })
+      console.log(`📚 [RAG-DERMA] OCR differentials injected: ${ocrDifferentials.length > 0 ? ocrDifferentials.join(' | ') : '(none)'}`)
+      // Run TWO retrievals in parallel:
+      // (a) dermatology% prefix — captures dermatology, dermatology_inflammatory
+      //     (atopic, contact, eczema), dermatology_acne, dermatology_pruritus,
+      //     dermatology_drug, dermatology_blistering, dermatology_infectious,
+      //     dermatology_pediatric, dermatology_genodermatosis,
+      //     allergology_dermatologic.
+      // (b) general_medicine — paradoxically the corpus indexes a lot of
+      //     gold-standard dermatology guidelines (AAD atopic dermatitis,
+      //     AAP, AAD systemic therapies, AAD contact dermatitis) under
+      //     general_medicine rather than dermatology_inflammatory. Filtering
+      //     only on dermatology% misses those, leaving the retriever to
+      //     return scabies / pediculosis chunks (dermatology_infectious)
+      //     for an atopic dermatitis case. Adding a fan-out into
+      //     general_medicine pulls the right refs back in.
+      ragContext = await queryMedicalGuidelinesMulti(
+        ragQuery,
+        [
+          {
+            label: 'derma_general_medicine',
+            text: ragQuery,
+            specialty: 'general_medicine',
+            limit: 6,
+          },
+        ],
+        { specialty: 'dermatology%', limit: 12 }
+      )
       console.log(
-        `📚 [RAG-DERMA] Retrieved ${ragContext.totalChunks} chunks ` +
+        `📚 [RAG-DERMA] Embedding retrieval: ${ragContext.totalChunks} chunks ` +
+          `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
+      )
+
+      // TITLE-PATTERN BOOST: the embedding-based retrieval has repeatedly
+      // failed to surface disease-specific atopic-dermatitis chunks (AAD,
+      // NICE CG57, BAD, EuroGuiDerm) because their vocabulary doesn't
+      // overlap with the morphology-heavy query — instead the cosine
+      // keeps returning CDC scabies / pediculosis chunks that share the
+      // "pruritic scaly skin" surface vocabulary. When the OCR step has
+      // already labelled the likely diagnoses (e.g. "Atopic dermatitis,
+      // Contact dermatitis"), bypass embedding for those and pull
+      // guideline chunks whose TITLE contains the matching keyword.
+      // Merged on top of the embedding context so the LLM still sees
+      // the broader cosine results too.
+      const titlePatterns: string[] = []
+      for (const dx of ocrDifferentials) {
+        const lower = dx.toLowerCase()
+        if (lower.includes('atopic') || lower.includes('eczema')) titlePatterns.push('atopic', 'eczema')
+        if (lower.includes('contact derm')) titlePatterns.push('contact dermat')
+        if (lower.includes('psoriasis')) titlePatterns.push('psoriasis')
+        if (lower.includes('seborrh')) titlePatterns.push('seborrh')
+        if (lower.includes('tinea') || lower.includes('dermatophyt')) titlePatterns.push('tinea', 'dermatophyt')
+        if (lower.includes('scabies')) titlePatterns.push('scabies')
+        if (lower.includes('rosacea')) titlePatterns.push('rosacea')
+        if (lower.includes('urticaria')) titlePatterns.push('urticaria')
+        if (lower.includes('acne')) titlePatterns.push('acne')
+        if (lower.includes('vitiligo')) titlePatterns.push('vitiligo')
+        if (lower.includes('lichen')) titlePatterns.push('lichen')
+      }
+      const dedupedPatterns = Array.from(new Set(titlePatterns))
+      if (dedupedPatterns.length > 0) {
+        const titleRows = await fetchGuidelineChunksByTitlePatterns(dedupedPatterns, { limit: 8 })
+        if (titleRows.length > 0) {
+          const before = ragContext.totalChunks
+          ragContext = mergeTitlePatternRowsIntoContext(ragContext, titleRows)
+          console.log(
+            `📚 [RAG-DERMA] Title-pattern boost merged: ${ragContext.totalChunks - before} new chunks added ` +
+              `(patterns: ${dedupedPatterns.join(', ')})`
+          )
+        }
+      }
+      console.log(
+        `📚 [RAG-DERMA] Final context: ${ragContext.totalChunks} chunks ` +
           `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
       )
       ragPromptBlock = formatGuidelinesForPrompt(ragContext)
@@ -951,8 +1092,16 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     }
 
     // Call OpenAI with retry mechanism and quality validation
-    const result = await callOpenAIWithRetry(openai, diagnosticPrompt, 1, ragPromptBlock)
+    const result = await callOpenAIWithRetry(null, diagnosticPrompt, 1, ragPromptBlock)
     const diagnosisData = result.diagnosis
+
+    // DDX likelihood normalisation — ensures primary + differentials = 100.
+    normaliseDiagnosticProbabilities(
+      diagnosisData?.primaryDiagnosis,
+      diagnosisData?.differentialDiagnoses,
+      'likelihood',
+      { logPrefix: '🎯 [DDX-NORM-DERMA]' }
+    )
 
     // RAG: scrub + Bug-D + Bug-F + Pass-1/2 enrichment (shared helper).
     const ragResult = scrubAndEnrichEvidenceRefs(
@@ -960,7 +1109,36 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
       ragContext,
       { logPrefix: '📚 [RAG-DERMA]' }
     )
-    const evidenceReferences = ragResult.evidenceReferences
+    // Topic-match safety net: drop refs whose title has zero substantive
+    // keyword overlap with the primary diagnosis / differentials. Catches
+    // cases the LLM-level STRICT TOPIC-MATCH prompt rule misses (e.g.
+    // EuroGuiDerm bullous pemphigoid cited in a contact dermatitis case).
+    const dermatoTopicSeeds: string[] = [
+      diagnosisData?.primaryDiagnosis?.name || '',
+      diagnosisData?.primaryDiagnosis?.condition || '',
+      ...(Array.isArray(diagnosisData?.differentialDiagnoses)
+        ? diagnosisData.differentialDiagnoses.map((d: any) => d?.condition || d?.name || '')
+        : []),
+    ].filter(s => typeof s === 'string' && s.length > 0)
+    const topicFiltered = filterEvidenceRefsByTopic(
+      ragResult.evidenceReferences,
+      dermatoTopicSeeds,
+      {
+        logPrefix: '🎯 [TOPIC-FILTER-DERMA]',
+        patientFlags: {
+          isPregnant: /\b(pregn|enceinte|gestational|gravid)/i.test(String(anonymizedPatient.pregnancyStatus || '')),
+          isChild: typeof anonymizedPatient.age === 'number' ? anonymizedPatient.age < 18 :
+            /^(\d+)/.test(String(anonymizedPatient.age || ''))
+              ? parseInt(String(anonymizedPatient.age), 10) < 18
+              : false,
+          hasCancer: Array.isArray(anonymizedPatient.medicalHistory) &&
+            anonymizedPatient.medicalHistory.some((d: string) =>
+              /\b(cancer|carcinoma|melanoma|lymphoma|leukemi|leukaemi|sarcoma|metastat|oncolog|tumou?r|neoplas)/i.test(String(d || ''))
+            ),
+        },
+      }
+    )
+    const evidenceReferences = topicFiltered.kept
     
     // Generate formatted text for backward compatibility
     const fullTextDiagnosis = generateFormattedDiagnosisText(diagnosisData)
@@ -1008,6 +1186,19 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     
     const topicalMedications = topicalMedicationsRaw.map((med: any) => {
       console.log(`   📦 Transforming topical med: ${med.medication || 'UNNAMED'}`)
+      // CRITICAL: pull justification from the LLM's "indication" field
+      // (now part of the topical schema — see treatmentPlan above) so the
+      // [ref-N] citations the model embeds actually survive into the UI.
+      // Falling back to the old hardcoded "Topical treatment. ..." string
+      // only when no indication is provided keeps backward compatibility
+      // with older diagnosis payloads but is no longer the primary path.
+      const ind = typeof med.indication === 'string' ? med.indication.trim() : ''
+      const justification = ind
+        ? ind
+        : `Topical treatment. ${med.sideEffects || ''}`.trim()
+      const monitoring = typeof med.monitoring === 'string' && med.monitoring.trim()
+        ? med.monitoring.trim()
+        : (med.sideEffects || '')
       return {
         nom: med.medication || '',
         denominationCommune: med.dci || '',
@@ -1018,8 +1209,8 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         dureeTraitement: med.duration || '',
         quantite: '1 tube',
         instructions: med.instructions || '',
-        justification: `Topical treatment. ${med.sideEffects || ''}`,
-        surveillanceParticuliere: med.sideEffects || '',
+        justification,
+        surveillanceParticuliere: monitoring,
         nonSubstituable: false
       }
     })
@@ -1063,38 +1254,171 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
     
     // ========== EXTRACT INVESTIGATIONS FROM recommendedInvestigations ==========
     const investigations = diagnosisData?.recommendedInvestigations || {}
-    const laboratoryTests = investigations.laboratory || []
-    const imagingTests = investigations.imaging || []
-    
+
+    // Each investigation entry can be either:
+    //   - a string ("KOH preparation")                 ← legacy LLM output
+    //   - { name: "KOH preparation", indication: "Exclude dermatophyte... [ref-2]" }
+    //
+    // We normalise to { name, indication } and apply the same defensive
+    // hygiene the previous version did on bare strings: strip trailing
+    // parenthetical hedges, reject conditional/negative phrasings, length
+    // cap. The `indication` field is where [ref-N] citations live — that's
+    // what flows to motifClinique on the lab request and indicationClinique
+    // on the imaging request, which the prescription/labo/imagery components
+    // then render with renderWithCitations on the frontend.
+    type InvestigationItem = { name: string; indication: string }
+
+    const isCleanTestName = (rawName: unknown): boolean => {
+      let s = String(rawName ?? '').trim()
+      if (!s) return false
+      if (s.length > 90) return false
+      s = s.replace(/\s*\([^)]*\)\s*$/g, '').trim()
+      if (!s) return false
+      const lower = s.toLowerCase()
+      const banned = [
+        'no routine', 'no laboratory', 'no labs', 'not indicated',
+        'should be considered', 'may be justified', 'may be considered',
+        ' if ', 'if recalcitrant', 'if condition', 'if not improving',
+        'if it persists', 'if symptoms', 'unless considering',
+        'unless the patient', 'when clinically', 'when indicated',
+        'recommended only', 'consider if',
+      ]
+      if (banned.some(b => lower.includes(b))) return false
+      return true
+    }
+    const stripParenSuffix = (raw: string): string =>
+      raw.replace(/\s*\([^)]*\)\s*$/g, '').trim()
+
+    const normaliseInvestigations = (
+      raw: unknown,
+      defaultIndication: string
+    ): InvestigationItem[] => {
+      const arr = Array.isArray(raw) ? raw : []
+      const out: InvestigationItem[] = []
+      for (const item of arr) {
+        if (typeof item === 'string') {
+          if (!isCleanTestName(item)) continue
+          out.push({ name: stripParenSuffix(item), indication: defaultIndication })
+        } else if (item && typeof item === 'object') {
+          const name = typeof (item as any).name === 'string'
+            ? (item as any).name
+            : typeof (item as any).test === 'string'
+              ? (item as any).test
+              : ''
+          if (!isCleanTestName(name)) continue
+          const indication = typeof (item as any).indication === 'string'
+            ? (item as any).indication.trim()
+            : ''
+          out.push({
+            name: stripParenSuffix(name),
+            indication: indication || defaultIndication,
+          })
+        }
+      }
+      return out
+    }
+
+    const laboratoryInvestigations = normaliseInvestigations(
+      investigations.laboratory,
+      'Dermatology investigation'
+    )
+    const imagingInvestigationsAll = normaliseInvestigations(
+      investigations.imaging,
+      'Dermatology imaging'
+    )
+    const specializedInvestigationsAll = normaliseInvestigations(
+      investigations.specializedTests,
+      'Specialised dermatology test'
+    )
+
+    // Dermoscopy / Wood's lamp / reflectance confocal microscopy / mycology
+    // direct exam etc. are bedside dermatology procedures, NOT radiology.
+    // Even with the schema instruction the LLM still routes them into
+    // recommendedInvestigations.imaging — defensively move them to
+    // specializedTests so they end up on the right request form instead of
+    // the radiology form.
+    const BEDSIDE_DERMATO_PROCEDURE = /\b(dermo?scop|dermatoscop|wood'?s\s*lamp|reflect(ance)?\s*confocal|rcm\b|mycolog|koh\s*prep|tzanck|patch\s*test|photo\s*test|phototest|skin\s*scrap|capilloscop|trichoscop)/i
+    const imagingInvestigations = imagingInvestigationsAll
+      .filter(i => !BEDSIDE_DERMATO_PROCEDURE.test(i.name))
+    const reroutedFromImaging = imagingInvestigationsAll
+      .filter(i => BEDSIDE_DERMATO_PROCEDURE.test(i.name))
+    const specializedInvestigations = [
+      ...specializedInvestigationsAll,
+      ...reroutedFromImaging,
+    ]
+    if (reroutedFromImaging.length > 0) {
+      console.log(`🩺 DERMATOLOGY: Re-routed ${reroutedFromImaging.length} bedside procedure(s) from imaging to specializedTests:`,
+        reroutedFromImaging.map(i => i.name).join(', '))
+    }
+
+    // Defensive: if an investigation indication doesn't already cite a
+    // [ref-N], append the first available ref from the diagnosis's
+    // evidence_references list. The LLM sometimes skips citing diagnostic
+    // procedures like dermoscopy (it weighs the ref relevance subjectively),
+    // which leaves an unattributed clinical indication on the request form.
+    // Even a partially-relevant ref is better than leaving the clinician /
+    // patient looking at an unsourced order. Mirrors the min-citation rule
+    // we already apply to evidence_references at scrub time.
+    const availableRefIds = Array.isArray(diagnosisData?.evidence_references)
+      ? (diagnosisData.evidence_references as any[])
+          .map(r => r?.ref_id)
+          .filter((r): r is string => typeof r === 'string' && r.length > 0)
+      : []
+    const ensureRefCited = (item: InvestigationItem): InvestigationItem => {
+      if (availableRefIds.length === 0) return item
+      if (/\[ref-\d+\]/i.test(item.indication)) return item
+      // Append the first available ref at the end of the sentence. Soft
+      // attribution is better than no attribution.
+      const sep = item.indication.trim().endsWith('.') ? ' ' : '. '
+      return {
+        ...item,
+        indication: `${item.indication.trim()}${sep}${availableRefIds[0]
+          .startsWith('ref-') ? `[${availableRefIds[0]}]` : `[ref-${availableRefIds[0]}]`}`,
+      }
+    }
+    const laboratoryInvestigationsCited = laboratoryInvestigations.map(ensureRefCited)
+    const imagingInvestigationsCited = imagingInvestigations.map(ensureRefCited)
+    const specializedInvestigationsCited = specializedInvestigations.map(ensureRefCited)
+
+    // Keep the string-only arrays around for legacy callers in this route
+    // (logging, downstream extraction structures).
+    const laboratoryTests: string[] = laboratoryInvestigationsCited.map(i => i.name)
+    const imagingTests: string[] = imagingInvestigationsCited.map(i => i.name)
+
     // ⚠️ FILTER OUT "Not indicated" from biopsy recommendation
     const biopsyRaw = investigations.biopsy || ''
-    const biopsyTest = (biopsyRaw && 
-                        biopsyRaw !== 'Not indicated' && 
-                        !biopsyRaw.toLowerCase().includes('not indicated')) 
-      ? [biopsyRaw] 
+    const biopsyTest = (biopsyRaw &&
+                        biopsyRaw !== 'Not indicated' &&
+                        !biopsyRaw.toLowerCase().includes('not indicated'))
+      ? [biopsyRaw]
       : []
-    
-    const specializedTests = investigations.specializedTests || []
+
+    const specializedTests: string[] = specializedInvestigations.map(i => i.name)
     
     console.log(`🔬 DERMATOLOGY: Filtering investigations`)
     console.log(`   - Biopsy raw: "${biopsyRaw}"`)
     console.log(`   - Biopsy filtered: ${biopsyTest.length > 0 ? `"${biopsyTest[0]}"` : 'EXCLUDED (Not indicated)'}`)
     
-    // Combine all investigations into expertAnalysis format (match normal workflow)
+    // Combine all investigations into expertAnalysis format. The `indication`
+    // field now carries the LLM's per-test rationale (which includes [ref-N]
+    // citations when the model has guidelines to back the choice). Downstream
+    // the route reshapes these into motifClinique / indicationClinique, and
+    // the prescription/labo/imagery UI components run renderWithCitations on
+    // those fields to convert [ref-N] → clickable [N].
     const allInvestigations = [
-      ...laboratoryTests.map((test: string) => ({
-        examination: test,
+      ...laboratoryInvestigationsCited.map(i => ({
+        examination: i.name,
         category: 'Laboratory',
         urgency: 'routine',
-        indication: 'Dermatology investigation',
-        rationale: 'Clinical assessment'
+        indication: i.indication,
+        rationale: i.indication,
       })),
-      ...imagingTests.map((test: string) => ({
-        examination: test,
+      ...imagingInvestigationsCited.map(i => ({
+        examination: i.name,
         category: 'Imaging',
         urgency: 'routine',
-        indication: 'Dermatology imaging',
-        rationale: 'Diagnostic imaging'
+        indication: i.indication,
+        rationale: i.indication,
       })),
       ...biopsyTest.map((test: string) => ({
         examination: test,
@@ -1103,13 +1427,13 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         indication: 'Tissue diagnosis if diagnosis uncertain',
         rationale: 'Histopathological confirmation'
       })),
-      ...specializedTests.map((test: string) => ({
-        examination: test,
+      ...specializedInvestigationsCited.map(i => ({
+        examination: i.name,
         category: 'Laboratory',
         urgency: 'routine',
-        indication: 'Specialized dermatology test',
-        rationale: 'Specific diagnostic test'
-      }))
+        indication: i.indication,
+        rationale: i.indication,
+      })),
     ]
     
     console.log(`🔬 DERMATOLOGY: Extracting investigations`)

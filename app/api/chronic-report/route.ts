@@ -1,10 +1,10 @@
 // app/api/chronic-report/route.ts - PROFESSIONAL Chronic Disease Report with SAME STRUCTURE as consultation-report
 // Uses EXACT SAME LOGIC as generate-consultation-report for consistency (NO EMOJIS, NO COLORS)
 import { type NextRequest, NextResponse } from "next/server"
-import OpenAI from "openai"
+import { callLLM } from '@/lib/llm-client'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300
+export const maxDuration = 600 // 600s: chronic-report fans out to 4 LLM calls (meds/labs/imaging extraction + narrative). DeepSeek total can run 250-500s.
 
 // ==================== HELPER FUNCTIONS ====================
 function getString(value: any): string {
@@ -222,7 +222,12 @@ function extractChronicDiseaseData(diagnosisData: any, patientData: any, clinica
     imagingStudies,
     medicationsCount: medications.length,
     labTestsCount: labTests.length,
-    imagingStudiesCount: imagingStudies.length
+    imagingStudiesCount: imagingStudies.length,
+    // Pass through the RAG evidence references — the narrative LLM uses
+    // these to know which [ref-N] tokens it is allowed to cite inline.
+    evidenceReferences: Array.isArray(diagnosisData?.evidence_references)
+      ? diagnosisData.evidence_references
+      : []
   }
 }
 
@@ -279,7 +284,16 @@ function prepareChronicDiseaseGPTData(extractedData: any, patientData: any) {
       medicationsCount: extractedData.medicationsCount,
       labTestsCount: extractedData.labTestsCount,
       imagingCount: extractedData.imagingStudiesCount
-    }
+    },
+
+    // RAG-side evidence — passed through so the narrative LLM knows which
+    // [ref-N] tokens are legitimate and can ACTIVELY cite them at the
+    // sentence-level. Without this the LLM only preserves the few [ref-N]
+    // chronic-diagnosis already wrote into its short structured fields, so
+    // a 10-section narrative ends up with one inline citation total.
+    evidenceReferences: Array.isArray((extractedData as any).evidenceReferences)
+      ? (extractedData as any).evidenceReferences
+      : []
   }
 }
 
@@ -300,14 +314,17 @@ IMPORTANT: You are receiving PRE-ANALYZED medical data including:
 
 Your task is to STRUCTURE this existing analysis into narrative form, NOT to re-analyze.
 
-CRITICAL CITATION PRESERVATION RULE:
-The input data may contain in-text citation tokens of the form [ref-1], [ref-2], [ref-3], etc.
-These are MEDICAL GUIDELINE REFERENCES that MUST be preserved verbatim in your output narrative,
-at the same locations where they appear in the input. They are NOT jargon to clean up.
-- DO NOT remove [ref-N] tokens.
-- DO NOT paraphrase, translate, or replace them.
-- DO NOT move them to a different sentence — keep them adjacent to the claim they support.
-- A later pipeline stage will transform them into Vancouver-style numbers ([1], [2]…) and produce a bibliography.
+CRITICAL CITATION RULE:
+The user prompt lists the available [ref-N] tokens with their guideline titles under "EVIDENCE REFERENCES YOU MAY CITE". You must ACTIVELY cite these references inline in your narrative, not just preserve the few [ref-N] tokens already present in the input.
+
+How to cite:
+- Place [ref-N] at the END of the sentence whose claim is supported by that guideline (e.g. "Stage 1 hypertension is defined as a systolic BP of 140-159 mmHg [ref-1].")
+- STRICT TOPIC-MATCH: a [ref-N] may ONLY be cited when its title clearly addresses the same disease family as the diagnosis or recommendation. Examples of FORBIDDEN citations: a pancreatic cancer staging ref for an HTA report, a movement-disorders ref for diabetes, an asthma guideline for hypertension. Off-topic citations are worse than no citation at all.
+- If no listed ref matches a sentence's topic, write the sentence WITHOUT [ref-N] — do NOT pad to a minimum count.
+- Only cite [ref-N] tokens that appear in the "EVIDENCE REFERENCES YOU MAY CITE" list — NEVER fabricate [ref-N] that aren't on that list.
+- Preserve verbatim any [ref-N] tokens already present in the input data — these have been topic-checked upstream.
+
+Why this matters: the doctor and patient see numbered citations in the final report; an unattributed claim looks like opinion, while an attributed claim looks like evidence-based practice. A later pipeline stage will transform [ref-N] into Vancouver numbers ([1], [2]…) and produce the bibliography.
 
 CRITICAL FORMATTING REQUIREMENTS:
 - Each section must contain minimum 150-200 words
@@ -365,9 +382,26 @@ ${fu.formatted_table}
     }
   }
 
+  // RAG-side evidence: list available [ref-N] tokens with their titles so the
+  // LLM can actively cite them in the narrative instead of producing a 9-section
+  // report with one inline citation total.
+  const evidenceBlock = Array.isArray(enrichedData.evidenceReferences) && enrichedData.evidenceReferences.length > 0
+    ? `=== EVIDENCE REFERENCES YOU MAY CITE ===
+The following guideline references are available. Use the [ref-N] tokens INLINE in your narrative at the END of each sentence whose claim is supported by the corresponding guideline (epidemiology, diagnostic threshold, treatment choice, monitoring interval, target value, etc.).
+Cite at MINIMUM ${Math.min(3, enrichedData.evidenceReferences.length)} distinct [ref-N] across the report. Distribute citations — at least one in Diagnostic Synthesis OR Diagnostic Conclusion, at least one in Management Plan, and at least one elsewhere (Follow-up, Dietary, Self-Monitoring). It is acceptable and encouraged to cite the same [ref-N] more than once.
+
+${enrichedData.evidenceReferences.map((r: any, i: number) => {
+  const refId = r?.ref_id || `ref-${i + 1}`
+  const title = r?.title || r?.guideline_title || 'Untitled guideline'
+  const source = r?.source || ''
+  return `[${refId}] ${title}${source ? ' — ' + source : ''}`
+}).join('\n')}
+
+` : ''
+
   return `Based on this COMPLETE CHRONIC DISEASE ANALYSIS, generate a professional medical report in ENGLISH:
 
-=== PATIENT INFORMATION ===
+${evidenceBlock}=== PATIENT INFORMATION ===
 ${JSON.stringify(enrichedData.patient, null, 2)}
 
 === CLINICAL PRESENTATION ===
@@ -436,10 +470,16 @@ TASK: Structure this EXISTING analysis into these narrative sections:
 4. physicalExamination - Use clinical examination findings
 5. diagnosticSynthesis - Use disease assessments (diabetes, hypertension, obesity) + complications screening + IF FOLLOW-UP DATA IS AVAILABLE, reference actual measurement statistics (averages, trends, alert counts, adherence) (200+ words)
 6. diagnosticConclusion - Use overall assessment + therapeutic objectives + IF FOLLOW-UP DATA IS AVAILABLE, cite specific measurement trends and control status (150+ words)
-7. managementPlan - Use therapeutic plan + mention ${enrichedData.summary.medicationsCount} medications, ${enrichedData.summary.labTestsCount} lab tests, ${enrichedData.summary.imagingCount} imaging studies + IF FOLLOW-UP DATA IS AVAILABLE, reference adherence and measurement patterns
+7. managementPlan - Use therapeutic plan + mention ${enrichedData.summary.medicationsCount} medications, ${enrichedData.summary.labTestsCount} lab tests, ${enrichedData.summary.imagingCount} imaging studies + IF FOLLOW-UP DATA IS AVAILABLE, reference adherence and measurement patterns.
+   ⚠️ HARD CONSTRAINT — COUNT CONSISTENCY: the counts above are the SINGLE SOURCE OF TRUTH.
+   - If medicationsCount ≥ 1: name the medications and describe their role. Do NOT write "no medications were prescribed".
+   - If labTestsCount ≥ 1: acknowledge the lab workup explicitly. Do NOT write "no laboratory tests are required" or "clinical monitoring approach without diagnostic testing".
+   - If imagingCount ≥ 1: acknowledge the imaging/paraclinical workup. Do NOT write "no imaging studies are required".
+   - If a count is 0: say so honestly and explain the rationale.
+   - NEVER let the management plan contradict the prescription / lab / imaging forms that are attached to this report.
 8. dietaryPlan - Use dietary plan summary (expand to 150+ words)
 9. selfMonitoring - Use self-monitoring instructions (expand to 150+ words)
-10. followUpPlan - Use follow-up schedule + warning signs (expand to 150+ words)
+10. followUpPlan - Use follow-up schedule + warning signs (expand to 150+ words). HARD SAFETY RULE: if the diagnosis flagged hypertension severity as URGENT (DBP 110-119 or SBP 180-219) or EMERGENCY (DBP ≥120 or SBP ≥220 or acute target organ damage), the follow-up MUST be within 1-2 weeks (urgent) or same-day/24h (emergency). NEVER write "review in 3 months" for these cases — that is an outpatient triage failure. Mirror the followUpPlan.severity / followUpUrgency fields from the input.
 11. conclusion - Synthesize the complete chronic disease management plan
 
 IMPORTANT:
@@ -488,8 +528,7 @@ function useChronicDiseaseFallback(extractedData: any, patientData: any) {
 
 // ==================== PROFESSIONAL PRESCRIPTION EXTRACTION ====================
 async function extractMedicationsProfessional(diagnosisData: any, patientData: any): Promise<any[]> {
-  const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  
+
   try {
     const prompt = `Extract ALL medications from chronic disease management data with COMPLETE professional details.
 
@@ -528,19 +567,22 @@ Return format (professional prescription - NO EMOJIS):
 
 CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON medical nomenclature in ENGLISH. NO EMOJIS.`
 
-    const completion = await openaiClient.chat.completions.create({
-      model: "gpt-5.5",
+    const completion = await callLLM({
+      useCase: 'CHRONIC_REPORT_EXTRACT_MEDS',
+      // Extraction is structured re-formatting, not clinical reasoning —
+      // deepseek-chat (v3 non-reasoning) emits 3-5× faster than v4-pro
+      // without the long chain-of-thought stall before token 1.
+      model: 'deepseek-chat',
       messages: [
-        { 
-          role: "system", 
-          content: "You are a clinical pharmacist extracting medication prescriptions. Use professional medical terminology in ENGLISH. NO EMOJIS. Include all safety information." 
-        },
+        { role: "system", content: "You are a clinical pharmacist extracting medication prescriptions. Use professional medical terminology in ENGLISH. NO EMOJIS. Include all safety information." },
         { role: "user", content: prompt }
       ],
-      max_completion_tokens: 3000
+      maxTokens: 3000,
+      reasoningEffort: 'none',
+      timeoutMs: 180_000,
     })
 
-    const text = (completion.choices[0].message.content || '[]').trim()
+    const text = (completion.text || '[]').trim()
     const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '')
     const match = cleaned.match(/\[[\s\S]*\]/)
     return match ? JSON.parse(match[0]) : []
@@ -551,8 +593,7 @@ CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON medical nomenclature in EN
 }
 
 async function extractLabTestsProfessional(diagnosisData: any, patientData: any): Promise<any[]> {
-  const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  
+
   try {
     const prompt = `Extract ALL laboratory tests for chronic disease monitoring with COMPLETE details.
 
@@ -581,19 +622,19 @@ Categories: hematology, clinicalChemistry, immunology, microbiology, endocrinolo
 
 CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON nomenclature. NO EMOJIS.`
 
-    const completion = await openaiClient.chat.completions.create({
-      model: "gpt-5.5",
+    const completion = await callLLM({
+      useCase: 'CHRONIC_REPORT_EXTRACT_LABS',
+      model: 'deepseek-chat',
       messages: [
-        { 
-          role: "system", 
-          content: "You are a clinical pathologist ordering laboratory investigations. Professional medical terminology in ENGLISH. NO EMOJIS." 
-        },
+        { role: "system", content: "You are a clinical pathologist ordering laboratory investigations. Professional medical terminology in ENGLISH. NO EMOJIS." },
         { role: "user", content: prompt }
       ],
-      max_completion_tokens: 3000
+      maxTokens: 3000,
+      reasoningEffort: 'none',
+      timeoutMs: 180_000,
     })
 
-    const text = (completion.choices[0].message.content || '[]').trim()
+    const text = (completion.text || '[]').trim()
     const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '')
     const match = cleaned.match(/\[[\s\S]*\]/)
     return match ? JSON.parse(match[0]) : []
@@ -604,8 +645,7 @@ CRITICAL: Return ONLY the JSON array. Use ANGLO-SAXON nomenclature. NO EMOJIS.`
 }
 
 async function extractImagingStudiesProfessional(diagnosisData: any, patientData: any): Promise<any[]> {
-  const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  
+
   try {
     const prompt = `Extract ALL imaging studies for chronic disease complications screening with COMPLETE details.
 
@@ -631,19 +671,19 @@ Return format (professional imaging request - NO EMOJIS):
 
 CRITICAL: Return ONLY the JSON array. Professional terminology. NO EMOJIS.`
 
-    const completion = await openaiClient.chat.completions.create({
-      model: "gpt-5.5",
+    const completion = await callLLM({
+      useCase: 'CHRONIC_REPORT_EXTRACT_IMAGING',
+      model: 'deepseek-chat',
       messages: [
-        { 
-          role: "system", 
-          content: "You are a radiologist ordering imaging studies. Professional medical terminology in ENGLISH. NO EMOJIS." 
-        },
+        { role: "system", content: "You are a radiologist ordering imaging studies. Professional medical terminology in ENGLISH. NO EMOJIS." },
         { role: "user", content: prompt }
       ],
-      max_completion_tokens: 2500
+      maxTokens: 2500,
+      reasoningEffort: 'none',
+      timeoutMs: 180_000,
     })
 
-    const text = (completion.choices[0].message.content || '[]').trim()
+    const text = (completion.text || '[]').trim()
     const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '')
     const match = cleaned.match(/\[[\s\S]*\]/)
     return match ? JSON.parse(match[0]) : []
@@ -695,61 +735,70 @@ export async function POST(req: NextRequest) {
     console.log("STEP 2: Preparing enriched GPT data...")
     const enrichedData = prepareChronicDiseaseGPTData(extractedData, patientData)
     
-    // ===== STEP 3: GENERATE NARRATIVE REPORT WITH GPT-5.5 (like consultation-report) =====
-    console.log("STEP 3: Generating narrative report with gpt-5.5...")
-    
+    // ===== STEP 3 + 5 in PARALLEL: narrative + prescription extracts =====
+    // The narrative LLM call and the 3 extract LLM calls (medications, labs,
+    // imaging) are all functions of the same diagnosisData input — none of
+    // them depend on each other's output. Running them sequentially used to
+    // take ~5-7 min total wall time on deepseek-v4-pro. With Promise.all on
+    // deepseek-chat (non-reasoning, 3-5× faster) we get max(narrative,
+    // extracts) ≈ 1-2 min total.
+    console.log("STEP 3+5: Generating narrative + extracting prescriptions in PARALLEL on deepseek-chat...")
+
     const systemPrompt = createChronicDiseaseSystemPrompt()
     const userPrompt = createChronicDiseaseUserPrompt(enrichedData, patientData, doctorData, followUpContext)
-    
-    let narrativeSections: any
-    
-    try {
-      const narrativeResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-5.5",
+
+    const narrativePromise = (async () => {
+      try {
+        const narrativeResult = await callLLM({
+          useCase: 'CHRONIC_REPORT_NARRATIVE',
+          // Narrative is structured re-formatting of an already-analysed
+          // diagnosis — no novel clinical reasoning needed. deepseek-chat
+          // (v3 non-reasoning) eliminates the chain-of-thought stall and
+          // emits 3-5× faster than v4-pro.
+          model: 'deepseek-chat',
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt }
           ],
-          max_completion_tokens: 6000,
-          response_format: { type: "json_object" }
-        }),
-      })
+          // Cap at 8k (deepseek-chat's max output) — was 12k on v4-pro.
+          // The 10 narrative sections fit comfortably under 8k.
+          maxTokens: 8000,
+          responseFormat: 'json_object',
+          reasoningEffort: 'none',
+          timeoutMs: 240_000,
+        })
+        const content = narrativeResult.text
+        console.log(`[llm] use=CHRONIC_REPORT_NARRATIVE provider=${narrativeResult.provider} model=${narrativeResult.model} latency=${narrativeResult.latencyMs}ms tokens=${narrativeResult.usage?.totalTokens ?? 'n/a'}`)
 
-      if (!narrativeResponse.ok) {
-        const errorText = await narrativeResponse.text()
-        throw new Error(`OpenAI API error (${narrativeResponse.status}): ${errorText.substring(0, 200)}`)
-      }
-
-      const narrativeData = await narrativeResponse.json()
-      const content = narrativeData.choices?.[0]?.message?.content
-      console.log(`📡 Narrative response - finish_reason: ${narrativeData.choices?.[0]?.finish_reason}, usage: ${JSON.stringify(narrativeData.usage || {})}`)
-
-      if (!content) {
-        console.warn("No content in AI response, using fallback")
-        narrativeSections = useChronicDiseaseFallback(extractedData, patientData)
-      } else {
+        if (!content) {
+          console.warn("No content in AI response, using fallback")
+          return useChronicDiseaseFallback(extractedData, patientData)
+        }
         console.log("AI response received, length:", content.length)
         try {
-          narrativeSections = JSON.parse(content)
+          return JSON.parse(content)
         } catch (parseError: any) {
           console.warn("JSON parse error, using fallback:", parseError.message)
-          narrativeSections = useChronicDiseaseFallback(extractedData, patientData)
+          return useChronicDiseaseFallback(extractedData, patientData)
         }
+      } catch (aiError: any) {
+        console.warn("AI generation error, using fallback:", aiError.message)
+        return useChronicDiseaseFallback(extractedData, patientData)
       }
-    } catch (aiError: any) {
-      console.warn("AI generation error, using fallback:", aiError.message)
-      narrativeSections = useChronicDiseaseFallback(extractedData, patientData)
-    }
-    
+    })()
+
+    const [narrativeSections, medications, labTests, imagingStudies] = await Promise.all([
+      narrativePromise,
+      extractMedicationsProfessional(diagnosisData, patientData),
+      extractLabTestsProfessional(diagnosisData, patientData),
+      extractImagingStudiesProfessional(diagnosisData, patientData),
+    ])
+
+    console.log(`Extracted: ${medications.length} medications, ${labTests.length} lab tests, ${imagingStudies.length} imaging studies`)
+
     // ===== STEP 4: BUILD COMPLETE NARRATIVE TEXT =====
     console.log("STEP 4: Building complete narrative text...")
-    
+
     const fullText = `CHRONIC DISEASE FOLLOW-UP CONSULTATION REPORT
 
 ═══════════════════════════════════════════════════════════════
@@ -839,17 +888,8 @@ Date: ${reportDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long',
 
 ═══════════════════════════════════════════════════════════════`
 
-    // ===== STEP 5: EXTRACT PROFESSIONAL PRESCRIPTIONS =====
-    console.log("STEP 5: Extracting PROFESSIONAL prescriptions...")
-    
-    const [medications, labTests, imagingStudies] = await Promise.all([
-      extractMedicationsProfessional(diagnosisData, patientData),
-      extractLabTestsProfessional(diagnosisData, patientData),
-      extractImagingStudiesProfessional(diagnosisData, patientData)
-    ])
-    
-    console.log(`Extracted: ${medications.length} medications, ${labTests.length} lab tests, ${imagingStudies.length} imaging studies`)
-    
+    // ===== STEP 5 — moved into the Promise.all above (parallel with narrative). =====
+
     // ===== STEP 6: BUILD PROFESSIONAL PRESCRIPTIONS =====
     const examDate = reportDate.toLocaleDateString('en-US', {
       month: '2-digit',

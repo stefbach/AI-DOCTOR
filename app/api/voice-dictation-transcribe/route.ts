@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { callLLM } from '@/lib/llm-client';
 import {
   normalizeTranscriptionToEnglish,
   normalizeMedicationList,
@@ -115,9 +116,8 @@ Dosages: milligrams, milligrammes, mg, grams, grammes, g.`;
 // ============================================
 async function translateToEnglish(text: string): Promise<string> {
   try {
-    const openai = getOpenAIClient();
-    const response = await openai.chat.completions.create({
-      model: 'gpt-5.5',
+    const response = await callLLM({
+      useCase: 'VOICE_TRANSLATE',
       messages: [
         {
           role: 'system',
@@ -132,18 +132,15 @@ RULES:
 6. Keep the same structure and meaning
 7. Return ONLY the translated text, nothing else`
         },
-        {
-          role: 'user',
-          content: text
-        }
+        { role: 'user', content: text }
       ],
-      max_completion_tokens: 2000,
+      maxTokens: 2000,
+      timeoutMs: 60_000,
     });
 
-    return response.choices[0]?.message?.content?.trim() || text;
+    return response.text?.trim() || text;
   } catch (error: any) {
     console.error('❌ Translation failed:', error.message);
-    // Return original text if translation fails
     return text;
   }
 }
@@ -256,23 +253,19 @@ ${normalizedText}
 Respond ONLY with JSON, no additional text.`;
 
   try {
-    const openai = getOpenAIClient();
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-5.5',
+    const completion = await callLLM({
+      useCase: 'VOICE_EXTRACTION',
       messages: [
-        {
-          role: 'system',
-          content: 'You are an expert medical assistant who extracts structured clinical data using Anglo-Saxon (UK/US) medical nomenclature.',
-        },
-        {
-          role: 'user',
-          content: extractionPrompt,
-        },
+        { role: 'system', content: 'You are an expert medical assistant who extracts structured clinical data using Anglo-Saxon (UK/US) medical nomenclature.' },
+        { role: 'user', content: extractionPrompt },
       ],
-      response_format: { type: 'json_object' },
+      maxTokens: 4000,
+      responseFormat: 'json_object',
+      timeoutMs: 120_000,
     });
+    console.log(`[llm] use=VOICE_EXTRACTION provider=${completion.provider} model=${completion.model} latency=${completion.latencyMs}ms`)
 
-    const extractedData = JSON.parse(completion.choices[0].message.content || '{}');
+    const extractedData = JSON.parse(completion.text || '{}');
 
     console.log('✅ Extraction completed');
     console.log(`   Patient: ${extractedData.patientInfo?.firstName} ${extractedData.patientInfo?.lastName}`);

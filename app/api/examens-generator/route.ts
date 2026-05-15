@@ -1,6 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { callLLM } from "@/lib/llm-client"
+
+export const runtime = 'nodejs'
+// 600s for parity with /api/openai-diagnosis and report routes. The Phase 5
+// system prompt (senior diagnostician persona + 8 strict quality rules +
+// tropical syndromic mandates + anti-boilerplate list) adds ~1100 prompt
+// tokens and pushes DeepSeek-V4-Pro to 220-340s on a febrile case with full
+// arboviral workup. 300s was tight.
+export const maxDuration = 600
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +25,7 @@ export async function POST(request: NextRequest) {
     // Construction du contexte médical complet pour prescription examens
     const examensContext = `
 PROFIL PATIENT DÉTAILLÉ POUR EXAMENS:
-- Identité: ${patientData.firstName || "N/A"} ${patientData.lastName || "N/A"}
+- Identité: Patient anonymisé (le nom sera réinjecté côté serveur après génération)
 - Âge: ${patientData.age || "N/A"} ans (${patientData.age >= 65 ? "PATIENT ÂGÉE - Adaptations gériatriques nécessaires" : "Adulte standard"})
 - Sexe: ${patientData.gender || "N/A"} ${patientData.gender === "Femme" && patientData.age >= 15 && patientData.age <= 50 ? "(Âge de procréation - Test grossesse si pertinent)" : ""}
 - Poids: ${patientData.weight || "N/A"} kg, Taille: ${patientData.height || "N/A"} cm
@@ -68,9 +75,9 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
       "establishment": "Centre Médical TIBOK - Consultation IA Expert"
     },
     "patient": {
-      "lastName": "${patientData.lastName || "N/A"}",
-      "firstName": "${patientData.firstName || "N/A"}",
-      "birthDate": "${patientData.dateOfBirth || "N/A"}",
+      "lastName": "[FILL_LASTNAME]",
+      "firstName": "[FILL_FIRSTNAME]",
+      "birthDate": "[FILL_BIRTHDATE]",
       "age": "${patientData.age || "N/A"} ans",
       "weight": "${patientData.weight || "N/A"} kg"
     },
@@ -214,15 +221,60 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
 }
 `
 
-    console.log("🧠 Génération ordonnance examens experte avec OpenAI...")
+    console.log("🧠 Génération ordonnance examens experte (LLM)...")
 
-    const result = await generateText({
-      model: openai("gpt-5.5", { reasoningEffort: "none" }),
-      prompt: expertExamensPrompt,
+    const result = await callLLM({
+      useCase: 'EXAMENS',
+      messages: [
+        {
+          role: 'system',
+          content: `PERSONA — SENIOR CLINICAL DIAGNOSTICIAN (MAURITIUS / UK STANDARDS)
+
+You are a senior physician supervising the investigation strategy for a teleconsultation in Mauritius. You apply NICE, BMJ Best Practice, IDSA, and Mauritius MoH protocols, with active awareness of the locally relevant tropical and arboviral workup (dengue NS1 + IgM, chikungunya RT-PCR, leptospirosis MAT, malaria thick & thin smears + RDT, typhoid blood culture). Your output is a finalised, lab-and-imaging-orderable investigation panel — not a draft.
+
+INVESTIGATION QUALITY RULES — STRICT
+
+1. EXACT TEST NAMES — use UK / Mauritius nomenclature. "Full Blood Count (FBC) with differential" not "CBC". "C-Reactive Protein (CRP)" not "C-reactive protein test". "Chest X-ray (PA view)" not "chest imaging".
+
+2. CLINICAL JUSTIFICATION — every test needs a clinical justification field of minimum 40 characters that states (a) which differential diagnosis the test confirms or excludes, (b) what specific result would change management, (c) why this test was chosen over alternatives when relevant. Cite [ref-N] when a guideline directly supports the choice.
+
+3. EXPECTED RESULTS — every test must declare the expected / target result range with units, plus the interpretation that would trigger action (e.g. "Platelet count < 100 × 10⁹/L raises concern for dengue or severe sepsis").
+
+4. PRIORITISATION — every test must declare urgency: "immediate" (within hours, would change next-step management), "urgent" (same-day), "routine" (within 24-72h), "deferred" (only if symptoms persist or worsen). Justify "immediate" / "urgent" tags.
+
+5. NO SHOTGUN PANEL — every test must be specifically justified for THIS patient. Do not order a panel "just to be safe". If a test is borderline-indicated, classify as "deferred" and state the trigger.
+
+6. TROPICAL / SYNDROMIC RELEVANCE — when fever in Mauritius:
+   - Dengue NS1 antigen + IgM/IgG is mandatory (rule out the most prevalent severe arbovirosis).
+   - Chikungunya RT-PCR or IgM when joint pain, OR when dengue test is negative and symptoms persist.
+   - Leptospirosis IgM ELISA / MAT when freshwater exposure, calf tenderness, or jaundice.
+   - Blood film + malaria RDT only if travel history to malaria-endemic area or atypical exposure.
+   - Typhoid blood culture if fever ≥ 7 days or suspected enteric source.
+   Cite ECDC / WHO / IDSA / Mauritius MoH guidance for each.
+
+7. IMAGING DISCIPLINE — order imaging only with clear indication. Chest X-ray for cough + fever ≥ 3 days OR signs of consolidation. Avoid CT / MRI unless red flags or first-line tests inconclusive. Document the exposure justification when imaging is ionising.
+
+8. PREGNANCY-AWARE — when pregnancy is documented, defer ionising imaging if possible; favour ultrasound / MRI without contrast / non-imaging diagnostics. State the maternal-fetal safety rationale.
+
+ANTI-BOILERPLATE — BANNED PHRASES
+"Standard workup", "Baseline investigations", "Routine bloods", "As clinically indicated", "Per protocol", "Consider further testing". Every justification must be patient-specific.
+
+ANTI-HALLUCINATION (STRICT)
+- Never order a test that is not part of established practice for the working / differential diagnoses.
+- Never invent reference ranges or normal values; if uncertain, state the expected DIRECTION ("low platelet count expected in dengue") rather than a precise figure.
+- If a clinical detail required to choose between two tests is missing, state the gap in the justification and choose the more sensitive option.
+
+OUTPUT FORMAT — STRICT
+Respond with valid JSON only, matching the schema in the user prompt. No prose outside the JSON.`
+        },
+        { role: 'user', content: expertExamensPrompt },
+      ],
       maxTokens: 16000,
+      reasoningEffort: 'low',
+      timeoutMs: 280_000,
     })
 
-    console.log("✅ Ordonnance examens experte générée")
+    console.log(`✅ Ordonnance examens experte générée (provider=${result.provider}${result.fallbackUsed ? ' [fallback]' : ''}, ${result.latencyMs}ms)`)
 
     // Parsing JSON avec gestion d'erreur experte
     let examensData
@@ -242,7 +294,15 @@ Génère EXACTEMENT cette structure JSON (remplace les valeurs par des données 
       
       examensData = JSON.parse(cleanText)
       console.log("✅ JSON examens parsé avec succès")
-      
+
+      // Re-inject patient identity stripped from the LLM prompt for privacy.
+      if (examensData?.prescriptionHeader?.patient) {
+        const p = examensData.prescriptionHeader.patient
+        if (!p.lastName || p.lastName === '[FILL_LASTNAME]') p.lastName = patientData.lastName || "N/A"
+        if (!p.firstName || p.firstName === '[FILL_FIRSTNAME]') p.firstName = patientData.firstName || "N/A"
+        if (!p.birthDate || p.birthDate === '[FILL_BIRTHDATE]') p.birthDate = patientData.dateOfBirth || "N/A"
+      }
+
     } catch (parseError) {
       console.warn("⚠️ Erreur parsing JSON examens, génération fallback expert")
       examensData = generateExpertExamensFallback(patientData, diagnosisData, clinicalData)

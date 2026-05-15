@@ -25,6 +25,7 @@ import {
 } from "lucide-react"
 import TibokMedicalAssistant from './tibok-medical-assistant'
 import EvidenceReferencesSection from './rag/evidence-references-section'
+import { renderWithCitations, aggregateReferences, SectionBibliography } from './rag/citation-renderer'
 
 // ==================== HELPER FUNCTIONS ====================
 // Helper function to safely handle DCI fields
@@ -3704,25 +3705,21 @@ const handleSendDocuments = async () => {
  email: doctorInfo.email.includes('[') ? 'doctor@tibok.mu' : doctorInfo.email
  }
 
- // 🚨 Detect emergency status early (used in both save-medical-report and documents payload)
- const rapportForEmergency = getReportRapport()
- const emergencyTextToCheck = [
-   rapportForEmergency?.motifConsultation || '',
-   rapportForEmergency?.syntheseDiagnostique || '',
-   rapportForEmergency?.conclusionDiagnostique || '',
-   rapportForEmergency?.priseEnCharge || '',
-   rapportForEmergency?.surveillance || ''
- ].join(' ').toUpperCase()
- const emergencyKeywordsList = [
-   'IMMEDIATE HOSPITAL REFERRAL', 'EMERGENCY REFERRAL', 'EMERGENCY',
-   'URGENT REFERRAL', 'SAMU 114', 'CALL AMBULANCE', 'LIFE-THREATENING',
-   'ACUTE CORONARY SYNDROME', 'ACS', 'STEMI', 'NSTEMI', 'STROKE',
-   'PULMONARY EMBOLISM', 'AORTIC DISSECTION', 'SEPSIS',
-   'DIABETIC KETOACIDOSIS', 'HYPOGLYCEMIC COMA', 'ANAPHYLAXIS',
-   'STATUS EPILEPTICUS', 'HYPERTENSIVE EMERGENCY', 'ACUTE ABDOMEN',
-   'URGENCES', 'URGENCE MÉDICALE', 'ORIENTATION URGENCES'
- ]
- const isEmergencyCase = emergencyKeywordsList.some(keyword => emergencyTextToCheck.includes(keyword))
+ // 🚨 Detect emergency status from the LLM's structured triage block
+ // (used in both save-medical-report and documents payload). See the
+ // comment on detectEmergency() below for why we no longer string-match
+ // the narrative.
+ const isEmergencyCase = (() => {
+   const triage = diagnosisData?.triage_assessment
+   if (!triage || typeof triage !== 'object') return false
+   const severity = String(triage.severity || '').toLowerCase()
+   const disposition = String(triage.disposition || '').toLowerCase()
+   return (
+     severity === 'emergency' ||
+     disposition === 'ambulance_immediate' ||
+     disposition === 'a&e_same_day'
+   )
+ })()
 
  console.log('📝 Saving to database...')
 
@@ -4985,46 +4982,37 @@ const ConsultationReport = () => {
  const metadata = getReportMetadata()
 
  // 🚨 DETECT EMERGENCY SITUATIONS
+ //
+ // Reads the structured `triage_assessment` block produced by the
+ // diagnostic LLM (post prompt-v2). The legacy approach of scanning the
+ // narrative text for keywords ("EMERGENCY", "SEPSIS", "ACUTE ABDOMEN",
+ // "STROKE", "ACS"…) caused false-positive banners on benign cases —
+ // any sentence like "rule out acute coronary syndrome" or "warning
+ // signs of severe dengue include..." or "no signs of meningitis"
+ // would trip the keyword check.
+ //
+ // The LLM now emits explicit severity + disposition + criteria. We
+ // raise the banner only when the LLM itself classifies the case as
+ // an emergency requiring same-day hospital care. Anything else
+ // (routine, urgent in 24h, etc.) does NOT show the banner.
+ //
+ // Backward compatibility: reports produced BEFORE prompt v2 will not
+ // have triage_assessment. In that case we treat them as routine —
+ // historic reports are not retroactively banner-flagged (acceptable
+ // per product decision, the case database has very few legacy
+ // reports anyway).
  const detectEmergency = () => {
-   const textToCheck = [
-     rapport?.motifConsultation || '',
-     rapport?.syntheseDiagnostique || '',
-     rapport?.conclusionDiagnostique || '',
-     rapport?.priseEnCharge || '',
-     rapport?.surveillance || ''
-   ].join(' ').toUpperCase()
-   
-   // Emergency keywords
-   const emergencyKeywords = [
-     'IMMEDIATE HOSPITAL REFERRAL',
-     'EMERGENCY REFERRAL',
-     'EMERGENCY',
-     'URGENT REFERRAL',
-     'SAMU 114',
-     'CALL AMBULANCE',
-     'LIFE-THREATENING',
-     'ACUTE CORONARY SYNDROME',
-     'ACS',
-     'STEMI',
-     'NSTEMI',
-     'STROKE',
-     'PULMONARY EMBOLISM',
-     'AORTIC DISSECTION',
-     'SEPSIS',
-     'DIABETIC KETOACIDOSIS',
-     'HYPOGLYCEMIC COMA',
-     'ANAPHYLAXIS',
-     'STATUS EPILEPTICUS',
-     'HYPERTENSIVE EMERGENCY',
-     'ACUTE ABDOMEN',
-     'URGENCES',
-     'URGENCE MÉDICALE',
-     'ORIENTATION URGENCES'
-   ]
-   
-   return emergencyKeywords.some(keyword => textToCheck.includes(keyword))
+   const triage = diagnosisData?.triage_assessment
+   if (!triage || typeof triage !== 'object') return false
+   const severity = String(triage.severity || '').toLowerCase()
+   const disposition = String(triage.disposition || '').toLowerCase()
+   return (
+     severity === 'emergency' ||
+     disposition === 'ambulance_immediate' ||
+     disposition === 'a&e_same_day'
+   )
  }
- 
+
  const isEmergency = detectEmergency()
  
  // 🏥 CHECK SPECIALIST REFERRAL
@@ -5600,7 +5588,38 @@ const ConsultationReport = () => {
  const medications = report?.ordonnances?.medicaments?.prescription?.medicaments || []
  const patient = getReportPatient()
  const praticien = getReportPraticien()
- 
+ const evidenceRefs = (diagnosisData?.evidence_references as any[]) || []
+ // Aggregate citations across justification + instructions + monitoring so
+ // the per-section bibliography fires even when only the dosing notes carry
+ // the [ref-N] markers (common pattern for chronic-style prescriptions).
+ const prescriptionCitations = aggregateReferences(
+   medications.map((m: any) => (typeof m?.justification === 'string' ? m.justification : '')),
+   evidenceRefs
+ )
+ const prescriptionInstructionCitations = aggregateReferences(
+   medications.map((m: any) => (typeof m?.instructions === 'string' ? m.instructions : '')),
+   evidenceRefs
+ )
+ const prescriptionMonitoringCitations = aggregateReferences(
+   medications.map((m: any) => {
+     const v = m?.surveillanceParticuliere ?? m?.monitoring
+     return typeof v === 'string' ? v : ''
+   }),
+   evidenceRefs
+ )
+ const prescriptionAllUsedRefIds = new Set<string>()
+ ;[
+   ...prescriptionCitations.usedRefs,
+   ...prescriptionInstructionCitations.usedRefs,
+   ...prescriptionMonitoringCitations.usedRefs,
+ ].forEach((r: any) => {
+   if (r?.ref_id) prescriptionAllUsedRefIds.add(r.ref_id)
+   else if (r?.title) prescriptionAllUsedRefIds.add(r.title)
+ })
+ const prescriptionAllUsedRefs = evidenceRefs.filter((r: any) =>
+   prescriptionAllUsedRefIds.has(r?.ref_id) || prescriptionAllUsedRefIds.has(r?.title)
+ )
+
  if (!includeFullPrescriptions && report?.prescriptionsResume) {
  return (
  <Card>
@@ -5700,12 +5719,12 @@ const ConsultationReport = () => {
  )}
  {med.instructions && (
  <p className="mt-2 text-sm text-gray-600 italic">
- ℹ️ {med.instructions}
+ ℹ️ {prescriptionInstructionCitations.nodes[index] || med.instructions}
  </p>
  )}
  {med.justification && (
  <p className="mt-1 text-sm text-gray-600">
- <span className="font-medium">Indication:</span> {med.justification}
+ <span className="font-medium">Indication:</span> {prescriptionCitations.nodes[index] || med.justification}
  </p>
  )}
  </div>
@@ -5732,6 +5751,12 @@ const ConsultationReport = () => {
  </div>
  )}
  </div>
+
+ <SectionBibliography
+ references={prescriptionAllUsedRefs}
+ globalReferences={evidenceRefs}
+ title="Références citées dans cette prescription"
+ />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
  <p className="text-sm text-gray-600 mb-4">
@@ -5773,7 +5798,8 @@ const ConsultationReport = () => {
  const patient = getReportPatient()
  const praticien = getReportPraticien()
  const rapport = getReportRapport()
- 
+ const evidenceRefs = (diagnosisData?.evidence_references as any[]) || []
+
  const categories = [
  { key: 'hematology', label: 'HEMATOLOGY' },
  { key: 'clinicalChemistry', label: 'CLINICAL CHEMISTRY' },
@@ -5782,6 +5808,28 @@ const ConsultationReport = () => {
  { key: 'endocrinology', label: 'ENDOCRINOLOGY' },
  { key: 'general', label: 'GENERAL LABORATORY' }
  ]
+
+ // Aggregate indications across every test in every category to compute
+ // which refs are cited in this section, and to memoise the rendered nodes
+ // by (category, index) so the iteration below stays cheap.
+ const labCitationsByCategory: Record<string, ReturnType<typeof aggregateReferences>> = {}
+ const labAllUsedRefIds = new Set<string>()
+ for (const { key } of categories) {
+   const tests = analyses[key]
+   if (!Array.isArray(tests) || tests.length === 0) continue
+   const agg = aggregateReferences(
+     tests.map((t: any) => (typeof t?.motifClinique === 'string' ? t.motifClinique : '')),
+     evidenceRefs
+   )
+   labCitationsByCategory[key] = agg
+   agg.usedRefs.forEach((r: any) => {
+     if (r?.ref_id) labAllUsedRefIds.add(r.ref_id)
+     else if (r?.title) labAllUsedRefIds.add(r.title)
+   })
+ }
+ const labUsedRefs = evidenceRefs.filter((r: any) =>
+   labAllUsedRefIds.has(r?.ref_id) || labAllUsedRefIds.has(r?.title)
+ )
  
  if (!includeFullPrescriptions && report?.prescriptionsResume) {
  return (
@@ -5850,7 +5898,9 @@ const ConsultationReport = () => {
  {label}
  </h3>
  <div className="space-y-2">
- {tests.map((test: any, idx: number) => (
+ {tests.map((test: any, idx: number) => {
+ const indicationNode = labCitationsByCategory[key]?.nodes?.[idx]
+ return (
  <div key={`${key}-test-${idx}`} className="prescription-item">
  {editMode && validationStatus !== 'validated' ? (
 <BiologyTestEditForm
@@ -5879,18 +5929,27 @@ const ConsultationReport = () => {
  )}
  {test.motifClinique && (
  <p className="text-sm text-gray-600 mt-1">
- Indication: {test.motifClinique}
+ Indication: {indicationNode || test.motifClinique}
  </p>
  )}
  </div>
  <div className="text-sm text-gray-500">
+ {/* Dermoscopy / Wood's lamp / RCM / patch testing / phototesting are
+   bedside clinical procedures with no specimen — hide Tube + TAT lines
+   instead of surfacing the misleading "Tube: As per laboratory protocol"
+   fallback. Detect on test name; lab tests don't match this pattern. */}
+ {!/\b(dermo?scop|dermatoscop|wood'?s\s*lamp|reflect(ance)?\s*confocal|rcm\b|patch\s*test|photo\s*test|phototest|trichoscop|capilloscop)/i.test(String(test.nom || '')) && (
+ <>
  <p>Tube: {test.tubePrelevement}</p>
  <p>TAT: {test.delaiResultat}</p>
+ </>
+ )}
  </div>
  </div>
  )}
  </div>
- ))}
+ )
+ })}
  </div>
  </div>
  )
@@ -5937,6 +5996,12 @@ const ConsultationReport = () => {
  </div>
  )}
 
+ <SectionBibliography
+ references={labUsedRefs}
+ globalReferences={evidenceRefs}
+ title="Références citées dans cette demande d'analyses"
+ />
+
  <div className="mt-8 pt-6 border-t border-gray-300">
  <p className="text-sm text-gray-600 mb-4">
  Laboratory: {report?.ordonnances?.biologie?.prescription?.laboratoireRecommande || "Any MoH approved laboratory"}
@@ -5974,7 +6039,25 @@ const ConsultationReport = () => {
  const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
  const patient = getReportPatient()
  const praticien = getReportPraticien()
- 
+ const evidenceRefs = (diagnosisData?.evidence_references as any[]) || []
+ // Indications + diagnostic questions both may carry citations.
+ const indicationCitations = aggregateReferences(
+   examens.map((e: any) => (typeof e?.indicationClinique === 'string' ? e.indicationClinique : '')),
+   evidenceRefs
+ )
+ const questionCitations = aggregateReferences(
+   examens.map((e: any) => (typeof e?.questionDiagnostique === 'string' ? e.questionDiagnostique : '')),
+   evidenceRefs
+ )
+ const imagingUsedRefIds = new Set<string>()
+ ;[...indicationCitations.usedRefs, ...questionCitations.usedRefs].forEach((r: any) => {
+   if (r?.ref_id) imagingUsedRefIds.add(r.ref_id)
+   else if (r?.title) imagingUsedRefIds.add(r.title)
+ })
+ const imagingUsedRefs = evidenceRefs.filter((r: any) =>
+   imagingUsedRefIds.has(r?.ref_id) || imagingUsedRefIds.has(r?.title)
+ )
+
  return (
  <div id="prescription-imagerie" className="bg-white p-8 rounded-lg shadow print:shadow-none">
  <div className="border-b-2 border-blue-600 pb-4 mb-6 header">
@@ -6041,7 +6124,7 @@ const ConsultationReport = () => {
  </p>
  )}
  <p className="mt-1">
- <span className="font-medium">Clinical Indication:</span> {exam.indicationClinique}
+ <span className="font-medium">Clinical Indication:</span> {indicationCitations.nodes[index] || exam.indicationClinique}
  </p>
  {exam.contraste && (
  <p className="mt-1 text-blue-600">
@@ -6055,7 +6138,7 @@ const ConsultationReport = () => {
  )}
  {exam.questionDiagnostique && (
  <p className="mt-1 text-sm text-gray-600">
- <span className="font-medium">Clinical Question:</span> {exam.questionDiagnostique}
+ <span className="font-medium">Clinical Question:</span> {questionCitations.nodes[index] || exam.questionDiagnostique}
  </p>
  )}
  </div>
@@ -6075,6 +6158,12 @@ const ConsultationReport = () => {
  )}
  </div>
  )}
+
+ <SectionBibliography
+ references={imagingUsedRefs}
+ globalReferences={evidenceRefs}
+ title="Références citées dans cette demande d'imagerie"
+ />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
  <p className="text-sm text-gray-600 mb-4">

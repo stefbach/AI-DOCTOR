@@ -1,7 +1,9 @@
 // app/api/generate-dermatology-report/route.ts - ADAPTED FROM CONSULTATION REPORT v2.6 FOR DERMATOLOGY
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { callLLM } from "@/lib/llm-client"
+
+export const runtime = 'nodejs'
+export const maxDuration = 600 // 600s for DeepSeek-V4-Pro narrative generation (10-section dermato report)
 import {
   buildRefDisplayMap,
   buildRefSourceYearMap,
@@ -191,15 +193,24 @@ function translateFrenchMedicalTerms(text: string): string {
   }
   
   let translatedText = text
-  
-  // Appliquer les traductions (ordre important : phrases longues d'abord)
+
+  // Apply translations longest-first so multi-word phrases beat single
+  // words. Wrap each French term in word boundaries (\b) so we don't
+  // accidentally rewrite substrings of unrelated English words.
+  // Without the boundary, 'mois' → 'month' was rewriting 'moisturizer'
+  // into 'monthturizer' in every dermato report. Same trap would hit
+  // 'jour' inside 'journey', 'sur' inside 'surface', etc.
   Object.entries(translations)
-    .sort((a, b) => b[0].length - a[0].length) // Trier par longueur décroissante
+    .sort((a, b) => b[0].length - a[0].length)
     .forEach(([french, english]) => {
-      const regex = new RegExp(french.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')
-      translatedText = translatedText.replace(regex, english)
+      const escaped = french.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      // Use lookahead/lookbehind word boundaries that work even when the
+      // French term starts/ends with apostrophes or accents (\b only fires
+      // on ASCII word chars). Falls back to plain \b on the simple cases.
+      const regex = new RegExp(`(^|[^\\p{L}\\p{N}])${escaped}(?=[^\\p{L}\\p{N}]|$)`, 'giu')
+      translatedText = translatedText.replace(regex, (_match, prefix) => `${prefix}${english}`)
     })
-  
+
   return translatedText
 }
 
@@ -847,11 +858,16 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any = {}
     medicationsCount: medications.length,
     labTestsCount: labTests.length,
     imagingStudiesCount: imagingStudies.length,
-    
+
     // Raw data
     rawMedications: medications,
     rawLabTests: labTests,
-    rawImaging: imagingStudies
+    rawImaging: imagingStudies,
+
+    // RAG references — forwarded so the narrative LLM can cite them inline.
+    evidenceReferences: Array.isArray(diagnosisData?.evidence_references)
+      ? diagnosisData.evidence_references
+      : []
   }
 }
 
@@ -1075,6 +1091,21 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
 
 // ==================== GPT-5.5 DATA PREPARATION ====================
 function prepareEnrichedGPTData(realData: any, patientData: any) {
+  // Coerce + filter medications once so summary.medicationsCount and the
+  // MEDICATIONS list block in the prompt are guaranteed consistent.
+  // Mismatch was the root cause of the LLM writing "no medications were
+  // prescribed" in the Management Plan while the prescription form
+  // contained 2 meds — the count read raw length, the list filtered
+  // them out, the LLM saw "MEDICATIONS (2): <empty>" and hallucinated.
+  const coercedMedications = (Array.isArray(realData.detailedMedications) ? realData.detailedMedications : [])
+    .map((m: any) => {
+      const name = m?.name || m?.medication || m?.drug_name || m?.dci || ''
+      const dosing = m?.dosing || m?.application || m?.dosage || m?.frequency || m?.posology || ''
+      const duration = m?.duration || m?.treatmentDuration || ''
+      const indication = m?.indication || m?.clinicalRationale || m?.reason || ''
+      return { name, dosing, duration, indication }
+    })
+    .filter((m: any) => m.name || m.indication)
   return {
     // Patient info
     patient: {
@@ -1105,10 +1136,17 @@ function prepareEnrichedGPTData(realData: any, patientData: any) {
       pregnancyImpact: realData.pregnancyImpact
     },
 
-    // Detailed treatment  
+    // Detailed treatment
+    // Medication shape coercion: the dermato pipeline emits topical objects
+    // with `medication`/`application` (and oral with `medication`/`dosage`),
+    // but the prompt template reads `name`/`dosing`/`duration`. Without this
+    // mapping, every line in the MEDICATIONS block becomes
+    // "- undefined: ... - undefined (undefined)", and the narrative LLM
+    // verbalises about "medication details recorded as undefined in the
+    // supplied treatment data" inside the management plan.
     treatment: {
       approach: realData.managementPlan,
-      medications: realData.detailedMedications,
+      medications: coercedMedications,
       investigationStrategy: realData.investigationStrategy,
       labTests: realData.detailedLabTests,
       imaging: realData.detailedImaging
@@ -1122,12 +1160,22 @@ function prepareEnrichedGPTData(realData: any, patientData: any) {
       patientEducation: realData.patientEducation
     },
 
-    // Summary
+    // Summary — keep count consistent with the coerced list so the LLM
+    // never sees "MEDICATIONS (2)" with an empty list block underneath.
     summary: {
-      medicationsCount: realData.medicationsCount,
+      medicationsCount: coercedMedications.length,
       labTestsCount: realData.labTestsCount,
       imagingCount: realData.imagingStudiesCount
-    }
+    },
+
+    // RAG-side evidence references — passed through to the narrative LLM so
+    // it knows which [ref-N] tokens are legitimate and can ACTIVELY cite
+    // them at the sentence level. Without this the LLM produced a 10-section
+    // dermatology report with zero inline citations even when the diagnosis
+    // had refs available.
+    evidenceReferences: Array.isArray(realData.evidenceReferences)
+      ? realData.evidenceReferences
+      : []
   }
 }
 
@@ -1139,12 +1187,12 @@ function createEnhancedSystemPrompt(pregnancyStatus: string): string {
   const breastfeedingNote = (status === 'breastfeeding') ?
     'NOTE: Patient is BREASTFEEDING - Consider medication compatibility.' : ''
 
-  return `You are a medical report writer for Mauritius. 
+  return `You are a medical report writer for Mauritius.
 Write professional medical reports in ENGLISH using the provided COMPLETE ANALYSIS from openai-diagnosis.
 
 IMPORTANT: You are receiving PRE-ANALYZED medical data including:
 - Complete diagnostic reasoning with pathophysiology (200+ words)
-- Full clinical reasoning (150+ words) 
+- Full clinical reasoning (150+ words)
 - Validated treatment plan with medications
 - Investigation strategy with specific indications
 - Differential diagnoses with probabilities
@@ -1153,6 +1201,14 @@ Your task is to STRUCTURE this existing analysis into narrative form, NOT to re-
 
 ${pregnancyNote}
 ${breastfeedingNote}
+
+CITATION RULE (read this BEFORE writing your narrative):
+The user prompt lists the available [ref-N] guideline references under "EVIDENCE REFERENCES YOU MAY CITE". You must embed [ref-N] tokens inline in your narrative when — and only when — a ref genuinely supports the sentence:
+- Place [ref-N] at the END of the sentence whose claim is supported by that guideline (e.g. "Atopic dermatitis is characterised by epidermal barrier dysfunction and Th2-dominant inflammation [ref-1].").
+- STRICT TOPIC-MATCH RULE: a [ref-N] may only be cited when the guideline title clearly addresses the SAME disease family as the primary diagnosis. Citing a "bullous pemphigoid" or "pemphigus" guideline to support recommendations for atopic dermatitis / contact dermatitis / eczema is FORBIDDEN, even when nothing else is available. A short unattributed paragraph is better than an off-topic citation.
+- If no listed ref matches the topic, write the narrative WITHOUT inline [ref-N] — do NOT pad to a minimum count.
+- Only cite [ref-N] tokens that appear in the EVIDENCE REFERENCES YOU MAY CITE list — NEVER fabricate one. NEVER replace [ref-N] with prose like "(see reference 1)".
+- Preserve verbatim any [ref-N] tokens already present in the input data (clinicalReasoning, medications.indication, etc.) — these have already been topic-checked upstream. A later pipeline stage transforms [ref-N] into Vancouver [1]/[2]/[3] for display.
 
 FORMATTING REQUIREMENTS:
 - Each section must contain minimum 150-200 words
@@ -1163,9 +1219,23 @@ FORMATTING REQUIREMENTS:
 }
 
 function createEnhancedUserPrompt(enrichedData: any): string {
+  const evidenceBlock = Array.isArray(enrichedData.evidenceReferences) && enrichedData.evidenceReferences.length > 0
+    ? `=== EVIDENCE REFERENCES YOU MAY CITE ===
+The following guideline references are available. Use these [ref-N] tokens INLINE in your narrative ONLY at the END of a sentence whose claim is GENUINELY supported by the corresponding guideline (epidemiology, diagnostic criteria, treatment first-line choice, monitoring threshold, differential reasoning, etc.).
+Skip any ref whose title does not clearly match the primary diagnosis topic — DO NOT pad to a minimum count. Off-topic citations (e.g. a pemphigoid guideline for atopic dermatitis) are FORBIDDEN.
+
+${enrichedData.evidenceReferences.map((r: any, i: number) => {
+  const refId = r?.ref_id || `ref-${i + 1}`
+  const title = r?.title || r?.guideline_title || 'Untitled guideline'
+  const source = r?.source || ''
+  return `[${refId}] ${title}${source ? ' — ' + source : ''}`
+}).join('\n')}
+
+` : ''
+
   return `Based on this COMPLETE MEDICAL ANALYSIS from openai-diagnosis, generate a professional medical report in ENGLISH:
 
-=== PATIENT INFORMATION ===
+${evidenceBlock}=== PATIENT INFORMATION ===
 ${JSON.stringify(enrichedData.patient, null, 2)}
 
 === CLINICAL PRESENTATION ===
@@ -1197,9 +1267,22 @@ ${enrichedData.diagnosis.pregnancyImpact ? `PREGNANCY IMPACT: ${enrichedData.dia
 Therapeutic Approach: ${enrichedData.treatment.approach}
 
 MEDICATIONS (${enrichedData.summary.medicationsCount}):
-${enrichedData.treatment.medications?.map((med: any) => 
-  `- ${med.name}: ${med.indication} - ${med.dosing} (${med.duration})`
-).join('\n') || 'No medications prescribed'}
+${(Array.isArray(enrichedData.treatment.medications) && enrichedData.treatment.medications.length > 0)
+  ? enrichedData.treatment.medications.map((med: any) => {
+      const parts: string[] = []
+      const head = [med?.name, med?.dosing].filter(Boolean).join(' ').trim()
+      if (head) parts.push(head)
+      if (med?.duration) parts.push(`for ${med.duration}`)
+      if (med?.indication) parts.push(`— ${med.indication}`)
+      return `- ${parts.join(' ')}`
+    }).filter((line: string) => line.trim() !== '-').join('\n')
+  : 'No medications prescribed'}
+
+⚠️ HARD CONSTRAINT — MEDICATION COUNT CONSISTENCY:
+- The MEDICATIONS section above is the SINGLE SOURCE OF TRUTH for what was prescribed.
+- If ${enrichedData.summary.medicationsCount} ≥ 1: in the managementPlan you MUST acknowledge each medication BY NAME and describe its role (e.g. "Desonide 0.05% cream was prescribed twice daily for 14 days as a low-potency topical corticosteroid…"). You MUST NOT write "no medications were prescribed", "pharmacotherapy was not indicated", or similar phrasing that contradicts the list.
+- If ${enrichedData.summary.medicationsCount} = 0: the managementPlan must state that no pharmacotherapy was indicated and explain the non-pharmacological rationale. Do NOT invent medications.
+- Never verbalise about missing fields, "undefined" data, or template placeholders — those are not patient-facing concerns.
 
 INVESTIGATIONS (${enrichedData.summary.labTestsCount + enrichedData.summary.imagingCount} total):
 Laboratory Tests (${enrichedData.summary.labTestsCount}):
@@ -1641,18 +1724,28 @@ export async function POST(request: NextRequest) {
       const systemPrompt = createEnhancedSystemPrompt(getString(patientData?.pregnancyStatus) || '')
       const userPrompt = createEnhancedUserPrompt(enrichedGPTData)
       
-      const result = await generateText({
-        model: openai("gpt-5.5"),
+      const result = await callLLM({
+        useCase: 'DERMATOLOGY_REPORT',
+        // 10-section narrative re-formatting from already-analyzed data —
+        // no clinical reasoning needed, just templated text expansion.
+        // DeepSeek-V4-Pro even at 'low' reasoning was the second long step
+        // in the dermato flow (after dermatology-diagnosis). Switch to
+        // deepseek-chat (v3 non-reasoning) for 3-5× lower latency.
+        model: 'deepseek-chat',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        maxTokens: 4000,
+        maxTokens: 8000,
+        responseFormat: 'json_object',
+        reasoningEffort: 'none',
+        timeoutMs: 240_000,
       })
+      console.log(`[llm] use=DERMATOLOGY_REPORT provider=${result.provider} model=${result.model} latency=${result.latencyMs}ms tokens=${result.usage?.totalTokens ?? 'n/a'}`)
 
       // IMPROVED JSON PARSING WITH BETTER ERROR HANDLING
-      console.log(" GPT-5.5 raw response length:", result.text.length)
-      console.log(" GPT-5.5 response preview:", result.text.substring(0, 500))
+      console.log(" LLM raw response length:", result.text.length)
+      console.log(" LLM response preview:", result.text.substring(0, 500))
       
       let cleanedText = result.text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
       

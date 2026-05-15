@@ -2,12 +2,17 @@
 // - 4 retry attempts with progressive enhancement
 // - Auto-correction on final attempt
 // - 8000 max tokens for all modes
-// - Upgraded models: fast→gpt-5.5, balanced→gpt-5.5, intelligent→gpt-5.5
+// - LLM provider switchable via env var LLM_PROVIDER_QUESTIONS (openai|deepseek)
 import { type NextRequest, NextResponse } from "next/server"
-import OpenAI from 'openai'
+import { z } from 'zod'
+import { callLLM } from '@/lib/llm-client'
 
 // ==================== CONFIGURATION ====================
 export const runtime = 'nodejs'
+// DeepSeek V4-Pro thinking can take ~70s at default reasoning_effort. We
+// raise the function timeout to 120s and brake reasoning to 'low' below to
+// keep latency safely under the limit while preserving JSON quality.
+export const maxDuration = 600 // 600s for parity with /api/openai-diagnosis: DeepSeek-V4-Pro on the Phase-5 enriched question system prompt regularly runs 100-160s (vs ~65-95s under the previous 1-line prompt). 120s was timing out on the questions endpoint after the Phase 5 prompt upgrade.
 
 // ==================== INTERFACES & TYPES ====================
 interface PatientData {
@@ -318,41 +323,71 @@ function containsAll(text: string, keywords: string[]): boolean {
   return keywords.every(keyword => normalizedText.includes(normalizeText(keyword)))
 }
 
+// ==================== OUTPUT VALIDATION (Zod) ====================
+// Loose schema: we want resilience to model variations, just enforce the
+// minimal contract used downstream by the questions form.
+const QuestionSchema = z.object({
+  id: z.union([z.string(), z.number()]).optional(),
+  question_id: z.union([z.string(), z.number()]).optional(),
+  question: z.string().min(1),
+}).passthrough()
+
+const QuestionsPayloadSchema = z.object({
+  questions: z.array(QuestionSchema).min(1),
+}).passthrough()
+
 // ==================== RETRY MECHANISM ====================
 async function callOpenAIWithRetry(
-  apiKey: string,
+  _apiKey: string,
   model: string,
   prompt: string,
   systemMessage: string,
   isPregnant: boolean,
   maxRetries: number = 3
 ): Promise<any> {
-  const openai = new OpenAI({ apiKey })
   let lastError: Error | null = null
+  let lastLLMMeta: { provider: string; model: string; latencyMs: number; fallbackUsed: boolean } | null = null
+
+  // Anti-hallucination clause appended once and kept across retries.
+  const antiHallucination = `\n\nANTI-HALLUCINATION RULE (STRICT): Never invent facts. Each question must be grounded in the patient context provided. If the context is too thin to ask N questions, return fewer high-quality questions rather than fabricated ones. Output MUST be valid JSON with the shape { "questions": [{ "id": ..., "question": "..." }, ...] }.`
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`📡 OpenAI call attempt ${attempt + 1}/${maxRetries + 1} (model: ${model})`)
+      console.log(`📡 LLM call attempt ${attempt + 1}/${maxRetries + 1} (model hint: ${model})`)
 
-      let enhancedSystemMessage = systemMessage
+      let enhancedSystemMessage = `${systemMessage}${antiHallucination}`
 
       if (attempt === 1) {
-        enhancedSystemMessage = `${systemMessage}\n\nCRITICAL: Questions must be clinically specific, actionable, and evidence-based.${isPregnant ? ' Consider pregnancy safety.' : ''}`
+        enhancedSystemMessage += `\n\nCRITICAL: Questions must be clinically specific, actionable, and evidence-based.${isPregnant ? ' Consider pregnancy safety.' : ''}`
       } else if (attempt >= 2) {
-        enhancedSystemMessage = `${systemMessage}\n\nAll questions must have unique IDs, clear priorities, and be patient-appropriate. Response must be valid JSON.`
+        enhancedSystemMessage += `\n\nAll questions must have unique IDs, clear priorities, and be patient-appropriate. Response must be valid JSON.`
       }
 
-      const completion = await openai.chat.completions.create({
-        model,
+      const llmResult = await callLLM({
+        useCase: 'QUESTIONS',
+        // Same shift applied across the rest of the routes: generating 5-8
+        // structured clinical questions is templated output, not reasoning.
+        // V4-Pro at reasoningEffort 'low' was burning 30-60s of CoT for
+        // the "Generating Questions… 2-3s" step — way past the UI estimate.
+        // deepseek-chat handles this schema in ~5-15s.
+        model: 'deepseek-chat',
         messages: [
           { role: 'system', content: enhancedSystemMessage },
-          { role: 'user', content: prompt }
+          { role: 'user', content: prompt },
         ],
-        max_completion_tokens: 8000,
-        response_format: { type: 'json_object' },
+        maxTokens: 4000,
+        responseFormat: 'json_object',
+        reasoningEffort: 'none',
+        timeoutMs: 110_000,
       })
+      lastLLMMeta = {
+        provider: llmResult.provider,
+        model: llmResult.model,
+        latencyMs: llmResult.latencyMs,
+        fallbackUsed: llmResult.fallbackUsed,
+      }
 
-      const content = completion.choices[0]?.message?.content || '{}'
+      const content = llmResult.text || '{}'
 
       let parsed
       try {
@@ -361,7 +396,8 @@ async function callOpenAIWithRetry(
         throw new Error('Invalid JSON response')
       }
 
-      const questions = parsed.questions || []
+      const validation = QuestionsPayloadSchema.safeParse(parsed)
+      const questions = validation.success ? validation.data.questions : (parsed.questions || [])
 
       // Quality validation - minimum 3 questions (fast=3, balanced=5, intelligent=8)
       const hasMinimumQuestions = questions.length >= 3
@@ -382,15 +418,17 @@ async function callOpenAIWithRetry(
         console.log('✅ Auto-correction applied for missing IDs')
       }
 
-      console.log(`✅ Generated ${questions.length} questions (attempt ${attempt + 1})`)
+      console.log(`✅ Generated ${questions.length} questions (attempt ${attempt + 1}, provider=${llmResult.provider}${llmResult.fallbackUsed ? ' [fallback]' : ''})`)
 
       return {
         questions,
         qualityMetrics: {
           attempt: attempt + 1,
           questionsCount: questions.length,
-          allHaveIds
-        }
+          allHaveIds,
+          schemaValid: validation.success,
+        },
+        llm: lastLLMMeta,
       }
 
     } catch (error: any) {
@@ -1977,7 +2015,33 @@ export async function POST(request: NextRequest) {
     
     console.log(`Calling ${aiConfig.model} with ${adjustedMode} mode (history-enhanced) with retry mechanism`)
     
-    const systemMessage = `You are an expert physician conducting a thorough clinical assessment with advanced history analysis capabilities. Generate diagnostic questions based on evidence-based medicine. Always respond with valid JSON only. ${processedPatient.isPregnant ? 'IMPORTANT: This patient is pregnant - consider pregnancy-specific conditions and medication safety.' : ''} Pay special attention to history analysis findings when crafting questions.`
+    const systemMessage = `PERSONA — SENIOR CONSULTANT PHYSICIAN (MAURITIUS)
+
+You are a senior consultant physician practicing in Mauritius, with active awareness of tropical and infectious diseases endemic to the Indian Ocean region (dengue, chikungunya, leptospirosis, malaria, typhoid). You behave as the relevant subspecialist when the presentation calls for it. Your task is to generate a focused set of MCQ questions that a clinician would actually ask next, in order to discriminate between the active differential diagnoses for this specific patient — not generic textbook questions.
+
+QUESTION QUALITY RULES — STRICT
+
+1. CLINICAL DISCRIMINATION — every question must materially change the probability of at least one differential diagnosis. Forbid questions whose answer cannot move management. For each question, internally identify which differential(s) the answer discriminates.
+
+2. NO REDUNDANCY — never ask the patient to confirm something already in the chief complaint, symptoms list, or vital signs. If the chief complaint already says "fever and cough for 2 days", do NOT ask "do you have fever?" or "how long have you had cough?".
+
+3. RED-FLAG PRIORITISATION — at least one question in every set must screen for the syndrome's red flags (e.g. for fever+headache: meningeal signs, neurological deficit; for chest pain: radiation, dyspnea, sweating; for abdominal pain: peritonism, melaena; for pregnancy: bleeding, decreased fetal movement). Place red-flag questions early in the list.
+
+4. TROPICAL / GEOGRAPHIC RELEVANCE — when fever + symptoms compatible with arboviruses, leptospirosis, malaria, or typhoid: include at least one question that elicits epidemiological exposure (recent freshwater contact, rodent exposure, mosquito-bite recall, family/contact illness, food handling, travel within last 30 days). Mauritius IS a tropical / arbovirus-endemic context — do not skip this just because there is no travel history.
+
+5. ANSWER FORMAT — every question must be MCQ with 3-5 mutually exclusive options. Include "None of these" / "Not applicable" / "Unsure" as the last option when clinically appropriate. Options must be patient-comprehensible language, not medical jargon (write "sharp, like a knife stab" rather than "lancinating").
+
+6. SEQUENCING — order questions so the patient's answer to question N can refine what question N+1 needs to ask. Start broad, narrow as the differential collapses.
+
+7. PREGNANCY-AWARE — ${processedPatient.isPregnant ? 'THIS PATIENT IS PREGNANT. Include at least one question screening for pregnancy-specific red flags (vaginal bleeding, fluid leakage, decreased fetal movement, severe headache + visual change, RUQ pain). All differential considerations must weigh maternal-fetal safety.' : 'patient is not pregnant — do not generate pregnancy-specific questions.'}
+
+OUTPUT FORMAT — STRICT
+Respond with valid JSON only, no prose, in the exact shape requested in the user prompt. Each question object must include the "question" string and an "options" array of strings.
+
+ANTI-BOILERPLATE
+Banned phrasings: "How are you feeling today?", "Can you describe your symptoms?", "Is there anything else?", "On a scale of 1 to 10..." (unless quantifying pain SPECIFICALLY). Every question must convey case-specific clinical purpose.
+
+Pay special attention to history-analysis findings when crafting questions.`
     
     const result = await callOpenAIWithRetry(
       apiKey,
@@ -2028,7 +2092,10 @@ export async function POST(request: NextRequest) {
         compliance: ['GDPR', 'HIPAA']
       },
       metadata: {
-        model: aiConfig.model,
+        model: result.llm?.model ?? aiConfig.model,
+        provider: result.llm?.provider ?? 'openai',
+        fallbackUsed: result.llm?.fallbackUsed ?? false,
+        llmLatencyMs: result.llm?.latencyMs,
         version: '4.0-Professional-Grade-4Retry',
         processingTime: Date.now() - startTime,
         dataCompleteness,

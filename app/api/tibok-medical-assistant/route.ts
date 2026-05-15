@@ -3,12 +3,11 @@
 // Version 1.0 - Integration with Professional Report Page
 
 import { NextRequest, NextResponse } from "next/server"
-import { generateObject } from "ai"
-import { openai } from "@ai-sdk/openai"
 import { z } from "zod"
+import { callLLM } from "@/lib/llm-client"
 
 export const runtime = 'nodejs'
-export const maxDuration = 90 // 90 seconds for GPT-5.5 medical assistance (increased for complex analysis)
+export const maxDuration = 120 // 120s: DeepSeek V4-Pro thinking can be slower than gpt-5.5
 
 // ==================== ZOD SCHEMA FOR STRUCTURED OUTPUT ====================
 const tibokResponseSchema = z.object({
@@ -484,27 +483,62 @@ export async function POST(request: NextRequest) {
     // Build context summary from all documents (avec données anonymisées)
     const contextSummary = buildDocumentContextSummary(documentContext || {})
 
-    // Prepare messages for GPT-5.5 (avec données anonymisées)
+    // Prepare messages for the LLM (avec données anonymisées)
+    const antiHallucinationClause = `\n\nANTI-HALLUCINATION RULE (STRICT): Base every suggested action on the provided document context. Do NOT invent drugs, lab tests, imaging studies or report content absent from the context. If you cannot justify an action from the documents in front of you, return an empty actions array and explain briefly in "response".`
     const messages: Message[] = [
-      { role: 'system', content: TIBOK_MEDICAL_ASSISTANT_SYSTEM_PROMPT },
+      { role: 'system', content: TIBOK_MEDICAL_ASSISTANT_SYSTEM_PROMPT + antiHallucinationClause },
       { role: 'system', content: contextSummary },  // ✅ CONTEXTE ANONYMISÉ
       ...conversationHistory.slice(-15), // Keep last 15 messages for context
       { role: 'user', content: message }
     ]
 
-    console.log('📡 Calling GPT-5.5 with ANONYMIZED patient data (GDPR/HIPAA compliant)...')
+    console.log('📡 Calling LLM with ANONYMIZED patient data (GDPR/HIPAA compliant)...')
 
-    // Call GPT-5.5 with structured output (guarantees valid JSON)
-    const result = await generateObject({
-      model: openai("gpt-5.5", { reasoningEffort: "none" }),
-      schema: tibokResponseSchema,
-      messages,
+    // Call LLM via wrapper. DeepSeek does not support strict json_schema like
+    // OpenAI structured outputs, so we constrain output via json_object +
+    // Zod safeParse on the parsed payload.
+    const result = await callLLM({
+      useCase: 'TIBOK',
+      messages: messages.map((m: any) => ({
+        role: m.role,
+        content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content),
+      })),
       maxTokens: 1500,
+      responseFormat: 'json_object',
+      reasoningEffort: 'low',
+      timeoutMs: 110_000,
     })
 
-    const parsed = result.object as any
+    let parsed: any
+    try {
+      const cleanText = (result.text || '{}').replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
+      const firstBrace = cleanText.indexOf('{')
+      const lastBrace = cleanText.lastIndexOf('}')
+      const jsonString = firstBrace >= 0 && lastBrace > firstBrace ? cleanText.substring(firstBrace, lastBrace + 1) : cleanText
+      const raw = JSON.parse(jsonString)
+      const validation = tibokResponseSchema.safeParse(raw)
+      if (validation.success) {
+        parsed = validation.data
+      } else {
+        console.warn('⚠️ TIBOK schema validation failed, coercing to safe defaults:', validation.error.issues.slice(0, 3))
+        parsed = {
+          response: typeof raw?.response === 'string' ? raw.response.slice(0, 300) : 'Unable to produce a fully-structured analysis.',
+          actions: Array.isArray(raw?.actions) ? raw.actions.slice(0, 2) : [],
+          alerts: Array.isArray(raw?.alerts) ? raw.alerts : [],
+          suggestions: Array.isArray(raw?.suggestions) ? raw.suggestions : [],
+        }
+      }
+    } catch (err: any) {
+      console.error('❌ TIBOK JSON parse failed:', err?.message)
+      parsed = {
+        response: 'Unable to parse the assistant response. Please retry.',
+        actions: [],
+        alerts: [{ type: 'warning' as const, message: 'Assistant response could not be parsed' }],
+        suggestions: [],
+      }
+    }
 
-    console.log('✅ TIBOK Assistant response generated')
+    console.log(`✅ TIBOK Assistant response generated (provider=${result.provider}${result.fallbackUsed ? ' [fallback]' : ''}, ${result.latencyMs}ms)`)
     console.log(`   - Response length: ${parsed.response.length} chars`)
     console.log(`   - Actions: ${parsed.actions.length}`)
     console.log(`   - Alerts: ${parsed.alerts.length}`)

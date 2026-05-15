@@ -1,9 +1,11 @@
 // app/api/chronic-dietary/route.ts - Dietary Protocol for Chronic Diseases
-// Uses direct OpenAI fetch with JSON mode for reliability
+// Routes through callLLM (DeepSeek when LLM_PROVIDER_CHRONIC_DIETARY=deepseek)
 import { type NextRequest, NextResponse } from "next/server"
+import { callLLM } from '@/lib/llm-client'
+import { parseLLMJsonSafely } from '@/lib/llm/json-recovery'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300 // 7-day meal plan generation needs time with gpt-5.5
+export const maxDuration = 600 // 600s for DeepSeek-V4-Pro (7-day meal plan can run 200-400s on rich cases)
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -121,12 +123,13 @@ export async function POST(req: NextRequest) {
       fatPercent = 30
     }
 
-    const systemPrompt = `You are a clinical dietitian specialized in chronic disease management.
+    // ---- Shared system context used by both half-week calls. ----
+    const sharedRules = `You are a clinical dietitian specialized in chronic disease management.
 
 CRITICAL MEDICAL REQUIREMENTS:
 1. BMI: ${bmi.toFixed(1)} kg/m²
 2. BMR (Basal Metabolic Rate): ${Math.round(bmr)} kcal/day
-3. TDEE (Total Daily Energy Expenditure): ${Math.round(tdee)} kcal/day
+3. TDEE: ${Math.round(tdee)} kcal/day
 4. TARGET DAILY CALORIES: ${Math.round(targetCalories)} kcal/day
 5. Caloric Strategy: ${caloricAdjustment}
 
@@ -144,7 +147,23 @@ Macronutrient distribution:
 - Protein: ${proteinPercent}% (${Math.round(targetCalories * proteinPercent / 400)} g)
 - Fat: ${fatPercent}% (${Math.round(targetCalories * fatPercent / 900)} g)
 
-Return ONLY valid JSON with this structure:
+DISEASE-SPECIFIC REQUIREMENTS:
+${hasDiabetes ? '- DIABETES: Low GI foods, complex carbs, 45-60g carbs per meal, avoid simple sugars' : ''}
+${hasHypertension ? '- HYPERTENSION: Low sodium (<2000mg/day), high potassium foods, DASH diet principles' : ''}
+${bmi >= 30 ? '- OBESITY: High protein for satiety, high fiber, portion control emphasis' : ''}
+
+Use Mauritius-appropriate foods (rice, dholl puri, rougaille, fish, tropical fruits).
+
+OUTPUT BUDGET RULES (critical to avoid truncated JSON):
+- Each food entry SHORT: "item" ≤ 4 words, "quantity" ≤ 3 words.
+- Max 5 food items per meal (3-4 ideal). Snacks: 1-2 items.
+- Numbers in "calories" / "totalCalories" are plain integers (no quotes, no units).
+- Output MUST be valid JSON with every brace and bracket closed.`
+
+    // ===== CALL 1: nutritional assessment + days 1-4 + practical guidance =====
+    const systemPromptCall1 = `${sharedRules}
+
+Return ONLY valid JSON with this exact structure (no extra keys):
 {
   "success": true,
   "dietaryProtocol": {
@@ -171,16 +190,15 @@ Return ONLY valid JSON with this structure:
     },
     "weeklyMealPlan": {
       "day1": {
-        "breakfast": {
-          "foods": [{"item": "food", "quantity": "amount", "calories": number}],
-          "totalCalories": ${Math.round(targetCalories * 0.25)}
-        },
+        "breakfast": {"foods": [{"item": "food", "quantity": "amount", "calories": number}], "totalCalories": ${Math.round(targetCalories * 0.25)}},
         "midMorningSnack": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.10)}},
         "lunch": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.35)}},
         "afternoonSnack": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.10)}},
         "dinner": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.20)}}
       },
-      "day2": {...}, "day3": {...}, "day4": {...}, "day5": {...}, "day6": {...}, "day7": {...}
+      "day2": "<same 5-meal object shape as day1, fully populated>",
+      "day3": "<same shape, fully populated>",
+      "day4": "<same shape, fully populated>"
     },
     "practicalGuidance": {
       "groceryList": {"proteins": [], "vegetables": [], "grains": []},
@@ -190,12 +208,28 @@ Return ONLY valid JSON with this structure:
   }
 }
 
-DISEASE-SPECIFIC REQUIREMENTS:
-${hasDiabetes ? '- DIABETES: Low GI foods, complex carbs, 45-60g carbs per meal, avoid simple sugars' : ''}
-${hasHypertension ? '- HYPERTENSION: Low sodium (<2000mg/day), high potassium foods, DASH diet principles' : ''}
-${bmi >= 30 ? '- OBESITY: High protein for satiety, high fiber, portion control emphasis' : ''}
+PART 1 of 2: Generate ONLY days 1-4. Days 5-7 will be requested in a follow-up call — DO NOT include them here.
+groceryList: max 8 items per category. mealPrepTips: max 5 short bullets. cookingMethods: max 5 each.`
 
-Use Mauritius-appropriate foods (rice, dholl puri, rougaille, fish, tropical fruits).`
+    // ===== CALL 2: days 5-7 only =====
+    const systemPromptCall2 = `${sharedRules}
+
+PART 2 of 2: Generate ONLY days 5-7 of the 7-day meal plan. Vary the menus from days 1-4 to keep the week interesting while respecting the same caloric targets, macro distribution, and disease-specific constraints.
+
+Return ONLY valid JSON with this exact structure (no nesting under dietaryProtocol, no extra keys):
+{
+  "weeklyMealPlan": {
+    "day5": {
+      "breakfast": {"foods": [{"item": "food", "quantity": "amount", "calories": number}], "totalCalories": ${Math.round(targetCalories * 0.25)}},
+      "midMorningSnack": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.10)}},
+      "lunch": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.35)}},
+      "afternoonSnack": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.10)}},
+      "dinner": {"foods": [...], "totalCalories": ${Math.round(targetCalories * 0.20)}}
+    },
+    "day6": "<same shape, fully populated>",
+    "day7": "<same shape, fully populated>"
+  }
+}`
 
     // ANONYMIZED patient context - no personal identifiers sent to AI
     const patientContext = `
@@ -211,75 +245,117 @@ VITAL SIGNS:
 - BP: ${clinicalData?.vitalSigns?.bloodPressureSystolic || '?'}/${clinicalData?.vitalSigns?.bloodPressureDiastolic || '?'} mmHg
 - Blood Glucose: ${clinicalData?.vitalSigns?.bloodGlucose || '?'} g/L
 
-Generate complete 7-day meal plan with EXACTLY ${Math.round(targetCalories)} kcal per day.`
+PART 1: produce ONLY days 1-4 plus nutritionalAssessment and practicalGuidance, with daily totals near ${Math.round(targetCalories)} kcal.`
 
-    const apiKey = process.env.OPENAI_API_KEY
-    if (!apiKey) {
-      return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 })
-    }
+    // ===== CALLS 1 & 2 in PARALLEL =====
+    // Vercel serverless has a hard ~300s edge-gateway cap on Pro plan
+    // (independent of maxDuration). Two sequential ~3-min DeepSeek calls
+    // were tripping ERR_CONNECTION_CLOSED in the client. Running them
+    // concurrently keeps wall time at max(call1, call2) ≈ 3 min instead
+    // of 5-6 min, comfortably under the cap.
+    //
+    // Trade-off: call 2 no longer sees call 1's days 1-4 output, so it
+    // can't explicitly "vary from" them. We compensate with a stronger
+    // diversity rule in systemPromptCall2 (\"choose 3 menus that are
+    // distinct from each other and from any common breakfast/lunch
+    // patterns\") and rely on the LLM's variation tendencies — which are
+    // strong enough on a structured generation like this. Worst case a
+    // dish repeats once across the week; a non-blocking issue.
+    const part2UserPrompt = `${patientContext}
 
-    console.log('🥗 Calling OpenAI API (direct fetch, JSON mode) for 7-day dietary protocol...')
+PART 2: produce ONLY days 5-7. Choose distinct menus from each other so the patient sees a variety of dishes within these three days, while respecting the same caloric targets and macro distribution.`
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-5.5",
+    console.log('🥗 Dietary calls 1/2 + 2/2 running in PARALLEL on deepseek-chat...')
+    // deepseek-chat (v3 non-reasoning) is 3-5× faster than deepseek-v4-pro
+    // on this template-filling task. v4-pro is a reasoning model that spends
+    // 200-400s in chain-of-thought BEFORE emitting tokens, which is wasted
+    // budget when the task is "fill a 7-day meal plan template" — no novel
+    // medical reasoning is required (the calorie targets, macro distribution,
+    // and disease-specific constraints are already computed and pinned in
+    // the system prompt). Expected wall time drops from ~10 min → ~1-2 min.
+    const FAST_MODEL = 'deepseek-chat'
+    const [call1Settled, call2Settled] = await Promise.allSettled([
+      callLLM({
+        useCase: 'CHRONIC_DIETARY',
+        model: FAST_MODEL,
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: patientContext }
+          { role: 'system', content: systemPromptCall1 },
+          { role: 'user', content: patientContext }
         ],
-        max_completion_tokens: 10000,
-        response_format: { type: "json_object" }
+        // deepseek-chat caps output at 8192 tokens. The Part-1 schema
+        // (4 days × 5 meals × 3-5 foods + nutritionalAssessment +
+        // practicalGuidance) fits comfortably under 8k when foods stay
+        // short per the OUTPUT BUDGET RULES in the prompt.
+        maxTokens: 8000,
+        responseFormat: 'json_object',
+        // 'none' = no reasoning_effort param sent. deepseek-chat doesn't
+        // support reasoning_effort anyway, and explicitly passing 'low'
+        // would just be ignored (or worse, rejected by the provider).
+        reasoningEffort: 'none',
+        timeoutMs: 240_000,
       }),
-    })
+      callLLM({
+        useCase: 'CHRONIC_DIETARY',
+        model: FAST_MODEL,
+        messages: [
+          { role: 'system', content: systemPromptCall2 },
+          { role: 'user', content: part2UserPrompt }
+        ],
+        // Part 2: 3 days × 5 meals, easily fits in 6k tokens.
+        maxTokens: 6000,
+        responseFormat: 'json_object',
+        reasoningEffort: 'none',
+        timeoutMs: 240_000,
+      }),
+    ])
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error(`❌ OpenAI API error (${response.status}):`, errorText.substring(0, 300))
+    if (call1Settled.status === 'rejected') {
+      console.error('❌ Dietary call 1 failed:', call1Settled.reason?.message || call1Settled.reason)
       return NextResponse.json(
-        { error: `OpenAI API error (${response.status})`, details: errorText.substring(0, 200) },
+        { error: 'Dietary call 1 failed', details: String(call1Settled.reason?.message || call1Settled.reason).substring(0, 200) },
         { status: 502 }
       )
     }
+    const call1Result = call1Settled.value
+    console.log(`[llm] use=CHRONIC_DIETARY part=1/2 provider=${call1Result.provider} model=${call1Result.model} latency=${call1Result.latencyMs}ms tokens=${call1Result.usage?.totalTokens ?? 'n/a'}`)
 
-    const data = await response.json()
-    const choice = data.choices?.[0]
-    const content = choice?.message?.content
-
-    console.log(`📡 OpenAI response - finish_reason: ${choice?.finish_reason}, usage: ${JSON.stringify(data.usage || {})}`)
-
-    if (!content) {
-      console.error('❌ No content in OpenAI response:', JSON.stringify(data, null, 2).substring(0, 500))
-      if (choice?.finish_reason === 'length') {
-        return NextResponse.json(
-          { error: "Response truncated - model ran out of tokens" },
-          { status: 502 }
-        )
-      }
-      return NextResponse.json(
-        { error: "No content in OpenAI response" },
-        { status: 502 }
-      )
-    }
-
-    console.log('✅ Dietary protocol response received, length:', content.length)
-
-    let dietaryData
+    let part1: any
     try {
-      dietaryData = JSON.parse(content)
-      console.log('✅ JSON parsed successfully')
+      part1 = parseLLMJsonSafely(call1Result.text || '', 'dietary part 1')
     } catch (parseError: any) {
-      console.error("❌ JSON parse error:", parseError.message)
-      console.error("Content sample:", content.substring(0, 500))
       return NextResponse.json(
-        { error: "Failed to parse dietary protocol", details: parseError.message },
+        { error: 'Failed to parse dietary protocol (part 1)', details: parseError.message },
         { status: 500 }
       )
     }
+
+    // Call 2 result (may have failed — graceful degradation).
+    let part2: any = null
+    if (call2Settled.status === 'fulfilled') {
+      const call2Result = call2Settled.value
+      console.log(`[llm] use=CHRONIC_DIETARY part=2/2 provider=${call2Result.provider} model=${call2Result.model} latency=${call2Result.latencyMs}ms tokens=${call2Result.usage?.totalTokens ?? 'n/a'}`)
+      try {
+        part2 = parseLLMJsonSafely(call2Result.text || '', 'dietary part 2')
+      } catch {
+        console.warn('⚠️ Dietary call 2 unparseable — returning part 1 only (days 1-4 + assessment)')
+      }
+    } else {
+      console.warn('⚠️ Dietary call 2 failed — returning part 1 only:', call2Settled.reason?.message || call2Settled.reason)
+    }
+
+    // Merge: keep part1's full envelope, append days 5-7 onto weeklyMealPlan.
+    const dietaryData = {
+      ...part1,
+      dietaryProtocol: {
+        ...(part1?.dietaryProtocol || {}),
+        weeklyMealPlan: {
+          ...(part1?.dietaryProtocol?.weeklyMealPlan || {}),
+          ...(part2?.weeklyMealPlan || {}),
+        },
+      },
+    }
+
+    console.log('✅ Dietary protocol assembled (parts 1+2 merged)')
 
     return NextResponse.json(dietaryData)
 

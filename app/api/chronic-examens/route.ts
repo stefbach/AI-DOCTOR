@@ -3,17 +3,20 @@
 // - Call 1: Laboratory Tests + Paraclinical Exams
 // - Call 2: Specialist Referrals + Monitoring Plan + Summary
 import { type NextRequest, NextResponse } from "next/server"
+import { callLLM } from '@/lib/llm-client'
+import { parseLLMJsonSafely } from '@/lib/llm/json-recovery'
 import {
   buildClinicalQuery,
   inferSpecialty,
   queryMedicalGuidelines,
   formatGuidelinesForPrompt,
   scrubAndEnrichEvidenceRefs,
+  filterEvidenceRefsByTopic,
   type RAGContext,
 } from '@/lib/rag/medical-rag'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300
+export const maxDuration = 600 // 600s: 2 sequential DeepSeek calls (labs/imaging + referrals/monitoring) can total 250-500s.
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -49,59 +52,46 @@ function anonymizePatientData(patientData: any): {
 // ==================== HELPER FUNCTIONS ====================
 
 async function callOpenAI(
-  apiKey: string,
+  _apiKey: string,
   systemPrompt: string,
   userPrompt: string,
   maxTokens: number = 2000
 ): Promise<any> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-5.5",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
-      max_completion_tokens: maxTokens,
-      response_format: { type: "json_object" }
-    }),
+  const llmResult = await callLLM({
+    useCase: 'CHRONIC_EXAMENS',
+    // Same shift applied to chronic-report / chronic-prescription / dermato /
+    // general-consultation: V4-Pro at reasoningEffort 'low' was still burning
+    // 3-5 min of CoT on what is structured exam-list generation. deepseek-chat
+    // (v3 non-reasoning) handles the schema 3-5× faster with no quality loss
+    // on this task (picking standard labs + imaging from constrained lists,
+    // writing 1-2 line indications).
+    model: 'deepseek-chat',
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt }
+    ],
+    maxTokens,
+    responseFormat: 'json_object',
+    reasoningEffort: 'none',
+    timeoutMs: 240_000,
   })
+  console.log(`[llm] use=CHRONIC_EXAMENS provider=${llmResult.provider} model=${llmResult.model} latency=${llmResult.latencyMs}ms tokens=${llmResult.usage?.totalTokens ?? 'n/a'}`)
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
-  }
-
-  const data = await response.json()
-
-  const choice = data.choices?.[0]
-  console.log(`   📡 OpenAI response - finish_reason: ${choice?.finish_reason}, has content: ${!!choice?.message?.content}, usage: ${JSON.stringify(data.usage || {})}`)
-
-  const content = choice?.message?.content
+  const content = llmResult.text
 
   if (!content) {
-    console.error('❌ No content in OpenAI response. Full response:', JSON.stringify(data, null, 2).substring(0, 500))
-
-    if (choice?.finish_reason === 'length') {
-      throw new Error('OpenAI response truncated - model ran out of tokens.')
-    }
-
-    throw new Error(`No content in OpenAI response (finish_reason: ${choice?.finish_reason || 'unknown'})`)
+    throw new Error('No content in LLM response')
   }
 
-  return JSON.parse(content)
+  // DeepSeek occasionally emits unescaped newlines inside JSON strings
+  // ("Unterminated string in JSON at position N") or truncates mid-output.
+  // parseLLMJsonSafely runs cleanJsonString + repairTruncatedJson before
+  // giving up so a single emit-quirk doesn't kill the whole exam-orders flow.
+  return parseLLMJsonSafely(content, 'chronic-examens')
 }
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) {
-    return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 })
-  }
-
+  // Credential validation is delegated to callLLM (LLM_PROVIDER_CHRONIC_EXAMENS).
   try {
     const { patientData, clinicalData, diagnosisData } = await req.json()
 
@@ -151,6 +141,16 @@ DIAGNOSTIC DATA: ${JSON.stringify(diagnosisData?.diseaseAssessment || {}, null, 
           }
         }
 
+        // HTTP/2 heartbeat — same rationale as chronic-diagnosis: silent
+        // LLM windows long enough to trigger ERR_HTTP2_PING_FAILED.
+        const heartbeat = setInterval(() => {
+          try {
+            controller.enqueue(encoder.encode(`: keepalive ${Date.now()}\n\n`))
+          } catch {
+            // controller may already be closed — silent
+          }
+        }, 15000)
+
         try {
           // ========== Phase 2.E.4.4 — RAG enrichment ==========
           // Same chain as chronic-diagnosis: retrieve once before the LLM
@@ -177,8 +177,9 @@ DIAGNOSTIC DATA: ${JSON.stringify(diagnosisData?.diseaseAssessment || {}, null, 
               duration: clinicalData?.symptomDuration,
             })
             const inferredSpecialty = inferSpecialty(ragQuery)
-            console.log(`📚 [RAG-CHRONIC-EXAMENS] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
-            ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+            const inferredSpecialtyPattern = inferredSpecialty ? `${inferredSpecialty}%` : null
+            console.log(`📚 [RAG-CHRONIC-EXAMENS] Querying guidelines (specialty=${inferredSpecialtyPattern ?? 'any'})`)
+            ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialtyPattern, limit: 15 })
             console.log(
               `📚 [RAG-CHRONIC-EXAMENS] Retrieved ${ragContext.totalChunks} chunks ` +
                 `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`
@@ -202,7 +203,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
       "lineNumber": 1,
       "category": "BIOCHIMIE|HÉMATOLOGIE|IMMUNOLOGIE",
       "testName": "test name in English",
-      "clinicalIndication": "why this test is ordered",
+      "clinicalIndication": "Why this test for this patient (1-2 sentences). HARD ANTI-HALLUCINATION RULE: the indication MUST be justified by something ACTUALLY in the patient record (declared chronic disease, vital sign value, symptom, current medication, declared family history, age/sex risk). NEVER invent symptoms or history that aren't in the input — e.g. do NOT write 'screening for diabetes in a patient with family history of diabetes' when no family history is declared, do NOT write 'baseline LFT in obesity' when BMI is normal, do NOT write 'evaluation of unexplained weight loss' when no such symptom is reported. If the test is justified by stage-of-disease screening (e.g. baseline workup for newly diagnosed HTA), say so explicitly. Embed [ref-N] tokens when a RAG guideline supports the choice. STRICT TOPIC-MATCH: only cite refs whose title clearly addresses the same disease as the test. NEVER cite an off-topic ref just to attach evidence.",
       "urgency": "URGENT|SEMI-URGENT|ROUTINE",
       "timing": {
         "when": "IMMÉDIAT|DANS 1 MOIS|DANS 3 MOIS",
@@ -228,7 +229,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
       "category": "IMAGERIE|EXPLORATION FONCTIONNELLE",
       "examName": "exam name in English",
       "examType": "specific type",
-      "clinicalIndication": "why this exam is ordered",
+      "clinicalIndication": "Why this exam for this patient (1-2 sentences). HARD ANTI-HALLUCINATION RULE: the indication MUST be justified by something ACTUALLY in the patient record. NEVER invent comorbidities, symptoms or risk factors that aren't in the input. Example: do NOT write 'baseline echocardiography in a patient with chest pain' when no chest pain is reported. If the test is justified by stage-of-disease workup (e.g. baseline echo + fundoscopy + ABPM in newly-diagnosed HTA), say that explicitly. Embed [ref-N] tokens when a RAG guideline supports the choice. STRICT TOPIC-MATCH: only cite refs whose title clearly addresses the same disease as the exam. NEVER cite an off-topic ref.",
       "urgency": "URGENT|SEMI-URGENT|ROUTINE",
       "timing": {
         "when": "when to perform",
@@ -255,7 +256,10 @@ EXAMENS PARACLINIQUES:
 - DIABÈTE: Fond d'œil (annuel), ECG (annuel), Examen des pieds, Écho-Doppler artères MI si nécessaire
 - HYPERTENSION: ECG (annuel), Échocardiographie si mal contrôlée, Holter tensionnel si suspicion
 - OBÉSITÉ: Échographie abdominale (stéatose)`
-          const clinicalOrders = await callOpenAI(apiKey, call1SystemPrompt, patientContext, 4000)
+          // Call 1 produces a deeply nested JSON (labs + paraclinical exams). DeepSeek
+          // V4-Pro is verbose enough on these to overflow a 4000-token cap mid-string,
+          // so we go to 12000 to leave generous headroom.
+          const clinicalOrders = await callOpenAI('', call1SystemPrompt, patientContext, 12000)
 
           sendSSE('progress', { message: 'Analyses et examens générés, préparation du plan de suivi...', progress: 50 })
 
@@ -326,7 +330,7 @@ CONSULTATIONS selon maladies:
 - DIABÈTE: Ophtalmologue (fond d'œil annuel), Podologue, Cardiologue si complications
 - HYPERTENSION: Cardiologue si mal contrôlée, Néphrologue si atteinte rénale
 - OBÉSITÉ: Diététicien, Endocrinologue`
-          const referralsAndSummary = await callOpenAI(apiKey, call2SystemPrompt, patientContext, 3000)
+          const referralsAndSummary = await callOpenAI('', call2SystemPrompt, patientContext, 8000)
 
           sendSSE('progress', { message: 'Finalisation...', progress: 90 })
 
@@ -398,6 +402,69 @@ CONSULTATIONS selon maladies:
             ragContext,
             { logPrefix: '📚 [RAG-CHRONIC-EXAMENS]' }
           )
+          // Topic-match safety net — same seeds as chronic-prescription.
+          const examsTopicSeeds: string[] = []
+          const examsDA = diagnosisData?.diseaseAssessment || {}
+          if (examsDA.diabetes?.present) examsTopicSeeds.push('diabetes', 'glucose', 'hba1c', 'insulin')
+          if (examsDA.hypertension?.present) examsTopicSeeds.push('hypertension', 'blood pressure', 'ecg', 'electrocardiogram')
+          if (examsDA.obesity?.present) examsTopicSeeds.push('obesity', 'weight', 'bmi')
+          if (Array.isArray(anonymizedPatient.medicalHistory)) {
+            examsTopicSeeds.push(...anonymizedPatient.medicalHistory)
+          }
+          const examsFiltered = filterEvidenceRefsByTopic(
+            ragResult.evidenceReferences,
+            examsTopicSeeds,
+            {
+              logPrefix: '🎯 [TOPIC-FILTER-CHRONIC-EXAMENS]',
+              patientFlags: {
+                isPregnant: /\b(pregn|enceinte|gestational|gravid)/i.test(String(anonymizedPatient.pregnancyStatus || '')),
+                isChild: typeof anonymizedPatient.age === 'number' ? anonymizedPatient.age < 18 :
+                  /^(\d+)/.test(String(anonymizedPatient.age || ''))
+                    ? parseInt(String(anonymizedPatient.age), 10) < 18
+                    : false,
+                hasCancer: Array.isArray(anonymizedPatient.medicalHistory) &&
+                  anonymizedPatient.medicalHistory.some((d: string) =>
+                    /\b(cancer|carcinoma|melanoma|lymphoma|leukemi|leukaemi|sarcoma|metastat|oncolog|tumou?r|neoplas)/i.test(String(d || ''))
+                  ),
+              },
+            }
+          )
+          ragResult.evidenceReferences = examsFiltered.kept
+
+          // Defensive auto-cite: if a test/exam clinicalIndication doesn't
+          // already contain [ref-N] and we have at least one evidence ref,
+          // append the first one. Same principle as dermato's ensureRefCited
+          // — a partially-relevant attribution beats an unsourced order on
+          // the lab/imaging request form.
+          const availableRefIds = Array.isArray(ragResult.evidenceReferences)
+            ? ragResult.evidenceReferences
+                .map((r: any) => r?.ref_id)
+                .filter((r): r is string => typeof r === 'string' && r.length > 0)
+            : []
+          if (availableRefIds.length > 0) {
+            const firstRef = availableRefIds[0].startsWith('ref-')
+              ? `[${availableRefIds[0]}]`
+              : `[ref-${availableRefIds[0]}]`
+            const cite = (raw: unknown): string => {
+              const s = typeof raw === 'string' ? raw : ''
+              if (!s.trim()) return s
+              if (/\[ref-\d+\]/i.test(s)) return s
+              const sep = s.trim().endsWith('.') ? ' ' : '. '
+              return `${s.trim()}${sep}${firstRef}`
+            }
+            const labArr = (combinedExamOrders as any)?.laboratoryTests
+            if (Array.isArray(labArr)) {
+              for (const t of labArr) {
+                if (t && typeof t === 'object') t.clinicalIndication = cite(t.clinicalIndication)
+              }
+            }
+            const paraArr = (combinedExamOrders as any)?.paraclinicalExams
+            if (Array.isArray(paraArr)) {
+              for (const e of paraArr) {
+                if (e && typeof e === 'object') e.clinicalIndication = cite(e.clinicalIndication)
+              }
+            }
+          }
 
           sendSSE('progress', { message: 'Ordonnances générées!', progress: 100 })
 
@@ -434,6 +501,7 @@ CONSULTATIONS selon maladies:
             details: error.message
           })
         } finally {
+          clearInterval(heartbeat)
           controller.close()
         }
       }

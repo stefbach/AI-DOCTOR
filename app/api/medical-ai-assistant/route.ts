@@ -1,5 +1,9 @@
 // app/api/medical-ai-assistant/route.ts
 import { NextRequest, NextResponse } from 'next/server'
+import { callLLM } from '@/lib/llm-client'
+
+export const runtime = 'nodejs'
+export const maxDuration = 120
 
 interface MedicalAIRequest {
   userRequest: string
@@ -199,16 +203,6 @@ export async function POST(request: NextRequest) {
   console.log('🤖 Enhanced Medical AI Assistant API - Mauritius Standards')
   
   try {
-    const apiKey = process.env.OPENAI_API_KEY
-    
-    if (!apiKey || !apiKey.startsWith('sk-')) {
-      console.error('❌ OpenAI API key missing or invalid')
-      return NextResponse.json({
-        success: false,
-        error: 'Configuration API manquante'
-      }, { status: 500 })
-    }
-
     const body: MedicalAIRequest = await request.json()
     
     if (!body.userRequest || !body.medicalContext) {
@@ -248,45 +242,31 @@ export async function POST(request: NextRequest) {
     console.log('🔧 Enhanced capabilities enabled:', useEnhancedCapabilities)
     console.log('🎯 Available capabilities:', body.medicalContext.capabilities)
 
-    // Appel à GPT-5.5 avec paramètres optimisés pour les capacités étendues
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-5.5',
-        messages: [
-          {
-            role: 'system',
-            content: useEnhancedCapabilities ?
-              `You are an expert medical AI assistant specializing in Mauritius healthcare standards with ENHANCED CAPABILITIES. You MUST respond ONLY with valid JSON. Use UK medical terminology, precise DCI names, and comply with Medical Council of Mauritius guidelines. You can now modify text sections, add medications, add lab tests, and add imaging studies. Always provide structured data for additions and specify the correct "type" field in your suggestion.` :
-              `You are an expert medical AI assistant specializing in Mauritius healthcare standards. You MUST respond ONLY with valid JSON. Use UK medical terminology, precise DCI names, and comply with Medical Council of Mauritius guidelines. Every medication must have exact DCI, UK dosing format, and detailed clinical indications.`
-          },
-          {
-            role: 'user',
-            content: finalPrompt
-          }
-        ],
-        max_completion_tokens: 4000,
-        response_format: { type: "json_object" },
-        top_p: 0.9,
-        frequency_penalty: 0.1,
-        presence_penalty: 0.2
-      }),
+    // Appel LLM via wrapper unifié (OpenAI / DeepSeek selon LLM_PROVIDER_MEDICAL_AI)
+    const systemContent = useEnhancedCapabilities
+      ? `You are an expert medical AI assistant specializing in Mauritius healthcare standards with ENHANCED CAPABILITIES. You MUST respond ONLY with valid JSON. Use UK medical terminology, precise DCI names, and comply with Medical Council of Mauritius guidelines. You can now modify text sections, add medications, add lab tests, and add imaging studies. Always provide structured data for additions and specify the correct "type" field in your suggestion.`
+      : `You are an expert medical AI assistant specializing in Mauritius healthcare standards. You MUST respond ONLY with valid JSON. Use UK medical terminology, precise DCI names, and comply with Medical Council of Mauritius guidelines. Every medication must have exact DCI, UK dosing format, and detailed clinical indications.`
+
+    const antiHallucination = `\n\nANTI-HALLUCINATION RULE (STRICT): Base every suggestion strictly on the provided medical context. Do NOT invent drugs, dosages, lab tests or imaging absent from established Mauritius / UK guidelines. If you cannot justify a suggestion from the provided context and recognised guidelines, return an empty actions array with a short explanation in "response".`
+
+    const llmResult = await callLLM({
+      useCase: 'MEDICAL_AI',
+      messages: [
+        { role: 'system', content: systemContent + antiHallucination },
+        { role: 'user', content: finalPrompt },
+      ],
+      maxTokens: 4000,
+      responseFormat: 'json_object',
+      reasoningEffort: 'low',
+      topP: 0.9,
+      frequencyPenalty: 0.1,
+      presencePenalty: 0.2,
+      timeoutMs: 110_000,
     })
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ OpenAI API error:', errorText)
-      throw new Error(`OpenAI API error: ${response.status}`)
-    }
+    const rawContent = llmResult.text
 
-    const data = await response.json()
-    const rawContent = data.choices[0]?.message?.content || ''
-
-    console.log('📥 Enhanced GPT-5.5 response received')
+    console.log(`📥 LLM response received (provider=${llmResult.provider}${llmResult.fallbackUsed ? ' [fallback]' : ''}, ${llmResult.latencyMs}ms)`)
 
     // Parser la réponse JSON
     let parsedResponse: any

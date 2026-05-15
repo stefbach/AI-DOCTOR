@@ -1,11 +1,16 @@
 // app/api/generate-consultation-report/route.ts - VERSION 2.6 WITH PRAGMATIC TRANSLATION AND IMPROVEMENTS
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { callLLM, type LLMMessage } from "@/lib/llm-client"
+import { CRITICAL_RULES_BLOCK_NARRATIVE } from "@/lib/critical-rules"
+import { detectFabricatedExam } from "@/lib/anti-fabrication"
 import { buildRefDisplayMap, buildRefSourceYearMap, expandRefsInTree, expandRefsAsSourceYearInTree } from "@/lib/rag/medical-rag"
 
 export const runtime = 'nodejs'
-export const maxDuration = 120 // 120 seconds for GPT-5.5 report generation (increased from 60s to prevent 504 timeouts)
+// 300s: DeepSeek V4-Pro thinking on the 10-section narrative blew through
+// 120s on Vercel with a FUNCTION_INVOCATION_TIMEOUT. 300s is the cap on
+// Vercel Pro and gives enough headroom even when reasoning_effort='low'
+// produces a longer-than-expected response.
+export const maxDuration = 600 // 600s for parity with /api/openai-diagnosis: DeepSeek-V4-Pro on the report LLM with maxTokens=12000 can run 150-250s on rich cases; 600 absorbs variance without timing out mid-JSON (which is what previously triggered the fallback content path)
 
 // ==================== "HORS GUIDELINE RAG" JARGON SANITISER ====================
 // Internal pipeline vocabulary (the prompt previously asked the LLM to write
@@ -626,11 +631,29 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
   )
 
   // =========== 7. DIFFERENTIAL DIAGNOSES ===========
+  // Robust formatter: tolerate missing probability / reasoning (some LLMs
+  // omit these fields even when asked). We never want to render
+  // "(probability: undefined%, reasoning:)" to the doctor.
   const differentialDiagnoses = diagnosisData?.diagnosis?.differential || []
-  const differentialText = differentialDiagnoses.length > 0 
-    ? differentialDiagnoses.map((diff: any) => 
-        `${getString(diff.condition)} (probability: ${diff.probability}%, reasoning: ${getString(diff.reasoning)})`
-      ).join('; ')
+  const differentialText = differentialDiagnoses.length > 0
+    ? differentialDiagnoses
+        .map((diff: any) => {
+          const condition = getString(diff.condition) || 'Unspecified differential'
+          const rawProb = diff.probability
+          const probNum = typeof rawProb === 'number'
+            ? rawProb
+            : typeof rawProb === 'string' && rawProb.trim() !== '' && !isNaN(Number(rawProb))
+              ? Number(rawProb)
+              : null
+          const reasoning = getString(diff.reasoning).trim()
+          const discriminator = getString(diff.discriminating_test || diff.discriminatingTest).trim()
+          const segments: string[] = []
+          if (probNum !== null) segments.push(`probability: ${Math.round(probNum)}%`)
+          if (reasoning) segments.push(`reasoning: ${reasoning}`)
+          if (discriminator) segments.push(`discriminating test: ${discriminator}`)
+          return segments.length > 0 ? `${condition} (${segments.join('; ')})` : condition
+        })
+        .join('; ')
     : ""
 
   // =========== 8. PREGNANCY CONSIDERATIONS ===========
@@ -1566,23 +1589,46 @@ function useRealDataFallback(realData: any, pregnancyInfo: any, clinicalData?: a
     " Systematic symptom assessment was conducted."
   
   return {
-    chiefComplaint: `${chiefComplaint}${pregnancyNote} This consultation follows established medical protocols for teleconsultation assessment and management.`,
+    // Anti-boilerplate (Phase 3 follow-up): "This consultation follows
+    // established medical protocols..." was tacked onto every chief
+    // complaint regardless of content. Drop it. Pregnancy note is kept
+    // only when relevant.
+    chiefComplaint: `${chiefComplaint}${pregnancyNote}`.trim(),
     
-    historyOfPresentIllness: realData.historyOfPresentIllness || 
-      `Comprehensive history taking reveals the current clinical presentation.${symptomText} The temporal evolution and characteristics of symptoms have been assessed systematically.${isPregnant ? ` Patient's pregnancy status (${pregnancyInfo.display}) has been documented and considered in the clinical evaluation.` : ''} All relevant historical factors have been incorporated into the diagnostic assessment.`,
-    
-    pastMedicalHistory: realData.medicalHistory || 
-      `Past medical history has been reviewed systematically. Previous medical conditions, surgical procedures, medications, and allergies have been documented.${isPregnant ? ` Obstetric history and current pregnancy status have been recorded.` : ''} Family history and social history relevant to current presentation have been considered. This background information contributes to comprehensive patient care planning.`,
-    
-    physicalExamination: realData.clinicalExamination || 
-      `Clinical assessment was conducted via teleconsultation methodology. Systematic evaluation of patient's general appearance, vital signs, and symptomatic areas was performed remotely.${isPregnant ? ` Pregnancy-appropriate assessment techniques were utilized.` : ''} Visual assessment and patient-reported examination findings were documented. This remote evaluation provides valuable clinical information for diagnostic consideration.`,
-    
-    diagnosticSynthesis: realData.diagnosticSynthesis || realData.pathophysiology || 
-      `Clinical synthesis integrates all available assessment data including history, symptoms, and teleconsultation findings. ${realData.diagnosticConclusion ? `Working diagnosis of ${realData.diagnosticConclusion} is supported by clinical presentation.` : 'Systematic diagnostic approach considers differential possibilities based on available clinical information.'} The pathophysiological basis of symptoms has been analyzed.${realData.pregnancyImpact ? ` Pregnancy considerations: ${realData.pregnancyImpact}` : ''} Evidence-based clinical reasoning supports diagnostic conclusions.`,
-    
-    diagnosticConclusion: realData.diagnosticConclusion ? 
-      `Following systematic clinical evaluation, the primary diagnostic impression is: ${realData.diagnosticConclusion}. ${realData.clinicalReasoning || 'This diagnosis is established through comprehensive analysis of clinical presentation, symptomatology, and available medical information.'} The diagnostic confidence is based on teleconsultation assessment methodology.${realData.differentialText ? ` Differential diagnostic considerations include: ${realData.differentialText}` : ''}${isPregnant ? ` This diagnosis has been evaluated considering pregnancy status and implications for both maternal and fetal wellbeing.` : ''} Clinical management will be guided by this diagnostic assessment.` :
-      `Comprehensive teleconsultation evaluation has been completed with systematic diagnostic assessment. Clinical impression is being formulated based on available symptomatology and clinical presentation.${isPregnant ? ` All diagnostic considerations have been evaluated in the context of pregnancy status.` : ''} Further clinical correlation and monitoring may enhance diagnostic precision. Treatment approach will be tailored to clinical findings and patient presentation.`,
+    // Anti-boilerplate rewrite (Phase 3): each section now renders the LLM
+    // narrative when available, or a short honest "not generated" marker
+    // otherwise. The previous wrapper boilerplate ("has been reviewed
+    // systematically", "comprehensive history taking reveals", etc.) is
+    // gone — it was masking sparse LLM output instead of surfacing it.
+    historyOfPresentIllness: realData.historyOfPresentIllness?.trim() ||
+      (symptoms.length > 0
+        ? `History of present illness not generated by the AI engine. Reported symptoms: ${symptoms.join(', ')}.${isPregnant ? ` Patient is currently ${pregnancyInfo.display}.` : ''}`
+        : `History of present illness not generated by the AI engine.${isPregnant ? ` Patient is currently ${pregnancyInfo.display}.` : ''}`),
+
+    pastMedicalHistory: realData.medicalHistory?.trim() ||
+      'Past medical history not provided / not generated. The AI engine did not surface a specific record. If clinically relevant, confirm at in-person review.',
+
+    physicalExamination: realData.clinicalExamination?.trim() ||
+      'Physical examination not performed (teleconsultation). Findings limited to patient-reported symptoms; no clinician-performed inspection, palpation or auscultation available.',
+
+    diagnosticSynthesis: (realData.diagnosticSynthesis || realData.pathophysiology)?.trim() ||
+      'Diagnostic synthesis not generated by the AI engine for this consultation.',
+
+    diagnosticConclusion: realData.diagnosticConclusion
+      ? (() => {
+          const segments: string[] = []
+          segments.push(`Primary diagnostic impression: ${realData.diagnosticConclusion}.`)
+          const reasoning = realData.clinicalReasoning?.trim()
+          if (reasoning) segments.push(reasoning)
+          if (realData.differentialText) {
+            segments.push(`Differential diagnoses: ${realData.differentialText}.`)
+          }
+          if (isPregnant) {
+            segments.push('This diagnostic assessment has been evaluated in the context of the patient\'s pregnancy.')
+          }
+          return segments.join(' ')
+        })()
+      : 'Primary diagnostic conclusion not generated by the AI engine.',
     
     pregnancyConsiderations: isPregnant ?
       `Patient is currently ${pregnancyInfo.display}${pregnancyInfo.trimester ? ` in the ${pregnancyInfo.trimester}` : ''}. All clinical decisions have been made with comprehensive consideration of pregnancy safety protocols. Medication selections prioritize pregnancy categories A and B when possible. Diagnostic procedures avoid unnecessary radiation exposure. Management plan includes appropriate obstetric coordination and specialized pregnancy monitoring as indicated.` :
@@ -1605,11 +1651,46 @@ function useRealDataFallback(realData: any, pregnancyInfo: any, clinicalData?: a
       return 'No workplace-related illness or accident reported. The patient\'s condition is not documented as being related to their workplace environment or occupational activities.'
     })(),
 
-    managementPlan: `Comprehensive therapeutic strategy has been developed based on clinical assessment and diagnostic conclusions.${realData.managementPlan ? ` ${realData.managementPlan}` : ' Evidence-based treatment approach focuses on appropriate interventions for presenting condition.'} ${realData.medicationsCount > 0 ? `Pharmacological management includes ${realData.medicationsCount} medication(s)${isPregnant ? ' with confirmed pregnancy safety profiles' : ''}.` : 'Non-pharmacological management approach has been prioritized.'} ${realData.labTestsCount > 0 || realData.imagingStudiesCount > 0 ? `Diagnostic investigations include ${realData.labTestsCount || 0} laboratory studies and ${realData.imagingStudiesCount || 0} imaging examinations${isPregnant ? ' selected for pregnancy safety' : ''}.` : 'Clinical monitoring approach without immediate diagnostic testing.'} Treatment plan ensures patient safety and optimal clinical outcomes.`,
-    
-    followUpPlan: `Structured follow-up protocol ensures continuity of care and clinical monitoring.${realData.followUp ? ` ${realData.followUp}` : ' Appropriate follow-up intervals have been established based on clinical presentation.'} ${realData.pregnancyFollowUp ? `Pregnancy-specific monitoring includes: ${realData.pregnancyFollowUp}` : ''}${realData.redFlags ? ` Critical warning signs requiring immediate medical attention: ${realData.redFlags}` : ' Patient has been counseled regarding symptoms requiring urgent medical evaluation.'} This comprehensive follow-up approach promotes patient safety and ensures appropriate clinical progression.${isPregnant ? ' Coordination with obstetric care providers ensures comprehensive pregnancy management.' : ''}`,
-    
-    conclusion: `This comprehensive teleconsultation has provided thorough clinical evaluation ${realData.diagnosticConclusion ? `with establishment of ${realData.diagnosticConclusion} diagnosis` : 'with systematic symptom assessment'} and implementation of evidence-based management approach.${isPregnant ? ' All clinical decisions have incorporated pregnancy safety considerations and maternal-fetal wellbeing priorities.' : ''} Patient education has been provided regarding condition understanding and treatment compliance. Appropriate follow-up arrangements ensure continued clinical monitoring and optimal patient outcomes. This teleconsultation meets professional medical standards for remote healthcare delivery.`
+    // Anti-boilerplate rewrite (Phase 3): show the LLM-generated content
+    // when present, otherwise a short honest placeholder. The investigative
+    // counts (medications / labs / imaging) are appended as a factual
+    // summary line only when at least one is > 0 — never as filler.
+    managementPlan: (() => {
+      const llm = realData.managementPlan?.trim()
+      const counts: string[] = []
+      if (realData.medicationsCount > 0) {
+        counts.push(
+          `${realData.medicationsCount} medication(s) prescribed${isPregnant ? ' (pregnancy-safe selections)' : ''}`,
+        )
+      }
+      if (realData.labTestsCount > 0) counts.push(`${realData.labTestsCount} laboratory test(s) requested`)
+      if (realData.imagingStudiesCount > 0) counts.push(`${realData.imagingStudiesCount} imaging study/studies requested`)
+      const countsLine = counts.length > 0 ? `Summary: ${counts.join('; ')}.` : ''
+      if (llm) return countsLine ? `${llm}\n\n${countsLine}` : llm
+      return countsLine
+        ? `Management plan narrative not generated by the AI engine. ${countsLine}`
+        : 'Management plan not generated by the AI engine.'
+    })(),
+
+    followUpPlan: (() => {
+      const llm = realData.followUp?.trim()
+      const extras: string[] = []
+      if (realData.pregnancyFollowUp) extras.push(`Pregnancy-specific monitoring: ${realData.pregnancyFollowUp}.`)
+      if (realData.redFlags) extras.push(`Red flags requiring immediate medical attention: ${realData.redFlags}.`)
+      if (llm) return extras.length > 0 ? `${llm}\n\n${extras.join(' ')}` : llm
+      return extras.length > 0
+        ? `Follow-up narrative not generated by the AI engine. ${extras.join(' ')}`
+        : 'Follow-up plan not generated by the AI engine.'
+    })(),
+
+    conclusion: (() => {
+      const dx = realData.diagnosticConclusion?.trim()
+      const llm = realData.clinicalReasoning?.trim()
+      if (dx && llm) return `Working diagnosis: ${dx}. ${llm}`
+      if (dx) return `Working diagnosis: ${dx}.`
+      if (llm) return llm
+      return 'Conclusion not generated by the AI engine.'
+    })()
   }
 }
 
@@ -1995,17 +2076,47 @@ export async function POST(request: NextRequest) {
         userPrompt = createEnhancedUserPrompt(enrichedGPTData)
       }
       
-      const result = await generateText({
-        model: openai("gpt-5.5", { reasoningEffort: "none" }),
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        maxTokens: 4000,
+      const reportSystemPrompt = `${CRITICAL_RULES_BLOCK_NARRATIVE}
+
+${systemPrompt}
+
+ANTI-HALLUCINATION RULE (STRICT): Stay strictly within the provided diagnostic analysis. Never invent diagnoses, drugs, doses, lab values or findings absent from the input. If a section has no source data, write a short factual placeholder rather than fabricating content.`
+
+      const reportMessages: LLMMessage[] = [
+        { role: 'system', content: reportSystemPrompt },
+        { role: 'user', content: userPrompt },
+      ]
+
+      let result = await callLLM({
+        useCase: 'REPORT',
+        // Narrative re-formatting from already-analyzed data — same pattern
+        // as dermato/chronic report routes. Switch to deepseek-chat (v3
+        // non-reasoning) for 3-5× lower latency. No CoT needed to expand
+        // pre-analyzed sections into 150-200 words each.
+        model: 'deepseek-chat',
+        messages: reportMessages,
+        maxTokens: 8000,
+        reasoningEffort: 'none',
+        timeoutMs: 240_000,
       })
 
+      // Teleconsultation guard: log fabricated physical-exam findings in the
+      // narrative for observability, but do NOT retry. The retry costs another
+      // full DeepSeek generation (~150-280s) on top of the first call, which
+      // systematically blows the Vercel 300s cap on febrile cases (where the
+      // model almost always emits at least one fabrication pattern). Hard 504
+      // is a worse outcome than letting an invented exam line through.
+      const fabCheck = detectFabricatedExam(result.text || '', /* hasExamData */ false)
+      if (fabCheck.fabricationDetected) {
+        console.warn(
+          `[llm] use=REPORT provider=${result.provider} fabrication_detected=true ` +
+            `patterns=[${fabCheck.patterns.join(',')}] excerpts=${JSON.stringify(fabCheck.excerpts.slice(0, 3))} ` +
+            `— retry DISABLED (would exceed Vercel 300s cap), keeping original response`,
+        )
+      }
+
       // IMPROVED JSON PARSING WITH BETTER ERROR HANDLING
-      console.log("🔍 GPT-5.5 raw response length:", result.text.length)
+      console.log(`🔍 LLM raw response length: ${result.text.length} (provider=${result.provider}${result.fallbackUsed ? ' [fallback]' : ''})`)
       console.log("🔍 GPT-5.5 response preview:", result.text.substring(0, 500))
       
       let cleanedText = result.text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()

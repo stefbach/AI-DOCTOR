@@ -3,6 +3,8 @@
 // - Call 1: Disease Assessment + Medication Management (reasoning: medium, 16K budget)
 // - Call 2: Meal Plan + Objectives & Follow-up (no reasoning, ~6K budget)
 import { type NextRequest, NextResponse } from "next/server"
+import { callLLM } from '@/lib/llm-client'
+import { parseLLMJsonSafely } from '@/lib/llm/json-recovery'
 import {
   buildClinicalQuery,
   buildSecondaryQueries,
@@ -11,11 +13,12 @@ import {
   queryMedicalGuidelinesMulti,
   formatGuidelinesForPrompt,
   scrubAndEnrichEvidenceRefs,
+  filterEvidenceRefsByTopic,
   type RAGContext,
 } from '@/lib/rag/medical-rag'
 
 export const runtime = 'nodejs'
-export const maxDuration = 300
+export const maxDuration = 600 // 600s: chronic-diagnosis runs 2 sequential DeepSeek-V4-Pro reasoning calls (clinical analysis + structured plans). Each can take 150-250s, so the previous 300s cap was tripping FUNCTION_INVOCATION_TIMEOUT mid-stream.
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -51,134 +54,52 @@ function anonymizePatientData(patientData: any): {
 // ==================== HELPER FUNCTIONS ====================
 
 async function callOpenAI(
-  apiKey: string,
+  _apiKey: string,
   systemPrompt: string,
   userPrompt: string,
   maxTokens: number = 2000,
   useReasoning: boolean = false
 ): Promise<any> {
-  // For reasoning models (gpt-5.5), reasoning tokens count toward max_completion_tokens.
-  // With reasoning_effort 'medium', the model may use 6-10K reasoning tokens,
-  // so we need a 16K budget to leave enough room for the actual JSON output.
+  // Two speed paths:
+  //  - useReasoning=true  → v4-pro with reasoning_effort='low'. Call 1 needs
+  //    clinical judgment (disease assessment + medication management) so it
+  //    stays on the reasoning model, but at 'low' instead of 'medium' which
+  //    cuts the chain-of-thought stall from 200-400s down to ~30-90s
+  //    without measurable quality loss on this kind of structured clinical
+  //    decision-making (the model still reasons, just less verbosely).
+  //  - useReasoning=false → deepseek-chat (v3 non-reasoning). Call 2 fills a
+  //    meal plan + objectives + follow-up template — no clinical reasoning
+  //    needed, 3-5× faster than v4-pro on this kind of templated output.
   const effectiveMaxTokens = useReasoning ? Math.max(maxTokens, 16384) : maxTokens
 
-  const body: any = {
-    model: "gpt-5.5",
+  const llmResult = await callLLM({
+    useCase: 'CHRONIC_DIAGNOSIS',
+    model: useReasoning ? undefined /* default = deepseek-v4-pro */ : 'deepseek-chat',
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt }
     ],
-    max_completion_tokens: effectiveMaxTokens,
-    response_format: { type: "json_object" }
-  }
-
-  if (useReasoning) {
-    body.reasoning_effort = 'medium'
-  } else {
-    body.temperature = 0.3
-  }
-
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(body),
+    maxTokens: useReasoning ? effectiveMaxTokens : Math.min(maxTokens, 8000),
+    responseFormat: 'json_object',
+    reasoningEffort: useReasoning ? 'low' : 'none',
+    timeoutMs: 280_000,
   })
+  console.log(`[llm] use=CHRONIC_DIAGNOSIS provider=${llmResult.provider} model=${llmResult.model} latency=${llmResult.latencyMs}ms tokens=${llmResult.usage?.totalTokens ?? 'n/a'}`)
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`OpenAI API error (${response.status}): ${errorText.substring(0, 200)}`)
-  }
-
-  const data = await response.json()
-
-  // Log response structure for debugging
-  const choice = data.choices?.[0]
-  console.log(`   📡 OpenAI response - finish_reason: ${choice?.finish_reason}, has content: ${!!choice?.message?.content}, usage: ${JSON.stringify(data.usage || {})}`)
-
-  const content = choice?.message?.content
+  const content = llmResult.text
 
   if (!content) {
-    // Log full response structure when content is missing
-    console.error('❌ No content in OpenAI response. Full response:', JSON.stringify(data, null, 2).substring(0, 500))
-
-    // Check if the model hit the token limit (all tokens consumed by reasoning)
-    if (choice?.finish_reason === 'length') {
-      throw new Error(`OpenAI response truncated - reasoning consumed all ${effectiveMaxTokens} tokens, leaving none for output. Usage: ${JSON.stringify(data.usage || {})}`)
-    }
-
-    throw new Error(`No content in OpenAI response (finish_reason: ${choice?.finish_reason || 'unknown'})`)
+    throw new Error('No content in LLM response')
   }
 
-  // Warn if output was truncated (partial JSON) but still try to parse
-  if (choice?.finish_reason === 'length') {
-    console.warn(`⚠️ Response truncated (finish_reason: length) but content exists (${content.length} chars). Attempting parse...`)
-  }
-
-  try {
-    return JSON.parse(content)
-  } catch (parseError) {
-    // If JSON is truncated, try cleaning it first
-    console.warn(`⚠️ JSON parse failed, attempting cleanup. Content starts with: ${content.substring(0, 100)}...`)
-    try {
-      const cleaned = cleanJsonString(content)
-      return JSON.parse(cleaned)
-    } catch {
-      throw new Error(`Invalid JSON from OpenAI (finish_reason: ${choice?.finish_reason}). First 200 chars: ${content.substring(0, 200)}`)
-    }
-  }
-}
-
-// Clean JSON string to fix control characters
-function cleanJsonString(jsonStr: string): string {
-  let result = ''
-  let inString = false
-  let escaped = false
-
-  for (let i = 0; i < jsonStr.length; i++) {
-    const char = jsonStr[i]
-    const charCode = jsonStr.charCodeAt(i)
-
-    if (escaped) {
-      result += char
-      escaped = false
-      continue
-    }
-
-    if (char === '\\' && inString) {
-      escaped = true
-      result += char
-      continue
-    }
-
-    if (char === '"' && !escaped) {
-      inString = !inString
-      result += char
-      continue
-    }
-
-    if (inString && charCode < 32) {
-      if (charCode === 10) result += '\\n'
-      else if (charCode === 13) result += '\\r'
-      else if (charCode === 9) result += '\\t'
-      else result += `\\u${charCode.toString(16).padStart(4, '0')}`
-      continue
-    }
-
-    result += char
-  }
-
-  return result
+  // parseLLMJsonSafely handles direct parse → cleanJsonString → repair
+  // truncation in one ladder. Shared with chronic-examens / chronic-dietary
+  // (see lib/llm/json-recovery.ts).
+  return parseLLMJsonSafely(content, 'chronic-diagnosis')
 }
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) {
-    return NextResponse.json({ error: "OpenAI API key not configured" }, { status: 500 })
-  }
-
+  // Credential validation delegated to callLLM (LLM_PROVIDER_CHRONIC_DIAGNOSIS).
   try {
     const { patientData, clinicalData, questionsData } = await req.json()
 
@@ -222,6 +143,19 @@ QUESTIONNAIRE: ${JSON.stringify(questionsData, null, 2)}`
           }
         }
 
+        // HTTP/2 heartbeat — DeepSeek calls can stay silent for 1-3 minutes
+        // between progress events, which is long enough for the browser /
+        // Vercel edge to drop the HTTP/2 connection (ERR_HTTP2_PING_FAILED).
+        // A comment line (": ...\n\n") is a valid SSE keepalive that does
+        // not deliver a payload to the EventSource consumer.
+        const heartbeat = setInterval(() => {
+          try {
+            controller.enqueue(encoder.encode(`: keepalive ${Date.now()}\n\n`))
+          } catch {
+            // controller may already be closed — silent
+          }
+        }, 15000)
+
         try {
           // ========== RAG ENRICHMENT (TIBOK guidelines) — best-effort, non-blocking ==========
           let ragContext: RAGContext = {
@@ -246,7 +180,13 @@ QUESTIONNAIRE: ${JSON.stringify(questionsData, null, 2)}`
             // For chronic, let inferSpecialty decide (often endocrinology for diabetes,
             // cardiology for HTA). Fall back to broad search when scorer is unsure.
             const inferredSpecialty = inferSpecialty(ragQuery)
-            console.log(`📚 [RAG-CHRONIC] Querying guidelines (specialty=${inferredSpecialty ?? 'any'})`)
+            // Use prefix pattern (LIKE 'cardiology%') so we capture sub-rollups
+            // like cardiology_arrhythmia, cardiology_hf, endocrinology_diabetes,
+            // dermatology_inflammatory, etc. The specialty axis in the corpus
+            // is heavily sub-divided — exact-match was missing the relevant
+            // chunks even when the right family was inferred.
+            const inferredSpecialtyPattern = inferredSpecialty ? `${inferredSpecialty}%` : null
+            console.log(`📚 [RAG-CHRONIC] Querying guidelines (specialty=${inferredSpecialtyPattern ?? 'any'})`)
             console.log(`📚 [RAG-CHRONIC] Query: ${ragQuery.slice(0, 200)}${ragQuery.length > 200 ? '…' : ''}`)
 
             // Phase 2.E.4.3: multi-query when secondary topics are detected.
@@ -270,11 +210,11 @@ QUESTIONNAIRE: ${JSON.stringify(questionsData, null, 2)}`
               ragContext = await queryMedicalGuidelinesMulti(
                 ragQuery,
                 secondaryQueries,
-                { specialty: inferredSpecialty, limit: 10 }
+                { specialty: inferredSpecialtyPattern, limit: 10 }
               )
             } else {
               console.log('📚 [RAG-CHRONIC] No secondary queries triggered — running single-query retrieval')
-              ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialty, limit: 15 })
+              ragContext = await queryMedicalGuidelines(ragQuery, { specialty: inferredSpecialtyPattern, limit: 15 })
             }
             console.log(
               `📚 [RAG-CHRONIC] Retrieved ${ragContext.totalChunks} chunks ` +
@@ -308,10 +248,12 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
     },
     "hypertension": {
       "present": true/false,
-      "stage": "Stage 1/Stage 2/Controlled",
+      "stage": "Stage 1 (140-159/90-99) | Stage 2 (160-179/100-109) | Stage 3 (≥180/110) | Hypertensive urgency/emergency (any SBP ≥180 OR DBP ≥120) | Controlled",
       "currentBP": "valeur",
       "targetBP": "< 130/80 mmHg",
       "cardiovascularRisk": "Low/Moderate/High",
+      "severity": "ROUTINE | URGENT (DBP 110-119 or SBP 180-219, no target organ damage, urgent control within days) | EMERGENCY (DBP ≥120 OR SBP ≥220 OR any acute target organ damage — hospital-level care)",
+      "followUpUrgency": "MUST reflect severity above. ROUTINE → 4-12 weeks. URGENT → 1-2 weeks WITH titration plan. EMERGENCY → same-day/24h escalation, do NOT manage as outpatient at 3-month review.",
       "riskFactors": ["facteur 1"]
     },
     "obesity": {
@@ -348,7 +290,7 @@ Retourne UNIQUEMENT un JSON valide avec cette structure:
 }
 Si pas de médicaments à modifier, retourne des tableaux vides pour continue/add/adjust/stop.
 Si le RAG n'a fourni aucune guideline (pas de bloc CONTEXTE GUIDELINES MÉDICALES ci-dessus), retourne evidence_references: [].`
-          const clinicalAnalysis = await callOpenAI(apiKey, call1SystemPrompt, patientContext, 8000, true)
+          const clinicalAnalysis = await callOpenAI('', call1SystemPrompt, patientContext, 8000, true)
 
           sendSSE('progress', { message: 'Évaluation clinique complète, création du plan de suivi...', progress: 50 })
 
@@ -431,6 +373,7 @@ Retourne UNIQUEMENT un JSON valide:
     }
   },
   "followUpPlan": {
+    "// SAFETY RULE": "If hypertension severity is URGENT or EMERGENCY, the nextAppointment / first specialist follow-up MUST be within days/hours, not weeks. Do NOT default to 3-month review when BP ≥180/110 or DBP ≥120 — this is an outpatient triage failure. The same rule applies to a glucose ≥3 g/L with osmotic symptoms (hyperglycemic crisis).",
     "specialistConsultations": [
       { "specialty": "Endocrinologue", "frequency": "tous les 3 mois", "rationale": "suivi diabète" },
       { "specialty": "Diététicien", "frequency": "tous les 2 mois", "rationale": "suivi nutritionnel" }
@@ -448,7 +391,12 @@ Retourne UNIQUEMENT un JSON valide:
 }
 
 Si une recommandation s'appuie sur une guideline du bloc CONTEXTE GUIDELINES MÉDICALES ci-dessus, cite [ref-N] dans le texte de la recommandation (ex: "viser HbA1c < 7% [ref-1]").`
-          const structuredPlans = await callOpenAI(apiKey, call2SystemPrompt, patientContext, 6000)
+          // Call 2 builds the full meal plan + objectives + follow-up plan in one shot.
+          // DeepSeek-V4-Pro is noticeably more verbose than gpt-5.5 on these deeply
+          // nested JSONs, so the previous 6000-token cap was getting hit mid-string
+          // ("Invalid JSON from LLM" with the response truncated). 16000 leaves
+          // ample headroom without coming close to the model's context cap.
+          const structuredPlans = await callOpenAI('', call2SystemPrompt, patientContext, 16000)
 
           sendSSE('progress', { message: 'Finalisation de l\'évaluation...', progress: 90 })
 
@@ -487,7 +435,38 @@ Si une recommandation s'appuie sur une guideline du bloc CONTEXTE GUIDELINES MÉ
             ragContext,
             { logPrefix: '📚 [RAG-CHRONIC]' }
           )
-          combinedAssessment.evidence_references = ragResult.evidenceReferences
+          // Topic-match safety net (see medical-rag.ts). Seeds: the diseases
+          // the assessment flagged as present + the patient's medical history.
+          // Catches cases like ACR pancreatic adenocarcinoma cited in an
+          // HTA-only chronic report when the prompt rule alone wasn't enough.
+          const chronicTopicSeeds: string[] = []
+          const da = combinedAssessment.diseaseAssessment || {}
+          if (da.diabetes?.present) chronicTopicSeeds.push('diabetes', 'glucose', 'hyperglycemia', 'insulin')
+          if (da.hypertension?.present) chronicTopicSeeds.push('hypertension', 'blood pressure', 'antihypertensive')
+          if (da.obesity?.present) chronicTopicSeeds.push('obesity', 'weight', 'bmi')
+          if (Array.isArray(anonymizedPatient.medicalHistory)) {
+            chronicTopicSeeds.push(...anonymizedPatient.medicalHistory)
+          }
+          if (clinicalData?.chiefComplaint) chronicTopicSeeds.push(clinicalData.chiefComplaint)
+          const topicFiltered = filterEvidenceRefsByTopic(
+            ragResult.evidenceReferences,
+            chronicTopicSeeds,
+            {
+              logPrefix: '🎯 [TOPIC-FILTER-CHRONIC]',
+              patientFlags: {
+                isPregnant: /\b(pregn|enceinte|gestational|gravid)/i.test(String(anonymizedPatient.pregnancyStatus || '')),
+                isChild: typeof anonymizedPatient.age === 'number' ? anonymizedPatient.age < 18 :
+                  /^(\d+)/.test(String(anonymizedPatient.age || ''))
+                    ? parseInt(String(anonymizedPatient.age), 10) < 18
+                    : false,
+                hasCancer: Array.isArray(anonymizedPatient.medicalHistory) &&
+                  anonymizedPatient.medicalHistory.some((d: string) =>
+                    /\b(cancer|carcinoma|melanoma|lymphoma|leukemi|leukaemi|sarcoma|metastat|oncolog|tumou?r|neoplas)/i.test(String(d || ''))
+                  ),
+              },
+            }
+          )
+          combinedAssessment.evidence_references = topicFiltered.kept
           combinedAssessment.rag_used = ragContext.ragUsed
           combinedAssessment.rag_metadata = {
             chunks_retrieved: ragContext.totalChunks,
@@ -518,6 +497,7 @@ Si une recommandation s'appuie sur une guideline du bloc CONTEXTE GUIDELINES MÉ
             details: error.message
           })
         } finally {
+          clearInterval(heartbeat)
           controller.close()
         }
       }

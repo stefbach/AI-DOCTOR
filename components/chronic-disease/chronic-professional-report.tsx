@@ -17,6 +17,7 @@ import { Progress } from "@/components/ui/progress"
 import { toast } from "@/components/ui/use-toast"
 import TibokMedicalAssistant from '../tibok-medical-assistant'
 import EvidenceReferencesSection from '../rag/evidence-references-section'
+import { renderWithCitations, aggregateReferences, SectionBibliography } from '../rag/citation-renderer'
 import {
   FileText, Download, Printer, CheckCircle, Loader2, Pill, TestTube,
   Scan, AlertTriangle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
@@ -131,6 +132,7 @@ interface ChronicProfessionalReportData {
       registrationNumber: string
       date: string
     }
+    evidence_references?: any[]
   }
   laboratoryTests?: {
     header: any
@@ -155,6 +157,7 @@ interface ChronicProfessionalReportData {
       registrationNumber: string
       date: string
     }
+    evidence_references?: any[]
   }
   paraclinicalExams?: {
     header: any
@@ -179,6 +182,7 @@ interface ChronicProfessionalReportData {
       registrationNumber: string
       date: string
     }
+    evidence_references?: any[]
   }
   dietaryProtocol?: {
     header: {
@@ -1077,7 +1081,26 @@ export default function ChronicProfessionalReport({
           // Extract and build follow-up plan from diagnosis data
           if (diagnosisData.followUpPlan || diagnosisData.diseaseAssessment) {
             const followUpData = diagnosisData.followUpPlan || {}
-            const assessment = diagnosisData.diseaseAssessment || {}
+            // chronic-diagnosis returns diseaseAssessment.{diabetes,hypertension,obesity}
+            // with a `present` flag; the conditional blocks below historically
+            // checked .diabetesControl / .hypertensionAssessment / .obesityAssessment,
+            // which never existed in the API payload. Normalise here so the
+            // goal-builders, monitoring parameters, emergency protocol and
+            // educational resources fire only for diseases the patient
+            // actually has.
+            const rawAssessment = diagnosisData.diseaseAssessment || {}
+            const assessment: any = {
+              ...rawAssessment,
+              diabetesControl: (rawAssessment.diabetes && rawAssessment.diabetes.present)
+                ? rawAssessment.diabetes
+                : rawAssessment.diabetesControl || null,
+              hypertensionAssessment: (rawAssessment.hypertension && rawAssessment.hypertension.present)
+                ? rawAssessment.hypertension
+                : rawAssessment.hypertensionAssessment || null,
+              obesityAssessment: (rawAssessment.obesity && rawAssessment.obesity.present)
+                ? rawAssessment.obesity
+                : rawAssessment.obesityAssessment || null,
+            }
             
             // Calculate BMI for follow-up goals
             const weight = parseFloat(patientData.weight) || 0
@@ -1186,8 +1209,37 @@ export default function ChronicProfessionalReport({
               "Side effects monitoring"
             )
             
+            // Detect smoking + alcohol from patient data so lifestyle
+            // recommendations actually reflect modifiable risk factors. For
+            // an HTA case the smoking-cessation line should be the first
+            // intervention — historically the report skipped it entirely.
+            const smokingRaw = (patientData?.smokingStatus || patientData?.tabac || '')
+              .toString()
+              .toLowerCase()
+            const isSmoker = /\b(yes|current|actuel|smoker|fumeur|active|every|daily|occasional)\b/.test(smokingRaw)
+              && !/\b(no|never|non|jamais|former|ex-)\b/.test(smokingRaw)
+            const isFormerSmoker = /\b(former|ex-?smoker|ex-?fumeur|quit|stopped)\b/.test(smokingRaw)
+            const alcoholRaw = (patientData?.alcoholConsumption || patientData?.alcool || '')
+              .toString()
+              .toLowerCase()
+            const drinksAlcohol = alcoholRaw && !/\b(no|never|non|jamais|none)\b/.test(alcoholRaw)
+
+            const substanceUse: string[] = []
+            if (isSmoker) {
+              substanceUse.push(
+                "Smoking cessation — first-line priority for cardiovascular risk reduction",
+                "Offer nicotine replacement therapy / varenicline / behavioural support",
+                "Refer to a smoking cessation programme"
+              )
+            } else if (isFormerSmoker) {
+              substanceUse.push("Maintain smoking cessation — continued abstinence reduces cardiovascular risk")
+            }
+            if (drinksAlcohol) {
+              substanceUse.push("Limit alcohol intake (≤14 units/week, spread across the week, ≥2 alcohol-free days)")
+            }
+
             // Build lifestyle modifications
-            const lifestyleModifications = {
+            const lifestyleModifications: any = {
               physicalActivity: [
                 "30 minutes of moderate exercise 5 days per week",
                 "Walking, swimming, or cycling recommended",
@@ -1215,6 +1267,9 @@ export default function ChronicProfessionalReport({
                 "Limit caffeine after 2 PM",
                 "Avoid heavy meals before bedtime"
               ]
+            }
+            if (substanceUse.length > 0) {
+              lifestyleModifications.substanceUse = substanceUse
             }
             
             // Build emergency protocol
@@ -1270,12 +1325,39 @@ export default function ChronicProfessionalReport({
                 monitoringParameters: monitoringParameters
               },
               lifestyleModifications: lifestyleModifications,
-              educationalResources: followUpData.educationalResources || [
-                "Diabetes education program enrollment recommended",
-                "Nutritional counseling sessions",
-                "Patient support groups",
-                "Online resources: mauritiusdiabetes.org"
-              ],
+              // Disease-aware default — previously this fallback was hardcoded
+              // with diabetes resources, which surfaced "Diabetes education
+              // program enrollment recommended" and "mauritiusdiabetes.org"
+              // in reports for patients who don't have diabetes (e.g. a pure
+              // HTA case).
+              educationalResources: followUpData.educationalResources || (() => {
+                const items: string[] = []
+                if (assessment.diabetesControl) {
+                  items.push(
+                    "Diabetes education programme enrolment recommended",
+                    "Carbohydrate counting and glycaemic index workshops",
+                    "Online resources: mauritiusdiabetes.org",
+                  )
+                }
+                if (assessment.hypertensionAssessment) {
+                  items.push(
+                    "Home blood pressure monitoring training",
+                    "DASH diet education",
+                    "Online resources: NICE NG136 hypertension patient information",
+                  )
+                }
+                if (assessment.obesityAssessment) {
+                  items.push(
+                    "Structured weight-management programme referral",
+                    "Behavioural and dietary counselling",
+                  )
+                }
+                items.push(
+                  "Nutritional counselling sessions",
+                  "Patient support groups",
+                )
+                return items
+              })(),
               emergencyProtocol: emergencyProtocol,
               specialInstructions: followUpData.specialInstructions || [
                 "Keep a health diary: track glucose, BP, weight, medications",
@@ -1574,7 +1656,15 @@ export default function ChronicProfessionalReport({
               dureeTraitement: med.treatment?.duration || 'Long-term chronic treatment',
               quantite: med.treatment?.totalQuantity || '1 box',
               instructions: med.posology?.specificInstructions || '',
-              justification: med.indication?.chronicDisease || '',
+              // Prefer the LLM's full clinicalRationale (which carries [ref-N]
+              // citations) over the bare chronicDisease label. Falling back to
+              // the disease label is only useful when the rationale is empty —
+              // otherwise we'd be throwing away the per-medication evidence
+              // that the prescription form is supposed to display.
+              justification: med.indication?.clinicalRationale
+                || med.indication?.therapeuticGoal
+                || med.indication?.chronicDisease
+                || '',
               surveillanceParticuliere: med.monitoring?.clinicalMonitoring || '',
               nonSubstituable: false
             }))
@@ -1602,7 +1692,13 @@ export default function ChronicProfessionalReport({
                 practitionerName: prev.medicalReport.practitioner.name,
                 registrationNumber: prev.medicalReport.practitioner.registrationNumber,
                 date: new Date().toISOString().split('T')[0]
-              }
+              },
+              // chronic-prescription returns its own ref id space — the
+              // [ref-N] embedded in clinicalRationale / instructions /
+              // monitoring resolves against THIS array, not diagnosisData's.
+              evidence_references: Array.isArray(prescriptionData.evidence_references)
+                ? prescriptionData.evidence_references
+                : []
             }
             console.log('💊 Transformed Medications:', transformedMeds.length, 'medications')
           }
@@ -1667,23 +1763,38 @@ export default function ChronicProfessionalReport({
                   practitionerName: prev.medicalReport.practitioner.name,
                   registrationNumber: prev.medicalReport.practitioner.registrationNumber,
                   date: new Date().toISOString().split('T')[0]
-                }
+                },
+                // chronic-examens returns its own ref id space — [ref-N]
+                // embedded in test clinicalIndication resolves against THIS
+                // array, not diagnosisData's.
+                evidence_references: Array.isArray(examensData.evidence_references)
+                  ? examensData.evidence_references
+                  : []
               }
               console.log('🧪 Laboratory Tests Grouped:', Object.keys(groupedTests).map(k => `${k}: ${groupedTests[k].length}`).join(', '))
             }
             
             // Paraclinical exams (imaging, etc.)
             if (examOrders.paraclinicalExams && examOrders.paraclinicalExams.length > 0) {
-              const paraclinicalExams = examOrders.paraclinicalExams.map((exam: any) => ({
-                type: exam.examName || exam.examType || '',
-                modality: exam.category || 'IMAGING',
-                region: exam.technicalSpecifications?.views || '',
-                clinicalIndication: exam.clinicalIndication || '',
-                urgency: exam.urgency === 'URGENT',
-                contrast: exam.preparation?.contrastAllergy !== undefined,
-                specificProtocol: exam.technicalSpecifications?.specificProtocol || '',
-                diagnosticQuestion: exam.expectedFindings?.concerningFindings || ''
-              }))
+              const paraclinicalExams = examOrders.paraclinicalExams.map((exam: any) => {
+                const examLabel = `${exam.examName || exam.examType || ''} ${exam.category || ''}`
+                // Only flag "with contrast" when the modality actually uses
+                // contrast. The previous code checked `preparation.contrastAllergy
+                // !== undefined`, which the LLM fills with placeholders like
+                // "N/A" or "NKA" on every exam — flagging ECGs as "WITH CONTRAST"
+                // which is medically impossible.
+                const usesContrast = /\b(with\s+contrast|gadolinium|angiograph|angiogram|venograph|urograph|cystograph|sialograph|myelograph|cholangiograph|CT\s*PA\b|CTA\b|MRA\b)/i.test(examLabel)
+                return {
+                  type: exam.examName || exam.examType || '',
+                  modality: exam.category || 'IMAGING',
+                  region: exam.technicalSpecifications?.views || '',
+                  clinicalIndication: exam.clinicalIndication || '',
+                  urgency: exam.urgency === 'URGENT',
+                  contrast: usesContrast,
+                  specificProtocol: exam.technicalSpecifications?.specificProtocol || '',
+                  diagnosticQuestion: exam.expectedFindings?.concerningFindings || ''
+                }
+              })
               
               updatedReport.paraclinicalExams = {
                 header: prev.medicalReport.practitioner,
@@ -1698,7 +1809,13 @@ export default function ChronicProfessionalReport({
                   practitionerName: prev.medicalReport.practitioner.name,
                   registrationNumber: prev.medicalReport.practitioner.registrationNumber,
                   date: new Date().toISOString().split('T')[0]
-                }
+                },
+                // Same source as laboratoryTests above — chronic-examens
+                // returns a single evidence_references array shared by both
+                // forms.
+                evidence_references: Array.isArray(examensData.evidence_references)
+                  ? examensData.evidence_references
+                  : []
               }
               console.log('🏥 Paraclinical Exams:', paraclinicalExams.length, 'exams')
             }
@@ -2793,22 +2910,24 @@ export default function ChronicProfessionalReport({
         })
       }
 
-      // 🚨 Detect emergency status early (used in both save-medical-report and documents payload)
-      const emergencyTextToCheck = [
-        report?.medicalReport?.narrative || '',
-        report?.medicalReport?.patient?.chiefComplaint || '',
-        JSON.stringify(report?.medicalReport?.diagnosis || '')
-      ].join(' ').toUpperCase()
-      const emergencyKeywordsList = [
-        'IMMEDIATE HOSPITAL REFERRAL', 'EMERGENCY REFERRAL', 'EMERGENCY',
-        'URGENT REFERRAL', 'SAMU 114', 'CALL AMBULANCE', 'LIFE-THREATENING',
-        'ACUTE CORONARY SYNDROME', 'ACS', 'STEMI', 'NSTEMI', 'STROKE',
-        'PULMONARY EMBOLISM', 'AORTIC DISSECTION', 'SEPSIS',
-        'DIABETIC KETOACIDOSIS', 'HYPOGLYCEMIC COMA', 'ANAPHYLAXIS',
-        'STATUS EPILEPTICUS', 'HYPERTENSIVE EMERGENCY', 'ACUTE ABDOMEN',
-        'URGENCES', 'URGENCE MÉDICALE', 'ORIENTATION URGENCES'
-      ]
-      const isEmergencyCase = emergencyKeywordsList.some(keyword => emergencyTextToCheck.includes(keyword))
+      // 🚨 Detect emergency status from the LLM's structured triage block.
+      // See professional-report.tsx for the rationale (string-matching the
+      // narrative caused false positives). The chronic-disease flow does
+      // not yet populate triage_assessment (Phase 5 on this endpoint is a
+      // separate sprint). When the field is absent we err on the side of
+      // NO banner — false positives are worse than no banner on chronic
+      // care (which is rarely a true emergency anyway).
+      const isEmergencyCase = (() => {
+        const triage = (report as any)?.medicalReport?.triage_assessment
+        if (!triage || typeof triage !== 'object') return false
+        const severity = String(triage.severity || '').toLowerCase()
+        const disposition = String(triage.disposition || '').toLowerCase()
+        return (
+          severity === 'emergency' ||
+          disposition === 'ambulance_immediate' ||
+          disposition === 'a&e_same_day'
+        )
+      })()
 
       // Save final version to consultation_records table
       const saveResponse = await fetch('/api/save-medical-report', {
@@ -4105,46 +4224,29 @@ export default function ChronicProfessionalReport({
   // Medical report section component
   const MedicalReportSection = () => {
     const { medicalReport } = report
+    // evidenceReferences from the diagnosis are used to convert inline
+    // [ref-N] tokens in the narrative into clickable superscript [N]
+    // matching the global bibliography numbering.
+    const narrativeEvidenceRefs = ((diagnosisData as any)?.evidence_references as any[]) || []
 
     // 🚨 DETECT EMERGENCY SITUATIONS
+    // See professional-report.tsx for the rationale on this switch:
+    // keyword scanning fires false positives ("rule out STROKE", "warning
+    // signs of SEPSIS include…") and we now consume the LLM's structured
+    // triage block instead. Chronic flow will gain its own triage block
+    // when Phase 5 is applied to /api/openai-chronic in a later sprint.
     const detectEmergency = () => {
-      const textToCheck = [
-        medicalReport?.narrative || '',
-        medicalReport?.patient?.chiefComplaint || '',
-        JSON.stringify(medicalReport?.diagnosis || '')
-      ].join(' ').toUpperCase()
-      
-      // Emergency keywords
-      const emergencyKeywords = [
-        'IMMEDIATE HOSPITAL REFERRAL',
-        'EMERGENCY REFERRAL',
-        'EMERGENCY',
-        'URGENT REFERRAL',
-        'SAMU 114',
-        'CALL AMBULANCE',
-        'LIFE-THREATENING',
-        'ACUTE CORONARY SYNDROME',
-        'ACS',
-        'STEMI',
-        'NSTEMI',
-        'STROKE',
-        'PULMONARY EMBOLISM',
-        'AORTIC DISSECTION',
-        'SEPSIS',
-        'DIABETIC KETOACIDOSIS',
-        'HYPOGLYCEMIC COMA',
-        'ANAPHYLAXIS',
-        'STATUS EPILEPTICUS',
-        'HYPERTENSIVE EMERGENCY',
-        'ACUTE ABDOMEN',
-        'URGENCES',
-        'URGENCE MÉDICALE',
-        'ORIENTATION URGENCES'
-      ]
-      
-      return emergencyKeywords.some(keyword => textToCheck.includes(keyword))
+      const triage = (medicalReport as any)?.triage_assessment
+      if (!triage || typeof triage !== 'object') return false
+      const severity = String(triage.severity || '').toLowerCase()
+      const disposition = String(triage.disposition || '').toLowerCase()
+      return (
+        severity === 'emergency' ||
+        disposition === 'ambulance_immediate' ||
+        disposition === 'a&e_same_day'
+      )
     }
-    
+
     const isEmergency = detectEmergency()
 
     // 🏥 CHECK SPECIALIST REFERRAL
@@ -4325,7 +4427,9 @@ export default function ChronicProfessionalReport({
                     placeholder={`Enter ${section.title.toLowerCase()}...`}
                   />
                 ) : content ? (
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {renderWithCitations(content, narrativeEvidenceRefs).node}
+                  </p>
                 ) : (
                   <p className="text-gray-400 italic text-sm">No content - use voice button to add</p>
                 )}
@@ -4605,31 +4709,31 @@ export default function ChronicProfessionalReport({
             {medicalReport.clinicalEvaluation.chiefComplaint && (
               <div className="border-l-4 border-teal-500 pl-4 py-2">
                 <h4 className="font-bold text-lg mb-2 text-teal-900">🔍 CHIEF COMPLAINT</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.chiefComplaint}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{renderWithCitations(medicalReport.clinicalEvaluation.chiefComplaint, narrativeEvidenceRefs).node}</p>
               </div>
             )}
             {medicalReport.clinicalEvaluation.historyOfPresentIllness && (
               <div className="border-l-4 border-blue-500 pl-4 py-2">
                 <h4 className="font-bold text-lg mb-2 text-blue-900">🩺 HISTORY OF PRESENT ILLNESS</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.historyOfPresentIllness}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{renderWithCitations(medicalReport.clinicalEvaluation.historyOfPresentIllness, narrativeEvidenceRefs).node}</p>
               </div>
             )}
             {medicalReport.clinicalEvaluation.reviewOfSystems && (
               <div className="border-l-4 border-purple-500 pl-4 py-2">
                 <h4 className="font-bold text-lg mb-2 text-purple-900">📋 REVIEW OF SYSTEMS</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.reviewOfSystems}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{renderWithCitations(medicalReport.clinicalEvaluation.reviewOfSystems, narrativeEvidenceRefs).node}</p>
               </div>
             )}
             {medicalReport.clinicalEvaluation.physicalExamination && (
               <div className="border-l-4 border-green-500 pl-4 py-2">
                 <h4 className="font-bold text-lg mb-2 text-green-900">👁️ PHYSICAL EXAMINATION</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.physicalExamination}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{renderWithCitations(medicalReport.clinicalEvaluation.physicalExamination, narrativeEvidenceRefs).node}</p>
               </div>
             )}
             {medicalReport.clinicalEvaluation.vitalSignsAnalysis && (
               <div className="border-l-4 border-cyan-500 pl-4 py-2">
                 <h4 className="font-bold text-lg mb-2 text-cyan-900">💓 VITAL SIGNS ANALYSIS</h4>
-                <p className="text-gray-700 whitespace-pre-wrap">{medicalReport.clinicalEvaluation.vitalSignsAnalysis}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{renderWithCitations(medicalReport.clinicalEvaluation.vitalSignsAnalysis, narrativeEvidenceRefs).node}</p>
               </div>
             )}
           </div>
@@ -4691,6 +4795,43 @@ export default function ChronicProfessionalReport({
     // Use local state if available, otherwise use report (for display before editing)
     const medicationPrescription = localMedications || report.medicationPrescription
     const medications = medicationPrescription.prescription.medications || []
+    // Prefer the prescription-route's own ref id space — the [ref-N] tokens
+    // in clinicalRationale/instructions/monitoring were emitted against
+    // chronic-prescription's RAG context, not chronic-diagnosis's.
+    const sectionRefs = (medicationPrescription as any)?.evidence_references
+    const evidenceRefs = (Array.isArray(sectionRefs) && sectionRefs.length > 0)
+      ? sectionRefs
+      : (((diagnosisData as any)?.evidence_references as any[]) || [])
+    // The LLM frequently embeds citations not just in the indication but also
+    // in the dosing instructions ("Avoid salt substitutes... [ref-1]") and the
+    // monitoring directive ("Blood pressure, signs of postural hypotension
+    // [ref-1]"). Aggregate across all three so the per-section bibliography
+    // shows up even when the indication is a short phrase like "Hypertension
+    // Stage 1" with no inline ref.
+    const prescriptionCitations = aggregateReferences(
+      medications.map((m: any) => (typeof m?.justification === 'string' ? m.justification : '')),
+      evidenceRefs
+    )
+    const prescriptionInstructionCitations = aggregateReferences(
+      medications.map((m: any) => (typeof m?.instructions === 'string' ? m.instructions : '')),
+      evidenceRefs
+    )
+    const prescriptionMonitoringCitations = aggregateReferences(
+      medications.map((m: any) => (typeof m?.surveillanceParticuliere === 'string' ? m.surveillanceParticuliere : '')),
+      evidenceRefs
+    )
+    const prescriptionAllUsedRefIds = new Set<string>()
+    ;[
+      ...prescriptionCitations.usedRefs,
+      ...prescriptionInstructionCitations.usedRefs,
+      ...prescriptionMonitoringCitations.usedRefs,
+    ].forEach((r: any) => {
+      if (r?.ref_id) prescriptionAllUsedRefIds.add(r.ref_id)
+      else if (r?.title) prescriptionAllUsedRefIds.add(r.title)
+    })
+    const prescriptionAllUsedRefs = evidenceRefs.filter((r: any) =>
+      prescriptionAllUsedRefIds.has(r?.ref_id) || prescriptionAllUsedRefIds.has(r?.title)
+    )
 
     const handleAddMedication = () => {
       // Update local state only - no setReport call
@@ -4955,17 +5096,17 @@ export default function ChronicProfessionalReport({
                     )}
                     {med.instructions && (
                       <p className="mt-2 text-sm text-gray-600 italic">
-                        ℹ️ {med.instructions}
+                        ℹ️ {prescriptionInstructionCitations.nodes[index] || med.instructions}
                       </p>
                     )}
                     {med.justification && (
                       <p className="mt-1 text-sm text-gray-600">
-                        <span className="font-medium">Indication:</span> {med.justification}
+                        <span className="font-medium">Indication:</span> {prescriptionCitations.nodes[index] || med.justification}
                       </p>
                     )}
                     {med.surveillanceParticuliere && (
                       <p className="mt-1 text-sm text-cyan-600">
-                        <span className="font-medium">⚠️ Monitoring:</span> {med.surveillanceParticuliere}
+                        <span className="font-medium">⚠️ Monitoring:</span> {prescriptionMonitoringCitations.nodes[index] || med.surveillanceParticuliere}
                       </p>
                     )}
                   </>
@@ -4997,7 +5138,13 @@ export default function ChronicProfessionalReport({
             </ul>
           </div>
         )}
-        
+
+        <SectionBibliography
+          references={prescriptionAllUsedRefs}
+          globalReferences={evidenceRefs}
+          title="Références citées dans cette prescription"
+        />
+
         {/* Validity & Signature */}
         <div className="mt-8 pt-6 border-t border-gray-300">
           <p className="text-sm text-gray-600 mb-4">
@@ -5058,6 +5205,38 @@ export default function ChronicProfessionalReport({
       { key: 'endocrinology', label: 'ENDOCRINOLOGY' },
       { key: 'general', label: 'GENERAL LABORATORY' }
     ]
+
+    // chronic-examens returns its own ref id space; prefer those refs over
+    // the diagnosis-route refs because the [ref-N] tokens inside test
+    // indications were emitted against chronic-examens's RAG context.
+    const labSectionRefs = (laboratoryTests as any)?.evidence_references
+    const labEvidenceRefs = (Array.isArray(labSectionRefs) && labSectionRefs.length > 0)
+      ? labSectionRefs
+      : (((diagnosisData as any)?.evidence_references as any[]) || [])
+    const labCitationsByCategory: Record<string, ReturnType<typeof aggregateReferences>> = {}
+    const labUsedRefIds = new Set<string>()
+    // chronic-examens populates tests with `indication` while the manual-edit
+    // path uses `motifClinique` — fall back across both (and clinicalIndication).
+    const labGetIndication = (t: any): string => {
+      const v = t?.motifClinique ?? t?.indication ?? t?.clinicalIndication
+      return typeof v === 'string' ? v : ''
+    }
+    for (const { key } of categories) {
+      const arr = (tests as any)[key]
+      if (!Array.isArray(arr) || arr.length === 0) continue
+      const agg = aggregateReferences(
+        arr.map(labGetIndication),
+        labEvidenceRefs
+      )
+      labCitationsByCategory[key] = agg
+      agg.usedRefs.forEach((r: any) => {
+        if (r?.ref_id) labUsedRefIds.add(r.ref_id)
+        else if (r?.title) labUsedRefIds.add(r.title)
+      })
+    }
+    const labUsedRefs = labEvidenceRefs.filter((r: any) =>
+      labUsedRefIds.has(r?.ref_id) || labUsedRefIds.has(r?.title)
+    )
 
     const handleLabTestEdit = (categoryKey: string, testIdx: number, field: string, value: any) => {
       // Update local state only - no setReport call
@@ -5180,7 +5359,9 @@ export default function ChronicProfessionalReport({
                 <div key={category.key} className="border rounded-lg p-4">
                   <h3 className="font-bold text-lg mb-3 text-blue-700">{category.label}</h3>
                   <div className="space-y-3">
-                    {categoryTests.map((test: any, idx: number) => (
+                    {categoryTests.map((test: any, idx: number) => {
+                      const indicationNode = labCitationsByCategory[category.key]?.nodes?.[idx]
+                      return (
                       <div key={idx} className="border-l-4 border-blue-400 pl-4 py-2">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -5242,9 +5423,9 @@ export default function ChronicProfessionalReport({
                             ) : (
                               <>
                                 <p className="font-semibold">{test.nom || test.name}</p>
-                                {test.motifClinique && (
+                                {labGetIndication(test) && (
                                   <p className="text-sm text-gray-600 mt-1">
-                                    <span className="font-medium">Indication:</span> {test.motifClinique}
+                                    <span className="font-medium">Indication:</span> {indicationNode || labGetIndication(test)}
                                   </p>
                                 )}
                                 {test.conditionsPrelevement && (
@@ -5284,7 +5465,8 @@ export default function ChronicProfessionalReport({
                           </div>
                         </div>
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
                   {editMode && (
                     <div className="mt-3">
@@ -5350,6 +5532,12 @@ export default function ChronicProfessionalReport({
           </div>
         )}
         
+        <SectionBibliography
+          references={labUsedRefs}
+          globalReferences={labEvidenceRefs}
+          title="Références citées dans cette demande d'analyses"
+        />
+
         {/* Signature */}
         <div className="mt-8 pt-6 border-t border-gray-300">
           <div className="text-right">
@@ -5397,6 +5585,35 @@ export default function ChronicProfessionalReport({
     // Use local state if available, otherwise use report (for display before editing)
     const paraclinicalExams = localParaclinicalExams || report.paraclinicalExams
     const exams = paraclinicalExams.prescription.exams || []
+    // Same rationale as the lab section above — [ref-N] tokens in
+    // clinicalIndication / diagnosticQuestion were emitted by chronic-examens
+    // against its own RAG context.
+    const imagingSectionRefs = (paraclinicalExams as any)?.evidence_references
+    const imagingEvidenceRefs = (Array.isArray(imagingSectionRefs) && imagingSectionRefs.length > 0)
+      ? imagingSectionRefs
+      : (((diagnosisData as any)?.evidence_references as any[]) || [])
+    const imagingIndicationCitations = aggregateReferences(
+      exams.map((e: any) => {
+        const v = e?.clinicalIndication ?? e?.indicationClinique ?? e?.indication
+        return typeof v === 'string' ? v : ''
+      }),
+      imagingEvidenceRefs
+    )
+    const imagingQuestionCitations = aggregateReferences(
+      exams.map((e: any) => {
+        const v = e?.diagnosticQuestion ?? e?.questionDiagnostique
+        return typeof v === 'string' ? v : ''
+      }),
+      imagingEvidenceRefs
+    )
+    const imagingUsedRefIds = new Set<string>()
+    ;[...imagingIndicationCitations.usedRefs, ...imagingQuestionCitations.usedRefs].forEach((r: any) => {
+      if (r?.ref_id) imagingUsedRefIds.add(r.ref_id)
+      else if (r?.title) imagingUsedRefIds.add(r.title)
+    })
+    const imagingUsedRefs = imagingEvidenceRefs.filter((r: any) =>
+      imagingUsedRefIds.has(r?.ref_id) || imagingUsedRefIds.has(r?.title)
+    )
 
     const handleParaclinicalEdit = (examIdx: number, field: string, value: any) => {
       // Update local state only - no setReport call
@@ -5485,7 +5702,10 @@ export default function ChronicProfessionalReport({
         {/* Exams List */}
         <div className="space-y-6">
           {exams.length > 0 ? (
-            exams.map((exam: any, index: number) => (
+            exams.map((exam: any, index: number) => {
+              const indicationNode = imagingIndicationCitations.nodes[index]
+              const questionNode = imagingQuestionCitations.nodes[index]
+              return (
               <div key={index} className="border-l-4 border-indigo-500 pl-4 py-2">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -5585,12 +5805,12 @@ export default function ChronicProfessionalReport({
                         )}
                         {exam.clinicalIndication && (
                           <p className="mt-2 text-sm text-gray-600">
-                            <span className="font-medium">Clinical Indication:</span> {exam.clinicalIndication}
+                            <span className="font-medium">Clinical Indication:</span> {indicationNode || exam.clinicalIndication}
                           </p>
                         )}
                         {exam.diagnosticQuestion && (
                           <p className="mt-1 text-sm text-gray-600">
-                            <span className="font-medium">Diagnostic Question:</span> {exam.diagnosticQuestion}
+                            <span className="font-medium">Diagnostic Question:</span> {questionNode || exam.diagnosticQuestion}
                           </p>
                         )}
                         {exam.specificProtocol && (
@@ -5613,7 +5833,8 @@ export default function ChronicProfessionalReport({
                   )}
                 </div>
               </div>
-            ))
+              )
+            })
           ) : (
             <div className="text-center py-8 text-gray-500">
               <Scan className="h-12 w-12 mx-auto mb-4 text-gray-300" />
@@ -5649,6 +5870,12 @@ export default function ChronicProfessionalReport({
           </div>
         )}
         
+        <SectionBibliography
+          references={imagingUsedRefs}
+          globalReferences={imagingEvidenceRefs}
+          title="Références citées dans cette demande d'imagerie"
+        />
+
         {/* Signature */}
         <div className="mt-8 pt-6 border-t border-gray-300">
           <div className="text-right">
@@ -6533,6 +6760,24 @@ export default function ChronicProfessionalReport({
                 <div className="bg-gray-50 p-3 rounded text-sm">
                   <ul className="list-disc list-inside space-y-1">
                     {followUpPlan.lifestyleModifications.sleepHygiene.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {/* Substance Use — smoking cessation (first-line in HTA),
+                alcohol moderation. The upstream populates this from
+                patientData.smokingStatus / alcoholConsumption; the
+                previous render block was missing this section entirely so
+                "smoking cessation" never reached the patient-facing report. */}
+            {followUpPlan.lifestyleModifications.substanceUse && followUpPlan.lifestyleModifications.substanceUse.length > 0 && (
+              <div>
+                <h4 className="font-semibold mb-2 text-blue-700">Tobacco & Alcohol:</h4>
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded text-sm">
+                  <ul className="list-disc list-inside space-y-1">
+                    {followUpPlan.lifestyleModifications.substanceUse.map((item, idx) => (
                       <li key={idx}>{item}</li>
                     ))}
                   </ul>
