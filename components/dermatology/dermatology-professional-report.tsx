@@ -1935,10 +1935,27 @@ useEffect(() => {
  const result = await response.json()
  
  if (result.success && result.data) {
+ // A draft row can exist with an empty / partial report_content — this
+ // happens when an earlier run on the SAME consultationId saved a draft
+ // before the report finished (e.g. the CORS send failures during
+ // testing). Blindly trusting result.data here set report=<empty> and
+ // shouldGenerateReport=false → a completely blank report with no way
+ // to regenerate. Only treat the draft as usable when it actually has
+ // narrative content; otherwise fall through to generation.
+ const draftReport: any = result.data.report_content
+ const draftRapport = draftReport?.compteRendu?.rapport
+ const hasUsableDraft =
+ !!draftRapport &&
+ typeof draftRapport === 'object' &&
+ Object.values(draftRapport).some(
+ (v) => typeof v === 'string' && v.trim().length > 0
+ )
+
+ if (hasUsableDraft) {
  console.log('📂 Loading draft from database')
- 
- setReport(result.data.report_content)
- 
+
+ setReport(draftReport)
+
  // Only update doctor info if it exists in the draft
  if (result.data.doctor_info) {
  setDoctorInfo(prev => ({
@@ -1950,27 +1967,38 @@ useEffect(() => {
  adresseCabinet: result.data.doctor_info.adresseCabinet || prev.adresseCabinet,
  }))
  }
- 
+
  setModifiedSections(new Set(result.data.modified_sections || []))
         // Always reset to draft on page load/refresh to allow re-validation for testing
         setValidationStatus('draft')
- 
+
  toast({
  title: "Draft loaded",
  description: "Your previous edits have been restored (ready for re-validation)",
  duration: 3000
  })
- 
+
  setShouldGenerateReport(false)
  } else {
- console.log('No draft found, will generate new report if patient data is valid')
- 
- const hasValidPatientData = patientData && 
+ console.log('⚠️ Draft row exists but report_content is empty/incomplete — regenerating instead of showing a blank report')
+
+ const hasValidPatientData = patientData &&
  patientData.name !== 'Patient' &&
  patientData.name !== 'Non spécifié' &&
  patientData.name !== '1 janvier 1970' &&
  !patientData.name?.includes('1970')
- 
+
+ setShouldGenerateReport(hasValidPatientData)
+ }
+ } else {
+ console.log('No draft found, will generate new report if patient data is valid')
+
+ const hasValidPatientData = patientData &&
+ patientData.name !== 'Patient' &&
+ patientData.name !== 'Non spécifié' &&
+ patientData.name !== '1 janvier 1970' &&
+ !patientData.name?.includes('1970')
+
  setShouldGenerateReport(hasValidPatientData)
  }
  } catch (error) {
