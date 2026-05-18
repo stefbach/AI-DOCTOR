@@ -3675,6 +3675,23 @@ isEmergency: isEmergencyCase
  return decodeURIComponent(urlParam)
  }
 
+ // Phase 2.D.B.4: the hub persists the originating Tibok origin to
+ // sessionStorage BEFORE the query-stripping router.push to /dermatology.
+ // By the time we POST documents the URL param is gone, so this is the
+ // only reliable way to hit the SAME Tibok deployment that launched the
+ // consult (prod, branch preview, or localhost). Without it we fell back
+ // to the hardcoded prod alias, which redirects on the CORS preflight →
+ // "Failed to fetch" and documents never reach the patient.
+ try {
+ const storedTibokUrl = sessionStorage.getItem('tibokUrl')
+ if (storedTibokUrl) {
+ console.log('📍 Using Tibok URL from sessionStorage:', storedTibokUrl)
+ return storedTibokUrl
+ }
+ } catch {
+ // sessionStorage unavailable — fall through
+ }
+
  // Check referrer
  if (document.referrer) {
  try {
