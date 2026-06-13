@@ -35,33 +35,44 @@ export interface ModelPrice {
 // via prefix matching in `getModelPrice()`.
 const PRICING_TABLE: Record<string, ModelPrice> = {
   // ── DeepSeek ────────────────────────────────────────────────────────────
-  // deepseek-chat (V3) is the workhorse for this app: it runs the two heaviest
-  // calls (DIAGNOSIS, REPORT) and most extraction steps. Public DeepSeek API
-  // pricing (USD / 1M tokens): cache-hit 0.07, cache-miss 0.27 input, 1.10 out.
-  'deepseek-chat': {
-    inputPerMTok: 0.27,
-    cachedInputPerMTok: 0.07,
-    outputPerMTok: 1.10,
-    source: 'DeepSeek API pricing — deepseek-chat (V3 non-reasoning)',
-    confirmed: true,
-  },
-  // deepseek-reasoner (R1): cache-hit 0.14, cache-miss 0.55 input, 2.19 output.
-  'deepseek-reasoner': {
-    inputPerMTok: 0.55,
-    cachedInputPerMTok: 0.14,
-    outputPerMTok: 2.19,
-    source: 'DeepSeek API pricing — deepseek-reasoner (R1)',
-    confirmed: true,
-  },
-  // deepseek-v4-pro is the DEEPSEEK_DEFAULT_MODEL configured in llm-client.ts
-  // but is not a publicly priced SKU yet. Placeholder aligned with the
-  // reasoner tier — CONFIRM against the DeepSeek pricing page before relying on it.
+  // Source: official DeepSeek API pricing page (api-docs.deepseek.com/quick_start/pricing).
+  // All values USD per 1M tokens.
+  //
+  // deepseek-v4-pro — the model actually used in production for this app
+  // (DEEPSEEK_DEFAULT_MODEL). Carries the two heaviest calls (DIAGNOSIS, REPORT).
   'deepseek-v4-pro': {
-    inputPerMTok: 0.55,
-    cachedInputPerMTok: 0.14,
-    outputPerMTok: 2.19,
-    source: 'PLACEHOLDER — aligned to deepseek-reasoner tier, no public price yet',
-    confirmed: false,
+    inputPerMTok: 0.435,
+    cachedInputPerMTok: 0.003625,
+    outputPerMTok: 0.87,
+    source: 'DeepSeek API pricing — deepseek-v4-pro',
+    confirmed: true,
+  },
+  // deepseek-v4-flash — cheaper non-pro tier.
+  'deepseek-v4-flash': {
+    inputPerMTok: 0.14,
+    cachedInputPerMTok: 0.0028,
+    outputPerMTok: 0.28,
+    source: 'DeepSeek API pricing — deepseek-v4-flash',
+    confirmed: true,
+  },
+  // deepseek-chat / deepseek-reasoner — LEGACY aliases (non-thinking / thinking
+  // modes of v4-flash), billed at v4-flash rates. Deprecated 2026-07-24.
+  // NOTE: several routes still hard-code model: 'deepseek-chat' (e.g.
+  // openai-diagnosis, generate-consultation-report). After deprecation, or to
+  // use V4-Pro there, switch those overrides to 'deepseek-v4-pro'/'deepseek-v4-flash'.
+  'deepseek-chat': {
+    inputPerMTok: 0.14,
+    cachedInputPerMTok: 0.0028,
+    outputPerMTok: 0.28,
+    source: 'DeepSeek API pricing — deepseek-chat (legacy alias of v4-flash, deprecated 2026-07-24)',
+    confirmed: true,
+  },
+  'deepseek-reasoner': {
+    inputPerMTok: 0.14,
+    cachedInputPerMTok: 0.0028,
+    outputPerMTok: 0.28,
+    source: 'DeepSeek API pricing — deepseek-reasoner (legacy thinking-mode alias of v4-flash, deprecated 2026-07-24)',
+    confirmed: true,
   },
 
   // ── OpenAI ──────────────────────────────────────────────────────────────
