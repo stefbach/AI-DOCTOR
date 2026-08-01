@@ -12,6 +12,7 @@ import {
   inferSpecialty,
   buildClinicalQuery,
   scrubAndEnrichEvidenceRefs,
+  filterEvidenceRefsByTopic,
   normaliseDiagnosticProbabilities,
   type RAGContext,
   type RAGReference,
@@ -5868,6 +5869,46 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     // lib/rag/medical-rag.ts so all three flows behave identically.
     const ragResult = scrubAndEnrichEvidenceRefs(finalAnalysis, ragContext)
 
+    // ============ RAG: TOPIC-MATCH SAFETY NET ============
+    // Every other citing flow (dermatology, chronic, chronic-examens,
+    // chronic-prescription) already ran this; the general consultation — the
+    // most used one, and the one whose prompt pushes hardest to cite
+    // ("MINIMUM 3 references", "when in doubt PREFER citing") — did not.
+    // Hard-drops refs whose subject is outside the patient's context
+    // (pregnancy on a non-pregnant patient, paediatric on an adult, oncology
+    // with no cancer history) and soft-drops those whose title shares no
+    // substantive token with the diagnosis.
+    const generalTopicSeeds: string[] = [
+      finalAnalysis?.clinical_analysis?.primary_diagnosis?.condition || '',
+      finalAnalysis?.clinical_analysis?.primary_diagnosis?.diagnosis || '',
+      finalAnalysis?.clinical_analysis?.primary_diagnosis?.name || '',
+      ...(Array.isArray(finalAnalysis?.clinical_analysis?.differential_diagnoses)
+        ? finalAnalysis.clinical_analysis.differential_diagnoses.map(
+            (d: any) => d?.condition || d?.diagnosis || d?.name || ''
+          )
+        : []),
+      patientContext.chief_complaint || '',
+      ...(Array.isArray(patientContext.symptoms) ? patientContext.symptoms : []),
+    ].filter((s: any) => typeof s === 'string' && s.length > 0)
+    const ageForFlags = typeof patientContext.age === 'number'
+      ? patientContext.age
+      : parseInt(String(patientContext.age ?? ''), 10)
+    const generalTopicFiltered = filterEvidenceRefsByTopic(
+      ragResult.evidenceReferences,
+      generalTopicSeeds,
+      {
+        logPrefix: '🎯 [TOPIC-FILTER-GENERAL]',
+        patientFlags: {
+          isPregnant: /\b(pregn|enceinte|gestational|gravid)/i.test(String(patientContext.pregnancy_status || '')),
+          isChild: Number.isFinite(ageForFlags) ? ageForFlags < 18 : false,
+          hasCancer: Array.isArray(patientContext.medical_history) &&
+            patientContext.medical_history.some((d: string) =>
+              /\b(cancer|carcinoma|melanoma|lymphoma|leukemi|leukaemi|sarcoma|metastat|oncolog|tumou?r|neoplas)/i.test(String(d || ''))
+            ),
+        },
+      }
+    )
+
     // ============ RAG: GROUNDING VERIFICATION ============
     // The scrub above proves each [ref-N] points at a guideline we really
     // retrieved. It does NOT prove that guideline says anything about the
@@ -5878,7 +5919,7 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     const verifyResult = await verifyCitationGrounding(
       finalAnalysis,
       ragContext,
-      ragResult.evidenceReferences,
+      generalTopicFiltered.kept,
       ragResult.refUsageByPath,
       { logPrefix: '🔒 [RAG-VERIFY]' },
     )

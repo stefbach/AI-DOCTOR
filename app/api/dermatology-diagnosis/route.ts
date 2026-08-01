@@ -19,6 +19,7 @@ import {
   queryMedicalGuidelinesMulti,
   fetchGuidelineChunksByTitlePatterns,
   mergeTitlePatternRowsIntoContext,
+  attachContentKind,
   formatGuidelinesForPrompt,
   scrubAndEnrichEvidenceRefs,
   filterEvidenceRefsByTopic,
@@ -1083,6 +1084,11 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
           )
         }
       }
+      // The title-pattern merge is synchronous and bypasses the query entry
+      // points, so guidelines pulled in by TITLE arrive unlabelled. Re-run the
+      // labelling over the merged context — one query on a handful of ids,
+      // idempotent for those already labelled.
+      ragContext = await attachContentKind(ragContext)
       console.log(
         `📚 [RAG-DERMA] Final context: ${ragContext.totalChunks} chunks ` +
           `(avg similarity ${ragContext.avgSimilarity.toFixed(2)}, refs: ${ragContext.references.length})`

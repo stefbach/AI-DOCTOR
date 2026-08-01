@@ -14,6 +14,8 @@
 
 import React from 'react'
 
+type GuidelineContentKind = 'referentiel' | 'recherche' | 'notice' | 'indetermine'
+
 interface EvidenceReference {
   ref_id?: string
   title?: string
@@ -23,6 +25,36 @@ interface EvidenceReference {
   publication_date?: string
   specialty?: string
   used_for?: string
+  /** Nature of the source, read from guideline_content_kind server-side. */
+  content_kind?: GuidelineContentKind
+}
+
+/**
+ * What the reader is told about a source that is NOT a society guideline.
+ *
+ * A third of the corpus is primary research and an eighth is a bibliographic
+ * pointer whose full text was never retrieved. Listing all of them under
+ * "international medical guidelines" — as this section did until now — lends
+ * a 53-patient cohort the authority of a learned society. A title alone
+ * cannot be trusted to say what a document is, so we say it explicitly.
+ *
+ * `referentiel` gets no badge on purpose: it IS what the section header
+ * already claims, and badging the normal case only adds noise.
+ */
+const KIND_BADGE: Record<GuidelineContentKind, { label: string; className: string } | null> = {
+  referentiel: null,
+  recherche: {
+    label: 'Étude — pas une recommandation de société savante',
+    className: 'bg-amber-50 text-amber-800 border-amber-200',
+  },
+  notice: {
+    label: 'Notice bibliographique — texte intégral non consulté',
+    className: 'bg-gray-100 text-gray-700 border-gray-300',
+  },
+  indetermine: {
+    label: 'Statut non confirmé',
+    className: 'bg-gray-100 text-gray-700 border-gray-300',
+  },
 }
 
 interface Props {
@@ -63,8 +95,9 @@ export default function EvidenceReferencesSection({ references }: Props) {
         Références médicales utilisées
       </h2>
       <p className="text-sm text-gray-700 mb-4">
-        Ce diagnostic et ces recommandations s'appuient sur les guidelines
-        médicales internationales suivantes :
+        Ce diagnostic et ces recommandations s'appuient sur les sources
+        médicales internationales suivantes. Les sources qui ne sont pas des
+        recommandations de société savante sont signalées comme telles :
       </p>
       <ol className="space-y-4 text-sm text-gray-700">
         {refs.map((ref, idx) => {
@@ -73,12 +106,22 @@ export default function EvidenceReferencesSection({ references }: Props) {
           const date = formatDate(ref.publication_date)
           const url = ref.url?.trim()
           const usedFor = ref.used_for?.trim()
+          const badge = ref.content_kind ? KIND_BADGE[ref.content_kind] : null
           return (
             <li key={`${ref.ref_id || ref.external_id || idx}`} className="break-inside-avoid">
               <div className="flex gap-2">
                 <span className="font-semibold shrink-0">[{idx + 1}]</span>
                 <div className="flex-1 space-y-1">
                   <p className="font-semibold text-gray-900">{title}</p>
+                  {badge && (
+                    <p>
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded border text-[11px] font-medium ${badge.className}`}
+                      >
+                        {badge.label}
+                      </span>
+                    </p>
+                  )}
                   {date && (
                     <p className="text-xs text-gray-600">Publié : {date}</p>
                   )}

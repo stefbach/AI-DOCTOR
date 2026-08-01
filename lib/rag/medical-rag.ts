@@ -105,6 +105,13 @@ export type SpecialtyCode =
 
 /** Raw row shape returned by public.match_guidelines RPC. */
 interface MatchGuidelinesRow {
+  /**
+   * Document id. Verified present in the RPC's return type on
+   * tibok-production — it is what joins a chunk to guideline_content_kind.
+   * Optional here anyway: a deployment whose RPC drops the column must
+   * degrade to "unlabelled", never to a crash.
+   */
+  guideline_id?: string
   guideline_title: string
   guideline_external_id: string
   source_code: string
@@ -123,6 +130,29 @@ export interface RAGChunk {
   refId: string
 }
 
+/**
+ * What the text indexed under this title actually IS.
+ *
+ * Read from guideline_content_kind, computed ONCE over the whole document
+ * (a 6000-char slice taken from the middle of a real guideline — a dosing
+ * table, an appendix — carries no "we recommend", so the same test applied
+ * per-chunk would misclassify impeccable guidelines as primary literature).
+ *
+ * Measured on the live corpus (6315 documents, 2026-08-01):
+ *   referentiel  2092 (33%)  carries recommendation language
+ *   recherche    2019 (32%)  reports a study — NOT a society recommendation
+ *   indetermine  1425 (23%)  neither, clearly
+ *   notice        779 (12%)  bibliographic pointer, full text never retrieved
+ *
+ * So roughly 44% of what this pipeline can cite is not a society guideline —
+ * and until now every one of them was presented to the doctor under the same
+ * "international medical guidelines" heading. This field exists to LABEL a
+ * citation, never to filter one: a cohort study belongs in clinical
+ * reasoning, it simply does not carry the authority of a learned society,
+ * and the report has to say so.
+ */
+export type GuidelineContentKind = 'referentiel' | 'recherche' | 'notice' | 'indetermine'
+
 export interface RAGReference {
   /** Citation tag injected in the prompt (e.g. "ref-1"). */
   ref_id: string
@@ -132,6 +162,10 @@ export interface RAGReference {
   url: string
   publication_date: string
   specialty: string
+  /** Document id, used to join guideline_content_kind. Absent when the RPC drops it. */
+  guideline_id?: string
+  /** Nature of the source. Undefined = not established; treat as unlabelled, never as authoritative. */
+  content_kind?: GuidelineContentKind
 }
 
 export interface RAGContext {
@@ -198,7 +232,10 @@ export async function queryMedicalGuidelines(
   const rows = await fetchGuidelineRows(trimmedQuery, { specialty, threshold, limit })
   if (rows === null) return { ...EMPTY_CONTEXT, ragUsed: false }
   if (rows.length === 0) return { ...EMPTY_CONTEXT, ragUsed: true }
-  return buildContextFromRows(rows)
+  // Label the nature of each source before anything downstream reads the
+  // context. Done at the entry point so every caller gets it for free — a
+  // route must not be able to forget it.
+  return attachContentKind(buildContextFromRows(rows))
 }
 
 /**
@@ -301,7 +338,7 @@ export async function queryMedicalGuidelinesMulti(
       `in ${Date.now() - t0}ms (deduped ${allRows.length - dedupedRows.length})`
   )
 
-  const ctx = buildContextFromRows(dedupedRows)
+  const ctx = await attachContentKind(buildContextFromRows(dedupedRows))
   return { ...ctx, ragUsed: ragUsed && ctx.ragUsed }
 }
 
@@ -477,6 +514,7 @@ function buildContextFromRows(rows: MatchGuidelinesRow[]): RAGContext {
         url: row.source_url || '',
         publication_date: row.source_publication_date || '',
         specialty: row.specialty_code || '',
+        guideline_id: row.guideline_id,
       }
       refByExternalId.set(externalId, ref)
     }
@@ -499,6 +537,131 @@ function buildContextFromRows(rows: MatchGuidelinesRow[]): RAGContext {
     avgSimilarity,
     ragUsed: true,
   }
+}
+
+/**
+ * A BIBLIOGRAPHIC POINTER, not the text of a recommendation.
+ *
+ * 779 documents of the corpus (12%) were indexed by the `citation-stub`
+ * method: the full text was not freely retrievable (proprietary access,
+ * member portal), and the ingestion recorded a pointer instead. They declare
+ * themselves:
+ *
+ *   "This is a citation reference for the ANSM guideline '…' published in
+ *    2024. The full text was not freely retrievable at the time of indexing…"
+ *
+ * These are not fake references — they are honest pointers, and dropping them
+ * would be wrong: knowing that a recommendation exists on the subject has
+ * value. The danger is the model citing one AS IF it carried a recommendation
+ * and inventing the missing content. So we label it for what it is.
+ *
+ * Detected on the TEXT, so it still works when the content_kind lookup fails.
+ */
+const CITATION_STUB_RE =
+  /this is a citation (?:reference|stub) for|full text was not freely retrievable/i
+
+export function isCitationStub(content: string): boolean {
+  return CITATION_STUB_RE.test(String(content || ''))
+}
+
+/**
+ * Label each reference with the nature of its source.
+ *
+ * One query, on the handful of guidelines actually retrieved — not on the
+ * corpus. Falls back to the self-declaring citation-stub text when the table
+ * lookup yields nothing for a reference.
+ *
+ * Fails SILENTLY: without this signal we label less precisely, we do not
+ * return fewer references. A missing table must never cost a report its
+ * bibliography.
+ */
+export async function attachContentKind(ctx: RAGContext): Promise<RAGContext> {
+  if (!ctx.ragUsed || ctx.references.length === 0) return ctx
+
+  // Text-based fallback first — it needs no database at all.
+  const stubExternalIds = new Set<string>()
+  for (const chunk of ctx.chunks) {
+    if (isCitationStub(chunk.content)) {
+      const ref = ctx.references.find(r => r.ref_id === chunk.refId)
+      if (ref) stubExternalIds.add(ref.external_id)
+    }
+  }
+
+  const kindByGuidelineId = new Map<string, GuidelineContentKind>()
+  const ids = Array.from(
+    new Set(ctx.references.map(r => r.guideline_id).filter((v): v is string => !!v))
+  )
+  if (ids.length > 0) {
+    try {
+      const t0 = Date.now()
+      const { data, error } = await getSupabase()
+        .from('guideline_content_kind')
+        .select('guideline_id, kind')
+        .in('guideline_id', ids)
+      if (error) {
+        console.warn(`[RAG] content_kind lookup failed (non-blocking): ${error.message}`)
+      } else {
+        for (const row of (data || []) as Array<{ guideline_id: string; kind: string }>) {
+          const k = String(row.kind || '')
+          if (k === 'referentiel' || k === 'recherche' || k === 'notice' || k === 'indetermine') {
+            kindByGuidelineId.set(row.guideline_id, k)
+          }
+        }
+        console.log(
+          `[RAG] content_kind resolved for ${kindByGuidelineId.size}/${ids.length} guideline(s) in ${Date.now() - t0}ms`
+        )
+      }
+    } catch (err: any) {
+      console.warn('[RAG] content_kind lookup threw (non-blocking):', err?.message || err)
+    }
+  } else {
+    console.warn(
+      '[RAG] no guideline_id on any reference — content_kind labelling INOPERATIVE ' +
+        '(the RPC did not project the column); falling back to citation-stub text detection only.'
+    )
+  }
+
+  const references = ctx.references.map(ref => {
+    const fromTable = ref.guideline_id ? kindByGuidelineId.get(ref.guideline_id) : undefined
+    const kind: GuidelineContentKind | undefined =
+      fromTable ?? (stubExternalIds.has(ref.external_id) ? 'notice' : undefined)
+    return kind ? { ...ref, content_kind: kind } : ref
+  })
+
+  const mix = references.reduce<Record<string, number>>((acc, r) => {
+    const k = r.content_kind ?? 'unlabelled'
+    acc[k] = (acc[k] || 0) + 1
+    return acc
+  }, {})
+  console.log(`[RAG] source nature: ${JSON.stringify(mix)}`)
+
+  return { ...ctx, references }
+}
+
+/** Prompt-side warning carried right next to the excerpt the model reads. */
+function contentKindWarning(ref: RAGReference): string {
+  if (ref.content_kind === 'notice') {
+    return (
+      '\n⚠ POINTER ONLY — the full text of this guideline was NOT retrieved. You may state ' +
+      'that this guideline exists and is relevant to the topic. You must NOT attribute any ' +
+      'recommendation, threshold, dose or figure to it, and you must NOT infer its content.'
+    )
+  }
+  if (ref.content_kind === 'recherche') {
+    return (
+      '\n⚠ PRIMARY RESEARCH, not a society guideline — despite the title above, this text ' +
+      'reports a study (cohort, trial or review). Cite it as study evidence ("a study reports…"). ' +
+      'Do NOT write "according to the X recommendation" and do NOT attach a recommendation grade to it.'
+    )
+  }
+  if (ref.content_kind === 'indetermine') {
+    return (
+      '\n⚠ STATUS UNCONFIRMED — this text could not be established as carrying society ' +
+      'recommendation language. Use it to inform reasoning, but do not present it as a formal ' +
+      'recommendation.'
+    )
+  }
+  return ''
 }
 
 /**
@@ -542,6 +705,13 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
     const refChunks = chunksByRef.get(ref.ref_id) ?? []
     const date = ref.publication_date ? ` (${ref.publication_date})` : ''
     lines.push(`[${ref.ref_id}] ${ref.source} ${ref.external_id}${date} — ${ref.title}`)
+    // Status warning FIRST, before the URL and the text: the status matters as
+    // much as the content. An excerpt announced under a "CHEST guideline"
+    // title whose text is a 53-patient cohort must be cited as a study, not
+    // as a learned-society recommendation — otherwise the report lends a case
+    // series the authority of a reference standard.
+    const kindWarning = contentKindWarning(ref)
+    if (kindWarning) lines.push(kindWarning.replace(/^\n/, ''))
     if (ref.url) lines.push(`URL: ${ref.url}`)
     if (ref.specialty) lines.push(`Specialty: ${ref.specialty}`)
     for (const chunk of refChunks) {
@@ -585,6 +755,9 @@ export function formatGuidelinesForPrompt(ctx: RAGContext): string {
   )
   lines.push(
     "9. NE PAS inventer de références: ne cite que les [ref-N] présents ci-dessus."
+  )
+  lines.push(
+    "10. STATUT DE LA SOURCE: respecte l'avertissement ⚠ attaché à une référence. Une source marquée PRIMARY RESEARCH se cite comme une étude, jamais comme une recommandation de société savante. Une source marquée POINTER ONLY peut être signalée comme existante et pertinente, mais AUCUN chiffre, seuil, dose ni recommandation ne peut lui être attribué — ne devine jamais son contenu."
   )
   lines.push('')
 
@@ -1567,14 +1740,31 @@ export function scrubAndEnrichEvidenceRefs(
   }
 
   // Pass 2 — fallback if LLM emitted nothing despite chunks being available.
+  //
+  // ONLY refs the model actually cited in the prose are reconstructed. The
+  // previous version had a second branch: when NOTHING was cited anywhere, it
+  // listed every retrieved ref. That produced a bibliography of guidelines the
+  // report never used — the reader sees sources presented as having informed
+  // the reasoning when none of them did. It is the same fabricated attribution
+  // that got Pass 3 removed (see below), just quieter: Pass 3 padded a partial
+  // list, this branch invented the whole one.
+  //
+  // A report the model wrote without citing anything is a report based on
+  // clinical practice, and saying so is the honest outcome. The bibliography
+  // stays empty and EvidenceReferencesSection renders its "standard clinical
+  // practice" note.
   if (evidenceReferences.length === 0 && ragContext.references.length > 0) {
-    citationsReconstructed = true
-    const fallbackRefs = usedValidRefs.size > 0
-      ? ragContext.references.filter(r => usedValidRefs.has(r.ref_id))
-      : ragContext.references
-    console.log(
-      `${tag} Reconstructing ${fallbackRefs.length} citation(s) — LLM emitted empty evidence_references despite ${ragContext.totalChunks} chunks provided ` +
-        `(narrative-cited: ${usedValidRefs.size}, full-fallback: ${usedValidRefs.size === 0})`
+    const fallbackRefs = ragContext.references.filter(r => usedValidRefs.has(r.ref_id))
+    if (fallbackRefs.length === 0) {
+      console.warn(
+        `${tag} LLM emitted empty evidence_references AND cited no [ref-N] anywhere in the report, ` +
+          `despite ${ragContext.totalChunks} chunk(s) provided. Bibliography left EMPTY — listing ` +
+          `uncited refs would attribute the reasoning to guidelines the report never used.`
+      )
+    }
+    citationsReconstructed = fallbackRefs.length > 0
+    if (fallbackRefs.length > 0) console.log(
+      `${tag} Reconstructing ${fallbackRefs.length} citation(s) — LLM emitted empty evidence_references but DID cite them in the narrative`
     )
     for (const ref of fallbackRefs) {
       evidenceReferences.push({
