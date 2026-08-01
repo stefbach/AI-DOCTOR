@@ -12,6 +12,7 @@ import {
   filterEvidenceRefsByTopic,
   type RAGContext,
 } from '@/lib/rag/medical-rag'
+import { verifyCitationGrounding } from '@/lib/rag/verify-citations'
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s for DeepSeek-V4-Pro chronic prescription generation
@@ -500,6 +501,17 @@ Generate the comprehensive chronic disease prescription now.`
       }
     )
     ragResult.evidenceReferences = presFiltered.kept
+    // Grounding verification — the topic filter above compares TITLES only.
+    // This pass reads the guideline TEXT and removes citations it does not
+    // support. Prose untouched, fail-open.
+    const verifyResult = await verifyCitationGrounding(
+      prescriptionData,
+      ragContext,
+      ragResult.evidenceReferences,
+      ragResult.refUsageByPath,
+      { logPrefix: '🔒 [RAG-VERIFY-CHRONIC-PRESCRIPTION]' },
+    )
+    ragResult.evidenceReferences = verifyResult.evidenceReferences
 
     // Defensive auto-cite: if a chronicMedication's indication.clinicalRationale
     // doesn't already contain [ref-N] and we have at least one evidence ref,
@@ -551,6 +563,14 @@ Generate the comprehensive chronic disease prescription now.`
         hallucinated_refs_scrubbed: ragResult.hallucinatedRefsScrubbed,
         hallucinated_refs_breakdown: ragResult.hallucinatedRefsBreakdown,
         unused_refs_filtered: ragResult.unusedRefsFiltered,
+        // Grounding verification (lib/rag/verify-citations.ts)
+        grounding_verified: verifyResult.verified,
+        grounding_skipped_reason: verifyResult.skippedReason ?? null,
+        unsupported_refs_removed: verifyResult.removedRefIds.length,
+        unsupported_refs_breakdown: verifyResult.removedRefIds,
+        unverifiable_refs: verifyResult.unverifiableRefIds,
+        grounding_verdicts: verifyResult.verdicts,
+        grounding_latency_ms: verifyResult.latencyMs,
       },
       evidence_references: ragResult.evidenceReferences,
     })

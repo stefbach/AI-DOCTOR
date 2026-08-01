@@ -17,6 +17,7 @@ import {
   type RAGReference,
 } from '@/lib/rag/medical-rag'
 import { reRankAndShrinkContext } from '@/lib/rag/rerank'
+import { verifyCitationGrounding } from '@/lib/rag/verify-citations'
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s: DeepSeek-V4-Pro on the Phase 1 enriched system prompt + Phase 2 boosted RAG context regularly runs 250-350s; 600 gives headroom without burning more compute than the call actually uses (Vercel bills real runtime, not the cap).
@@ -5866,7 +5867,22 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     // Shared with chronic-diagnosis and dermatology-diagnosis via the helper in
     // lib/rag/medical-rag.ts so all three flows behave identically.
     const ragResult = scrubAndEnrichEvidenceRefs(finalAnalysis, ragContext)
-    const evidenceReferences = ragResult.evidenceReferences
+
+    // ============ RAG: GROUNDING VERIFICATION ============
+    // The scrub above proves each [ref-N] points at a guideline we really
+    // retrieved. It does NOT prove that guideline says anything about the
+    // sentence it is attached to — every check so far reasons on the title.
+    // This pass reads the actual chunk text and removes citations the
+    // guideline does not support. Narrative prose is never modified.
+    // Fail-open: on any error the bibliography is returned untouched.
+    const verifyResult = await verifyCitationGrounding(
+      finalAnalysis,
+      ragContext,
+      ragResult.evidenceReferences,
+      ragResult.refUsageByPath,
+      { logPrefix: '🔒 [RAG-VERIFY]' },
+    )
+    const evidenceReferences = verifyResult.evidenceReferences
     const unknownCitedRefs = ragResult.unknownCitedRefs
     const citationsReconstructed = ragResult.citationsReconstructed
     const hallucinatedRefsScrubbed = ragResult.hallucinatedRefsScrubbed
@@ -5905,6 +5921,14 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         hallucinated_refs_scrubbed: hallucinatedRefsScrubbed,
         hallucinated_refs_breakdown: hallucinatedRefsBreakdown,
         unused_refs_filtered: unusedRefsFiltered,
+        // Grounding verification (lib/rag/verify-citations.ts)
+        grounding_verified: verifyResult.verified,
+        grounding_skipped_reason: verifyResult.skippedReason ?? null,
+        unsupported_refs_removed: verifyResult.removedRefIds.length,
+        unsupported_refs_breakdown: verifyResult.removedRefIds,
+        unverifiable_refs: verifyResult.unverifiableRefIds,
+        grounding_verdicts: verifyResult.verdicts,
+        grounding_latency_ms: verifyResult.latencyMs,
       },
       evidence_references: evidenceReferences,
 

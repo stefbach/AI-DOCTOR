@@ -14,6 +14,7 @@ import {
   filterEvidenceRefsByTopic,
   type RAGContext,
 } from '@/lib/rag/medical-rag'
+import { verifyCitationGrounding } from '@/lib/rag/verify-citations'
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s: 2 sequential DeepSeek calls (labs/imaging + referrals/monitoring) can total 250-500s.
@@ -430,6 +431,18 @@ CONSULTATIONS selon maladies:
             }
           )
           ragResult.evidenceReferences = examsFiltered.kept
+          // Grounding verification — the topic filter above compares TITLES
+          // only. This pass reads the guideline TEXT and removes citations it
+          // does not support. Runs BEFORE the auto-cite below so the fallback
+          // can only pick a ref that survived verification.
+          const verifyResult = await verifyCitationGrounding(
+            combinedExamOrders,
+            ragContext,
+            ragResult.evidenceReferences,
+            ragResult.refUsageByPath,
+            { logPrefix: '🔒 [RAG-VERIFY-CHRONIC-EXAMENS]' },
+          )
+          ragResult.evidenceReferences = verifyResult.evidenceReferences
 
           // Defensive auto-cite: if a test/exam clinicalIndication doesn't
           // already contain [ref-N] and we have at least one evidence ref,
@@ -488,6 +501,14 @@ CONSULTATIONS selon maladies:
               hallucinated_refs_scrubbed: ragResult.hallucinatedRefsScrubbed,
               hallucinated_refs_breakdown: ragResult.hallucinatedRefsBreakdown,
               unused_refs_filtered: ragResult.unusedRefsFiltered,
+              // Grounding verification (lib/rag/verify-citations.ts)
+              grounding_verified: verifyResult.verified,
+              grounding_skipped_reason: verifyResult.skippedReason ?? null,
+              unsupported_refs_removed: verifyResult.removedRefIds.length,
+              unsupported_refs_breakdown: verifyResult.removedRefIds,
+              unverifiable_refs: verifyResult.unverifiableRefIds,
+              grounding_verdicts: verifyResult.verdicts,
+              grounding_latency_ms: verifyResult.latencyMs,
             },
             evidence_references: ragResult.evidenceReferences,
           })

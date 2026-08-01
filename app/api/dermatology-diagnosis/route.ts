@@ -25,6 +25,7 @@ import {
   normaliseDiagnosticProbabilities,
   type RAGContext,
 } from '@/lib/rag/medical-rag'
+import { verifyCitationGrounding } from '@/lib/rag/verify-citations'
 
 // ==================== DATA ANONYMIZATION ====================
 function anonymizePatientData(patientData: any): {
@@ -1138,8 +1139,18 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         },
       }
     )
-    const evidenceReferences = topicFiltered.kept
-    
+    // Grounding verification — the topic filter above only compares the ref
+    // TITLE with the diagnosis. This pass reads the guideline TEXT and drops
+    // citations it does not support. Prose untouched, fail-open.
+    const verifyResult = await verifyCitationGrounding(
+      diagnosisData,
+      ragContext,
+      topicFiltered.kept,
+      ragResult.refUsageByPath,
+      { logPrefix: '🔒 [RAG-VERIFY-DERMA]' },
+    )
+    const evidenceReferences = verifyResult.evidenceReferences
+
     // Generate formatted text for backward compatibility
     const fullTextDiagnosis = generateFormattedDiagnosisText(diagnosisData)
 
@@ -1500,6 +1511,14 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         hallucinated_refs_scrubbed: ragResult.hallucinatedRefsScrubbed,
         hallucinated_refs_breakdown: ragResult.hallucinatedRefsBreakdown,
         unused_refs_filtered: ragResult.unusedRefsFiltered,
+        // Grounding verification (lib/rag/verify-citations.ts)
+        grounding_verified: verifyResult.verified,
+        grounding_skipped_reason: verifyResult.skippedReason ?? null,
+        unsupported_refs_removed: verifyResult.removedRefIds.length,
+        unsupported_refs_breakdown: verifyResult.removedRefIds,
+        unverifiable_refs: verifyResult.unverifiableRefIds,
+        grounding_verdicts: verifyResult.verdicts,
+        grounding_latency_ms: verifyResult.latencyMs,
       },
       evidence_references: evidenceReferences,
 
