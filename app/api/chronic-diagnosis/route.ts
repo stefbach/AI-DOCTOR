@@ -16,6 +16,7 @@ import {
   filterEvidenceRefsByTopic,
   type RAGContext,
 } from '@/lib/rag/medical-rag'
+import { verifyCitationGrounding } from '@/lib/rag/verify-citations'
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s: chronic-diagnosis runs 2 sequential DeepSeek-V4-Pro reasoning calls (clinical analysis + structured plans). Each can take 150-250s, so the previous 300s cap was tripping FUNCTION_INVOCATION_TIMEOUT mid-stream.
@@ -466,7 +467,17 @@ Si une recommandation s'appuie sur une guideline du bloc CONTEXTE GUIDELINES MÉ
               },
             }
           )
-          combinedAssessment.evidence_references = topicFiltered.kept
+          // Grounding verification — the topic filter above compares TITLES
+          // only. This pass reads the guideline TEXT and removes citations it
+          // does not support. Prose untouched, fail-open.
+          const verifyResult = await verifyCitationGrounding(
+            combinedAssessment,
+            ragContext,
+            topicFiltered.kept,
+            ragResult.refUsageByPath,
+            { logPrefix: '🔒 [RAG-VERIFY-CHRONIC]' },
+          )
+          combinedAssessment.evidence_references = verifyResult.evidenceReferences
           combinedAssessment.rag_used = ragContext.ragUsed
           combinedAssessment.rag_metadata = {
             chunks_retrieved: ragContext.totalChunks,
@@ -478,6 +489,14 @@ Si une recommandation s'appuie sur une guideline du bloc CONTEXTE GUIDELINES MÉ
             hallucinated_refs_scrubbed: ragResult.hallucinatedRefsScrubbed,
             hallucinated_refs_breakdown: ragResult.hallucinatedRefsBreakdown,
             unused_refs_filtered: ragResult.unusedRefsFiltered,
+            // Grounding verification (lib/rag/verify-citations.ts)
+            grounding_verified: verifyResult.verified,
+            grounding_skipped_reason: verifyResult.skippedReason ?? null,
+            unsupported_refs_removed: verifyResult.removedRefIds.length,
+            unsupported_refs_breakdown: verifyResult.removedRefIds,
+            unverifiable_refs: verifyResult.unverifiableRefIds,
+            grounding_verdicts: verifyResult.verdicts,
+            grounding_latency_ms: verifyResult.latencyMs,
           }
 
           sendSSE('progress', { message: 'Évaluation terminée!', progress: 100 })

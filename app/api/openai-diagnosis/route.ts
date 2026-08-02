@@ -12,11 +12,13 @@ import {
   inferSpecialty,
   buildClinicalQuery,
   scrubAndEnrichEvidenceRefs,
+  filterEvidenceRefsByTopic,
   normaliseDiagnosticProbabilities,
   type RAGContext,
   type RAGReference,
 } from '@/lib/rag/medical-rag'
 import { reRankAndShrinkContext } from '@/lib/rag/rerank'
+import { verifyCitationGrounding } from '@/lib/rag/verify-citations'
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s: DeepSeek-V4-Pro on the Phase 1 enriched system prompt + Phase 2 boosted RAG context regularly runs 250-350s; 600 gives headroom without burning more compute than the call actually uses (Vercel bills real runtime, not the cap).
@@ -5866,7 +5868,62 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     // Shared with chronic-diagnosis and dermatology-diagnosis via the helper in
     // lib/rag/medical-rag.ts so all three flows behave identically.
     const ragResult = scrubAndEnrichEvidenceRefs(finalAnalysis, ragContext)
-    const evidenceReferences = ragResult.evidenceReferences
+
+    // ============ RAG: TOPIC-MATCH SAFETY NET ============
+    // Every other citing flow (dermatology, chronic, chronic-examens,
+    // chronic-prescription) already ran this; the general consultation — the
+    // most used one, and the one whose prompt pushes hardest to cite
+    // ("MINIMUM 3 references", "when in doubt PREFER citing") — did not.
+    // Hard-drops refs whose subject is outside the patient's context
+    // (pregnancy on a non-pregnant patient, paediatric on an adult, oncology
+    // with no cancer history) and soft-drops those whose title shares no
+    // substantive token with the diagnosis.
+    const generalTopicSeeds: string[] = [
+      finalAnalysis?.clinical_analysis?.primary_diagnosis?.condition || '',
+      finalAnalysis?.clinical_analysis?.primary_diagnosis?.diagnosis || '',
+      finalAnalysis?.clinical_analysis?.primary_diagnosis?.name || '',
+      ...(Array.isArray(finalAnalysis?.clinical_analysis?.differential_diagnoses)
+        ? finalAnalysis.clinical_analysis.differential_diagnoses.map(
+            (d: any) => d?.condition || d?.diagnosis || d?.name || ''
+          )
+        : []),
+      patientContext.chief_complaint || '',
+      ...(Array.isArray(patientContext.symptoms) ? patientContext.symptoms : []),
+    ].filter((s: any) => typeof s === 'string' && s.length > 0)
+    const ageForFlags = typeof patientContext.age === 'number'
+      ? patientContext.age
+      : parseInt(String(patientContext.age ?? ''), 10)
+    const generalTopicFiltered = filterEvidenceRefsByTopic(
+      ragResult.evidenceReferences,
+      generalTopicSeeds,
+      {
+        logPrefix: '🎯 [TOPIC-FILTER-GENERAL]',
+        patientFlags: {
+          isPregnant: /\b(pregn|enceinte|gestational|gravid)/i.test(String(patientContext.pregnancy_status || '')),
+          isChild: Number.isFinite(ageForFlags) ? ageForFlags < 18 : false,
+          hasCancer: Array.isArray(patientContext.medical_history) &&
+            patientContext.medical_history.some((d: string) =>
+              /\b(cancer|carcinoma|melanoma|lymphoma|leukemi|leukaemi|sarcoma|metastat|oncolog|tumou?r|neoplas)/i.test(String(d || ''))
+            ),
+        },
+      }
+    )
+
+    // ============ RAG: GROUNDING VERIFICATION ============
+    // The scrub above proves each [ref-N] points at a guideline we really
+    // retrieved. It does NOT prove that guideline says anything about the
+    // sentence it is attached to — every check so far reasons on the title.
+    // This pass reads the actual chunk text and removes citations the
+    // guideline does not support. Narrative prose is never modified.
+    // Fail-open: on any error the bibliography is returned untouched.
+    const verifyResult = await verifyCitationGrounding(
+      finalAnalysis,
+      ragContext,
+      generalTopicFiltered.kept,
+      ragResult.refUsageByPath,
+      { logPrefix: '🔒 [RAG-VERIFY]' },
+    )
+    const evidenceReferences = verifyResult.evidenceReferences
     const unknownCitedRefs = ragResult.unknownCitedRefs
     const citationsReconstructed = ragResult.citationsReconstructed
     const hallucinatedRefsScrubbed = ragResult.hallucinatedRefsScrubbed
@@ -5905,6 +5962,14 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         hallucinated_refs_scrubbed: hallucinatedRefsScrubbed,
         hallucinated_refs_breakdown: hallucinatedRefsBreakdown,
         unused_refs_filtered: unusedRefsFiltered,
+        // Grounding verification (lib/rag/verify-citations.ts)
+        grounding_verified: verifyResult.verified,
+        grounding_skipped_reason: verifyResult.skippedReason ?? null,
+        unsupported_refs_removed: verifyResult.removedRefIds.length,
+        unsupported_refs_breakdown: verifyResult.removedRefIds,
+        unverifiable_refs: verifyResult.unverifiableRefIds,
+        grounding_verdicts: verifyResult.verdicts,
+        grounding_latency_ms: verifyResult.latencyMs,
       },
       evidence_references: evidenceReferences,
 
