@@ -6,6 +6,7 @@
 // back automatically to OpenAI so the consultation flow never breaks.
 
 import OpenAI from 'openai'
+import { estimateCost, formatUsd, type CostBreakdown } from './llm-pricing'
 
 export type LLMProvider = 'openai' | 'deepseek'
 export type LLMReasoningEffort = 'none' | 'low' | 'medium' | 'high'
@@ -59,6 +60,8 @@ export interface LLMUsage {
   promptTokens?: number
   completionTokens?: number
   totalTokens?: number
+  /** Subset of promptTokens billed at the reduced cache-hit rate, when reported by the provider. */
+  cachedPromptTokens?: number
 }
 
 export interface LLMResult {
@@ -70,6 +73,8 @@ export interface LLMResult {
   latencyMs: number
   fallbackUsed: boolean
   attempts: number
+  /** Estimated USD cost of this call, derived from `model` + `usage` via lib/llm-pricing. Null when the model is unpriced. */
+  cost?: CostBreakdown | null
 }
 
 const OPENAI_DEFAULT_MODEL = 'gpt-5.5'
@@ -189,11 +194,22 @@ async function callProvider(
         }))
     : undefined
 
+  // Cached prompt tokens are reported differently per provider:
+  //  - OpenAI: usage.prompt_tokens_details.cached_tokens
+  //  - DeepSeek: usage.prompt_cache_hit_tokens
+  // They bill at a reduced rate, so capture them for accurate cost estimation.
+  const rawUsage = completion.usage as any
+  const cachedPromptTokens =
+    rawUsage?.prompt_tokens_details?.cached_tokens ??
+    rawUsage?.prompt_cache_hit_tokens ??
+    undefined
+
   const usage: LLMUsage | undefined = completion.usage
     ? {
         promptTokens: completion.usage.prompt_tokens,
         completionTokens: completion.usage.completion_tokens,
         totalTokens: completion.usage.total_tokens,
+        cachedPromptTokens,
       }
     : undefined
 
@@ -225,7 +241,8 @@ export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
     attempts++
     const { text, toolCalls, usage } = await callProvider(primaryProvider, primaryModel, params)
     const latencyMs = Date.now() - startedAt
-    console.log(`[llm] use=${params.useCase} provider=${primaryProvider} model=${primaryModel} latency=${latencyMs}ms tokens=${usage?.totalTokens ?? 'n/a'} toolCalls=${toolCalls?.length ?? 0}`)
+    const cost = estimateCost(primaryModel, usage)
+    console.log(`[llm] use=${params.useCase} provider=${primaryProvider} model=${primaryModel} latency=${latencyMs}ms tokens=${usage?.totalTokens ?? 'n/a'} cost=${cost ? formatUsd(cost.totalUsd) + (cost.priceConfirmed ? '' : '~') : 'n/a'} toolCalls=${toolCalls?.length ?? 0}`)
     return {
       text,
       toolCalls,
@@ -235,6 +252,7 @@ export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
       latencyMs,
       fallbackUsed: false,
       attempts,
+      cost,
     }
   } catch (err: any) {
     if (primaryProvider !== 'deepseek' || !isRetriableError(err) || fallbackDisabled) {
@@ -251,7 +269,8 @@ export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
   attempts++
   const { text, toolCalls, usage } = await callProvider('openai', fallbackModel, params)
   const latencyMs = Date.now() - startedAt
-  console.log(`[llm] use=${params.useCase} provider=openai(fallback) model=${fallbackModel} latency=${latencyMs}ms tokens=${usage?.totalTokens ?? 'n/a'} toolCalls=${toolCalls?.length ?? 0}`)
+  const cost = estimateCost(fallbackModel, usage)
+  console.log(`[llm] use=${params.useCase} provider=openai(fallback) model=${fallbackModel} latency=${latencyMs}ms tokens=${usage?.totalTokens ?? 'n/a'} cost=${cost ? formatUsd(cost.totalUsd) + (cost.priceConfirmed ? '' : '~') : 'n/a'} toolCalls=${toolCalls?.length ?? 0}`)
   return {
     text,
     toolCalls,
@@ -261,5 +280,6 @@ export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
     latencyMs,
     fallbackUsed: true,
     attempts,
+    cost,
   }
 }
