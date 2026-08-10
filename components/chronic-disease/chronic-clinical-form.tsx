@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Stethoscope, Activity, Heart, FileText, ClipboardList, AlertCircle, Calendar } from "lucide-react"
+import VitalSignsDisclaimer, { getVitalAlerts } from "@/components/vital-signs-disclaimer"
 
 interface ChronicClinicalFormProps {
  patientData: any
@@ -99,6 +100,19 @@ export default function ChronicClinicalForm({
  }
 
  const bmi = calculateBMI()
+
+ // Real-time verification disclaimer: elevated value OR related symptom
+ const vitalAlerts = getVitalAlerts({
+ temperature: formData.temperature,
+ systolic: formData.bloodPressureSystolic,
+ diastolic: formData.bloodPressureDiastolic,
+ glucose: formData.bloodGlucose,
+ symptoms: [
+ ...(formData.currentSymptoms || []),
+ ...(formData.hypertensionSymptoms || []),
+ ...(formData.visitReasons || []),
+ ],
+ })
 
  const validateForm = () => {
  const newErrors: any = {}
@@ -397,7 +411,10 @@ export default function ChronicClinicalForm({
  </div>
  )}
  </div>
- 
+
+ {/* Real-time verification disclaimer (elevated vital or related symptom) */}
+ <VitalSignsDisclaimer {...vitalAlerts} language="fr" />
+
  </CardContent>
  </Card>
 

@@ -34,6 +34,7 @@ import {
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
 import { getTranslation, Language } from "@/lib/translations"
 import { VoiceDictationButton } from "@/components/voice-dictation-button"
+import VitalSignsDisclaimer, { getVitalAlerts } from "@/components/vital-signs-disclaimer"
 
 // ==================== INTERFACES & TYPES ====================
 interface VitalSigns {
@@ -976,6 +977,15 @@ const COMMON_SYMPTOMS = useMemo(() => [
  )
  const bgStatus = validateBloodGlucose(localData.vitalSigns.bloodGlucose)
 
+ // Real-time verification disclaimer: elevated value OR related symptom
+ const vitalAlerts = getVitalAlerts({
+ temperature: localData.vitalSigns.temperature,
+ systolic: bpNotApplicable ? "" : localData.vitalSigns.bloodPressureSystolic,
+ diastolic: bpNotApplicable ? "" : localData.vitalSigns.bloodPressureDiastolic,
+ glucose: localData.vitalSigns.bloodGlucose,
+ symptoms: localData.symptoms,
+ })
+
  const showTibokNotification = hasLoadedTibokData.current && isFromTibok && tibokPatient
 
  // ========== Render ==========
@@ -1587,6 +1597,9 @@ const COMMON_SYMPTOMS = useMemo(() => [
  </div>
  </div>
  )}
+
+ {/* Real-time verification disclaimer (elevated vital or related symptom) */}
+ <VitalSignsDisclaimer {...vitalAlerts} language={language} />
  </CardContent>
  </Card>
 
