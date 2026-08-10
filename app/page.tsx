@@ -21,6 +21,7 @@ import ClinicalForm from "@/components/clinical-form"
 import QuestionsForm from "@/components/questions-form"
 import DiagnosisForm from "@/components/diagnosis-form"
 import ProfessionalReport from "@/components/professional-report"
+import KycVerificationDialog from "@/components/kyc-verification-dialog"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import { supabase } from '@/lib/supabase'
 import { useTibokBridge } from '@/hooks/use-tibok-bridge'
@@ -51,6 +52,8 @@ export default function MedicalAIExpert() {
   const [currentPatientId, setCurrentPatientId] = useState<string | null>(null)
   const [currentDoctorId, setCurrentDoctorId] = useState<string | null>(null)
   const [isSimulation, setIsSimulation] = useState(false)
+  // KYC (patient identity) gate — mandatory at the start of every consultation
+  const [kycApproved, setKycApproved] = useState<boolean>(false)
 
   // Load doctor data from URL params (from Tibok) and save to sessionStorage
   useEffect(() => {
@@ -726,6 +729,30 @@ const handlePrevious = () => {
 
   const CurrentStepComponent = steps[currentStep]?.component
 
+  // ===== KYC gate =====
+  const kycConsultationId = consultationDataService.getCurrentConsultationId() || currentConsultationId
+
+  // Remember approval for the session so the modal doesn't reappear on step navigation
+  useEffect(() => {
+    if (typeof window === 'undefined' || !kycConsultationId) return
+    if (sessionStorage.getItem(`kyc-approved-${kycConsultationId}`) === 'true') {
+      setKycApproved(true)
+    }
+  }, [kycConsultationId])
+
+  const handleKycConfirmed = () => {
+    setKycApproved(true)
+    if (typeof window !== 'undefined' && kycConsultationId) {
+      sessionStorage.setItem(`kyc-approved-${kycConsultationId}`, 'true')
+    }
+  }
+
+  // Only gate consultations that were initiated by a patient (have a consultation
+  // context) and have identity data to verify against — avoids interrupting a
+  // doctor manually creating a brand-new patient.
+  const patientHasIdentity = !!(patientData && (patientData.firstName || patientData.lastName))
+  const showKyc = !kycApproved && patientHasIdentity && !!kycConsultationId
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 flex items-center justify-center">
@@ -757,6 +784,17 @@ const handlePrevious = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
+      {/* Mandatory KYC identity verification at consultation start */}
+      <KycVerificationDialog
+        open={showKyc}
+        patientData={patientData}
+        consultationId={kycConsultationId}
+        patientId={currentPatientId}
+        doctorId={currentDoctorId}
+        consultationType="general"
+        language={language}
+        onConfirmed={handleKycConfirmed}
+      />
       {/* Simulation Banner */}
       {isSimulation && (
         <div className="bg-purple-100 text-purple-800 text-center py-2 text-sm font-medium sticky top-0 z-50 border-b border-purple-200">

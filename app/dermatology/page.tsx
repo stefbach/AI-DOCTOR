@@ -22,6 +22,7 @@ import DermatologyQuestionsForm from "@/components/dermatology/dermatology-quest
 import DermatologyDiagnosisForm from "@/components/dermatology/dermatology-diagnosis-form"
 import DermatologyProfessionalReport from "@/components/dermatology/dermatology-professional-report"
 import PatientForm from "@/components/patient-form"
+import KycVerificationDialog from "@/components/kyc-verification-dialog"
 import { consultationDataService } from '@/lib/consultation-data-service'
 
 export default function DermatologyWorkflow() {
@@ -34,6 +35,8 @@ export default function DermatologyWorkflow() {
   const [diagnosisData, setDiagnosisData] = useState<any>(null)
   const [isExistingPatient, setIsExistingPatient] = useState(false)
   const [isSimulation, setIsSimulation] = useState(false)
+  // KYC (patient identity) gate — mandatory at the start of every consultation
+  const [kycApproved, setKycApproved] = useState<boolean>(false)
 
   // Phase 2.E.5 — handoff hydration (dermato).
   // Same pattern as app/page.tsx and app/chronic-disease/page.tsx. The hub
@@ -172,6 +175,28 @@ export default function DermatologyWorkflow() {
 
   const progress = ((currentStep + 1) / steps.length) * 100
 
+  // ===== KYC gate =====
+  const kycConsultationId =
+    consultationDataService.getCurrentConsultationId() || patientData?.consultationId || null
+  const kycKey = kycConsultationId || patientData?.patientId || 'current'
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (sessionStorage.getItem(`kyc-approved-${kycKey}`) === 'true') {
+      setKycApproved(true)
+    }
+  }, [kycKey])
+
+  const handleKycConfirmed = () => {
+    setKycApproved(true)
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(`kyc-approved-${kycKey}`, 'true')
+    }
+  }
+
+  const patientHasIdentity = !!(patientData && (patientData.firstName || patientData.lastName))
+  const showKyc = !kycApproved && patientHasIdentity
+
   if (!patientData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 flex items-center justify-center">
@@ -186,6 +211,17 @@ export default function DermatologyWorkflow() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50">
+      {/* Mandatory KYC identity verification at consultation start */}
+      <KycVerificationDialog
+        open={showKyc}
+        patientData={patientData}
+        consultationId={kycConsultationId}
+        patientId={patientData?.patientId}
+        doctorId={patientData?.doctorId}
+        consultationType="dermatology"
+        language="fr"
+        onConfirmed={handleKycConfirmed}
+      />
       {/* Simulation Banner */}
       {isSimulation && (
         <div className="bg-purple-100 text-purple-800 text-center py-2 text-sm font-medium sticky top-0 z-50 border-b border-purple-200">
