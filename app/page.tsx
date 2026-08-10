@@ -730,7 +730,30 @@ const handlePrevious = () => {
   const CurrentStepComponent = steps[currentStep]?.component
 
   // ===== KYC gate =====
-  const kycConsultationId = consultationDataService.getCurrentConsultationId() || currentConsultationId
+  // TEST-ONLY: append ?kycTest=1 to the URL to preview the KYC popup without
+  // coming from TIBOK (seeds a fake patient and bypasses the consultation gate).
+  const kycTestMode =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('kycTest') === '1'
+
+  useEffect(() => {
+    if (!kycTestMode) return
+    if (!patientData || !(patientData.firstName || patientData.lastName)) {
+      setPatientData((prev: any) => ({
+        firstName: 'Jean',
+        lastName: 'Dupont',
+        birthDate: '1983-05-14',
+        age: '42',
+        gender: 'Male',
+        ...(prev || {}),
+      }))
+    }
+  }, [kycTestMode])
+
+  const kycConsultationId =
+    consultationDataService.getCurrentConsultationId() ||
+    currentConsultationId ||
+    (kycTestMode ? 'kyc-test-preview' : null)
 
   // Remember approval for the session so the modal doesn't reappear on step navigation
   useEffect(() => {
@@ -751,7 +774,7 @@ const handlePrevious = () => {
   // context) and have identity data to verify against — avoids interrupting a
   // doctor manually creating a brand-new patient.
   const patientHasIdentity = !!(patientData && (patientData.firstName || patientData.lastName))
-  const showKyc = !kycApproved && patientHasIdentity && !!kycConsultationId
+  const showKyc = !kycApproved && patientHasIdentity && (!!kycConsultationId || kycTestMode)
 
   if (isLoading) {
     return (

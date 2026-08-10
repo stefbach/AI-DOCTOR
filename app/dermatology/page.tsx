@@ -100,7 +100,22 @@ export default function DermatologyWorkflow() {
       console.log('🎮 Dermatology page: SIMULATION MODE active')
     }
     
+    // TEST-ONLY: ?kycTest=1 previews the KYC popup without coming from TIBOK
+    const kycTestMode = new URLSearchParams(window.location.search).get('kycTest') === '1'
+
     if (!savedPatientData || isDermatologyWorkflow !== 'true') {
+      if (kycTestMode) {
+        console.log('🧪 Dermatology KYC test mode - seeding fake patient')
+        setPatientData({
+          firstName: 'Jean',
+          lastName: 'Dupont',
+          birthDate: '1983-05-14',
+          age: '42',
+          gender: 'Male',
+          consultationId: 'kyc-test-preview',
+        })
+        return
+      }
       // Redirect back to consultation hub if no dermatology data
       console.log('❌ No dermatology patient data found, redirecting to consultation hub')
       router.push('/consultation-hub')
