@@ -177,9 +177,11 @@ export function computeFollowUp(input: FollowUpInput): FollowUpPlan | null {
   }
 
   const targetDate = new Date(now.getTime() + delay * 3600_000)
-  const deadlineDate = new Date(
-    now.getTime() + Math.max(delay, window.maxHours) * 3600_000
-  )
+  // The deadline IS the recommended delay. It previously stretched to the
+  // window's outer bound, which printed as "review within 24 h — no later
+  // than <72 h away>" in the booking dialog: two different deadlines in one
+  // sentence, the looser one appearing to authorise the delay.
+  const deadlineDate = targetDate
 
   const reason =
     input.reason ||
