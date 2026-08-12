@@ -5412,9 +5412,22 @@ export async function POST(request: NextRequest) {
     console.log('   - Type:', typeof anonymizedPatientData?.currentMedications)
     console.log('   - Is Array?:', Array.isArray(anonymizedPatientData?.currentMedications))
     
+    // The patient form stores the field as `gender` ('Male' / 'Female'); only
+    // reading `sex` meant every patient reached the model as "inconnu", which
+    // silently removed sex from the differential, dosing and pregnancy
+    // reasoning. Read both, and normalise the FR/EN spellings used upstream.
+    const normalisedSex = (() => {
+      const raw = String(
+        anonymizedPatientData?.sex ?? anonymizedPatientData?.gender ?? ''
+      ).toLowerCase().trim()
+      if (['m', 'male', 'masculin', 'homme', 'man'].includes(raw)) return 'Male'
+      if (['f', 'female', 'féminin', 'feminin', 'femme', 'woman'].includes(raw)) return 'Female'
+      return 'inconnu'
+    })()
+
     const patientContext: PatientContext = {
       age: parseInt(anonymizedPatientData?.age) || 0,
-      sex: anonymizedPatientData?.sex || 'inconnu',
+      sex: normalisedSex,
       weight: anonymizedPatientData?.weight,
       height: anonymizedPatientData?.height,
       medical_history: anonymizedPatientData?.medicalHistory || [],

@@ -382,6 +382,19 @@ export default function PatientAdviceCarousel({
  const [currentIndex, setCurrentIndex] = useState(0)
  const [autoPlay, setAutoPlay] = useState(true)
  const actions = generateDoctorActions(patientData, clinicalData)
+
+ // Patient sex label. This used to read `patientData.sex === 'M'`, but the
+ // patient record carries `gender` ('Male' / 'Female'), so `sex` was always
+ // undefined and EVERY patient was displayed as "Female". Read both fields,
+ // accept the FR/EN spellings used across the app, and render nothing rather
+ // than guessing when the value is missing.
+ const genderLabel = (() => {
+   const raw = String(patientData?.gender ?? patientData?.sex ?? '').toLowerCase().trim()
+   if (!raw) return ''
+   if (['m', 'male', 'masculin', 'homme', 'man'].includes(raw)) return 'Male'
+   if (['f', 'female', 'féminin', 'feminin', 'femme', 'woman'].includes(raw)) return 'Female'
+   return ''
+ })()
  
  // Auto-scroll
  useEffect(() => {
@@ -433,7 +446,7 @@ export default function PatientAdviceCarousel({
  {patientData?.firstName} {patientData?.lastName}
  </h3>
  <p className="text-sm text-gray-600">
- {patientData?.age} years • {patientData?.sex === 'M' ? 'Male' : 'Female'} • {clinicalData?.chiefComplaint}
+ {patientData?.age} years{genderLabel ? ` • ${genderLabel}` : ''} • {clinicalData?.chiefComplaint}
  </p>
  </div>
  </div>
