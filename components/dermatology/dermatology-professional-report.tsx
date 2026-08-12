@@ -27,7 +27,7 @@ import {
 } from "lucide-react"
 import { createClient } from '@supabase/supabase-js'
 import TriageBanner from '@/components/triage-banner'
-import { resolveTriage, computeFollowUp, hasUrgentLabs, formatDelay, toDateInputValue } from '@/lib/triage'
+import { resolveTriage, computeFollowUp, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
 
 // ==================== HELPER FUNCTIONS ====================
 // Helper function to safely handle DCI fields
@@ -5037,20 +5037,44 @@ const ConsultationReport = () => {
    language="fr"
    action={
      followUpPlan ? (
-       <Button
-         type="button"
-         className="bg-orange-600 hover:bg-orange-700 text-white"
-         onClick={() => {
-           // Pre-fill the existing RDV modal: same doctor, recommended date.
-           if (tibokDoctorId) setSelectedDoctorForAppt(tibokDoctorId)
-           const target = toDateInputValue(followUpPlan.targetDate)
-           setDoctorApptDate(target)
-           if (tibokDoctorId) loadDoctorAvailableSlots(tibokDoctorId, target)
-           handleOpenDoctorApptModal()
-         }}
-       >
-         Programmer la consultation de contrôle ({formatDelay(followUpPlan.delayHours, 'fr')})
-       </Button>
+       doctorAppointmentData ? (
+         // Already scheduled: show what was booked rather than repeating
+         // the call to action, which read as if nothing had been done.
+         <div className="rounded-lg border border-orange-300 bg-white p-3">
+           <p className="text-sm font-semibold text-orange-900">
+             ✅ Contrôle programmé — {formatAppointmentDate(doctorAppointmentData.appointmentDate)}
+             {` à ${doctorAppointmentData.appointmentTime.slice(0, 5)}`}
+           </p>
+           <p className="mt-0.5 text-sm text-orange-800">{doctorAppointmentData.doctorName}</p>
+           <p className="mt-1 text-xs text-orange-700">
+             Sera confirmé à la validation du rapport.
+           </p>
+           <Button
+             type="button"
+             variant="outline"
+             size="sm"
+             onClick={handleOpenDoctorApptModal}
+             className="mt-2 border-orange-400 text-orange-800 hover:bg-orange-50"
+           >
+             Reprogrammer
+           </Button>
+         </div>
+       ) : (
+         <Button
+              type="button"
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+              onClick={() => {
+                // Pre-fill the existing RDV modal: same doctor, recommended date.
+                if (tibokDoctorId) setSelectedDoctorForAppt(tibokDoctorId)
+                const target = toDateInputValue(followUpPlan.targetDate)
+                setDoctorApptDate(target)
+                if (tibokDoctorId) loadDoctorAvailableSlots(tibokDoctorId, target)
+                handleOpenDoctorApptModal()
+              }}
+            >
+              Programmer la consultation de contrôle ({formatDelay(followUpPlan.delayHours, 'fr')})
+            </Button>
+       )
      ) : null
    }
  />

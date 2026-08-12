@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "@/components/ui/use-toast"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import TriageBanner from '@/components/triage-banner'
-import { resolveTriage, computeFollowUp, hasUrgentLabs, formatDelay, toDateInputValue } from '@/lib/triage'
+import { resolveTriage, computeFollowUp, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
 import { createClient } from '@supabase/supabase-js'
 import {
  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube,
@@ -5170,15 +5170,40 @@ const ConsultationReport = () => {
    language="fr"
    action={
      followUpPlan ? (
-       <Button
-         type="button"
-         onClick={handleScheduleRecommendedFollowUp}
-         className="bg-orange-600 hover:bg-orange-700 text-white"
-       >
-         <Calendar className="h-4 w-4 mr-2" />
-         Programmer la consultation de contrôle
-         {` (${formatDelay(followUpPlan.delayHours, 'fr')})`}
-       </Button>
+       doctorAppointmentData ? (
+         // Already scheduled: show what was booked rather than repeating the
+         // call to action, which read as if nothing had been done.
+         <div className="rounded-lg border border-orange-300 bg-white p-3">
+           <p className="text-sm font-semibold text-orange-900">
+             ✅ Contrôle programmé — {formatAppointmentDate(doctorAppointmentData.appointmentDate)}
+             {` à ${doctorAppointmentData.appointmentTime.slice(0, 5)}`}
+           </p>
+           <p className="mt-0.5 text-sm text-orange-800">{doctorAppointmentData.doctorName}</p>
+           <p className="mt-1 text-xs text-orange-700">
+             Sera confirmé à la validation du rapport.
+           </p>
+           <Button
+             type="button"
+             variant="outline"
+             size="sm"
+             onClick={handleOpenDoctorApptModal}
+             className="mt-2 border-orange-400 text-orange-800 hover:bg-orange-50"
+           >
+             <Calendar className="h-4 w-4 mr-2" />
+             Reprogrammer
+           </Button>
+         </div>
+       ) : (
+         <Button
+           type="button"
+           onClick={handleScheduleRecommendedFollowUp}
+           className="bg-orange-600 hover:bg-orange-700 text-white"
+         >
+           <Calendar className="h-4 w-4 mr-2" />
+           Programmer la consultation de contrôle
+           {` (${formatDelay(followUpPlan.delayHours, 'fr')})`}
+         </Button>
+       )
      ) : null
    }
  />

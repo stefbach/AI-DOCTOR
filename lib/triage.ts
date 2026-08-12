@@ -200,6 +200,19 @@ export function formatDelay(hours: number, language: "fr" | "en" = "fr"): string
   return days === 1 ? "24 hrs" : `${days} days`
 }
 
+/** "jeudi 13 août 2026" from a YYYY-MM-DD string, for confirmation labels. */
+export function formatAppointmentDate(isoDate: string, locale = "fr-FR"): string {
+  if (!isoDate) return ""
+  const d = new Date(`${isoDate}T00:00:00`)
+  if (isNaN(d.getTime())) return isoDate
+  return d.toLocaleDateString(locale, {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  })
+}
+
 /** YYYY-MM-DD in local time — matches the date input the booking modal uses. */
 export function toDateInputValue(date: Date): string {
   const y = date.getFullYear()
