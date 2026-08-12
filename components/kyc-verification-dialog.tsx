@@ -232,8 +232,7 @@ export default function KycVerificationDialog({
           scroll container and the panel flows from the top, so every part of
           it is always reachable however short the visible area is.
         */}
-        <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain">
-          <div className="flex min-h-full items-start justify-center p-2 sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-2 sm:p-4">
         <DialogPrimitive.Content
           // Mandatory / blocking: prevent every implicit close path.
           onEscapeKeyDown={(e) => e.preventDefault()}
@@ -241,7 +240,12 @@ export default function KycVerificationDialog({
           onInteractOutside={(e) => e.preventDefault()}
           onOpenAutoFocus={(e) => e.preventDefault()}
           className={cn(
-            "relative w-full max-w-lg my-auto",
+            "relative w-full max-w-lg",
+            // The scroll container MUST be the Content element itself: Radix
+            // locks scrolling everywhere except inside Content, so a wrapper
+            // around it looks scrollable but is frozen — the patient details
+            // were unreachable on a short viewport.
+            "max-h-full overflow-y-auto overscroll-contain",
             "border bg-background p-4 shadow-lg rounded-lg",
             "data-[state=open]:animate-in data-[state=open]:fade-in-0"
           )}
@@ -371,7 +375,6 @@ export default function KycVerificationDialog({
             </button>
           </div>
         </DialogPrimitive.Content>
-          </div>
         </div>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
