@@ -26,6 +26,8 @@ import {
  UserPlus, Droplets, Scale, Activity
 } from "lucide-react"
 import { createClient } from '@supabase/supabase-js'
+import TriageBanner from '@/components/triage-banner'
+import { resolveTriage, computeFollowUp, hasUrgentLabs, formatDelay, toDateInputValue } from '@/lib/triage'
 
 // ==================== HELPER FUNCTIONS ====================
 // Helper function to safely handle DCI fields
@@ -3582,17 +3584,9 @@ const handleSendDocuments = async () => {
 // SJS/TEN, anaphylaxis) will be flagged by the LLM as severity=emergency
 // in the new triage_assessment block. Until Phase 5 reaches the dermato
 // LLM, we default to NO banner rather than risk false positives.
-const isEmergencyCase = (() => {
-  const triage = (diagnosisData as any)?.triage_assessment
-  if (!triage || typeof triage !== 'object') return false
-  const severity = String(triage.severity || '').toLowerCase()
-  const disposition = String(triage.disposition || '').toLowerCase()
-  return (
-    severity === 'emergency' ||
-    disposition === 'ambulance_immediate' ||
-    disposition === 'a&e_same_day'
-  )
-})()
+// Same resolver as the banner, so the persisted flag and what the doctor
+// saw on screen can never diverge.
+const isEmergencyCase = resolveTriage(diagnosisData).level === 'emergency'
 
 
  console.log(' Saving to database...')
@@ -4955,19 +4949,15 @@ const ConsultationReport = () => {
  // 🚨 DETECT EMERGENCY SITUATIONS — see professional-report.tsx for the
  // rationale on consuming triage_assessment from the LLM rather than
  // string-matching the narrative.
- const detectEmergency = () => {
-   const triage = (diagnosisData as any)?.triage_assessment
-   if (!triage || typeof triage !== 'object') return false
-   const severity = String(triage.severity || '').toLowerCase()
-   const disposition = String(triage.disposition || '').toLowerCase()
-   return (
-     severity === 'emergency' ||
-     disposition === 'ambulance_immediate' ||
-     disposition === 'a&e_same_day'
-   )
- }
-
- const isEmergency = detectEmergency()
+ // Shared resolver (lib/triage.ts): also surfaces the "urgent" and
+ // "triage not assessed" states, which the old boolean silently dropped.
+ const resolvedTriage = resolveTriage(diagnosisData)
+ const followUpPlan = computeFollowUp({
+   level: resolvedTriage.level,
+   proposedDelayHours: (diagnosisData as any)?.follow_up_plan?.next_consultation_delay_hours,
+   urgentLabs: hasUrgentLabs(diagnosisData || {}, resolvedTriage.level),
+   reason: (diagnosisData as any)?.follow_up_plan?.second_consultation_reason,
+ })
 
  // 🏥 CHECK SPECIALIST REFERRAL
  const specialistReferral = diagnosisData?.follow_up_plan?.specialist_referral || null
@@ -4991,19 +4981,30 @@ const ConsultationReport = () => {
  <Card className="shadow-xl print:shadow-none">
  <CardContent className="p-8 print:p-12" id="consultation-report">
  
- {/* 🚨 EMERGENCY BANNER */}
- {isEmergency && (
-   <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-600 text-white rounded-lg border-2 sm:border-4 border-red-700 shadow-xl sm:shadow-2xl animate-pulse print:animate-none print:bg-red-100 print:text-red-900 print:border-red-900 overflow-hidden">
-    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
-      <div className="text-3xl sm:text-4xl">🚨</div>
-      <div className="flex-1 min-w-0">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-black mb-1 sm:mb-2 tracking-wide">⚠️ EMERGENCY ⚠️</h2>
-        <p className="text-sm sm:text-base font-bold">IMMEDIATE ATTENTION REQUIRED</p>
-        <p className="text-xs sm:text-sm mt-1 sm:mt-2">Urgent hospital referral - Do not delay</p>
-      </div>
-     </div>
-   </div>
- )}
+ {/* 🚦 TRIAGE BANNER (emergency / urgent / triage-not-assessed) */}
+ <TriageBanner
+   triage={resolvedTriage}
+   followUp={followUpPlan}
+   language="fr"
+   action={
+     followUpPlan ? (
+       <Button
+         type="button"
+         className="bg-orange-600 hover:bg-orange-700 text-white"
+         onClick={() => {
+           // Pre-fill the existing RDV modal: same doctor, recommended date.
+           if (tibokDoctorId) setSelectedDoctorForAppt(tibokDoctorId)
+           const target = toDateInputValue(followUpPlan.targetDate)
+           setDoctorApptDate(target)
+           if (tibokDoctorId) loadDoctorAvailableSlots(tibokDoctorId, target)
+           handleOpenDoctorApptModal()
+         }}
+       >
+         Programmer la consultation de contrôle ({formatDelay(followUpPlan.delayHours, 'fr')})
+       </Button>
+     ) : null
+   }
+ />
 
  {/* 🏥 SPECIALIST REFERRAL BANNER */}
  {needsSpecialistReferral && (

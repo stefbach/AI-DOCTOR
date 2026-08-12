@@ -26,6 +26,8 @@ import {
   UserPlus, Droplets, Scale
 } from "lucide-react"
 import { createClient } from '@supabase/supabase-js'
+import TriageBanner from '@/components/triage-banner'
+import { resolveTriage, computeFollowUp, hasUrgentLabs, formatDelay, toDateInputValue } from '@/lib/triage'
 
 // Initialize Supabase client for fetching consultation IDs
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
@@ -2917,17 +2919,9 @@ export default function ChronicProfessionalReport({
       // separate sprint). When the field is absent we err on the side of
       // NO banner — false positives are worse than no banner on chronic
       // care (which is rarely a true emergency anyway).
-      const isEmergencyCase = (() => {
-        const triage = (report as any)?.medicalReport?.triage_assessment
-        if (!triage || typeof triage !== 'object') return false
-        const severity = String(triage.severity || '').toLowerCase()
-        const disposition = String(triage.disposition || '').toLowerCase()
-        return (
-          severity === 'emergency' ||
-          disposition === 'ambulance_immediate' ||
-          disposition === 'a&e_same_day'
-        )
-      })()
+      // Same resolver as the banner, so the persisted flag and what the
+      // doctor saw on screen can never diverge.
+      const isEmergencyCase = resolveTriage(report).level === 'emergency'
 
       // Save final version to consultation_records table
       const saveResponse = await fetch('/api/save-medical-report', {
@@ -4253,19 +4247,15 @@ export default function ChronicProfessionalReport({
     // signs of SEPSIS include…") and we now consume the LLM's structured
     // triage block instead. Chronic flow will gain its own triage block
     // when Phase 5 is applied to /api/openai-chronic in a later sprint.
-    const detectEmergency = () => {
-      const triage = (medicalReport as any)?.triage_assessment
-      if (!triage || typeof triage !== 'object') return false
-      const severity = String(triage.severity || '').toLowerCase()
-      const disposition = String(triage.disposition || '').toLowerCase()
-      return (
-        severity === 'emergency' ||
-        disposition === 'ambulance_immediate' ||
-        disposition === 'a&e_same_day'
-      )
-    }
-
-    const isEmergency = detectEmergency()
+    // Shared resolver (lib/triage.ts): also surfaces the "urgent" and
+    // "triage not assessed" states, which the old boolean silently dropped.
+    const resolvedTriage = resolveTriage(medicalReport || diagnosisData)
+    const followUpPlan = computeFollowUp({
+      level: resolvedTriage.level,
+      proposedDelayHours: (diagnosisData as any)?.follow_up_plan?.next_consultation_delay_hours,
+      urgentLabs: hasUrgentLabs(diagnosisData || {}, resolvedTriage.level),
+      reason: (diagnosisData as any)?.follow_up_plan?.second_consultation_reason,
+    })
 
     // 🏥 CHECK SPECIALIST REFERRAL
     const specialistReferral = diagnosisData?.follow_up_plan?.specialist_referral || null
@@ -4274,20 +4264,30 @@ export default function ChronicProfessionalReport({
     return (
       <div id="medical-report-section" className="bg-white p-3 sm:p-6 md:p-8 rounded-lg shadow print:shadow-none">
         
-        {/* 🚨 EMERGENCY BANNER */}
-        {isEmergency && (
-          <div className="mb-6 p-6 bg-red-600 text-white rounded-lg border-4 border-red-700 shadow-2xl animate-pulse print:animate-none print:bg-red-100 print:text-red-900 print:border-red-900">
-            <div className="flex items-center gap-4">
-              <div className="text-6xl">🚨</div>
-              <div className="flex-1">
-                <h2 className="text-3xl font-black mb-2 tracking-wide">⚠️ EMERGENCY CASE ⚠️</h2>
-                <p className="text-xl font-bold">IMMEDIATE MEDICAL ATTENTION REQUIRED</p>
-                <p className="text-lg mt-2">This consultation requires urgent hospital referral - Do not delay</p>
-              </div>
-              <div className="text-6xl">🚨</div>
-            </div>
-          </div>
-        )}
+        {/* 🚦 TRIAGE BANNER (emergency / urgent / triage-not-assessed) */}
+        <TriageBanner
+          triage={resolvedTriage}
+          followUp={followUpPlan}
+          language="fr"
+          action={
+            followUpPlan ? (
+              <Button
+                type="button"
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+                onClick={() => {
+                  // Pre-fill the existing RDV modal: same doctor, recommended date.
+                  if (tibokDoctorId) setSelectedDoctorForAppt(tibokDoctorId)
+                  const target = toDateInputValue(followUpPlan.targetDate)
+                  setDoctorApptDate(target)
+                  if (tibokDoctorId) loadDoctorAvailableSlots(tibokDoctorId, target)
+                  handleOpenDoctorApptModal()
+                }}
+              >
+                Programmer la consultation de contrôle ({formatDelay(followUpPlan.delayHours, 'fr')})
+              </Button>
+            ) : null
+          }
+        />
         
         {/* 🏥 SPECIALIST REFERRAL BANNER */}
         {needsSpecialistReferral && (

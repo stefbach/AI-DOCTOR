@@ -6,6 +6,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import TriageBanner from '@/components/triage-banner'
+import { resolveTriage, computeFollowUp } from '@/lib/triage'
 import {
   ArrowLeft,
   Download,
@@ -233,58 +235,26 @@ export default function ViewReportPage() {
  * later). If absent (legacy reports, or a flow that hasn't yet adopted
  * the new schema), we default to NO banner.
  */
-function detectEmergencyFromReport(report: any): boolean {
-  // Triage block may sit at several plausible paths depending on how
-  // the report was persisted. We check each one once.
-  const candidates: any[] = [
-    report?.triage_assessment,
-    report?.rapport?.triage_assessment,
-    report?.medicalReport?.triage_assessment,
-    report?.diagnosis?.triage_assessment,
-    report?.diagnosticReasoning?.triage_assessment,
-  ]
-  const triage = candidates.find(
-    t => t && typeof t === 'object',
-  )
-  if (!triage) return false
-  const severity = String(triage.severity || '').toLowerCase()
-  const disposition = String(triage.disposition || '').toLowerCase()
-  return (
-    severity === 'emergency' ||
-    disposition === 'ambulance_immediate' ||
-    disposition === 'a&e_same_day'
-  )
-}
-
-/**
- * Emergency banner component
- */
-function EmergencyBanner() {
-  return (
-    <div className="mb-6 p-6 bg-red-600 text-white rounded-lg border-4 border-red-700 shadow-2xl print:bg-red-100 print:text-red-900 print:border-red-900">
-      <div className="flex items-center gap-4">
-        <div className="text-5xl">🚨</div>
-        <div className="flex-1">
-          <h2 className="text-2xl font-black mb-1 tracking-wide">⚠️ EMERGENCY CASE ⚠️</h2>
-          <p className="text-lg font-bold">IMMEDIATE MEDICAL ATTENTION REQUIRED</p>
-          <p className="text-base mt-1">This consultation requires urgent hospital referral - Do not delay</p>
-        </div>
-        <div className="text-5xl">🚨</div>
-      </div>
-    </div>
-  )
-}
-
 /**
  * Render report based on its structure
  */
 function renderReport(report: any) {
-  const isEmergency = detectEmergencyFromReport(report)
+  // Shared resolver (lib/triage.ts) so this viewer, the report editor and the
+  // persisted is_emergency flag can never disagree. The "not assessed" notice
+  // is hidden here: legacy reports predate the triage block and the
+  // consultation is already closed.
+  const resolvedTriage = resolveTriage(report)
+  const followUpPlan = computeFollowUp({ level: resolvedTriage.level })
 
-  // Helper to wrap content with emergency banner if needed
+  // Helper to wrap content with the triage banner if needed
   const wrapWithEmergency = (content: React.ReactNode) => (
     <>
-      {isEmergency && <EmergencyBanner />}
+      <TriageBanner
+        triage={resolvedTriage}
+        followUp={followUpPlan}
+        language="fr"
+        hideUnassessed
+      />
       {content}
     </>
   )

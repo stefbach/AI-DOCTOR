@@ -15,6 +15,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { toast } from "@/components/ui/use-toast"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import TriageBanner from '@/components/triage-banner'
+import { resolveTriage, computeFollowUp, hasUrgentLabs, formatDelay, toDateInputValue } from '@/lib/triage'
 import { createClient } from '@supabase/supabase-js'
 import {
  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube,
@@ -1131,6 +1133,23 @@ const getFullSignatureUrl = (signatureUrl: string | null): string | null => {
  const getReportPraticien = () => report?.compteRendu?.praticien || doctorInfo
  const getReportPatient = () => report?.compteRendu?.patient || createEmptyReport().compteRendu.patient
  const getReportRapport = () => report?.compteRendu?.rapport || createEmptyReport().compteRendu.rapport
+
+ // ===== TRIAGE (shared across flows — see lib/triage.ts) =====
+ // Declared early: the save handler below persists these values, so they must
+ // be initialised before any callback that closes over them can run.
+ // Resolves emergency / urgent / routine / unassessed and, for the first two,
+ // when the result-review consultation should happen (AI proposal + guard rails).
+ const resolvedTriage = resolveTriage(diagnosisData)
+ const urgentLabsPending = hasUrgentLabs(
+   { ...(diagnosisData || {}), ...(report?.compteRendu || {}) },
+   resolvedTriage.level
+ )
+ const followUpPlan = computeFollowUp({
+   level: resolvedTriage.level,
+   proposedDelayHours: diagnosisData?.follow_up_plan?.next_consultation_delay_hours,
+   urgentLabs: urgentLabsPending,
+   reason: diagnosisData?.follow_up_plan?.second_consultation_reason,
+ })
  const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
 
 // ==================== TRACKING & UPDATES ====================
@@ -3734,17 +3753,9 @@ const handleSendDocuments = async () => {
  // (used in both save-medical-report and documents payload). See the
  // comment on detectEmergency() below for why we no longer string-match
  // the narrative.
- const isEmergencyCase = (() => {
-   const triage = diagnosisData?.triage_assessment
-   if (!triage || typeof triage !== 'object') return false
-   const severity = String(triage.severity || '').toLowerCase()
-   const disposition = String(triage.disposition || '').toLowerCase()
-   return (
-     severity === 'emergency' ||
-     disposition === 'ambulance_immediate' ||
-     disposition === 'a&e_same_day'
-   )
- })()
+ // Same resolver as the banner, so the persisted flag and what the doctor
+ // saw on screen can never diverge.
+ const isEmergencyCase = resolveTriage(diagnosisData).level === 'emergency'
 
  console.log('📝 Saving to database...')
 
@@ -3782,7 +3793,14 @@ const handleSendDocuments = async () => {
  },
  clinicalData: clinicalData || {},
  diagnosisData: diagnosisData || {},
- isEmergency: isEmergencyCase
+ isEmergency: isEmergencyCase,
+ triage: {
+   level: resolvedTriage.level,
+   assessed: resolvedTriage.assessed,
+   labsUrgent: urgentLabsPending,
+   followUpDelayHours: followUpPlan?.delayHours ?? null,
+   followUpTarget: followUpPlan ? followUpPlan.targetDate.toISOString() : null
+ }
  })
  })
 
@@ -5043,20 +5061,25 @@ const ConsultationReport = () => {
  // historic reports are not retroactively banner-flagged (acceptable
  // per product decision, the case database has very few legacy
  // reports anyway).
- const detectEmergency = () => {
-   const triage = diagnosisData?.triage_assessment
-   if (!triage || typeof triage !== 'object') return false
-   const severity = String(triage.severity || '').toLowerCase()
-   const disposition = String(triage.disposition || '').toLowerCase()
-   return (
-     severity === 'emergency' ||
-     disposition === 'ambulance_immediate' ||
-     disposition === 'a&e_same_day'
-   )
- }
+ // (Triage is resolved once near the top of this component via lib/triage.ts
+ // and rendered by <TriageBanner/>; the local detectEmergency() copy was
+ // removed because it silently swallowed the "urgent" and "not assessed"
+ // states and diverged from the other flows.)
 
- const isEmergency = detectEmergency()
- 
+ // Pre-fill the existing "RDV Médecin" modal with the SAME doctor and the
+ // clinically recommended date, then let the doctor confirm.
+ const handleScheduleRecommendedFollowUp = useCallback(() => {
+   if (!followUpPlan) return
+   loadDoctorsList()
+   const sameDoctorId = propDoctorId || doctorData?.id || ''
+   if (sameDoctorId) setSelectedDoctorForAppt(sameDoctorId)
+   const target = toDateInputValue(followUpPlan.targetDate)
+   setDoctorApptDate(target)
+   if (sameDoctorId) loadDoctorAvailableSlots(sameDoctorId, target)
+   setDoctorApptReason(followUpPlan.reason)
+   setShowDoctorApptModal(true)
+ }, [followUpPlan, loadDoctorsList, loadDoctorAvailableSlots, propDoctorId, doctorData])
+
  // 🏥 CHECK SPECIALIST REFERRAL
  const specialistReferral = diagnosisData?.follow_up_plan?.specialist_referral || null
  const needsSpecialistReferral = specialistReferral?.required === true
@@ -5079,21 +5102,26 @@ const ConsultationReport = () => {
  <Card className="shadow-xl print:shadow-none">
  <CardContent className="p-8 print:p-12" id="consultation-report">
  
- {/* 🚨 EMERGENCY BANNER */}
- {isEmergency && (
-   <div className="mb-6 p-6 bg-red-600 text-white rounded-lg border-4 border-red-700 shadow-2xl animate-pulse print:animate-none print:bg-red-100 print:text-red-900 print:border-red-900">
-     <div className="flex items-center gap-4">
-       <div className="text-6xl">🚨</div>
-       <div className="flex-1">
-         <h2 className="text-3xl font-black mb-2 tracking-wide">⚠️ EMERGENCY CASE ⚠️</h2>
-         <p className="text-xl font-bold">IMMEDIATE MEDICAL ATTENTION REQUIRED</p>
-         <p className="text-lg mt-2">This consultation requires urgent hospital referral - Do not delay</p>
-       </div>
-       <div className="text-6xl">🚨</div>
-     </div>
-   </div>
- )}
- 
+ {/* 🚦 TRIAGE BANNER (emergency / urgent / triage-not-assessed) */}
+ <TriageBanner
+   triage={resolvedTriage}
+   followUp={followUpPlan}
+   language="fr"
+   action={
+     followUpPlan ? (
+       <Button
+         type="button"
+         onClick={handleScheduleRecommendedFollowUp}
+         className="bg-orange-600 hover:bg-orange-700 text-white"
+       >
+         <Calendar className="h-4 w-4 mr-2" />
+         Programmer la consultation de contrôle
+         {` (${formatDelay(followUpPlan.delayHours, 'fr')})`}
+       </Button>
+     ) : null
+   }
+ />
+
  {/* 🏥 SPECIALIST REFERRAL BANNER */}
  {needsSpecialistReferral && (
    <div className={`mb-6 p-6 rounded-lg border-4 shadow-2xl print:shadow-lg ${
@@ -7590,6 +7618,26 @@ const [localSickLeave, setLocalSickLeave] = useState({
       </DialogTitle>
     </DialogHeader>
     <div className="space-y-4 py-4 overflow-y-auto flex-1 pr-2">
+      {/* Clinically recommended window + same-doctor availability fallback */}
+      {followUpPlan && (
+        <div className="rounded-lg border border-orange-300 bg-orange-50 p-3 text-sm">
+          <p className="font-semibold text-orange-900">
+            Contrôle recommandé sous {formatDelay(followUpPlan.delayHours, 'fr')}
+            {' — au plus tard le '}
+            {followUpPlan.deadlineDate.toLocaleDateString('fr-FR')}
+          </p>
+          <p className="mt-1 text-orange-800">{followUpPlan.reason}</p>
+          {selectedDoctorForAppt === propDoctorId &&
+            doctorApptDate &&
+            !loadingDoctorSlots &&
+            doctorAvailableSlots.length === 0 && (
+              <p className="mt-2 font-medium text-orange-900">
+                Vous n'avez aucun créneau libre à cette date. Choisissez une autre date,
+                ou sélectionnez un autre médecin disponible dans le délai recommandé.
+              </p>
+            )}
+        </div>
+      )}
       <div className="space-y-2">
         <Label htmlFor="doctorSelect">Médecin *</Label>
         <Select value={selectedDoctorForAppt} onValueChange={handleDoctorForApptChange}>

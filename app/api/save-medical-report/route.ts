@@ -187,7 +187,8 @@ export async function POST(request: NextRequest) {
       patientData,
       clinicalData,
       diagnosisData,
-      isEmergency
+      isEmergency,
+      triage
     } = body
 
     // Basic field validation
@@ -466,6 +467,18 @@ const updateData = {
                           existingRecord.doctor_specialty ||
                           null,
         is_emergency: isEmergency === true,
+        // Triage outcome + follow-up decision, so downstream consumers (lab
+        // prioritisation, scheduling, audit) read the same values the doctor saw.
+        workflow_metadata: triage
+          ? {
+              triage_level: triage.level || null,
+              triage_assessed: triage.assessed !== false,
+              labs_urgent: triage.labsUrgent === true,
+              follow_up_delay_hours: triage.followUpDelayHours ?? null,
+              follow_up_target: triage.followUpTarget || null,
+              recorded_at: new Date().toISOString()
+            }
+          : undefined,
         updated_at: new Date().toISOString()
       }
       
@@ -537,6 +550,16 @@ const insertData = {
                           report?.medicalReport?.practitioner?.specialty ||
                           null,
         is_emergency: isEmergency === true,
+        workflow_metadata: triage
+          ? {
+              triage_level: triage.level || null,
+              triage_assessed: triage.assessed !== false,
+              labs_urgent: triage.labsUrgent === true,
+              follow_up_delay_hours: triage.followUpDelayHours ?? null,
+              follow_up_target: triage.followUpTarget || null,
+              recorded_at: new Date().toISOString()
+            }
+          : null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }
@@ -577,6 +600,30 @@ const insertData = {
     }
 
     console.log('✅ Supabase save successful')
+
+    // Propagate lab urgency to the laboratory. lab_orders rows are created by
+    // the booking side (often after this save), so we flag the ones that
+    // already exist; the rest is carried by workflow_metadata.labs_urgent
+    // above for whoever creates the order later. Best-effort: a failure here
+    // must never fail the report save.
+    if (triage?.labsUrgent === true) {
+      try {
+        const { error: labErr, count } = await supabase
+          .from('lab_orders')
+          .update({ is_urgent: true, updated_at: new Date().toISOString() })
+          .eq('consultation_id', consultationId)
+          .neq('is_urgent', true)
+          .select('id', { count: 'exact' })
+
+        if (labErr) {
+          console.error('⚠️ Could not flag lab orders as urgent:', labErr.message)
+        } else {
+          console.log(`🔬 Lab orders flagged urgent for ${consultationId}:`, count ?? 0)
+        }
+      } catch (labFlagError) {
+        console.error('⚠️ Lab urgency flagging failed (non-blocking):', labFlagError)
+      }
+    }
 
     return NextResponse.json({
       success: true,

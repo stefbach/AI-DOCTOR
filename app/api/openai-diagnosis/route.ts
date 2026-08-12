@@ -491,6 +491,10 @@ BEFORE PRESCRIBING ANY MEDICATION, SYSTEMATICALLY CHECK:
     "red_flags": "MANDATORY - Specific alarm signs",
     "immediate": "MANDATORY - Specific surveillance",
     "next_consultation": "MANDATORY - Precise timing",
+    "next_consultation_delay_hours": "MANDATORY - integer. Machine-readable delay in HOURS before the result-review consultation, counted from now. Must match 'next_consultation' and respect test turnaround (see FOLLOW-UP TIMING rule). Typical: 24 for emergency, 24-72 for urgent, 168+ for routine.",
+    "second_consultation_required": "MANDATORY - true/false. True when the patient must be reviewed by a doctor to interpret pending investigations or reassess an unstable situation.",
+    "second_consultation_reason": "MANDATORY IF second_consultation_required=true - short reason shown to the doctor, e.g. 'Contrôle des résultats biologiques urgents'.",
+    "labs_urgent": "MANDATORY - true/false. True when at least one ordered laboratory investigation must be processed as URGENT (priority handling by the lab).",
     "specialist_referral": {
       "required": "MANDATORY - true/false",
       "specialty": "MANDATORY IF required=true - EXACT specialty name (Cardiology, Neurology, Gastroenterology, Endocrinology, Nephrology, Rheumatology, Dermatology, Psychiatry, Pulmonology, etc.)",
@@ -1952,8 +1956,19 @@ function ensureCompleteStructure(analysis: any): any {
                 "Consulter immédiatement si : aggravation des symptômes, fièvre persistante >48h, difficultés respiratoires, douleur sévère non contrôlée",
       immediate: analysis?.follow_up_plan?.immediate || 
                 "Surveillance clinique selon l'évolution symptomatique",
-      next_consultation: analysis?.follow_up_plan?.next_consultation || 
+      next_consultation: analysis?.follow_up_plan?.next_consultation ||
                         "Consultation de suivi dans 48-72h si persistance des symptômes",
+      // Machine-readable scheduling fields (see lib/triage.ts). Kept nullable:
+      // the client applies severity-based guard rails and falls back to a
+      // default window when the LLM omits or mis-fills them.
+      next_consultation_delay_hours: (() => {
+        const raw = analysis?.follow_up_plan?.next_consultation_delay_hours
+        const n = typeof raw === 'string' ? parseFloat(raw) : raw
+        return typeof n === 'number' && isFinite(n) && n > 0 ? Math.round(n) : null
+      })(),
+      second_consultation_required: analysis?.follow_up_plan?.second_consultation_required === true,
+      second_consultation_reason: analysis?.follow_up_plan?.second_consultation_reason || null,
+      labs_urgent: analysis?.follow_up_plan?.labs_urgent === true,
       specialist_referral: analysis?.follow_up_plan?.specialist_referral || {
         required: false,
         specialty: null,
@@ -2283,6 +2298,13 @@ Classify the patient using these clinical thresholds. The classification MUST co
 
 ▶ severity = "routine"  AND disposition = "outpatient":
   - Everything else. Well-appearing, stable vitals, no red flags. Manage and follow up by teleconsultation or scheduled visit.
+
+IMPORTANT — HYPERTENSION IS NOT AUTOMATICALLY AN EMERGENCY. A high blood pressure reading WITHOUT acute end-organ damage (no chest pain, no neurological deficit, no acute dyspnoea, no visual loss) is severity = "urgent", NOT "emergency". Do NOT send such a patient to A&E: they must be reviewed by a doctor within days, with the reading confirmed and treatment adjusted. Only BP > 180/120 WITH end-organ damage is a hypertensive emergency.
+
+▶ SCHEDULING THE RESULT-REVIEW CONSULTATION (populate follow_up_plan):
+  - Set second_consultation_required = true whenever the patient needs a doctor to interpret pending investigations or to reassess an unstable but non-emergency situation.
+  - Set next_consultation_delay_hours to the delay in HOURS from now. It MUST be consistent with severity (emergency ≈ 24, urgent 24-72, routine ≥ 168) AND never earlier than the time the ordered tests need to come back.
+  - Set labs_urgent = true only when an ordered laboratory investigation genuinely requires priority processing by the laboratory.
 
 If the patient is genuinely in the "emergency" category, the diagnosis narrative, prescription and follow-up MUST reflect that (immediate hospital transfer recommendation, no outpatient prescriptions of definitive treatment, urgent investigations only). If the patient is "routine", do NOT use words like "emergency", "stat", "ambulance" anywhere in the report — they trigger downstream alerts inappropriately.
 
@@ -6069,12 +6091,20 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       // Fallback: default to a calm "routine" classification rather than
       // omit the field — keeps downstream readers safe even if the LLM
       // forgot to populate the block.
-      triage_assessment: finalAnalysis.triage_assessment || {
-        severity: 'routine',
-        disposition: 'outpatient',
-        criteria_met: [],
-        justification: 'Triage block not produced by the diagnostic LLM — defaulted to routine. Treating clinician should review.',
-      },
+      // Fallback: mark the block as NOT assessed instead of silently passing it
+      // off as "routine". A defaulted "routine" hid genuine urgencies — the
+      // banner simply never rendered and nobody knew triage had failed.
+      // Downstream (lib/triage.ts) turns assessed:false into a visible
+      // "triage not completed" notice so the clinician assesses it manually.
+      triage_assessment: finalAnalysis.triage_assessment
+        ? { assessed: true, ...finalAnalysis.triage_assessment }
+        : {
+            assessed: false,
+            severity: 'unassessed',
+            disposition: '',
+            criteria_met: [],
+            justification: 'Triage block not produced by the diagnostic LLM. Treating clinician must assess urgency manually.',
+          },
 
       // Raisonnement diagnostique
       diagnosticReasoning: finalAnalysis.diagnostic_reasoning || {
