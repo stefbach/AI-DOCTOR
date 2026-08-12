@@ -24,13 +24,18 @@ export interface ResolvedTriage {
 /**
  * Clinical windows for the result-review consultation, in hours.
  * The AI proposes a delay; these bounds are authoritative.
+ *
+ * `defaultHours` applies only when the AI gives no usable figure. It sits at
+ * the CONSERVATIVE end of each window on purpose: when the system has to
+ * guess for a safety notice, it should err early. The AI can still push the
+ * review later (up to maxHours) when it justifies doing so.
  */
 export const TRIAGE_WINDOWS: Record<
   Exclude<TriageLevel, "unassessed">,
   { minHours: number; maxHours: number; defaultHours: number }
 > = {
   emergency: { minHours: 0, maxHours: 24, defaultHours: 24 },
-  urgent: { minHours: 24, maxHours: 72, defaultHours: 48 },
+  urgent: { minHours: 24, maxHours: 72, defaultHours: 24 },
   routine: { minHours: 168, maxHours: 720, defaultHours: 168 },
 }
 
