@@ -125,7 +125,14 @@ Return a verdict for EVERY ref_id you were given.`
  * the structured bibliography is not rewritten by a narrative pass — the
  * caller filters those explicitly.
  */
-function stripRefTokens(
+/**
+ * Remove `[ref-N]` tokens for the given ref ids from every string in the tree.
+ * Exported so callers that drop a reference for a reason OTHER than grounding
+ * (e.g. the topic filter dropping a paediatric guideline for an adult) can
+ * clear its dangling citations too — otherwise the report shows `[ref-1]`
+ * pointing at a bibliography entry that no longer exists.
+ */
+export function stripRefTokens(
   node: any,
   idsToRemove: ReadonlySet<string>,
   counter: { n: number },

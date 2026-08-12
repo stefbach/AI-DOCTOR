@@ -3941,6 +3941,16 @@ const handleSendDocuments = async () => {
  patientPhone: patientPhone,
  generatedAt: new Date().toISOString(),
  isEmergency: isEmergencyCase,
+ // Full triage outcome. `isEmergency` alone is a boolean, so the new
+ // "urgent" tier (e.g. high BP without end-organ damage — must be reviewed
+ // within days, but must NOT be sent to A&E) was invisible to TIBOK.
+ triage: {
+   level: resolvedTriage.level,
+   assessed: resolvedTriage.assessed,
+   criteriaMet: resolvedTriage.criteriaMet,
+   followUpDelayHours: followUpPlan?.delayHours ?? null,
+   followUpBy: followUpPlan ? followUpPlan.targetDate.toISOString() : null,
+ },
  consultationMode,
  presentialActor,
  nurseId,

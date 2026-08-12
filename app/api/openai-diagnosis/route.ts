@@ -18,7 +18,7 @@ import {
   type RAGReference,
 } from '@/lib/rag/medical-rag'
 import { reRankAndShrinkContext } from '@/lib/rag/rerank'
-import { verifyCitationGrounding } from '@/lib/rag/verify-citations'
+import { verifyCitationGrounding, stripRefTokens } from '@/lib/rag/verify-citations'
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s: DeepSeek-V4-Pro on the Phase 1 enriched system prompt + Phase 2 boosted RAG context regularly runs 250-350s; 600 gives headroom without burning more compute than the call actually uses (Vercel bills real runtime, not the cap).
@@ -5947,6 +5947,33 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         },
       }
     )
+
+    // The topic filter removes a reference from the BIBLIOGRAPHY but leaves its
+    // [ref-N] tokens behind in the prose, the medication indications and the
+    // lab/imaging request forms — so the doctor and the patient saw "[ref-1]"
+    // pointing at an entry that no longer exists (and, when every ref was
+    // dropped, alongside "no RAG guideline applied"). Clear those tokens the
+    // same way the grounding verifier does for the refs it rejects.
+    try {
+      const keptRefIds = new Set(
+        generalTopicFiltered.map((r: any) => String(r?.ref_id || '')).filter(Boolean)
+      )
+      const topicDroppedIds = new Set(
+        ragResult.evidenceReferences
+          .map((r: any) => String(r?.ref_id || ''))
+          .filter((id: string) => id && !keptRefIds.has(id))
+      )
+      if (topicDroppedIds.size > 0) {
+        const topicCounter = { n: 0 }
+        stripRefTokens(finalAnalysis, topicDroppedIds, topicCounter)
+        console.log(
+          `🎯 [TOPIC-FILTER-GENERAL] Cleared ${topicCounter.n} dangling [ref-N] token(s) for dropped ref(s): ${[...topicDroppedIds].join(', ')}`
+        )
+      }
+    } catch (topicStripError) {
+      // Never fail the consultation over citation cosmetics.
+      console.error('⚠️ [TOPIC-FILTER-GENERAL] Could not clear dangling tokens:', topicStripError)
+    }
 
     // ============ RAG: GROUNDING VERIFICATION ============
     // The scrub above proves each [ref-N] points at a guideline we really
