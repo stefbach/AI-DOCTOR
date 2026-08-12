@@ -327,8 +327,14 @@ export default function KycVerificationDialog({
             </div>
           )}
 
-          {/* Confirm */}
-          <div className="mt-4">
+          {/*
+            Sticky to the bottom of the scrolling overlay: the actions stay on
+            screen while the doctor scrolls through the patient details, so
+            they are visible without scrolling AND reachable when the panel is
+            taller than the visible area. Reaching them must never depend on
+            the doctor realising the panel scrolls.
+          */}
+          <div className="sticky bottom-0 -mx-4 mt-4 border-t bg-background px-4 pb-1 pt-3">
             <Button
               type="button"
               onClick={handleConfirm}
