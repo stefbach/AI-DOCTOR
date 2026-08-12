@@ -309,6 +309,18 @@ export function diffSnapshots(
   return diff
 }
 
+/**
+ * Labels of the medication lines the doctor added or edited. Used to keep
+ * low-severity noise off lines they never touched: the report generator
+ * writes placeholder strengths ("Dose individuelle") of its own accord, and
+ * an alert about the AI's own output is not what the doctor is being asked
+ * to review. Safety findings ignore this — see runDeterministicChecks.
+ */
+export function touchedMedicationLabels(diff: SnapshotDiff | null | undefined): Set<string> | null {
+  if (!diff || diff.baselineMissing) return null
+  return new Set([...diff.medicationsAdded, ...diff.medicationsModified.map((m) => m.item)])
+}
+
 export function medLabel(m: MedicationSnapshot): string {
   // A placeholder strength ("Dose individuelle") in the label reads as a real
   // dose and makes every alert about that line confusing — drop it.
@@ -612,6 +624,14 @@ const nextId = (prefix: string) => `${prefix}-${++alertCounter}`
 export function runDeterministicChecks(
   snapshot: ReviewSnapshot,
   patient: PatientContext,
+  /**
+   * Medication lines the doctor added or edited. When known, minor/info
+   * findings on the OTHER lines are dropped — they describe the AI's own
+   * output, which the doctor is not being asked to answer for. Critical and
+   * major findings are never filtered: a duplication is dangerous whichever
+   * of the two lines was typed by a human.
+   */
+  touched?: Set<string> | null,
 ): ReviewAlert[] {
   const alerts: ReviewAlert[] = []
   const meds = snapshot.medications
@@ -810,7 +830,11 @@ export function runDeterministicChecks(
     }
   }
 
-  return sortAlerts(alerts)
+  const relevant = touched
+    ? alerts.filter((a) => isBlocking(a) || touched.has(a.item))
+    : alerts
+
+  return sortAlerts(relevant)
 }
 
 // ============================================================================

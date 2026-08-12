@@ -11,6 +11,7 @@ import {
   mergeAlerts,
   runDeterministicChecks,
   sortAlerts,
+  touchedMedicationLabels,
 } from "@/lib/prescription-review"
 
 // Clinical review of a doctor-edited report, run just before signature.
@@ -155,6 +156,7 @@ RULES
 - Judge the WHOLE prescription together, not each line in isolation.
 - Be specific: name the medication/test and say what is wrong and why, in clinical terms.
 - Prefer silence over noise. If the edits are clinically sound, return an empty list. An empty list is a perfectly good answer and is the expected answer most of the time.
+- When the doctor's edits are listed above, do NOT raise "minor" or "info" alerts about parts of the document they did not change — that content is the AI's own draft and is not what the doctor is being asked to answer for. "critical" and "major" safety findings still apply to the whole document, whoever wrote the line.
 - The doctor is responsible and may have context you do not. Word alerts as findings to check, never as orders.
 - Never invent a patient detail that is not stated above.
 - "message" must be in FRENCH, "messageEn" in ENGLISH, and both must say the same thing.
@@ -288,7 +290,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Layer 1 — always runs, cannot fail on a model outage.
-    const ruleAlerts = runDeterministicChecks(safeSnapshot, safePatient)
+    const ruleAlerts = runDeterministicChecks(
+      safeSnapshot,
+      safePatient,
+      touchedMedicationLabels(diff),
+    )
 
     const nothingToReview =
       safeSnapshot.medications.length === 0 &&
