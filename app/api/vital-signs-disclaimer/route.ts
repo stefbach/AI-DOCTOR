@@ -54,10 +54,13 @@ ${presentation}
 Respond with ONLY a compact JSON object, no markdown, no commentary, exactly in this shape:
 {"temperature": true|false, "bloodPressure": true|false, "glucose": true|false}`
 
+    // NOTE: no `temperature` here — gpt-5.5 rejects the parameter outright
+    // ("Unsupported parameter: 'temperature' is not supported with this
+    // model"), which made every call to this route fail and silently fall
+    // back to the heuristic-only path.
     const result = await generateText({
       model: openai("gpt-5.5", { reasoningEffort: "none" }),
       prompt,
-      temperature: 0,
     })
 
     let alerts = { ...EMPTY }

@@ -836,6 +836,11 @@ export default function DiagnosisForm({
  evidence_references: evidenceReferences,
  rag_used: ragUsed,
  rag_metadata: ragMetadata,
+ // Structured triage — MUST be persisted: page.tsx reloads diagnosisData
+ // from storage on every step change, so this saved copy is what the
+ // report actually receives. Omitting it here silently discarded the
+ // emergency classification even once the in-memory payloads carried it.
+ triage_assessment: triageAssessment,
  timestamp: new Date().toISOString()
  }
  await consultationDataService.saveStepData(3, dataToSave)
