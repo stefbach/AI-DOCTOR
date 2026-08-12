@@ -89,18 +89,28 @@ function formatGender(gender: string | undefined, t: (typeof TEXT)["fr"]): strin
 }
 
 /**
- * DISABLED IN PRODUCTION — 12/08/2026.
+ * PREVIEW ONLY — off in production since 12/08/2026.
  *
  * This dialog is deliberately non-dismissible, and on a phone it grew past
  * the viewport: the confirm button fell below the fold with no way to reach
  * it, locking a doctor out of a live, paid consultation with a real patient.
- * The scroll fix is in place, but the feature stays off until it has been
- * validated on real mobile devices — the cost of being wrong here is a
- * blocked consultation, not a cosmetic defect.
+ * The scroll fix is in place, but it stays off in production until it has
+ * been validated on real mobile devices — the failure mode here is a blocked
+ * consultation, not a cosmetic defect.
  *
- * To re-enable: delete the early return below.
+ * The check is host-based and denies by default: it runs only on a Vercel
+ * branch preview or on localhost. Production is v0-medical-ai-expert.vercel.app
+ * / medical-ai-expert.vercel.app (the hosts TIBOK points at), and the
+ * main-branch alias mirrors production, so both stay off.
+ *
+ * To ship to production: make isKycPreviewHost() return true unconditionally.
  */
-const KYC_ENABLED = false
+function isKycPreviewHost(): boolean {
+  if (typeof window === "undefined") return false
+  const host = window.location.hostname
+  if (host === "localhost" || host === "127.0.0.1") return true
+  return host.includes("-git-") && !host.includes("-git-main-")
+}
 
 export default function KycVerificationDialog({
   open,
@@ -112,12 +122,14 @@ export default function KycVerificationDialog({
   language = "en",
   onConfirmed,
 }: KycVerificationDialogProps) {
-  if (!KYC_ENABLED) return null
-
   const t = TEXT[language] ?? TEXT.en
   const [approved, setApproved] = React.useState(false)
   const [isSaving, setIsSaving] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  // Resolved after mount, never during SSR: the server has no hostname, and
+  // deciding on the client only keeps markup identical on both sides.
+  const [enabled, setEnabled] = React.useState(false)
+  React.useEffect(() => { setEnabled(isKycPreviewHost()) }, [])
 
   const firstName = patientData?.firstName?.toString().trim() || ""
   const lastName = patientData?.lastName?.toString().trim() || ""
@@ -175,6 +187,9 @@ export default function KycVerificationDialog({
     onConfirmed,
     t.error,
   ])
+
+  // Placed after every hook so the hook order never changes between renders.
+  if (!enabled) return null
 
   return (
     <DialogPrimitive.Root open={open}>
