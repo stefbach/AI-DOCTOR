@@ -26,6 +26,15 @@ import {
  UserPlus, Activity, Heart, Scale, Droplets
 } from "lucide-react"
 import TibokMedicalAssistant from './tibok-medical-assistant'
+import PrescriptionReviewDialog from './prescription-review-dialog'
+import {
+  type ReviewAlert,
+  type ReviewSnapshot,
+  diffSnapshots,
+  extractPatientContext,
+  extractReviewSnapshot,
+  isBlocking,
+} from '@/lib/prescription-review'
 import EvidenceReferencesSection from './rag/evidence-references-section'
 import { renderWithCitations, aggregateReferences, SectionBibliography } from './rag/citation-renderer'
 
@@ -954,6 +963,21 @@ export default function ProfessionalReportEditable({
  const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
  const [saving, setSaving] = useState(false)
  const [isSendingDocuments, setIsSendingDocuments] = useState(false)
+
+ // ---- AI clinical review of doctor edits (runs before signature) ----
+ // The AI's own proposal, captured the moment the report is generated. Every
+ // later edit is measured against it so the review can tell the model WHAT
+ // the doctor changed. It is a ref, not state: nothing renders from it and it
+ // must never trigger a re-render mid-consultation.
+ const aiBaselineRef = useRef<ReviewSnapshot | null>(null)
+ // Set once the doctor has answered the review; cleared on the next edit so a
+ // prescription changed after clearance gets reviewed again.
+ const reviewClearedRef = useRef(false)
+ const [reviewOpen, setReviewOpen] = useState(false)
+ const [reviewLoading, setReviewLoading] = useState(false)
+ const [reviewAlerts, setReviewAlerts] = useState<ReviewAlert[]>([])
+ const [reviewDegraded, setReviewDegraded] = useState(false)
+ const [reviewId, setReviewId] = useState<string | null>(null)
  const [showFullReport, setShowFullReport] = useState(false)
  const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
  
@@ -1163,6 +1187,9 @@ const trackModification = useCallback((section: string) => {
  if (validationStatus === 'validated') return
  setModifiedSections(prev => new Set(prev).add(section))
  setHasUnsavedChanges(true)
+ // Any new edit invalidates a clearance already given: the document the
+ // doctor signs must be the document that was reviewed.
+ reviewClearedRef.current = false
 }, [validationStatus])
 
 const updateRapportSection = useCallback((section: string, value: string) => {
@@ -2665,7 +2692,13 @@ if (isRenewal) {
  }
  
  console.log("✅ Structure mapping complete")
- 
+
+ // Freeze the AI's proposal before the doctor can touch it. Everything the
+ // pre-signature review reports as "changed by the doctor" is measured
+ // against this snapshot.
+ aiBaselineRef.current = extractReviewSnapshot(reportData)
+ reviewClearedRef.current = false
+
  setReport(reportData)
  setValidationStatus('draft')
  setDocumentSignatures({})
@@ -2751,7 +2784,9 @@ if (isRenewal) {
  }
  
  // ==================== VALIDATION & SIGNATURE ====================
- const handleValidation = async () => {
+ // `skipReview` is set by the review dialog once the doctor has answered it,
+ // so accepting the review resumes the same signature flow instead of looping.
+ const handleValidation = async (options?: { skipReview?: boolean }) => {
  const requiredFieldsMissing = []
  if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
  if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
@@ -2776,11 +2811,19 @@ if (isRenewal) {
  return
  }
  
+ // Clinical review of the doctor's edits, between "validate" and the actual
+ // signature. It opens a dialog and hands control back to it — the dialog
+ // calls handleValidation({ skipReview: true }) once the doctor has decided.
+ if (!options?.skipReview && !reviewClearedRef.current) {
+ await runPrescriptionReview()
+ return
+ }
+
  // Save any unsaved changes before validation
  if (hasUnsavedChanges) {
  await handleManualSave()
  }
- 
+
  let currentReportId = reportId
  if (!currentReportId) {
  currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -2986,6 +3029,155 @@ const signatures = {
  setSaving(false)
 }
  }
+
+// ==================== AI CLINICAL REVIEW OF DOCTOR EDITS ====================
+// Runs once per signature attempt, on the WHOLE document rather than on the
+// edited line: the failure this exists to catch (a branded combination product
+// repeating a molecule already prescribed) is invisible line by line.
+
+const resolveReviewIds = () => {
+  const params = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search)
+    : new URLSearchParams()
+
+  let stored: any = {}
+  try {
+    stored = JSON.parse(sessionStorage.getItem('consultationPatientData') || '{}')
+  } catch { /* ignore */ }
+
+  return {
+    consultationId: propConsultationId
+      || consultationDataService.getCurrentConsultationId()
+      || stored.consultationId
+      || params.get('consultationId')
+      || null,
+    patientId: propPatientId
+      || patientData?.id
+      || patientData?.patientId
+      || stored.patientId
+      || params.get('patientId')
+      || null,
+    doctorId: propDoctorId || stored.doctorId || params.get('doctorId') || null,
+  }
+}
+
+// Records the doctor's answer and resumes the signature flow.
+const finaliseReview = async (
+  decision: 'accepted' | 'overridden',
+  justification: string,
+  currentReviewId: string | null,
+) => {
+  setReviewOpen(false)
+  reviewClearedRef.current = true
+
+  // Fire-and-forget: the audit row must not delay the signature, and a failed
+  // audit write must not fail the consultation.
+  if (currentReviewId) {
+    fetch('/api/prescription-review', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reviewId: currentReviewId,
+        decision,
+        justification,
+        doctorId: resolveReviewIds().doctorId,
+      }),
+    }).catch(err => console.error('⚠️ Could not record review decision:', err))
+  }
+
+  await handleValidation({ skipReview: true })
+}
+
+const runPrescriptionReview = async () => {
+  if (!report) return
+
+  setReviewAlerts([])
+  setReviewDegraded(false)
+  setReviewId(null)
+  setReviewLoading(true)
+  setReviewOpen(true)
+
+  let alerts: ReviewAlert[] = []
+  let degraded = false
+  let newReviewId: string | null = null
+
+  try {
+    const current = extractReviewSnapshot(report)
+    const ids = resolveReviewIds()
+
+    const response = await fetch('/api/prescription-review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...ids,
+        consultationType: 'general',
+        patient: extractPatientContext(report),
+        snapshot: current,
+        diff: diffSnapshots(aiBaselineRef.current, current),
+      }),
+    })
+
+    const data = await response.json()
+    alerts = Array.isArray(data?.alerts) ? data.alerts : []
+    degraded = data?.degraded === true
+    newReviewId = data?.reviewId ?? null
+    console.log('🩺 Prescription review:', {
+      alerts: alerts.length,
+      blocking: data?.blockingCount ?? 0,
+      aiStatus: data?.aiStatus,
+    })
+  } catch (error) {
+    // A failed review must never stand between the doctor and the patient.
+    console.error('❌ Prescription review failed:', error)
+    alerts = []
+    degraded = true
+  }
+
+  setReviewAlerts(alerts)
+  setReviewDegraded(degraded)
+  setReviewId(newReviewId)
+  setReviewLoading(false)
+
+  // Nothing to say: don't make the doctor dismiss a modal to be told so.
+  // The review is still recorded, and a degraded run says so in a toast
+  // rather than blocking — an infrastructure failure must not stop a
+  // consultation.
+  if (alerts.length === 0) {
+    toast({
+      title: degraded ? "⚠️ Contrôle clinique partiel" : "✅ Contrôle clinique",
+      description: degraded
+        ? "L'analyse IA n'a pas pu s'exécuter. Seules les vérifications automatiques ont été appliquées."
+        : "Aucune anomalie détectée dans vos modifications.",
+      duration: 4000
+    })
+    await finaliseReview('accepted', '', newReviewId)
+  }
+}
+
+const handleReviewProceed = async (justification: string) => {
+  await finaliseReview(
+    reviewAlerts.some(isBlocking) ? 'overridden' : 'accepted',
+    justification,
+    reviewId,
+  )
+}
+
+const handleReviewCorrect = () => {
+  const currentReviewId = reviewId
+  setReviewOpen(false)
+  // Not cleared: the doctor is going back to edit, so the next signature
+  // attempt reviews the corrected document.
+  reviewClearedRef.current = false
+  setEditMode(true)
+
+  if (currentReviewId) {
+    fetch('/api/prescription-review', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reviewId: currentReviewId, decision: 'corrected' }),
+    }).catch(err => console.error('⚠️ Could not record review decision:', err))
+  }
+}
 
 // ==================== REFERRAL & FOLLOW-UP FUNCTIONS ====================
 // Load specialties from Supabase
@@ -6806,7 +6998,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <Button
  variant="default"
  size="sm"
- onClick={handleValidation}
+ onClick={() => handleValidation()}
  disabled={saving || validationStatus === 'validated'}
  className="flex-1 sm:flex-none"
  >
@@ -6901,6 +7093,18 @@ const [localSickLeave, setLocalSickLeave] = useState({
  // ==================== MAIN RENDER ====================
  return (
  <div className="space-y-6 print:space-y-4">
+ {/* Clinical review of the doctor's edits, shown between "Validate and
+     sign" and the signature itself. print:hidden is unnecessary — it only
+     exists while the doctor is answering it. */}
+ <PrescriptionReviewDialog
+   open={reviewOpen}
+   loading={reviewLoading}
+   alerts={reviewAlerts}
+   degraded={reviewDegraded}
+   language="fr"
+   onProceed={handleReviewProceed}
+   onCorrect={handleReviewCorrect}
+ />
  <ActionsBar />
  <UnsavedChangesAlert />
  <DoctorInfoEditor />
