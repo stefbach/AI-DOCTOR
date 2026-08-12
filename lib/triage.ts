@@ -53,6 +53,8 @@ export function resolveTriage(source: any): ResolvedTriage {
   // was persisted; check every known location once.
   const triage = [
     source?.triage_assessment,
+    // The diagnosis step historically nested the raw API payload here.
+    source?.completeData?.triage_assessment,
     source?.rapport?.triage_assessment,
     source?.medicalReport?.triage_assessment,
     source?.diagnosis?.triage_assessment,
