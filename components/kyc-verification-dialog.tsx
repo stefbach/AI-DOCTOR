@@ -172,7 +172,11 @@ export default function KycVerificationDialog({
           onOpenAutoFocus={(e) => e.preventDefault()}
           className={cn(
             "fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%]",
-            "gap-4 border bg-background p-6 shadow-lg sm:rounded-lg",
+            // max-height + scroll: without them the dialog grew past the
+            // viewport on a phone and the confirm button sat below the fold
+            // with no way to reach it, trapping the doctor mid-consultation.
+            "max-h-[90vh] overflow-y-auto overscroll-contain",
+            "gap-4 border bg-background p-4 sm:p-6 shadow-lg sm:rounded-lg",
             "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
           )}
         >
@@ -257,8 +261,8 @@ export default function KycVerificationDialog({
             </div>
           )}
 
-          {/* Confirm */}
-          <div className="mt-4">
+          {/* Confirm — sticky so it stays reachable however short the viewport */}
+          <div className="sticky bottom-0 mt-4 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-3 pb-1 bg-background border-t">
             <Button
               type="button"
               onClick={handleConfirm}
