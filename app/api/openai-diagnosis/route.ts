@@ -5955,13 +5955,12 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
     // dropped, alongside "no RAG guideline applied"). Clear those tokens the
     // same way the grounding verifier does for the refs it rejects.
     try {
-      const keptRefIds = new Set(
-        generalTopicFiltered.map((r: any) => String(r?.ref_id || '')).filter(Boolean)
-      )
+      // filterEvidenceRefsByTopic returns { kept, dropped } — use the dropped
+      // list it already computed rather than diffing against kept.
       const topicDroppedIds = new Set(
-        ragResult.evidenceReferences
+        (generalTopicFiltered.dropped || [])
           .map((r: any) => String(r?.ref_id || ''))
-          .filter((id: string) => id && !keptRefIds.has(id))
+          .filter(Boolean)
       )
       if (topicDroppedIds.size > 0) {
         const topicCounter = { n: 0 }
