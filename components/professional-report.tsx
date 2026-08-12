@@ -3781,23 +3781,6 @@ const handleSendDocuments = async () => {
    doctorId = params.get('doctorId')
  }
 
- // ==================== TEST-ONLY BLOCK — REMOVE BEFORE MERGE ====================
- // `?kycTest=1` builds a fictitious patient with no real ids, so this handler
- // aborts on "Missing required IDs" and the appointment is never persisted —
- // which makes the follow-up booking impossible to verify end to end.
- // In that mode ONLY, we substitute the team's own test records and skip the
- // POST to TIBOK further below (see KYC_TEST_SIMULATED_SEND), so the database
- // path can be exercised without pushing a document to a real patient.
- const KYC_TEST_SIMULATED_SEND =
-   typeof window !== 'undefined' &&
-   new URLSearchParams(window.location.search).get('kycTest') === '1'
- if (KYC_TEST_SIMULATED_SEND) {
-   if (!patientId) patientId = 'c9b1d49d-968c-4b15-8d00-2c27476c0e7b'   // patient "Megane Claudia Quenette"
-   if (!doctorId) doctorId = '74204cfd-c4bc-46d5-bcaf-e16a2d2d4030'     // doctor "Megane Quenette"
-   console.log('🧪 KYC TEST MODE — using test patient/doctor ids, TIBOK send will be simulated')
- }
- // ================== END TEST-ONLY BLOCK — REMOVE BEFORE MERGE ==================
-
  console.log('📍 IDs found:', { consultationId, patientId, doctorId, sources: { props: { propConsultationId, propPatientId, propDoctorId }, service: consultationDataService.getCurrentConsultationId() } })
 
  if (!consultationId || !patientId || !doctorId) {
@@ -4153,23 +4136,12 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
    console.error('[VERIFY-OUTGOING-1] instrumentation error (non-blocking):', verifyErr?.message || verifyErr)
  }
 
- // Call Tibok endpoint for ALL consultation types.
- // TEST-ONLY (REMOVE BEFORE MERGE): under ?kycTest=1 the POST is skipped so a
- // fictitious consultation is never delivered to a real patient dashboard —
- // getTibokUrl() falls back to https://tibok.mu (production) when no tibokUrl
- // was passed, which is exactly the case in test mode. Everything after this
- // point, including the appointment persistence, still runs.
- const response = KYC_TEST_SIMULATED_SEND
-   ? (console.log('🧪 KYC TEST MODE — POST to TIBOK skipped (simulated 200)'),
-      new Response(JSON.stringify({ success: true, simulated: true }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }))
-   : await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-       body: bodyStr
-     })
+ // Call Tibok endpoint for ALL consultation types
+ const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: bodyStr
+ })
 
  console.log('📨 Tibok response status:', response.status)
 
@@ -4383,13 +4355,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
        // Send WhatsApp activation notification via WATI
        try {
          const diseaseSubtypes = followUps.map(f => f.disease_subtype).filter(Boolean)
-         // TEST-ONLY guard (REMOVE BEFORE MERGE): this sends a real WhatsApp
-         // through WATI. In ?kycTest=1 the phone is the placeholder string
-         // "Not provided", which is truthy, so the message would still be
-         // dispatched from a fictitious consultation.
-         if (KYC_TEST_SIMULATED_SEND) {
-           console.log('🧪 KYC TEST MODE — WhatsApp follow-up notification skipped')
-         } else if (diseaseSubtypes.length > 0 && patientPhone) {
+         if (diseaseSubtypes.length > 0 && patientPhone) {
            await fetch('/api/send-follow-up-notification', {
              method: 'POST',
              headers: { 'Content-Type': 'application/json' },
