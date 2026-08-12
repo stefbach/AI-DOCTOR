@@ -1898,6 +1898,10 @@ function ensureCompleteStructure(analysis: any): any {
   console.log('🛡️ Ensuring complete medical analysis structure...')
   
   const ensuredStructure = {
+    // Declared explicitly so the key always exists downstream. The `...analysis`
+    // spread further below already carries it through when the LLM produced one;
+    // this just guarantees a defined field when it did not.
+    triage_assessment: analysis?.triage_assessment || null,
     diagnostic_reasoning: {
       key_findings: {
         from_history: analysis?.diagnostic_reasoning?.key_findings?.from_history || "Analyse de l'historique médical disponible",
