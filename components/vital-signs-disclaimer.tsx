@@ -51,7 +51,7 @@ const toNumber = (v: any): number | null => {
 // are left to the AI layer to avoid false positives.
 const TEMP_TERMS = [
   "fever", "fièvre", "fievre", "febrile", "fébrile", "pyrexia", "pyrexie",
-  "chills", "frisson", "rigor", "night sweats", "sueurs nocturnes",
+  "chills", "frisson", "shivering", "night sweats", "sueurs nocturnes",
   "hyperthermi", "high temperature", "température élevée", "temperature elevee",
 ]
 const BP_TERMS = [
@@ -69,8 +69,38 @@ const GLUCOSE_TERMS = [
   "urines fréquentes", "mictions fréquentes",
 ]
 
+// Negation cues (FR + EN). A clause carrying one of these is skipped, so
+// "No fever" / "pas de fièvre" / "denies chest pain" do NOT raise an alert.
+const NEGATION_CUES = [
+  "no ", "not ", "without ", "denies ", "denied ", "negative for ", "nil ",
+  "absence of ", "free of ", "ruled out", "rules out", "never had",
+  "pas de ", "pas d'", "sans ", "aucun", "aucune", "absence de ", "ni ",
+  "nie ", "jamais eu",
+]
+
+// Split on sentence/list punctuation AND contrastive conjunctions, so a
+// negation in one clause never suppresses a positive finding in the next
+// (e.g. "no fever but severe headache" -> two independent clauses).
+const splitClauses = (text: string): string[] =>
+  text
+    .split(/[.;,\n·!?]+|\s(?:but|mais|however|although|though|except)\s/g)
+    .map((c) => c.trim())
+    .filter(Boolean)
+
+const isNegated = (clause: string): boolean =>
+  NEGATION_CUES.some((cue) => clause.startsWith(cue) || clause.includes(" " + cue))
+
+const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+
+// Match at a word start (prefix matching kept on purpose: "diabet" -> diabetic,
+// diabetes) to avoid firing on unrelated words that merely embed the term.
+const clauseHasTerm = (clause: string, terms: string[]): boolean =>
+  terms.some((t) => new RegExp("(^|[^a-zà-ÿ])" + escapeRegex(t)).test(clause))
+
 const textMatches = (haystack: string, terms: string[]): boolean =>
-  terms.some((t) => haystack.includes(t))
+  splitClauses(haystack).some(
+    (clause) => !isNegated(clause) && clauseHasTerm(clause, terms)
+  )
 
 /**
  * Deterministic decision: which vitals should raise the real-time

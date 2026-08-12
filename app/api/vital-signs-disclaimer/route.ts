@@ -40,7 +40,11 @@ Flag each of these three vitals independently:
 - "bloodPressure": suspicion of hypertension or a BP-relevant emergency (e.g. severe headache with visual symptoms, chest pain, palpitations, dizziness in a known hypertensive, epistaxis, stroke-like symptoms, known/poorly-controlled hypertension...).
 - "glucose": suspicion of hyper- or hypoglycemia or diabetes relevance (e.g. known diabetic, excessive thirst, frequent urination, blurred vision, unexplained weight loss, confusion, polyphagia...).
 
-Be conservative and specific: only flag a vital when the presentation genuinely warrants live verification. Do NOT flag on isolated non-specific complaints such as fatigue alone, a mild isolated headache, or generic malaise. The presentation may be written in English, French or a mix.
+Be conservative and specific: only flag a vital when the presentation genuinely warrants live verification. Do NOT flag on isolated non-specific complaints such as fatigue alone, a mild isolated headache, or generic malaise.
+
+CRITICAL — respect negations: an explicitly denied or absent finding must NEVER raise its alert. For example "no fever", "afebrile", "denies chest pain", "pas de fièvre", "sans douleur thoracique" mean that finding is ABSENT, so do not flag the corresponding vital on that basis.
+
+The presentation may be written in English, French or a mix.
 
 Patient presentation:
 """
