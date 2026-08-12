@@ -28,11 +28,18 @@ export async function POST(request: NextRequest) {
       doctorId,
       consultationType,
       approved,
+      skipped,
       patientSnapshot,
     } = body || {}
 
-    // KYC is an explicit attestation — approval must be true to be recorded.
-    if (approved !== true) {
+    // Two legitimate outcomes: an explicit approval, or an explicit skip when
+    // the doctor cannot verify (no ID to hand, cramped screen, save failure).
+    // A skip is recorded too — an unverified consultation must be visible in
+    // the audit trail, not indistinguishable from a verified one. Anything
+    // else is a malformed call.
+    const isApproval = approved === true
+    const isSkip = skipped === true
+    if (!isApproval && !isSkip) {
       return NextResponse.json({ success: false, error: 'KYC not approved' }, { status: 400 })
     }
 
@@ -54,8 +61,11 @@ export async function POST(request: NextRequest) {
         patient_id: patientId ?? null,
         doctor_id: doctorId ?? null,
         consultation_type: consultationType ?? null,
-        approved: true,
-        patient_snapshot: patientSnapshot ?? {},
+        approved: isApproval,
+        patient_snapshot: {
+          ...(patientSnapshot ?? {}),
+          ...(isSkip ? { skipped: true, skip_reason: 'doctor_could_not_verify' } : {}),
+        },
         verified_at: new Date().toISOString(),
       })
       .select('id')
@@ -66,7 +76,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
-    console.log('✅ KYC verification recorded:', { consultationId, doctorId, id: data?.id })
+    console.log(isSkip ? '⚠️ KYC SKIPPED (recorded):' : '✅ KYC verification recorded:', { consultationId, doctorId, id: data?.id })
     return NextResponse.json({ success: true, data: { id: data?.id ?? null } })
   } catch (error: any) {
     console.error('❌ KYC: Unexpected error:', error)

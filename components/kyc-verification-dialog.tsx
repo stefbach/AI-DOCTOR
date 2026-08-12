@@ -57,6 +57,7 @@ const TEXT = {
     male: "Masculin",
     female: "Féminin",
     notProvided: "Non renseigné",
+    skip: "Impossible de vérifier maintenant — continuer sans vérification",
   },
   en: {
     title: "Identity Verification (KYC)",
@@ -77,6 +78,7 @@ const TEXT = {
     male: "Male",
     female: "Female",
     notProvided: "Not provided",
+    skip: "Cannot verify right now — continue without verification",
   },
 } as const
 
@@ -188,6 +190,32 @@ export default function KycVerificationDialog({
     t.error,
   ])
 
+  // Let the consultation proceed without a verification, recording that it
+  // was skipped. Best-effort: if the record cannot be written we still let the
+  // doctor through — the point of this path is that nothing traps them.
+  const handleSkip = React.useCallback(async () => {
+    if (isSaving) return
+    try {
+      await fetch("/api/kyc-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          consultationId: consultationId ?? null,
+          patientId: patientId ?? null,
+          doctorId: doctorId ?? null,
+          consultationType: consultationType ?? null,
+          approved: false,
+          skipped: true,
+          patientSnapshot: { firstName, lastName, age: ageValue, gender: patientData?.gender ?? null },
+        }),
+      })
+    } catch (err) {
+      console.error("⚠️ Could not record the skipped KYC:", err)
+    } finally {
+      onConfirmed()
+    }
+  }, [isSaving, consultationId, patientId, doctorId, consultationType, firstName, lastName, ageValue, patientData?.gender, onConfirmed])
+
   // Placed after every hook so the hook order never changes between renders.
   if (!enabled) return null
 
@@ -195,6 +223,17 @@ export default function KycVerificationDialog({
     <DialogPrimitive.Root open={open}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=open]:fade-in-0" />
+        {/*
+          The panel is NOT vertically centred with a fixed transform. This app
+          runs inside an iframe on tibok.mu, under a video pane that eats part
+          of the screen: `position: fixed` anchors to the iframe's viewport,
+          not to the sliver actually visible, so a centred panel can sit partly
+          off-screen with no way to reach it. Instead the whole overlay is the
+          scroll container and the panel flows from the top, so every part of
+          it is always reachable however short the visible area is.
+        */}
+        <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain">
+          <div className="flex min-h-full items-start justify-center p-2 sm:p-4">
         <DialogPrimitive.Content
           // Mandatory / blocking: prevent every implicit close path.
           onEscapeKeyDown={(e) => e.preventDefault()}
@@ -202,19 +241,15 @@ export default function KycVerificationDialog({
           onInteractOutside={(e) => e.preventDefault()}
           onOpenAutoFocus={(e) => e.preventDefault()}
           className={cn(
-            "fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%]",
-            // max-height + scroll: without them the dialog grew past the
-            // viewport on a phone and the confirm button sat below the fold
-            // with no way to reach it, trapping the doctor mid-consultation.
-            "max-h-[90vh] overflow-y-auto overscroll-contain",
-            "gap-4 border bg-background p-4 sm:p-6 shadow-lg sm:rounded-lg",
-            "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
+            "relative w-full max-w-lg my-auto",
+            "border bg-background p-4 shadow-lg rounded-lg",
+            "data-[state=open]:animate-in data-[state=open]:fade-in-0"
           )}
         >
           {/* Header */}
-          <div className="flex flex-col items-center text-center space-y-2">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 text-teal-600">
-              <ShieldCheck className="h-6 w-6" />
+          <div className="flex flex-col items-center text-center space-y-1.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-100 text-teal-600">
+              <ShieldCheck className="h-5 w-5" />
             </div>
             <DialogPrimitive.Title className="text-lg font-semibold leading-none tracking-tight">
               {t.title}
@@ -292,8 +327,8 @@ export default function KycVerificationDialog({
             </div>
           )}
 
-          {/* Confirm — sticky so it stays reachable however short the viewport */}
-          <div className="sticky bottom-0 mt-4 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-3 pb-1 bg-background border-t">
+          {/* Confirm */}
+          <div className="mt-4">
             <Button
               type="button"
               onClick={handleConfirm}
@@ -311,8 +346,27 @@ export default function KycVerificationDialog({
                 t.confirm
               )}
             </Button>
+
+            {/*
+              Escape hatch. A blocked identity check must never cost a paid
+              consultation: whatever goes wrong — cramped screen, patient
+              without ID to hand, saving failure — the doctor keeps a way out.
+              The skip is recorded, so an unverified consultation is visible
+              in the audit trail rather than silently indistinguishable from a
+              verified one.
+            */}
+            <button
+              type="button"
+              onClick={handleSkip}
+              disabled={isSaving}
+              className="mt-3 w-full text-center text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground disabled:opacity-50"
+            >
+              {t.skip}
+            </button>
           </div>
         </DialogPrimitive.Content>
+          </div>
+        </div>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
   )
