@@ -88,6 +88,20 @@ function formatGender(gender: string | undefined, t: (typeof TEXT)["fr"]): strin
   return gender
 }
 
+/**
+ * DISABLED IN PRODUCTION — 12/08/2026.
+ *
+ * This dialog is deliberately non-dismissible, and on a phone it grew past
+ * the viewport: the confirm button fell below the fold with no way to reach
+ * it, locking a doctor out of a live, paid consultation with a real patient.
+ * The scroll fix is in place, but the feature stays off until it has been
+ * validated on real mobile devices — the cost of being wrong here is a
+ * blocked consultation, not a cosmetic defect.
+ *
+ * To re-enable: delete the early return below.
+ */
+const KYC_ENABLED = false
+
 export default function KycVerificationDialog({
   open,
   patientData,
@@ -98,6 +112,8 @@ export default function KycVerificationDialog({
   language = "en",
   onConfirmed,
 }: KycVerificationDialogProps) {
+  if (!KYC_ENABLED) return null
+
   const t = TEXT[language] ?? TEXT.en
   const [approved, setApproved] = React.useState(false)
   const [isSaving, setIsSaving] = React.useState(false)
