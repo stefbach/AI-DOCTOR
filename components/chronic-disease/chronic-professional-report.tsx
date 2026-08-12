@@ -690,6 +690,12 @@ export default function ChronicProfessionalReport({
   const [selectedDoctorForAppt, setSelectedDoctorForAppt] = useState('')
   const [doctorApptDate, setDoctorApptDate] = useState('')
   const [doctorAvailableSlots, setDoctorAvailableSlots] = useState<Array<{time: string, duration: number}>>([])
+  // Dates on which the selected doctor actually has an open schedule. The date
+  // field used to be a free <input type="date">, so every day of the calendar
+  // looked bookable and picking a day without a schedule silently returned an
+  // empty slot list.
+  const [doctorAvailableDates, setDoctorAvailableDates] = useState<string[]>([])
+  const [loadingDoctorDates, setLoadingDoctorDates] = useState(false)
   const [selectedDoctorSlot, setSelectedDoctorSlot] = useState<{time: string, duration: number} | null>(null)
   const [loadingDoctorSlots, setLoadingDoctorSlots] = useState(false)
   const [doctorApptReason, setDoctorApptReason] = useState('')
@@ -2548,12 +2554,55 @@ export default function ChronicProfessionalReport({
     }
   }, [getSupabaseClient])
 
-  const handleDoctorForApptChange = useCallback((targetDoctorId: string) => {
+  // Load the dates this doctor is actually open, from today onward, so the UI
+  // can offer only those instead of a full calendar.
+  const loadDoctorAvailableDates = useCallback(async (targetDoctorId: string): Promise<string[]> => {
+    const supabase = getSupabaseClient()
+    if (!supabase || !targetDoctorId) {
+      setDoctorAvailableDates([])
+      return []
+    }
+    setLoadingDoctorDates(true)
+    try {
+      const today = toDateInputValue(new Date())
+      const { data, error } = await supabase
+        .from('doctor_schedules')
+        .select('schedule_date')
+        .eq('doctor_id', targetDoctorId)
+        .eq('is_available', true)
+        .gte('schedule_date', today)
+        .order('schedule_date')
+
+      if (error) throw error
+      const dates = Array.from(new Set((data || []).map((r: any) => String(r.schedule_date))))
+      setDoctorAvailableDates(dates)
+      return dates
+    } catch (err) {
+      console.error('Error loading doctor available dates:', err)
+      setDoctorAvailableDates([])
+      return []
+    } finally {
+      setLoadingDoctorDates(false)
+    }
+  }, [getSupabaseClient])
+
+  const handleDoctorForApptChange = useCallback(async (targetDoctorId: string) => {
     setSelectedDoctorForAppt(targetDoctorId)
-    setDoctorApptDate('')
     setDoctorAvailableSlots([])
     setSelectedDoctorSlot(null)
-  }, [])
+
+    const dates = await loadDoctorAvailableDates(targetDoctorId)
+
+    // Keep the clinically recommended date the banner pre-filled, instead of
+    // clearing it, whenever this doctor is actually open that day.
+    setDoctorApptDate(prev => {
+      if (prev && dates.includes(prev)) {
+        loadDoctorAvailableSlots(targetDoctorId, prev)
+        return prev
+      }
+      return ''
+    })
+  }, [loadDoctorAvailableDates, loadDoctorAvailableSlots])
 
   const handleDoctorApptDateChange = useCallback((date: string) => {
     setDoctorApptDate(date)
@@ -8471,13 +8520,42 @@ export default function ChronicProfessionalReport({
             <>
               <div className="space-y-2">
                 <Label>Date du rendez-vous *</Label>
-                <input
-                  type="date"
-                  value={doctorApptDate}
-                  onChange={(e) => handleDoctorApptDateChange(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
+                {loadingDoctorDates ? (
+                  <div className="flex items-center gap-2 py-2 text-sm text-gray-500">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Chargement des dates disponibles…
+                  </div>
+                ) : doctorAvailableDates.length === 0 ? (
+                  <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                    Ce médecin n'a aucune date d'ouverture à venir. Sélectionnez un autre médecin.
+                  </p>
+                ) : (
+                  <>
+                    <select
+                      value={doctorApptDate}
+                      onChange={(e) => handleDoctorApptDateChange(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    >
+                      <option value="">Sélectionner une date</option>
+                      {doctorAvailableDates.map(d => {
+                        const beyondWindow = followUpPlan
+                          ? d > toDateInputValue(followUpPlan.deadlineDate)
+                          : false
+                        return (
+                          <option key={d} value={d}>
+                            {new Date(`${d}T00:00:00`).toLocaleDateString('fr-FR', {
+                              weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+                            })}
+                            {beyondWindow ? ' — hors délai recommandé' : ''}
+                          </option>
+                        )
+                      })}
+                    </select>
+                    <p className="text-xs text-gray-500">
+                      Seules les dates d'ouverture de ce médecin sont proposées.
+                    </p>
+                  </>
+                )}
               </div>
 
               {doctorApptDate && (
