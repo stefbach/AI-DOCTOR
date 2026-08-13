@@ -205,6 +205,39 @@ export function computeFollowUp(input: FollowUpInput): FollowUpPlan | null {
   return { required: true, delayHours: delay, targetDate, deadlineDate, reason, adjustedForLabs, clamped }
 }
 
+/**
+ * The narrative section that replaces the prescriptions on an emergency case.
+ *
+ * A report that says "go to hospital without delay" while also handing out a
+ * prescription, a lab form and three imaging requests contradicts itself, and
+ * sends the patient to a pharmacy instead of A&E. So on an emergency those
+ * documents are not produced — and this text says so, and says why, rather
+ * than leaving the doctor and the patient to wonder where they went.
+ */
+export function buildEmergencyTransferNotice(triage: ResolvedTriage): string {
+  const lines: string[] = [
+    "PRISE EN CHARGE MÉDICALE IMMÉDIATE REQUISE — TRANSFERT HOSPITALIER SANS DÉLAI.",
+    "",
+    "Cette consultation ne donne lieu à aucune prescription médicamenteuse, ni à aucune demande d'analyse ou d'imagerie de ville. Le bilan et le traitement relèvent de la structure hospitalière qui prendra le patient en charge : prescrire en parallèle retarderait ce transfert et exposerait le patient à un traitement décidé sans les examens qui doivent le guider.",
+  ]
+
+  if (triage.justification) {
+    lines.push("", `Motif de l'orientation : ${triage.justification}`)
+  }
+
+  if (triage.criteriaMet.length > 0) {
+    lines.push("", "Critères d'urgence retenus :")
+    for (const criterion of triage.criteriaMet) lines.push(`• ${criterion}`)
+  }
+
+  lines.push(
+    "",
+    "Le patient doit être informé de se rendre immédiatement aux urgences, ou un transport sanitaire doit être organisé selon son état.",
+  )
+
+  return lines.join("\n")
+}
+
 /** Human-readable delay, e.g. "48 h" / "3 jours". */
 export function formatDelay(hours: number, language: "fr" | "en" = "fr"): string {
   if (hours < 24) return language === "fr" ? `${hours} h` : `${hours} hrs`

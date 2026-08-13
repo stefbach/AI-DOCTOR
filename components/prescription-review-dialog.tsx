@@ -22,16 +22,27 @@ import {
   AlertTriangle,
   CheckCircle2,
   Info,
+  ArrowRight,
   Loader2,
+  Pencil,
+  RefreshCw,
   ShieldAlert,
   Stethoscope,
   X,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { type ReviewAlert, type ReviewSeverity, isBlocking } from "@/lib/prescription-review"
+import {
+  type MedicationSnapshot,
+  type ReviewAlert,
+  type ReviewSeverity,
+  type ReviewTarget,
+  isBlocking,
+  medLabel,
+} from "@/lib/prescription-review"
 
 export type ReviewLanguage = "fr" | "en"
 
@@ -46,6 +57,22 @@ interface PrescriptionReviewDialogProps {
   onProceed: (justification: string) => void
   /** Doctor goes back to the document to fix something. */
   onCorrect: () => void
+
+  // ---- Correcting without leaving the dialog -----------------------------
+  // A doctor told to fix a prescription line had to close this, find the tab,
+  // find the line, and remember what the alert said. For a sentence buried in
+  // a report that is a long hunt. So the lines an alert names are editable
+  // here, and anything not editable here gets a button that opens the right
+  // place instead of leaving them to look for it.
+
+  /** Current prescription lines, so an alert can be matched to what it names. */
+  medications?: MedicationSnapshot[]
+  /** Apply a partial edit to one prescription line. */
+  onApplyMedicationEdit?: (index: number, patch: Partial<MedicationSnapshot>) => void
+  /** Re-run the review after edits, since the alerts on screen are now stale. */
+  onRecheck?: () => void
+  /** Close and take the doctor to the part of the document an alert concerns. */
+  onGoToTarget?: (target: ReviewTarget) => void
 }
 
 const MIN_JUSTIFICATION = 10
@@ -73,6 +100,18 @@ const TEXT = {
     proceed: "Signer malgré tout",
     proceedClean: "Continuer et signer",
     suggestion: "À faire",
+    editLine: "Corriger ici",
+    closeEditor: "Fermer",
+    apply: "Appliquer",
+    goToTarget: "Aller corriger",
+    edited: "Modifications appliquées. Les alertes ci-dessus ne tiennent plus compte de vos corrections.",
+    recheck: "Revérifier",
+    fieldName: "Médicament",
+    fieldDosage: "Dosage",
+    fieldForm: "Forme",
+    fieldPosology: "Posologie",
+    fieldRoute: "Voie",
+    fieldDuration: "Durée",
     severity: {
       critical: "Critique",
       major: "Important",
@@ -109,6 +148,18 @@ const TEXT = {
     proceed: "Sign anyway",
     proceedClean: "Continue and sign",
     suggestion: "Action",
+    editLine: "Fix it here",
+    closeEditor: "Close",
+    apply: "Apply",
+    goToTarget: "Go and fix",
+    edited: "Changes applied. The alerts above no longer reflect your corrections.",
+    recheck: "Re-check",
+    fieldName: "Medication",
+    fieldDosage: "Strength",
+    fieldForm: "Form",
+    fieldPosology: "Posology",
+    fieldRoute: "Route",
+    fieldDuration: "Duration",
     severity: {
       critical: "Critical",
       major: "Important",
@@ -149,18 +200,88 @@ const SEVERITY_STYLES: Record<ReviewSeverity, { box: string; chip: string; icon:
   },
 }
 
+const EDITABLE_FIELDS: { key: keyof MedicationSnapshot; label: keyof (typeof TEXT)["fr"] }[] = [
+  { key: "nom", label: "fieldName" },
+  { key: "dosage", label: "fieldDosage" },
+  { key: "forme", label: "fieldForm" },
+  { key: "posologie", label: "fieldPosology" },
+  { key: "modeAdministration", label: "fieldRoute" },
+  { key: "dureeTraitement", label: "fieldDuration" },
+]
+
+/** One prescription line, editable in place. */
+function MedicationEditor({
+  med,
+  t,
+  onApply,
+}: {
+  med: MedicationSnapshot
+  t: (typeof TEXT)["fr"]
+  onApply: (patch: Partial<MedicationSnapshot>) => void
+}) {
+  const [draft, setDraft] = React.useState<Partial<MedicationSnapshot>>({})
+  const value = (key: keyof MedicationSnapshot) =>
+    (draft[key] as string | undefined) ?? ((med[key] as string) || "")
+
+  return (
+    <div className="mt-2 rounded border border-gray-300 bg-white p-2">
+      <div className="grid gap-2 sm:grid-cols-2">
+        {EDITABLE_FIELDS.map(({ key, label }) => (
+          <div key={key}>
+            <label className="text-[10px] font-semibold uppercase text-gray-500">{t[label] as string}</label>
+            <Input
+              value={value(key)}
+              onChange={(e) => setDraft((d) => ({ ...d, [key]: e.target.value }))}
+              className="mt-0.5 h-8 text-sm"
+              autoComplete="off"
+            />
+          </div>
+        ))}
+      </div>
+      <Button
+        size="sm"
+        onClick={() => onApply(draft)}
+        disabled={Object.keys(draft).length === 0}
+        className="mt-2 h-8 bg-blue-600 hover:bg-blue-700"
+      >
+        {t.apply}
+      </Button>
+    </div>
+  )
+}
+
 function AlertCard({
   alert,
   t,
   language,
+  medications,
+  onApplyMedicationEdit,
+  onGoToTarget,
 }: {
   alert: ReviewAlert
   t: (typeof TEXT)["fr"]
   language: ReviewLanguage
+  medications?: MedicationSnapshot[]
+  onApplyMedicationEdit?: (index: number, patch: Partial<MedicationSnapshot>) => void
+  onGoToTarget?: (target: ReviewTarget) => void
 }) {
   const style = SEVERITY_STYLES[alert.severity]
   const message = language === "fr" ? alert.message : alert.messageEn || alert.message
   const suggestion = language === "fr" ? alert.suggestion : alert.suggestionEn || alert.suggestion
+  const [editing, setEditing] = React.useState(false)
+
+  // Match the alert to the lines it names, using the same label the rules
+  // built it from, so there is one definition of "which line is this".
+  const concerned = React.useMemo(() => {
+    if (!medications?.length) return []
+    const wanted = new Set(alert.items?.length ? alert.items : [alert.item])
+    return medications
+      .map((m, index) => ({ med: m, index }))
+      .filter(({ med }) => wanted.has(medLabel(med)))
+  }, [medications, alert])
+
+  const canEditHere = alert.target === "medication" && concerned.length > 0 && !!onApplyMedicationEdit
+  const canJump = !canEditHere && !!onGoToTarget
 
   return (
     <div className={cn("rounded-md border p-3", style.box)}>
@@ -188,6 +309,47 @@ function AlertCard({
               {suggestion}
             </p>
           )}
+
+          {(canEditHere || canJump) && (
+            <div className="mt-2">
+              {canEditHere ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setEditing((v) => !v)}
+                  className="h-7 bg-white text-xs"
+                >
+                  <Pencil className="mr-1 h-3 w-3" />
+                  {editing ? t.closeEditor : t.editLine}
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onGoToTarget?.(alert.target)}
+                  className="h-7 bg-white text-xs"
+                >
+                  <ArrowRight className="mr-1 h-3 w-3" />
+                  {t.goToTarget}
+                </Button>
+              )}
+            </div>
+          )}
+
+          {editing &&
+            concerned.map(({ med, index }) => (
+              <div key={index}>
+                <p className="mt-2 text-[11px] font-semibold text-gray-600">{medLabel(med)}</p>
+                <MedicationEditor
+                  med={med}
+                  t={t}
+                  onApply={(patch) => {
+                    onApplyMedicationEdit?.(index, patch)
+                    setEditing(false)
+                  }}
+                />
+              </div>
+            ))}
         </div>
       </div>
     </div>
@@ -202,14 +364,24 @@ export default function PrescriptionReviewDialog({
   language = "fr",
   onProceed,
   onCorrect,
+  medications,
+  onApplyMedicationEdit,
+  onRecheck,
+  onGoToTarget,
 }: PrescriptionReviewDialogProps) {
   const t = TEXT[language] || TEXT.fr
   const [justification, setJustification] = React.useState("")
+  // Set as soon as a line is edited from here: the alerts on screen were
+  // computed against the document as it was, so they no longer describe it.
+  const [edited, setEdited] = React.useState(false)
 
   // A fresh review is a fresh decision — never carry a previous justification
   // over to a new set of alerts.
   React.useEffect(() => {
-    if (open) setJustification("")
+    if (open) {
+      setJustification("")
+      setEdited(false)
+    }
   }, [open, alerts])
 
   const blocking = React.useMemo(() => alerts.filter(isBlocking), [alerts])
@@ -278,7 +450,22 @@ export default function PrescriptionReviewDialog({
                 ) : (
                   <div className="mt-4 space-y-2">
                     {blocking.map((a) => (
-                      <AlertCard key={a.id} alert={a} t={t} language={language} />
+                      <AlertCard
+                        key={a.id}
+                        alert={a}
+                        t={t}
+                        language={language}
+                        medications={medications}
+                        onApplyMedicationEdit={
+                          onApplyMedicationEdit
+                            ? (i, patch) => {
+                                onApplyMedicationEdit(i, patch)
+                                setEdited(true)
+                              }
+                            : undefined
+                        }
+                        onGoToTarget={onGoToTarget}
+                      />
                     ))}
                     {advisory.length > 0 && blocking.length > 0 && (
                       <p className="pt-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -286,7 +473,22 @@ export default function PrescriptionReviewDialog({
                       </p>
                     )}
                     {advisory.map((a) => (
-                      <AlertCard key={a.id} alert={a} t={t} language={language} />
+                      <AlertCard
+                        key={a.id}
+                        alert={a}
+                        t={t}
+                        language={language}
+                        medications={medications}
+                        onApplyMedicationEdit={
+                          onApplyMedicationEdit
+                            ? (i, patch) => {
+                                onApplyMedicationEdit(i, patch)
+                                setEdited(true)
+                              }
+                            : undefined
+                        }
+                        onGoToTarget={onGoToTarget}
+                      />
                     ))}
                   </div>
                 )}
@@ -309,6 +511,22 @@ export default function PrescriptionReviewDialog({
                     />
                     {!justificationOk && justification.length > 0 && (
                       <p className="mt-1 text-[11px] text-red-600">{t.justificationTooShort}</p>
+                    )}
+                  </div>
+                )}
+
+                {edited && (
+                  <div className="mt-4 flex flex-col gap-2 rounded-md border border-blue-300 bg-blue-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-xs text-blue-900">{t.edited}</p>
+                    {onRecheck && (
+                      <Button
+                        size="sm"
+                        onClick={() => onRecheck()}
+                        className="h-8 shrink-0 bg-blue-600 hover:bg-blue-700"
+                      >
+                        <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                        {t.recheck}
+                      </Button>
                     )}
                   </div>
                 )}

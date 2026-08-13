@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "@/components/ui/use-toast"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import TriageBanner from '@/components/triage-banner'
-import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
+import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, buildEmergencyTransferNotice, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
 import { createClient } from '@supabase/supabase-js'
 import {
  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube,
@@ -154,6 +154,10 @@ interface MauritianReport {
  lastMenstrualPeriod?: string
  }
  rapport: {
+ // Only present when triage classified the case as an emergency. Explains
+ // why the consultation carries no prescription and why the patient must be
+ // transferred, so the document does not read as a contradiction.
+ urgenceHospitaliere?: string
  motifConsultation: string
  anamnese: string
  antecedents: string
@@ -2699,6 +2703,24 @@ if (isRenewal) {
  
  console.log("✅ Structure mapping complete")
 
+ // An emergency report carries no prescriptions.
+ //
+ // Telling a patient to go to hospital without delay while handing them a
+ // prescription, a lab form and three imaging requests contradicts itself,
+ // and sends them to a pharmacy instead of A&E. The hospital taking them in
+ // will order what it needs. The doctor is not blocked — the tabs stay
+ // editable and the add paths rebuild the structure — but the system stops
+ // proposing documents that work against its own instruction.
+ const emergencyTriage = resolveTriage(diagnosisData)
+ if (emergencyTriage.level === 'emergency') {
+   console.log('🚨 Emergency case — dropping prescriptions, labs and imaging from the report')
+   reportData.compteRendu.rapport.urgenceHospitaliere =
+     buildEmergencyTransferNotice(emergencyTriage)
+   reportData.ordonnances.medicaments = null
+   reportData.ordonnances.biologie = null
+   reportData.ordonnances.imagerie = null
+ }
+
  // Freeze the AI's proposal before the doctor can touch it. Everything the
  // pre-signature review reports as "changed by the doctor" is measured
  // against this snapshot.
@@ -3169,6 +3191,38 @@ const handleReviewProceed = async (justification: string) => {
     reviewAlerts.some(isBlocking) ? 'overridden' : 'accepted',
     justification,
     reviewId,
+  )
+}
+
+// Apply a correction made from inside the review dialog. The dialog sends only
+// the fields the doctor touched; the rest of the line is preserved.
+const handleReviewMedicationEdit = (index: number, patch: Record<string, any>) => {
+  const current = report?.ordonnances?.medicaments?.prescription?.medicaments?.[index]
+  if (!current) {
+    console.error('⚠️ Review edit: no medication at index', index)
+    return
+  }
+  updateMedicamentBatch(index, { ...current, ...patch })
+  trackModification('medicaments')
+  toast({
+    title: "✅ Ligne corrigée",
+    description: `${patch.nom || current.nom || 'Médicament'} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+// The alert concerns something not editable in the dialog (a lab, an imaging
+// study, a narrative section). Close, switch to edit mode, and land the doctor
+// on the right tab rather than leaving them to hunt for it.
+const handleReviewGoToTarget = (target: string) => {
+  setReviewOpen(false)
+  reviewClearedRef.current = false
+  setEditMode(true)
+  setActiveTab(
+    target === 'laboratory' ? 'biologie'
+    : target === 'imaging' ? 'imagerie'
+    : target === 'medication' ? 'medicaments'
+    : 'consultation',
   )
 }
 
@@ -5306,6 +5360,11 @@ DoctorInfoEditor.displayName = 'DoctorInfoEditor'
 
 const ConsultationReport = () => {
  const sections = [
+ // First, when it exists: an emergency transfer is the only thing that
+ // matters on the page, and it explains the absence of prescriptions below.
+ ...(getReportRapport()?.urgenceHospitaliere
+   ? [{ key: 'urgenceHospitaliere', title: "⚠️ PRISE EN CHARGE URGENTE — TRANSFERT HOSPITALIER" }]
+   : []),
  { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
  { key: 'anamnese', title: 'HISTORY OF PRESENT ILLNESS' },
  { key: 'antecedents', title: 'PAST MEDICAL HISTORY' },
@@ -7133,6 +7192,10 @@ const [localSickLeave, setLocalSickLeave] = useState({
    language="fr"
    onProceed={handleReviewProceed}
    onCorrect={handleReviewCorrect}
+   medications={report ? extractReviewSnapshot(report).medications : []}
+   onApplyMedicationEdit={handleReviewMedicationEdit}
+   onRecheck={() => runPrescriptionReview()}
+   onGoToTarget={handleReviewGoToTarget}
  />
  <ActionsBar />
  <UnsavedChangesAlert />
