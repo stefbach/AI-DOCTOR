@@ -9,7 +9,14 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  
+
+  // Without source maps a production stack trace reads "a.b is not a function"
+  // with no file and no line — useless for diagnosing a crash in a doctor's
+  // browser. Normally this trades readability against exposing the source, but
+  // this repository is already public, so there is nothing to protect.
+  productionBrowserSourceMaps: true,
+
+
   // ============================================
   // TIBOK IFRAME INTEGRATION
   // ============================================
