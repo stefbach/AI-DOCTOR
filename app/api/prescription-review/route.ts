@@ -71,21 +71,30 @@ function describeImaging(snapshot: ReviewSnapshot): string {
 }
 
 /**
- * `only === undefined` means the baseline is unknown, so the whole report has
- * to go. An EMPTY array means the doctor rewrote no narrative section — and
- * must send nothing.
+ * Sections that record what was DECIDED, as opposed to what was observed.
+ * These always go to the model, whether or not the doctor edited them: they
+ * are what an added drug can contradict.
  *
- * That distinction was collapsed (`!only || only.length === 0` kept
- * everything), so a review shipped the entire consultation report — several
- * thousand words — on every signature, even when only one prescription line
- * had changed. The clinical context the model needs is already in the PATIENT
- * block above; the full narrative is only relevant when the doctor edited it.
+ * Learned the hard way. Trimming the narrative to edited sections only cut
+ * the payload — and with it the management plan, which is where a report says
+ * things like "strict avoidance of NSAIDs pending dengue exclusion". A
+ * Norgesic added to exactly such a report went unremarked by the model, while
+ * the previous run, which still received the plan, had caught the equivalent
+ * contradiction. Latency was bought with detection.
+ */
+const DECISION_SECTIONS = ["priseEnCharge", "surveillance"]
+
+/**
+ * `only === undefined` means the baseline is unknown, so the whole report has
+ * to go. Otherwise: the sections the doctor edited, plus the decision-bearing
+ * ones above. Everything else — history, examination, diagnostic reasoning —
+ * stays out; the patient context the model needs is already in the PATIENT
+ * block, and shipping the full report added thousands of words to every call.
  */
 function describeNarrative(snapshot: ReviewSnapshot, only?: string[]): string {
-  const entries = Object.entries(snapshot.narrative).filter(
-    ([k]) => only === undefined || only.includes(k),
-  )
-  if (!entries.length) return "(none — no narrative section was modified)"
+  const keep = only === undefined ? null : new Set([...only, ...DECISION_SECTIONS])
+  const entries = Object.entries(snapshot.narrative).filter(([k]) => !keep || keep.has(k))
+  if (!entries.length) return "(none)"
   return entries.map(([k, v]) => `### ${k}\n${v}`).join("\n\n")
 }
 
@@ -154,8 +163,9 @@ ${alreadyFlagged}
 
 WHAT TO LOOK FOR
 1. Medication safety: therapeutic duplication (including a branded combination product that repeats a molecule already prescribed), drug-drug interaction with the prescribed list or the patient's existing medications, contraindication given the age/sex/history/allergies, dose or duration inappropriate for the indication, wrong galenic form or route for the stated posology.
-2. Clinical relevance: a drug, lab test or imaging study that does not correspond to the documented presentation and diagnosis — either not indicated, or a needed one obviously missing given the diagnosis.
-3. Diagnostic and narrative coherence: a diagnosis or a rewritten section that contradicts the documented symptoms, examination findings, or the treatment actually prescribed. Only flag a genuine clinical contradiction — never a matter of wording, length or style.
+2. A drug that contradicts a precaution the report itself states. The management plan below may explicitly rule a drug class out — "avoid NSAIDs pending dengue exclusion", "no muscle relaxant because of drowsiness" — and a prescription line may breach it. Pay particular attention when the breach is hidden inside a combination product whose name names none of its ingredients, and say which ingredient creates the conflict. Where a brand has different formulations by country, say so rather than assuming one.
+3. Clinical relevance: a drug, lab test or imaging study that does not correspond to the documented presentation and diagnosis — either not indicated, or a needed one obviously missing given the diagnosis.
+4. Diagnostic and narrative coherence: a diagnosis or a rewritten section that contradicts the documented symptoms, examination findings, or the treatment actually prescribed. Only flag a genuine clinical contradiction — never a matter of wording, length or style.
 
 SEVERITY
 - "critical": could seriously harm the patient (overdose, contraindication, dangerous interaction, wrong route for the form).
