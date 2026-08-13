@@ -856,15 +856,54 @@ export function runDeterministicChecks(
 // ============================================================================
 
 /**
+ * Issues that are the SAME finding as a deterministic duplication check, under
+ * whatever name the model gave it — "duplicate-paracetamol",
+ * "doublon-molecule", "redundant-analgesic".
+ */
+const DUPLICATION_ISSUE = /duplicat|doublon|redundan/i
+
+/** Rules that already state a duplication exhaustively and arithmetically. */
+const RULE_DUPLICATION_ISSUES = ["duplicate-active-ingredient", "paracetamol-max-daily-dose"]
+
+/**
  * Merge rule alerts with model alerts. Rules win: when the model raises the
- * same issue on the same item, its (possibly softer) version is dropped.
+ * same issue on the same item, its version is dropped.
+ *
+ * The exact-key match is not enough on its own. Told three times, in
+ * increasingly explicit prompt wording, not to repeat a finding the rules had
+ * already made, the model still re-raised a paracetamol duplication under a
+ * different issue name and a shorter item label — and graded it MAJOR where
+ * the rule had graded it CRITICAL. Two alerts for one problem at two
+ * severities is worse than either alone, so the duplication family is now
+ * filtered here rather than asked for politely.
+ *
+ * Deliberately narrow: it drops only duplication findings on a line the rules
+ * already flagged for duplication. A different problem on the same line — a
+ * sedating ingredient, a contraindication against the management plan — has a
+ * different issue name and survives, which is the whole point of the layer.
  */
 export function mergeAlerts(ruleAlerts: ReviewAlert[], aiAlerts: ReviewAlert[]): ReviewAlert[] {
   const seen = new Set(ruleAlerts.map((a) => `${a.issue}|${normalise(a.item)}`))
+
+  const itemsCoveredByRuleDuplication = ruleAlerts
+    .filter((a) => RULE_DUPLICATION_ISSUES.includes(a.issue))
+    .flatMap((a) => (a.items?.length ? a.items : [a.item]))
+    .map(normalise)
+    .filter(Boolean)
+
   const merged = [...ruleAlerts]
   for (const a of aiAlerts) {
     const key = `${a.issue}|${normalise(a.item)}`
     if (seen.has(key)) continue
+
+    if (itemsCoveredByRuleDuplication.length && DUPLICATION_ISSUE.test(a.issue)) {
+      const aiItem = normalise(a.item)
+      const sameLine = itemsCoveredByRuleDuplication.some(
+        (ruleItem) => aiItem.includes(ruleItem) || ruleItem.includes(aiItem),
+      )
+      if (sameLine) continue
+    }
+
     seen.add(key)
     merged.push(a)
   }
