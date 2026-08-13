@@ -62,22 +62,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false }, { status: 200 })
     }
 
-    const { error } = await supabase.from("client_error_events").insert({
-      occurred_at: text(body.occurredAt, 40) || new Date().toISOString(),
-      kind,
-      severity,
-      message: text(body.message, 1000),
-      stack: text(body.stack, 4000),
-      pathname,
-      consultation_id: text(body.consultationId, 100),
-      patient_id: text(body.patientId, 100),
-      doctor_id: text(body.doctorId, 100),
-      breadcrumbs,
-      session_id: text(body.sessionId, 100),
-      user_agent: text(body.userAgent, 400),
-      viewport: text(body.viewport, 20),
-      commit_sha: text(body.commitSha, 60),
-    })
+    // The browser retries delivery and also beacons on page hide, so the same
+    // report can arrive twice. Upserting on the client-generated id drops the
+    // duplicate instead of inflating the incident count on the dashboard.
+    const clientEventId = text(body._id, 100)
+
+    const { error } = await supabase.from("client_error_events").upsert(
+      {
+        client_event_id: clientEventId,
+        occurred_at: text(body.occurredAt, 40) || new Date().toISOString(),
+        kind,
+        severity,
+        message: text(body.message, 1000),
+        stack: text(body.stack, 4000),
+        pathname,
+        consultation_id: text(body.consultationId, 100),
+        patient_id: text(body.patientId, 100),
+        doctor_id: text(body.doctorId, 100),
+        breadcrumbs,
+        session_id: text(body.sessionId, 100),
+        user_agent: text(body.userAgent, 400),
+        viewport: text(body.viewport, 20),
+        commit_sha: text(body.commitSha, 60),
+      },
+      clientEventId
+        ? { onConflict: "client_event_id", ignoreDuplicates: true }
+        : undefined,
+    )
 
     if (error) {
       console.error("⚠️ client-events: insert failed:", error.message)

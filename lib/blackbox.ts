@@ -45,6 +45,10 @@ const SLOW_REQUEST_MS = 15_000
 const BOOT_STALL_MS = 30_000
 const MAX_STACK_CHARS = 4000
 
+/** Reports waiting to be delivered, across page loads. */
+const OUTBOX_KEY = "blackbox_outbox_v1"
+const MAX_OUTBOX = 20
+
 const state = {
   installed: false,
   startedAt: 0,
@@ -53,6 +57,11 @@ const state = {
   reportsSent: 0,
   /** Signatures already reported, so one recurring error is not sent N times. */
   seen: new Set<string>(),
+  /** Unpatched fetch, so delivery never re-enters our own instrumentation. */
+  nativeFetch: null as typeof fetch | null,
+  /** Fallback outbox when localStorage is unavailable (iframe partitioning). */
+  memoryOutbox: [] as any[],
+  flushing: false,
   /** In-flight requests, for the slow-request watchdog. */
   pending: new Map<number, { url: string; startedAt: number; warned: boolean }>(),
   requestSeq: 0,
@@ -174,9 +183,95 @@ export interface ReportInput {
   severity?: "error" | "warning"
 }
 
+// --- Outbox --------------------------------------------------------------
+//
+// A report is queued first and delivered second, because the two can be far
+// apart. The first version sent reports straight out and lost every one raised
+// while the network was down — which is exactly when a report matters most.
+// navigator.sendBeacon returns true once the browser has QUEUED the request,
+// not when it has been delivered, so an offline beacon reads as a success and
+// vanishes. Delivery is now confirmed by an actual response, and anything
+// undelivered survives in localStorage until the connection comes back — even
+// across a reload or a crash that killed the tab.
+
+function readOutbox(): any[] {
+  try {
+    const raw = localStorage.getItem(OUTBOX_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) return parsed
+    }
+    return []
+  } catch {
+    // localStorage can be unavailable inside the TIBOK iframe (third-party
+    // storage partitioning) or in private mode. Degrade to memory.
+    return state.memoryOutbox
+  }
+}
+
+function writeOutbox(entries: any[]): void {
+  state.memoryOutbox = entries
+  try {
+    localStorage.setItem(OUTBOX_KEY, JSON.stringify(entries))
+  } catch {
+    /* memory-only is an acceptable degradation */
+  }
+}
+
+function enqueue(payload: any): void {
+  const entries = readOutbox()
+  entries.push(payload)
+  // Oldest first out: a flood must not push out the report that explains it,
+  // but an unbounded queue must not grow either.
+  while (entries.length > MAX_OUTBOX) entries.shift()
+  writeOutbox(entries)
+}
+
 /**
- * Ship an incident. Fire-and-forget by design: never awaited, never retried,
- * never allowed to surface an error to the caller.
+ * Try to deliver everything queued. Stops at the first failure rather than
+ * hammering a dead connection; the next trigger (online event, watchdog tick,
+ * next page load) will pick up where it left off.
+ */
+async function flushOutbox(): Promise<void> {
+  if (state.flushing) return
+  state.flushing = true
+  try {
+    const send = state.nativeFetch || fetch
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const entries = readOutbox()
+      if (!entries.length) break
+
+      const entry = entries[0]
+      let delivered = false
+      try {
+        const response = await send("/api/client-events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(entry),
+          keepalive: true,
+          cache: "no-store",
+        })
+        delivered = response?.ok === true
+      } catch {
+        delivered = false
+      }
+
+      if (!delivered) break
+
+      // Re-read: something may have been queued while we were awaiting.
+      writeOutbox(readOutbox().filter((e: any) => e?._id !== entry?._id))
+    }
+  } catch {
+    /* never throw from telemetry */
+  } finally {
+    state.flushing = false
+  }
+}
+
+/**
+ * Record an incident. Queued immediately, delivered when the network allows.
+ * Never awaited, never allowed to surface an error to the caller.
  */
 export function report(input: ReportInput): void {
   try {
@@ -189,7 +284,8 @@ export function report(input: ReportInput): void {
     state.reportsSent++
 
     const ctx = collectContext()
-    const payload = {
+    enqueue({
+      _id: makeSessionId(),
       kind: input.kind,
       severity: input.severity || "error",
       message: String(input.message || "unknown").slice(0, 1000),
@@ -198,37 +294,31 @@ export function report(input: ReportInput): void {
       occurredAt: new Date().toISOString(),
       breadcrumbs: state.breadcrumbs.slice(-MAX_BREADCRUMBS),
       ...ctx,
-    }
+    })
 
-    const body = JSON.stringify(payload)
-
-    // sendBeacon survives the page being torn down, which is exactly the case
-    // a crash report has to survive.
-    let sent = false
-    try {
-      if (navigator.sendBeacon) {
-        sent = navigator.sendBeacon(
-          "/api/client-events",
-          new Blob([body], { type: "application/json" }),
-        )
-      }
-    } catch {
-      sent = false
-    }
-
-    if (!sent) {
-      // keepalive so the request is not cancelled by the unload.
-      fetch("/api/client-events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body,
-        keepalive: true,
-        // Marked so the fetch patch below ignores its own traffic.
-        cache: "no-store",
-      }).catch(() => {})
-    }
+    void flushOutbox()
   } catch {
     /* never throw from telemetry */
+  }
+}
+
+/**
+ * Last chance on the way out. The page is being torn down, so there is no time
+ * to await a response — sendBeacon is the only transport that survives, and an
+ * unconfirmed attempt beats none. Anything it drops stays in the outbox for
+ * the next page load.
+ */
+function beaconPendingOnExit(): void {
+  try {
+    if (!navigator.sendBeacon) return
+    for (const entry of readOutbox()) {
+      navigator.sendBeacon(
+        "/api/client-events",
+        new Blob([JSON.stringify(entry)], { type: "application/json" }),
+      )
+    }
+  } catch {
+    /* ignore */
   }
 }
 
@@ -241,6 +331,8 @@ const isOwnTraffic = (url: string) => url.includes("/api/client-events")
 function patchFetch(): void {
   const original = window.fetch
   if (typeof original !== "function") return
+  // Kept so outbox delivery bypasses our own instrumentation entirely.
+  state.nativeFetch = original.bind(window) as typeof fetch
 
   window.fetch = function patchedFetch(this: any, ...args: Parameters<typeof fetch>) {
     let label = ""
@@ -323,6 +415,10 @@ function installWatchdogs(): void {
         }
       }
 
+      // Anything the network refused earlier gets another chance, without
+      // waiting for a new incident to trigger delivery.
+      void flushOutbox()
+
       // Nothing has completed since the page loaded. This is the shape of the
       // 13/08 incident: 26 seconds of dead air before the first API call, then
       // a hub that never issued its own.
@@ -385,8 +481,24 @@ export function installBlackBox(): void {
       }
     })
 
+    // The connection coming back is the moment a queued report can finally
+    // leave. This is what the offline test on 13/08 was missing.
+    window.addEventListener("online", () => {
+      addBreadcrumb("info", "network: online")
+      void flushOutbox()
+    })
+    window.addEventListener("offline", () => addBreadcrumb("info", "network: offline"))
+
+    // pagehide fires on tab close, navigation and mobile backgrounding, where
+    // visibilitychange alone is not enough on Safari/iOS.
+    window.addEventListener("pagehide", beaconPendingOnExit)
+
     patchFetch()
     installWatchdogs()
+
+    // Deliver whatever a previous page load could not — including a report
+    // written by the very crash that ended it.
+    void flushOutbox()
   } catch {
     /* a recorder that cannot install must still not break the app */
   }
