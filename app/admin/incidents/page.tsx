@@ -131,6 +131,9 @@ function BreadcrumbTrail({ crumbs }: { crumbs: Breadcrumb[] }) {
   )
 }
 
+/** Polling interval. This page is meant to be left open during a shift. */
+const POLL_MS = 30_000
+
 export default function IncidentsPage() {
   const [hours, setHours] = React.useState(24)
   const [loading, setLoading] = React.useState(true)
@@ -138,28 +141,92 @@ export default function IncidentsPage() {
   const [groups, setGroups] = React.useState<IncidentGroup[]>([])
   const [total, setTotal] = React.useState(0)
   const [expanded, setExpanded] = React.useState<string | null>(null)
+  const [lastChecked, setLastChecked] = React.useState<Date | null>(null)
+  const [newCount, setNewCount] = React.useState(0)
 
-  const load = React.useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const response = await fetch(`/api/incidents?hours=${hours}`)
-      const data = await response.json()
-      if (!data?.success) throw new Error(data?.error || "Chargement impossible")
-      setGroups(data.groups || [])
-      setTotal(data.total || 0)
-    } catch (err: any) {
-      setError(err?.message || "Chargement impossible")
-      setGroups([])
-      setTotal(0)
-    } finally {
-      setLoading(false)
-    }
-  }, [hours])
+  // Most recent incident already seen by a human, i.e. while the tab was in
+  // front. Anything after it counts as new.
+  const seenUpToRef = React.useRef<string | null>(null)
+
+  const load = React.useCallback(
+    async (opts?: { background?: boolean }) => {
+      if (!opts?.background) setLoading(true)
+      try {
+        const response = await fetch(`/api/incidents?hours=${hours}`)
+        const data = await response.json()
+        if (!data?.success) throw new Error(data?.error || "Chargement impossible")
+
+        const nextGroups: IncidentGroup[] = data.groups || []
+        setGroups(nextGroups)
+        setTotal(data.total || 0)
+        setError(null)
+        setLastChecked(new Date())
+
+        const newest = nextGroups.reduce<string | null>(
+          (max, g) => (!max || g.lastSeen > max ? g.lastSeen : max),
+          null,
+        )
+
+        if (typeof document !== "undefined" && document.hidden) {
+          // Nobody is looking: accumulate a badge instead of silently updating.
+          if (newest && seenUpToRef.current && newest > seenUpToRef.current) {
+            setNewCount(
+              nextGroups.filter((g) => g.lastSeen > (seenUpToRef.current as string)).length,
+            )
+          }
+        } else {
+          seenUpToRef.current = newest
+          setNewCount(0)
+        }
+      } catch (err: any) {
+        setError(err?.message || "Chargement impossible")
+        if (!opts?.background) {
+          setGroups([])
+          setTotal(0)
+        }
+      } finally {
+        if (!opts?.background) setLoading(false)
+      }
+    },
+    [hours],
+  )
 
   React.useEffect(() => {
     load()
   }, [load])
+
+  // Poll, so leaving the page open during a shift actually shows what arrives.
+  // Without this it only ever displayed the snapshot taken on mount.
+  React.useEffect(() => {
+    const id = setInterval(() => load({ background: true }), POLL_MS)
+    return () => clearInterval(id)
+  }, [load])
+
+  // Coming back to the tab clears the badge and refreshes immediately.
+  React.useEffect(() => {
+    const onVisible = () => {
+      if (!document.hidden) {
+        setNewCount(0)
+        load({ background: true })
+      }
+    }
+    document.addEventListener("visibilitychange", onVisible)
+    return () => document.removeEventListener("visibilitychange", onVisible)
+  }, [load])
+
+  // The tab title is the only thing visible when the page is in the background,
+  // which is exactly how it will be used during a shift.
+  React.useEffect(() => {
+    document.title = newCount > 0 ? `(${newCount}) Incidents` : "Incidents"
+    return () => {
+      document.title = "Incidents"
+    }
+  }, [newCount])
+
+  const isNew = React.useCallback(
+    (g: IncidentGroup) => !!seenUpToRef.current && g.lastSeen > seenUpToRef.current,
+    [],
+  )
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 sm:p-6">
@@ -172,6 +239,15 @@ export default function IncidentsPage() {
             </h1>
             <p className="mt-1 text-sm text-gray-600">
               Ce que la boîte noire a enregistré dans le navigateur des médecins.
+            </p>
+            <p className="mt-0.5 text-xs text-gray-500">
+              Vérification automatique toutes les 30 s
+              {lastChecked && ` · dernière à ${lastChecked.toLocaleTimeString("fr-FR")}`}
+              {newCount > 0 && (
+                <span className="ml-1 font-semibold text-red-600">
+                  · {newCount} nouveau(x)
+                </span>
+              )}
             </p>
           </div>
 
@@ -190,7 +266,7 @@ export default function IncidentsPage() {
               ))}
             </div>
             <button
-              onClick={load}
+              onClick={() => load()}
               disabled={loading}
               className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
             >
@@ -228,7 +304,12 @@ export default function IncidentsPage() {
               {groups.map((g) => {
                 const isOpen = expanded === g.key
                 return (
-                  <div key={g.key} className="rounded-md border border-gray-200 bg-white shadow-sm">
+                  <div
+                    key={g.key}
+                    className={`rounded-md border bg-white shadow-sm ${
+                      isNew(g) ? "border-l-4 border-l-red-500 border-gray-200" : "border-gray-200"
+                    }`}
+                  >
                     <button
                       onClick={() => setExpanded(isOpen ? null : g.key)}
                       className="flex w-full items-start gap-2 p-3 text-left"
