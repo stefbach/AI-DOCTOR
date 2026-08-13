@@ -48,6 +48,8 @@ const MAX_STACK_CHARS = 4000
 /** Reports waiting to be delivered, across page loads. */
 const OUTBOX_KEY = "blackbox_outbox_v1"
 const MAX_OUTBOX = 20
+/** Stop retrying a report the server keeps refusing. */
+const MAX_DELIVERY_ATTEMPTS = 10
 
 const state = {
   installed: false,
@@ -252,12 +254,29 @@ async function flushOutbox(): Promise<void> {
           keepalive: true,
           cache: "no-store",
         })
-        delivered = response?.ok === true
+        // The status alone is not the outcome: the ingest route answers 200
+        // even when it drops a report, so that a telemetry failure never adds
+        // console noise on top of whatever already went wrong. Trusting the
+        // status made the outbox discard reports the database had refused.
+        const result = await response.json().catch(() => null)
+        delivered = response?.ok === true && result?.success === true
       } catch {
         delivered = false
       }
 
-      if (!delivered) break
+      if (!delivered) {
+        // Give up on an entry the server keeps refusing, so a permanently
+        // broken endpoint cannot have us retrying for the whole consultation.
+        const tries = (entry._tries || 0) + 1
+        const remaining = readOutbox()
+        if (tries >= MAX_DELIVERY_ATTEMPTS) {
+          writeOutbox(remaining.filter((e: any) => e?._id !== entry?._id))
+        } else if (remaining[0]?._id === entry?._id) {
+          remaining[0] = { ...entry, _tries: tries }
+          writeOutbox(remaining)
+        }
+        break
+      }
 
       // Re-read: something may have been queued while we were awaiting.
       writeOutbox(readOutbox().filter((e: any) => e?._id !== entry?._id))
