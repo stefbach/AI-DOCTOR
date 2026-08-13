@@ -4264,8 +4264,16 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
        .insert({
          patient_id: patientId,
          doctor_id: doctorAppointmentData.doctorId,
-         status: 'scheduled',
+         // An appointment the doctor books is NOT a planned consultation yet:
+         // TIBOK treats 'pending_payment' as invisible to the doctor until the
+         // patient has paid, and shows it to the patient under "À venir" with a
+         // Pay button. Price is deliberately not set here — TIBOK resolves the
+         // tariff at payment time and is the single source of truth for it.
+         status: 'pending_payment',
          payment_status: 'pending',
+         // Hold the slot until the appointment itself rather than for a short
+         // window, so a patient who pays late does not find it gone.
+         payment_hold_until: scheduledTimestamp,
          // Phase 1 hybrid: inherit the mode of the parent consultation; default
          // to 'telemedicine' for back-compat when the URL didn't carry the param.
          consultation_type: consultationMode || 'telemedicine',
