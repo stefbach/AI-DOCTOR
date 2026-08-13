@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "@/components/ui/use-toast"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import TriageBanner from '@/components/triage-banner'
-import { resolveTriage, computeFollowUp, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
+import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
 import { createClient } from '@supabase/supabase-js'
 import {
  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube,
@@ -4454,6 +4454,16 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
      // Build scheduled_time as a full timestamp (date + time in Mauritius timezone)
      const scheduledTimestamp = `${doctorAppointmentData.appointmentDate}T${doctorAppointmentData.appointmentTime}`
 
+     // Because the appointment is now payment-gated, an urgent review the
+     // patient never pays for would sit invisible in nobody's schedule. TIBOK
+     // needs to find those and chase them, so the row carries the urgency.
+     // Same signal that raises the "Suivi rapproché requis" banner above.
+     const triageForAppointment = resolveTriage(diagnosisData)
+     const isUrgentAppointment = requiresUrgentFollowUp(
+       triageForAppointment.level,
+       hasUrgentLabs(diagnosisData, triageForAppointment.level),
+     )
+
      // 1. Create a new scheduled consultation record
      const { data: newConsultation, error: consultError } = await supabaseClient
        .from('consultations')
@@ -4470,6 +4480,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
          // Hold the slot until the appointment itself rather than for a short
          // window, so a patient who pays late does not find it gone.
          payment_hold_until: scheduledTimestamp,
+         is_urgent: isUrgentAppointment,
          // Phase 1 hybrid: inherit the mode of the parent consultation; default
          // to 'telemedicine' for back-compat when the URL didn't carry the param.
          consultation_type: consultationMode || 'telemedicine',

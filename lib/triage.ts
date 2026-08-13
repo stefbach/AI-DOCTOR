@@ -141,18 +141,31 @@ export interface FollowUpInput {
 }
 
 /**
+ * Does this case need a review on an urgent timescale?
+ *
+ * The single definition of "urgent follow-up", used both to decide whether to
+ * propose an appointment at all and to mark the created appointment urgent so
+ * TIBOK can chase an unpaid one. Nothing is proposed when triage failed — the
+ * doctor decides. A routine case qualifies only when urgent labs are pending:
+ * those must be read within days, not deferred to a 7-day routine follow-up.
+ *
+ * Kept as one exported function rather than repeated at each call site, so the
+ * appointment cannot be marked non-urgent while the banner above it says
+ * "Suivi rapproché requis".
+ */
+export function requiresUrgentFollowUp(level: TriageLevel, urgentLabs = false): boolean {
+  if (level === "unassessed") return false
+  return level === "emergency" || level === "urgent" || urgentLabs
+}
+
+/**
  * Decide whether and when a second (result-review) consultation is needed.
  * The AI proposes; these rules dispose.
  */
 export function computeFollowUp(input: FollowUpInput): FollowUpPlan | null {
   const { level, proposedDelayHours, urgentLabs = false, now = new Date() } = input
 
-  // Nothing is auto-proposed when triage failed — the doctor decides.
-  if (level === "unassessed") return null
-
-  // Routine cases only get a proposal when urgent labs are pending.
-  const required = level === "emergency" || level === "urgent" || urgentLabs
-  if (!required) return null
+  if (!requiresUrgentFollowUp(level, urgentLabs)) return null
 
   // Urgent investigations pull a routine case into the urgent window: pending
   // urgent labs must be reviewed within days, not deferred to a 7-day routine

@@ -27,7 +27,7 @@ import {
 } from "lucide-react"
 import { createClient } from '@supabase/supabase-js'
 import TriageBanner from '@/components/triage-banner'
-import { resolveTriage, computeFollowUp, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
+import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
 
 // ==================== HELPER FUNCTIONS ====================
 // Helper function to safely handle DCI fields
@@ -4174,6 +4174,17 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
    try {
      const scheduledTimestamp = `${doctorAppointmentData.appointmentDate}T${doctorAppointmentData.appointmentTime}`
 
+     // Same as the general flow: a payment-gated urgent review that is never
+     // paid for would be invisible to everyone, so TIBOK needs to be able to
+     // find it and chase the patient. Computed here rather than reused from
+     // the banner, whose followUpPlan lives in a nested component and is not
+     // in scope at this point.
+     const triageForAppointment = resolveTriage(diagnosisData)
+     const isUrgentAppointment = requiresUrgentFollowUp(
+       triageForAppointment.level,
+       hasUrgentLabs(diagnosisData, triageForAppointment.level),
+     )
+
      const { data: newConsultation, error: consultError } = await supabaseClient
        .from('consultations')
        .insert({
@@ -4186,6 +4197,7 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
          status: 'pending_payment',
          payment_status: 'pending',
          payment_hold_until: scheduledTimestamp,
+         is_urgent: isUrgentAppointment,
          // Phase 1 hybrid: inherit the parent consultation's mode.
          consultation_type: consultationMode || 'telemedicine',
          scheduled_time: scheduledTimestamp,
