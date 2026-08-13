@@ -91,27 +91,30 @@ function formatGender(gender: string | undefined, t: (typeof TEXT)["fr"]): strin
 }
 
 /**
- * PREVIEW ONLY — off in production since 12/08/2026.
+ * Live everywhere since 13/08/2026.
  *
- * This dialog is deliberately non-dismissible, and on a phone it grew past
- * the viewport: the confirm button fell below the fold with no way to reach
- * it, locking a doctor out of a live, paid consultation with a real patient.
- * The scroll fix is in place, but it stays off in production until it has
- * been validated on real mobile devices — the failure mode here is a blocked
- * consultation, not a cosmetic defect.
+ * History worth keeping: this dialog is deliberately non-dismissible, and on
+ * 12/08/2026 it grew past the phone viewport — the confirm button fell below
+ * the fold with no way to reach it, locking a doctor out of a live, paid
+ * consultation with a real patient. It was restricted to previews the same
+ * day, and three things had to be true before it came back:
  *
- * The check is host-based and denies by default: it runs only on a Vercel
- * branch preview or on localhost. Production is v0-medical-ai-expert.vercel.app
- * / medical-ai-expert.vercel.app (the hosts TIBOK points at), and the
- * main-branch alias mirrors production, so both stay off.
+ *   1. Content itself is the scroll container (Radix locks scrolling
+ *      everywhere else, so a wrapper around it looks scrollable but is not),
+ *   2. the panel is top-anchored rather than centred with a fixed transform,
+ *      because `position: fixed` inside the TIBOK iframe anchors to the
+ *      iframe viewport and not to the sliver left visible under the video
+ *      pane,
+ *   3. there is always a way out — the skip action records an unverified
+ *      consultation rather than trapping the doctor.
  *
- * To ship to production: make isKycPreviewHost() return true unconditionally.
+ * All three are in place and were validated on a short viewport. If this ever
+ * has to be pulled again in a hurry, return false here: that disables it
+ * everywhere without touching any call site.
  */
-function isKycPreviewHost(): boolean {
+function isKycEnabled(): boolean {
   if (typeof window === "undefined") return false
-  const host = window.location.hostname
-  if (host === "localhost" || host === "127.0.0.1") return true
-  return host.includes("-git-") && !host.includes("-git-main-")
+  return true
 }
 
 export default function KycVerificationDialog({
@@ -131,7 +134,7 @@ export default function KycVerificationDialog({
   // Resolved after mount, never during SSR: the server has no hostname, and
   // deciding on the client only keeps markup identical on both sides.
   const [enabled, setEnabled] = React.useState(false)
-  React.useEffect(() => { setEnabled(isKycPreviewHost()) }, [])
+  React.useEffect(() => { setEnabled(isKycEnabled()) }, [])
 
   const firstName = patientData?.firstName?.toString().trim() || ""
   const lastName = patientData?.lastName?.toString().trim() || ""
