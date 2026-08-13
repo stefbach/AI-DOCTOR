@@ -9,6 +9,7 @@ import {
   type SnapshotDiff,
   countBlocking,
   mergeAlerts,
+  activeIngredients,
   runDeterministicChecks,
   sortAlerts,
   touchedMedicationLabels,
@@ -40,13 +41,24 @@ const VALID_TARGETS = ["medication", "laboratory", "imaging", "diagnosis"] as co
 
 const s = (v: any): string => (typeof v === "string" ? v.trim() : "")
 
+/**
+ * Each line carries the ingredients resolved from our own Mauritius brand
+ * table, because the model guesses otherwise — and guessed wrong. Asked about
+ * Norgesic it answered "contains aspirin", which is the US formulation; the
+ * Commonwealth and therefore Mauritian product is orphenadrine + paracetamol.
+ * That put two alerts on the doctor's screen contradicting each other about
+ * the same box, which costs more trust than either alert is worth.
+ */
 function describeMedications(snapshot: ReviewSnapshot): string {
   if (!snapshot.medications.length) return "(none)"
   return snapshot.medications
-    .map(
-      (m, i) =>
-        `${i + 1}. name="${m.nom}" | INN/dci="${m.dci}" | strength="${m.dosage}" | form="${m.forme}" | route="${m.modeAdministration}" | posology="${m.posologie}" | duration="${m.dureeTraitement}" | instructions="${m.instructions}" | stated indication="${m.justification}"`,
-    )
+    .map((m, i) => {
+      const resolved = activeIngredients(m)
+      const composition = resolved.length
+        ? resolved.join(" + ")
+        : "not resolved — reason from the name and say you are unsure"
+      return `${i + 1}. name="${m.nom}" | INN/dci="${m.dci}" | ACTIVE INGREDIENTS (Mauritius formulary, authoritative — do not substitute another country's formulation): ${composition} | strength="${m.dosage}" | form="${m.forme}" | route="${m.modeAdministration}" | posology="${m.posologie}" | duration="${m.dureeTraitement}" | instructions="${m.instructions}" | stated indication="${m.justification}"`
+    })
     .join("\n")
 }
 
@@ -167,6 +179,13 @@ DIFFERENT problem — a sedating or anticholinergic ingredient in a patient at
 risk of falls, an ingredient breaching a precaution the plan states, an
 interaction with another line. Only stay silent when the problem you would
 raise is the same one already listed.
+
+A problem counts as already listed even if you would rate it MORE SEVERE than
+the rule did, and even if you would group into one alert several lines the
+rules reported separately. In particular, never report a missing posology,
+strength, route or duration: those checks are exhaustive and deterministic,
+they already cover every line, and repeating them at a higher severity turns
+a clerical omission into a blocking alert.
 
 WHAT TO LOOK FOR
 1. Medication safety: therapeutic duplication (including a branded combination product that repeats a molecule already prescribed), drug-drug interaction with the prescribed list or the patient's existing medications, contraindication given the age/sex/history/allergies, dose or duration inappropriate for the indication, wrong galenic form or route for the stated posology.
