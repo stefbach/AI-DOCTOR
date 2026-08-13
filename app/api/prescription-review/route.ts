@@ -332,6 +332,11 @@ export async function POST(request: NextRequest) {
     // Layer 2 — clinical judgement.
     let aiAlerts: ReviewAlert[] = []
     let aiStatus = "ok"
+    // Echoed back to the browser so the review can be diagnosed from the
+    // doctor's console. The Vercel log API has been unreachable exactly when
+    // it was needed, and "which model actually answered, and how fast" is the
+    // one question this feature keeps raising.
+    let aiDiagnostics: Record<string, unknown> = {}
 
     if (nothingToReview && Object.keys(safeSnapshot.narrative).length === 0) {
       aiStatus = "skipped_empty"
@@ -348,24 +353,41 @@ export async function POST(request: NextRequest) {
             { role: "user", content: buildPrompt(safePatient, safeSnapshot, diff, ruleAlerts) },
           ],
           responseFormat: "json_object",
-          maxTokens: 2000,
-          // This runs with a doctor and a patient waiting on the line. On
-          // gpt-5.5 at medium effort the first real run took over 30 seconds,
-          // which is not a usable wait mid-consultation. DeepSeek at low
-          // effort is the trade: the deterministic rules carry the findings
-          // that must not be missed, and this layer contributes judgement on
-          // top. The env var LLM_PROVIDER_PRESCRIPTION_REVIEW still overrides
-          // both directions, and a DeepSeek outage falls back to OpenAI.
+          maxTokens: 1500,
+          // This runs with a doctor and a patient waiting on the line, so the
+          // model is chosen for latency, not depth.
+          //
+          // gpt-5.5 at medium effort took over 30s. DeepSeek v4-pro at low
+          // effort took 29s — barely better, because v4-pro is a REASONING
+          // model and still emits thinking tokens before answering. The task
+          // does not need that: it is coherence checking between a drug list
+          // and a management plan, not multi-step deduction. deepseek-chat is
+          // the non-reasoning variant, which is what llm-client already
+          // documents as the escape hatch for auxiliary calls like this one.
+          //
+          // LLM_PROVIDER_PRESCRIPTION_REVIEW still overrides the provider in
+          // both directions; the model override is ignored when it does, so
+          // a flip to OpenAI cannot send a DeepSeek model name to OpenAI.
           provider: "deepseek",
-          reasoningEffort: "low",
-          timeoutMs: 30_000,
+          model: "deepseek-chat",
+          reasoningEffort: "none",
+          timeoutMs: 20_000,
         })
         aiAlerts = parseAiAlerts(result.text)
+        aiDiagnostics = {
+          provider: result.provider,
+          model: result.model,
+          latencyMs: result.latencyMs,
+          fallbackUsed: result.fallbackUsed,
+          totalTokens: result.usage?.totalTokens ?? null,
+          aiAlertCount: aiAlerts.length,
+        }
         console.log(
           `[prescription-review] provider=${result.provider} model=${result.model} latency=${result.latencyMs}ms rules=${ruleAlerts.length} ai=${aiAlerts.length}`,
         )
       } catch (err: any) {
         aiStatus = `failed: ${err?.message || "unknown error"}`
+        aiDiagnostics = { error: err?.message || "unknown error" }
         console.error("⚠️ prescription-review: AI layer failed:", err?.message || err)
       }
     }
@@ -392,6 +414,7 @@ export async function POST(request: NextRequest) {
       // rather than letting a silent model outage read as "all clear".
       aiStatus,
       degraded: aiStatus !== "ok" && aiStatus !== "skipped_empty",
+      ai: aiDiagnostics,
     })
   } catch (error: any) {
     console.error("❌ prescription-review error:", error?.message || error)

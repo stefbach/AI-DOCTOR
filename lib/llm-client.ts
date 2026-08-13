@@ -223,7 +223,11 @@ function isRetriableError(err: any): boolean {
 export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
   const startedAt = Date.now()
   const primaryProvider = resolveProvider(params.useCase, params.provider)
-  const primaryModel = params.model ?? resolveModel(primaryProvider)
+  // A model override only applies when the provider actually resolved to the
+  // one the caller had in mind. Otherwise an env flag flipping the provider
+  // would send e.g. a DeepSeek model name to OpenAI and fail every call.
+  const modelOverrideApplies = !params.provider || params.provider === primaryProvider
+  const primaryModel = (modelOverrideApplies ? params.model : undefined) ?? resolveModel(primaryProvider)
   // When LLM_DISABLE_FALLBACK=true we never silently fall back to OpenAI on
   // a DeepSeek error. Useful during A/B testing so DeepSeek is judged on its
   // own merits without the safety net masking outages or timeouts.

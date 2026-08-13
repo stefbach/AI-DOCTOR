@@ -3121,10 +3121,14 @@ const runPrescriptionReview = async () => {
     alerts = Array.isArray(data?.alerts) ? data.alerts : []
     degraded = data?.degraded === true
     newReviewId = data?.reviewId ?? null
+    // Printed in full because the Vercel log API has repeatedly been
+    // unreachable when this needed diagnosing. `ai` carries the provider,
+    // the model that actually answered, the latency and the token count.
     console.log('🩺 Prescription review:', {
       alerts: alerts.length,
       blocking: data?.blockingCount ?? 0,
       aiStatus: data?.aiStatus,
+      ai: data?.ai,
     })
   } catch (error) {
     // A failed review must never stand between the doctor and the patient.
