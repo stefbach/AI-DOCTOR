@@ -16,6 +16,13 @@ const nextConfig = {
   // this repository is already public, so there is nothing to protect.
   productionBrowserSourceMaps: true,
 
+  // So a black-box report says which build it came from. Vercel exposes the
+  // SHA server-side only; NEXT_PUBLIC_ is what makes it readable in the
+  // browser, where the crashes happen.
+  env: {
+    NEXT_PUBLIC_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA || 'local',
+  },
+
 
   // ============================================
   // TIBOK IFRAME INTEGRATION

@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { PatientDataLoader } from "@/components/patient-data-loader"
 import { EmbeddedModeProvider } from "@/components/embedded-mode-provider"
+import BlackBoxProvider from "@/components/black-box-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -34,7 +35,10 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider 
+        {/* Outside the providers on purpose: it must record a crash in one of
+            them, not disappear with it. */}
+        <BlackBoxProvider />
+        <ThemeProvider
           attribute="class" 
           defaultTheme="light" 
           enableSystem 

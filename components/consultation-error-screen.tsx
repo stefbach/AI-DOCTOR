@@ -21,6 +21,8 @@
 import * as React from "react"
 import { AlertTriangle, RefreshCw, RotateCcw } from "lucide-react"
 
+import { reportRenderCrash } from "@/lib/blackbox"
+
 interface ConsultationErrorScreenProps {
   error: Error & { digest?: string }
   /** Re-render the failed segment. Provided by the Next.js error boundary. */
@@ -39,14 +41,18 @@ export default function ConsultationErrorScreen({
   const reference = error?.digest || null
 
   React.useEffect(() => {
-    // Until the black box ships, the browser console is the only trace there
-    // is. Keep it loud and unmistakable.
     console.error("💥 Consultation UI crash:", {
       message: error?.message,
       digest: error?.digest,
       stack: error?.stack,
-      href: typeof window !== "undefined" ? window.location.href : "",
     })
+    // Ship it with the breadcrumbs that led here. Guarded: a telemetry failure
+    // must not stop the doctor seeing their way out.
+    try {
+      reportRenderCrash(error)
+    } catch {
+      /* ignore */
+    }
   }, [error])
 
   return (
