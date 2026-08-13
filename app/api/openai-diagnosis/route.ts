@@ -3507,7 +3507,11 @@ export function validateTherapeuticCompleteness(analysis: any, patientContext: P
     }
   })
   
-  const symptomAnalysis = analyzeUnaddressedSymptoms(patientContext, medications)
+  const symptomAnalysis = analyzeUnaddressedSymptoms(
+    patientContext,
+    medications,
+    analysis?.current_medications_validated || [],
+  )
   issues.push(...symptomAnalysis.issues)
   completenessScore -= symptomAnalysis.scoreDeduction
   
@@ -3533,7 +3537,20 @@ export function validateTherapeuticCompleteness(analysis: any, patientContext: P
   }
 }
 
-function analyzeUnaddressedSymptoms(patientContext: PatientContext, medications: any[]) {
+/**
+ * `validatedCurrentMeds` is the AI-corrected reading of what the patient
+ * already takes. The raw `patientContext.current_medications` strings are
+ * whatever was typed at intake — a patient entered "almodipne", the raw
+ * string matched nothing in the antihypertensive list, and the case was
+ * flagged as "hypertension without treatment", which then auto-added
+ * Amlodipine 5mg to a patient already on Amlodipine 10mg. The validated list
+ * carries the corrected INN, so it is what these checks read first.
+ */
+function analyzeUnaddressedSymptoms(
+  patientContext: PatientContext,
+  medications: any[],
+  validatedCurrentMeds: any[] = [],
+) {
   const issues: Array<{type: 'critical'|'important'|'minor', category: string, description: string, suggestion: string}> = []
   let scoreDeduction = 0
   
@@ -3541,6 +3558,16 @@ function analyzeUnaddressedSymptoms(patientContext: PatientContext, medications:
     .join(' ').toLowerCase()
   
   const drugList = medications.map(med => (med?.drug || '').toLowerCase()).join(' ')
+
+  // What the patient is already on, read from the corrected list when the AI
+  // produced one and from the typed strings otherwise.
+  const currentMedsForMatching = validatedCurrentMeds.length > 0
+    ? validatedCurrentMeds.map((med: any) => ({
+        drug: med?.medication_name || med?.name || '',
+        medication_name: med?.medication_name || med?.name || '',
+        dci: med?.dci || '',
+      }))
+    : (patientContext.current_medications || []).map(med => ({ drug: med, medication_name: med }))
   
   if ((symptoms.includes('fever') || symptoms.includes('fièvre') || 
        (patientContext.vital_signs?.temperature && patientContext.vital_signs.temperature > 38.5)) &&
@@ -3584,10 +3611,8 @@ function analyzeUnaddressedSymptoms(patientContext: PatientContext, medications:
   const bpAnalysis = hasHypertensiveCrisis(patientContext.vital_signs)
   if (bpAnalysis.needsAntihypertensive && !hasAntihypertensive(medications)) {
     // Also check in current medications (patient may already be on antihypertensive)
-    const currentMedsHaveAntihypertensive = hasAntihypertensive(
-      (patientContext.current_medications || []).map(med => ({ drug: med, medication_name: med }))
-    )
-    
+    const currentMedsHaveAntihypertensive = hasAntihypertensive(currentMedsForMatching)
+
     if (!currentMedsHaveAntihypertensive) {
       issues.push({
         type: 'critical',
@@ -3604,10 +3629,8 @@ function analyzeUnaddressedSymptoms(patientContext: PatientContext, medications:
   // Check for hypertension mentioned in symptoms/complaint without treatment
   const hypertensionKeywords = ['hypertension', 'hypertensive', 'high blood pressure', 'tension artérielle', 'hta', 'pression élevée']
   if (hypertensionKeywords.some(kw => symptoms.includes(kw)) && !hasAntihypertensive(medications)) {
-    const currentMedsHaveAntihypertensive = hasAntihypertensive(
-      (patientContext.current_medications || []).map(med => ({ drug: med, medication_name: med }))
-    )
-    
+    const currentMedsHaveAntihypertensive = hasAntihypertensive(currentMedsForMatching)
+
     if (!currentMedsHaveAntihypertensive) {
       issues.push({
         type: 'critical',
@@ -3737,6 +3760,10 @@ function applyMinimalCorrections(analysis: any, issues: any[], patientContext: P
     }
     
     if (issue.category === 'symptomatic' && issue.description.includes('Fever present without antipyretic')) {
+      if (alreadyOnMolecule(analysis, 'Paracetamol')) {
+        console.log('⏭️ Paracetamol already on the sheet — antipyretic auto-correction skipped')
+        return
+      }
       const medications = analysis?.treatment_plan?.medications || []
       medications.push({
         drug: "Paracetamol 500mg",
@@ -3796,10 +3823,48 @@ function applyTargetedUniversalCorrections(analysis: any, issues: any[], patient
   return analysis
 }
 
+/**
+ * Is this molecule already on the patient's sheet — carried over from their
+ * current treatment, or already prescribed by the model?
+ *
+ * The automatic corrections below add a drug when a symptom looks untreated.
+ * They read the symptom, never the sheet, which is how a patient continuing
+ * Amlodipine 10mg was also handed Amlodipine 5mg. Composition decides, not the
+ * written name: "Amlodipine 5mg" and "Norvasc" are the same answer.
+ */
+function alreadyOnMolecule(analysis: any, dci: string): boolean {
+  const target = compositionKey(dci)
+  if (!target) return false
+  const lines = [
+    ...(analysis?.current_medications_validated || []),
+    ...(analysis?.treatment_plan?.medications || []),
+  ]
+  return lines.some((med: any) =>
+    compositionKey(med?.medication_name || med?.drug || med?.name, med?.dci) === target,
+  )
+}
+
+/** The patient's current treatment in the shape hasAntihypertensive() reads. */
+function currentMedsForClassCheck(analysis: any, patientContext: PatientContext): any[] {
+  const validated = analysis?.current_medications_validated || []
+  if (validated.length > 0) {
+    return validated.map((med: any) => ({
+      drug: med?.medication_name || med?.name || '',
+      medication_name: med?.medication_name || med?.name || '',
+      dci: med?.dci || '',
+    }))
+  }
+  return (patientContext.current_medications || []).map(med => ({ drug: med, medication_name: med }))
+}
+
 function applySymptomaticCorrections(analysis: any, issue: any, patientContext: PatientContext): number {
   const medications = analysis?.treatment_plan?.medications || []
-  
+
   if (issue.description.includes('Fever') && issue.description.includes('antipyretic')) {
+    if (alreadyOnMolecule(analysis, 'Paracetamol')) {
+      console.log('⏭️ Paracetamol already on the sheet — antipyretic auto-correction skipped')
+      return 0
+    }
     medications.push({
       drug: "Paracetamol 500mg", 
       dci: "Paracetamol",
@@ -3831,6 +3896,10 @@ function applySymptomaticCorrections(analysis: any, issue: any, patientContext: 
   }
   
   if (issue.description.includes('Nausea') && issue.description.includes('antiemetic')) {
+    if (alreadyOnMolecule(analysis, 'Metoclopramide') || alreadyOnMolecule(analysis, 'Domperidone')) {
+      console.log('⏭️ An antiemetic is already on the sheet — auto-correction skipped')
+      return 0
+    }
     medications.push({
       drug: "Métoclopramide 10mg",
       dci: "Métoclopramide",
@@ -3863,8 +3932,18 @@ function applySymptomaticCorrections(analysis: any, issue: any, patientContext: 
   
   // 🩺 CRITICAL: Add antihypertensive for hypertensive patients
   if (issue.description.includes('Hypertensive') || issue.description.includes('hypertension')) {
+    // The issue was raised from the blood pressure and the history; this reads
+    // the sheet. A patient already on an antihypertensive does not need one
+    // added — their dose may need review, which is the doctor's call, not an
+    // automatic second line of the same class.
+    if (hasAntihypertensive(currentMedsForClassCheck(analysis, patientContext)) ||
+        hasAntihypertensive(medications)) {
+      console.log('⏭️ Patient already on an antihypertensive — auto-correction skipped')
+      return 0
+    }
+
     const isCrisis = issue.description.includes('crisis') || issue.description.includes('Crisis')
-    
+
     // ⚠️ IMPORTANT: For hypertensive CRISIS with end-organ damage, patient needs EMERGENCY referral
     // Oral antihypertensives are for hypertensive URGENCY (no end-organ damage)
     

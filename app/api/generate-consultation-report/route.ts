@@ -4,6 +4,7 @@ import { callLLM, type LLMMessage } from "@/lib/llm-client"
 import { CRITICAL_RULES_BLOCK_NARRATIVE } from "@/lib/critical-rules"
 import { detectFabricatedExam } from "@/lib/anti-fabrication"
 import { buildRefDisplayMap, buildRefSourceYearMap, expandRefsInTree, expandRefsAsSourceYearInTree } from "@/lib/rag/medical-rag"
+import { compositionKey } from "@/lib/prescription-review"
 
 export const runtime = 'nodejs'
 // 300s: DeepSeek V4-Pro thinking on the 10-section narrative blew through
@@ -919,11 +920,72 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
 }
 
 // ==================== PRESCRIPTION EXTRACTION ====================
+
+/**
+ * Reduce a route to the family that matters for duplication.
+ *
+ * Two lines of the same molecule by the same route are one prescription
+ * written twice; the same molecule by two different routes (a salbutamol
+ * inhaler plus salbutamol nebules, an oral antibiotic plus its eye drops) is
+ * a legitimate pair. Free text varies — "Oral", "Oral route", "PO", "voie
+ * orale" — so it is folded onto a small closed set before comparison.
+ */
+function routeFamily(route: string): string {
+  const r = String(route || "").toLowerCase()
+  if (/topic|cutan|derma|skin|local/.test(r)) return "topical"
+  if (/inhal|nebul|aeros|respir/.test(r)) return "inhaled"
+  if (/ophtal|ophthal|eye|oculaire|collyre/.test(r)) return "ophthalmic"
+  if (/auricul|otic|ear/.test(r)) return "otic"
+  if (/nasal|nose/.test(r)) return "nasal"
+  if (/rectal|suppos/.test(r)) return "rectal"
+  if (/vagin/.test(r)) return "vaginal"
+  if (/\biv\b|\bim\b|\bsc\b|intraven|intramus|subcut|inject|perfus|parenter/.test(r)) return "parenteral"
+  return "oral"
+}
+
+/**
+ * The prescription the doctor signs is assembled here, and only here: the
+ * patient's validated current treatment first, then everything newly
+ * prescribed. Nothing upstream ever compared the two lists, so a patient
+ * already on Amlodipine 10mg whose case triggered the automatic
+ * "hypertension without antihypertensive" correction walked out with
+ * amlodipine twice on the same form.
+ *
+ * Identity here is the composition, not the written name: "Amlodipine",
+ * "Amlodipine 5mg" and "Norvasc" are the same drug. A line whose composition
+ * cannot be resolved keeps its place rather than colliding with every other
+ * unnamed line.
+ */
+function prescriptionLineKey(med: any): string {
+  const key = compositionKey(
+    med?.name || med?.medication_name || med?.drug || med?.nom,
+    med?.genericName || med?.dci || med?.denominationCommune,
+  )
+  if (!key) return ""
+  return `${key}|${routeFamily(med?.route)}`
+}
+
 function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStatus?: string) {
   const medications: any[] = []
   const labTests: any[] = []
   const imagingStudies: any[] = []
   
+  // Current treatment is pushed first and therefore wins a clash: it is what
+  // the patient actually takes, at the dose they actually take it. A newly
+  // prescribed line carrying the same molecule by the same route is dropped
+  // and named in the logs, so a disappearing line can be traced.
+  const seenCompositions = new Set<string>()
+  const droppedDuplicates: string[] = []
+  const pushMedication = (entry: any) => {
+    const key = prescriptionLineKey(entry)
+    if (key && seenCompositions.has(key)) {
+      droppedDuplicates.push(`${entry.name} (${entry.medication_type})`)
+      return
+    }
+    if (key) seenCompositions.add(key)
+    medications.push(entry)
+  }
+
   console.log("💊 ========== PRESCRIPTION EXTRACTION FROM DIAGNOSIS API ==========")
   console.log("📦 diagnosisData received:", {
     hasCurrentMedicationsValidated: !!diagnosisData?.currentMedicationsValidated,
@@ -967,7 +1029,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       detailedFrequency = `${ukFormat} (${frequencyPerDay}×/jour, total: ${dailyTotalDose})`
     }
     
-    medications.push({
+    pushMedication({
       name: getString(med.name || med.medication_name || `Current medication ${idx + 1}`),
       genericName: getString(med.dci || med.name || `Current medication ${idx + 1}`),
       dosage: completeDosage,
@@ -1006,7 +1068,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     console.log(`💊 Dermatology medications: ${topical.length} topical + ${oral.length} oral = ${allDermMeds.length} total`)
     
     allDermMeds.forEach((med: any, idx: number) => {
-      medications.push({
+      pushMedication({
         name: getString(med.medication || med.name || `Medication ${idx + 1}`),
         genericName: getString(med.dci || med.medication || `Medication ${idx + 1}`),
         dosage: getString(med.dosage || ''),
@@ -1073,7 +1135,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       detailedFrequency = `${ukFormat} (${frequencyPerDay}×/jour, total: ${dailyTotalDose})`
     }
     
-    medications.push({
+    pushMedication({
       name: getString(med.nom || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
       genericName: getString(med.denominationCommune || med.dci || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
       dosage: completeDosage,
@@ -1096,7 +1158,12 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     })
   }
   
-  console.log(`✅ COMBINED PRESCRIPTION: ${validatedCurrentMeds.length} current + ${medications.length - validatedCurrentMeds.length} newly prescribed = ${medications.length} total medications`)
+  const keptCurrent = medications.filter(m => m.medication_type === 'current_continued').length
+  const keptNew = medications.length - keptCurrent
+  console.log(`✅ COMBINED PRESCRIPTION: ${keptCurrent} current + ${keptNew} newly prescribed = ${medications.length} total medications`)
+  if (droppedDuplicates.length > 0) {
+    console.log(`🔄 ${droppedDuplicates.length} duplicate line(s) removed from the prescription: ${droppedDuplicates.join(', ')}`)
+  }
 
   // =========== 2. LAB TESTS (COMMON FOR ALL CONSULTATION TYPES) ===========
   const extractedData = extractRealDataFromDiagnosis(diagnosisData, {}, {})
