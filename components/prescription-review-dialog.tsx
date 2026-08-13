@@ -243,9 +243,14 @@ export default function PrescriptionReviewDialog({
             </DialogPrimitive.Title>
 
             {loading ? (
+              // Radix requires a Description on every open dialog; without one
+              // in this branch it warned on every review and told a screen
+              // reader nothing about what the wait was for.
               <div className="mt-6 flex flex-col items-center gap-3 py-8 text-center">
                 <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
-                <p className="text-sm font-medium text-gray-900">{t.analysing}</p>
+                <DialogPrimitive.Description className="text-sm font-medium text-gray-900">
+                  {t.analysing}
+                </DialogPrimitive.Description>
                 <p className="max-w-sm text-xs text-gray-500">{t.analysingHint}</p>
               </div>
             ) : (

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto"
 import { createClient } from "@supabase/supabase-js"
 import { type NextRequest, NextResponse } from "next/server"
 import { callLLM } from "@/lib/llm-client"
@@ -34,7 +35,25 @@ export const maxDuration = 60
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+
+// The audit trail is written with the service role, never the anon key.
+//
+// prescription_reviews grants INSERT and UPDATE to anon but no SELECT, so that
+// nobody holding the public key can read back a patient's review. Under RLS
+// that also makes the row invisible to the anon role itself, and PostgreSQL
+// applies SELECT policies to any statement that READS rows — including the
+// WHERE of an UPDATE and any RETURNING clause. The consequences were silent:
+// the insert was refused with an error the route swallowed, and the update
+// that records the doctor's decision matched zero rows while reporting
+// success. The table was empty all day and nothing said so.
+//
+// This route is server-only, so the service key never reaches a browser.
+// Falls back to anon when the key is absent: an insert still works there.
+const supabase = supabaseUrl && (supabaseServiceKey || supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey)
+  : null
+const auditCanUpdate = Boolean(supabaseUrl && supabaseServiceKey)
 
 const VALID_SEVERITIES: ReviewSeverity[] = ["critical", "major", "minor", "info"]
 const VALID_TARGETS = ["medication", "laboratory", "imaging", "diagnosis"] as const
@@ -265,9 +284,19 @@ async function persistReview(payload: {
   if (!supabase) return null
   if (!payload.consultationId || payload.consultationId.startsWith("sim-")) return null
 
-  const { data, error } = await supabase
+  // The id is generated here rather than read back from the insert. Asking
+  // Supabase for it (.select('id')) turns the statement into
+  // INSERT ... RETURNING, and a RETURNING clause needs a SELECT policy — which
+  // this table deliberately does not grant, so that nobody holding the public
+  // key can read back a patient's prescription review. Every audit row was
+  // being refused for that reason and the failure swallowed by the guard
+  // below, so the table stayed empty while the feature looked like it worked.
+  const reviewId = randomUUID()
+
+  const { error } = await supabase
     .from("prescription_reviews")
     .insert({
+      id: reviewId,
       consultation_id: payload.consultationId,
       patient_id: payload.patientId,
       doctor_id: payload.doctorId,
@@ -284,15 +313,17 @@ async function persistReview(payload: {
       },
       reviewed_at: new Date().toISOString(),
     })
-    .select("id")
-    .maybeSingle()
 
   if (error) {
-    // Never fail the review because the audit row could not be written.
-    console.error("⚠️ prescription-review: audit insert failed:", error.message)
+    // Never fail the review because the audit row could not be written — but
+    // say so loudly. This exact failure went unnoticed for a day precisely
+    // because it was warned about and moved past.
+    console.error("⚠️ prescription-review: AUDIT ROW NOT WRITTEN:", error.message)
     return null
   }
-  return data?.id ?? null
+
+  console.log(`🗄️ prescription-review: audit row ${reviewId} written`)
+  return reviewId
 }
 
 export async function POST(request: NextRequest) {
@@ -474,11 +505,15 @@ export async function PATCH(request: NextRequest) {
         { status: 400 },
       )
     }
-    if (!supabase) {
+    if (!supabase || !auditCanUpdate) {
+      console.error("❌ prescription-review PATCH: SUPABASE_SERVICE_ROLE_KEY missing, decision not recorded")
       return NextResponse.json({ success: false, error: "Audit storage not configured" }, { status: 503 })
     }
 
-    const { error } = await supabase
+    // select() so the update reports what it actually touched. Without it a
+    // zero-row update returns no error, which is exactly how this recorded
+    // nothing while answering success.
+    const { data, error } = await supabase
       .from("prescription_reviews")
       .update({
         decision,
@@ -487,10 +522,16 @@ export async function PATCH(request: NextRequest) {
         decided_at: new Date().toISOString(),
       })
       .eq("id", reviewId)
+      .select("id")
 
     if (error) {
       console.error("❌ prescription-review PATCH failed:", error.message)
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    }
+
+    if (!data || data.length === 0) {
+      console.error(`❌ prescription-review PATCH matched no row for ${reviewId} — decision NOT recorded`)
+      return NextResponse.json({ success: false, error: "Review not found" }, { status: 404 })
     }
 
     console.log(`✅ prescription-review decision recorded: ${reviewId} -> ${decision}`)
