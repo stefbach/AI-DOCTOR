@@ -4179,8 +4179,13 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
        .insert({
          patient_id: tibokPatientId || null,
          doctor_id: doctorAppointmentData.doctorId,
-         status: 'scheduled',
+         // Same contract as the general flow: an appointment the doctor books
+         // is not a planned consultation until the patient pays. TIBOK hides
+         // 'pending_payment' from the doctor and shows it to the patient with a
+         // Pay button; it resolves the tariff itself, so no price is set here.
+         status: 'pending_payment',
          payment_status: 'pending',
+         payment_hold_until: scheduledTimestamp,
          // Phase 1 hybrid: inherit the parent consultation's mode.
          consultation_type: consultationMode || 'telemedicine',
          scheduled_time: scheduledTimestamp,
