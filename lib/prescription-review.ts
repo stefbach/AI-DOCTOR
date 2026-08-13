@@ -35,6 +35,12 @@ export interface ReviewAlert {
   target: ReviewTarget
   /** The prescription line / test / section the alert is about. */
   item: string
+  /**
+   * When an alert spans several lines, `item` joins them for display. This
+   * holds them separately so provenance filtering can ask "did the doctor
+   * touch ANY of these" — matching against the joined string never hits.
+   */
+  items?: string[]
   /** Stable machine-readable code, e.g. "duplicate-active-ingredient". */
   issue: string
   /** Doctor-facing explanation (French). */
@@ -654,6 +660,7 @@ export function runDeterministicChecks(
       severity: "critical",
       target: "medication",
       item: labels.join(" + "),
+      items: labels,
       issue: "duplicate-active-ingredient",
       message: `${labels.join(" et ")} contiennent tous les deux du ${ingredient}. Le patient recevrait la même molécule deux fois, sous deux noms différents — risque de surdosage.`,
       messageEn: `${labels.join(" and ")} both contain ${ingredient}. The patient would receive the same molecule twice under two different names — overdose risk.`,
@@ -676,6 +683,7 @@ export function runDeterministicChecks(
       severity: "critical",
       target: "medication",
       item: nsaidMeds.map(medLabel).join(" + "),
+      items: nsaidMeds.map(medLabel),
       issue: "multiple-nsaids",
       message: `Deux AINS systémiques sont prescrits simultanément (${[...distinctNsaids].join(", ")}). L'association n'augmente pas l'efficacité antalgique et multiplie le risque digestif et rénal.`,
       messageEn: `Two systemic NSAIDs are prescribed together (${[...distinctNsaids].join(", ")}). The combination adds no analgesic benefit and multiplies gastrointestinal and renal risk.`,
@@ -738,6 +746,7 @@ export function runDeterministicChecks(
       severity: "critical",
       target: "medication",
       item: paracetamolLines.join(" + "),
+      items: paracetamolLines,
       issue: "paracetamol-max-daily-dose",
       message: `La dose quotidienne cumulée de paracétamol atteint ${Math.round(paracetamolDaily)} mg, au-dessus du maximum de ${PARACETAMOL_MAX_DAILY_MG} mg/24 h chez l'adulte. Risque d'hépatotoxicité.`,
       messageEn: `Cumulative daily paracetamol reaches ${Math.round(paracetamolDaily)} mg, above the ${PARACETAMOL_MAX_DAILY_MG} mg/24 h adult maximum. Hepatotoxicity risk.`,
@@ -796,6 +805,7 @@ export function runDeterministicChecks(
       severity: "minor",
       target: "medication",
       item: owners.join(" + "),
+      items: owners,
       issue: "duplicated-justification",
       message: `${owners.join(" et ")} portent exactement la même justification clinique. Elle a probablement été recopiée d'une ligne à l'autre et ne décrit pas l'indication réelle du second produit.`,
       messageEn: `${owners.join(" and ")} carry exactly the same clinical justification. It was most likely copied from one line to the other and does not describe the second product's actual indication.`,
@@ -831,7 +841,11 @@ export function runDeterministicChecks(
   }
 
   const relevant = touched
-    ? alerts.filter((a) => isBlocking(a) || touched.has(a.item))
+    ? alerts.filter(
+        (a) =>
+          isBlocking(a) ||
+          (a.items?.length ? a.items.some((i) => touched.has(i)) : touched.has(a.item)),
+      )
     : alerts
 
   return sortAlerts(relevant)
