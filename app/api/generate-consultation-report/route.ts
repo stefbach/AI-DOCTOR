@@ -965,11 +965,117 @@ function prescriptionLineKey(med: any): string {
   return `${key}|${routeFamily(med?.route)}`
 }
 
+/**
+ * When a field comes back empty, the pipeline fills it with a label that
+ * describes the field — "Dose individuelle", "Instructions d'administration",
+ * "Format UK", "Dose totale/jour". Those are developer defaults, written in
+ * French, and they print on the prescription exactly where a strength or an
+ * instruction belongs: a real form went out reading "Paracetamol — Form:
+ * tablet - Dose individuelle", with no strength anywhere on the line.
+ *
+ * A blank field is a hole the doctor can see. A label that reads like content
+ * is a hole nobody sees. So the labels are removed here, at the single point
+ * where the printed prescription is assembled.
+ */
+const FIELD_PLACEHOLDERS = new Set([
+  "dose individuelle", "dose totale/jour", "dose totale/j", "format uk",
+  "instructions d'administration", "instructions d administration",
+  "prendre selon prescription", "posologie à déterminer", "posologie a determiner",
+  "selon prescription", "as prescribed",
+  "dosage", "dosage non spécifié", "dosage non specifie", "dose", "posologie",
+  "indication thérapeutique", "indication therapeutique",
+  "investigation thérapeutique", "investigation therapeutique",
+  "médicament", "medicament", "médicament actuel", "medicament actuel",
+  "dci", "surveillance standard", "standard monitoring",
+  "aucune spécifiée", "aucun spécifié", "aucune specifiee", "aucun specifie",
+  "non spécifié", "non specifie", "à déterminer", "a determiner",
+  "mécanisme d'action spécifique pour le patient",
+  "effets secondaires à surveiller", "aucune contre-indication identifiée",
+  "interactions vérifiées", "agent thérapeutique",
+  "n/a", "none", "-", "—",
+])
+
+function stripPlaceholder(value: any): string {
+  const v = String(value ?? "").trim()
+  return FIELD_PLACEHOLDERS.has(v.toLowerCase()) ? "" : v
+}
+
+/** Fields printed on the prescription, where a placeholder does real damage. */
+const PLACEHOLDER_PRONE_FIELDS = [
+  "genericName", "dosage", "frequency", "instructions", "indication", "monitoring",
+]
+
+const DOSE_UNITS = "mg|g|mcg|µg|ug|ml|l|iu|ui|units?"
+const DOSE_TOKEN = new RegExp(`\\d+(?:[.,]\\d+)?\\s*(?:${DOSE_UNITS})\\b`, "i")
+
+/**
+ * The corrected strength an AI validation note announces — when it announces
+ * one at all.
+ *
+ * The validator writes what it changed into a free-text note: "Dose adjusted
+ * from 100mg to standard maintenance dose of 500mg OD". That note was the only
+ * place the correction ever landed. The structured fields kept the original,
+ * so a form printed "Metformin 100mg" on every line with a footnote saying it
+ * should be 500mg — a strength metformin is not even sold in.
+ *
+ * Only an explicit replacement is read: "from X to Y", or the arrow form
+ * "Dosology: '10 od' → '10mg OD'". A note that merely mentions a figure
+ * ("maximum 4g/day", "target <130/80") changes nothing, by construction.
+ */
+function correctedDoseFrom(note: any): string {
+  const text = String(note ?? "")
+  if (!text) return ""
+
+  // Every pattern is anchored on a dose word, stops at the end of its own
+  // sentence, and requires the ORIGINAL value to be a strength too. Without
+  // that last condition "changed from tablet to capsule form, max 4g" would
+  // read as a correction to 4g.
+  const patterns = [
+    // "Dose adjusted/reduced/increased from 100mg to ... 500mg".
+    new RegExp(
+      `dos(?:e|age|olog\\w*)[^.;\\n]*?\\bfrom\\b\\s*\\d+(?:[.,]\\d+)?\\s*(?:${DOSE_UNITS})\\b[^.;\\n]*?\\bto\\b([^.;\\n]*)`,
+      "i",
+    ),
+    // French: "Dose ajustée de 100mg à 500mg". (\b does not work against "à",
+    // which is not a word character, so the spaces are matched explicitly.)
+    new RegExp(
+      `dos(?:e|age)\\s+(?:ajust|corrig|modifi|augment|réduit|reduit|diminu|port)\\S*\\s+de\\s+\\d+(?:[.,]\\d+)?\\s*(?:${DOSE_UNITS})\\b[^.;\\n]*?\\sà\\s([^.;\\n]*)`,
+      "i",
+    ),
+    // Arrow form: "Dosology: '10 od' → '10mg OD'".
+    /(?:dos(?:e|age|olog\w*)|posolog\w*)[^→\n]{0,60}→([^.;\n]*)/i,
+  ]
+
+  for (const pattern of patterns) {
+    const tail = text.match(pattern)?.[1]
+    if (!tail) continue
+    const dose = tail.match(DOSE_TOKEN)?.[0]
+    if (dose) return dose.replace(/\s+/g, "").toLowerCase()
+  }
+  return ""
+}
+
+/** Same strength written two ways — "500 MG" and "500mg" — is one strength. */
+function sameDose(a: string, b: string): boolean {
+  const norm = (v: string) => String(v || "").replace(/\s+/g, "").replace(",", ".").toLowerCase()
+  return !!norm(a) && norm(a) === norm(b)
+}
+
+/** "500mg" × 3/day → "1500mg/day". Returns "" when it cannot be computed. */
+function dailyTotalFrom(individualDose: string, frequencyPerDay: number): string {
+  if (!individualDose || !frequencyPerDay || frequencyPerDay <= 0) return ""
+  const parsed = individualDose.match(new RegExp(`^(\\d+(?:[.,]\\d+)?)\\s*(${DOSE_UNITS})$`, "i"))
+  if (!parsed) return ""
+  const total = parseFloat(parsed[1].replace(",", ".")) * frequencyPerDay
+  if (!isFinite(total)) return ""
+  return `${Number(total.toFixed(3))}${parsed[2]}/day`
+}
+
 function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStatus?: string) {
   const medications: any[] = []
   const labTests: any[] = []
   const imagingStudies: any[] = []
-  
+
   // Current treatment is pushed first and therefore wins a clash: it is what
   // the patient actually takes, at the dose they actually take it. A newly
   // prescribed line carrying the same molecule by the same route is dropped
@@ -977,6 +1083,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   const seenCompositions = new Set<string>()
   const droppedDuplicates: string[] = []
   const pushMedication = (entry: any) => {
+    for (const field of PLACEHOLDER_PRONE_FIELDS) entry[field] = stripPlaceholder(entry[field])
     const key = prescriptionLineKey(entry)
     if (key && seenCompositions.has(key)) {
       droppedDuplicates.push(`${entry.name} (${entry.medication_type})`)
@@ -1012,25 +1119,40 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   validatedCurrentMeds.forEach((med: any, idx: number) => {
     // Extract detailed dosing information if available
     const dosingDetails = med.dosing_details || {}
-    const individualDose = dosingDetails.individual_dose || ''
     const frequencyPerDay = dosingDetails.frequency_per_day || 0
-    const dailyTotalDose = dosingDetails.daily_total_dose || ''
-    const ukFormat = med.posology || med.frequency || med.how_to_take || 'As prescribed'
-    
+    const individualDose = stripPlaceholder(dosingDetails.individual_dose)
+    let dailyTotalDose = stripPlaceholder(dosingDetails.daily_total_dose)
+    const ukFormat = stripPlaceholder(med.posology || med.frequency || med.how_to_take)
+
     // Build complete dosage string
-    let completeDosage = getString(med.dosage || '')
+    let completeDosage = stripPlaceholder(getString(med.dosage || ''))
     if (!completeDosage && individualDose) {
       completeDosage = individualDose
     }
-    
+
+    // The validator announced a dose correction in prose; apply it to the
+    // fields that are actually printed, so the line and its footnote agree.
+    let displayName = getString(med.name || med.medication_name || `Current medication ${idx + 1}`)
+    const correctedDose = correctedDoseFrom(med.validated_corrections)
+    if (correctedDose && !sameDose(correctedDose, completeDosage)) {
+      console.log(`💊 Dose correction applied to "${displayName}": ${completeDosage || '(none)'} → ${correctedDose}`)
+      displayName = DOSE_TOKEN.test(displayName)
+        ? displayName.replace(DOSE_TOKEN, correctedDose)
+        : `${displayName} ${correctedDose}`.trim()
+      completeDosage = correctedDose
+      // The old total was computed from the old strength; recompute it, and
+      // print nothing rather than a stale figure when it cannot be recomputed.
+      dailyTotalDose = dailyTotalFrom(correctedDose, frequencyPerDay)
+    }
+
     // Build detailed frequency with total daily dose
     let detailedFrequency = ukFormat
-    if (frequencyPerDay > 0 && dailyTotalDose) {
+    if (ukFormat && frequencyPerDay > 0 && dailyTotalDose) {
       detailedFrequency = `${ukFormat} (${frequencyPerDay}×/jour, total: ${dailyTotalDose})`
     }
-    
+
     pushMedication({
-      name: getString(med.name || med.medication_name || `Current medication ${idx + 1}`),
+      name: displayName,
       genericName: getString(med.dci || med.name || `Current medication ${idx + 1}`),
       dosage: completeDosage,
       form: getString(med.form || 'tablet'),
@@ -1049,7 +1171,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       pregnancyCategory: '',
       pregnancySafety: '',
       breastfeedingSafety: '',
-      completeLine: `${getString(med.name || med.medication_name)} ${completeDosage}\n${detailedFrequency}\n[Current treatment - AI validated]`
+      completeLine: `${displayName} ${completeDosage}\n${detailedFrequency}\n[Current treatment - AI validated]`
     })
   })
   
@@ -1118,23 +1240,29 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   primaryTreatments.forEach((med: any, idx: number) => {
     // Extract detailed dosing information
     const dosingDetails = med.dosing_regimen?.adult || med.dosing_details || {}
-    const individualDose = dosingDetails.individual_dose || ''
+    const individualDose = stripPlaceholder(dosingDetails.individual_dose)
     const frequencyPerDay = dosingDetails.frequency_per_day || 0
-    const dailyTotalDose = dosingDetails.daily_total_dose || ''
-    const ukFormat = dosingDetails.en || dosingDetails.fr || dosingDetails.uk_format || med.how_to_take || 'As prescribed'
-    
+    const dailyTotalDose = stripPlaceholder(dosingDetails.daily_total_dose)
+    const ukFormat = stripPlaceholder(
+      dosingDetails.en || dosingDetails.fr || dosingDetails.uk_format || med.how_to_take,
+    )
+
     // Build complete dosage string with detailed information
-    let completeDosage = getString(med.dosage_strength || med.dosage || med.strength || '')
+    let completeDosage = stripPlaceholder(getString(med.dosage_strength || med.dosage || med.strength || ''))
     if (!completeDosage && individualDose) {
       completeDosage = individualDose
     }
-    
+    // No guessing the strength out of the posology text: on a real line reading
+    // "QDS as needed... Do not exceed 4g in 24 hours", the first figure is the
+    // DAILY CEILING, and printing it as the unit dose would quadruple the dose.
+    // A missing strength stays missing, and stays visible.
+
     // Build detailed frequency with total daily dose
     let detailedFrequency = ukFormat
-    if (frequencyPerDay > 0 && dailyTotalDose) {
+    if (ukFormat && frequencyPerDay > 0 && dailyTotalDose) {
       detailedFrequency = `${ukFormat} (${frequencyPerDay}×/jour, total: ${dailyTotalDose})`
     }
-    
+
     pushMedication({
       name: getString(med.nom || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
       genericName: getString(med.denominationCommune || med.dci || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),

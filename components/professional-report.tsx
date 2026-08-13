@@ -6137,10 +6137,19 @@ const ConsultationReport = () => {
  <p className="text-sm text-gray-600">Generic (INN): {med.denominationCommune}</p>
  )}
  <p className="mt-1">
- <span className="font-medium">Form:</span> {med.forme} - {med.dosage}
+ <span className="font-medium">Form:</span> {med.forme}
+ {med.dosage ? ` - ${med.dosage}` : (
+ /* The strength used to be filled with the placeholder "Dose individuelle"
+    when the generator produced none, which printed as if it were a real
+    dose. An empty strength is now empty — and said out loud, because a
+    silent gap on a prescription is no safer than a fake one. */
+ <span className="ml-1 text-red-600 font-medium">— strength missing, to be completed</span>
+ )}
  </p>
  <p className="mt-1">
- <span className="font-medium">Frequency:</span> {med.posologie}
+ <span className="font-medium">Frequency:</span> {med.posologie || (
+ <span className="text-red-600 font-medium">to be completed</span>
+ )}
  </p>
  <p className="mt-1">
  <span className="font-medium">Route:</span> {med.modeAdministration}
