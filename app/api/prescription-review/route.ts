@@ -10,7 +10,7 @@ import {
   type SnapshotDiff,
   countBlocking,
   mergeAlerts,
-  activeIngredients,
+  resolveComposition,
   runDeterministicChecks,
   sortAlerts,
   touchedMedicationLabels,
@@ -72,11 +72,16 @@ function describeMedications(snapshot: ReviewSnapshot): string {
   if (!snapshot.medications.length) return "(none)"
   return snapshot.medications
     .map((m, i) => {
-      const resolved = activeIngredients(m)
-      const composition = resolved.length
-        ? resolved.join(" + ")
-        : "not resolved — reason from the name and say you are unsure"
-      return `${i + 1}. name="${m.nom}" | INN/dci="${m.dci}" | ACTIVE INGREDIENTS (Mauritius formulary, authoritative — do not substitute another country's formulation): ${composition} | strength="${m.dosage}" | form="${m.forme}" | route="${m.modeAdministration}" | posology="${m.posologie}" | duration="${m.dureeTraitement}" | instructions="${m.instructions}" | stated indication="${m.justification}"`
+      const { ingredients, source } = resolveComposition(m)
+      // Only claim authority where there is any. When the composition was not
+      // resolved the fallback is just the product's own name, and presenting
+      // that as its ingredients would invite the model to reason from a label
+      // as though it were a molecule.
+      const composition =
+        source === "known"
+          ? `ACTIVE INGREDIENTS (Mauritius formulary, authoritative — do not substitute another country's formulation): ${ingredients.join(" + ")}`
+          : `COMPOSITION NOT RESOLVED — the system does not know what this product contains. Reason from the name if you can, and say plainly that you are unsure`
+      return `${i + 1}. name="${m.nom}" | INN/dci="${m.dci}" | ${composition} | strength="${m.dosage}" | form="${m.forme}" | route="${m.modeAdministration}" | posology="${m.posologie}" | duration="${m.dureeTraitement}" | instructions="${m.instructions}" | stated indication="${m.justification}"`
     })
     .join("\n")
 }

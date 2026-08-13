@@ -477,7 +477,34 @@ const canonicalIngredient = (name: string): string => {
  * the doctor filled it, plus anything the brand name resolves to. Returns
  * canonical lowercase names, deduplicated.
  */
-export function activeIngredients(med: MedicationSnapshot): string[] {
+/** Strength and galenic wording, so "Amoxicillin 500mg tablet" reduces to the drug. */
+const PRESENTATION_NOISE =
+  /\b\d+(?:[.,]\d+)?\s*(?:mg|g|mcg|ug|ml|iu|ui|%)\b|\b(?:tablets?|tabs?|capsules?|caps?|gel|cream|ointment|syrup|suspension|solution|sachets?|drops?|spray|injection|suppository|patch|comprimes?|gelules?|creme|pommade|sirop|solute)\b/g
+
+export interface ResolvedComposition {
+  ingredients: string[]
+  /**
+   * 'known' — read from the DCI field or the brand table, so the duplication,
+   *   NSAID and allergy checks are meaningful on this line.
+   * 'name'  — nothing matched; the drug's own name stands in for its
+   *   composition. Catches the same product prescribed twice, and nothing more:
+   *   we know the label, not what is inside it.
+   * 'none'  — not even a usable name.
+   */
+  source: "known" | "name" | "none"
+}
+
+/**
+ * Resolve what a prescription line actually contains.
+ *
+ * The name fallback exists because the checks were blind to plainly named
+ * drugs. "Amoxicillin" is not a brand and was in no list, so it resolved to
+ * nothing — which meant Amoxicillin prescribed twice, under that exact name,
+ * raised no duplication at all. The most obvious error possible went through.
+ * Using the name itself closes that, and costs no false positive: two lines
+ * bearing the same drug name are a duplication whatever the drug is.
+ */
+export function resolveComposition(med: MedicationSnapshot): ResolvedComposition {
   const found = new Set<string>()
 
   const dci = normalise(med.dci)
@@ -502,7 +529,20 @@ export function activeIngredients(med: MedicationSnapshot): string[] {
     if (new RegExp(`(^|[^a-z])${known}([^a-z]|$)`).test(haystack)) found.add(known)
   }
 
-  return [...found]
+  if (found.size) return { ingredients: [...found], source: "known" }
+
+  const byName = normalise(med.nom || med.dci)
+    .replace(PRESENTATION_NOISE, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+
+  if (byName.length >= 3) return { ingredients: [byName], source: "name" }
+  return { ingredients: [], source: "none" }
+}
+
+/** Ingredients only. Kept for callers that do not care how they were resolved. */
+export function activeIngredients(med: MedicationSnapshot): string[] {
+  return resolveComposition(med).ingredients
 }
 
 const looksTopical = (med: MedicationSnapshot): boolean => {
@@ -835,6 +875,43 @@ export function runDeterministicChecks(
         messageEn: `${medLabel(med)}: missing ${missing.join(", ")}. An incomplete prescription cannot be dispensed.`,
         suggestion: `Compléter la ligne avant signature.`,
         suggestionEn: `Complete the line before signing.`,
+        source: "rule",
+      })
+    }
+  }
+
+  // --- 8. Composition we could not verify ----------------------------------
+  // Turns a silence into a question. When a line resolves only through its own
+  // name, the duplication, NSAID and allergy checks ran against a label rather
+  // than a molecule — so they proved nothing, and the doctor would otherwise
+  // read the resulting quiet as "checked, all clear". Info severity, never
+  // blocking, and the provenance filter below keeps it to lines the doctor
+  // touched: the AI's own lines are not theirs to answer for. Only worth
+  // saying when there is something else it could collide with.
+  if (meds.length > 1) {
+    for (const med of meds) {
+      if (resolveComposition(med).source !== "name") continue
+
+      // Saying "the duplication check could not run on this line" directly
+      // under a duplication alert about that same line reads as a system that
+      // does not know what it just did. When the name fallback was enough to
+      // find something, there is nothing to warn about.
+      const label = medLabel(med)
+      const alreadyFlagged = alerts.some(
+        (a) => a.item === label || a.items?.includes(label),
+      )
+      if (alreadyFlagged) continue
+
+      alerts.push({
+        id: nextId("unverified"),
+        severity: "info",
+        target: "medication",
+        item: medLabel(med),
+        issue: "unverified-composition",
+        message: `La composition de ${medLabel(med)} n'est pas connue du système. Les contrôles automatiques de doublon, d'AINS et d'allergie n'ont pas pu s'appliquer à cette ligne.`,
+        messageEn: `The composition of ${medLabel(med)} is not known to the system. The automatic duplication, NSAID and allergy checks could not be applied to this line.`,
+        suggestion: `Vérifiez vous-même qu'elle ne fait pas doublon avec les autres médicaments prescrits. Renseigner la DCI rend le contrôle automatique opérant.`,
+        suggestionEn: `Check yourself that it does not duplicate another prescribed medication. Filling in the INN makes the automatic check work.`,
         source: "rule",
       })
     }
