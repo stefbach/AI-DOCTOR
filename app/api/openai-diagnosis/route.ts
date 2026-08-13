@@ -4,6 +4,9 @@ import crypto from 'crypto'
 import { callLLM, type LLMMessage } from '@/lib/llm-client'
 import { CRITICAL_RULES_BLOCK } from '@/lib/critical-rules'
 import { detectFabricatedExam } from '@/lib/anti-fabrication'
+// Same drug knowledge the pre-signature review uses, so "what is in this box"
+// has one definition across generation and checking.
+import { compositionKey } from '@/lib/prescription-review'
 import {
   queryMedicalGuidelines,
   queryMedicalGuidelinesMulti,
@@ -5812,15 +5815,36 @@ export async function POST(request: NextRequest) {
     }
     
     // ========== DÉDUPLICATION DES MÉDICAMENTS ==========
+/**
+ * Identify a medication by WHAT IT CONTAINS, not by how it was written.
+ *
+ * The previous comparison was the raw `dci` string, so "Amlodipine" and
+ * "Amlodipine 5mg" read as two different drugs and both reached the
+ * prescription — a real report went out continuing the patient's Amlodipine
+ * 10mg while also prescribing Amlodipine 5mg. compositionKey strips the
+ * strength and galenic wording and resolves brand names, so the two collapse.
+ *
+ * Returns '' when nothing identifiable is present; callers must not treat that
+ * as a key, or every unnamed line would collide into one.
+ */
+function medicationKey(med: any): string {
+  return compositionKey(
+    med?.medication_name || med?.drug || med?.name,
+    med?.dci || med?.denominationCommune,
+  )
+}
+
 function deduplicateMedications(medications: any[]): any[] {
-  const seen = new Set()
+  const seen = new Set<string>()
   return medications.filter(med => {
-    const dci = (med.dci || '').toLowerCase().trim()
-    if (seen.has(dci)) {
-      console.log(`🔄 Removing duplicate medication: ${dci}`)
+    const key = medicationKey(med)
+    // Unidentifiable lines are kept rather than collapsed together.
+    if (!key) return true
+    if (seen.has(key)) {
+      console.log(`🔄 Removing duplicate medication: ${key}`)
       return false
     }
-    seen.add(dci)
+    seen.add(key)
     return true
   })
 }
@@ -6347,8 +6371,9 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       // ========== COMBINED PRESCRIPTION - ALL MEDICATIONS TO PRESCRIBE ==========
       combinedPrescription: (() => {
         const currentMeds = deduplicateMedications(finalAnalysis.current_medications_validated || [])
-        // Build a set of DCI names from current medications to prevent cross-list duplicates
-        const currentMedDCIs = new Set(currentMeds.map((med: any) => (med?.dci || med?.medication_name || '').toLowerCase().trim()).filter(Boolean))
+        // Keyed on composition, not on the written name: a patient already on
+        // "Amlodipine" must not also be prescribed "Amlodipine 5mg".
+        const currentMedKeys = new Set(currentMeds.map(medicationKey).filter(Boolean))
 
         const currentMedItems = currentMeds.map((med: any, idx: number) => ({
           id: idx + 1,
@@ -6372,9 +6397,9 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
         // Filter out new medications that duplicate current medications (by DCI)
         const newMeds = deduplicateMedications(finalAnalysis.treatment_plan?.medications || [])
           .filter((med: any) => {
-            const newDci = (med?.dci || med?.drug || med?.medication_name || '').toLowerCase().trim()
-            if (currentMedDCIs.has(newDci)) {
-              console.log(`🔄 Removing duplicate from new prescriptions (already in current meds): ${newDci}`)
+            const key = medicationKey(med)
+            if (key && currentMedKeys.has(key)) {
+              console.log(`🔄 Removing duplicate from new prescriptions (already in current meds): ${key}`)
               return false
             }
             return true

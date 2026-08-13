@@ -983,6 +983,11 @@ export default function ProfessionalReportEditable({
  
  // Manual save states
  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+ // When the report was last actually written to the database. Kept so the
+ // status stays on screen: the previous "Saved!" toast vanished after three
+ // seconds, leaving a doctor with no way to tell, at any later moment, whether
+ // their edit had been persisted or was still only in the page.
+ const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
  // Loading states
@@ -1884,15 +1889,16 @@ const handleManualSave = useCallback(async () => {
  
  if (result.success) {
  setSaveStatus('saved')
+ setLastSavedAt(new Date())
  setHasUnsavedChanges(false)
  setModifiedSections(new Set())
- 
+
  toast({
- title: "✅ Saved successfully",
- description: "Your changes have been saved",
+ title: "✅ Modifications enregistrées",
+ description: "Le rapport a été sauvegardé.",
  duration: 2000
  })
- 
+
  setTimeout(() => setSaveStatus('idle'), 3000)
  } else {
  throw new Error(result.error || 'Failed to save')
@@ -7751,24 +7757,44 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </div>
  )}
 
- {/* Save Status Indicators (positioned left) */}
- {saveStatus === 'saving' && (
- <div className="fixed bottom-4 left-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
- <Loader2 className="h-4 w-4 animate-spin" />
- Saving...
- </div>
- )}
- {saveStatus === 'saved' && (
- <div className="fixed bottom-4 left-4 bg-teal-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
- <CheckCircle className="h-4 w-4" />
- Saved!
- </div>
- )}
+ {/*
+   One persistent status, in one place.
 
- {/* Unsaved Changes Indicator (positioned top-left) */}
- {hasUnsavedChanges && (
- <div className="fixed top-4 left-4 bg-cyan-500 text-white px-3 py-1 rounded-full text-sm z-50">
- Unsaved changes
+   There used to be three indicators in two corners: "Saving..." and "Saved!"
+   bottom-left, both gone after three seconds, and "Unsaved changes" top-left.
+   Nothing told a doctor, at an arbitrary moment, whether what they had typed
+   was in the database — and nothing is, until they press Save; the 3s debounce
+   on the text fields only moves the value into the page's own state.
+
+   So: it always says which of the three states applies, it names the time of
+   the last real write, and it stays.
+ */}
+ {(saveStatus === 'saving' || hasUnsavedChanges || lastSavedAt) && (
+ <div className="fixed bottom-4 left-4 z-50 print:hidden">
+   {saveStatus === 'saving' ? (
+     <div className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white shadow-lg">
+       <Loader2 className="h-4 w-4 animate-spin" />
+       <span className="text-sm font-medium">Enregistrement en cours…</span>
+     </div>
+   ) : hasUnsavedChanges ? (
+     <div className="flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-amber-950 shadow-lg">
+       <AlertTriangle className="h-4 w-4 shrink-0" />
+       <div className="text-sm leading-tight">
+         <div className="font-semibold">Modifications non enregistrées</div>
+         <div className="text-xs opacity-90">
+           Cliquez sur « Save Changes » pour les sauvegarder
+           {lastSavedAt && ` · dernier enregistrement à ${lastSavedAt.toLocaleTimeString('fr-FR')}`}
+         </div>
+       </div>
+     </div>
+   ) : (
+     <div className="flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-white shadow-lg">
+       <CheckCircle className="h-4 w-4 shrink-0" />
+       <span className="text-sm font-medium">
+         Enregistré à {lastSavedAt?.toLocaleTimeString('fr-FR')}
+       </span>
+     </div>
+   )}
  </div>
  )}
 

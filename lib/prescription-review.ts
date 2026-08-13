@@ -442,6 +442,33 @@ const TOPICAL_FORM_CUES = [
 ]
 
 const ORAL_ROUTE_CUES = ["oral", "orale", "per os", "by mouth", "voie orale", "po"]
+
+/** Forms that can only be swallowed. */
+const ENTERAL_FORM_CUES = ["tablet", "comprime", "capsule", "gelule", "caplet", "pill", "syrup", "sirop"]
+
+/**
+ * Wording that describes an injected or infused administration. A line carrying
+ * any of these cannot also be an oral tablet.
+ *
+ * Added after a real report prescribed intravenous sodium chloride as
+ * "Form: tablet / Route: Oral / Frequency: IV infusion" — an infusion, in a
+ * tablet, to be swallowed. The existing route check only knew about topical
+ * forms put on an oral route, so it saw nothing.
+ */
+const PARENTERAL_CUES = [
+  "iv infusion",
+  "intravenous",
+  "intraveineu",
+  "perfusion",
+  "intramuscular",
+  "intramusculaire",
+  "subcutaneous",
+  "sous-cutane",
+  "sous cutane",
+  "im injection",
+  "sc injection",
+  "injectable",
+]
 const TOPICAL_ROUTE_CUES = ["topical", "topique", "cutaneous", "cutané", "cutane", "local", "externe", "external"]
 
 const TOPICAL_INSTRUCTION_CUES = [
@@ -545,6 +572,36 @@ export function activeIngredients(med: MedicationSnapshot): string[] {
   return resolveComposition(med).ingredients
 }
 
+/**
+ * A stable key identifying WHAT a prescription line contains, for comparing two
+ * lines that may be written differently.
+ *
+ * Used at report-generation time to stop the same molecule being prescribed
+ * twice before anyone reviews it. The generator's own de-duplication compared
+ * raw strings, so a patient already on "Amlodipine" was also prescribed
+ * "Amlodipine 5mg" — different strings, same drug — and the duplication only
+ * surfaced later, in the pre-signature review. Detecting it there was never the
+ * point; not producing it is.
+ *
+ * Returns "" when nothing identifiable is present, which callers must treat as
+ * "cannot compare" rather than as a key, or every unnamed line collides.
+ */
+export function compositionKey(name?: string | null, dci?: string | null): string {
+  const { ingredients } = resolveComposition({
+    index: 0,
+    nom: str(name),
+    dci: str(dci),
+    dosage: "",
+    forme: "",
+    posologie: "",
+    modeAdministration: "",
+    dureeTraitement: "",
+    instructions: "",
+    justification: "",
+  })
+  return [...ingredients].sort().join("+")
+}
+
 const looksTopical = (med: MedicationSnapshot): boolean => {
   const formeAndName = normalise(`${med.forme} ${med.nom}`)
   return TOPICAL_FORM_CUES.some((cue) => formeAndName.includes(normalise(cue)))
@@ -565,6 +622,18 @@ const routeSaysTopical = (med: MedicationSnapshot): boolean => {
 const instructionsSayTopical = (med: MedicationSnapshot): boolean => {
   const text = normalise(`${med.posologie} ${med.instructions}`)
   return TOPICAL_INSTRUCTION_CUES.some((cue) => text.includes(normalise(cue)))
+}
+
+/** The line describes an injection or an infusion, wherever it says so. */
+const describesParenteral = (med: MedicationSnapshot): boolean => {
+  const text = normalise(`${med.posologie} ${med.instructions} ${med.modeAdministration} ${med.forme}`)
+  return PARENTERAL_CUES.some((cue) => text.includes(normalise(cue)))
+}
+
+/** The line is a form that can only be swallowed. */
+const looksEnteralForm = (med: MedicationSnapshot): boolean => {
+  const forme = normalise(med.forme)
+  return ENTERAL_FORM_CUES.some((cue) => forme.includes(normalise(cue)))
 }
 
 /** Systemic = anything not clearly a topical/local preparation. */
@@ -735,6 +804,26 @@ export function runDeterministicChecks(
 
   // --- 3. Route / galenic form incoherence ---------------------------------
   for (const med of meds) {
+    // An injection or infusion written as something to swallow. Checked before
+    // the topical rules because it is the more dangerous mismatch: the product
+    // is either undeliverable or, if a nurse follows the wording, given by the
+    // wrong route entirely.
+    if (describesParenteral(med) && (looksEnteralForm(med) || routeSaysOral(med))) {
+      alerts.push({
+        id: nextId("parenteral"),
+        severity: "critical",
+        target: "medication",
+        item: medLabel(med),
+        issue: "parenteral-route-mismatch",
+        message: `${medLabel(med)} décrit une administration injectable ou en perfusion, mais la ligne indique une forme « ${med.forme || "orale"} » par « ${med.modeAdministration || "voie orale"} ». Une perfusion ne s'avale pas, et cette ordonnance est inexécutable telle quelle.`,
+        messageEn: `${medLabel(med)} describes an injected or infused administration, yet the line reads form "${med.forme || "oral"}" by "${med.modeAdministration || "oral route"}". An infusion cannot be swallowed, and this prescription cannot be dispensed as written.`,
+        suggestion: `Corriger la voie et la forme, ou retirer cette ligne de l'ordonnance de ville si le traitement est administré à l'hôpital.`,
+        suggestionEn: `Correct the route and form, or remove this line from the outpatient prescription if the treatment is given in hospital.`,
+        source: "rule",
+      })
+      continue
+    }
+
     const topicalForm = looksTopical(med)
     if (topicalForm && routeSaysOral(med)) {
       alerts.push({
