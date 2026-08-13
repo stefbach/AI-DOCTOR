@@ -158,8 +158,15 @@ ${describeImaging(snapshot)}
 CURRENT NARRATIVE REPORT
 ${describeNarrative(snapshot, diff && !diff.baselineMissing ? diff.narrativeModified : undefined)}
 
-ALREADY DETECTED BY DETERMINISTIC RULES — do NOT repeat these, they are already shown to the doctor
+ALREADY DETECTED BY DETERMINISTIC RULES — already shown to the doctor
 ${alreadyFlagged}
+
+This list excludes those SPECIFIC PROBLEMS, not the medications they name. A
+medication that already appears above can and should be reported again for a
+DIFFERENT problem — a sedating or anticholinergic ingredient in a patient at
+risk of falls, an ingredient breaching a precaution the plan states, an
+interaction with another line. Only stay silent when the problem you would
+raise is the same one already listed.
 
 WHAT TO LOOK FOR
 1. Medication safety: therapeutic duplication (including a branded combination product that repeats a molecule already prescribed), drug-drug interaction with the prescribed list or the patient's existing medications, contraindication given the age/sex/history/allergies, dose or duration inappropriate for the indication, wrong galenic form or route for the stated posology.
