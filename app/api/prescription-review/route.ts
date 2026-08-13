@@ -70,11 +70,22 @@ function describeImaging(snapshot: ReviewSnapshot): string {
     .join("\n")
 }
 
+/**
+ * `only === undefined` means the baseline is unknown, so the whole report has
+ * to go. An EMPTY array means the doctor rewrote no narrative section — and
+ * must send nothing.
+ *
+ * That distinction was collapsed (`!only || only.length === 0` kept
+ * everything), so a review shipped the entire consultation report — several
+ * thousand words — on every signature, even when only one prescription line
+ * had changed. The clinical context the model needs is already in the PATIENT
+ * block above; the full narrative is only relevant when the doctor edited it.
+ */
 function describeNarrative(snapshot: ReviewSnapshot, only?: string[]): string {
   const entries = Object.entries(snapshot.narrative).filter(
-    ([k]) => !only || only.length === 0 || only.includes(k),
+    ([k]) => only === undefined || only.includes(k),
   )
-  if (!entries.length) return "(none)"
+  if (!entries.length) return "(none — no narrative section was modified)"
   return entries.map(([k, v]) => `### ${k}\n${v}`).join("\n\n")
 }
 
@@ -320,9 +331,17 @@ export async function POST(request: NextRequest) {
             { role: "user", content: buildPrompt(safePatient, safeSnapshot, diff, ruleAlerts) },
           ],
           responseFormat: "json_object",
-          maxTokens: 3000,
-          reasoningEffort: "medium",
-          timeoutMs: 45_000,
+          maxTokens: 2000,
+          // This runs with a doctor and a patient waiting on the line. On
+          // gpt-5.5 at medium effort the first real run took over 30 seconds,
+          // which is not a usable wait mid-consultation. DeepSeek at low
+          // effort is the trade: the deterministic rules carry the findings
+          // that must not be missed, and this layer contributes judgement on
+          // top. The env var LLM_PROVIDER_PRESCRIPTION_REVIEW still overrides
+          // both directions, and a DeepSeek outage falls back to OpenAI.
+          provider: "deepseek",
+          reasoningEffort: "low",
+          timeoutMs: 30_000,
         })
         aiAlerts = parseAiAlerts(result.text)
         console.log(
