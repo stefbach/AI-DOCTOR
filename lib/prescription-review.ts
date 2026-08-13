@@ -856,14 +856,39 @@ export function runDeterministicChecks(
 // ============================================================================
 
 /**
- * Issues that are the SAME finding as a deterministic duplication check, under
- * whatever name the model gave it — "duplicate-paracetamol",
- * "doublon-molecule", "redundant-analgesic".
+ * Findings the deterministic rules OWN.
+ *
+ * Each entry pairs the rule issues that state a problem exhaustively with the
+ * shapes the model uses when it restates the same thing in its own words. When
+ * a rule has already reported a family on a given prescription line, a model
+ * alert of that family on that same line is dropped.
+ *
+ * This exists because asking did not work. The prompt has been told three
+ * times, in increasingly explicit wording, not to repeat a rule finding, and
+ * the model repeated one on the next run every time — a duplication renamed
+ * "duplicate-paracetamol", then the very same 8 g/day paracetamol arithmetic
+ * the rule had just computed, graded one notch lower.
+ *
+ * Kept to families where the rule is arithmetic or exhaustive and the model
+ * can add nothing. Route/form and NSAID findings are deliberately NOT here:
+ * "this NSAID is contraindicated pending dengue exclusion" is a different
+ * problem from "two NSAIDs together", and losing it would cost more than the
+ * noise it saves.
  */
-const DUPLICATION_ISSUE = /duplicat|doublon|redundan/i
-
-/** Rules that already state a duplication exhaustively and arithmetically. */
-const RULE_DUPLICATION_ISSUES = ["duplicate-active-ingredient", "paracetamol-max-daily-dose"]
+const RULE_OWNED_FAMILIES: { rules: string[]; aiIssue: RegExp }[] = [
+  {
+    rules: ["duplicate-active-ingredient"],
+    aiIssue: /duplicat|doublon|redundan/i,
+  },
+  {
+    rules: ["paracetamol-max-daily-dose"],
+    aiIssue: /dose|dosage|posolog|overdose|surdos|hepatotox|maximum/i,
+  },
+  {
+    rules: ["incomplete-prescription-line"],
+    aiIssue: /incomplete|missing|absent|unspecified/i,
+  },
+]
 
 /**
  * Merge rule alerts with model alerts. Rules win: when the model raises the
@@ -885,24 +910,28 @@ const RULE_DUPLICATION_ISSUES = ["duplicate-active-ingredient", "paracetamol-max
 export function mergeAlerts(ruleAlerts: ReviewAlert[], aiAlerts: ReviewAlert[]): ReviewAlert[] {
   const seen = new Set(ruleAlerts.map((a) => `${a.issue}|${normalise(a.item)}`))
 
-  const itemsCoveredByRuleDuplication = ruleAlerts
-    .filter((a) => RULE_DUPLICATION_ISSUES.includes(a.issue))
-    .flatMap((a) => (a.items?.length ? a.items : [a.item]))
-    .map(normalise)
-    .filter(Boolean)
+  // Per family: the lines a rule already covered.
+  const coveredByFamily = RULE_OWNED_FAMILIES.map((family) => ({
+    aiIssue: family.aiIssue,
+    items: ruleAlerts
+      .filter((a) => family.rules.includes(a.issue))
+      .flatMap((a) => (a.items?.length ? a.items : [a.item]))
+      .map(normalise)
+      .filter(Boolean),
+  })).filter((f) => f.items.length > 0)
 
   const merged = [...ruleAlerts]
   for (const a of aiAlerts) {
     const key = `${a.issue}|${normalise(a.item)}`
     if (seen.has(key)) continue
 
-    if (itemsCoveredByRuleDuplication.length && DUPLICATION_ISSUE.test(a.issue)) {
-      const aiItem = normalise(a.item)
-      const sameLine = itemsCoveredByRuleDuplication.some(
-        (ruleItem) => aiItem.includes(ruleItem) || ruleItem.includes(aiItem),
-      )
-      if (sameLine) continue
-    }
+    const aiItem = normalise(a.item)
+    const alreadyOwned = coveredByFamily.some(
+      (family) =>
+        family.aiIssue.test(a.issue) &&
+        family.items.some((ruleItem) => aiItem.includes(ruleItem) || ruleItem.includes(aiItem)),
+    )
+    if (alreadyOwned) continue
 
     seen.add(key)
     merged.push(a)

@@ -201,10 +201,19 @@ raise is the same one already listed.
 
 A problem counts as already listed even if you would rate it MORE SEVERE than
 the rule did, and even if you would group into one alert several lines the
-rules reported separately. In particular, never report a missing posology,
-strength, route or duration: those checks are exhaustive and deterministic,
-they already cover every line, and repeating them at a higher severity turns
-a clerical omission into a blocking alert.
+rules reported separately.
+
+Four things are computed exhaustively and arithmetically before you are called,
+and are NEVER yours to report, whatever name you would give them:
+  - the same active ingredient appearing twice, under any names;
+  - a cumulative daily dose exceeding a maximum;
+  - a missing posology, strength, route or duration;
+  - a galenic form that does not match its stated route.
+Restating any of those adds nothing and costs the doctor a second alert about
+a problem already on their screen. Report what needs clinical judgement:
+whether a drug suits THIS patient and THIS diagnosis, whether it breaches a
+precaution the report itself states, whether an investigation is relevant,
+whether the narrative still holds together.
 
 WHAT TO LOOK FOR
 1. Medication safety: therapeutic duplication (including a branded combination product that repeats a molecule already prescribed), drug-drug interaction with the prescribed list or the patient's existing medications, contraindication given the age/sex/history/allergies, dose or duration inappropriate for the indication, wrong galenic form or route for the stated posology.
