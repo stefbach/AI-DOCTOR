@@ -63,34 +63,43 @@ export async function POST(request: NextRequest) {
     }
 
     // The browser retries delivery and also beacons on page hide, so the same
-    // report can arrive twice. Upserting on the client-generated id drops the
-    // duplicate instead of inflating the incident count on the dashboard.
+    // report can arrive twice. It carries a browser-generated id, and a unique
+    // index turns the second arrival into a 23505 we swallow below.
+    //
+    // Deliberately a plain insert, NOT an upsert: any ON CONFLICT clause — even
+    // DO NOTHING — makes Postgres require an UPDATE policy on the table, and
+    // the only way to grant that here would be to let anyone holding the public
+    // key rewrite stored incidents. A black box whose records can be edited is
+    // not a black box. Verified as the anon role: plain INSERT passes,
+    // ON CONFLICT DO NOTHING and DO UPDATE are both refused by RLS.
     const clientEventId = text(body._id, 100)
 
-    const { error } = await supabase.from("client_error_events").upsert(
-      {
-        client_event_id: clientEventId,
-        occurred_at: text(body.occurredAt, 40) || new Date().toISOString(),
-        kind,
-        severity,
-        message: text(body.message, 1000),
-        stack: text(body.stack, 4000),
-        pathname,
-        consultation_id: text(body.consultationId, 100),
-        patient_id: text(body.patientId, 100),
-        doctor_id: text(body.doctorId, 100),
-        breadcrumbs,
-        session_id: text(body.sessionId, 100),
-        user_agent: text(body.userAgent, 400),
-        viewport: text(body.viewport, 20),
-        commit_sha: text(body.commitSha, 60),
-      },
-      clientEventId
-        ? { onConflict: "client_event_id", ignoreDuplicates: true }
-        : undefined,
-    )
+    const { error } = await supabase.from("client_error_events").insert({
+      client_event_id: clientEventId,
+      occurred_at: text(body.occurredAt, 40) || new Date().toISOString(),
+      kind,
+      severity,
+      message: text(body.message, 1000),
+      stack: text(body.stack, 4000),
+      pathname,
+      consultation_id: text(body.consultationId, 100),
+      patient_id: text(body.patientId, 100),
+      doctor_id: text(body.doctorId, 100),
+      breadcrumbs,
+      session_id: text(body.sessionId, 100),
+      user_agent: text(body.userAgent, 400),
+      viewport: text(body.viewport, 20),
+      commit_sha: text(body.commitSha, 60),
+    })
 
     if (error) {
+      // 23505: this report is already stored — a retry or the exit beacon
+      // arriving after the queued copy got through. Report success so the
+      // browser drops it from its outbox instead of retrying forever.
+      if (error.code === "23505") {
+        console.log(`📼 Black box: duplicate report ignored (${clientEventId})`)
+        return NextResponse.json({ success: true, duplicate: true })
+      }
       console.error("⚠️ client-events: insert failed:", error.message)
       return NextResponse.json({ success: false }, { status: 200 })
     }
