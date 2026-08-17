@@ -104,6 +104,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
+    // A consultation is given its real identifier only after the clock has
+    // started, so the first transitions were recorded under a temporary one.
+    // Left behind, that row reads as a consultation abandoned after a few
+    // seconds — a phantom in exactly the dashboard meant to spot real ones.
+    const supersedes = str(body?.supersedes)
+    if (supersedes && supersedes !== consultationId) {
+      const { error: cleanupError } = await supabase
+        .from("consultation_timings")
+        .delete()
+        .eq("consultation_id", supersedes)
+      if (cleanupError) {
+        console.error("⏱️ superseded row not removed:", cleanupError.message)
+      } else {
+        console.log(`⏱️ Superseded timing row removed: ${supersedes} → ${consultationId}`)
+      }
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     // A measurement must never take a consultation down with it.

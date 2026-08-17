@@ -88,7 +88,7 @@ export default function MedicalAIExpert() {
    * end: a consultation abandoned halfway is exactly the one worth seeing, and
    * writing only at signature would leave no trace of it at all.
    */
-  const reportTiming = React.useCallback((state: TimerState) => {
+  const reportTiming = React.useCallback((state: TimerState, supersedes?: string) => {
     fetch('/api/consultation-timings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -104,6 +104,9 @@ export default function MedicalAIExpert() {
         sectionSeconds: allSectionSeconds(state),
         questionCount: state.questionCount,
         budgetSeconds: TOTAL_BUDGET_SECONDS,
+        // The row written under the temporary id describes the same
+        // consultation and must not survive as a phantom "abandoned at 49s".
+        supersedes: supersedes || null,
       }),
       keepalive: true,
       // A measurement must never take a consultation down with it.
@@ -132,19 +135,38 @@ export default function MedicalAIExpert() {
     }
 
     setTimer((prev) => {
-      // Reload picks the clock back up rather than restarting it — losing it
-      // on a refresh would make every measurement a guess, and refreshes happen.
-      const base =
-        prev && prev.consultationId === consultationId
-          ? prev
-          : loadState(consultationId) || emptyState(consultationId)
+      let base: TimerState
+      let supersededId: string | undefined
+
+      if (prev && prev.consultationId === consultationId) {
+        base = prev
+      } else if (prev && prev.endedAt == null) {
+        // The consultation is given its real identifier only when the doctor
+        // leaves the first step, so the clock starts under one id and finds
+        // itself under another. It used to read that as a different
+        // consultation and start over — the doctor watched the total fall back
+        // to zero on the way into Clinical Data, which is the one number they
+        // are meant to be able to trust. Re-key it; never restart it.
+        console.log('⏱️ Consultation re-keyed:', prev.consultationId, '→', consultationId)
+        clearState(prev.consultationId)
+        supersededId = prev.consultationId
+        base = { ...prev, consultationId }
+      } else {
+        // Fresh mount: resume what was stored, or start. Reload picks the clock
+        // back up rather than restarting it — losing it on a refresh would make
+        // every measurement a guess, and refreshes happen.
+        base = loadState(consultationId) || emptyState(consultationId)
+      }
 
       if (base.endedAt != null) return base
       const next = enterSection(base, section)
-      if (next === base) return base
+      // `enterSection` returns the same object when the section has not
+      // changed, which happens on a plain re-key — but the new id still has to
+      // be persisted, or a reload would find nothing under it.
+      if (next === base && base === prev) return base
 
       saveState(next)
-      reportTiming(next)
+      reportTiming(next, supersededId)
       return next
     })
   }, [currentStep, currentConsultationId, reportTiming])
