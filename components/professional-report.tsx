@@ -357,7 +357,7 @@ const DebouncedTextarea = memo(({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Modification prise en compte…
+ Modification en cours…
  </div>
  )}
  <Textarea
@@ -457,7 +457,7 @@ const MedicationEditForm = memo(({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Modification prise en compte…
+ Modification en cours…
  </div>
  )}
  </div>
@@ -680,7 +680,7 @@ const BiologyTestEditForm = memo(({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Modification prise en compte…
+ Modification en cours…
  </div>
  )}
  
@@ -847,7 +847,7 @@ const ImagingExamEditForm = memo(({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Modification prise en compte…
+ Modification en cours…
  </div>
  )}
  
@@ -1198,6 +1198,33 @@ const getFullSignatureUrl = (signatureUrl: string | null): string | null => {
  const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
 
 // ==================== TRACKING & UPDATES ====================
+// ==================== "TAKEN INTO ACCOUNT" ====================
+//
+// What the doctor actually wants to know while they work is not whether the
+// database has their edit — it is whether the DOCUMENT has it. The text fields
+// hold a change for three seconds before committing it, so there is a real
+// window where what is on screen is not yet in the report.
+//
+// The signal is the report itself changing, because that is the moment the
+// change exists. Watching the keystroke instead would announce "taken into
+// account" for something still sitting in a field, which is what the old
+// label did.
+const [justApplied, setJustApplied] = useState(false)
+const firstReportRef = useRef(true)
+useEffect(() => {
+  if (!report) return
+  // The first assignment is the generated report arriving, not an edit.
+  if (firstReportRef.current) {
+    firstReportRef.current = false
+    return
+  }
+  if (validationStatus === 'validated') return
+
+  setJustApplied(true)
+  const id = setTimeout(() => setJustApplied(false), 4000)
+  return () => clearTimeout(id)
+}, [report, validationStatus])
+
 const trackModification = useCallback((section: string) => {
  if (validationStatus === 'validated') return
  setModifiedSections(prev => new Set(prev).add(section))
@@ -6946,7 +6973,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Modification prise en compte…
+ Modification en cours…
  </div>
  )}
  
@@ -7229,36 +7256,51 @@ const [localSickLeave, setLocalSickLeave] = useState({
  }
 
  /**
-  * One save status, pinned to the bottom of the viewport.
+  * What the doctor is told about their own edit, pinned to the bottom of the
+  * viewport.
   *
-  * It was `position: fixed` here before and did not stay in view — not because
-  * of the iframe, as first supposed, but because every step renders inside a
-  * card carrying `glass-card` (`backdrop-filter`), `overflow-hidden` and
-  * `hover-lift` (`transform`). Each of those makes the card the containing
-  * block for a fixed descendant, and the card then clips it. So it is
-  * portalled out of the tree entirely.
+  * It answers the question they actually have while working — "has my change
+  * been taken into account?" — and not the one the code happens to know the
+  * answer to, "has it reached the database?". Those are different moments: the
+  * document takes the change three seconds after typing stops, and the
+  * database is written at signature. This banner reported the second and left
+  * the first, the one that matters, invisible.
   *
-  * At the bottom rather than the top: a doctor typing into a field near the
-  * end of a long report needs to see their change land without scrolling back
-  * up to look for it.
+  * Worse, when the page carried no consultation to save against it announced
+  * "saving impossible" — technically true, entirely useless, and alarming
+  * about something the doctor was not asking about.
+  *
+  * At the bottom rather than the top: a doctor typing near the end of a long
+  * report needs to see their change land without scrolling up to look for it.
+  *
+  * It is portalled out of the tree because `position: fixed` does not work
+  * from inside the step card — `glass-card` sets `backdrop-filter`,
+  * `hover-lift` sets a `transform`, and either makes that card the containing
+  * block; `overflow-hidden` then clips whatever escapes.
   */
  const SaveStatus = () => {
  if (validationStatus === 'validated') return null
+
+ // First and loudest: the change is in the document.
+ if (justApplied) {
+ return (
+ <span className="flex items-center gap-1.5 rounded-md bg-teal-50 px-3 py-1.5 text-sm font-medium text-teal-900 pointer-events-auto border border-teal-300 shadow-lg">
+ <CheckCircle className="h-4 w-4 shrink-0" />
+ Modification prise en compte
+ </span>
+ )
+ }
+
+ // Everything below is about the database, and is secondary. It is shown
+ // only where a write is actually expected: on a page with no consultation
+ // attached there is nothing to report and nothing to worry the doctor with.
+ if (!canPersist) return null
 
  if (saveStatus === 'saving') {
  return (
  <span className="flex items-center gap-1.5 rounded-md bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-800 pointer-events-auto border border-blue-300 shadow-lg">
  <Loader2 className="h-3.5 w-3.5 animate-spin" />
  Enregistrement…
- </span>
- )
- }
-
- if (hasUnsavedChanges && !canPersist) {
- return (
- <span className="flex items-center gap-1.5 rounded-md bg-red-50 px-3 py-1.5 text-sm font-medium text-red-900 pointer-events-auto border border-red-300 shadow-lg">
- <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
- Enregistrement impossible — cette page n'est rattachée à aucune consultation
  </span>
  )
  }
@@ -7283,8 +7325,8 @@ const [localSickLeave, setLocalSickLeave] = useState({
 
  if (lastSavedAt) {
  return (
- <span className="flex items-center gap-1.5 rounded-md bg-teal-50 px-3 py-1.5 text-sm font-medium text-teal-800 pointer-events-auto border border-teal-300 shadow-lg">
- <CheckCircle className="h-3.5 w-3.5" />
+ <span className="flex items-center gap-1.5 rounded-md bg-gray-50 px-3 py-1.5 text-sm font-medium text-gray-700 pointer-events-auto border border-gray-300 shadow-lg">
+ <CheckCircle className="h-3.5 w-3.5 shrink-0" />
  Enregistré à {lastSavedAt.toLocaleTimeString('fr-FR')}
  </span>
  )
