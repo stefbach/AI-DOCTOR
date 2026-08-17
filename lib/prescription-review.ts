@@ -1107,6 +1107,69 @@ const RULE_OWNED_FAMILIES: { rules: string[]; aiIssue: RegExp }[] = [
  * sedating ingredient, a contraindication against the management plan — has a
  * different issue name and survives, which is the whole point of the layer.
  */
+/**
+ * One card per thing, even when the model says it twice.
+ *
+ * A real review came back with two alerts on the same CT request: "not
+ * indicated for a headache" and "the stated indication is clinically
+ * incoherent" — one finding, split in two, doubling the count the doctor is
+ * asked to work through and making two corrections look necessary where one
+ * was.
+ *
+ * Grouping is by target and item, and only among the model's own findings.
+ * The rules are left alone: two rule alerts on the same pair of lines are two
+ * different problems by construction (the same molecule twice, AND above the
+ * daily ceiling), and each needs its own answer.
+ *
+ * Nothing is thrown away. The severest alert carries the card, and the other
+ * wordings are appended, so a second angle on the same problem is still read
+ * — it just no longer counts as a second problem.
+ */
+function joinDistinct(parts: (string | undefined)[]): string {
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const part of parts) {
+    const text = (part || "").trim()
+    if (!text) continue
+    const key = normalise(text)
+    if (!key || seen.has(key)) continue
+    seen.add(key)
+    out.push(text)
+  }
+  return out.join(" ")
+}
+
+function collapseAiAlerts(alerts: ReviewAlert[]): ReviewAlert[] {
+  const groups = new Map<string, ReviewAlert[]>()
+  const order: string[] = []
+
+  for (const alert of alerts) {
+    const key = `${alert.target}|${normalise(alert.item)}`
+    if (!groups.has(key)) {
+      groups.set(key, [])
+      order.push(key)
+    }
+    groups.get(key)!.push(alert)
+  }
+
+  return order.map((key) => {
+    const group = groups.get(key)!
+    if (group.length === 1) return group[0]
+
+    const worst = [...group].sort(
+      (a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity],
+    )[0]
+
+    return {
+      ...worst,
+      message: joinDistinct(group.map((a) => a.message)),
+      messageEn: joinDistinct(group.map((a) => a.messageEn)),
+      suggestion: joinDistinct(group.map((a) => a.suggestion)),
+      suggestionEn: joinDistinct(group.map((a) => a.suggestionEn)),
+    }
+  })
+}
+
 export function mergeAlerts(ruleAlerts: ReviewAlert[], aiAlerts: ReviewAlert[]): ReviewAlert[] {
   const seen = new Set(ruleAlerts.map((a) => `${a.issue}|${normalise(a.item)}`))
 
@@ -1120,7 +1183,7 @@ export function mergeAlerts(ruleAlerts: ReviewAlert[], aiAlerts: ReviewAlert[]):
       .filter(Boolean),
   })).filter((f) => f.items.length > 0)
 
-  const merged = [...ruleAlerts]
+  const keptAi: ReviewAlert[] = []
   for (const a of aiAlerts) {
     const key = `${a.issue}|${normalise(a.item)}`
     if (seen.has(key)) continue
@@ -1134,7 +1197,7 @@ export function mergeAlerts(ruleAlerts: ReviewAlert[], aiAlerts: ReviewAlert[]):
     if (alreadyOwned) continue
 
     seen.add(key)
-    merged.push(a)
+    keptAi.push(a)
   }
-  return sortAlerts(merged)
+  return sortAlerts([...ruleAlerts, ...collapseAiAlerts(keptAi)])
 }
