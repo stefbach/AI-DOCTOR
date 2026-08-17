@@ -333,8 +333,13 @@ export function touchedMedicationLabels(diff: SnapshotDiff | null | undefined): 
 export function medLabel(m: MedicationSnapshot): string {
   // A placeholder strength ("Dose individuelle") in the label reads as a real
   // dose and makes every alert about that line confusing — drop it.
-  const dose = m.dosage && !isPlaceholderDose(m.dosage) ? m.dosage : ""
-  return [m.nom || m.dci, dose].filter(Boolean).join(" ") || "Médicament sans nom"
+  const name = m.nom || m.dci
+  let dose = m.dosage && !isPlaceholderDose(m.dosage) ? m.dosage : ""
+  // Not twice. When the name already carries a strength the label came out as
+  // "Atorvastatin 80mg 20mg" — which is the alert's own title, on an alert
+  // about those two doses contradicting each other, and it reads like a third.
+  if (dose && strengthsInName(name).length === 1) dose = ""
+  return [name, dose].filter(Boolean).join(" ") || "Médicament sans nom"
 }
 
 export function imagingLabel(e: ImagingSnapshot): string {
