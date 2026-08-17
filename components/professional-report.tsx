@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "@/components/ui/use-toast"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import TriageBanner from '@/components/triage-banner'
-import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, buildEmergencyTransferNotice, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
+import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, buildEmergencyTransferNotice, buildEmergencyManagementPlan, buildEmergencyFollowUpPlan, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
 import { createClient } from '@supabase/supabase-js'
 import {
  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube,
@@ -2805,11 +2805,29 @@ if (isRenewal) {
  // will order what it needs. The doctor is not blocked — the tabs stay
  // editable and the add paths rebuild the structure — but the system stops
  // proposing documents that work against its own instruction.
+ //
+ // Dropping the documents is not enough on its own. The narrative is written
+ // server-side FROM those documents, before this runs, so the management and
+ // follow-up plans go on describing a regimen in prose that no longer exists
+ // on paper. Both are rewritten here for the same reason the documents are
+ // dropped: the report must say one thing, and that thing is transfer.
  const emergencyTriage = resolveTriage(diagnosisData)
  if (emergencyTriage.level === 'emergency') {
    console.log('🚨 Emergency case — dropping prescriptions, labs and imaging from the report')
+   // Kept in the console rather than the document: the doctor needs a report
+   // that reads straight, but a dropped plan should still be traceable when
+   // someone asks afterwards what the model had proposed.
+   console.log('🚨 Management plan replaced. Model proposal was:',
+     reportData.compteRendu.rapport.priseEnCharge || '(empty)')
+   console.log('🚨 Follow-up plan replaced. Model proposal was:',
+     reportData.compteRendu.rapport.surveillance || '(empty)')
+
    reportData.compteRendu.rapport.urgenceHospitaliere =
      buildEmergencyTransferNotice(emergencyTriage)
+   reportData.compteRendu.rapport.priseEnCharge =
+     buildEmergencyManagementPlan(emergencyTriage)
+   reportData.compteRendu.rapport.surveillance =
+     buildEmergencyFollowUpPlan(emergencyTriage)
    reportData.ordonnances.medicaments = null
    reportData.ordonnances.biologie = null
    reportData.ordonnances.imagerie = null
@@ -5576,7 +5594,9 @@ const ConsultationReport = () => {
  // First, when it exists: an emergency transfer is the only thing that
  // matters on the page, and it explains the absence of prescriptions below.
  ...(getReportRapport()?.urgenceHospitaliere
-   ? [{ key: 'urgenceHospitaliere', title: "⚠️ PRISE EN CHARGE URGENTE — TRANSFERT HOSPITALIER" }]
+   // English, like every other title on this page: the document is issued in
+   // English and a single French heading in the middle of it reads as a bug.
+   ? [{ key: 'urgenceHospitaliere', title: "⚠️ URGENT CARE REQUIRED — IMMEDIATE HOSPITAL TRANSFER" }]
    : []),
  { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
  { key: 'anamnese', title: 'HISTORY OF PRESENT ILLNESS' },

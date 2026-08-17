@@ -216,26 +216,69 @@ export function computeFollowUp(input: FollowUpInput): FollowUpPlan | null {
  */
 export function buildEmergencyTransferNotice(triage: ResolvedTriage): string {
   const lines: string[] = [
-    "PRISE EN CHARGE MÉDICALE IMMÉDIATE REQUISE — TRANSFERT HOSPITALIER SANS DÉLAI.",
+    "IMMEDIATE MEDICAL CARE REQUIRED — HOSPITAL TRANSFER WITHOUT DELAY.",
     "",
-    "Cette consultation ne donne lieu à aucune prescription médicamenteuse, ni à aucune demande d'analyse ou d'imagerie de ville. Le bilan et le traitement relèvent de la structure hospitalière qui prendra le patient en charge : prescrire en parallèle retarderait ce transfert et exposerait le patient à un traitement décidé sans les examens qui doivent le guider.",
+    "This consultation issues no prescription, and no community laboratory or imaging request. Investigation and treatment are the responsibility of the receiving hospital: prescribing in parallel would delay the transfer and commit the patient to a treatment decided without the investigations that must guide it.",
   ]
 
   if (triage.justification) {
-    lines.push("", `Motif de l'orientation : ${triage.justification}`)
+    lines.push("", `Reason for referral: ${triage.justification}`)
   }
 
   if (triage.criteriaMet.length > 0) {
-    lines.push("", "Critères d'urgence retenus :")
+    lines.push("", "Emergency criteria met:")
     for (const criterion of triage.criteriaMet) lines.push(`• ${criterion}`)
   }
 
   lines.push(
     "",
-    "Le patient doit être informé de se rendre immédiatement aux urgences, ou un transport sanitaire doit être organisé selon son état.",
+    "The patient must be instructed to attend Accident & Emergency immediately, or ambulance transport arranged according to their condition.",
   )
 
   return lines.join("\n")
+}
+
+/**
+ * The MANAGEMENT PLAN of an emergency report.
+ *
+ * The narrative is written server-side from the medications the diagnostic
+ * model proposed, and the emergency policy drops those medications afterwards,
+ * client-side. Left alone, the report then states in prose that a four-drug
+ * regimen "has been prescribed" while carrying no prescription at all — the
+ * most dangerous kind of inconsistency, because the prose is what a hospital
+ * reads to know what the patient has already been given.
+ *
+ * So on an emergency the plan is replaced by what the plan actually is:
+ * transfer. Deliberately short — the criteria and the justification are set
+ * out in the transfer notice at the top of the report and repeating them here
+ * turns a decision into noise.
+ */
+export function buildEmergencyManagementPlan(_triage: ResolvedTriage): string {
+  return [
+    "Immediate transfer to hospital is the management of this case.",
+    "",
+    "No medication has been prescribed and no investigation has been requested at this teleconsultation. Any treatment already taken by the patient is recorded in the history above; nothing has been added to it here. The receiving unit is to order the investigations and start the treatment its own assessment indicates.",
+    "",
+    "Should the transfer be refused or delayed for any reason, the case must be reassessed by a physician in person — it cannot be managed remotely on the basis of this consultation.",
+  ].join("\n")
+}
+
+/**
+ * The FOLLOW-UP PLAN of an emergency report.
+ *
+ * Same reasoning as the management plan, with one addition: this service may
+ * still schedule a review consultation on an emergency case (see
+ * `computeFollowUp`), and that appointment must never read as an alternative
+ * to attending A&E. It comes after hospital care, not instead of it.
+ */
+export function buildEmergencyFollowUpPlan(_triage: ResolvedTriage): string {
+  return [
+    "Follow-up is the responsibility of the receiving hospital for as long as the patient is in its care.",
+    "",
+    "Any review consultation scheduled through this service is intended to take stock once that care has taken place. It is not an alternative to attending, and must not be waited for.",
+    "",
+    "If the patient's condition worsens on the way, or if they have not been seen at hospital, emergency services are to be called without further delay.",
+  ].join("\n")
 }
 
 /** Human-readable delay, e.g. "48 h" / "3 jours". */
