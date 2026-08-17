@@ -220,10 +220,42 @@ whether a drug suits THIS patient and THIS diagnosis, whether it breaches a
 precaution the report itself states, whether an investigation is relevant,
 whether the narrative still holds together.
 
+None of this silences the relevance question below. A line may be perfectly
+complete — every field filled, nothing arithmetically wrong — and still have
+no business being on the document. That judgement is yours alone; no rule can
+make it.
+
+FIRST, FOR EVERY ORDERED ITEM: DOES THE CASE JUSTIFY IT?
+
+Before anything else, take each medication, each laboratory test and each
+imaging study above, one at a time, and answer one question: does the
+documented presentation, history and diagnosis justify ordering THIS, for THIS
+patient, today? Not "is it written correctly" — is it warranted at all.
+
+A blank, vague or copied indication field is NOT the finding. It is the reason
+you have to judge the item on the case itself. Asking the doctor to "add an
+indication" for an investigation the case does not warrant sends them to
+write a justification for something that should be removed. If the case does
+not support it, say that; mention the missing indication only where the item
+is otherwise reasonable and the wording is genuinely all that is missing.
+
+A real review failed exactly here: a cerebral CT was added for a febrile
+headache with no neurological sign, and the only alert returned was that its
+indication was not specified. The question the doctor needed answered was
+whether the scan was warranted.
+
+Hold an investigation to a higher bar the more it costs the patient: ionising
+radiation, iodinated contrast, an invasive sample, a long wait for a result
+that changes nothing. A test whose result cannot change today's management is
+not indicated, however harmless it is.
+
+Say the same for the reverse: an investigation the diagnosis plainly demands
+and that nobody ordered.
+
 WHAT TO LOOK FOR
 1. Medication safety: therapeutic duplication (including a branded combination product that repeats a molecule already prescribed), drug-drug interaction with the prescribed list or the patient's existing medications, contraindication given the age/sex/history/allergies, dose or duration inappropriate for the indication, wrong galenic form or route for the stated posology.
 2. A drug that contradicts a precaution the report itself states. The management plan below may explicitly rule a drug class out — "avoid NSAIDs pending dengue exclusion", "no muscle relaxant because of drowsiness" — and a prescription line may breach it. Pay particular attention when the breach is hidden inside a combination product whose name names none of its ingredients, and say which ingredient creates the conflict. Where a brand has different formulations by country, say so rather than assuming one.
-3. Clinical relevance: a drug, lab test or imaging study that does not correspond to the documented presentation and diagnosis — either not indicated, or a needed one obviously missing given the diagnosis.
+3. Clinical relevance — the pass described above, and the one most often skipped. A drug, lab test or imaging study that the documented presentation and diagnosis do not support, or one they plainly demand and nobody ordered. An investigation ordered without a case for it is at least "major" when it exposes the patient to radiation, contrast or an invasive sample; "minor" only when it is harmless and merely useless.
 4. Diagnostic and narrative coherence: a diagnosis or a rewritten section that contradicts the documented symptoms, examination findings, or the treatment actually prescribed. Only flag a genuine clinical contradiction — never a matter of wording, length or style.
 
 SEVERITY
