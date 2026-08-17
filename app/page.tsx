@@ -26,6 +26,7 @@ import { consultationDataService } from '@/lib/consultation-data-service'
 import { supabase } from '@/lib/supabase'
 import { useTibokBridge } from '@/hooks/use-tibok-bridge'
 import ConsultationTimerBar from '@/components/consultation-timer-bar'
+import ViewportLayer from '@/components/viewport-layer'
 import {
   type TimerState,
   SECTION_BY_STEP,
@@ -1005,12 +1006,15 @@ const handlePrevious = () => {
 
           <Progress value={progress} className="mb-3 sm:mb-4 h-2 sm:h-3 bg-blue-100" />
 
-          {/* In the flow, at the top, next to the step chips — where the doctor
-              already looks. Not fixed-positioned: inside the TIBOK iframe that
-              anchors to the iframe's full height, not to what is on screen. */}
-          <div className="mb-4 sm:mb-6 md:mb-8">
-            <ConsultationTimerBar state={timer} aiBusy={aiBusy} language="fr" />
-          </div>
+          {/* Pinned to the top of the viewport, so it stays in sight while the
+              doctor scrolls through a long form. It carries no controls and
+              the layer takes no pointer events, so it cannot intercept a
+              click meant for the page beneath it. */}
+          {timer && (
+            <ViewportLayer className="top-2 left-1/2 -translate-x-1/2 max-w-[96vw]">
+              <ConsultationTimerBar state={timer} aiBusy={aiBusy} language="fr" />
+            </ViewportLayer>
+          )}
 
           {/* Mobile: Horizontal scroll, Tablet+: Grid */}
           <div className={`flex overflow-x-auto pb-2 gap-3 sm:grid ${isNurse ? 'sm:grid-cols-3 md:grid-cols-3' : 'sm:grid-cols-3 md:grid-cols-5'} sm:gap-4 sm:overflow-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0`}>

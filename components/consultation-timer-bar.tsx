@@ -75,7 +75,7 @@ export default function ConsultationTimerBar({
     <div className="flex flex-wrap items-center gap-2 print:hidden">
       <div
         className={cn(
-          "flex items-center gap-2 rounded-lg border px-3 py-1.5",
+          "flex items-center gap-2 rounded-lg border px-3 py-1.5 shadow-lg",
           TONE[totalStatus],
         )}
       >
@@ -89,7 +89,7 @@ export default function ConsultationTimerBar({
       {section && (
         <div
           className={cn(
-            "flex items-center gap-2 rounded-lg border px-3 py-1.5",
+            "flex items-center gap-2 rounded-lg border px-3 py-1.5 shadow-lg",
             TONE[sectionStat],
           )}
         >
@@ -107,18 +107,18 @@ export default function ConsultationTimerBar({
           reason it is moving. Without this the doctor watches the number climb
           during a three-minute generation and reads it as their own delay. */}
       {aiBusy && state.endedAt == null && (
-        <div className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-blue-900">
+        <div className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-blue-900 shadow-lg">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
           <span className="text-xs font-medium">{t.ai}</span>
         </div>
       )}
 
       {totalStatus === "over" && state.endedAt == null && (
-        <span className="text-xs font-medium text-red-700">{t.over}</span>
+        <span className="rounded bg-white/90 px-2 py-1 text-xs font-medium text-red-700 shadow">{t.over}</span>
       )}
 
       {state.endedAt != null && (
-        <span className="text-xs font-medium text-gray-600">{t.done}</span>
+        <span className="rounded bg-white/90 px-2 py-1 text-xs font-medium text-gray-600 shadow">{t.done}</span>
       )}
     </div>
   )

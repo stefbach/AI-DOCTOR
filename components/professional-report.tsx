@@ -1,6 +1,7 @@
 "use client"
 // import MedicalAIAssistant from './MedicalAIAssistant'
 import { markAiCallStart } from "@/lib/consultation-timer"
+import ViewportLayer from "@/components/viewport-layer"
 import { useState, useEffect, useCallback, useMemo, memo, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -7228,23 +7229,25 @@ const [localSickLeave, setLocalSickLeave] = useState({
  }
 
  /**
-  * One save status, in one place, always on screen.
+  * One save status, pinned to the bottom of the viewport.
   *
-  * It lived bottom-left in `position: fixed` — which, inside the TIBOK iframe,
-  * anchors to the iframe's full height rather than to what the doctor can see,
-  * so it only appeared after scrolling to the very bottom. Worse, the "Save
-  * Changes" button was fixed to the same corner and the status panel painted
-  * over it: the banner told the doctor to press a button it was covering.
+  * It was `position: fixed` here before and did not stay in view — not because
+  * of the iframe, as first supposed, but because every step renders inside a
+  * card carrying `glass-card` (`backdrop-filter`), `overflow-hidden` and
+  * `hover-lift` (`transform`). Each of those makes the card the containing
+  * block for a fixed descendant, and the card then clips it. So it is
+  * portalled out of the tree entirely.
   *
-  * It now sits in the actions bar, in the normal flow, next to the Edit
-  * toggle — where the doctor already is when they change something.
+  * At the bottom rather than the top: a doctor typing into a field near the
+  * end of a long report needs to see their change land without scrolling back
+  * up to look for it.
   */
  const SaveStatus = () => {
  if (validationStatus === 'validated') return null
 
  if (saveStatus === 'saving') {
  return (
- <span className="flex items-center gap-1.5 rounded-md bg-blue-50 px-2.5 py-1 text-sm font-medium text-blue-800">
+ <span className="flex items-center gap-1.5 rounded-md bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-800 pointer-events-auto border border-blue-300 shadow-lg">
  <Loader2 className="h-3.5 w-3.5 animate-spin" />
  Enregistrement…
  </span>
@@ -7253,7 +7256,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
 
  if (hasUnsavedChanges && !canPersist) {
  return (
- <span className="flex items-center gap-1.5 rounded-md bg-red-50 px-2.5 py-1 text-sm font-medium text-red-900">
+ <span className="flex items-center gap-1.5 rounded-md bg-red-50 px-3 py-1.5 text-sm font-medium text-red-900 pointer-events-auto border border-red-300 shadow-lg">
  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
  Enregistrement impossible — cette page n'est rattachée à aucune consultation
  </span>
@@ -7262,7 +7265,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
 
  if (hasUnsavedChanges) {
  return (
- <span className="flex flex-wrap items-center gap-1.5 rounded-md bg-amber-50 px-2.5 py-1 text-sm font-medium text-amber-900">
+ <span className="flex flex-wrap items-center gap-1.5 rounded-md bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-900 pointer-events-auto border border-amber-300 shadow-lg">
  <Clock className="h-3.5 w-3.5 shrink-0" />
  Enregistrement dans quelques secondes…
  <Button
@@ -7280,7 +7283,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
 
  if (lastSavedAt) {
  return (
- <span className="flex items-center gap-1.5 rounded-md bg-teal-50 px-2.5 py-1 text-sm font-medium text-teal-800">
+ <span className="flex items-center gap-1.5 rounded-md bg-teal-50 px-3 py-1.5 text-sm font-medium text-teal-800 pointer-events-auto border border-teal-300 shadow-lg">
  <CheckCircle className="h-3.5 w-3.5" />
  Enregistré à {lastSavedAt.toLocaleTimeString('fr-FR')}
  </span>
@@ -7289,6 +7292,13 @@ const [localSickLeave, setLocalSickLeave] = useState({
 
  return null
  }
+
+ /** Pinned above the page rather than in it — see SaveStatus. */
+ const FloatingSaveStatus = () => (
+   <ViewportLayer className="bottom-3 left-1/2 -translate-x-1/2 max-w-[96vw]">
+     <SaveStatus />
+   </ViewportLayer>
+ )
 
  const ActionsBar = () => {
  const metadata = getReportMetadata()
@@ -7442,6 +7452,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
    onGoToTarget={handleReviewGoToTarget}
  />
  <ActionsBar />
+ <FloatingSaveStatus />
  <DoctorInfoEditor />
  <PrescriptionStats />
 
