@@ -34,6 +34,7 @@ import {
   extractPatientContext,
   extractReviewSnapshot,
   isBlocking,
+  narrativeLabel,
 } from '@/lib/prescription-review'
 import EvidenceReferencesSection from './rag/evidence-references-section'
 import { renderWithCitations, aggregateReferences, SectionBibliography } from './rag/citation-renderer'
@@ -3194,6 +3195,14 @@ const handleReviewProceed = async (justification: string) => {
   )
 }
 
+// What the review dialog offers to correct. Recomputed from the report itself
+// rather than frozen when the review ran, so a line the doctor has just fixed
+// from inside the dialog shows its new value if they open the editor again.
+const reviewSnapshot = useMemo(
+  () => (report ? extractReviewSnapshot(report) : { medications: [], laboratory: [], imaging: [], narrative: {} }),
+  [report],
+)
+
 // Apply a correction made from inside the review dialog. The dialog sends only
 // the fields the doctor touched; the rest of the line is preserved.
 const handleReviewMedicationEdit = (index: number, patch: Record<string, any>) => {
@@ -3211,9 +3220,81 @@ const handleReviewMedicationEdit = (index: number, patch: Record<string, any>) =
   })
 }
 
-// The alert concerns something not editable in the dialog (a lab, an imaging
-// study, a narrative section). Close, switch to edit mode, and land the doctor
-// on the right tab rather than leaving them to hunt for it.
+const handleReviewLabEdit = (category: string, index: number, patch: Record<string, any>) => {
+  const current = report?.ordonnances?.biologie?.prescription?.analyses?.[category]?.[index]
+  if (!current) {
+    console.error('⚠️ Review edit: no lab test at', category, index)
+    return
+  }
+  updateBiologyTestBatch(category, index, { ...current, ...patch })
+  trackModification(`biologie.${category}.${index}`)
+  toast({
+    title: "✅ Analyse corrigée",
+    description: `${patch.nom || current.nom || 'Analyse'} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+const handleReviewImagingEdit = (index: number, patch: Record<string, any>) => {
+  const current = report?.ordonnances?.imagerie?.prescription?.examens?.[index]
+  if (!current) {
+    console.error('⚠️ Review edit: no imaging study at index', index)
+    return
+  }
+  updateImagingExamBatch(index, { ...current, ...patch })
+  trackModification(`imagerie.${index}`)
+  toast({
+    title: "✅ Examen corrigé",
+    description: `${patch.type || current.type || 'Examen'} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+const handleReviewNarrativeEdit = (section: string, value: string) => {
+  updateRapportSection(section, value)
+  trackModification(`rapport.${section}`)
+  toast({
+    title: "✅ Section corrigée",
+    description: `${narrativeLabel(section, 'fr')} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+// Removal from inside the review. The dialog asks for confirmation before
+// calling this, so there is no second prompt here.
+const handleReviewRemoveMedication = (index: number) => {
+  const removed = report?.ordonnances?.medicaments?.prescription?.medicaments?.[index]
+  removeMedicament(index)
+  toast({
+    title: "🗑️ Ligne retirée",
+    description: `${removed?.nom || 'Médicament'} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+const handleReviewRemoveLab = (category: string, index: number) => {
+  const removed = report?.ordonnances?.biologie?.prescription?.analyses?.[category]?.[index]
+  removeBiologyTest(category, index)
+  toast({
+    title: "🗑️ Analyse retirée",
+    description: `${removed?.nom || 'Analyse'} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+const handleReviewRemoveImaging = (index: number) => {
+  const removed = report?.ordonnances?.imagerie?.prescription?.examens?.[index]
+  removeImagingExam(index)
+  toast({
+    title: "🗑️ Examen retiré",
+    description: `${removed?.type || 'Examen'} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+// Last resort: the alert names a kind of item the document does not contain,
+// so there is nothing to open an editor on. Close, switch to edit mode, and
+// land the doctor on the right tab rather than leaving them to hunt for it.
 const handleReviewGoToTarget = (target: string) => {
   setReviewOpen(false)
   reviewClearedRef.current = false
@@ -7201,8 +7282,17 @@ const [localSickLeave, setLocalSickLeave] = useState({
    language="fr"
    onProceed={handleReviewProceed}
    onCorrect={handleReviewCorrect}
-   medications={report ? extractReviewSnapshot(report).medications : []}
+   medications={reviewSnapshot.medications}
+   laboratory={reviewSnapshot.laboratory}
+   imaging={reviewSnapshot.imaging}
+   narrative={reviewSnapshot.narrative}
    onApplyMedicationEdit={handleReviewMedicationEdit}
+   onApplyLabEdit={handleReviewLabEdit}
+   onApplyImagingEdit={handleReviewImagingEdit}
+   onApplyNarrativeEdit={handleReviewNarrativeEdit}
+   onRemoveMedication={handleReviewRemoveMedication}
+   onRemoveLab={handleReviewRemoveLab}
+   onRemoveImaging={handleReviewRemoveImaging}
    onRecheck={() => runPrescriptionReview()}
    onGoToTarget={handleReviewGoToTarget}
  />

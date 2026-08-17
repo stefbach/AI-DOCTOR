@@ -28,6 +28,7 @@ import {
   RefreshCw,
   ShieldAlert,
   Stethoscope,
+  Trash2,
   X,
 } from "lucide-react"
 
@@ -36,12 +37,18 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import {
+  type ImagingSnapshot,
+  type LabSnapshot,
   type MedicationSnapshot,
   type ReviewAlert,
   type ReviewSeverity,
   type ReviewTarget,
+  NARRATIVE_SECTIONS,
   isBlocking,
+  imagingLabel,
+  labLabel,
   medLabel,
+  narrativeLabel,
 } from "@/lib/prescription-review"
 
 export type ReviewLanguage = "fr" | "en"
@@ -59,19 +66,35 @@ interface PrescriptionReviewDialogProps {
   onCorrect: () => void
 
   // ---- Correcting without leaving the dialog -----------------------------
-  // A doctor told to fix a prescription line had to close this, find the tab,
-  // find the line, and remember what the alert said. For a sentence buried in
-  // a report that is a long hunt. So the lines an alert names are editable
-  // here, and anything not editable here gets a button that opens the right
-  // place instead of leaving them to look for it.
+  // A doctor told to fix something had to close this, find the tab, find the
+  // line, and remember what the alert said. Prescription lines became editable
+  // here first; labs, imaging and the report's own sections kept sending the
+  // doctor away, which is the same hunt the dialog exists to remove. Every
+  // target an alert can name is now correctable in place, and the doctor is
+  // only sent back to the document when there is genuinely nothing here to
+  // correct.
 
-  /** Current prescription lines, so an alert can be matched to what it names. */
+  /** Everything an alert can name, so it can be matched to what it describes. */
   medications?: MedicationSnapshot[]
-  /** Apply a partial edit to one prescription line. */
+  laboratory?: LabSnapshot[]
+  imaging?: ImagingSnapshot[]
+  /** Report sections, keyed by report field name. */
+  narrative?: Record<string, string>
+
   onApplyMedicationEdit?: (index: number, patch: Partial<MedicationSnapshot>) => void
+  onApplyLabEdit?: (category: string, index: number, patch: Partial<LabSnapshot>) => void
+  onApplyImagingEdit?: (index: number, patch: Partial<ImagingSnapshot>) => void
+  onApplyNarrativeEdit?: (key: string, value: string) => void
+
+  // Removal, because the commonest finding about an investigation is that it
+  // is not indicated — and rewording it does not answer that.
+  onRemoveMedication?: (index: number) => void
+  onRemoveLab?: (category: string, index: number) => void
+  onRemoveImaging?: (index: number) => void
+
   /** Re-run the review after edits, since the alerts on screen are now stale. */
   onRecheck?: () => void
-  /** Close and take the doctor to the part of the document an alert concerns. */
+  /** Last resort: nothing of that kind exists to correct here. */
   onGoToTarget?: (target: ReviewTarget) => void
 }
 
@@ -112,6 +135,20 @@ const TEXT = {
     fieldPosology: "Posologie",
     fieldRoute: "Voie",
     fieldDuration: "Durée",
+    fieldTestName: "Analyse",
+    fieldCategory: "Catégorie",
+    fieldClinicalReason: "Motif clinique",
+    fieldUrgent: "Urgent",
+    fieldExamType: "Examen",
+    fieldModality: "Modalité",
+    fieldRegion: "Région",
+    fieldIndication: "Indication clinique",
+    remove: "Retirer",
+    removeConfirm: "Confirmer le retrait",
+    cancel: "Annuler",
+    pickOne: "Quelle ligne corriger ?",
+    pickSection: "Quelle section corriger ?",
+    sectionEmpty: "(section vide)",
     severity: {
       critical: "Critique",
       major: "Important",
@@ -160,6 +197,20 @@ const TEXT = {
     fieldPosology: "Posology",
     fieldRoute: "Route",
     fieldDuration: "Duration",
+    fieldTestName: "Test",
+    fieldCategory: "Category",
+    fieldClinicalReason: "Clinical indication",
+    fieldUrgent: "Urgent",
+    fieldExamType: "Examination",
+    fieldModality: "Modality",
+    fieldRegion: "Region",
+    fieldIndication: "Clinical indication",
+    remove: "Remove",
+    removeConfirm: "Confirm removal",
+    cancel: "Cancel",
+    pickOne: "Which line do you want to fix?",
+    pickSection: "Which section do you want to fix?",
+    sectionEmpty: "(empty section)",
     severity: {
       critical: "Critical",
       major: "Important",
@@ -209,26 +260,137 @@ const EDITABLE_FIELDS: { key: keyof MedicationSnapshot; label: keyof (typeof TEX
   { key: "dureeTraitement", label: "fieldDuration" },
 ]
 
-/** One prescription line, editable in place. */
-function MedicationEditor({
-  med,
+const LAB_FIELDS: { key: keyof LabSnapshot; label: keyof (typeof TEXT)["fr"] }[] = [
+  { key: "nom", label: "fieldTestName" },
+  { key: "category", label: "fieldCategory" },
+  { key: "motifClinique", label: "fieldClinicalReason" },
+]
+
+const IMAGING_FIELDS: { key: keyof ImagingSnapshot; label: keyof (typeof TEXT)["fr"] }[] = [
+  { key: "type", label: "fieldExamType" },
+  { key: "modalite", label: "fieldModality" },
+  { key: "region", label: "fieldRegion" },
+  { key: "indicationClinique", label: "fieldIndication" },
+]
+
+/**
+ * Fold a label for comparison. The model writes an alert's subject in its own
+ * words — "Dengue NS1 antigen", "the dengue serology", "Prise en charge" —
+ * while the document holds one exact spelling. Accents, case and punctuation
+ * must not decide whether the doctor gets an editor or a dead end.
+ */
+function fold(value: string): string {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+}
+
+/**
+ * Does an alert's subject name this item?
+ *
+ * Exact and loose are answered separately, because "Conclusion" is contained
+ * in "Conclusion diagnostique": on containment alone it names two sections at
+ * once, and the doctor is asked to choose between an obvious answer and a
+ * wrong one. An exact hit, when there is one, settles it.
+ *
+ * Separators are ignored on both sides, so "chest xray" and "Chest X-ray"
+ * are the same examination.
+ */
+function namesItem(alertSubjects: string[], candidates: string[]): "exact" | "loose" | false {
+  const compact = (s: string) => s.replace(/ /g, "")
+  const subjects = alertSubjects.map(fold).filter((s) => s.length >= 3)
+  const targets = candidates.map(fold).filter((s) => s.length >= 3)
+  if (!subjects.length || !targets.length) return false
+
+  if (subjects.some((s) => targets.some((c) => s === c || compact(s) === compact(c)))) return "exact"
+  if (
+    subjects.some((s) =>
+      targets.some(
+        (c) =>
+          s.includes(c) || c.includes(s) || compact(s).includes(compact(c)) || compact(c).includes(compact(s)),
+      ),
+    )
+  ) {
+    return "loose"
+  }
+  return false
+}
+
+/** Exact matches when there are any, loose ones otherwise. */
+function bestMatches<T>(items: T[], subjectsOf: (item: T) => string[], subjects: string[]): T[] {
+  const scored = items
+    .map((item) => ({ item, hit: namesItem(subjects, subjectsOf(item)) }))
+    .filter(({ hit }) => hit !== false)
+  const exact = scored.filter(({ hit }) => hit === "exact")
+  return (exact.length ? exact : scored).map(({ item }) => item)
+}
+
+/** Two-step removal: a stray click must not drop a line before signature. */
+function RemoveButton({ t, onRemove }: { t: (typeof TEXT)["fr"]; onRemove: () => void }) {
+  const [armed, setArmed] = React.useState(false)
+  if (!armed) {
+    return (
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => setArmed(true)}
+        className="h-8 border-red-300 bg-white text-xs text-red-700 hover:bg-red-50"
+      >
+        <Trash2 className="mr-1 h-3 w-3" />
+        {t.remove}
+      </Button>
+    )
+  }
+  return (
+    <div className="flex gap-1.5">
+      <Button size="sm" onClick={onRemove} className="h-8 bg-red-600 text-xs hover:bg-red-700">
+        {t.removeConfirm}
+      </Button>
+      <Button size="sm" variant="ghost" onClick={() => setArmed(false)} className="h-8 text-xs">
+        {t.cancel}
+      </Button>
+    </div>
+  )
+}
+
+/**
+ * A row of short text fields over one item, applied as a partial patch.
+ * Shared by prescription lines, laboratory tests and imaging studies: they
+ * differ only in which fields they show.
+ */
+function FieldEditor<T extends Record<string, any>>({
+  item,
+  fields,
   t,
   onApply,
+  onRemove,
+  urgentKey,
 }: {
-  med: MedicationSnapshot
+  item: T
+  fields: { key: keyof T; label: keyof (typeof TEXT)["fr"] }[]
   t: (typeof TEXT)["fr"]
-  onApply: (patch: Partial<MedicationSnapshot>) => void
+  onApply: (patch: Partial<T>) => void
+  onRemove?: () => void
+  /** When set, that boolean field gets a checkbox. */
+  urgentKey?: keyof T
 }) {
-  const [draft, setDraft] = React.useState<Partial<MedicationSnapshot>>({})
-  const value = (key: keyof MedicationSnapshot) =>
-    (draft[key] as string | undefined) ?? ((med[key] as string) || "")
+  const [draft, setDraft] = React.useState<Partial<T>>({})
+  const value = (key: keyof T) => (draft[key] as string | undefined) ?? ((item[key] as string) || "")
+  const checked = urgentKey
+    ? ((draft[urgentKey] as boolean | undefined) ?? !!item[urgentKey])
+    : false
 
   return (
     <div className="mt-2 rounded border border-gray-300 bg-white p-2">
       <div className="grid gap-2 sm:grid-cols-2">
-        {EDITABLE_FIELDS.map(({ key, label }) => (
-          <div key={key}>
-            <label className="text-[10px] font-semibold uppercase text-gray-500">{t[label] as string}</label>
+        {fields.map(({ key, label }) => (
+          <div key={String(key)}>
+            <label className="text-[10px] font-semibold uppercase text-gray-500">
+              {t[label] as string}
+            </label>
             <Input
               value={value(key)}
               onChange={(e) => setDraft((d) => ({ ...d, [key]: e.target.value }))}
@@ -238,11 +400,66 @@ function MedicationEditor({
           </div>
         ))}
       </div>
+      {urgentKey && (
+        <label className="mt-2 flex items-center gap-1.5 text-xs text-gray-700">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={(e) => setDraft((d) => ({ ...d, [urgentKey]: e.target.checked }) as Partial<T>)}
+            className="h-3.5 w-3.5"
+          />
+          {t.fieldUrgent}
+        </label>
+      )}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        <Button
+          size="sm"
+          onClick={() => onApply(draft)}
+          disabled={Object.keys(draft).length === 0}
+          className="h-8 bg-blue-600 text-xs hover:bg-blue-700"
+        >
+          {t.apply}
+        </Button>
+        {onRemove && <RemoveButton t={t} onRemove={onRemove} />}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * A report section, editable as the paragraph it is.
+ *
+ * These are the alerts that used to cost the most: a contradiction in the
+ * management plan meant closing the dialog, finding the section, and rewriting
+ * from memory what the alert had said. The alert stays on screen above the
+ * text being rewritten.
+ */
+function NarrativeEditor({
+  value,
+  t,
+  onApply,
+}: {
+  value: string
+  t: (typeof TEXT)["fr"]
+  onApply: (next: string) => void
+}) {
+  const [draft, setDraft] = React.useState(value)
+  React.useEffect(() => setDraft(value), [value])
+
+  return (
+    <div className="mt-2 rounded border border-gray-300 bg-white p-2">
+      <Textarea
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        rows={8}
+        className="text-sm"
+        placeholder={t.sectionEmpty}
+      />
       <Button
         size="sm"
         onClick={() => onApply(draft)}
-        disabled={Object.keys(draft).length === 0}
-        className="mt-2 h-8 bg-blue-600 hover:bg-blue-700"
+        disabled={draft === value}
+        className="mt-2 h-8 bg-blue-600 text-xs hover:bg-blue-700"
       >
         {t.apply}
       </Button>
@@ -255,14 +472,32 @@ function AlertCard({
   t,
   language,
   medications,
+  laboratory,
+  imaging,
+  narrative,
   onApplyMedicationEdit,
+  onApplyLabEdit,
+  onApplyImagingEdit,
+  onApplyNarrativeEdit,
+  onRemoveMedication,
+  onRemoveLab,
+  onRemoveImaging,
   onGoToTarget,
 }: {
   alert: ReviewAlert
   t: (typeof TEXT)["fr"]
   language: ReviewLanguage
   medications?: MedicationSnapshot[]
+  laboratory?: LabSnapshot[]
+  imaging?: ImagingSnapshot[]
+  narrative?: Record<string, string>
   onApplyMedicationEdit?: (index: number, patch: Partial<MedicationSnapshot>) => void
+  onApplyLabEdit?: (category: string, index: number, patch: Partial<LabSnapshot>) => void
+  onApplyImagingEdit?: (index: number, patch: Partial<ImagingSnapshot>) => void
+  onApplyNarrativeEdit?: (key: string, value: string) => void
+  onRemoveMedication?: (index: number) => void
+  onRemoveLab?: (category: string, index: number) => void
+  onRemoveImaging?: (index: number) => void
   onGoToTarget?: (target: ReviewTarget) => void
 }) {
   const style = SEVERITY_STYLES[alert.severity]
@@ -270,18 +505,80 @@ function AlertCard({
   const suggestion = language === "fr" ? alert.suggestion : alert.suggestionEn || alert.suggestion
   const [editing, setEditing] = React.useState(false)
 
-  // Match the alert to the lines it names, using the same label the rules
-  // built it from, so there is one definition of "which line is this".
-  const concerned = React.useMemo(() => {
-    if (!medications?.length) return []
-    const wanted = new Set(alert.items?.length ? alert.items : [alert.item])
-    return medications
-      .map((m, index) => ({ med: m, index }))
-      .filter(({ med }) => wanted.has(medLabel(med)))
-  }, [medications, alert])
+  const subjects = React.useMemo(
+    () => (alert.items?.length ? alert.items : [alert.item]).filter(Boolean),
+    [alert],
+  )
 
-  const canEditHere = alert.target === "medication" && concerned.length > 0 && !!onApplyMedicationEdit
+  // Which items of the alert's own kind it is about.
+  //
+  // Prescription lines are matched on the exact label the rules built the
+  // alert from — one definition of "which line is this". The other kinds come
+  // from the model, which names them in its own words, so those are matched
+  // loosely. When the loose match finds nothing, the doctor is offered the
+  // list to pick from rather than being sent back to the document: a wrong
+  // guess would silently edit the wrong test.
+  const editable = React.useMemo(() => {
+    if (alert.target === "medication") {
+      const wanted = new Set(subjects)
+      const all = (medications || []).map((med, index) => ({ med, index }))
+      // The rules build a medication alert from medLabel itself, so an exact
+      // label hit is authoritative; the loose pass only serves AI alerts.
+      const byLabel = all.filter(({ med }) => wanted.has(medLabel(med)))
+      return {
+        all,
+        matched: byLabel.length
+          ? byLabel
+          : bestMatches(all, ({ med }) => [medLabel(med), med.nom, med.dci], subjects),
+      }
+    }
+    if (alert.target === "laboratory") {
+      const all = laboratory || []
+      return {
+        all,
+        matched: bestMatches(all, (test) => [labLabel(test), test.nom, test.category], subjects),
+      }
+    }
+    if (alert.target === "imaging") {
+      const all = (imaging || []).map((exam, index) => ({ exam, index }))
+      return {
+        all,
+        matched: bestMatches(
+          all,
+          ({ exam }) => [imagingLabel(exam), exam.type, exam.modalite, exam.region],
+          subjects,
+        ),
+      }
+    }
+    // diagnosis → the report's narrative sections.
+    const present = NARRATIVE_SECTIONS.filter((s) => narrative && s.key in narrative)
+    const all = present.map((s) => ({ key: s.key, value: narrative?.[s.key] || "" }))
+    return {
+      all,
+      matched: bestMatches(
+        all,
+        ({ key }) => [key, narrativeLabel(key, "fr"), narrativeLabel(key, "en")],
+        subjects,
+      ),
+    }
+  }, [alert.target, subjects, medications, laboratory, imaging, narrative])
+
+  const handlerPresent =
+    alert.target === "medication" ? !!onApplyMedicationEdit
+    : alert.target === "laboratory" ? !!onApplyLabEdit
+    : alert.target === "imaging" ? !!onApplyImagingEdit
+    : !!onApplyNarrativeEdit
+
+  const canEditHere = handlerPresent && (editable.all as any[]).length > 0
+  // Only when there is nothing of that kind in the document at all.
   const canJump = !canEditHere && !!onGoToTarget
+
+  // Ambiguity is shown, not resolved silently: whenever more than one item is
+  // offered, the doctor is asked which — never quietly given the first.
+  const shown = (editable.matched as any[]).length ? editable.matched : editable.all
+  const ambiguous = (shown as any[]).length > 1
+
+  const done = () => setEditing(false)
 
   return (
     <div className={cn("rounded-md border p-3", style.box)}>
@@ -336,20 +633,95 @@ function AlertCard({
             </div>
           )}
 
-          {editing &&
-            concerned.map(({ med, index }) => (
-              <div key={index}>
-                <p className="mt-2 text-[11px] font-semibold text-gray-600">{medLabel(med)}</p>
-                <MedicationEditor
-                  med={med}
-                  t={t}
-                  onApply={(patch) => {
-                    onApplyMedicationEdit?.(index, patch)
-                    setEditing(false)
-                  }}
-                />
-              </div>
-            ))}
+          {editing && (
+            <div>
+              {ambiguous && (
+                <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                  {alert.target === "diagnosis" ? t.pickSection : t.pickOne}
+                </p>
+              )}
+
+              {alert.target === "medication" &&
+                (shown as { med: MedicationSnapshot; index: number }[]).map(({ med, index }) => (
+                  <div key={`med-${index}`}>
+                    <p className="mt-2 text-[11px] font-semibold text-gray-600">{medLabel(med)}</p>
+                    <FieldEditor
+                      item={med}
+                      fields={EDITABLE_FIELDS}
+                      t={t}
+                      onApply={(patch) => {
+                        onApplyMedicationEdit?.(index, patch)
+                        done()
+                      }}
+                      onRemove={
+                        onRemoveMedication ? () => { onRemoveMedication(index); done() } : undefined
+                      }
+                    />
+                  </div>
+                ))}
+
+              {alert.target === "laboratory" &&
+                (shown as LabSnapshot[]).map((test) => (
+                  <div key={`lab-${test.category}-${test.index}`}>
+                    <p className="mt-2 text-[11px] font-semibold text-gray-600">
+                      {labLabel(test)} <span className="font-normal text-gray-500">— {test.category}</span>
+                    </p>
+                    <FieldEditor
+                      item={test}
+                      fields={LAB_FIELDS}
+                      t={t}
+                      urgentKey="urgence"
+                      onApply={(patch) => {
+                        onApplyLabEdit?.(test.category, test.index, patch)
+                        done()
+                      }}
+                      onRemove={
+                        onRemoveLab
+                          ? () => { onRemoveLab(test.category, test.index); done() }
+                          : undefined
+                      }
+                    />
+                  </div>
+                ))}
+
+              {alert.target === "imaging" &&
+                (shown as { exam: ImagingSnapshot; index: number }[]).map(({ exam, index }) => (
+                  <div key={`img-${index}`}>
+                    <p className="mt-2 text-[11px] font-semibold text-gray-600">{imagingLabel(exam)}</p>
+                    <FieldEditor
+                      item={exam}
+                      fields={IMAGING_FIELDS}
+                      t={t}
+                      urgentKey="urgence"
+                      onApply={(patch) => {
+                        onApplyImagingEdit?.(index, patch)
+                        done()
+                      }}
+                      onRemove={
+                        onRemoveImaging ? () => { onRemoveImaging(index); done() } : undefined
+                      }
+                    />
+                  </div>
+                ))}
+
+              {alert.target === "diagnosis" &&
+                (shown as { key: string; value: string }[]).map(({ key, value }) => (
+                  <div key={`nar-${key}`}>
+                    <p className="mt-2 text-[11px] font-semibold text-gray-600">
+                      {narrativeLabel(key, language)}
+                    </p>
+                    <NarrativeEditor
+                      value={value}
+                      t={t}
+                      onApply={(next) => {
+                        onApplyNarrativeEdit?.(key, next)
+                        done()
+                      }}
+                    />
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -365,7 +737,16 @@ export default function PrescriptionReviewDialog({
   onProceed,
   onCorrect,
   medications,
+  laboratory,
+  imaging,
+  narrative,
   onApplyMedicationEdit,
+  onApplyLabEdit,
+  onApplyImagingEdit,
+  onApplyNarrativeEdit,
+  onRemoveMedication,
+  onRemoveLab,
+  onRemoveImaging,
   onRecheck,
   onGoToTarget,
 }: PrescriptionReviewDialogProps) {
@@ -383,6 +764,25 @@ export default function PrescriptionReviewDialog({
       setEdited(false)
     }
   }, [open, alerts])
+
+  // Every correction made from here invalidates the alerts on screen, so each
+  // handler is wrapped once rather than at each of the two call sites.
+  const editHandlers = React.useMemo(() => {
+    const flag = <A extends any[]>(fn?: (...args: A) => void) =>
+      fn ? (...args: A) => { fn(...args); setEdited(true) } : undefined
+    return {
+      onApplyMedicationEdit: flag(onApplyMedicationEdit),
+      onApplyLabEdit: flag(onApplyLabEdit),
+      onApplyImagingEdit: flag(onApplyImagingEdit),
+      onApplyNarrativeEdit: flag(onApplyNarrativeEdit),
+      onRemoveMedication: flag(onRemoveMedication),
+      onRemoveLab: flag(onRemoveLab),
+      onRemoveImaging: flag(onRemoveImaging),
+    }
+  }, [
+    onApplyMedicationEdit, onApplyLabEdit, onApplyImagingEdit, onApplyNarrativeEdit,
+    onRemoveMedication, onRemoveLab, onRemoveImaging,
+  ])
 
   const blocking = React.useMemo(() => alerts.filter(isBlocking), [alerts])
   const advisory = React.useMemo(() => alerts.filter((a) => !isBlocking(a)), [alerts])
@@ -456,14 +856,10 @@ export default function PrescriptionReviewDialog({
                         t={t}
                         language={language}
                         medications={medications}
-                        onApplyMedicationEdit={
-                          onApplyMedicationEdit
-                            ? (i, patch) => {
-                                onApplyMedicationEdit(i, patch)
-                                setEdited(true)
-                              }
-                            : undefined
-                        }
+                        laboratory={laboratory}
+                        imaging={imaging}
+                        narrative={narrative}
+                        {...editHandlers}
                         onGoToTarget={onGoToTarget}
                       />
                     ))}
@@ -479,14 +875,10 @@ export default function PrescriptionReviewDialog({
                         t={t}
                         language={language}
                         medications={medications}
-                        onApplyMedicationEdit={
-                          onApplyMedicationEdit
-                            ? (i, patch) => {
-                                onApplyMedicationEdit(i, patch)
-                                setEdited(true)
-                              }
-                            : undefined
-                        }
+                        laboratory={laboratory}
+                        imaging={imaging}
+                        narrative={narrative}
+                        {...editHandlers}
                         onGoToTarget={onGoToTarget}
                       />
                     ))}

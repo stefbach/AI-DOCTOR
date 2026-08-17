@@ -94,6 +94,8 @@ export interface MedicationSnapshot {
 
 export interface LabSnapshot {
   category: string
+  /** Position within its own category list — what an edit has to address. */
+  index: number
   nom: string
   urgence: boolean
   motifClinique: string
@@ -166,14 +168,15 @@ export function extractReviewSnapshot(report: any): ReviewSnapshot {
   if (analyses && typeof analyses === "object") {
     for (const [category, list] of Object.entries(analyses)) {
       if (!Array.isArray(list)) continue
-      for (const t of list as any[]) {
+      ;(list as any[]).forEach((t, index) => {
         laboratory.push({
           category,
+          index,
           nom: str(t?.nom || t?.name),
           urgence: t?.urgence === true || t?.urgent === true,
           motifClinique: str(t?.motifClinique || t?.clinicalIndication),
         })
-      }
+      })
     }
   }
 
@@ -336,6 +339,37 @@ export function medLabel(m: MedicationSnapshot): string {
 
 export function imagingLabel(e: ImagingSnapshot): string {
   return [e.type || e.modalite, e.region].filter(Boolean).join(" — ") || "Examen sans intitulé"
+}
+
+export function labLabel(t: LabSnapshot): string {
+  return t.nom || t.category || "Analyse sans intitulé"
+}
+
+/**
+ * The narrative sections, and what to call them.
+ *
+ * The review prompt shows the model raw field names (`priseEnCharge`), the
+ * report prints English titles ("MANAGEMENT PLAN"), and a doctor reading an
+ * alert sees neither. All three names for one section live here so an alert
+ * can be matched back to the section it is about, whichever of them the model
+ * echoed.
+ */
+export const NARRATIVE_SECTIONS: { key: string; fr: string; en: string }[] = [
+  { key: "urgenceHospitaliere", fr: "Prise en charge urgente", en: "Urgent transfer" },
+  { key: "motifConsultation", fr: "Motif de consultation", en: "Chief complaint" },
+  { key: "anamnese", fr: "Anamnèse", en: "History of present illness" },
+  { key: "antecedents", fr: "Antécédents", en: "Past medical history" },
+  { key: "examenClinique", fr: "Examen clinique", en: "Physical examination" },
+  { key: "syntheseDiagnostique", fr: "Synthèse diagnostique", en: "Diagnostic synthesis" },
+  { key: "conclusionDiagnostique", fr: "Conclusion diagnostique", en: "Diagnostic conclusion" },
+  { key: "priseEnCharge", fr: "Prise en charge", en: "Management plan" },
+  { key: "surveillance", fr: "Surveillance et suivi", en: "Follow-up plan" },
+  { key: "conclusion", fr: "Conclusion", en: "Final remarks" },
+]
+
+export function narrativeLabel(key: string, language: "fr" | "en" = "fr"): string {
+  const section = NARRATIVE_SECTIONS.find((s) => s.key === key)
+  return section ? section[language] : key
 }
 
 // ============================================================================
