@@ -162,6 +162,7 @@ const TEXT = {
     removeConfirm: "Confirmer le retrait",
     cancel: "Annuler",
     handled: "Corrigé — à revérifier",
+    noMatch: "Aucune ligne ne correspond exactement à cette alerte — choisissez celle à corriger :",
     pickOne: "Quelle ligne corriger ?",
     pickSection: "Quelle section corriger ?",
     sectionEmpty: "(section vide)",
@@ -225,6 +226,7 @@ const TEXT = {
     removeConfirm: "Confirm removal",
     cancel: "Cancel",
     handled: "Fixed — needs re-check",
+    noMatch: "No line matches this alert exactly — pick the one to fix:",
     pickOne: "Which line do you want to fix?",
     pickSection: "Which section do you want to fix?",
     sectionEmpty: "(empty section)",
@@ -540,65 +542,105 @@ function AlertCard({
   // loosely. When the loose match finds nothing, the doctor is offered the
   // list to pick from rather than being sent back to the document: a wrong
   // guess would silently edit the wrong test.
+  /**
+   * Which item the alert is about, and of what kind.
+   *
+   * The kind comes from the alert's `target`, which the model fills in and
+   * sometimes gets wrong: a real review returned an alert about "CT Scan
+   * CÉRÉBRAL" labelled `medication`. Nothing matched among the medications, so
+   * the whole list was offered as a fallback — and the list held exactly one
+   * line, Paracetamol, which then appeared under the CT scan alert as though
+   * it were the thing to fix.
+   *
+   * So the ITEM decides, not the label. The declared target is tried first;
+   * when nothing there matches, the other three are searched, and a single
+   * unambiguous hit wins. The model classifies; the item names.
+   */
   const editable = React.useMemo(() => {
-    if (alert.target === "medication") {
-      const wanted = new Set(subjects)
-      const all = (medications || []).map((med, index) => ({ med, index }))
-      // The rules build a medication alert from medLabel itself, so an exact
-      // label hit is authoritative; the loose pass only serves AI alerts.
-      const byLabel = all.filter(({ med }) => wanted.has(medLabel(med)))
-      return {
-        all,
-        matched: byLabel.length
-          ? byLabel
-          : bestMatches(all, ({ med }) => [medLabel(med), med.nom, med.dci], subjects),
+    const poolFor = (target: ReviewTarget) => {
+      if (target === "medication") {
+        const wanted = new Set(subjects)
+        const all = (medications || []).map((med, index) => ({ med, index }))
+        // The rules build a medication alert from medLabel itself, so an exact
+        // label hit is authoritative; the loose pass only serves AI alerts.
+        const byLabel = all.filter(({ med }) => wanted.has(medLabel(med)))
+        return {
+          all,
+          matched: byLabel.length
+            ? byLabel
+            : bestMatches(all, ({ med }) => [medLabel(med), med.nom, med.dci], subjects),
+        }
       }
-    }
-    if (alert.target === "laboratory") {
-      const all = laboratory || []
-      return {
-        all,
-        matched: bestMatches(all, (test) => [labLabel(test), test.nom, test.category], subjects),
+      if (target === "laboratory") {
+        const all = laboratory || []
+        return {
+          all,
+          matched: bestMatches(all, (test) => [labLabel(test), test.nom, test.category], subjects),
+        }
       }
-    }
-    if (alert.target === "imaging") {
-      const all = (imaging || []).map((exam, index) => ({ exam, index }))
+      if (target === "imaging") {
+        const all = (imaging || []).map((exam, index) => ({ exam, index }))
+        return {
+          all,
+          matched: bestMatches(
+            all,
+            ({ exam }) => [imagingLabel(exam), exam.type, exam.modalite, exam.region],
+            subjects,
+          ),
+        }
+      }
+      const present = NARRATIVE_SECTIONS.filter((s) => narrative && s.key in narrative)
+      const all = present.map((s) => ({ key: s.key, value: narrative?.[s.key] || "" }))
       return {
         all,
         matched: bestMatches(
           all,
-          ({ exam }) => [imagingLabel(exam), exam.type, exam.modalite, exam.region],
+          ({ key }) => [key, narrativeLabel(key, "fr"), narrativeLabel(key, "en")],
           subjects,
         ),
       }
     }
-    // diagnosis → the report's narrative sections.
-    const present = NARRATIVE_SECTIONS.filter((s) => narrative && s.key in narrative)
-    const all = present.map((s) => ({ key: s.key, value: narrative?.[s.key] || "" }))
-    return {
-      all,
-      matched: bestMatches(
-        all,
-        ({ key }) => [key, narrativeLabel(key, "fr"), narrativeLabel(key, "en")],
-        subjects,
-      ),
+
+    const declared = poolFor(alert.target)
+    if ((declared.matched as any[]).length) {
+      return { target: alert.target, ...declared, unmatched: false }
     }
+
+    // The label was wrong, or the item is simply not in the document. Look
+    // everywhere else before giving up.
+    const others = (["medication", "laboratory", "imaging", "diagnosis"] as ReviewTarget[])
+      .filter((t) => t !== alert.target)
+      .map((t) => ({ target: t, ...poolFor(t) }))
+      .filter((p) => (p.matched as any[]).length)
+
+    if (others.length === 1) {
+      return { ...others[0], unmatched: false }
+    }
+
+    // Nothing found, or found in several places at once. Fall back to the
+    // declared kind — and say so, because presenting an unrelated line as the
+    // answer is exactly the failure this comment exists to describe.
+    return { target: alert.target, ...declared, unmatched: true }
   }, [alert.target, subjects, medications, laboratory, imaging, narrative])
 
+  const resolvedTarget = editable.target
+
   const handlerPresent =
-    alert.target === "medication" ? !!onApplyMedicationEdit
-    : alert.target === "laboratory" ? !!onApplyLabEdit
-    : alert.target === "imaging" ? !!onApplyImagingEdit
+    resolvedTarget === "medication" ? !!onApplyMedicationEdit
+    : resolvedTarget === "laboratory" ? !!onApplyLabEdit
+    : resolvedTarget === "imaging" ? !!onApplyImagingEdit
     : !!onApplyNarrativeEdit
 
   const canEditHere = handlerPresent && (editable.all as any[]).length > 0
   // Only when there is nothing of that kind in the document at all.
   const canJump = !canEditHere && !!onGoToTarget
 
-  // Ambiguity is shown, not resolved silently: whenever more than one item is
-  // offered, the doctor is asked which — never quietly given the first.
   const shown = (editable.matched as any[]).length ? editable.matched : editable.all
-  const ambiguous = (shown as any[]).length > 1
+  // Ask which whenever the choice is not settled: several candidates, OR none
+  // matched at all. That second case used to pass silently when the document
+  // held a single line of that kind — the doctor was shown one editor and had
+  // every reason to believe it was the line the alert named.
+  const needsPicking = editable.unmatched || (shown as any[]).length > 1
 
   const done = () => {
     setEditing(false)
@@ -615,7 +657,7 @@ function AlertCard({
               {t.severity[alert.severity]}
             </span>
             <span className="rounded bg-white/70 px-1.5 py-0.5 text-[10px] font-medium text-gray-700">
-              {t.target[alert.target] || alert.target}
+              {t.target[resolvedTarget] || resolvedTarget}
             </span>
             {alert.source === "rule" && (
               <span className="rounded bg-white/70 px-1.5 py-0.5 text-[10px] font-medium text-gray-500">
@@ -654,7 +696,7 @@ function AlertCard({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => onGoToTarget?.(alert.target)}
+                  onClick={() => onGoToTarget?.(resolvedTarget)}
                   className="h-7 bg-white text-xs"
                 >
                   <ArrowRight className="mr-1 h-3 w-3" />
@@ -666,13 +708,15 @@ function AlertCard({
 
           {editing && (
             <div>
-              {ambiguous && (
+              {needsPicking && (
                 <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                  {alert.target === "diagnosis" ? t.pickSection : t.pickOne}
+                  {editable.unmatched
+                    ? t.noMatch
+                    : resolvedTarget === "diagnosis" ? t.pickSection : t.pickOne}
                 </p>
               )}
 
-              {alert.target === "medication" &&
+              {resolvedTarget === "medication" &&
                 (shown as { med: MedicationSnapshot; index: number }[]).map(({ med, index }) => (
                   <div key={`med-${index}`}>
                     <p className="mt-2 text-[11px] font-semibold text-gray-600">{medLabel(med)}</p>
@@ -691,7 +735,7 @@ function AlertCard({
                   </div>
                 ))}
 
-              {alert.target === "laboratory" &&
+              {resolvedTarget === "laboratory" &&
                 (shown as LabSnapshot[]).map((test) => (
                   <div key={`lab-${test.category}-${test.index}`}>
                     <p className="mt-2 text-[11px] font-semibold text-gray-600">
@@ -715,7 +759,7 @@ function AlertCard({
                   </div>
                 ))}
 
-              {alert.target === "imaging" &&
+              {resolvedTarget === "imaging" &&
                 (shown as { exam: ImagingSnapshot; index: number }[]).map(({ exam, index }) => (
                   <div key={`img-${index}`}>
                     <p className="mt-2 text-[11px] font-semibold text-gray-600">{imagingLabel(exam)}</p>
@@ -735,7 +779,7 @@ function AlertCard({
                   </div>
                 ))}
 
-              {alert.target === "diagnosis" &&
+              {resolvedTarget === "diagnosis" &&
                 (shown as { key: string; value: string }[]).map(({ key, value }) => (
                   <div key={`nar-${key}`}>
                     <p className="mt-2 text-[11px] font-semibold text-gray-600">
