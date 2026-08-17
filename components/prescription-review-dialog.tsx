@@ -92,6 +92,13 @@ interface PrescriptionReviewDialogProps {
   onRemoveLab?: (category: string, index: number) => void
   onRemoveImaging?: (index: number) => void
 
+  /**
+   * Identifies this review run. Local state (justification, what has been
+   * corrected) resets when it changes — and only then. The alert list itself
+   * is refreshed live as the doctor corrects, so resetting on the list would
+   * wipe a half-written justification every time they fixed a line.
+   */
+  reviewKey?: string | null
   /** Re-run the review after edits, since the alerts on screen are now stale. */
   onRecheck?: () => void
   /** Last resort: nothing of that kind exists to correct here. */
@@ -99,6 +106,14 @@ interface PrescriptionReviewDialogProps {
 }
 
 const MIN_JUSTIFICATION = 10
+
+/**
+ * Identify an alert by what it says, not by its id: ids come from a module
+ * counter and are regenerated every time the rule layer re-runs, so keying on
+ * them would remount a card — and lose an editor the doctor is typing in —
+ * each time anything else changed.
+ */
+const alertKey = (a: ReviewAlert) => `${a.severity}|${a.issue}|${a.item}`
 
 const TEXT = {
   fr: {
@@ -146,6 +161,7 @@ const TEXT = {
     remove: "Retirer",
     removeConfirm: "Confirmer le retrait",
     cancel: "Annuler",
+    handled: "Corrigé — à revérifier",
     pickOne: "Quelle ligne corriger ?",
     pickSection: "Quelle section corriger ?",
     sectionEmpty: "(section vide)",
@@ -208,6 +224,7 @@ const TEXT = {
     remove: "Remove",
     removeConfirm: "Confirm removal",
     cancel: "Cancel",
+    handled: "Fixed — needs re-check",
     pickOne: "Which line do you want to fix?",
     pickSection: "Which section do you want to fix?",
     sectionEmpty: "(empty section)",
@@ -483,6 +500,8 @@ function AlertCard({
   onRemoveLab,
   onRemoveImaging,
   onGoToTarget,
+  handled,
+  onHandled,
 }: {
   alert: ReviewAlert
   t: (typeof TEXT)["fr"]
@@ -499,6 +518,9 @@ function AlertCard({
   onRemoveLab?: (category: string, index: number) => void
   onRemoveImaging?: (index: number) => void
   onGoToTarget?: (target: ReviewTarget) => void
+  /** The doctor corrected something from this card; it describes the old text. */
+  handled?: boolean
+  onHandled?: () => void
 }) {
   const style = SEVERITY_STYLES[alert.severity]
   const message = language === "fr" ? alert.message : alert.messageEn || alert.message
@@ -578,10 +600,13 @@ function AlertCard({
   const shown = (editable.matched as any[]).length ? editable.matched : editable.all
   const ambiguous = (shown as any[]).length > 1
 
-  const done = () => setEditing(false)
+  const done = () => {
+    setEditing(false)
+    onHandled?.()
+  }
 
   return (
-    <div className={cn("rounded-md border p-3", style.box)}>
+    <div className={cn("rounded-md border p-3", style.box, handled && "opacity-60")}>
       <div className="flex items-start gap-2">
         {style.icon}
         <div className="min-w-0 flex-1">
@@ -595,6 +620,12 @@ function AlertCard({
             {alert.source === "rule" && (
               <span className="rounded bg-white/70 px-1.5 py-0.5 text-[10px] font-medium text-gray-500">
                 auto
+              </span>
+            )}
+            {handled && (
+              <span className="flex items-center gap-1 rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+                <CheckCircle2 className="h-3 w-3" />
+                {t.handled}
               </span>
             )}
           </div>
@@ -747,6 +778,7 @@ export default function PrescriptionReviewDialog({
   onRemoveMedication,
   onRemoveLab,
   onRemoveImaging,
+  reviewKey,
   onRecheck,
   onGoToTarget,
 }: PrescriptionReviewDialogProps) {
@@ -755,15 +787,22 @@ export default function PrescriptionReviewDialog({
   // Set as soon as a line is edited from here: the alerts on screen were
   // computed against the document as it was, so they no longer describe it.
   const [edited, setEdited] = React.useState(false)
+  // Which alerts the doctor has corrected from. Their text describes the
+  // document as it was, so they are dimmed and badged rather than left looking
+  // like live findings.
+  const [handled, setHandled] = React.useState<Set<string>>(new Set())
 
   // A fresh review is a fresh decision — never carry a previous justification
-  // over to a new set of alerts.
+  // over to a new one. Keyed on the review, NOT on the alert list: the rule
+  // layer now refreshes that list live as the doctor corrects, and resetting
+  // on it would wipe a half-written justification at every fix.
   React.useEffect(() => {
     if (open) {
       setJustification("")
       setEdited(false)
+      setHandled(new Set())
     }
-  }, [open, alerts])
+  }, [open, reviewKey])
 
   // Every correction made from here invalidates the alerts on screen, so each
   // handler is wrapped once rather than at each of the two call sites.
@@ -842,6 +881,24 @@ export default function PrescriptionReviewDialog({
                   </div>
                 )}
 
+                {/* Above the list, not below it: it says the alerts underneath
+                    are out of date, which is no use after reading them all. */}
+                {edited && (
+                  <div className="mt-3 flex flex-col gap-2 rounded-md border border-blue-300 bg-blue-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-xs text-blue-900">{t.edited}</p>
+                    {onRecheck && (
+                      <Button
+                        size="sm"
+                        onClick={() => onRecheck()}
+                        className="h-8 shrink-0 bg-blue-600 hover:bg-blue-700"
+                      >
+                        <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                        {t.recheck}
+                      </Button>
+                    )}
+                  </div>
+                )}
+
                 {alerts.length === 0 ? (
                   <div className="mt-4 flex items-center gap-2 rounded-md border border-green-300 bg-green-50 p-3">
                     <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
@@ -851,7 +908,7 @@ export default function PrescriptionReviewDialog({
                   <div className="mt-4 space-y-2">
                     {blocking.map((a) => (
                       <AlertCard
-                        key={a.id}
+                        key={alertKey(a)}
                         alert={a}
                         t={t}
                         language={language}
@@ -861,6 +918,10 @@ export default function PrescriptionReviewDialog({
                         narrative={narrative}
                         {...editHandlers}
                         onGoToTarget={onGoToTarget}
+                        handled={handled.has(alertKey(a))}
+                        onHandled={() =>
+                          setHandled((prev) => new Set(prev).add(alertKey(a)))
+                        }
                       />
                     ))}
                     {advisory.length > 0 && blocking.length > 0 && (
@@ -870,7 +931,7 @@ export default function PrescriptionReviewDialog({
                     )}
                     {advisory.map((a) => (
                       <AlertCard
-                        key={a.id}
+                        key={alertKey(a)}
                         alert={a}
                         t={t}
                         language={language}
@@ -880,6 +941,10 @@ export default function PrescriptionReviewDialog({
                         narrative={narrative}
                         {...editHandlers}
                         onGoToTarget={onGoToTarget}
+                        handled={handled.has(alertKey(a))}
+                        onHandled={() =>
+                          setHandled((prev) => new Set(prev).add(alertKey(a)))
+                        }
                       />
                     ))}
                   </div>
@@ -903,22 +968,6 @@ export default function PrescriptionReviewDialog({
                     />
                     {!justificationOk && justification.length > 0 && (
                       <p className="mt-1 text-[11px] text-red-600">{t.justificationTooShort}</p>
-                    )}
-                  </div>
-                )}
-
-                {edited && (
-                  <div className="mt-4 flex flex-col gap-2 rounded-md border border-blue-300 bg-blue-50 p-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-xs text-blue-900">{t.edited}</p>
-                    {onRecheck && (
-                      <Button
-                        size="sm"
-                        onClick={() => onRecheck()}
-                        className="h-8 shrink-0 bg-blue-600 hover:bg-blue-700"
-                      >
-                        <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-                        {t.recheck}
-                      </Button>
                     )}
                   </div>
                 )}

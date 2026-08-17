@@ -23,7 +23,7 @@ import {
  Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
  Trash2, AlertCircle, Lock, Unlock, Copy, ClipboardCheck, Stethoscope,
  Calendar, User, Building, CreditCard, Receipt, Brain, Mic, MicOff, RefreshCw,
- UserPlus, Activity, Heart, Scale, Droplets
+ UserPlus, Activity, Heart, Scale, Droplets, Clock
 } from "lucide-react"
 import TibokMedicalAssistant from './tibok-medical-assistant'
 import PrescriptionReviewDialog from './prescription-review-dialog'
@@ -34,7 +34,10 @@ import {
   extractPatientContext,
   extractReviewSnapshot,
   isBlocking,
+  mergeAlerts,
   narrativeLabel,
+  runDeterministicChecks,
+  touchedMedicationLabels,
 } from '@/lib/prescription-review'
 import EvidenceReferencesSection from './rag/evidence-references-section'
 import { renderWithCitations, aggregateReferences, SectionBibliography } from './rag/citation-renderer'
@@ -352,7 +355,7 @@ const DebouncedTextarea = memo(({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Auto-saving...
+ Modification prise en compte…
  </div>
  )}
  <Textarea
@@ -452,7 +455,7 @@ const MedicationEditForm = memo(({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Auto-saving...
+ Modification prise en compte…
  </div>
  )}
  </div>
@@ -675,7 +678,7 @@ const BiologyTestEditForm = memo(({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Auto-saving...
+ Modification prise en compte…
  </div>
  )}
  
@@ -842,7 +845,7 @@ const ImagingExamEditForm = memo(({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Auto-saving...
+ Modification prise en compte…
  </div>
  )}
  
@@ -1861,22 +1864,31 @@ const handleAIAddImaging = useCallback((exam: any) => {
  }, 100)
 }, [addImagingExam, updateImagingExamBatch, report])
 
-// ==================== MANUAL SAVE FUNCTION ====================
-const handleManualSave = useCallback(async () => {
+// ==================== SAVE ====================
+//
+// One write, two callers. The button calls it because the doctor asked; the
+// autosave below calls it because they stopped typing. Both go to the same
+// endpoint and land in the same state, so "saved" always means the same thing.
+//
+// `silent` suppresses the toast: an autosave firing every few seconds must not
+// stack toasts over the report the doctor is reading.
+const persistReport = useCallback(async (silent = false) => {
  const params = new URLSearchParams(window.location.search)
  const consultationId = params.get('consultationId')
- 
+
  if (!consultationId || !report) {
+ if (!silent) {
  toast({
  title: "Cannot save",
  description: "Missing consultation ID or report data",
  variant: "destructive"
  })
+ }
  return
  }
- 
+
  setSaveStatus('saving')
- 
+
  try {
  const response = await fetch('/api/save-draft', {
  method: 'POST',
@@ -1898,11 +1910,13 @@ const handleManualSave = useCallback(async () => {
  setHasUnsavedChanges(false)
  setModifiedSections(new Set())
 
+ if (!silent) {
  toast({
  title: "✅ Modifications enregistrées",
  description: "Le rapport a été sauvegardé.",
  duration: 2000
  })
+ }
 
  setTimeout(() => setSaveStatus('idle'), 3000)
  } else {
@@ -1911,13 +1925,35 @@ const handleManualSave = useCallback(async () => {
  } catch (error) {
  console.error('Save error:', error)
  setSaveStatus('idle')
+ // A failed autosave is reported too. Failing quietly would leave the
+ // doctor believing their work is safe when it is not, which is the whole
+ // reason this indicator exists.
  toast({
- title: "Save failed",
+ title: silent ? "⚠️ Enregistrement automatique échoué" : "Save failed",
  description: error instanceof Error ? error.message : "Failed to save changes",
  variant: "destructive"
  })
  }
 }, [report, doctorInfo, modifiedSections, validationStatus])
+
+const handleManualSave = useCallback(() => persistReport(false), [persistReport])
+
+// ==================== AUTOSAVE ====================
+//
+// Nothing reached the server except by pressing the button, while the text
+// fields announced "Auto-saving…" — which only ever meant "copied into the
+// page's own state". A doctor who closed the tab lost the lot, and the one
+// who read the words believed the opposite.
+//
+// This delay stacks on the fields' own 3s debounce, so a report is written
+// about five seconds after the doctor stops typing rather than on every
+// keystroke. Nothing is written once the document is signed.
+const autosaveTimerRef = useRef<NodeJS.Timeout>()
+useEffect(() => {
+ if (!hasUnsavedChanges || validationStatus === 'validated' || saveStatus === 'saving') return
+ autosaveTimerRef.current = setTimeout(() => { void persistReport(true) }, 2500)
+ return () => clearTimeout(autosaveTimerRef.current)
+}, [hasUnsavedChanges, validationStatus, saveStatus, persistReport])
  
  // ==================== LOAD DOCTOR DATA ====================
  useEffect(() => {
@@ -3116,6 +3152,40 @@ const finaliseReview = async (
 
   await handleValidation({ skipReview: true })
 }
+
+/**
+ * Keep the deterministic layer honest while the dialog is open.
+ *
+ * The alerts were computed once, when the review ran, and never again. A
+ * doctor who removed the duplicate paracetamol line kept reading an alert
+ * saying two medications contained it — the correction had worked, the screen
+ * said otherwise.
+ *
+ * The rules are a pure function of the document, so re-running them here costs
+ * nothing and an answered rule alert disappears the moment it is answered. The
+ * model's findings cannot be recomputed without another call, so they are
+ * carried over and the dialog marks the ones the doctor has acted on.
+ */
+useEffect(() => {
+  if (!reviewOpen || reviewLoading || !report) return
+
+  const snapshot = extractReviewSnapshot(report)
+  const rules = runDeterministicChecks(
+    snapshot,
+    extractPatientContext(report),
+    touchedMedicationLabels(diffSnapshots(aiBaselineRef.current, snapshot)),
+  )
+
+  setReviewAlerts((prev) => {
+    const next = mergeAlerts(rules, prev.filter((a) => a.source === 'ai'))
+    // Alert ids come from a module counter and differ on every run, so the
+    // comparison is on what an alert SAYS. Without it this would set state on
+    // every render and loop.
+    const signature = (list: ReviewAlert[]) =>
+      list.map((a) => `${a.severity}|${a.issue}|${a.item}`).join('§')
+    return signature(prev) === signature(next) ? prev : next
+  })
+}, [report, reviewOpen, reviewLoading])
 
 const runPrescriptionReview = async () => {
   if (!report) return
@@ -6852,7 +6922,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Auto-saving...
+ Modification prise en compte…
  </div>
  )}
  
@@ -7134,9 +7204,63 @@ const [localSickLeave, setLocalSickLeave] = useState({
  )
  }
 
+ /**
+  * One save status, in one place, always on screen.
+  *
+  * It lived bottom-left in `position: fixed` — which, inside the TIBOK iframe,
+  * anchors to the iframe's full height rather than to what the doctor can see,
+  * so it only appeared after scrolling to the very bottom. Worse, the "Save
+  * Changes" button was fixed to the same corner and the status panel painted
+  * over it: the banner told the doctor to press a button it was covering.
+  *
+  * It now sits in the actions bar, in the normal flow, next to the Edit
+  * toggle — where the doctor already is when they change something.
+  */
+ const SaveStatus = () => {
+ if (validationStatus === 'validated') return null
+
+ if (saveStatus === 'saving') {
+ return (
+ <span className="flex items-center gap-1.5 rounded-md bg-blue-50 px-2.5 py-1 text-sm font-medium text-blue-800">
+ <Loader2 className="h-3.5 w-3.5 animate-spin" />
+ Enregistrement…
+ </span>
+ )
+ }
+
+ if (hasUnsavedChanges) {
+ return (
+ <span className="flex flex-wrap items-center gap-1.5 rounded-md bg-amber-50 px-2.5 py-1 text-sm font-medium text-amber-900">
+ <Clock className="h-3.5 w-3.5 shrink-0" />
+ Enregistrement dans quelques secondes…
+ <Button
+   size="sm"
+   variant="outline"
+   onClick={handleManualSave}
+   className="ml-1 h-6 border-amber-400 bg-white px-2 text-xs text-amber-900"
+ >
+   <Save className="mr-1 h-3 w-3" />
+   Enregistrer maintenant
+ </Button>
+ </span>
+ )
+ }
+
+ if (lastSavedAt) {
+ return (
+ <span className="flex items-center gap-1.5 rounded-md bg-teal-50 px-2.5 py-1 text-sm font-medium text-teal-800">
+ <CheckCircle className="h-3.5 w-3.5" />
+ Enregistré à {lastSavedAt.toLocaleTimeString('fr-FR')}
+ </span>
+ )
+ }
+
+ return null
+ }
+
  const ActionsBar = () => {
  const metadata = getReportMetadata()
- 
+
  return (
  <Card className="print:hidden">
  <CardContent className="p-4">
@@ -7160,6 +7284,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <span className="text-sm text-gray-600">
  {metadata.wordCount} words
  </span>
+ <SaveStatus />
  </div>
  <div className="flex flex-wrap gap-2 w-full md:w-auto">
  <Button
@@ -7198,19 +7323,6 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </div>
  </CardContent>
  </Card>
- )
- }
-
- const UnsavedChangesAlert = () => {
- if (!hasUnsavedChanges || validationStatus === 'validated') return null
-
- return (
- <Alert className="print:hidden">
- <AlertTriangle className="h-4 w-4" />
- <AlertDescription>
- You have unsaved changes. Click the Save button or press Ctrl+S to save.
- </AlertDescription>
- </Alert>
  )
  }
 
@@ -7293,11 +7405,11 @@ const [localSickLeave, setLocalSickLeave] = useState({
    onRemoveMedication={handleReviewRemoveMedication}
    onRemoveLab={handleReviewRemoveLab}
    onRemoveImaging={handleReviewRemoveImaging}
+   reviewKey={reviewId}
    onRecheck={() => runPrescriptionReview()}
    onGoToTarget={handleReviewGoToTarget}
  />
  <ActionsBar />
- <UnsavedChangesAlert />
  <DoctorInfoEditor />
  <PrescriptionStats />
 
@@ -7905,62 +8017,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </div>
 )}
 
- {/* Manual Save Button (positioned left) */}
- {hasUnsavedChanges && (
- <div className="fixed bottom-4 left-4 z-50">
- <Button
- onClick={handleManualSave}
- className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
- size="lg"
- >
- <Save className="h-5 w-5 mr-2" />
- Save Changes
- </Button>
- </div>
- )}
-
- {/*
-   One persistent status, in one place.
-
-   There used to be three indicators in two corners: "Saving..." and "Saved!"
-   bottom-left, both gone after three seconds, and "Unsaved changes" top-left.
-   Nothing told a doctor, at an arbitrary moment, whether what they had typed
-   was in the database — and nothing is, until they press Save; the 3s debounce
-   on the text fields only moves the value into the page's own state.
-
-   So: it always says which of the three states applies, it names the time of
-   the last real write, and it stays.
- */}
- {(saveStatus === 'saving' || hasUnsavedChanges || lastSavedAt) && (
- <div className="fixed bottom-4 left-4 z-50 print:hidden">
-   {saveStatus === 'saving' ? (
-     <div className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white shadow-lg">
-       <Loader2 className="h-4 w-4 animate-spin" />
-       <span className="text-sm font-medium">Enregistrement en cours…</span>
-     </div>
-   ) : hasUnsavedChanges ? (
-     <div className="flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-amber-950 shadow-lg">
-       <AlertTriangle className="h-4 w-4 shrink-0" />
-       <div className="text-sm leading-tight">
-         <div className="font-semibold">Modifications non enregistrées</div>
-         <div className="text-xs opacity-90">
-           Cliquez sur « Save Changes » pour les sauvegarder
-           {lastSavedAt && ` · dernier enregistrement à ${lastSavedAt.toLocaleTimeString('fr-FR')}`}
-         </div>
-       </div>
-     </div>
-   ) : (
-     <div className="flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-white shadow-lg">
-       <CheckCircle className="h-4 w-4 shrink-0" />
-       <span className="text-sm font-medium">
-         Enregistré à {lastSavedAt?.toLocaleTimeString('fr-FR')}
-       </span>
-     </div>
-   )}
- </div>
- )}
-
-{/* TIBOK Medical Assistant is now integrated as a tab - see AI Assistant tab */}
+ {/* TIBOK Medical Assistant is now integrated as a tab - see AI Assistant tab */}
 
 {/* Referral Modal */}
 <Dialog open={showReferralModal} onOpenChange={setShowReferralModal}>
