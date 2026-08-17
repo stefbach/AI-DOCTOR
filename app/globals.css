@@ -266,6 +266,32 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
+
+  /* The consultation clock, once past its budget.
+     
+     A slow breath, not a blink: 2.4s a cycle and 6% of scale. Fast flashing on
+     something permanently on screen stops being a signal and becomes an
+     irritant, and a doctor cannot look away from it — it sits above the
+     consultation for as long as they run late.
+     
+     The transform is on the pill, never on the fixed layer around it: a
+     transform makes an element the containing block for fixed descendants,
+     which is the bug that pinned the save indicator to a card instead of the
+     viewport. */
+  @keyframes timer-over-budget {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.06); }
+  }
+
+  .timer-over-budget {
+    animation: timer-over-budget 2.4s ease-in-out infinite;
+  }
+
+  /* Some people get motion sick, and a doctor mid-consultation cannot leave. */
+  @media (prefers-reduced-motion: reduce) {
+    .timer-over-budget { animation: none; }
+  }
+
   /* Smooth transitions */
   .smooth-transition {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

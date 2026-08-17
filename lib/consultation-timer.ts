@@ -34,7 +34,7 @@ export const SECTION_LABELS: Record<TimerSection, { fr: string; en: string }> = 
   patientInfo: { fr: "Informations patient", en: "Patient information" },
   clinicalData: { fr: "Données cliniques", en: "Clinical data" },
   questions: { fr: "Questions", en: "Questions" },
-  diagnosis: { fr: "Diagnostic", en: "Diagnosis" },
+  diagnosis: { fr: "Préparation du dossier", en: "Preparing the record" },
   medicalRecord: { fr: "Dossier médical", en: "Medical record" },
 }
 
@@ -47,7 +47,11 @@ export const SECTION_BUDGET_SECONDS: Record<TimerSection, number> = {
   patientInfo: 2 * 60,
   clinicalData: 3 * 60,
   questions: 1 * 60,
-  diagnosis: 1 * 60,
+  // No budget: the doctor does not work during this step, the machine does.
+  // It is still measured and still shown — they should see how long they are
+  // being made to wait — but timing it against a target would mark them late
+  // for something they cannot influence. Zero means "measure, do not judge".
+  diagnosis: 0,
   medicalRecord: 5 * 60,
 }
 

@@ -84,6 +84,9 @@ export default function ConsultationTimerBar({
         className={cn(
           "flex shrink-0 items-center gap-1 rounded-lg border px-2 py-1 shadow-lg sm:gap-2 sm:px-3 sm:py-1.5",
           TONE[totalStatus],
+          // Past the target it breathes, slowly, so a doctor who has stopped
+          // reading the number still registers the colour.
+          totalStatus === "over" && state.endedAt == null && "timer-over-budget",
         )}
       >
         <Clock className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
@@ -100,6 +103,7 @@ export default function ConsultationTimerBar({
           className={cn(
             "flex min-w-0 items-center gap-1 rounded-lg border px-2 py-1 shadow-lg sm:gap-2 sm:px-3 sm:py-1.5",
             TONE[sectionStat],
+            sectionStat === "over" && state.endedAt == null && "timer-over-budget",
           )}
         >
           <span className="truncate text-[10px] font-medium opacity-80 sm:text-xs">
@@ -107,7 +111,12 @@ export default function ConsultationTimerBar({
           </span>
           <span className="whitespace-nowrap text-xs font-semibold tabular-nums sm:text-sm">
             <span className={VALUE_TONE[sectionStat]}>{formatDuration(sectionElapsed)}</span>
-            <span className="opacity-70"> / {formatDuration(sectionBudget)}</span>
+            {/* No target for a step the doctor does not work through — showing
+                "/ 1:00" against the machine's own pace would mark them late for
+                something they cannot influence. */}
+            {sectionBudget > 0 && (
+              <span className="opacity-70"> / {formatDuration(sectionBudget)}</span>
+            )}
           </span>
         </div>
       )}

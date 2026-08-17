@@ -691,8 +691,21 @@ useEffect(() => {
   // Clinical Data, AI Questions). Step 3 (Diagnosis) and step 4 (Medical
   // Record) are doctor-only. The full `steps` array stays intact so
   // `steps[currentStep]` lookups still work — we just filter the chips.
-  const visibleSteps = isNurse ? steps.slice(0, 3) : steps
-  const progress = ((Math.min(currentStep, visibleSteps.length - 1) + 1) / visibleSteps.length) * 100
+  // Step 3 runs the diagnosis engine and is no longer a screen the doctor
+  // reads: it produced a page that repeated, uneditable, what the medical
+  // record shows next. The step still exists — it is what builds the
+  // prescriptions, the investigations and the triage — but it hands over on
+  // its own, so it is not offered as somewhere to go.
+  const HIDDEN_STEP_IDS = isNurse ? [] : [3]
+  const visibleSteps = (isNurse ? steps.slice(0, 3) : steps).filter(
+    (step) => !HIDDEN_STEP_IDS.includes(step.id),
+  )
+
+  // While the hidden step runs, the destination is what to highlight: the
+  // doctor is on their way to the record, not stalled between two chips.
+  const activeStepId = HIDDEN_STEP_IDS.includes(currentStep) ? currentStep + 1 : currentStep
+  const activePosition = Math.max(0, visibleSteps.findIndex((step) => step.id === activeStepId))
+  const progress = ((activePosition + 1) / visibleSteps.length) * 100
 
 const handleNext = async () => {
   const consultationId = consultationDataService.getCurrentConsultationId()
@@ -872,6 +885,8 @@ const handlePrevious = () => {
           data: diagnosisData,  // ✅ FIXED: Changed from initialData to data
           onDataChange: setDiagnosisData,
           onNext: handleNext,
+          // Runs and hands over; the doctor reads the medical record, not this.
+          autoAdvance: true,
           onPrevious: handlePrevious,
         }
       case 4:
@@ -1033,7 +1048,7 @@ const handlePrevious = () => {
             </div>
             <div className="text-right">
               <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">
-                {Math.min(currentStep, visibleSteps.length - 1) + 1}/{visibleSteps.length}
+                {activePosition + 1}/{visibleSteps.length}
               </div>
               <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">
                 Étapes
@@ -1054,35 +1069,35 @@ const handlePrevious = () => {
           )}
 
           {/* Mobile: Horizontal scroll, Tablet+: Grid */}
-          <div className={`flex overflow-x-auto pb-2 gap-3 sm:grid ${isNurse ? 'sm:grid-cols-3 md:grid-cols-3' : 'sm:grid-cols-3 md:grid-cols-5'} sm:gap-4 sm:overflow-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0`}>
+          <div className={`flex overflow-x-auto pb-2 gap-3 sm:grid ${isNurse ? 'sm:grid-cols-3 md:grid-cols-3' : 'sm:grid-cols-2 md:grid-cols-4'} sm:gap-4 sm:overflow-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0`}>
             {visibleSteps.map((step, index) => (
               <div
                 key={step.id}
-                onClick={() => handleStepClick(index)}
+                onClick={() => handleStepClick(step.id)}
                 className={`relative flex flex-col items-center text-center p-3 sm:p-4 md:p-5 rounded-xl smooth-transition cursor-pointer transform min-w-[120px] sm:min-w-0 flex-shrink-0 sm:flex-shrink
-                  ${index === currentStep
+                  ${step.id === activeStepId
                     ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-xl sm:scale-105 step-active'
-                    : index < currentStep
+                    : step.id < activeStepId
                     ? 'bg-gradient-to-br from-teal-500 to-teal-500 text-white shadow-lg hover:scale-105 hover:shadow-xl'
                     : 'bg-white/50 backdrop-blur-sm border-2 border-gray-200 opacity-70 cursor-not-allowed'
                   }`}
               >
                 {/* Step Number Badge */}
                 <div className={`absolute -top-2 -right-2 sm:-top-3 sm:-right-3 w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold shadow-lg
-                  ${index === currentStep
+                  ${step.id === activeStepId
                     ? 'bg-white text-blue-600 ring-2 sm:ring-4 ring-blue-200'
-                    : index < currentStep
+                    : step.id < activeStepId
                     ? 'bg-white text-teal-600 ring-2 sm:ring-4 ring-teal-200'
                     : 'bg-gray-300 text-gray-600'
                   }`}>
-                  {index < currentStep ? '✓' : index + 1}
+                  {step.id < activeStepId ? '✓' : index + 1}
                 </div>
 
                 {/* Icon Circle */}
                 <div className={`w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-3 md:mb-4 smooth-transition
-                  ${index === currentStep
+                  ${step.id === activeStepId
                     ? 'bg-white/20 backdrop-blur-sm shadow-inner'
-                    : index < currentStep
+                    : step.id < activeStepId
                     ? 'bg-white/20 backdrop-blur-sm'
                     : 'bg-gray-200 text-gray-500'
                   }`}>
@@ -1091,7 +1106,7 @@ const handlePrevious = () => {
 
                 {/* Title */}
                 <h3 className={`font-bold mb-1 sm:mb-2 text-[11px] sm:text-xs md:text-sm leading-tight
-                  ${index === currentStep || index < currentStep
+                  ${step.id === activeStepId || step.id < activeStepId
                     ? 'text-white'
                     : 'text-gray-600'
                   }`}>
@@ -1100,9 +1115,9 @@ const handlePrevious = () => {
 
                 {/* Description - Hidden on mobile */}
                 <p className={`text-[10px] sm:text-xs leading-relaxed hidden sm:block
-                  ${index === currentStep
+                  ${step.id === activeStepId
                     ? 'text-blue-100'
-                    : index < currentStep
+                    : step.id < activeStepId
                     ? 'text-teal-100'
                     : 'text-gray-500'
                   }`}>
