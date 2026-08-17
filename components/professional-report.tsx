@@ -1,5 +1,6 @@
 "use client"
 // import MedicalAIAssistant from './MedicalAIAssistant'
+import { markAiCallStart } from "@/lib/consultation-timer"
 import { useState, useEffect, useCallback, useMemo, memo, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -1877,6 +1878,11 @@ const persistReport = useCallback(async (silent = false) => {
  const consultationId = params.get('consultationId')
 
  if (!consultationId || !report) {
+ // Nothing can be written without a consultation to write it against. This
+ // used to return silently on the autosave path, which left the indicator
+ // promising a save that would never come — the doctor read "saving in a
+ // few seconds" for as long as they cared to look.
+ console.warn('💾 Save impossible:', { consultationId, hasReport: !!report })
  if (!silent) {
  toast({
  title: "Cannot save",
@@ -1948,12 +1954,24 @@ const handleManualSave = useCallback(() => persistReport(false), [persistReport]
 // This delay stacks on the fields' own 3s debounce, so a report is written
 // about five seconds after the doctor stops typing rather than on every
 // keystroke. Nothing is written once the document is signed.
+//
+// Whether anything CAN be written: the report is saved against a consultation,
+// and opened without one (a preview URL, a lost query string) there is nothing
+// to save it to. Tracked so the indicator can say that plainly instead of
+// counting down to a save that will never happen.
+const canPersist = typeof window !== 'undefined'
+  && !!new URLSearchParams(window.location.search).get('consultationId')
+
 const autosaveTimerRef = useRef<NodeJS.Timeout>()
 useEffect(() => {
+ if (!canPersist) return
  if (!hasUnsavedChanges || validationStatus === 'validated' || saveStatus === 'saving') return
- autosaveTimerRef.current = setTimeout(() => { void persistReport(true) }, 2500)
+ autosaveTimerRef.current = setTimeout(() => {
+   console.log('💾 Autosave firing')
+   void persistReport(true)
+ }, 2500)
  return () => clearTimeout(autosaveTimerRef.current)
-}, [hasUnsavedChanges, validationStatus, saveStatus, persistReport])
+}, [canPersist, hasUnsavedChanges, validationStatus, saveStatus, persistReport])
  
  // ==================== LOAD DOCTOR DATA ====================
  useEffect(() => {
@@ -2384,6 +2402,9 @@ if (isRenewal) {
  setDocumentSignatures({})
  setHasUnsavedChanges(false)
 
+  // The report generation is the longest wait in the consultation; the clock
+  // keeps running through it, so the bar says the model is the reason.
+  const aiCallDone = markAiCallStart()
  try {
  let currentDoctorInfo = doctorInfo
  if (currentDoctorInfo.nom === 'Dr. [DOCTOR NAME]' || currentDoctorInfo.nom === 'Dr. [Name Required]') {
@@ -2844,6 +2865,8 @@ if (isRenewal) {
  variant: "destructive"
  })
  } finally {
+ // Whatever happened, the bar must stop showing "AI working".
+ aiCallDone()
  setLoading(false)
  }
  }
@@ -7224,6 +7247,15 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <span className="flex items-center gap-1.5 rounded-md bg-blue-50 px-2.5 py-1 text-sm font-medium text-blue-800">
  <Loader2 className="h-3.5 w-3.5 animate-spin" />
  Enregistrement…
+ </span>
+ )
+ }
+
+ if (hasUnsavedChanges && !canPersist) {
+ return (
+ <span className="flex items-center gap-1.5 rounded-md bg-red-50 px-2.5 py-1 text-sm font-medium text-red-900">
+ <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+ Enregistrement impossible — cette page n'est rattachée à aucune consultation
  </span>
  )
  }

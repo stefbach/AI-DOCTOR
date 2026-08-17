@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import { markAiCallStart } from "@/lib/consultation-timer"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import { saveTibokDraft } from '@/lib/tibok-draft-service'
 import { useTibokBridge } from '@/hooks/use-tibok-bridge'
@@ -344,6 +345,7 @@ export default function QuestionsForm({
  setError(null)
  const startTime = Date.now()
 
+ const aiCallDone = markAiCallStart()
  try {
  console.log(`📡 Calling API /api/openai-questions in ${mode} mode...`)
  
@@ -453,6 +455,8 @@ export default function QuestionsForm({
  }))
  setResponses(initialResponses)
  } finally {
+ // Whatever happened, the clock must stop showing "AI working".
+ aiCallDone()
  setLoading(false)
  }
  }

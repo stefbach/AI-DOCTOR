@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { markAiCallStart } from "@/lib/consultation-timer"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -1055,6 +1056,7 @@ export default function DiagnosisForm({
  setError(null)
  setDocumentsGenerated(false)
 
+ const aiCallDone = markAiCallStart()
  try {
  console.log("📡 Calling API /api/openai-diagnosis...")
  
@@ -1168,6 +1170,8 @@ export default function DiagnosisForm({
  animateProgressiveAppearance(fallbackData)
 
  } finally {
+  // Whatever happened, the clock must stop showing "AI working".
+  aiCallDone()
  // Loading is now handled in animateProgressiveAppearance
  console.log('🩺 ========== DIAGNOSIS GENERATION COMPLETE ==========')
  }

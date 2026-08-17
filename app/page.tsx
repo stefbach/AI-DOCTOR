@@ -25,6 +25,21 @@ import KycVerificationDialog from "@/components/kyc-verification-dialog"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import { supabase } from '@/lib/supabase'
 import { useTibokBridge } from '@/hooks/use-tibok-bridge'
+import ConsultationTimerBar from '@/components/consultation-timer-bar'
+import {
+  type TimerState,
+  SECTION_BY_STEP,
+  TOTAL_BUDGET_SECONDS,
+  allSectionSeconds,
+  emptyState,
+  enterSection,
+  loadState,
+  saveState,
+  stopTimer,
+  subscribeAiBusy,
+  subscribeAiElapsed,
+  totalSeconds,
+} from '@/lib/consultation-timer'
 
 export type Language = 'fr' | 'en'
 
@@ -54,6 +69,115 @@ export default function MedicalAIExpert() {
   const [isSimulation, setIsSimulation] = useState(false)
   // KYC (patient identity) gate — mandatory at the start of every consultation
   const [kycApproved, setKycApproved] = useState<boolean>(false)
+
+  // ==================== CONSULTATION CLOCK ====================
+  //
+  // Driven from `currentStep` rather than from each navigation handler: the
+  // step is set from six different places, including the restore path that
+  // reopens a consultation where the doctor left it, and a clock that missed
+  // one of them would quietly under-report.
+  const [timer, setTimer] = useState<TimerState | null>(null)
+  const [aiBusy, setAiBusy] = useState(false)
+  const timerRef = React.useRef<TimerState | null>(null)
+  timerRef.current = timer
+
+  /**
+   * Send the current measurement. Called at every transition, not only at the
+   * end: a consultation abandoned halfway is exactly the one worth seeing, and
+   * writing only at signature would leave no trace of it at all.
+   */
+  const reportTiming = React.useCallback((state: TimerState) => {
+    fetch('/api/consultation-timings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        consultationId: state.consultationId,
+        doctorId: currentDoctorId,
+        patientId: currentPatientId,
+        consultationType: 'general',
+        startedAt: new Date(state.startedAt).toISOString(),
+        endedAt: state.endedAt ? new Date(state.endedAt).toISOString() : null,
+        totalSeconds: totalSeconds(state),
+        aiWaitSeconds: state.aiWaitSeconds,
+        sectionSeconds: allSectionSeconds(state),
+        questionCount: state.questionCount,
+        budgetSeconds: TOTAL_BUDGET_SECONDS,
+      }),
+      keepalive: true,
+      // A measurement must never take a consultation down with it.
+    }).catch(() => {})
+  }, [currentDoctorId, currentPatientId])
+
+  useEffect(() => {
+    const consultationId =
+      consultationDataService.getCurrentConsultationId() || currentConsultationId
+    if (!consultationId) return
+
+    const section = SECTION_BY_STEP[currentStep]
+    if (!section) return
+
+    setTimer((prev) => {
+      // Reload picks the clock back up rather than restarting it — losing it
+      // on a refresh would make every measurement a guess, and refreshes happen.
+      const base =
+        prev && prev.consultationId === consultationId
+          ? prev
+          : loadState(consultationId) || emptyState(consultationId)
+
+      if (base.endedAt != null) return base
+      const next = enterSection(base, section)
+      if (next === base) return base
+
+      saveState(next)
+      reportTiming(next)
+      return next
+    })
+  }, [currentStep, currentConsultationId, reportTiming])
+
+  // The clock does not stop for the models, so the bar says when they are the
+  // reason it is moving; their share is banked separately so a slow model can
+  // be told apart from a slow doctor.
+  useEffect(() => subscribeAiBusy(setAiBusy), [])
+  useEffect(
+    () =>
+      subscribeAiElapsed((seconds) => {
+        setTimer((prev) => {
+          if (!prev || prev.endedAt != null) return prev
+          const next = { ...prev, aiWaitSeconds: prev.aiWaitSeconds + seconds }
+          saveState(next)
+          return next
+        })
+      }),
+    [],
+  )
+
+  // The number of questions sets the budget for that step: one minute each,
+  // and the case produces three or five of them.
+  useEffect(() => {
+    const count = Array.isArray(questionsData?.questions)
+      ? questionsData.questions.length
+      : Array.isArray(questionsData)
+        ? questionsData.length
+        : null
+    if (count == null) return
+    setTimer((prev) => {
+      if (!prev || prev.questionCount === count) return prev
+      const next = { ...prev, questionCount: count }
+      saveState(next)
+      return next
+    })
+  }, [questionsData])
+
+  /** The report was signed: freeze the clock and write the final record. */
+  const stopConsultationTimer = React.useCallback(() => {
+    setTimer((prev) => {
+      if (!prev || prev.endedAt != null) return prev
+      const next = stopTimer(prev)
+      saveState(next)
+      reportTiming(next)
+      return next
+    })
+  }, [reportTiming])
 
   // Load doctor data from URL params (from Tibok) and save to sessionStorage
   useEffect(() => {
@@ -640,6 +764,9 @@ const handlePrevious = () => {
   
   const handleFinalReportComplete = async (data: any) => {
     console.log('Final report and documents completed:', data)
+    // Before anything else: the consultation is over, and how long it took
+    // should not include whatever the completion handler does next.
+    stopConsultationTimer()
     setFinalReport(data)
     
     const consultationId = consultationDataService.getCurrentConsultationId()
@@ -876,7 +1003,14 @@ const handlePrevious = () => {
             </div>
           </div>
 
-          <Progress value={progress} className="mb-4 sm:mb-6 md:mb-8 h-2 sm:h-3 bg-blue-100" />
+          <Progress value={progress} className="mb-3 sm:mb-4 h-2 sm:h-3 bg-blue-100" />
+
+          {/* In the flow, at the top, next to the step chips — where the doctor
+              already looks. Not fixed-positioned: inside the TIBOK iframe that
+              anchors to the iframe's full height, not to what is on screen. */}
+          <div className="mb-4 sm:mb-6 md:mb-8">
+            <ConsultationTimerBar state={timer} aiBusy={aiBusy} language="fr" />
+          </div>
 
           {/* Mobile: Horizontal scroll, Tablet+: Grid */}
           <div className={`flex overflow-x-auto pb-2 gap-3 sm:grid ${isNurse ? 'sm:grid-cols-3 md:grid-cols-3' : 'sm:grid-cols-3 md:grid-cols-5'} sm:gap-4 sm:overflow-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0`}>
