@@ -883,6 +883,7 @@ const handlePrevious = () => {
           questionsData,
           diagnosisData,
           onComplete: handleFinalReportComplete,
+          onSigned: stopConsultationTimer,
           onPrevious: handlePrevious,
           isSimulation,
         }

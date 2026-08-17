@@ -209,6 +209,13 @@ interface ProfessionalReportProps {
  diagnosisData: any
  editedDocuments?: any
  onComplete?: () => void
+ /**
+  * The document has been signed. Separate from `onComplete`, which fires on
+  * "Finalize and Send": the medical work ends at the signature, and anything
+  * after it — sending, closing, or simply leaving the page open — is not time
+  * the doctor spent on the patient.
+  */
+ onSigned?: () => void
  onPrevious?: () => void
  doctorData?: any
  // IDs for document sending (passed from parent when coming from hub)
@@ -948,6 +955,7 @@ export default function ProfessionalReportEditable({
  diagnosisData,
  editedDocuments,
  onComplete,
+ onSigned,
  onPrevious,
  doctorData,
  consultationId: propConsultationId,
@@ -3128,6 +3136,9 @@ const signatures = {
  setValidationStatus('validated')
  setModifiedSections(new Set())
  setHasUnsavedChanges(false)
+ // Stops the consultation clock. The doctor still has "Finalize and Send" to
+ // press, but the work being measured is over.
+ onSigned?.()
  
  toast({
  title: "✅ Document Validated",
