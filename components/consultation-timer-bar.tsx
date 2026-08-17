@@ -71,17 +71,26 @@ export default function ConsultationTimerBar({
     ? { over: "au-delà du temps prévu", ai: "IA en cours — le chrono continue", done: "Consultation terminée" }
     : { over: "over the expected time", ai: "AI working — the clock keeps running", done: "Consultation finished" }
 
+  // One line, on a phone as much as on a desktop. Wrapping put each pill on
+  // its own row and the bar then covered a third of a small screen — a status
+  // display that big stops being a status display.
+  //
+  // Nothing is dropped to make it fit: the section name truncates, the wordy
+  // labels shorten, and the numbers — the only part that has to be read
+  // exactly — keep their size at every width.
   return (
-    <div className="flex flex-wrap items-center gap-2 print:hidden">
+    <div className="flex flex-nowrap items-center gap-1 sm:gap-2 print:hidden">
       <div
         className={cn(
-          "flex items-center gap-2 rounded-lg border px-3 py-1.5 shadow-lg",
+          "flex shrink-0 items-center gap-1 rounded-lg border px-2 py-1 shadow-lg sm:gap-2 sm:px-3 sm:py-1.5",
           TONE[totalStatus],
         )}
       >
-        <Clock className="h-4 w-4 shrink-0" />
-        <span className="text-sm font-semibold tabular-nums">
-          <span className={cn("text-base", VALUE_TONE[totalStatus])}>{formatDuration(total)}</span>
+        <Clock className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+        <span className="whitespace-nowrap text-xs font-semibold tabular-nums sm:text-sm">
+          <span className={cn("text-sm sm:text-base", VALUE_TONE[totalStatus])}>
+            {formatDuration(total)}
+          </span>
           <span className="opacity-70"> / {formatDuration(TOTAL_BUDGET_SECONDS)}</span>
         </span>
       </div>
@@ -89,14 +98,14 @@ export default function ConsultationTimerBar({
       {section && (
         <div
           className={cn(
-            "flex items-center gap-2 rounded-lg border px-3 py-1.5 shadow-lg",
+            "flex min-w-0 items-center gap-1 rounded-lg border px-2 py-1 shadow-lg sm:gap-2 sm:px-3 sm:py-1.5",
             TONE[sectionStat],
           )}
         >
-          <span className="text-xs font-medium opacity-80">
+          <span className="truncate text-[10px] font-medium opacity-80 sm:text-xs">
             {SECTION_LABELS[section][language]}
           </span>
-          <span className="text-sm font-semibold tabular-nums">
+          <span className="whitespace-nowrap text-xs font-semibold tabular-nums sm:text-sm">
             <span className={VALUE_TONE[sectionStat]}>{formatDuration(sectionElapsed)}</span>
             <span className="opacity-70"> / {formatDuration(sectionBudget)}</span>
           </span>
@@ -105,20 +114,28 @@ export default function ConsultationTimerBar({
 
       {/* The clock does not stop for the models, so it says when they are the
           reason it is moving. Without this the doctor watches the number climb
-          during a three-minute generation and reads it as their own delay. */}
+          during a three-minute generation and reads it as their own delay.
+          On a phone the spinner alone carries it — the sentence would push the
+          numbers off the screen. */}
       {aiBusy && state.endedAt == null && (
-        <div className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-blue-900 shadow-lg">
+        <div className="flex shrink-0 items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2 py-1 text-blue-900 shadow-lg sm:px-3 sm:py-1.5">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          <span className="text-xs font-medium">{t.ai}</span>
+          <span className="hidden text-xs font-medium md:inline">{t.ai}</span>
+          <span className="text-[10px] font-medium md:hidden">IA</span>
         </div>
       )}
 
+      {/* Redundant with the red, and the first thing to go when space is short. */}
       {totalStatus === "over" && state.endedAt == null && (
-        <span className="rounded bg-white/90 px-2 py-1 text-xs font-medium text-red-700 shadow">{t.over}</span>
+        <span className="hidden shrink-0 rounded bg-white/90 px-2 py-1 text-xs font-medium text-red-700 shadow lg:inline-block">
+          {t.over}
+        </span>
       )}
 
       {state.endedAt != null && (
-        <span className="rounded bg-white/90 px-2 py-1 text-xs font-medium text-gray-600 shadow">{t.done}</span>
+        <span className="hidden shrink-0 rounded bg-white/90 px-2 py-1 text-xs font-medium text-gray-600 shadow sm:inline-block">
+          {t.done}
+        </span>
       )}
     </div>
   )

@@ -109,6 +109,23 @@ export function loadState(consultationId: string): TimerState | null {
   }
 }
 
+/**
+ * Forget a consultation's clock, so the next visit starts from zero.
+ *
+ * The clock deliberately survives a reload — losing it on a refresh would
+ * make every measurement a guess. That is right in production and wrong on a
+ * test bench, where the same consultation is replayed again and again and the
+ * time from the previous run carries over. `?resetTimer=1` clears it.
+ */
+export function clearState(consultationId: string): void {
+  if (typeof window === "undefined" || !consultationId) return
+  try {
+    window.localStorage.removeItem(KEY_PREFIX + consultationId)
+  } catch {
+    // Nothing to do: an unreadable store is an empty one.
+  }
+}
+
 export function saveState(state: TimerState): void {
   if (typeof window === "undefined" || !state.consultationId) return
   try {

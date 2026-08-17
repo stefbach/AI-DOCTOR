@@ -32,6 +32,7 @@ import {
   SECTION_BY_STEP,
   TOTAL_BUDGET_SECONDS,
   allSectionSeconds,
+  clearState,
   emptyState,
   enterSection,
   loadState,
@@ -109,6 +110,11 @@ export default function MedicalAIExpert() {
     }).catch(() => {})
   }, [currentDoctorId, currentPatientId])
 
+  // Replaying the same consultation on a test bench inherits the clock from the
+  // previous run, because it is meant to survive a reload. `?resetTimer=1`
+  // starts it over; done once per page load, not on every step.
+  const timerResetRef = React.useRef(false)
+
   useEffect(() => {
     const consultationId =
       consultationDataService.getCurrentConsultationId() || currentConsultationId
@@ -116,6 +122,14 @@ export default function MedicalAIExpert() {
 
     const section = SECTION_BY_STEP[currentStep]
     if (!section) return
+
+    if (!timerResetRef.current) {
+      timerResetRef.current = true
+      if (new URLSearchParams(window.location.search).get('resetTimer') === '1') {
+        console.log('⏱️ Timer reset requested for', consultationId)
+        clearState(consultationId)
+      }
+    }
 
     setTimer((prev) => {
       // Reload picks the clock back up rather than restarting it — losing it
