@@ -1128,12 +1128,13 @@ export function runDeterministicChecks(
     if (missing.length) {
       alerts.push({
         id: nextId("incomplete"),
-        // A missing strength is not the same defect as a missing duration.
-        // Both make a line untidy; only one makes it undispensable, and minor
-        // findings are dropped on lines the doctor did not touch — so a
-        // paracetamol with no strength went out silently. It is the AI's
-        // omission, but it is the doctor's signature.
-        severity: dosageMissing ? "major" : "minor",
+        // A missing duration is not the same defect as a missing strength or a
+        // missing posology. All three make a line untidy; two of them make it
+        // undispensable, and they print on the document as "to be completed" —
+        // a placeholder on a signed prescription. Minor findings are dropped
+        // on lines the doctor did not touch, so those two used to go out in
+        // silence. The omission is the AI's; the signature is the doctor's.
+        severity: dosageMissing || !med.posologie ? "major" : "minor",
         target: "medication",
         item: medLabel(med),
         issue: "incomplete-prescription-line",
