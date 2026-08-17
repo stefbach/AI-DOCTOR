@@ -5687,10 +5687,13 @@ const ConsultationReport = () => {
  <CardContent className="p-8 print:p-12" id="consultation-report">
  
  {/* 🚦 TRIAGE BANNER (emergency / urgent / triage-not-assessed) */}
+ {/* English, like the document it sits on: this banner is not
+     print:hidden, it goes out on the PDF the receiving hospital
+     reads, and it is the first thing on the page. */}
  <TriageBanner
    triage={resolvedTriage}
    followUp={followUpPlan}
-   language="fr"
+   language="en"
    action={
      followUpPlan ? (
        doctorAppointmentData ? (

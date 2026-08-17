@@ -249,10 +249,13 @@ function renderReport(report: any) {
   // Helper to wrap content with the triage banner if needed
   const wrapWithEmergency = (content: React.ReactNode) => (
     <>
+      {/* English, like the document it sits on: this banner is not
+          print:hidden, it goes out on the PDF the receiving hospital
+          reads, and it is the first thing on the page. */}
       <TriageBanner
         triage={resolvedTriage}
         followUp={followUpPlan}
-        language="fr"
+        language="en"
         hideUnassessed
       />
       {content}

@@ -759,6 +759,91 @@ function isPlaceholderDose(dosage: string): boolean {
 
 const PARACETAMOL_MAX_DAILY_MG = 4000
 
+/**
+ * Molecules that do not exist as anything you can swallow.
+ *
+ * The route/form rule below reads the line's own words: it fires when the text
+ * says "infusion" and the form says "tablet". It cannot fire when the text is
+ * internally consistent and simply wrong about the drug — "Fondaparinux 2.5mg,
+ * tablet, 1 tablet BD" contradicts nothing on the page, and would be dispensed
+ * as written if a pharmacy had such a tablet. It does not: fondaparinux is a
+ * pre-filled subcutaneous syringe, once daily.
+ *
+ * Deliberately short, and deliberately molecules rather than brands. Every
+ * entry is a drug with NO oral form anywhere — a drug that merely has an
+ * injectable form as well would produce false alerts on the oral one. Matched
+ * against the resolved active ingredients, so a brand name resolves first.
+ */
+const INJECTION_ONLY_INGREDIENTS: Record<string, string> = {
+  fondaparinux: "seringue pré-remplie sous-cutanée",
+  enoxaparin: "seringue pré-remplie sous-cutanée",
+  dalteparin: "seringue pré-remplie sous-cutanée",
+  tinzaparin: "seringue pré-remplie sous-cutanée",
+  heparin: "voie intraveineuse ou sous-cutanée",
+  insulin: "voie sous-cutanée",
+  ceftriaxone: "voie intraveineuse ou intramusculaire",
+  cefotaxime: "voie intraveineuse ou intramusculaire",
+  gentamicin: "voie intraveineuse ou intramusculaire",
+  amikacin: "voie intraveineuse ou intramusculaire",
+  vancomycin: "voie intraveineuse",
+  benzathine: "voie intramusculaire",
+  adrenaline: "voie intramusculaire ou intraveineuse",
+  epinephrine: "voie intramusculaire ou intraveineuse",
+  naloxone: "voie parentérale",
+  ketamine: "voie parentérale",
+  tenecteplase: "voie intraveineuse",
+  alteplase: "voie intraveineuse",
+  streptokinase: "voie intraveineuse",
+}
+
+const INJECTION_ONLY_EN: Record<string, string> = {
+  fondaparinux: "a pre-filled subcutaneous syringe",
+  enoxaparin: "a pre-filled subcutaneous syringe",
+  dalteparin: "a pre-filled subcutaneous syringe",
+  tinzaparin: "a pre-filled subcutaneous syringe",
+  heparin: "given intravenously or subcutaneously",
+  insulin: "given subcutaneously",
+  ceftriaxone: "given intravenously or intramuscularly",
+  cefotaxime: "given intravenously or intramuscularly",
+  gentamicin: "given intravenously or intramuscularly",
+  amikacin: "given intravenously or intramuscularly",
+  vancomycin: "given intravenously",
+  benzathine: "given intramuscularly",
+  adrenaline: "given intramuscularly or intravenously",
+  epinephrine: "given intramuscularly or intravenously",
+  naloxone: "given parenterally",
+  ketamine: "given parenterally",
+  tenecteplase: "given intravenously",
+  alteplase: "given intravenously",
+  streptokinase: "given intravenously",
+}
+
+/**
+ * Every strength written in a free-text name, in mg.
+ *
+ * Returns an empty array rather than null when there is none, and more than
+ * one entry for a combination product — the caller uses that count to stay
+ * silent on "Co-amoxiclav 875/125mg", where comparing a single dosage field to
+ * two strengths says nothing.
+ */
+function strengthsInName(name: string): number[] {
+  const out: number[] = []
+  const text = normalise(name)
+  // "875/125mg" and "amoxicillin + clavulanic acid" carry two strengths of
+  // which only the last wears a unit. Reading that as a single strength would
+  // compare a dosage field against half the product.
+  if (/\d\s*\/\s*\d/.test(text) || text.includes("+")) return [0, 0]
+  const re = /(\d+(?:[.,]\d+)?)\s*(mg|g|mcg|µg|ug)\b/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(text)) !== null) {
+    const value = parseFloat(m[1].replace(",", "."))
+    if (!isFinite(value)) continue
+    const unit = m[2]
+    out.push(unit === "g" ? value * 1000 : unit === "mg" ? value : value / 1000)
+  }
+  return out
+}
+
 // ============================================================================
 // Deterministic rules
 // ============================================================================
@@ -867,6 +952,29 @@ export function runDeterministicChecks(
 
   // --- 3. Route / galenic form incoherence ---------------------------------
   for (const med of meds) {
+    // A molecule that has no oral form, written as something to swallow.
+    //
+    // Checked first, and separately from the rule below, because this line
+    // contradicts nothing on its own page: "Fondaparinux 2.5mg, tablet, 1
+    // tablet BD" is internally consistent and simply wrong about the drug.
+    // The text-based check cannot see that; only knowing the molecule can.
+    const injectableOnly = activeIngredients(med).find((ing) => ing in INJECTION_ONLY_INGREDIENTS)
+    if (injectableOnly && (looksEnteralForm(med) || routeSaysOral(med))) {
+      alerts.push({
+        id: nextId("injection-only"),
+        severity: "critical",
+        target: "medication",
+        item: medLabel(med),
+        issue: "injection-only-prescribed-orally",
+        message: `${medLabel(med)} n'existe pas sous forme orale : c'est ${INJECTION_ONLY_INGREDIENTS[injectableOnly]}. La ligne indique « ${med.forme || "comprimé"} » et une posologie à avaler — la pharmacie ne pourra rien délivrer, et le patient ne recevra pas son traitement.`,
+        messageEn: `${medLabel(med)} has no oral form: it is ${INJECTION_ONLY_EN[injectableOnly]}. The line reads "${med.forme || "tablet"}" with a posology to swallow — no pharmacy can dispense it, and the patient will go untreated.`,
+        suggestion: `Corriger la forme et la voie (et le rythme : la plupart de ces produits sont en une injection par jour), ou retirer la ligne si le traitement est administré à l'hôpital.`,
+        suggestionEn: `Correct the form and the route (and the frequency: most of these are once daily), or remove the line if the treatment is given in hospital.`,
+        source: "rule",
+      })
+      continue
+    }
+
     // An injection or infusion written as something to swallow. Checked before
     // the topical rules because it is the more dangerous mismatch: the product
     // is either undeliverable or, if a nurse follows the wording, given by the
@@ -1102,6 +1210,43 @@ export function runDeterministicChecks(
     })
   }
 
+  // --- 11. The name and the strength field disagree -------------------------
+  //
+  // "Atorvastatin 80mg" on the name line, "20mg" in the dosage field, "20mg OD"
+  // in the posology. One line of an ordonnance carrying two different doses of
+  // the same drug, four times apart. Whichever the pharmacy reads, one of the
+  // two is wrong, and the doctor signing it has no way to know which was meant.
+  //
+  // Arithmetic, not judgement, so it belongs here. Silent on combination
+  // products: comparing one dosage field against the two strengths of
+  // "Co-amoxiclav 875/125mg" says nothing.
+  for (const med of meds) {
+    const named = strengthsInName(med.nom)
+    if (named.length !== 1) continue
+    if (!med.dosage || isPlaceholderDose(med.dosage)) continue
+
+    const stated = parseDoseMg(med.dosage)
+    if (stated === null) continue
+    if (strengthsInName(med.dosage).length !== 1) continue
+
+    // A tolerance rather than equality: 0.5 g and 500 mg are the same dose
+    // written two ways, and floating point should not decide a clinical alert.
+    if (Math.abs(named[0] - stated) < 0.001) continue
+
+    alerts.push({
+      id: nextId("dose-mismatch"),
+      severity: "major",
+      target: "medication",
+      item: medLabel(med),
+      issue: "name-dose-disagreement",
+      message: `${medLabel(med)} porte deux doses différentes sur la même ligne : « ${med.nom} » dans le nom, « ${med.dosage} » dans le champ dosage. La pharmacie délivrera l'une des deux, et rien n'indique laquelle a été voulue.`,
+      messageEn: `${medLabel(med)} carries two different doses on one line: "${med.nom}" in the name, "${med.dosage}" in the strength field. The pharmacy will dispense one of them, and nothing says which was intended.`,
+      suggestion: `Aligner le nom et le dosage sur la dose réellement prescrite, puis vérifier que la posologie la reprend.`,
+      suggestionEn: `Align the name and the strength on the dose actually intended, then check the posology repeats it.`,
+      source: "rule",
+    })
+  }
+
   // --- Rule 10: prose that prescribes on a report that does not ------------
   //
   // An emergency case issues no prescription, no laboratory request and no
@@ -1263,6 +1408,17 @@ const RULE_OWNED_FAMILIES: { rules: string[]; aiIssue: RegExp }[] = [
   {
     rules: ["incomplete-prescription-line"],
     aiIssue: /incomplete|missing|absent|unspecified/i,
+  },
+  {
+    // The rule reads both numbers and compares them. The model, told the same
+    // line twice over, restates it as "dosage inconsistency" or "the strength
+    // does not match the product name" — the same finding, one notch lower.
+    rules: ["name-dose-disagreement"],
+    aiIssue: /dose|dosage|strength|posolog|mismatch|inconsist|discrepan/i,
+  },
+  {
+    rules: ["injection-only-prescribed-orally"],
+    aiIssue: /route|voie|form|galenic|oral|inject|parenteral|subcutan/i,
   },
 ]
 

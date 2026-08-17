@@ -1,6 +1,11 @@
 /**
  * Evidence References Section
  *
+ * English, like the report it closes. This section is printed on the document
+ * the patient and the receiving hospital read, not shown in the doctor's
+ * console, so it follows the language of the document rather than that of the
+ * interface.
+ *
  * Renders the medical guidelines that informed the diagnosis/recommendations.
  * Shown at the bottom of consultation reports (just before the doctor's signature).
  *
@@ -44,15 +49,15 @@ interface EvidenceReference {
 const KIND_BADGE: Record<GuidelineContentKind, { label: string; className: string } | null> = {
   referentiel: null,
   recherche: {
-    label: 'Étude — pas une recommandation de société savante',
+    label: 'Study — not a learned-society guideline',
     className: 'bg-amber-50 text-amber-800 border-amber-200',
   },
   notice: {
-    label: 'Notice bibliographique — texte intégral non consulté',
+    label: 'Bibliographic record — full text not consulted',
     className: 'bg-gray-100 text-gray-700 border-gray-300',
   },
   indetermine: {
-    label: 'Statut non confirmé',
+    label: 'Status unconfirmed',
     className: 'bg-gray-100 text-gray-700 border-gray-300',
   },
 }
@@ -72,7 +77,7 @@ function formatDate(iso?: string): string {
   if (!iso) return ''
   const d = new Date(iso)
   if (isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })
+  return d.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 export default function EvidenceReferencesSection({ references }: Props) {
@@ -82,8 +87,8 @@ export default function EvidenceReferencesSection({ references }: Props) {
     return (
       <section className="mt-10 pt-6 border-t border-gray-200 evidence-references">
         <p className="text-sm text-gray-500 italic">
-          Note : Recommandations basées sur la pratique clinique standard
-          (aucune guideline RAG appliquée pour ce cas).
+          Note: recommendations based on standard clinical practice (no
+          retrieved guideline applied to this case).
         </p>
       </section>
     )
@@ -92,12 +97,12 @@ export default function EvidenceReferencesSection({ references }: Props) {
   return (
     <section className="mt-10 pt-6 border-t border-gray-200 evidence-references">
       <h2 className="font-bold text-lg mb-3 text-gray-800">
-        Références médicales utilisées
+        Medical references used
       </h2>
       <p className="text-sm text-gray-700 mb-4">
-        Ce diagnostic et ces recommandations s'appuient sur les sources
-        médicales internationales suivantes. Les sources qui ne sont pas des
-        recommandations de société savante sont signalées comme telles :
+        This diagnosis and these recommendations draw on the international
+        medical sources below. Sources that are not learned-society guidelines
+        are labelled as such:
       </p>
       <ol className="space-y-4 text-sm text-gray-700">
         {refs.map((ref, idx) => {
@@ -123,10 +128,10 @@ export default function EvidenceReferencesSection({ references }: Props) {
                     </p>
                   )}
                   {date && (
-                    <p className="text-xs text-gray-600">Publié : {date}</p>
+                    <p className="text-xs text-gray-600">Published: {date}</p>
                   )}
                   {source && (
-                    <p className="text-xs text-gray-600">Source : {source}</p>
+                    <p className="text-xs text-gray-600">Source: {source}</p>
                   )}
                   {url && (
                     <p className="text-xs text-blue-700 break-all print:text-gray-700">
@@ -138,7 +143,7 @@ export default function EvidenceReferencesSection({ references }: Props) {
                   )}
                   {usedFor && (
                     <p className="text-xs text-gray-700 italic">
-                      Utilisé pour : {usedFor}
+                      Used for: {usedFor}
                     </p>
                   )}
                 </div>

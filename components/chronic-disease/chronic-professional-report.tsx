@@ -4386,10 +4386,13 @@ export default function ChronicProfessionalReport({
       <div id="medical-report-section" className="bg-white p-3 sm:p-6 md:p-8 rounded-lg shadow print:shadow-none">
         
         {/* 🚦 TRIAGE BANNER (emergency / urgent / triage-not-assessed) */}
+        {/* English, like the document it sits on: this banner is not
+            print:hidden, it goes out on the PDF the receiving hospital
+            reads, and it is the first thing on the page. */}
         <TriageBanner
           triage={resolvedTriage}
           followUp={followUpPlan}
-          language="fr"
+          language="en"
           action={
             followUpPlan ? (
               doctorAppointmentData ? (
