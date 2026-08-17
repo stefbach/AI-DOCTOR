@@ -1426,6 +1426,15 @@ const RULE_OWNED_FAMILIES: { rules: string[]; aiIssue: RegExp }[] = [
     rules: ["injection-only-prescribed-orally"],
     aiIssue: /route|voie|form|galenic|oral|inject|parenteral|subcutan/i,
   },
+  {
+    // The rule names the act, says why no laboratory can perform it and where
+    // it belongs instead. The model then restates it as information — "blood
+    // pressure is relevant, but cannot be requested from the immunology
+    // laboratory" — which is the same finding one severity lower, and reads on
+    // screen as a second thing to fix.
+    rules: ["not-a-laboratory-test"],
+    aiIssue: /laborator|laboratoire|analyse|sample|prelev|measur|mesure|examen clinique|physical exam/i,
+  },
 ]
 
 /**
