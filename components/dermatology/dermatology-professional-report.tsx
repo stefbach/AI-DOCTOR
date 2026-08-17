@@ -27,7 +27,7 @@ import {
 } from "lucide-react"
 import { createClient } from '@supabase/supabase-js'
 import TriageBanner from '@/components/triage-banner'
-import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
+import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, buildEmergencyTransferNotice, buildEmergencyManagementPlan, buildEmergencyFollowUpPlan, buildEmergencyConclusion, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
 
 // ==================== HELPER FUNCTIONS ====================
 // Helper function to safely handle DCI fields
@@ -103,6 +103,8 @@ interface MauritianReport {
  lastMenstrualPeriod?: string
  }
  rapport: {
+ // Present only on an emergency case, and rendered first when it is.
+ urgenceHospitaliere?: string
  motifConsultation: string
  anamnese: string
  antecedents: string
@@ -2607,7 +2609,41 @@ if (isRenewal) {
  }
  
  console.log(" Structure mapping complete")
- 
+
+ // An emergency report carries no prescriptions.
+ //
+ // Same policy as the general flow, for the same reason: a report that tells
+ // the patient to go to hospital without delay while handing them a
+ // prescription and a lab form contradicts itself, and sends them to a
+ // pharmacy instead of A&E. Dermatology has its own short list of conditions
+ // that kill within days — SJS/TEN, necrotising fasciitis, DRESS,
+ // meningococcaemia — and those are exactly the cases where a topical steroid
+ // on the printout is worst.
+ //
+ // The narrative is rewritten alongside the documents because it was written
+ // from them, server-side, before this runs. The history, examination and
+ // diagnostic reasoning are kept: they are what makes the referral actionable.
+ const emergencyTriage = resolveTriage(diagnosisData)
+ if (emergencyTriage.level === 'emergency') {
+ console.log(' Emergency case — dropping prescriptions, labs and imaging from the report')
+ for (const key of ['priseEnCharge', 'surveillance', 'conclusion'] as const) {
+ console.log(` ${key} replaced. Model proposal was:`,
+ reportData.compteRendu.rapport[key] || '(empty)')
+ }
+
+ reportData.compteRendu.rapport.urgenceHospitaliere =
+ buildEmergencyTransferNotice(emergencyTriage)
+ reportData.compteRendu.rapport.priseEnCharge =
+ buildEmergencyManagementPlan(emergencyTriage)
+ reportData.compteRendu.rapport.surveillance =
+ buildEmergencyFollowUpPlan(emergencyTriage)
+ reportData.compteRendu.rapport.conclusion =
+ buildEmergencyConclusion(emergencyTriage)
+ reportData.ordonnances.medicaments = null
+ reportData.ordonnances.biologie = null
+ reportData.ordonnances.imagerie = null
+ }
+
  setReport(reportData)
  setValidationStatus('draft')
  setDocumentSignatures({})
@@ -4995,6 +5031,11 @@ DoctorInfoEditor.displayName = 'DoctorInfoEditor'
 
 const ConsultationReport = () => {
  const sections = [
+ // First, when it exists: an emergency transfer is the only thing that
+ // matters on the page, and it explains the absence of prescriptions below.
+ ...(getReportRapport()?.urgenceHospitaliere
+ ? [{ key: 'urgenceHospitaliere', title: "⚠️ URGENT CARE REQUIRED — IMMEDIATE HOSPITAL TRANSFER" }]
+ : []),
  { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
  { key: 'anamnese', title: 'HISTORY OF PRESENT ILLNESS' },
  { key: 'antecedents', title: 'PAST MEDICAL HISTORY' },

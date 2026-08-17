@@ -300,6 +300,105 @@ export function buildEmergencyConclusion(_triage: ResolvedTriage): string {
   ].join("\n")
 }
 
+// ---------------------------------------------------------------------------
+// Emergency: keeping the generated narrative honest
+// ---------------------------------------------------------------------------
+//
+// The three report endpoints all ask their model to describe the therapeutic
+// approach and to say how many medications and tests were ordered. On an
+// emergency the report component then withdraws those documents, so the prose
+// was written from a treatment that was about to disappear — a report carrying
+// nothing at all announced four drugs "prescribed".
+//
+// Repairing that afterwards, section by section, is repairing text that should
+// never have been written. These two are applied BEFORE the model is called,
+// and they live here rather than in each route so the three flows cannot drift
+// apart on what an emergency report is allowed to say.
+
+/**
+ * Said in words as well as in data.
+ *
+ * Zero counts alone leave the model free to fill the gap from the diagnosis it
+ * was given, and "given the presentation, aspirin would be indicated" reads,
+ * to a receiving hospital, exactly like a prescription.
+ */
+export const EMERGENCY_NARRATIVE_DIRECTIVE = `
+EMERGENCY CASE — NO TREATMENT IS BEING ISSUED (OVERRIDES ANY INSTRUCTION BELOW):
+This patient is being transferred to hospital immediately. This consultation issues NO prescription, NO laboratory request and NO imaging request.
+- Do not name, propose, recommend or imply any medication, dose or investigation as coming from this consultation.
+- Do not write that anything "has been prescribed", "has been ordered" or "is recommended".
+- The management plan is the transfer itself; the follow-up plan belongs to the receiving hospital.
+- Medication the patient was ALREADY taking before this consultation is history: report it in the history sections only, and say plainly that it predates this consultation.
+- The clinical reasoning, the differential diagnoses and the examination are still to be written in full: the receiving team needs them.
+`
+
+/**
+ * Empty the treatment out of the data handed to a report model, in place.
+ *
+ * Returns what was withdrawn, so the route can log it: a silent withdrawal is
+ * indistinguishable from a case that never had a treatment, and the difference
+ * matters when someone asks afterwards why the report is bare.
+ */
+export function withdrawTreatmentForEmergency(enrichedData: any): {
+  medications: number
+  labTests: number
+  imaging: number
+} {
+  const withdrawn = {
+    medications: Number(enrichedData?.summary?.medicationsCount) || 0,
+    labTests: Number(enrichedData?.summary?.labTestsCount) || 0,
+    imaging: Number(enrichedData?.summary?.imagingCount) || 0,
+  }
+
+  const NO_TREATMENT =
+    "Immediate hospital transfer. No medication is prescribed and no investigation is requested at this teleconsultation."
+  const HOSPITAL_INVESTIGATES = "Investigation is the responsibility of the receiving hospital."
+  const HOSPITAL_FOLLOWS_UP =
+    "Immediate attendance at Accident & Emergency. Follow-up is the responsibility of the receiving hospital."
+
+  // Only keys the shape already has are touched. The three routes name these
+  // fields differently — `treatment.approach` here, `treatment.managementPlan`
+  // there, investigations under `treatment` in one and under `followUp` in
+  // another — and inventing a key a prompt never reads would look like it had
+  // been handled when it had not.
+  const clear = (container: any, values: Record<string, unknown>) => {
+    if (!container || typeof container !== "object") return
+    for (const [key, value] of Object.entries(values)) {
+      if (key in container) container[key] = value
+    }
+  }
+
+  clear(enrichedData?.treatment, {
+    medications: [],
+    labTests: [],
+    imaging: [],
+    approach: NO_TREATMENT,
+    managementPlan: NO_TREATMENT,
+    investigationStrategy: HOSPITAL_INVESTIGATES,
+    // A diet plan and a self-monitoring schedule describe months of outpatient
+    // management that is not happening today.
+    dietaryPlan: "",
+    selfMonitoring: "",
+  })
+
+  // Warning signs are kept everywhere: they tell the patient what to do on the
+  // way to hospital, which is the one instruction that still applies.
+  clear(enrichedData?.followUp, {
+    immediate: HOSPITAL_FOLLOWS_UP,
+    schedule: HOSPITAL_FOLLOWS_UP,
+    labTests: [],
+    imaging: [],
+  })
+
+  clear(enrichedData?.summary, {
+    medicationsCount: 0,
+    labTestsCount: 0,
+    imagingCount: 0,
+  })
+
+  return withdrawn
+}
+
 /** Human-readable delay, e.g. "48 h" / "3 jours". */
 export function formatDelay(hours: number, language: "fr" | "en" = "fr"): string {
   if (hours < 24) return language === "fr" ? `${hours} h` : `${hours} hrs`

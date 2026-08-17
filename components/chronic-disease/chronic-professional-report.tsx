@@ -27,7 +27,7 @@ import {
 } from "lucide-react"
 import { createClient } from '@supabase/supabase-js'
 import TriageBanner from '@/components/triage-banner'
-import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
+import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, buildEmergencyTransferNotice, buildEmergencyManagementPlan, buildEmergencyFollowUpPlan, buildEmergencyConclusion, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
 
 // Initialize Supabase client for fetching consultation IDs
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
@@ -499,6 +499,9 @@ function sanitizeMedications(medications: any[]): any[] {
 
 // ==================== CHRONIC DISEASE SECTION DEFINITIONS ====================
 const CHRONIC_SECTION_KEYS = [
+  // First, and only on an emergency case: the transfer is the only thing that
+  // matters on the page, and it explains the absence of prescriptions below.
+  { key: 'urgenceHospitaliere', title: '⚠️ URGENT CARE REQUIRED — IMMEDIATE HOSPITAL TRANSFER' },
   { key: 'chiefComplaint', title: 'CHIEF COMPLAINT' },
   { key: 'historyOfPresentIllness', title: 'HISTORY OF PRESENT ILLNESS' },
   { key: 'pastMedicalHistory', title: 'PAST MEDICAL HISTORY' },
@@ -599,6 +602,7 @@ export default function ChronicProfessionalReport({
 
   // State for individual chronic disease sections
   const [chronicSections, setChronicSections] = useState<Record<string, string>>({
+    urgenceHospitaliere: '',
     chiefComplaint: '',
     historyOfPresentIllness: '',
     pastMedicalHistory: '',
@@ -740,6 +744,7 @@ export default function ChronicProfessionalReport({
     if (report?.medicalReport?.narrative) {
       const narrative = report.medicalReport.narrative
       const parsedSections: Record<string, string> = {
+        urgenceHospitaliere: '',
         chiefComplaint: '',
         historyOfPresentIllness: '',
         pastMedicalHistory: '',
@@ -804,13 +809,39 @@ export default function ChronicProfessionalReport({
         parsedSections[currentSection] = currentContent.join('\n').trim()
       }
 
+      // An emergency report carries no prescriptions, and must not read as if
+      // it did.
+      //
+      // Same policy as the other two flows. A chronic follow-up is rarely an
+      // emergency, which is exactly why a decompensation goes unnoticed here:
+      // a hypertensive emergency or a ketoacidosis arrives inside a routine
+      // three-monthly review, and the report would otherwise close on a diet
+      // plan and a titration schedule while the patient needs an ambulance.
+      //
+      // Applied after parsing rather than to the narrative text, so it cannot
+      // be defeated by a heading the model formatted differently. The history,
+      // examination and diagnostic sections are kept — they are what makes the
+      // referral actionable. The diet plan and self-monitoring instructions
+      // are not: they describe months of outpatient management that is not
+      // happening today.
+      const parseTriage = resolveTriage(diagnosisData)
+      if (parseTriage.level === 'emergency') {
+        console.log('🚨 Emergency case — replacing the management, follow-up and closing sections')
+        parsedSections.urgenceHospitaliere = buildEmergencyTransferNotice(parseTriage)
+        parsedSections.managementPlan = buildEmergencyManagementPlan(parseTriage)
+        parsedSections.followUpPlan = buildEmergencyFollowUpPlan(parseTriage)
+        parsedSections.conclusion = buildEmergencyConclusion(parseTriage)
+        parsedSections.dietaryPlan = ''
+        parsedSections.selfMonitoringInstructions = ''
+      }
+
       // Update state only if we parsed any content
       const hasContent = Object.values(parsedSections).some(v => v.trim())
       if (hasContent) {
         setChronicSections(parsedSections)
       }
     }
-  }, [report?.medicalReport?.narrative])
+  }, [report?.medicalReport?.narrative, diagnosisData])
 
   // Initialize local medications from report (one-time sync)
   useEffect(() => {
@@ -1829,10 +1860,29 @@ export default function ChronicProfessionalReport({
             }
           }
           
+          // An emergency report carries no prescriptions.
+          //
+          // Telling a patient to go to hospital without delay while handing
+          // them a prescription, a lab form and an imaging request contradicts
+          // itself, and sends them to a pharmacy instead of A&E. The hospital
+          // taking them in will order what it needs. The doctor is not blocked
+          // — the tabs stay editable and the add paths rebuild the structure.
+          //
+          // The narrative half of this is applied where the sections are
+          // parsed; see the emergency block in that effect.
+          const emergencyTriage = resolveTriage(diagnosisData)
+          if (emergencyTriage.level === 'emergency') {
+            console.log('🚨 Emergency case — dropping prescriptions, labs and imaging from the report')
+            updatedReport.medicationPrescription = undefined
+            updatedReport.laboratoryTests = undefined
+            updatedReport.paraclinicalExams = undefined
+            updatedReport.dietaryProtocol = undefined
+          }
+
           // Dietary protocol will be generated on-demand via button
           // No dietary data from initial load - user will click button to generate
           console.log('ℹ️ Dietary protocol will be generated on-demand via button click')
-          
+
           console.log('✅ Updated Report Structure:', {
             hasMedicationPrescription: !!updatedReport.medicationPrescription,
             hasLaboratoryTests: !!updatedReport.laboratoryTests,
@@ -2963,14 +3013,16 @@ export default function ChronicProfessionalReport({
 
       // 🚨 Detect emergency status from the LLM's structured triage block.
       // See professional-report.tsx for the rationale (string-matching the
-      // narrative caused false positives). The chronic-disease flow does
-      // not yet populate triage_assessment (Phase 5 on this endpoint is a
-      // separate sprint). When the field is absent we err on the side of
-      // NO banner — false positives are worse than no banner on chronic
-      // care (which is rarely a true emergency anyway).
-      // Same resolver as the banner, so the persisted flag and what the
-      // doctor saw on screen can never diverge.
-      const isEmergencyCase = resolveTriage(report).level === 'emergency'
+      // narrative caused false positives).
+      //
+      // Read from `diagnosisData`, which is where /api/chronic-diagnosis puts
+      // the block — not from `report`, which never carried one. While the
+      // chronic endpoint emitted no triage at all that distinction cost
+      // nothing: both resolved to "unassessed". Now that it does emit one,
+      // reading the wrong object would persist is_urgent = false under a
+      // banner saying emergency — the exact divergence this comment used to
+      // promise could never happen.
+      const isEmergencyCase = resolveTriage(diagnosisData).level === 'emergency'
 
       // Save final version to consultation_records table
       const saveResponse = await fetch('/api/save-medical-report', {
@@ -4310,11 +4362,15 @@ export default function ChronicProfessionalReport({
     // See professional-report.tsx for the rationale on this switch:
     // keyword scanning fires false positives ("rule out STROKE", "warning
     // signs of SEPSIS include…") and we now consume the LLM's structured
-    // triage block instead. Chronic flow will gain its own triage block
-    // when Phase 5 is applied to /api/openai-chronic in a later sprint.
+    // triage block instead.
     // Shared resolver (lib/triage.ts): also surfaces the "urgent" and
     // "triage not assessed" states, which the old boolean silently dropped.
-    const resolvedTriage = resolveTriage(medicalReport || diagnosisData)
+    //
+    // `diagnosisData` only. It used to prefer `medicalReport`, which has never
+    // carried a triage block — so the moment a report existed the resolver was
+    // handed an object that could only answer "unassessed", and the banner
+    // could never fire however urgent the case.
+    const resolvedTriage = resolveTriage(diagnosisData)
     const followUpPlan = computeFollowUp({
       level: resolvedTriage.level,
       proposedDelayHours: (diagnosisData as any)?.follow_up_plan?.next_consultation_delay_hours,
@@ -4464,6 +4520,10 @@ export default function ChronicProfessionalReport({
           {CHRONIC_SECTION_KEYS.map((section) => {
             const content = chronicSections[section.key]
             // Show section if: has content, OR in edit mode, OR not validated (so user can use Voice)
+            // The transfer notice exists only on an emergency case. Unlike the
+            // others it must not appear as an empty box the doctor could fill:
+            // it is written by the triage policy, not by hand.
+            if (section.key === 'urgenceHospitaliere' && !content) return null
             if (!content && !editMode && validationStatus === 'validated') return null
 
             return (

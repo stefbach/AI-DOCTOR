@@ -1,6 +1,7 @@
 // app/api/generate-dermatology-report/route.ts - ADAPTED FROM CONSULTATION REPORT v2.6 FOR DERMATOLOGY
 import { type NextRequest, NextResponse } from "next/server"
 import { callLLM } from "@/lib/llm-client"
+import { resolveTriage, withdrawTreatmentForEmergency, EMERGENCY_NARRATIVE_DIRECTIVE } from "@/lib/triage"
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s for DeepSeek-V4-Pro narrative generation (10-section dermato report)
@@ -1633,6 +1634,25 @@ export async function POST(request: NextRequest) {
     
     // ===== ENRICHED GPT DATA PREPARATION =====
     const enrichedGPTData = prepareEnrichedGPTData(realData, anonymizedPatientData)
+
+    // ===== EMERGENCY: THERE IS NO TREATMENT TO DESCRIBE =====
+    //
+    // See lib/triage.ts. The report component withdraws the prescription, the
+    // lab form and the imaging request on an emergency; this withdraws them
+    // from the prompt as well, so the narrative comes out right instead of
+    // coming out wrong and being corrected afterwards.
+    //
+    // Dermatology reaches this rarely and lethally: SJS/TEN, necrotising
+    // fasciitis, DRESS, meningococcaemia. A topical steroid printed under a
+    // referral for one of those is the worst version of this bug.
+    const reportTriage = resolveTriage(diagnosisData)
+    const isEmergencyReport = reportTriage.level === 'emergency'
+
+    if (isEmergencyReport) {
+      console.log('🚨 EMERGENCY case — generating the narrative without a treatment plan')
+      const withdrawn = withdrawTreatmentForEmergency(enrichedGPTData)
+      console.log(`   - Withdrawn: ${withdrawn.medications} medications, ${withdrawn.labTests} lab tests, ${withdrawn.imaging} imaging studies`)
+    }
     
     // ===== PRESCRIPTION EXTRACTION WITH TRANSLATION =====
     const { medications, labTests, imagingStudies } = extractPrescriptionsFromDiagnosisData(
@@ -1721,7 +1741,7 @@ export async function POST(request: NextRequest) {
     let narrativeContent: any = {}
 
     try {
-      const systemPrompt = createEnhancedSystemPrompt(getString(patientData?.pregnancyStatus) || '')
+      const systemPrompt = `${isEmergencyReport ? EMERGENCY_NARRATIVE_DIRECTIVE + '\n' : ''}${createEnhancedSystemPrompt(getString(patientData?.pregnancyStatus) || '')}`
       const userPrompt = createEnhancedUserPrompt(enrichedGPTData)
       
       const result = await callLLM({

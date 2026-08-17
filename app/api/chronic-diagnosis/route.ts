@@ -235,8 +235,42 @@ Analyse les maladies chroniques du patient ET propose la gestion médicamenteuse
 UTILISE les noms DCI (Metformine, Périndopril, Amlodipine, etc.)
 Format posologie UK: OD (1x/jour), BD (2x/jour), TDS (3x/jour)
 
+═══════════════════════════════════════════════════════════════════════════════
+CRITÈRES DE TRIAGE (pour remplir le bloc triage_assessment)
+═══════════════════════════════════════════════════════════════════════════════
+
+Un suivi de maladie chronique est rarement une urgence, et c'est précisément pour cela qu'une décompensation y passe inaperçue. Classe à partir de critères objectifs que tu peux nommer, jamais d'une impression.
+
+▶ severity = "emergency", disposition = "ambulance_immediate" ou "A&E_same_day":
+  - Urgence hypertensive : PAS ≥ 220 OU PAD ≥ 120, OU toute atteinte aiguë d'organe cible (douleur thoracique, déficit neurologique, dyspnée aiguë, baisse visuelle brutale)
+  - Acidocétose ou état hyperosmolaire : glycémie > 25 mmol/L avec cétonurie, polyurie/polydipsie majeures, déshydratation, altération de conscience
+  - Hypoglycémie sévère : < 2,2 mmol/L symptomatique, ou tout épisode ayant nécessité l'aide d'un tiers
+  - Insuffisance cardiaque décompensée : orthopnée, dyspnée paroxystique nocturne, prise de poids rapide avec œdèmes
+  - Suspicion de syndrome coronarien aigu ou d'AVC, quel que soit le motif initial de la consultation
+  - Hyperkaliémie connue > 6,5 mmol/L, ou signes ECG d'hyperkaliémie
+  - Pied diabétique avec sepsis, gangrène ou ischémie critique
+
+▶ severity = "urgent", disposition = "gp_review_24h":
+  - PAD 110-119 OU PAS 180-219 sans atteinte d'organe cible
+  - Contrôle glycémique très dégradé sans critère d'urgence (HbA1c en forte hausse, glycémies répétées > 15 mmol/L)
+  - Aggravation fonctionnelle nette depuis la dernière consultation
+  - Effet indésirable médicamenteux significatif nécessitant une révision sous 24-48 h
+
+▶ severity = "routine", disposition = "outpatient":
+  - Tout le reste. Suivi programmé, patient stable, ajustements thérapeutiques ordinaires.
+
+UNE TENSION ÉLEVÉE N'EST PAS AUTOMATIQUEMENT UNE URGENCE. Sans atteinte aiguë d'organe cible, c'est "urgent", pas "emergency" : le patient doit être revu en quelques jours, pas envoyé aux urgences.
+
+Si severity = "emergency" : le patient part à l'hôpital. Ne propose alors ni traitement de fond ni bilan de ville — la structure d'accueil s'en charge. Si severity = "routine", n'emploie nulle part les mots "urgence" ou "stat" : ils déclenchent des alertes en aval.
+
 Retourne UNIQUEMENT un JSON valide avec cette structure:
 {
+  "triage_assessment": {
+    "severity": "OBLIGATOIRE - routine | urgent | emergency, selon les critères ci-dessus",
+    "disposition": "OBLIGATOIRE - outpatient | gp_review_24h | A&E_same_day | ambulance_immediate, cohérent avec severity",
+    "criteria_met": ["OBLIGATOIRE - les critères objectifs retenus (ex: 'PA 186/124 sans atteinte d'organe cible', 'glycémie 9,8 mmol/L'). Si routine, liste les critères d'urgence VÉRIFIÉS ET ABSENTS."],
+    "justification": "OBLIGATOIRE - 1 à 3 phrases de raisonnement clinique. Pas de formule toute faite."
+  },
   "diseaseAssessment": {
     "diabetes": {
       "present": true/false,
@@ -405,6 +439,14 @@ Si une recommandation s'appuie sur une guideline du bloc CONTEXTE GUIDELINES MÉ
           console.log('✅ Both calls completed, combining results...')
 
           const combinedAssessment: any = {
+            // Triage, under the same key as the other two flows — that is
+            // where `resolveTriage` looks, and the emergency policy in the
+            // report component is driven entirely by what it finds.
+            //
+            // Null when the model omitted it, never a defaulted "routine": a
+            // defaulted routine reads as "assessed and safe", which is the one
+            // thing a missing triage must never be allowed to say.
+            triage_assessment: clinicalAnalysis.triage_assessment || null,
             diseaseAssessment: {
               diabetes: clinicalAnalysis.diseaseAssessment?.diabetes || { present: false },
               hypertension: clinicalAnalysis.diseaseAssessment?.hypertension || { present: false },

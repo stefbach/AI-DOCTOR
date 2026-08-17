@@ -5,7 +5,7 @@ import { CRITICAL_RULES_BLOCK_NARRATIVE } from "@/lib/critical-rules"
 import { detectFabricatedExam } from "@/lib/anti-fabrication"
 import { buildRefDisplayMap, buildRefSourceYearMap, expandRefsInTree, expandRefsAsSourceYearInTree } from "@/lib/rag/medical-rag"
 import { compositionKey } from "@/lib/prescription-review"
-import { resolveTriage } from "@/lib/triage"
+import { resolveTriage, withdrawTreatmentForEmergency, EMERGENCY_NARRATIVE_DIRECTIVE } from "@/lib/triage"
 
 export const runtime = 'nodejs'
 // 300s: DeepSeek V4-Pro thinking on the 10-section narrative blew through
@@ -2205,21 +2205,8 @@ export async function POST(request: NextRequest) {
 
     if (isEmergencyReport) {
       console.log('🚨 EMERGENCY case — generating the narrative without a treatment plan')
-      console.log(`   - Withdrawn from the prompt: ${enrichedGPTData.summary.medicationsCount} medications, ${enrichedGPTData.summary.labTestsCount} lab tests, ${enrichedGPTData.summary.imagingCount} imaging studies`)
-
-      enrichedGPTData.treatment.medications = []
-      enrichedGPTData.treatment.labTests = []
-      enrichedGPTData.treatment.imaging = []
-      enrichedGPTData.treatment.approach =
-        'Immediate hospital transfer. No medication is prescribed and no investigation is requested at this teleconsultation.'
-      enrichedGPTData.treatment.investigationStrategy =
-        'Investigation is the responsibility of the receiving hospital.'
-      enrichedGPTData.summary.medicationsCount = 0
-      enrichedGPTData.summary.labTestsCount = 0
-      enrichedGPTData.summary.imagingCount = 0
-      // Warning signs are kept: they tell the patient what to do on the way.
-      enrichedGPTData.followUp.immediate =
-        'Immediate attendance at Accident & Emergency. Follow-up is the responsibility of the receiving hospital.'
+      const withdrawn = withdrawTreatmentForEmergency(enrichedGPTData)
+      console.log(`   - Withdrawn: ${withdrawn.medications} medications, ${withdrawn.labTests} lab tests, ${withdrawn.imaging} imaging studies`)
     }
 
     // ===== PRESCRIPTION EXTRACTION WITH TRANSLATION =====
@@ -2317,21 +2304,7 @@ export async function POST(request: NextRequest) {
         userPrompt = createEnhancedUserPrompt(enrichedGPTData)
       }
       
-      // Said in words as well as in data. Zero counts alone leave the model
-      // free to fill the gap from the diagnosis it was given — "given the
-      // presentation, aspirin and ticagrelor would be indicated" reads, to the
-      // hospital, exactly like a prescription.
-      const emergencyDirective = isEmergencyReport
-        ? `
-EMERGENCY CASE — NO TREATMENT IS BEING ISSUED (OVERRIDES ANY INSTRUCTION BELOW):
-This patient is being transferred to hospital immediately. This consultation issues NO prescription, NO laboratory request and NO imaging request.
-- Do not name, propose, recommend or imply any medication, dose or investigation as coming from this consultation.
-- Do not write that anything "has been prescribed", "has been ordered" or "is recommended".
-- The management plan is the transfer itself; the follow-up plan belongs to the receiving hospital.
-- Medication the patient was ALREADY taking before this consultation is history: report it in the history sections only, and say plainly that it predates this consultation.
-- The clinical reasoning, the differential diagnoses and the examination are still to be written in full: the receiving team needs them.
-`
-        : ''
+      const emergencyDirective = isEmergencyReport ? EMERGENCY_NARRATIVE_DIRECTIVE : ''
 
       const reportSystemPrompt = `${CRITICAL_RULES_BLOCK_NARRATIVE}
 ${emergencyDirective}
