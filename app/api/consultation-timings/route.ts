@@ -73,9 +73,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const questionCount = Number.isFinite(Number(body?.questionCount))
-      ? Math.max(0, Math.min(50, Math.round(Number(body.questionCount))))
-      : null
+    // Null means "not known yet", and must survive as null. Number(null) is 0
+    // and finite, so the obvious check quietly turned every unknown count into
+    // a consultation that asked no questions.
+    const rawCount = body?.questionCount
+    const questionCount =
+      rawCount === null || rawCount === undefined || !Number.isFinite(Number(rawCount))
+        ? null
+        : Math.max(0, Math.min(50, Math.round(Number(rawCount))))
 
     const { error } = await supabase
       .from("consultation_timings")

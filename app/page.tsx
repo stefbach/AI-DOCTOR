@@ -190,12 +190,21 @@ export default function MedicalAIExpert() {
 
   // The number of questions sets the budget for that step: one minute each,
   // and the case produces three or five of them.
+  //
+  // The questions step reports `{ responses: [...] }` — neither of the two
+  // shapes this first guessed at, so the count never resolved and every
+  // consultation was recorded with zero questions, leaving the budget for
+  // that step uncomputable on the dashboard.
   useEffect(() => {
-    const count = Array.isArray(questionsData?.questions)
-      ? questionsData.questions.length
-      : Array.isArray(questionsData)
-        ? questionsData.length
-        : null
+    const list = Array.isArray(questionsData?.responses)
+      ? questionsData.responses
+      : Array.isArray(questionsData?.questions)
+        ? questionsData.questions
+        : Array.isArray(questionsData)
+          ? questionsData
+          : null
+    // Zero is not a count, it is the state before the questions exist.
+    const count = list && list.length > 0 ? list.length : null
     if (count == null) return
     setTimer((prev) => {
       if (!prev || prev.questionCount === count) return prev
