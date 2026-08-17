@@ -252,6 +252,14 @@ not indicated, however harmless it is.
 Say the same for the reverse: an investigation the diagnosis plainly demands
 and that nobody ordered.
 
+And watch for the right act on the wrong document. A report sent "blood
+pressure measurement" to the laboratory, under HEMATOLOGY, with a tube type
+and a turnaround time — a blood pressure cannot be drawn from a sample, so
+the laboratory could never honour it and the doctor believed they had ordered
+something that would never happen. That one is now caught before you are
+called, but the family is wider than any list: an act ordered from a service
+that does not perform it is wrong however well indicated it is.
+
 WHAT TO LOOK FOR
 1. Medication safety: therapeutic duplication (including a branded combination product that repeats a molecule already prescribed), drug-drug interaction with the prescribed list or the patient's existing medications, contraindication given the age/sex/history/allergies, dose or duration inappropriate for the indication, wrong galenic form or route for the stated posology.
 2. A drug that contradicts a precaution the report itself states. The management plan below may explicitly rule a drug class out — "avoid NSAIDs pending dengue exclusion", "no muscle relaxant because of drowsiness" — and a prescription line may breach it. Pay particular attention when the breach is hidden inside a combination product whose name names none of its ingredients, and say which ingredient creates the conflict. Where a brand has different formulations by country, say so rather than assuming one.

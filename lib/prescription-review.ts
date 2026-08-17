@@ -767,6 +767,35 @@ let alertCounter = 0
 const nextId = (prefix: string) => `${prefix}-${++alertCounter}`
 
 /**
+ * Acts that are ordered, but never from a laboratory.
+ *
+ * Matched on the test's own name, after normalisation. Every entry is a phrase
+ * rather than a word, because the words alone are treacherous: "blood culture"
+ * and "blood glucose" are proper laboratory tests, and only "blood pressure"
+ * is not. Anything uncertain is left out — a false alert on a real test costs
+ * more trust than a missed one costs safety, since the doctor still reads the
+ * form.
+ */
+const NOT_A_LABORATORY_TEST: { pattern: RegExp; fr: string; en: string }[] = [
+  // Vital signs — measured on the patient, not drawn from them.
+  { pattern: /\bblood pressure\b|\btension arterielle\b|\bpression arterielle\b|\bmapa\b/, fr: "une mesure de tension artérielle", en: "a blood pressure measurement" },
+  { pattern: /\bheart rate\b|\bpulse rate\b|\bfrequence cardiaque\b/, fr: "une mesure de fréquence cardiaque", en: "a heart rate measurement" },
+  { pattern: /\brespiratory rate\b|\bfrequence respiratoire\b/, fr: "une mesure de fréquence respiratoire", en: "a respiratory rate measurement" },
+  { pattern: /\boxygen saturation\b|\bpulse oximetry\b|\bspo2\b|\bsaturation en oxygene\b|\boxymetrie\b/, fr: "une mesure de saturation en oxygène", en: "an oxygen saturation measurement" },
+  { pattern: /\bbody temperature\b|^temperature$/, fr: "une prise de température", en: "a temperature reading" },
+  { pattern: /^weight$|^body weight$|^poids$|^height$|^taille$|^bmi$|^imc$/, fr: "une mesure anthropométrique", en: "an anthropometric measurement" },
+
+  // Functional tests — performed on the patient by a clinician or a device.
+  { pattern: /\becg\b|\bekg\b|\belectrocardiogram\b|\belectrocardiogramme\b|\bholter\b/, fr: "un examen électrocardiographique", en: "an electrocardiographic examination" },
+  { pattern: /\bspirometry\b|\bspirometrie\b|\bpeak flow\b|\bdebit de pointe\b/, fr: "une exploration fonctionnelle respiratoire", en: "a respiratory function test" },
+  { pattern: /\bfundoscopy\b|\bophthalmoscopy\b|\bfond d oeil\b/, fr: "un examen ophtalmologique", en: "an eye examination" },
+  { pattern: /\bphysical examination\b|\bexamen clinique\b/, fr: "un examen clinique", en: "a physical examination" },
+
+  // Imaging — belongs on the radiology request, not the laboratory one.
+  { pattern: /\bx[ -]?ray\b|\bradiograph\w*\b|\bct scan\b|\bscanner\b|\bmri\b|\birm\b|\bultrasound\b|\bechograph\w*\b|\becographie\b|\bechographie\b|\bdoppler\b|\bmammograph\w*\b|\bechocardiograph\w*\b/, fr: "un examen d'imagerie", en: "an imaging study" },
+]
+
+/**
  * Rules that do not need a model. These always run, always win, and are the
  * reason the feature catches the Chavetian case even if the LLM is down.
  */
@@ -1038,6 +1067,39 @@ export function runDeterministicChecks(
         source: "rule",
       })
     }
+  }
+
+  // --- 9. An act that is not a laboratory test, on the laboratory form ------
+  //
+  // A real report sent "Blood pressure measurement" to the laboratory, under
+  // HEMATOLOGY, with a tube type and a turnaround time. You cannot draw a
+  // blood pressure. The laboratory receives a request it can never honour, and
+  // the doctor believes they ordered a measurement that will never be taken.
+  //
+  // The relevance pass the model runs cannot catch this: a blood pressure IS
+  // warranted in that patient. It is the right act on the wrong document, and
+  // the list of things that are not drawn from a sample is finite — so this is
+  // arithmetic, not judgement, and belongs here rather than in a prompt.
+  for (const test of snapshot.laboratory) {
+    const name = normalise(test.nom)
+    if (!name) continue
+
+    const misplaced = NOT_A_LABORATORY_TEST.find((entry) => entry.pattern.test(name))
+    if (!misplaced) continue
+
+    const label = labLabel(test)
+    alerts.push({
+      id: nextId("not-a-lab"),
+      severity: "major",
+      target: "laboratory",
+      item: label,
+      issue: "not-a-laboratory-test",
+      message: `« ${label} » ne se prélève pas : c'est ${misplaced.fr}, pas une analyse de laboratoire. Le laboratoire recevra une demande qu'il ne peut pas honorer, et la mesure ne sera jamais faite.`,
+      messageEn: `"${label}" cannot be sampled: it is ${misplaced.en}, not a laboratory test. The laboratory will receive a request it cannot fulfil, and the measurement will never be taken.`,
+      suggestion: `Retirer cette ligne de la demande d'analyses. Si la mesure est nécessaire, elle relève de l'examen clinique ou du suivi, à consigner dans le rapport.`,
+      suggestionEn: `Remove this line from the laboratory request. If the measurement is needed, it belongs to the examination or the follow-up plan, recorded in the report.`,
+      source: "rule",
+    })
   }
 
   const relevant = touched
