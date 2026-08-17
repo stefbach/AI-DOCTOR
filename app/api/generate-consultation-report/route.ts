@@ -996,6 +996,31 @@ const FIELD_PLACEHOLDERS = new Set([
   "n/a", "none", "-", "—",
 ])
 
+/**
+ * The strength written inside a drug name — "Paracetamol 500mg" → "500mg".
+ *
+ * The diagnostic model sometimes fills the name and leaves `dosage_strength`
+ * empty, and the prescription then prints a line with no strength at all,
+ * which no pharmacy can dispense. The strength is right there in the name; not
+ * copying it across was the whole defect.
+ *
+ * This is the ONLY place a strength may be recovered from. Reading it out of
+ * the posology was tried and removed: on "QDS as needed, do not exceed 4g in
+ * 24 hours" the first figure is the daily ceiling, and printing it as the unit
+ * dose quadruples the prescription. A name is a name; a sentence is not.
+ *
+ * Silent on combinations ("875/125mg", "amoxicillin + clavulanic acid") and on
+ * names carrying two figures — there is no single strength to copy, and
+ * guessing which one belongs in the field is exactly the mistake above.
+ */
+function strengthFromName(name: string): string {
+  const text = String(name || "")
+  if (/\d\s*\/\s*\d/.test(text) || text.includes("+")) return ""
+  const matches = text.match(/\d+(?:[.,]\d+)?\s*(?:mg|g|mcg|µg|ug|ml|iu|ui)\b/gi)
+  if (!matches || matches.length !== 1) return ""
+  return matches[0].replace(/\s+/g, "").trim()
+}
+
 function stripPlaceholder(value: any): string {
   const v = String(value ?? "").trim()
   return FIELD_PLACEHOLDERS.has(v.toLowerCase()) ? "" : v
@@ -1146,6 +1171,13 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       dailyTotalDose = dailyTotalFrom(correctedDose, frequencyPerDay)
     }
 
+    // Same last resort as the newly-prescribed path: a current treatment the
+    // patient names as "Amlodipine 10mg" must not print with an empty strength
+    // just because the validator returned none.
+    if (!completeDosage) {
+      completeDosage = strengthFromName(displayName)
+    }
+
     // Build detailed frequency with total daily dose
     let detailedFrequency = ukFormat
     if (ukFormat && frequencyPerDay > 0 && dailyTotalDose) {
@@ -1194,7 +1226,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       pushMedication({
         name: getString(med.medication || med.name || `Medication ${idx + 1}`),
         genericName: getString(med.dci || med.medication || `Medication ${idx + 1}`),
-        dosage: getString(med.dosage || ''),
+        dosage: getString(med.dosage || '') || strengthFromName(med.medication || med.name),
         form: getString(med.form || (topical.includes(med) ? 'topical' : 'tablet')),
         frequency: getString(med.application || med.frequency || 'As prescribed'),
         route: getString(med.route || (topical.includes(med) ? 'Topical' : 'Oral')),
@@ -1252,6 +1284,10 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     let completeDosage = stripPlaceholder(getString(med.dosage_strength || med.dosage || med.strength || ''))
     if (!completeDosage && individualDose) {
       completeDosage = individualDose
+    }
+    if (!completeDosage) {
+      // Last resort before printing a line with no strength: the name itself.
+      completeDosage = strengthFromName(med.nom || med.medication_name || med.drug || med.name)
     }
     // No guessing the strength out of the posology text: on a real line reading
     // "QDS as needed... Do not exceed 4g in 24 hours", the first figure is the

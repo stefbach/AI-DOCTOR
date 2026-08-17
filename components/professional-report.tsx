@@ -785,6 +785,8 @@ const BiologyTestEditForm = memo(({
 })
 
 // 4. ImagingExamEditForm Component - CORRECTED VERSION
+const IMAGING_MODALITIES = ['X-Ray', 'CT Scan', 'MRI', 'Ultrasound', 'Mammography']
+
 const ImagingExamEditForm = memo(({
  exam,
  index,
@@ -859,25 +861,47 @@ const ImagingExamEditForm = memo(({
  )}
  
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+ {/* Free text, not a five-item list.
+     `type` holds the examination as ordered — "Chest X-ray", "CT
+     pulmonary angiogram", "Ultrasound abdomen and pelvis". None of
+     those is one of five modality labels, so the Select that used to
+     sit here showed its placeholder as if the field were empty, and
+     the moment the doctor touched it the examination name was
+     replaced by the bare modality. "Chest X-ray" became "X-Ray", the
+     region field was empty because the body part had only ever been
+     part of the name, and the request went to the radiologist saying
+     what machine to use and not what to image. */}
  <div>
- <Label>Imaging Type</Label>
+ <Label>Examination</Label>
+ <Input
+ value={localExam.type}
+ onChange={(e) => handleFieldChange('type', e.target.value)}
+ placeholder="e.g., Chest X-ray"
+ />
+ </div>
+ <div>
+ <Label>Modality</Label>
  <Select
- value={localExam.type || localExam.modalite}
- onValueChange={(value) => handleFieldChange('type', value)}
+ value={localExam.modalite}
+ onValueChange={(value) => handleFieldChange('modalite', value)}
  >
  <SelectTrigger>
- <SelectValue placeholder="Select type" />
+ <SelectValue placeholder="Select modality" />
  </SelectTrigger>
  <SelectContent>
- <SelectItem value="X-Ray">X-Ray</SelectItem>
- <SelectItem value="CT Scan">CT Scan</SelectItem>
- <SelectItem value="MRI">MRI</SelectItem>
- <SelectItem value="Ultrasound">Ultrasound</SelectItem>
- <SelectItem value="Mammography">Mammography</SelectItem>
+ {/* Whatever the pipeline produced, kept as an option so choosing
+     from the list is never the only way to have a valid value. */}
+ {localExam.modalite &&
+  !IMAGING_MODALITIES.includes(localExam.modalite) && (
+   <SelectItem value={localExam.modalite}>{localExam.modalite}</SelectItem>
+ )}
+ {IMAGING_MODALITIES.map((m) => (
+   <SelectItem key={m} value={m}>{m}</SelectItem>
+ ))}
  </SelectContent>
  </Select>
  </div>
- <div>
+ <div className="col-span-2">
  <Label>Anatomical Region</Label>
  <Input
  value={localExam.region}
@@ -1590,8 +1614,18 @@ const addImagingExam = useCallback(() => {
  prescription: {
  datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
  examens: [],
- renseignementsCliniques: '',
- centreImagerie: ''
+ // Seeded from the report, not left blank.
+ //
+ // This branch runs when the AI ordered no imaging and the doctor adds
+ // the first study by hand. It used to build the form with empty
+ // clinical information, and the request then printed "Clinical
+ // Diagnosis: N/A" — a radiology request with no indication, which the
+ // radiologist cannot protocol. The diagnosis is already in the report;
+ // there is no reason to make the doctor retype it.
+ renseignementsCliniques: prev.compteRendu?.rapport?.conclusionDiagnostique
+ || prev.compteRendu?.rapport?.syntheseDiagnostique
+ || '',
+ centreImagerie: 'Any MoH approved imaging center'
  },
  authentification: {
  signature: "Medical Practitioner's Signature",
@@ -6782,7 +6816,14 @@ const ConsultationReport = () => {
  <div><strong>Examination Date:</strong> {patient.dateExamen}</div>
  <div><strong>Weight:</strong> {patient.poids}</div>
  <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
- <div><strong>Clinical Diagnosis:</strong> {report?.ordonnances?.imagerie?.prescription?.renseignementsCliniques || 'N/A'}</div>
+ {/* Falls back to the report's own diagnosis before giving up. "N/A" on a
+     radiology request is not a neutral placeholder: it tells the radiologist
+     the referrer had no question, and the study is protocolled blind. */}
+ <div><strong>Clinical Diagnosis:</strong> {
+   report?.ordonnances?.imagerie?.prescription?.renseignementsCliniques
+   || report?.compteRendu?.rapport?.conclusionDiagnostique
+   || 'N/A'
+ }</div>
  {report?.ordonnances?.imagerie?.patient?.allergiesConnues && (
  <div><strong>Known Allergies:</strong> {report.ordonnances.imagerie.patient.allergiesConnues}</div>
  )}
@@ -8054,8 +8095,18 @@ const [localSickLeave, setLocalSickLeave] = useState({
  prescription: {
  datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
  examens: [],
- renseignementsCliniques: '',
- centreImagerie: ''
+ // Seeded from the report, not left blank.
+ //
+ // This branch runs when the AI ordered no imaging and the doctor adds
+ // the first study by hand. It used to build the form with empty
+ // clinical information, and the request then printed "Clinical
+ // Diagnosis: N/A" — a radiology request with no indication, which the
+ // radiologist cannot protocol. The diagnosis is already in the report;
+ // there is no reason to make the doctor retype it.
+ renseignementsCliniques: prev.compteRendu?.rapport?.conclusionDiagnostique
+ || prev.compteRendu?.rapport?.syntheseDiagnostique
+ || '',
+ centreImagerie: 'Any MoH approved imaging center'
  },
  authentification: {
  signature: "Medical Practitioner's Signature",

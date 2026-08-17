@@ -1123,11 +1123,17 @@ export function runDeterministicChecks(
     // A placeholder counts as missing: "Dose individuelle" is what the report
     // generator writes when it has no strength, and a pharmacist cannot
     // dispense against it any more than against a blank field.
-    if (!med.dosage || isPlaceholderDose(med.dosage)) missing.push("dosage")
+    const dosageMissing = !med.dosage || isPlaceholderDose(med.dosage)
+    if (dosageMissing) missing.push("dosage")
     if (missing.length) {
       alerts.push({
         id: nextId("incomplete"),
-        severity: "minor",
+        // A missing strength is not the same defect as a missing duration.
+        // Both make a line untidy; only one makes it undispensable, and minor
+        // findings are dropped on lines the doctor did not touch — so a
+        // paracetamol with no strength went out silently. It is the AI's
+        // omission, but it is the doctor's signature.
+        severity: dosageMissing ? "major" : "minor",
         target: "medication",
         item: medLabel(med),
         issue: "incomplete-prescription-line",
