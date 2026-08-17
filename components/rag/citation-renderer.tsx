@@ -191,7 +191,7 @@ export function aggregateReferences(
 export function SectionBibliography({
   references,
   globalReferences,
-  title = 'Références citées dans cette section',
+  title = 'References cited in this section',
 }: {
   references: EvidenceReference[] | undefined | null
   globalReferences?: EvidenceReference[]

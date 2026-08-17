@@ -5312,7 +5312,7 @@ export default function ChronicProfessionalReport({
         <SectionBibliography
           references={prescriptionAllUsedRefs}
           globalReferences={evidenceRefs}
-          title="Références citées dans cette prescription"
+          title="References cited in this prescription"
         />
 
         {/* Validity & Signature */}
@@ -5705,7 +5705,7 @@ export default function ChronicProfessionalReport({
         <SectionBibliography
           references={labUsedRefs}
           globalReferences={labEvidenceRefs}
-          title="Références citées dans cette demande d'analyses"
+          title="References cited in this laboratory request"
         />
 
         {/* Signature */}
@@ -6043,7 +6043,7 @@ export default function ChronicProfessionalReport({
         <SectionBibliography
           references={imagingUsedRefs}
           globalReferences={imagingEvidenceRefs}
-          title="Références citées dans cette demande d'imagerie"
+          title="References cited in this imaging request"
         />
 
         {/* Signature */}

@@ -6480,7 +6480,7 @@ const ConsultationReport = () => {
  <SectionBibliography
  references={prescriptionAllUsedRefs}
  globalReferences={evidenceRefs}
- title="Références citées dans cette prescription"
+ title="References cited in this prescription"
  />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
@@ -6724,7 +6724,7 @@ const ConsultationReport = () => {
  <SectionBibliography
  references={labUsedRefs}
  globalReferences={evidenceRefs}
- title="Références citées dans cette demande d'analyses"
+ title="References cited in this laboratory request"
  />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
@@ -6763,6 +6763,16 @@ const ConsultationReport = () => {
  const ImagingPrescription = () => {
  const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
  const patient = getReportPatient()
+ // One short line, whichever source it comes from.
+ const rawClinicalDiagnosis =
+   report?.ordonnances?.imagerie?.prescription?.renseignementsCliniques
+   || report?.compteRendu?.rapport?.conclusionDiagnostique
+   || ''
+ const clinicalDiagnosisLine = !rawClinicalDiagnosis
+   ? 'N/A'
+   : rawClinicalDiagnosis.length > 160
+     ? `${rawClinicalDiagnosis.slice(0, 157).trimEnd()}…`
+     : rawClinicalDiagnosis
  const praticien = getReportPraticien()
  const evidenceRefs = (diagnosisData?.evidence_references as any[]) || []
  // Indications + diagnostic questions both may carry citations.
@@ -6818,12 +6828,11 @@ const ConsultationReport = () => {
  <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
  {/* Falls back to the report's own diagnosis before giving up. "N/A" on a
      radiology request is not a neutral placeholder: it tells the radiologist
-     the referrer had no question, and the study is protocolled blind. */}
- <div><strong>Clinical Diagnosis:</strong> {
-   report?.ordonnances?.imagerie?.prescription?.renseignementsCliniques
-   || report?.compteRendu?.rapport?.conclusionDiagnostique
-   || 'N/A'
- }</div>
+     the referrer had no question, and the study is protocolled blind.
+     Trimmed like the laboratory form's equivalent field: the fallback is a
+     whole paragraph of diagnostic reasoning, and a header line that runs to
+     fifteen hundred characters buries the request underneath it. */}
+ <div><strong>Clinical Diagnosis:</strong> {clinicalDiagnosisLine}</div>
  {report?.ordonnances?.imagerie?.patient?.allergiesConnues && (
  <div><strong>Known Allergies:</strong> {report.ordonnances.imagerie.patient.allergiesConnues}</div>
  )}
@@ -6894,7 +6903,7 @@ const ConsultationReport = () => {
  <SectionBibliography
  references={imagingUsedRefs}
  globalReferences={evidenceRefs}
- title="Références citées dans cette demande d'imagerie"
+ title="References cited in this imaging request"
  />
 
  <div className="mt-8 pt-6 border-t border-gray-300">

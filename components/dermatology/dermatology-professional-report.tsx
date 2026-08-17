@@ -5826,7 +5826,7 @@ const ConsultationReport = () => {
  <SectionBibliography
  references={prescriptionAllUsedRefs}
  globalReferences={evidenceRefs}
- title="Références citées dans cette prescription"
+ title="References cited in this prescription"
  />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
@@ -6054,7 +6054,7 @@ const ConsultationReport = () => {
  <SectionBibliography
  references={labUsedRefs}
  globalReferences={evidenceRefs}
- title="Références citées dans cette demande d'analyses"
+ title="References cited in this laboratory request"
  />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
@@ -6217,7 +6217,7 @@ const ConsultationReport = () => {
  <SectionBibliography
  references={imagingUsedRefs}
  globalReferences={evidenceRefs}
- title="Références citées dans cette demande d'imagerie"
+ title="References cited in this imaging request"
  />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
