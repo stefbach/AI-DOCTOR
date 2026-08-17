@@ -1102,6 +1102,56 @@ export function runDeterministicChecks(
     })
   }
 
+  // --- Rule 10: prose that prescribes on a report that does not ------------
+  //
+  // An emergency case issues no prescription, no laboratory request and no
+  // imaging request: the patient is being sent to hospital, and the hospital
+  // orders what it needs. The documents are dropped for that reason.
+  //
+  // The narrative is not written from the same place. It is generated from the
+  // treatment the diagnostic model proposed, before those documents are
+  // dropped, so a report carrying nothing at all could still state in prose
+  // that four drugs "have been prescribed" — and the management plan is
+  // precisely what a receiving unit reads to know what the patient has already
+  // been given.
+  //
+  // The management plan, the follow-up plan and the final remarks are replaced
+  // outright at generation. This rule covers what remains: the diagnostic
+  // sections, which carry the reasoning the hospital needs and must not be
+  // rewritten by a machine that cannot tell a proposal from a history. So it
+  // reports rather than edits, and it quotes the offending sentence — half of
+  // what it catches will be a legitimate mention of the patient's own
+  // treatment, and the doctor settles that in one glance.
+  const emergencyReport =
+    !!snapshot.narrative.urgenceHospitaliere &&
+    snapshot.medications.length === 0 &&
+    snapshot.laboratory.length === 0 &&
+    snapshot.imaging.length === 0
+
+  if (emergencyReport) {
+    for (const key of NARRATIVE_PRESCRIBING_SECTIONS) {
+      const text = snapshot.narrative[key]
+      if (!text) continue
+
+      const sentence = findPrescribingSentence(text)
+      if (!sentence) continue
+
+      const label = narrativeLabel(key, "fr")
+      alerts.push({
+        id: nextId("emergency-prose"),
+        severity: "major",
+        target: "diagnosis",
+        item: label,
+        issue: "prescribes-on-an-emergency-report",
+        message: `« ${label} » décrit un traitement ou un examen prescrit, alors que ce rapport n'en comporte aucun : le cas est classé urgence et les ordonnances ont été retirées. Passage concerné : « ${sentence} ». L'hôpital qui reçoit le patient lit cette section pour savoir ce qui lui a déjà été donné.`,
+        messageEn: `"${narrativeLabel(key, "en")}" describes a treatment or an investigation as ordered, while this report carries none: the case is triaged as an emergency and the prescriptions were withdrawn. The passage: "${sentence}". The receiving hospital reads this section to know what the patient has already been given.`,
+        suggestion: `Reformuler ce passage. S'il s'agit d'un traitement que le patient prend déjà, l'écrire comme tel ; s'il s'agit du traitement proposé par l'IA, le retirer — il relève de la structure d'accueil.`,
+        suggestionEn: `Reword this passage. If it is treatment the patient is already taking, say so; if it is the treatment the AI proposed, remove it — that decision belongs to the receiving unit.`,
+        source: "rule",
+      })
+    }
+  }
+
   const relevant = touched
     ? alerts.filter(
         (a) =>
@@ -1111,6 +1161,70 @@ export function runDeterministicChecks(
     : alerts
 
   return sortAlerts(relevant)
+}
+
+/**
+ * Sections where "has been prescribed" is a claim about THIS consultation.
+ *
+ * The history and the past medical history are left out on purpose: that is
+ * where a patient's existing treatment belongs, and flagging it there would
+ * fire on every emergency report for saying something true.
+ */
+const NARRATIVE_PRESCRIBING_SECTIONS = [
+  "syntheseDiagnostique",
+  "conclusionDiagnostique",
+  "priseEnCharge",
+  "surveillance",
+  "conclusion",
+]
+
+/**
+ * Phrases that assert this consultation issued something.
+ *
+ * Deliberately narrow. "Amoxicillin 500 mg" on its own is not a claim — the
+ * differential reasoning may legitimately name a drug it would use. Only the
+ * act of issuing counts, and only in the passive or first person, because
+ * "the patient takes metformin" must never trip it.
+ */
+const PRESCRIBING_CLAIM =
+  /\b(?:(?:has|have|is|are|was|were)\s+been\s+(?:prescribed|ordered|requested|arranged|initiated|commenced|started|issued)|(?:is|are)\s+prescribed|we\s+(?:have\s+)?(?:prescribed|initiated|commenced|ordered|requested)|(?:i|we)\s+am\s+prescribing|prescription\s+(?:has\s+been|is)\s+(?:issued|provided|given)|the\s+following\s+(?:medication|treatment|drug|investigation|test|examination|imaging)s?\b)/i
+
+/**
+ * A denial, not a claim.
+ *
+ * "No medication has been prescribed" matches the claim pattern word for word
+ * while saying the exact opposite — and it is the sentence the emergency
+ * management plan opens on, so without this the rule would fire on its own
+ * output, on every emergency case. The cue has to sit BEFORE the claim and
+ * close to it: a sentence that reports a prescription and then mentions the
+ * absence of something else is still a claim.
+ */
+const DENIAL_CUE = /\b(?:no|not|none|neither|nor|never|without|aucun\w*|sans)\b/i
+
+/**
+ * The sentence a claim sits in, trimmed for display. Returns null when there
+ * is no claim — the caller treats that as "nothing to report".
+ */
+function findPrescribingSentence(text: string): string | null {
+  if (!PRESCRIBING_CLAIM.test(text)) return null
+
+  // Split on sentence ends and on line breaks — not on every full stop, which
+  // would cut "5 mg. OD" in half and quote a fragment that reads as nonsense.
+  const sentences = text.split(/(?<=[.!?])\s+(?=[A-Z])|\n+/)
+  for (const raw of sentences) {
+    const sentence = raw.replace(/\s+/g, " ").trim()
+    if (!sentence) continue
+
+    const match = PRESCRIBING_CLAIM.exec(sentence)
+    if (!match) continue
+
+    const before = sentence.slice(Math.max(0, match.index - 60), match.index)
+    if (DENIAL_CUE.test(before)) continue
+
+    return sentence.length > 220 ? `${sentence.slice(0, 217)}…` : sentence
+  }
+
+  return null
 }
 
 // ============================================================================

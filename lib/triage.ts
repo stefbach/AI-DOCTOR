@@ -281,6 +281,25 @@ export function buildEmergencyFollowUpPlan(_triage: ResolvedTriage): string {
   ].join("\n")
 }
 
+/**
+ * The FINAL REMARKS of an emergency report.
+ *
+ * The generation prompt asks for a synthesis of the whole case, and a case
+ * whose therapeutic section listed four drugs gets synthesised as a case with
+ * a treatment. Closing a report that carries no prescription on a paragraph
+ * summarising one undoes both replacements above, on the last thing the reader
+ * sees.
+ */
+export function buildEmergencyConclusion(_triage: ResolvedTriage): string {
+  return [
+    "This consultation concludes on a referral, not on a treatment.",
+    "",
+    "The clinical assessment, the diagnostic reasoning and the differential diagnoses set out above are provided for the receiving team. No prescription, laboratory request or imaging request accompanies this report, and none should be inferred from it.",
+    "",
+    "The single instruction arising from this consultation is that the patient attends hospital immediately.",
+  ].join("\n")
+}
+
 /** Human-readable delay, e.g. "48 h" / "3 jours". */
 export function formatDelay(hours: number, language: "fr" | "en" = "fr"): string {
   if (hours < 24) return language === "fr" ? `${hours} h` : `${hours} hrs`

@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "@/components/ui/use-toast"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import TriageBanner from '@/components/triage-banner'
-import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, buildEmergencyTransferNotice, buildEmergencyManagementPlan, buildEmergencyFollowUpPlan, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
+import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, buildEmergencyTransferNotice, buildEmergencyManagementPlan, buildEmergencyFollowUpPlan, buildEmergencyConclusion, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
 import { createClient } from '@supabase/supabase-js'
 import {
  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube,
@@ -2807,20 +2807,28 @@ if (isRenewal) {
  // proposing documents that work against its own instruction.
  //
  // Dropping the documents is not enough on its own. The narrative is written
- // server-side FROM those documents, before this runs, so the management and
- // follow-up plans go on describing a regimen in prose that no longer exists
- // on paper. Both are rewritten here for the same reason the documents are
- // dropped: the report must say one thing, and that thing is transfer.
+ // server-side FROM those documents, before this runs, so every section that
+ // was asked to describe a treatment goes on describing one in prose that no
+ // longer exists on paper. All three are rewritten here for the same reason
+ // the documents are dropped: the report must say one thing, and that thing
+ // is transfer.
+ //
+ // Three and not more. The history, the examination, the diagnostic synthesis
+ // and the diagnostic conclusion are the reason the hospital can act on this
+ // document — deleting them to be safe would leave the receiving team with a
+ // referral and no case. Those sections can still mention a treatment the
+ // model proposed; rule 10 of the review flags it for the doctor rather than
+ // having the machine edit clinical reasoning it does not understand.
  const emergencyTriage = resolveTriage(diagnosisData)
  if (emergencyTriage.level === 'emergency') {
    console.log('🚨 Emergency case — dropping prescriptions, labs and imaging from the report')
    // Kept in the console rather than the document: the doctor needs a report
    // that reads straight, but a dropped plan should still be traceable when
    // someone asks afterwards what the model had proposed.
-   console.log('🚨 Management plan replaced. Model proposal was:',
-     reportData.compteRendu.rapport.priseEnCharge || '(empty)')
-   console.log('🚨 Follow-up plan replaced. Model proposal was:',
-     reportData.compteRendu.rapport.surveillance || '(empty)')
+   for (const key of ['priseEnCharge', 'surveillance', 'conclusion'] as const) {
+     console.log(`🚨 ${key} replaced. Model proposal was:`,
+       reportData.compteRendu.rapport[key] || '(empty)')
+   }
 
    reportData.compteRendu.rapport.urgenceHospitaliere =
      buildEmergencyTransferNotice(emergencyTriage)
@@ -2828,6 +2836,8 @@ if (isRenewal) {
      buildEmergencyManagementPlan(emergencyTriage)
    reportData.compteRendu.rapport.surveillance =
      buildEmergencyFollowUpPlan(emergencyTriage)
+   reportData.compteRendu.rapport.conclusion =
+     buildEmergencyConclusion(emergencyTriage)
    reportData.ordonnances.medicaments = null
    reportData.ordonnances.biologie = null
    reportData.ordonnances.imagerie = null
