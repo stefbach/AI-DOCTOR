@@ -5,6 +5,7 @@ import { CRITICAL_RULES_BLOCK_NARRATIVE } from "@/lib/critical-rules"
 import { detectFabricatedExam } from "@/lib/anti-fabrication"
 import { buildRefDisplayMap, buildRefSourceYearMap, expandRefsInTree, expandRefsAsSourceYearInTree } from "@/lib/rag/medical-rag"
 import { compositionKey } from "@/lib/prescription-review"
+import { resolveTriage } from "@/lib/triage"
 
 export const runtime = 'nodejs'
 // 300s: DeepSeek V4-Pro thinking on the 10-section narrative blew through
@@ -2175,7 +2176,52 @@ export async function POST(request: NextRequest) {
     
     // ===== ENRICHED GPT DATA PREPARATION =====
     const enrichedGPTData = prepareEnrichedGPTData(realData, anonymizedPatientData, clinicalData)
-    
+
+    // ===== EMERGENCY: THERE IS NO TREATMENT TO DESCRIBE =====
+    //
+    // An emergency case is sent to hospital and issues no prescription, no
+    // laboratory request and no imaging request — the report component drops
+    // those documents for exactly that reason.
+    //
+    // It could not drop the prose. This prompt asks the model to describe the
+    // therapeutic approach and to state how many medications and tests were
+    // ordered, so the narrative was written from a treatment that was about to
+    // be withdrawn: a report carrying nothing at all still announced four
+    // drugs "prescribed". Patching that afterwards, section by section, is
+    // repairing text that should never have been written.
+    //
+    // So the treatment is withdrawn HERE, before the model sees it. The
+    // narrative comes out right instead of coming out wrong and being
+    // corrected. The client-side replacement stays as the guarantee — a model
+    // can always disobey — but it should now have nothing left to do.
+    //
+    // Only the general flow can reach this today: dermatology and chronic
+    // disease do not emit a triage block, so `resolveTriage` returns
+    // "unassessed" there and this is inert. It is written flow-agnostic on
+    // purpose, so that adding triage to those endpoints makes them coherent
+    // without a second change here.
+    const reportTriage = resolveTriage(diagnosisData)
+    const isEmergencyReport = reportTriage.level === 'emergency'
+
+    if (isEmergencyReport) {
+      console.log('🚨 EMERGENCY case — generating the narrative without a treatment plan')
+      console.log(`   - Withdrawn from the prompt: ${enrichedGPTData.summary.medicationsCount} medications, ${enrichedGPTData.summary.labTestsCount} lab tests, ${enrichedGPTData.summary.imagingCount} imaging studies`)
+
+      enrichedGPTData.treatment.medications = []
+      enrichedGPTData.treatment.labTests = []
+      enrichedGPTData.treatment.imaging = []
+      enrichedGPTData.treatment.approach =
+        'Immediate hospital transfer. No medication is prescribed and no investigation is requested at this teleconsultation.'
+      enrichedGPTData.treatment.investigationStrategy =
+        'Investigation is the responsibility of the receiving hospital.'
+      enrichedGPTData.summary.medicationsCount = 0
+      enrichedGPTData.summary.labTestsCount = 0
+      enrichedGPTData.summary.imagingCount = 0
+      // Warning signs are kept: they tell the patient what to do on the way.
+      enrichedGPTData.followUp.immediate =
+        'Immediate attendance at Accident & Emergency. Follow-up is the responsibility of the receiving hospital.'
+    }
+
     // ===== PRESCRIPTION EXTRACTION WITH TRANSLATION =====
     const { medications, labTests, imagingStudies } = extractPrescriptionsFromDiagnosisData(
       translatedDiagnosisData,
@@ -2271,8 +2317,24 @@ export async function POST(request: NextRequest) {
         userPrompt = createEnhancedUserPrompt(enrichedGPTData)
       }
       
-      const reportSystemPrompt = `${CRITICAL_RULES_BLOCK_NARRATIVE}
+      // Said in words as well as in data. Zero counts alone leave the model
+      // free to fill the gap from the diagnosis it was given — "given the
+      // presentation, aspirin and ticagrelor would be indicated" reads, to the
+      // hospital, exactly like a prescription.
+      const emergencyDirective = isEmergencyReport
+        ? `
+EMERGENCY CASE — NO TREATMENT IS BEING ISSUED (OVERRIDES ANY INSTRUCTION BELOW):
+This patient is being transferred to hospital immediately. This consultation issues NO prescription, NO laboratory request and NO imaging request.
+- Do not name, propose, recommend or imply any medication, dose or investigation as coming from this consultation.
+- Do not write that anything "has been prescribed", "has been ordered" or "is recommended".
+- The management plan is the transfer itself; the follow-up plan belongs to the receiving hospital.
+- Medication the patient was ALREADY taking before this consultation is history: report it in the history sections only, and say plainly that it predates this consultation.
+- The clinical reasoning, the differential diagnoses and the examination are still to be written in full: the receiving team needs them.
+`
+        : ''
 
+      const reportSystemPrompt = `${CRITICAL_RULES_BLOCK_NARRATIVE}
+${emergencyDirective}
 ${systemPrompt}
 
 ANTI-HALLUCINATION RULE (STRICT): Stay strictly within the provided diagnostic analysis. Never invent diagnoses, drugs, doses, lab values or findings absent from the input. If a section has no source data, write a short factual placeholder rather than fabricating content.`
