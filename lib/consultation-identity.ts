@@ -84,14 +84,28 @@ export function readLocalIdentity(overrides: IdentityOverrides = {}): Consultati
 
   const stored = readSessionJson(CACHE_KEY)
 
+  // The TIBOK id wins over a locally invented one.
+  //
+  // `getCurrentConsultationId()` never returns null: asked before it has been
+  // told, it MAKES UP an id ("consultation_1786…") so the app can work
+  // standalone. Read blindly it therefore outranks the real identifier — and a
+  // report saved under an invented id is a report TIBOK will never find, which
+  // is indistinguishable from a report that was never saved.
+  //
+  // So a generated id is used only when nothing authoritative is available.
+  // The hub writes `tibokConsultationId` separately and nothing deletes it,
+  // unlike `consultationPatientData`, which app/page.tsx removes as soon as it
+  // has read it.
+  const serviceId = clean(consultationDataService.getCurrentConsultationId())
+  const serviceIdIsGenerated = !!serviceId && serviceId.startsWith("consultation_")
+
   const consultationId =
     clean(overrides.consultationId) ||
-    clean(consultationDataService.getCurrentConsultationId()) ||
+    (serviceIdIsGenerated ? null : serviceId) ||
     clean(stored?.consultationId) ||
-    // The hub writes this one separately, and it is the identifier that
-    // survived when the other did not.
     readSessionString("tibokConsultationId") ||
-    clean(params?.get("consultationId"))
+    clean(params?.get("consultationId")) ||
+    serviceId
 
   const patientId =
     clean(overrides.patientId) ||
