@@ -22,6 +22,11 @@ import {
 } from '@/lib/rag/medical-rag'
 import { reRankAndShrinkContext } from '@/lib/rag/rerank'
 import { verifyCitationGrounding, stripRefTokens } from '@/lib/rag/verify-citations'
+// This route runs 90-150s and the doctor waits on mobile data inside an
+// iframe. When that link drops mid-wait the response goes nowhere and the
+// analysis is lost. Writing the result down before answering makes it
+// recoverable — see lib/ai-result-cache.ts.
+import { saveStepResult } from '@/lib/ai-result-cache'
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s: DeepSeek-V4-Pro on the Phase 1 enriched system prompt + Phase 2 boosted RAG context regularly runs 250-350s; 600 gives headroom without burning more compute than the call actually uses (Vercel bills real runtime, not the cap).
@@ -6679,8 +6684,15 @@ console.log(`🏝️ Niveau de qualité utilisé : ${mauritius_quality_level}`)
       console.error('[DEBUG-LABS-OUT] instrumentation error (non-blocking):', dbgErr?.message || dbgErr)
     }
 
+    // Written down before it is sent. If the doctor's connection died during
+    // the wait, this row is what lets them recover the analysis in seconds
+    // instead of re-running the whole pipeline (or, worse, being handed
+    // invented placeholder content). Best-effort: a failed cache write must
+    // never cost the doctor the response they are waiting for.
+    await saveStepResult(body.consultationId, 'diagnosis', finalResponse, body.resultToken)
+
     return NextResponse.json(finalResponse)
-    
+
   } catch (error) {
     console.error('❌ Erreur critique :', error)
     const errorTime = Date.now() - startTime

@@ -19,6 +19,7 @@ import {
   forwardToTibok,
   recordAttempt,
 } from "@/lib/document-delivery"
+import { purgeExpiredStepResults } from "@/lib/ai-result-cache"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
@@ -88,7 +89,20 @@ async function sweep() {
     `📦 Sweep done: ${rows.length} queued, ${delivered} delivered, ${stillPending} still pending, ${skipped} not due yet`,
   )
 
-  return NextResponse.json({ success: true, examined: rows.length, delivered, stillPending, skipped })
+  // Cached AI results only help the doctor still on that consultation. This
+  // sweep already runs every five minutes, so it carries the cleanup rather
+  // than earning a cron entry of its own.
+  const purged = await purgeExpiredStepResults()
+  if (purged > 0) console.log(`♻️ Purged ${purged} expired AI result(s)`)
+
+  return NextResponse.json({
+    success: true,
+    examined: rows.length,
+    delivered,
+    stillPending,
+    skipped,
+    aiResultsPurged: purged,
+  })
 }
 
 /**
