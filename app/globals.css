@@ -117,7 +117,18 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Désactiver pull-to-refresh sur mobile (évite les conflits avec scroll) */
+/* Le geste qui ferme la consultation.
+ *
+ * Cette application tourne dans une iframe sur tibok.mu, sous le panneau
+ * vidéo. Quand le docteur scrolle trop vite vers le haut, le dépassement
+ * remonte à la page parente et y déclenche le pull-to-refresh : TIBOK se
+ * recharge, la session vidéo est perdue, et la consultation avec elle.
+ *
+ * La règle existait déjà — sur `body` seulement. Le comportement de
+ * dépassement du viewport est décidé par l'élément racine, et posée sur le
+ * seul `body` elle ne s'appliquait pas de façon fiable dans Chrome Android.
+ * `html` est ajouté, et l'axe horizontal avec, pour le geste de retour. */
+html,
 body {
   overscroll-behavior: contain;
 }

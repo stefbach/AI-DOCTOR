@@ -45,6 +45,7 @@ import EvidenceReferencesSection from './rag/evidence-references-section'
 import { renderWithCitations, aggregateReferences, SectionBibliography } from './rag/citation-renderer'
 import { readLocalIdentity, resolveIdentity } from '@/lib/consultation-identity'
 import { reportBlocking } from '@/lib/blackbox'
+import SendFailureDialog, { type SendFailure } from '@/components/send-failure-dialog'
 
 // ==================== HELPER FUNCTIONS ====================
 // Helper function to safely handle DCI fields
@@ -1007,6 +1008,10 @@ export default function ProfessionalReportEditable({
  const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
  const [saving, setSaving] = useState(false)
  const [isSendingDocuments, setIsSendingDocuments] = useState(false)
+ // What stopped the send, when something did. A dialog rather than a toast:
+ // see components/send-failure-dialog.tsx for why the toast was the wrong
+ // shape for the one message a doctor must not miss.
+ const [sendFailure, setSendFailure] = useState<SendFailure | null>(null)
 
  // ---- AI clinical review of doctor edits (runs before signature) ----
  // The AI's own proposal, captured the moment the report is generated. Every
@@ -1945,7 +1950,15 @@ const handleAIAddImaging = useCallback((exam: any) => {
 //
 // `silent` suppresses the toast: an autosave firing every few seconds must not
 // stack toasts over the report the doctor is reading.
-const persistReport = useCallback(async (silent = false) => {
+/**
+ * Writes the report to the server. Returns whether it is genuinely there.
+ *
+ * The boolean exists because the failure dialog offers "save the report" as
+ * the doctor's guarantee against losing a consultation, and a button that says
+ * "saved" over a save that failed would be the same class of bug as the one
+ * that caused the loss in the first place.
+ */
+const persistReport = useCallback(async (silent = false): Promise<boolean> => {
  // The same resolver the send uses — not the URL.
  //
  // This read `params.get('consultationId')` alone, and the workflow page is
@@ -1974,7 +1987,7 @@ const persistReport = useCallback(async (silent = false) => {
  variant: "destructive"
  })
  }
- return
+ return false
  }
 
  setSaveStatus('saving')
@@ -2011,11 +2024,15 @@ const persistReport = useCallback(async (silent = false) => {
  }
 
  setTimeout(() => setSaveStatus('idle'), 3000)
+ return true
  } else {
  throw new Error(result.error || 'Failed to save')
  }
  } catch (error) {
  console.error('Save error:', error)
+ // A report that cannot be written to the server exists in one browser tab
+ // and nowhere else. That is worth a record even when the doctor recovers.
+ reportBlocking('report_save_failed', error instanceof Error ? error.message : 'unknown error')
  setSaveStatus('idle')
  // A failed autosave is reported too. Failing quietly would leave the
  // doctor believing their work is safe when it is not, which is the whole
@@ -2025,6 +2042,7 @@ const persistReport = useCallback(async (silent = false) => {
  description: error instanceof Error ? error.message : "Failed to save changes",
  variant: "destructive"
  })
+ return false
  }
 }, [report, doctorInfo, modifiedSections, validationStatus])
 
@@ -4327,14 +4345,11 @@ const handleSendDocuments = async () => {
    'identity_unresolved',
    `send blocked: consultation=${!!consultationId} patient=${!!patientId} doctor=${!!doctorId}`,
  )
- toast({
- title: "Impossible d'envoyer les documents",
- description: "Les informations de la consultation n'ont pas pu être retrouvées. Le rapport a été enregistré — prévenez le support avant de fermer.",
- variant: "destructive"
+ setSendFailure({
+   kind: 'identity_unresolved',
+   detail: `consultation=${consultationId || 'null'} patient=${patientId || 'null'} doctor=${doctorId || 'null'}`,
  })
- // Losing the send must not also lose the work. The report is already on
- // the server from the line below; this only makes sure a late failure
- // cannot leave it behind.
+ // Losing the send must not also lose the work.
  void persistReport(true)
  return
  }
@@ -5000,11 +5015,20 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  
  } catch (error) {
  console.error("❌ Error in handleSendDocuments:", error)
- toast({
- title: "Error sending documents",
- description: error instanceof Error ? error.message : "An error occurred while sending documents",
- variant: "destructive"
- })
+ // The documents did not reach the patient. Whatever the cause, that is the
+ // event worth having in the record — the automatic instrumentation only
+ // sees the failed request underneath it, if there was one at all.
+ const detail = error instanceof Error ? error.message : 'unknown error'
+ reportBlocking('send_failed', detail)
+ // Which of the three the doctor is looking at decides what they should do
+ // next, and each sentence differs. Guessed from the message because that
+ // is all the failure carries — anything unrecognised falls back to the
+ // wording that fits every case.
+ const kind: SendFailure['kind'] =
+   /failed to fetch|network|load failed|timeout/i.test(detail) ? 'network'
+   : /\b5\d\d\b|server|HTML instead of JSON|endpoint/i.test(detail) ? 'server'
+   : 'unknown'
+ setSendFailure({ kind, detail })
  }
  } finally {
  // The one place the spinner goes off. Whatever happened above — a return,
@@ -7599,6 +7623,21 @@ const [localSickLeave, setLocalSickLeave] = useState({
  {/* Clinical review of the doctor's edits, shown between "Validate and
      sign" and the signature itself. print:hidden is unnecessary — it only
      exists while the doctor is answering it. */}
+ {/* Above everything, including the review dialog: this one reports that a
+     paid consultation may have been lost. */}
+ <SendFailureDialog
+   failure={sendFailure}
+   language="fr"
+   onClose={() => setSendFailure(null)}
+   onRetry={() => {
+     setSendFailure(null)
+     return handleSendDocuments()
+   }}
+   // Returns whether the report is genuinely on the server, so the button
+   // cannot say "saved" over a save that failed.
+   onSave={() => persistReport(true)}
+ />
+
  <PrescriptionReviewDialog
    open={reviewOpen}
    loading={reviewLoading}

@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import * as React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -16,6 +16,8 @@ import {
   FileSignature
 } from "lucide-react"
 
+import { readLocalIdentity } from "@/lib/consultation-identity"
+import NavigationGuard from "@/components/navigation-guard"
 import PatientForm from "@/components/patient-form"
 import ClinicalForm from "@/components/clinical-form"
 import QuestionsForm from "@/components/questions-form"
@@ -575,6 +577,72 @@ export default function MedicalAIExpert() {
     loadSavedData()
   }, [currentStep, prefillData])
 
+  // ==================== WHERE THE DOCTOR WAS ====================
+  //
+  // The step index lived in React state and nowhere else, so any reload — a
+  // pull-to-refresh reaching TIBOK through our iframe, a browser reclaiming
+  // memory on a phone, a crash — sent the doctor back to "Patient information"
+  // with a consultation half done. The data survived in storage; only the
+  // position was thrown away, which is the one part that cannot be retyped
+  // from memory.
+  //
+  // Keyed by consultation so one consultation cannot restore into another,
+  // and only restored when the step it names has data behind it: a saved
+  // index of 4 on a consultation whose clinical data was cleared would open
+  // the medical record on nothing.
+  const STEP_KEY = 'consultation-step-'
+  const stepRestoredRef = useRef(false)
+
+  useEffect(() => {
+    if (checkingReturningPatient) return
+    if (stepRestoredRef.current) return
+    stepRestoredRef.current = true
+
+    const restore = async () => {
+      try {
+        const { consultationId } = readLocalIdentity()
+        if (!consultationId) return
+
+        const raw = localStorage.getItem(STEP_KEY + consultationId)
+        const saved = raw === null ? NaN : Number(raw)
+        if (!Number.isFinite(saved) || saved <= 0) return
+
+        // How far the data actually goes. Restoring past it would open a step
+        // on an empty form and look like the work had been lost anyway.
+        const savedData = await consultationDataService.getAllData()
+        let reachable = 0
+        if (savedData?.patientData) reachable = 1
+        if (savedData?.clinicalData) reachable = 2
+        if (savedData?.questionsData) reachable = 3
+        if (savedData?.diagnosisData) reachable = 4
+
+        const target = Math.min(Math.round(saved), reachable, steps.length - 1)
+        if (target > 0) {
+          console.log(`↩️ Restoring the consultation at step ${target} (saved ${saved}, data reaches ${reachable})`)
+          setCurrentStep(target)
+        }
+      } catch (error) {
+        console.warn('↩️ Could not restore the workflow position:', error)
+      }
+    }
+
+    void restore()
+  }, [checkingReturningPatient])
+
+  useEffect(() => {
+    // Written after the restore has had its chance, so the initial 0 of a
+    // fresh mount cannot overwrite the position it is about to read.
+    if (!stepRestoredRef.current) return
+    try {
+      const { consultationId } = readLocalIdentity()
+      if (consultationId) {
+        localStorage.setItem(STEP_KEY + consultationId, String(currentStep))
+      }
+    } catch {
+      // A full or unavailable store costs the restore, not the consultation.
+    }
+  }, [currentStep])
+
   // Scroll to top when step changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -1076,6 +1144,12 @@ const handlePrevious = () => {
               <ConsultationTimerBar state={timer} aiBusy={aiBusy} language="fr" />
             </ViewportLayer>
           )}
+
+          {/* Armed once there is work to lose. On step 0 an accidental reload
+              costs nothing, and a browser confirmation on an empty form is
+              noise the doctor will learn to dismiss without reading — which is
+              exactly how it stops working on the step where it matters. */}
+          <NavigationGuard active={currentStep > 0} language="fr" />
 
           {/* Mobile: Horizontal scroll, Tablet+: Grid */}
           <div className={`flex overflow-x-auto pb-2 gap-3 sm:grid ${isNurse ? 'sm:grid-cols-3 md:grid-cols-3' : 'sm:grid-cols-2 md:grid-cols-4'} sm:gap-4 sm:overflow-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0`}>

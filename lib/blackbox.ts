@@ -45,7 +45,19 @@ export type IncidentKind =
   | "consultation_blocked"
 
 const MAX_BREADCRUMBS = 50
-const MAX_REPORTS_PER_PAGE = 5
+
+// Two budgets, not one.
+//
+// There used to be a single cap of five reports per page load. On 17/08 a
+// consultation spent all five on noise — one boot stall and four failures of a
+// disclaimer endpoint nobody depends on — and by the time the send broke, the
+// recorder had nothing left to say. The failure that cost a paid consultation
+// is the one event that is missing from the record of it.
+//
+// So a warning can no longer starve an error. Errors get their own allowance,
+// larger, and it cannot be spent by anything less serious.
+const MAX_WARNINGS_PER_PAGE = 5
+const MAX_ERRORS_PER_PAGE = 15
 const SLOW_REQUEST_MS = 15_000
 const BOOT_STALL_MS = 30_000
 const MAX_STACK_CHARS = 4000
@@ -61,7 +73,8 @@ const state = {
   startedAt: 0,
   sessionId: "",
   breadcrumbs: [] as Breadcrumb[],
-  reportsSent: 0,
+  warningsSent: 0,
+  errorsSent: 0,
   /** Signatures already reported, so one recurring error is not sent N times. */
   seen: new Set<string>(),
   /** Unpatched fetch, so delivery never re-enters our own instrumentation. */
@@ -300,18 +313,34 @@ async function flushOutbox(): Promise<void> {
 export function report(input: ReportInput): void {
   try {
     if (typeof window === "undefined") return
-    if (state.reportsSent >= MAX_REPORTS_PER_PAGE) return
 
-    const signature = `${input.kind}|${(input.message || "").slice(0, 160)}`
+    const severity = input.severity || "error"
+    if (severity === "warning") {
+      if (state.warningsSent >= MAX_WARNINGS_PER_PAGE) return
+    } else if (state.errorsSent >= MAX_ERRORS_PER_PAGE) {
+      return
+    }
+
+    // Digits out of the signature before comparing.
+    //
+    // Every message carries a duration — "failed after 4417ms" — so the same
+    // endpoint failing the same way four times produced four different
+    // signatures, defeated the deduplication entirely, and spent the whole
+    // budget on one recurring fault. What varies is exactly what must not be
+    // part of the identity of a fault.
+    const signature = `${input.kind}|${(input.message || "")
+      .slice(0, 160)
+      .replace(/\d+/g, "#")}`
     if (state.seen.has(signature)) return
     state.seen.add(signature)
-    state.reportsSent++
+    if (severity === "warning") state.warningsSent++
+    else state.errorsSent++
 
     const ctx = collectContext()
     enqueue({
       _id: makeSessionId(),
       kind: input.kind,
-      severity: input.severity || "error",
+      severity,
       message: String(input.message || "unknown").slice(0, 1000),
       stack: input.stack ? String(input.stack).slice(0, MAX_STACK_CHARS) : null,
       sessionId: state.sessionId,
