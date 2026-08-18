@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { resolveIdentity } from '@/lib/consultation-identity'
 import { saveTibokDraft } from '@/lib/tibok-draft-service'
 import { toast } from "@/components/ui/use-toast"
 import { supabase } from '@/lib/supabase'
@@ -214,6 +215,54 @@ export default function ModernPatientForm({
  ...data
  }))
  const [errors, setErrors] = useState<ValidationErrors>({})
+
+ // Fill the contact details from the database before asking the doctor for them.
+ //
+ // The phone is required to send the documents, and this form now blocks
+ // without it — which is right, and would be intolerable on its own. The
+ // number travels URL → sessionStorage → prefill, and when any of those hops
+ // drops it the doctor is left staring at an empty field for a patient whose
+ // verified number has been on file for months. That is asking a human to do
+ // the machine's work, on every consultation where the transport breaks.
+ //
+ // So the machine asks first. Same lookup that recovers the identifiers at
+ // send time, run once here, and only for fields that are actually empty: a
+ // value the doctor has typed is never overwritten.
+ const contactRecoveredRef = useRef(false)
+ useEffect(() => {
+   if (contactRecoveredRef.current) return
+   contactRecoveredRef.current = true
+
+   const recover = async () => {
+     try {
+       const identity = await resolveIdentity({}, { force: true })
+       if (!identity.patientPhone && !identity.patientEmail && !identity.patientName) return
+
+       setFormData((prev) => {
+         const next = { ...prev }
+         let changed = false
+
+         if (!/\d/.test(prev.phone || '') && identity.patientPhone) {
+           next.phone = identity.patientPhone
+           changed = true
+         }
+         if (!(prev.email || '').includes('@') && identity.patientEmail) {
+           next.email = identity.patientEmail
+           changed = true
+         }
+         if (!changed) return prev
+         console.log('📞 Contact details recovered from the database')
+         return next
+       })
+     } catch (error) {
+       // A failed lookup leaves the doctor exactly where they were: with a
+       // field to fill in. It must never stop the form from working.
+       console.warn('📞 Could not recover the contact details:', error)
+     }
+   }
+
+   void recover()
+ }, [])
  const [consultationType, setConsultationType] = useState<'normal' | 'chronic' | 'dermatology' | ''>('')
  const [allergySearch, setAllergySearch] = useState("")
  const [historySearch, setHistorySearch] = useState("")
