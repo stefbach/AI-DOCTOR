@@ -547,7 +547,15 @@ export default function ModernPatientForm({
  }
  }, [])
  // ========== Validation ==========
- const validateForm = useCallback((): boolean => {
+ /**
+  * Returns the errors it found, not just whether there were any.
+  *
+  * The caller used to read `errors` from state to decide where to scroll —
+  * state that `setErrors` below had not yet applied, so it was acting on the
+  * PREVIOUS attempt's errors. It scrolled to the wrong field, or to none, and
+  * said nothing at all. Returning the fresh object removes the guesswork.
+  */
+ const validateForm = useCallback((): ValidationErrors => {
  const newErrors: ValidationErrors = {}
 
  // Required fields
@@ -593,8 +601,28 @@ export default function ModernPatientForm({
  newErrors.email = "Invalid email format"
  }
 
+ // The phone is required, and it is required HERE.
+ //
+ // Without it the save route refuses the whole consultation with "Phone
+ // number required" — at the very end, after the doctor has written the
+ // report and pressed send. On 18/08 that happened on a real consultation and
+ // the documents never left. Asking for it on the first step costs seconds;
+ // discovering it on the last costs the consultation.
+ //
+ // Digits rather than a format: Mauritian numbers are written +230 5xxx xxxx,
+ // 5xxxxxxx, with spaces, dashes or none of it, and a doctor fighting a
+ // regular expression during a consultation is worse than a loosely formatted
+ // number. Anything with no digit at all is not a phone number — which is
+ // exactly what "Not provided" was.
+ const phoneDigits = (formData.phone || '').replace(/\D/g, '')
+ if (!phoneDigits) {
+ newErrors.phone = "Le numéro de téléphone du patient est obligatoire pour lui envoyer ses documents"
+ } else if (phoneDigits.length < 7) {
+ newErrors.phone = "Numéro de téléphone incomplet"
+ }
+
  setErrors(newErrors)
- return Object.keys(newErrors).length === 0
+ return newErrors
  }, [formData, isChildbearingAge])
 
  // Save patient medical records to the patients table via API
@@ -632,7 +660,8 @@ export default function ModernPatientForm({
  }, [formData])
 
  const handleSubmit = useCallback(() => {
- if (validateForm()) {
+ const validationErrors = validateForm()
+ if (Object.keys(validationErrors).length === 0) {
    // Save patient records to the patients table
    const urlParams = new URLSearchParams(window.location.search)
    let patientId = urlParams.get('patientId')
@@ -747,9 +776,19 @@ export default function ModernPatientForm({
    console.log(' User selected Normal Consultation, continuing standard workflow...')
    onNext()
  } else {
-   // Scroll to first error
-   const firstErrorField = Object.keys(errors)[0]
-   const element = document.getElementById(firstErrorField)
+   // Say what is missing, then go there.
+   //
+   // Silence was the old behaviour: it scrolled somewhere, on stale state, and
+   // a doctor who did not notice the field turn blue had no idea why the
+   // button had done nothing. On a phone, under the video pane, the field it
+   // scrolled to was often off screen anyway.
+   const fields = Object.keys(validationErrors)
+   toast({
+     title: fields.length === 1 ? "Information manquante" : `${fields.length} informations manquantes`,
+     description: validationErrors[fields[0]],
+     variant: "destructive",
+   })
+   const element = document.getElementById(fields[0])
    if (element) {
      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
      element.focus()
@@ -1402,7 +1441,7 @@ useEffect(() => {
  <div className="space-y-2">
  <Label htmlFor="phone" className="flex items-center gap-2 font-medium">
  <Phone className="h-4 w-4" />
- Phone Number
+ Phone Number *
  </Label>
  <Input
  id="phone"
@@ -1411,7 +1450,17 @@ useEffect(() => {
  onChange={(e) => handleInputChange("phone", e.target.value)}
  onKeyDown={handleKeyDown}
  placeholder="+230 5XXX XXXX"
+ className={errors.phone ? "border-blue-500" : ""}
  />
+ {errors.phone && (
+ <p className="text-sm text-blue-500 flex items-center gap-1">
+ <X className="h-3 w-3" />
+ {errors.phone}
+ </p>
+ )}
+ <p className="text-xs text-gray-500">
+ Nécessaire pour transmettre les documents au patient.
+ </p>
  </div>
 
  <div className="space-y-2">

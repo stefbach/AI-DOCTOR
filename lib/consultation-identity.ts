@@ -31,6 +31,16 @@ export interface ConsultationIdentity {
   consultationId: string | null
   patientId: string | null
   doctorId: string | null
+  /**
+   * The patient's own details, when the server had to be asked.
+   *
+   * Not part of "identity" strictly speaking, but they travel the same broken
+   * chain and are lost the same way — and one of them, the phone, is enough on
+   * its own to have a whole consultation refused at the save route.
+   */
+  patientName?: string | null
+  patientPhone?: string | null
+  patientEmail?: string | null
 }
 
 export interface IdentityOverrides {
@@ -171,10 +181,19 @@ const RETRY_AFTER_MS = 30_000
  */
 export async function resolveIdentity(
   overrides: IdentityOverrides = {},
+  /**
+   * Ask even when the three identifiers are already known.
+   *
+   * The phone can be missing while the ids are complete — which is exactly the
+   * case that had a report refused with "Phone number required" — so the send
+   * path asks unconditionally, while the autosave, which needs only the ids,
+   * does not pay for a round-trip it has no use for.
+   */
+  options: { force?: boolean } = {},
 ): Promise<ConsultationIdentity> {
   const local = readLocalIdentity(overrides)
 
-  if (isComplete(local)) return local
+  if (isComplete(local) && !options.force) return local
   if (!local.consultationId) {
     // Without this one there is nothing to look up by. This is the only
     // genuinely unrecoverable case, and it is the rarest.
@@ -205,6 +224,9 @@ export async function resolveIdentity(
       consultationId: local.consultationId,
       patientId: local.patientId || clean(result.patientId),
       doctorId: local.doctorId || clean(result.doctorId),
+      patientName: clean(result.patientName),
+      patientPhone: clean(result.patientPhone),
+      patientEmail: clean(result.patientEmail),
     }
 
     console.log("🆔 Identity recovered from the database:", {

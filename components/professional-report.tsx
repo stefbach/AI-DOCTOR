@@ -4434,29 +4434,36 @@ const handleSendDocuments = async () => {
  return
  }
  
- // Email validation with fallback
- let patientEmail = patient?.email || ''
- if (!patientEmail || patientEmail === '' || !patientEmail.includes('@')) {
- // Try to get from patientData
- patientEmail = patientData?.email || ''
- 
- if (!patientEmail || !patientEmail.includes('@')) {
- // Use a placeholder email if absolutely necessary
+ // Email: the real one first, the database second, an invented one last.
+ //
+ // The invented address is kept because many Mauritian patients genuinely have
+ // none — the one in this consultation does not — and the save route accepts
+ // it. It must stay the LAST resort though: reaching for it before asking the
+ // database is how a patient with an address on file ends up with mail sent to
+ // patient_1787054392844@tibok.mu.
+ const looksLikeEmail = (v: any) => String(v || '').includes('@')
+ let patientEmail = [patient?.email, patientData?.email, identity.patientEmail]
+   .find(looksLikeEmail) || ''
+ if (!patientEmail) {
  patientEmail = `patient_${Date.now()}@tibok.mu`
- console.log('⚠️ Using fallback email:', patientEmail)
- }
+ console.log('⚠️ No email anywhere, using a placeholder:', patientEmail)
  }
  
- // Phone validation with fallback
- let patientPhone = patient?.telephone || ''
- if (!patientPhone || patientPhone === '') {
- // Try to get from patientData
- patientPhone = patientData?.phone || patientData?.phoneNumber || ''
- 
+ // Phone: a value with no digits in it is not a phone number.
+ //
+ // The old check asked whether the field was empty. It never was: the report
+ // generator wrote "Not provided" into it, which is truthy, so every fallback
+ // below was skipped and the string travelled to the save route — which counts
+ // digits, found none, and refused the consultation with "Phone number
+ // required". The documents never left, and the patients table had held a
+ // verified number the whole time.
+ const hasDigits = (v: any) => /\d/.test(String(v || ''))
+ let patientPhone = hasDigits(patient?.telephone) ? String(patient.telephone) : ''
  if (!patientPhone) {
- // Use a placeholder phone
- patientPhone = '+230 0000 0000'
- console.log('⚠️ Using fallback phone:', patientPhone)
+ patientPhone = [patientData?.phone, patientData?.phoneNumber, identity.patientPhone]
+   .find(hasDigits) || ''
+ if (patientPhone) {
+   console.log('📞 Phone recovered from', hasDigits(patientData?.phone) ? 'patient data' : 'the database')
  }
  }
  
@@ -4532,11 +4539,17 @@ const handleSendDocuments = async () => {
  // the `consultations` row had carried the two missing ones since before the
  // consultation began. The doctor is not asked and is not told: there is
  // nothing they could do that the app cannot do for them.
- const identity = await resolveIdentity({
-   consultationId: propConsultationId,
-   patientId: propPatientId || patientData?.id || patientData?.patientId,
-   doctorId: propDoctorId,
- })
+ const identity = await resolveIdentity(
+   {
+     consultationId: propConsultationId,
+     patientId: propPatientId || patientData?.id || patientData?.patientId,
+     doctorId: propDoctorId,
+   },
+   // Forced: the phone can be missing while the three identifiers are known,
+   // and a missing phone is enough on its own to have the save route refuse
+   // the consultation.
+   { force: true },
+ )
  const consultationId = identity.consultationId
  const patientId = identity.patientId
  const doctorId = identity.doctorId
@@ -4645,20 +4658,19 @@ const handleSendDocuments = async () => {
 
  if (!saveResponse.ok) {
  console.log('❌ Save failed:', saveResult)
-
- if (saveResult.validationError) {
- toast({
- title: "❌ Validation Failed",
- description: saveResult.error || "Document validation failed",
- variant: "destructive"
+ const detail = saveResult.error || `HTTP ${saveResponse.status}`
+ reportBlocking('save_medical_report_rejected', detail)
+ // The dialog, not a toast.
+ //
+ // This branch is how the send actually died in production: the save route
+ // answered 400 "Phone number required", a toast said so at the top of the
+ // page behind the video pane, and the doctor saw nothing at all. A toast is
+ // the wrong shape for a message that decides whether a patient gets their
+ // documents — the same reason the other two failure paths already use it.
+ setSendFailure({
+   kind: saveResult.validationError ? 'validation' : 'server',
+   detail,
  })
- } else {
- toast({
- title: "❌ Save Failed",
- description: saveResult.error || 'Failed to save report',
- variant: "destructive"
- })
- }
  return
  }
 

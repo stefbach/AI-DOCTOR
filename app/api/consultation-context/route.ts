@@ -79,8 +79,43 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // The patient's own contact details, from the same lookup.
+    //
+    // The identifiers alone were not enough. A report reached the save route
+    // with the literal string "Not provided" where the phone should be, was
+    // rejected, and the documents never left — while `patients` held a
+    // verified number all along. Whatever the browser lost, the database has;
+    // there is no reason to ask a doctor to retype it.
+    //
+    // Best-effort: a consultation whose patient row cannot be read still
+    // returns its identifiers rather than failing outright.
+    let patient: { name: string | null; phone: string | null; email: string | null } = {
+      name: null,
+      phone: null,
+      email: null,
+    }
+
+    if (data.patient_id) {
+      const { data: row, error: patientError } = await supabase
+        .from("patients")
+        .select("first_name, last_name, phone_number, email")
+        .eq("id", data.patient_id)
+        .maybeSingle()
+
+      if (patientError) {
+        console.warn("🆔 patient lookup failed:", patientError.message)
+      } else if (row) {
+        const name = [row.first_name, row.last_name].filter(Boolean).join(" ").trim()
+        patient = {
+          name: name || null,
+          phone: (row.phone_number || "").trim() || null,
+          email: (row.email || "").trim() || null,
+        }
+      }
+    }
+
     console.log(
-      `🆔 consultation-context resolved ${consultationId}: patient=${!!data.patient_id} doctor=${!!data.doctor_id}`,
+      `🆔 consultation-context resolved ${consultationId}: patient=${!!data.patient_id} doctor=${!!data.doctor_id} phone=${!!patient.phone}`,
     )
 
     return NextResponse.json({
@@ -90,6 +125,9 @@ export async function GET(request: NextRequest) {
       doctorId: data.doctor_id || null,
       consultationType: data.consultation_type || null,
       status: data.status || null,
+      patientName: patient.name,
+      patientPhone: patient.phone,
+      patientEmail: patient.email,
     })
   } catch (error) {
     console.error("🆔 consultation-context route failed:", error)
