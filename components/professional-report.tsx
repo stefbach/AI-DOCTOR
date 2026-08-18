@@ -4921,14 +4921,32 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
    console.error('[VERIFY-OUTGOING-1] instrumentation error (non-blocking):', verifyErr?.message || verifyErr)
  }
 
- // Call Tibok endpoint for ALL consultation types
- const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+ // Handed to our own server, not to TIBOK.
+ //
+ // The browser used to make this call itself, straight across the network to
+ // TIBOK, from a phone on mobile data inside an iframe during a video call —
+ // the longest and least reliable hop in the chain, carrying the one payload
+ // that must not be lost. When it failed nothing retried it and nobody knew.
+ //
+ // Now it only has to reach our own origin. That route writes the payload
+ // down before forwarding it, so from the moment it answers, the documents
+ // cannot be lost: the doctor can close the tab, lose signal or go home, and
+ // the server keeps trying until TIBOK takes them.
+ const response = await fetch('/api/deliver-documents', {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
- body: bodyStr
+ body: JSON.stringify({
+   consultationId,
+   patientId,
+   doctorId,
+   patientName,
+   doctorName: finalDoctorInfo.nom,
+   tibokUrl,
+   payload: JSON.parse(bodyStr),
+ })
  })
 
- console.log('📨 Tibok response status:', response.status)
+ console.log('📨 Delivery response status:', response.status)
 
  let responseText = ''
  try {
@@ -4961,7 +4979,16 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  }
 
  if (result?.success) {
- console.log('🎉 Documents sent successfully!')
+ // Two different promises, and the doctor is told which one was kept.
+ // `delivered` means TIBOK has the documents; `queued` means our server has
+ // them and is still trying. Both are safe — the consultation cannot be
+ // lost either way — but only one means the patient can see them now, and
+ // saying "sent" over a pending delivery is the kind of comfortable lie
+ // this whole day has been spent removing.
+ const deliveredNow = result?.delivered !== false
+ console.log(deliveredNow
+   ? '🎉 Documents delivered to the patient dashboard'
+   : '📦 Documents secured on the server, delivery still in progress')
 
  // Save referral if configured
  const supabaseClient = getSupabaseClient()
@@ -5208,14 +5235,16 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  setIsSendingDocuments(false)
 
  toast({
- title: "✅ Documents envoyés avec succès",
- description: specialistMode
-   ? "Le rapport spécialiste est maintenant disponible dans le tableau de bord du patient"
-   : "Les documents sont maintenant disponibles dans le tableau de bord du patient"
+ title: deliveredNow ? "✅ Documents envoyés avec succès" : "📦 Documents enregistrés",
+ description: deliveredNow
+   ? (specialistMode
+     ? "Le rapport spécialiste est maintenant disponible dans le tableau de bord du patient"
+     : "Les documents sont maintenant disponibles dans le tableau de bord du patient")
+   : "Ils sont conservés en sécurité et seront transmis au patient automatiquement."
  })
 
  // Show success modal
- showSuccessModal()
+ showSuccessModal(deliveredNow)
  
  } else {
  throw new Error(result?.error || "Failed to send documents - no success flag")
@@ -5244,7 +5273,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  setIsSendingDocuments(false)
  }
 }
- const showSuccessModal = () => {
+ const showSuccessModal = (delivered = true) => {
  const modalContainer = document.createElement('div')
  modalContainer.id = 'success-modal'
  // Top-anchored and scrollable, not vertically centred.
@@ -5312,12 +5341,16 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  </div>
  
  <h2 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
- Documents envoyés avec succès!
+ ${delivered ? 'Documents envoyés avec succès!' : 'Documents enregistrés'}
  </h2>
  
  <p style="color: #6b7280; margin-bottom: 1rem; line-height: 1.5; font-size: 0.875rem;">
- Les documents médicaux ont été transmis au tableau de bord du patient.<br>
- Le patient recevra une notification pour valider son ordonnance.
+ ${delivered
+   ? `Les documents médicaux ont été transmis au tableau de bord du patient.<br>
+      Le patient recevra une notification pour valider son ordonnance.`
+   : `Les documents sont enregistrés en sécurité et seront transmis au patient
+      automatiquement dès que possible.<br>
+      Vous pouvez fermer cette consultation.`}
  </p>
  
  <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; border: 1px solid #e5e7eb;">
@@ -5333,7 +5366,9 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  
  <div style="background: #d1fae5; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; border: 1px solid #a7f3d0;">
  <p style="font-size: 0.875rem; color: #065f46; margin: 0; font-weight: 500;">
- ✅ Tous les documents ont été envoyés avec succès
+ ${delivered
+   ? '✅ Tous les documents ont été envoyés avec succès'
+   : '📦 Tous les documents sont enregistrés — transmission en cours'}
  </p>
  <p style="font-size: 0.75rem; color: #047857; margin: 0.25rem 0 0 0; word-break: break-all;">
  Référence consultation : ${readLocalIdentity().consultationId || 'non disponible'}
