@@ -4384,10 +4384,9 @@ const handleSendDocuments = async () => {
  // Check if report is validated
  if (!report || validationStatus !== 'validated') {
  console.log('❌ Report not validated', { hasReport: !!report, validationStatus })
- toast({
- title: "Cannot send documents",
- description: "Please validate the documents first",
- variant: "destructive"
+ setSendFailure({
+   kind: 'validation',
+   detail: "Le rapport n'a pas encore été validé et signé. Utilisez « Validate and sign » avant d'envoyer.",
  })
  return
  }
@@ -4430,10 +4429,38 @@ const handleSendDocuments = async () => {
    description: "Patient name is required to send documents. Please ensure patient information is complete.",
    variant: "destructive"
  })
+ setSendFailure({
+   kind: 'validation',
+   detail: "Le nom du patient est manquant, à l'étape « Informations patient ».",
+ })
  setIsSendingDocuments(false)
  return
  }
  
+ // Who this consultation belongs to, and how to reach the patient.
+ //
+ // Resolved HERE, before anything reads it. It used to be resolved two
+ // hundred lines further down, after the contact fallbacks that reference
+ // it — a `const` in its temporal dead zone, so every single send threw
+ // "identity is not defined" before it could do anything at all. The doctor
+ // saw no dialog and no toast, because the crash happened before the code
+ // that would have shown either.
+ //
+ // One resolver, shared with the autosave, and it asks the database for
+ // whatever the browser lost. The doctor is not asked and is not told: there
+ // is nothing they could do that the app cannot do for them.
+ const identity = await resolveIdentity(
+   {
+     consultationId: propConsultationId,
+     patientId: propPatientId || patientData?.id || patientData?.patientId,
+     doctorId: propDoctorId,
+   },
+   // Forced: the phone can be missing while the three identifiers are known,
+   // and a missing phone is enough on its own to have the save route refuse
+   // the consultation.
+   { force: true },
+ )
+
  // Email: the real one first, the database second, an invented one last.
  //
  // The invented address is kept because many Mauritian patients genuinely have
@@ -4478,10 +4505,9 @@ const handleSendDocuments = async () => {
  // Doctor validation - more lenient
  if (!doctorInfo?.nom || doctorInfo.nom === 'Dr. [Name Required]') {
  console.log('❌ Invalid doctor name')
- toast({
- title: "❌ Incomplete Doctor Information",
- description: "Please complete doctor profile before sending",
- variant: "destructive"
+ setSendFailure({
+   kind: 'validation',
+   detail: "Le profil du médecin est incomplet — nom et numéro d'enregistrement, dans « Doctor Information » en haut du rapport.",
  })
  setEditingDoctor(true)
  return
@@ -4499,10 +4525,9 @@ const handleSendDocuments = async () => {
  const rapport = getReportRapport()
  if (!rapport?.motifConsultation || rapport.motifConsultation.trim().length < 3) {
  console.log('❌ Missing chief complaint')
- toast({
- title: "❌ Incomplete Medical Report",
- description: "Please add a chief complaint to the report",
- variant: "destructive"
+ setSendFailure({
+   kind: 'validation',
+   detail: "Le motif de consultation est vide dans le rapport (section CHIEF COMPLAINT).",
  })
  setActiveTab('consultation')
  return
@@ -4510,10 +4535,9 @@ const handleSendDocuments = async () => {
  
  if (!rapport?.conclusionDiagnostique || rapport.conclusionDiagnostique.trim().length < 3) {
  console.log('❌ Missing diagnosis')
- toast({
- title: "❌ Missing Diagnosis",
- description: "Please add a diagnostic conclusion",
- variant: "destructive"
+ setSendFailure({
+   kind: 'validation',
+   detail: "La conclusion diagnostique est vide dans le rapport (section DIAGNOSTIC CONCLUSION).",
  })
  setActiveTab('consultation')
  return
@@ -4530,26 +4554,6 @@ const handleSendDocuments = async () => {
  
  const params = new URLSearchParams(window.location.search)
 
- // Who this consultation belongs to.
- //
- // One resolver, shared with the autosave, and it asks the database for
- // anything the browser lost. It used to be resolved here by hand from
- // props, sessionStorage and the URL — and when that chain broke on a phone
- // the send refused, with a message naming three internal identifiers, while
- // the `consultations` row had carried the two missing ones since before the
- // consultation began. The doctor is not asked and is not told: there is
- // nothing they could do that the app cannot do for them.
- const identity = await resolveIdentity(
-   {
-     consultationId: propConsultationId,
-     patientId: propPatientId || patientData?.id || patientData?.patientId,
-     doctorId: propDoctorId,
-   },
-   // Forced: the phone can be missing while the three identifiers are known,
-   // and a missing phone is enough on its own to have the save route refuse
-   // the consultation.
-   { force: true },
- )
  const consultationId = identity.consultationId
  const patientId = identity.patientId
  const doctorId = identity.doctorId
@@ -5279,6 +5283,25 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
    : 'unknown'
  setSendFailure({ kind, detail })
  }
+ } catch (unexpected) {
+ // Anything at all. This is the net under the whole function.
+ //
+ // The dialog used to be wired to the failures I had thought of — a refused
+ // identity, a rejected save, a failed transfer — and to nothing else. Then a
+ // reference error in this very function threw before any of that code ran,
+ // and the doctor got no dialog, no toast and no explanation: the button
+ // simply did nothing. A crash is not a rarer kind of failure than the ones
+ // on the list, it is the kind nobody wrote a message for.
+ //
+ // So the list is no longer how the doctor finds out. Every path out of this
+ // function that is not success now ends here, with something on screen and
+ // a button that saves their work.
+ console.error('❌ Unexpected failure in handleSendDocuments:', unexpected)
+ const detail = unexpected instanceof Error
+   ? `${unexpected.name}: ${unexpected.message}`
+   : String(unexpected)
+ reportBlocking('send_crashed', detail)
+ setSendFailure((current) => current || { kind: 'unknown', detail })
  } finally {
  // The one place the spinner goes off. Whatever happened above — a return,
  // a throw, a validation refusal — the doctor gets their button back.
