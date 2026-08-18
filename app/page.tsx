@@ -1170,8 +1170,14 @@ const handlePrevious = () => {
               doctor scrolls through a long form. It carries no controls and
               the layer takes no pointer events, so it cannot intercept a
               click meant for the page beneath it. */}
+          {/* Pushed below the simulation banner when there is one.
+              That banner is `sticky top-0 z-50` — above this layer and at the
+              same place — so in simulation mode it sat squarely on top of the
+              clock and the doctor could not see the time at all. */}
           {timer && (
-            <ViewportLayer className="top-2 left-1/2 -translate-x-1/2 max-w-[96vw]">
+            <ViewportLayer
+              className={`left-1/2 -translate-x-1/2 max-w-[96vw] ${isSimulation ? 'top-12' : 'top-2'}`}
+            >
               <ConsultationTimerBar state={timer} aiBusy={aiBusy} language="fr" />
             </ViewportLayer>
           )}
@@ -1180,7 +1186,11 @@ const handlePrevious = () => {
               costs nothing, and a browser confirmation on an empty form is
               noise the doctor will learn to dismiss without reading — which is
               exactly how it stops working on the step where it matters. */}
-          <NavigationGuard active={currentStep > 0} language="fr" />
+          <NavigationGuard
+            active={currentStep > 0}
+            language="fr"
+            topClass={isSimulation ? 'top-24' : 'top-14'}
+          />
 
           {/* Mobile: Horizontal scroll, Tablet+: Grid */}
           <div className={`flex overflow-x-auto pb-2 gap-3 sm:grid ${isNurse ? 'sm:grid-cols-3 md:grid-cols-3' : 'sm:grid-cols-2 md:grid-cols-4'} sm:gap-4 sm:overflow-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0`}>

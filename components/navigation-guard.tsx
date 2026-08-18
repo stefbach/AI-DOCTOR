@@ -31,10 +31,16 @@ const NOTICE_MS = 5000
 export default function NavigationGuard({
   active,
   language = "fr",
+  topClass = "top-14",
 }: {
   /** True while a consultation is in progress and worth protecting. */
   active: boolean
   language?: "fr" | "en"
+  /**
+   * Where to sit. Below the clock by default; lower again when a simulation
+   * banner is holding the top of the screen.
+   */
+  topClass?: string
 }) {
   const [showNotice, setShowNotice] = React.useState(false)
 
@@ -99,12 +105,12 @@ export default function NavigationGuard({
             "That gesture could have closed the consultation and dropped the video call. Scroll more slowly, or use the app's own buttons to move around.",
         }
 
-  // top-14, not top-2: the consultation clock already occupies that line.
+  // Below the clock, wherever the clock happens to be — see `topClass`.
   // Top-anchored rather than bottom, because on a phone the bottom of the
   // screen is where the send button lives and a notice sitting on it would be
   // worse than no notice at all.
   return (
-    <ViewportLayer className="top-14 left-1/2 -translate-x-1/2 max-w-[96vw]">
+    <ViewportLayer className={`left-1/2 -translate-x-1/2 max-w-[96vw] ${topClass}`}>
       <div className="flex justify-center px-3">
         <div className="pointer-events-auto flex max-w-md items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 shadow-lg">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
