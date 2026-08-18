@@ -15,6 +15,8 @@
 import * as React from "react"
 import { AlertTriangle, CalendarClock, HelpCircle } from "lucide-react"
 
+import { cn } from "@/lib/utils"
+
 import type { ResolvedTriage, FollowUpPlan } from "@/lib/triage"
 import { formatDelay } from "@/lib/triage"
 
@@ -31,6 +33,19 @@ interface TriageBannerProps {
    */
   hideUnassessed?: boolean
 }
+
+/**
+ * Lets a call-to-action button fit a phone.
+ *
+ * The buttons handed in as `action` come from the report pages and carry the
+ * shadcn defaults, `whitespace-nowrap` among them. "Programmer la consultation
+ * de contrôle" therefore refused to wrap, overflowed its column, and had its
+ * right-hand end clipped by the card — the doctor saw "…grammer la consultation
+ * de contrô". Below `sm` the button takes the full width and is allowed to run
+ * onto a second line; from `sm` up it goes back to its natural size.
+ */
+const ACTION_FITS =
+  "[&>button]:h-auto [&>button]:w-full [&>button]:whitespace-normal [&>button]:py-2 [&>button]:leading-snug sm:[&>button]:w-auto"
 
 const TEXT = {
   fr: {
@@ -81,12 +96,12 @@ export default function TriageBanner({
       <div className="mb-6 rounded-lg border-2 border-sky-300 bg-sky-50 p-4 print:shadow-none">
         <div className="flex items-start gap-3">
           <CalendarClock className="h-6 w-6 flex-shrink-0 text-sky-600" />
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <h3 className="font-bold text-sky-900">{t.reviewTitle}</h3>
-            <p className="mt-1 text-sm text-sky-800">
+            <p className="mt-1 break-words text-sm text-sky-800">
               {t.urgentBody(formatDelay(followUp.delayHours, language))} — {followUp.reason}
             </p>
-            {action && <div className="mt-3 print:hidden">{action}</div>}
+            {action && <div className={cn("mt-3 print:hidden", ACTION_FITS)}>{action}</div>}
           </div>
         </div>
       </div>
@@ -99,22 +114,30 @@ export default function TriageBanner({
     return (
       <div
         role="alert"
-        className="mb-6 p-6 bg-red-600 text-white rounded-lg border-4 border-red-700 shadow-2xl animate-pulse print:animate-none print:bg-red-100 print:text-red-900 print:border-red-900"
+        className="mb-6 p-4 sm:p-6 bg-red-600 text-white rounded-lg border-4 border-red-700 shadow-2xl animate-pulse print:animate-none print:bg-red-100 print:text-red-900 print:border-red-900"
       >
-        <div className="flex items-center gap-4">
-          <div className="text-6xl">🚨</div>
-          <div className="flex-1">
-            <h2 className="text-3xl font-black mb-2 tracking-wide">⚠️ {t.emergencyTitle} ⚠️</h2>
-            <p className="text-xl font-bold">{t.emergencySub}</p>
-            <p className="text-lg mt-2">{t.emergencyBody}</p>
+        {/* Sized for a phone first. Two 60px sirens and a 30px heading fitted a
+            desktop and nothing else: on the 360px screen this is actually read
+            on, they left barely a third of the width for the words, and the
+            criteria — the part a receiving hospital needs — wrapped into a
+            column one word wide. The second siren goes at small widths; the
+            first one is the alarm, the second was decoration. */}
+        <div className="flex items-start gap-3 sm:items-center sm:gap-4">
+          <div className="shrink-0 text-4xl sm:text-6xl">🚨</div>
+          <div className="min-w-0 flex-1">
+            <h2 className="mb-1 text-xl font-black tracking-wide sm:mb-2 sm:text-3xl">
+              ⚠️ {t.emergencyTitle} ⚠️
+            </h2>
+            <p className="text-base font-bold sm:text-xl">{t.emergencySub}</p>
+            <p className="mt-2 text-sm sm:text-lg">{t.emergencyBody}</p>
             {triage.criteriaMet.length > 0 && (
-              <p className="text-sm mt-3 opacity-90">
+              <p className="mt-3 break-words text-xs opacity-90 sm:text-sm">
                 <span className="font-semibold">{t.criteria} : </span>
                 {triage.criteriaMet.join(" · ")}
               </p>
             )}
           </div>
-          <div className="text-6xl">🚨</div>
+          <div className="hidden shrink-0 text-6xl sm:block">🚨</div>
         </div>
       </div>
     )
@@ -126,29 +149,29 @@ export default function TriageBanner({
     return (
       <div
         role="alert"
-        className="mb-6 p-5 rounded-lg border-4 border-orange-400 bg-orange-50 shadow-xl print:shadow-none"
+        className="mb-6 p-4 sm:p-5 rounded-lg border-4 border-orange-400 bg-orange-50 shadow-xl print:shadow-none"
       >
-        <div className="flex items-start gap-4">
-          <AlertTriangle className="h-10 w-10 flex-shrink-0 text-orange-600" />
-          <div className="flex-1">
-            <h2 className="text-2xl font-black text-orange-900 mb-1">{t.urgentTitle}</h2>
-            <p className="text-base font-bold text-orange-900">{t.urgentNoAE}</p>
+        <div className="flex items-start gap-3 sm:gap-4">
+          <AlertTriangle className="h-7 w-7 flex-shrink-0 text-orange-600 sm:h-10 sm:w-10" />
+          <div className="min-w-0 flex-1">
+            <h2 className="mb-1 text-lg font-black text-orange-900 sm:text-2xl">{t.urgentTitle}</h2>
+            <p className="text-sm font-bold text-orange-900 sm:text-base">{t.urgentNoAE}</p>
             {delayLabel && (
-              <p className="mt-1 flex items-center gap-2 text-lg font-semibold text-orange-800">
-                <CalendarClock className="h-5 w-5" />
-                {t.urgentBody(delayLabel)}
+              <p className="mt-1 flex items-start gap-2 text-base font-semibold text-orange-800 sm:items-center sm:text-lg">
+                <CalendarClock className="mt-0.5 h-5 w-5 shrink-0 sm:mt-0" />
+                <span className="min-w-0">{t.urgentBody(delayLabel)}</span>
               </p>
             )}
             {followUp?.adjustedForLabs && (
-              <p className="mt-1 text-sm text-orange-700">{t.urgentLabs}</p>
+              <p className="mt-1 text-xs text-orange-700 sm:text-sm">{t.urgentLabs}</p>
             )}
             {triage.criteriaMet.length > 0 && (
-              <p className="mt-2 text-sm text-orange-800">
+              <p className="mt-2 break-words text-xs text-orange-800 sm:text-sm">
                 <span className="font-semibold">{t.criteria} : </span>
                 {triage.criteriaMet.join(" · ")}
               </p>
             )}
-            {action && <div className="mt-4 print:hidden">{action}</div>}
+            {action && <div className={cn("mt-4 print:hidden", ACTION_FITS)}>{action}</div>}
           </div>
         </div>
       </div>
@@ -163,9 +186,9 @@ export default function TriageBanner({
     >
       <div className="flex items-start gap-3">
         <HelpCircle className="h-6 w-6 flex-shrink-0 text-slate-500" />
-        <div>
+        <div className="min-w-0">
           <h3 className="font-bold text-slate-800">{t.unassessedTitle}</h3>
-          <p className="mt-1 text-sm text-slate-700">{t.unassessedBody}</p>
+          <p className="mt-1 break-words text-sm text-slate-700">{t.unassessedBody}</p>
         </div>
       </div>
     </div>

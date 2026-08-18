@@ -99,6 +99,16 @@ export async function POST(request: NextRequest) {
           consultation_type: consultationType,
           doctor_name: doctorName,
           patient_name: patientName,
+          // Backfilled, not just set on insert.
+          //
+          // A draft written before the identifiers were resolved lands with
+          // `patient_id: 'unknown'` below, and stays orphaned from the
+          // consultation for good — invisible to anything that looks a patient
+          // up. Once the real ids are known, the row is corrected. Omitted
+          // when they are still unknown, so a later save cannot overwrite a
+          // good value with a placeholder.
+          ...(patientId ? { patient_id: patientId } : {}),
+          ...(doctorId ? { doctor_id: doctorId } : {}),
           updated_at: new Date().toISOString()
         })
         .eq('consultation_id', consultationId)

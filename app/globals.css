@@ -117,7 +117,18 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Désactiver pull-to-refresh sur mobile (évite les conflits avec scroll) */
+/* Le geste qui ferme la consultation.
+ *
+ * Cette application tourne dans une iframe sur tibok.mu, sous le panneau
+ * vidéo. Quand le docteur scrolle trop vite vers le haut, le dépassement
+ * remonte à la page parente et y déclenche le pull-to-refresh : TIBOK se
+ * recharge, la session vidéo est perdue, et la consultation avec elle.
+ *
+ * La règle existait déjà — sur `body` seulement. Le comportement de
+ * dépassement du viewport est décidé par l'élément racine, et posée sur le
+ * seul `body` elle ne s'appliquait pas de façon fiable dans Chrome Android.
+ * `html` est ajouté, et l'axe horizontal avec, pour le geste de retour. */
+html,
 body {
   overscroll-behavior: contain;
 }
@@ -266,6 +277,32 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
+
+  /* The consultation clock, once past its budget.
+     
+     A slow breath, not a blink: 2.4s a cycle and 6% of scale. Fast flashing on
+     something permanently on screen stops being a signal and becomes an
+     irritant, and a doctor cannot look away from it — it sits above the
+     consultation for as long as they run late.
+     
+     The transform is on the pill, never on the fixed layer around it: a
+     transform makes an element the containing block for fixed descendants,
+     which is the bug that pinned the save indicator to a card instead of the
+     viewport. */
+  @keyframes timer-over-budget {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.06); }
+  }
+
+  .timer-over-budget {
+    animation: timer-over-budget 2.4s ease-in-out infinite;
+  }
+
+  /* Some people get motion sick, and a doctor mid-consultation cannot leave. */
+  @media (prefers-reduced-motion: reduce) {
+    .timer-over-budget { animation: none; }
+  }
+
   /* Smooth transitions */
   .smooth-transition {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

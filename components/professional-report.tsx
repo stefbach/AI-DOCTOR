@@ -1,5 +1,7 @@
 "use client"
 // import MedicalAIAssistant from './MedicalAIAssistant'
+import { markAiCallStart } from "@/lib/consultation-timer"
+import ViewportLayer from "@/components/viewport-layer"
 import { useState, useEffect, useCallback, useMemo, memo, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,18 +18,34 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "@/components/ui/use-toast"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import TriageBanner from '@/components/triage-banner'
-import { resolveTriage, computeFollowUp, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
+import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, buildEmergencyTransferNotice, buildEmergencyManagementPlan, buildEmergencyFollowUpPlan, buildEmergencyConclusion, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
 import { createClient } from '@supabase/supabase-js'
 import {
  FileText, Download, Printer, CheckCircle, Loader2, Share2, Pill, TestTube,
  Scan, AlertTriangle, XCircle, Eye, EyeOff, Edit, Save, FileCheck, Plus,
  Trash2, AlertCircle, Lock, Unlock, Copy, ClipboardCheck, Stethoscope,
  Calendar, User, Building, CreditCard, Receipt, Brain, Mic, MicOff, RefreshCw,
- UserPlus, Activity, Heart, Scale, Droplets
+ UserPlus, Activity, Heart, Scale, Droplets, Clock
 } from "lucide-react"
 import TibokMedicalAssistant from './tibok-medical-assistant'
+import PrescriptionReviewDialog from './prescription-review-dialog'
+import {
+  type ReviewAlert,
+  type ReviewSnapshot,
+  diffSnapshots,
+  extractPatientContext,
+  extractReviewSnapshot,
+  isBlocking,
+  mergeAlerts,
+  narrativeLabel,
+  runDeterministicChecks,
+  touchedMedicationLabels,
+} from '@/lib/prescription-review'
 import EvidenceReferencesSection from './rag/evidence-references-section'
 import { renderWithCitations, aggregateReferences, SectionBibliography } from './rag/citation-renderer'
+import { readLocalIdentity, resolveIdentity } from '@/lib/consultation-identity'
+import { reportBlocking } from '@/lib/blackbox'
+import SendFailureDialog, { type SendFailure } from '@/components/send-failure-dialog'
 
 // ==================== HELPER FUNCTIONS ====================
 // Helper function to safely handle DCI fields
@@ -145,6 +163,10 @@ interface MauritianReport {
  lastMenstrualPeriod?: string
  }
  rapport: {
+ // Only present when triage classified the case as an emergency. Explains
+ // why the consultation carries no prescription and why the patient must be
+ // transferred, so the document does not read as a contradiction.
+ urgenceHospitaliere?: string
  motifConsultation: string
  anamnese: string
  antecedents: string
@@ -190,6 +212,13 @@ interface ProfessionalReportProps {
  diagnosisData: any
  editedDocuments?: any
  onComplete?: () => void
+ /**
+  * The document has been signed. Separate from `onComplete`, which fires on
+  * "Finalize and Send": the medical work ends at the signature, and anything
+  * after it — sending, closing, or simply leaving the page open — is not time
+  * the doctor spent on the patient.
+  */
+ onSigned?: () => void
  onPrevious?: () => void
  doctorData?: any
  // IDs for document sending (passed from parent when coming from hub)
@@ -338,7 +367,7 @@ const DebouncedTextarea = memo(({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Auto-saving...
+ Modification en cours…
  </div>
  )}
  <Textarea
@@ -438,7 +467,7 @@ const MedicationEditForm = memo(({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Auto-saving...
+ Modification en cours…
  </div>
  )}
  </div>
@@ -661,7 +690,7 @@ const BiologyTestEditForm = memo(({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Auto-saving...
+ Modification en cours…
  </div>
  )}
  
@@ -759,6 +788,8 @@ const BiologyTestEditForm = memo(({
 })
 
 // 4. ImagingExamEditForm Component - CORRECTED VERSION
+const IMAGING_MODALITIES = ['X-Ray', 'CT Scan', 'MRI', 'Ultrasound', 'Mammography']
+
 const ImagingExamEditForm = memo(({
  exam,
  index,
@@ -828,30 +859,52 @@ const ImagingExamEditForm = memo(({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Auto-saving...
+ Modification en cours…
  </div>
  )}
  
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+ {/* Free text, not a five-item list.
+     `type` holds the examination as ordered — "Chest X-ray", "CT
+     pulmonary angiogram", "Ultrasound abdomen and pelvis". None of
+     those is one of five modality labels, so the Select that used to
+     sit here showed its placeholder as if the field were empty, and
+     the moment the doctor touched it the examination name was
+     replaced by the bare modality. "Chest X-ray" became "X-Ray", the
+     region field was empty because the body part had only ever been
+     part of the name, and the request went to the radiologist saying
+     what machine to use and not what to image. */}
  <div>
- <Label>Imaging Type</Label>
+ <Label>Examination</Label>
+ <Input
+ value={localExam.type}
+ onChange={(e) => handleFieldChange('type', e.target.value)}
+ placeholder="e.g., Chest X-ray"
+ />
+ </div>
+ <div>
+ <Label>Modality</Label>
  <Select
- value={localExam.type || localExam.modalite}
- onValueChange={(value) => handleFieldChange('type', value)}
+ value={localExam.modalite}
+ onValueChange={(value) => handleFieldChange('modalite', value)}
  >
  <SelectTrigger>
- <SelectValue placeholder="Select type" />
+ <SelectValue placeholder="Select modality" />
  </SelectTrigger>
  <SelectContent>
- <SelectItem value="X-Ray">X-Ray</SelectItem>
- <SelectItem value="CT Scan">CT Scan</SelectItem>
- <SelectItem value="MRI">MRI</SelectItem>
- <SelectItem value="Ultrasound">Ultrasound</SelectItem>
- <SelectItem value="Mammography">Mammography</SelectItem>
+ {/* Whatever the pipeline produced, kept as an option so choosing
+     from the list is never the only way to have a valid value. */}
+ {localExam.modalite &&
+  !IMAGING_MODALITIES.includes(localExam.modalite) && (
+   <SelectItem value={localExam.modalite}>{localExam.modalite}</SelectItem>
+ )}
+ {IMAGING_MODALITIES.map((m) => (
+   <SelectItem key={m} value={m}>{m}</SelectItem>
+ ))}
  </SelectContent>
  </Select>
  </div>
- <div>
+ <div className="col-span-2">
  <Label>Anatomical Region</Label>
  <Input
  value={localExam.region}
@@ -922,6 +975,191 @@ MedicationEditForm.displayName = 'MedicationEditForm'
 BiologyTestEditForm.displayName = 'BiologyTestEditForm'
 ImagingExamEditForm.displayName = 'ImagingExamEditForm'
 // ==================== MAIN COMPONENT ====================
+// ==================== DOCTOR INFO EDITOR ====================
+//
+// Module level, and that placement is the whole point.
+//
+// It used to be declared inside ProfessionalReport, wrapped in memo(). A
+// component created during render gets a NEW type identity on every render,
+// so React cannot match it against the previous tree: it unmounts the old one
+// and mounts a fresh one. The <input> the doctor was typing into became a
+// different DOM node, focus went with it, and Android closed the keyboard.
+// memo() made it worse than useless — it guaranteed a new type every time and
+// could never memoise anything.
+//
+// The autosave then made it constant: every save flips saveStatus, lastSavedAt
+// and hasUnsavedChanges, each a parent re-render, each destroying the form
+// mid-sentence. A doctor filling in their own registration number was
+// interrupted every few seconds.
+//
+// Declared once, here, it keeps its identity and its state across every parent
+// render. Everything it needs comes in as props.
+interface DoctorInfoEditorProps {
+  doctorInfo: any
+  updateDoctorInfo: (field: string, value: string) => void
+  editingDoctor: boolean
+  setEditingDoctor: (value: boolean) => void
+  setHasUnsavedChanges: (value: boolean) => void
+}
+
+const DoctorInfoEditor = memo(function DoctorInfoEditor({
+  doctorInfo,
+  updateDoctorInfo,
+  editingDoctor,
+  setEditingDoctor,
+  setHasUnsavedChanges,
+}: DoctorInfoEditorProps) {
+ const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' &&
+ !doctorInfo.numeroEnregistrement.includes('[')
+
+ const [localDoctorInfo, setLocalDoctorInfo] = useState(doctorInfo)
+
+  // Refreshed from the parent only when the doctor is not typing.
+  //
+  // The remount used to do this by accident: a fresh mount re-seeded the local
+  // copy from the latest props. Now that the component survives, the sync has
+  // to be deliberate — and deliberately skipped while the form is open, since
+  // overwriting a half-typed field is exactly what this whole change is meant
+  // to stop.
+  useEffect(() => {
+    if (!editingDoctor) setLocalDoctorInfo(doctorInfo)
+  }, [doctorInfo, editingDoctor])
+
+ const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
+ 
+ useEffect(() => {
+ const timer = setTimeout(() => {
+ if (editingDoctor && JSON.stringify(localDoctorInfo) !== JSON.stringify(doctorInfo)) {
+ Object.keys(localDoctorInfo).forEach(key => {
+ if (localDoctorInfo[key as keyof typeof localDoctorInfo] !== doctorInfo[key as keyof typeof doctorInfo]) {
+ updateDoctorInfo(key, localDoctorInfo[key as keyof typeof localDoctorInfo])
+ }
+ })
+ }
+ }, 3000) // 3 seconds
+ 
+ return () => clearTimeout(timer)
+ }, [localDoctorInfo, editingDoctor])
+ 
+const handleDoctorFieldChange = useCallback((field: string, value: string) => {
+ setLocalDoctorInfo(prev => ({ ...prev, [field]: value }))
+ setHasUnsavedChanges(true)
+ }, [])
+ 
+ return (
+ <Card className="mb-6 print:hidden">
+ <CardHeader className="pb-3">
+ <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+ <Button
+ variant="outline"
+ size="sm"
+ onClick={() => setEditingDoctor(!editingDoctor)}
+ className="w-fit text-xs sm:text-sm"
+ >
+ {editingDoctor ? <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> : <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />}
+ {editingDoctor ? 'Done' : 'Complete Profile'}
+ </Button>
+ <span className="flex items-center text-base sm:text-lg">
+ <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+ Doctor Information
+ </span>
+ </CardTitle>
+ </CardHeader>
+ <CardContent>
+ {editingDoctor ? (
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+ <div>
+ <Label>Full name *</Label>
+ <Input
+ ref={(el) => { inputRefs.current['nom'] = el }}
+ value={localDoctorInfo.nom}
+ onChange={(e) => handleDoctorFieldChange('nom', e.target.value)}
+ placeholder="Dr. Full Name"
+ className={localDoctorInfo.nom.includes('[') ? 'border-blue-500' : ''}
+ />
+ </div>
+ <div>
+ <Label>Qualifications</Label>
+ <Input
+ ref={(el) => { inputRefs.current['qualifications'] = el }}
+ value={localDoctorInfo.qualifications}
+ onChange={(e) => handleDoctorFieldChange('qualifications', e.target.value)}
+ placeholder="MBBS, MD"
+ />
+ </div>
+ <div>
+ <Label>Speciality</Label>
+ <Input
+ ref={(el) => { inputRefs.current['specialite'] = el }}
+ value={localDoctorInfo.specialite}
+ onChange={(e) => handleDoctorFieldChange('specialite', e.target.value)}
+ placeholder="General Medicine"
+ />
+ </div>
+ <div>
+ <Label>Medical Council Registration No. *</Label>
+ <Input
+ ref={(el) => { inputRefs.current['numeroEnregistrement'] = el }}
+ value={localDoctorInfo.numeroEnregistrement}
+ onChange={(e) => handleDoctorFieldChange('numeroEnregistrement', e.target.value)}
+ placeholder="MCM/12345"
+ className={localDoctorInfo.numeroEnregistrement.includes('[') ? 'border-blue-500' : ''}
+ />
+ </div>
+ <div>
+ <Label>Email *</Label>
+ <Input
+ ref={(el) => { inputRefs.current['email'] = el }}
+ value={localDoctorInfo.email}
+ onChange={(e) => handleDoctorFieldChange('email', e.target.value)}
+ placeholder="doctor@email.com"
+ className={localDoctorInfo.email.includes('[') ? 'border-blue-500' : ''}
+ />
+ </div>
+ <div className="col-span-2">
+ <Label>Clinic Address</Label>
+ <Input
+ ref={(el) => { inputRefs.current['adresseCabinet'] = el }}
+ value={localDoctorInfo.adresseCabinet}
+ onChange={(e) => handleDoctorFieldChange('adresseCabinet', e.target.value)}
+ placeholder="Clinic address or Teleconsultation"
+ />
+ </div>
+ <div className="col-span-2">
+ <Label>Consultation Hours</Label>
+ <Input
+ ref={(el) => { inputRefs.current['heuresConsultation'] = el }}
+ value={localDoctorInfo.heuresConsultation}
+ onChange={(e) => handleDoctorFieldChange('heuresConsultation', e.target.value)}
+ placeholder="Teleconsultation Hours: 8:00 AM - 8:00 PM"
+ />
+ </div>
+ <div className="col-span-2">
+ <p className="text-sm text-blue-600">* Required fields must be completed before validation</p>
+ </div>
+ </div>
+ ) : (
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
+ <div><strong>Name:</strong> {doctorInfo.nom}</div>
+ <div><strong>Qualifications:</strong> {doctorInfo.qualifications}</div>
+ <div><strong>Speciality:</strong> {doctorInfo.specialite}</div>
+ <div><strong>Medical Council No.:</strong> {doctorInfo.numeroEnregistrement}</div>
+ <div><strong>Email:</strong> {doctorInfo.email}</div>
+ {doctorInfo.adresseCabinet && !doctorInfo.adresseCabinet.toLowerCase().includes('tibok') && (
+ <div className="col-span-2"><strong>Clinic Address:</strong> {doctorInfo.adresseCabinet}</div>
+ )}
+ {doctorInfo.heuresConsultation && (
+ <div className="col-span-2"><strong>Consultation Hours:</strong> {doctorInfo.heuresConsultation.replace(/^Teleconsultation Hours:\s*/i, '').replace(/8:00\s*PM/gi, '00:00')}</div>
+ )}
+ </div>
+ )}
+ </CardContent>
+ </Card>
+ )
+ })
+
+DoctorInfoEditor.displayName = 'DoctorInfoEditor'
+
 export default function ProfessionalReportEditable({
  patientData,
  clinicalData,
@@ -929,6 +1167,7 @@ export default function ProfessionalReportEditable({
  diagnosisData,
  editedDocuments,
  onComplete,
+ onSigned,
  onPrevious,
  doctorData,
  consultationId: propConsultationId,
@@ -954,12 +1193,51 @@ export default function ProfessionalReportEditable({
  const [modifiedSections, setModifiedSections] = useState<Set<string>>(new Set())
  const [saving, setSaving] = useState(false)
  const [isSendingDocuments, setIsSendingDocuments] = useState(false)
+ // What stopped the send, when something did. A dialog rather than a toast:
+ // see components/send-failure-dialog.tsx for why the toast was the wrong
+ // shape for the one message a doctor must not miss.
+ const [sendFailure, setSendFailure] = useState<SendFailure | null>(null)
+
+ // ---- AI clinical review of doctor edits (runs before signature) ----
+ // The AI's own proposal, captured the moment the report is generated. Every
+ // later edit is measured against it so the review can tell the model WHAT
+ // the doctor changed. It is a ref, not state: nothing renders from it and it
+ // must never trigger a re-render mid-consultation.
+ const aiBaselineRef = useRef<ReviewSnapshot | null>(null)
+ // Set once the doctor has answered the review; cleared on the next edit so a
+ // prescription changed after clearance gets reviewed again.
+ const reviewClearedRef = useRef(false)
+ const [reviewOpen, setReviewOpen] = useState(false)
+ const [reviewLoading, setReviewLoading] = useState(false)
+ const [reviewAlerts, setReviewAlerts] = useState<ReviewAlert[]>([])
+ const [reviewDegraded, setReviewDegraded] = useState(false)
+ const [reviewId, setReviewId] = useState<string | null>(null)
  const [showFullReport, setShowFullReport] = useState(false)
  const [includeFullPrescriptions, setIncludeFullPrescriptions] = useState(true)
  
  // Manual save states
  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+ // Bumped on every edit, so the autosave can debounce on activity rather than
+ // on a boolean that only ever changes once.
+ const [editVersion, setEditVersion] = useState(0)
+ // When the report was last actually written to the database. Kept so the
+ // status stays on screen: the previous "Saved!" toast vanished after three
+ // seconds, leaving a doctor with no way to tell, at any later moment, whether
+ // their edit had been persisted or was still only in the page.
+ const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+
+ /**
+  * One edit happened. Everything that changes the report calls this.
+  *
+  * `setHasUnsavedChanges(true)` alone was not enough to debounce on: it is a
+  * boolean that flips once and then stays, so the autosave timer was never
+  * restarted and the write landed mid-sentence.
+  */
+ const markEdited = useCallback(() => {
+   setHasUnsavedChanges(true)
+   setEditVersion(v => v + 1)
+ }, [])
 
  // Loading states
  const [isLoadingFromDb, setIsLoadingFromDb] = useState(true)
@@ -1159,10 +1437,40 @@ const getFullSignatureUrl = (signatureUrl: string | null): string | null => {
  const getReportMetadata = () => report?.compteRendu?.metadata || createEmptyReport().compteRendu.metadata
 
 // ==================== TRACKING & UPDATES ====================
+// ==================== "TAKEN INTO ACCOUNT" ====================
+//
+// What the doctor actually wants to know while they work is not whether the
+// database has their edit — it is whether the DOCUMENT has it. The text fields
+// hold a change for three seconds before committing it, so there is a real
+// window where what is on screen is not yet in the report.
+//
+// The signal is the report itself changing, because that is the moment the
+// change exists. Watching the keystroke instead would announce "taken into
+// account" for something still sitting in a field, which is what the old
+// label did.
+const [justApplied, setJustApplied] = useState(false)
+const firstReportRef = useRef(true)
+useEffect(() => {
+  if (!report) return
+  // The first assignment is the generated report arriving, not an edit.
+  if (firstReportRef.current) {
+    firstReportRef.current = false
+    return
+  }
+  if (validationStatus === 'validated') return
+
+  setJustApplied(true)
+  const id = setTimeout(() => setJustApplied(false), 4000)
+  return () => clearTimeout(id)
+}, [report, validationStatus])
+
 const trackModification = useCallback((section: string) => {
  if (validationStatus === 'validated') return
  setModifiedSections(prev => new Set(prev).add(section))
- setHasUnsavedChanges(true)
+ markEdited()
+ // Any new edit invalidates a clearance already given: the document the
+ // doctor signs must be the document that was reviewed.
+ reviewClearedRef.current = false
 }, [validationStatus])
 
 const updateRapportSection = useCallback((section: string, value: string) => {
@@ -1355,7 +1663,7 @@ const updatePatientField = useCallback((field: string, value: string) => {
  return newReport
  })
  trackModification(`patient.${field}`)
- setHasUnsavedChanges(true)
+ markEdited()
 }, [validationStatus, trackModification])
 
 // ==================== ADD FUNCTIONS ====================
@@ -1513,8 +1821,18 @@ const addImagingExam = useCallback(() => {
  prescription: {
  datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
  examens: [],
- renseignementsCliniques: '',
- centreImagerie: ''
+ // Seeded from the report, not left blank.
+ //
+ // This branch runs when the AI ordered no imaging and the doctor adds
+ // the first study by hand. It used to build the form with empty
+ // clinical information, and the request then printed "Clinical
+ // Diagnosis: N/A" — a radiology request with no indication, which the
+ // radiologist cannot protocol. The diagnosis is already in the report;
+ // there is no reason to make the doctor retype it.
+ renseignementsCliniques: prev.compteRendu?.rapport?.conclusionDiagnostique
+ || prev.compteRendu?.rapport?.syntheseDiagnostique
+ || '',
+ centreImagerie: 'Any MoH approved imaging center'
  },
  authentification: {
  signature: "Medical Practitioner's Signature",
@@ -1724,7 +2042,7 @@ const stableUpdateImagingExam = useCallback((index: number, updatedExam: any) =>
 }, [])
 
 const stableTrackModification = useCallback(() => {
- setHasUnsavedChanges(true)
+ markEdited()
 }, [])
 
 const stableRemoveMedication = useCallback((index: number) => {
@@ -1781,7 +2099,7 @@ const updateDoctorInfo = useCallback((field: string, value: string) => {
  setDoctorInfo(updatedInfo)
  trackModification(`praticien.${field}`)
  sessionStorage.setItem('currentDoctorInfo', JSON.stringify(updatedInfo))
- setHasUnsavedChanges(true)
+ markEdited()
  
  setReport(prev => {
  if (!prev) return prev
@@ -1824,28 +2142,64 @@ const handleAIAddImaging = useCallback((exam: any) => {
  }, 100)
 }, [addImagingExam, updateImagingExamBatch, report])
 
-// ==================== MANUAL SAVE FUNCTION ====================
-const handleManualSave = useCallback(async () => {
- const params = new URLSearchParams(window.location.search)
- const consultationId = params.get('consultationId')
- 
+// ==================== SAVE ====================
+//
+// One write, two callers. The button calls it because the doctor asked; the
+// autosave below calls it because they stopped typing. Both go to the same
+// endpoint and land in the same state, so "saved" always means the same thing.
+//
+// `silent` suppresses the toast: an autosave firing every few seconds must not
+// stack toasts over the report the doctor is reading.
+/**
+ * Writes the report to the server. Returns whether it is genuinely there.
+ *
+ * The boolean exists because the failure dialog offers "save the report" as
+ * the doctor's guarantee against losing a consultation, and a button that says
+ * "saved" over a save that failed would be the same class of bug as the one
+ * that caused the loss in the first place.
+ */
+const persistReport = useCallback(async (silent = false): Promise<boolean> => {
+ // The same resolver the send uses — not the URL.
+ //
+ // This read `params.get('consultationId')` alone, and the workflow page is
+ // reached through a `router.push('/')` that strips the query string. So on
+ // every real TIBOK consultation there was no id here, the autosave returned
+ // immediately, and `consultation_drafts` stayed empty — for months, silently,
+ // while the interface said the report was being saved. A consultation lived
+ // in one browser tab until the doctor pressed send, and if the send failed
+ // there was nothing left anywhere.
+ // Resolved, not just read: a draft row created without the patient and
+ // doctor ids is inserted with `patient_id: 'unknown'` by the save route,
+ // which orphans it from the consultation it belongs to.
+ const identity = await resolveIdentity()
+ const { consultationId } = identity
+
  if (!consultationId || !report) {
+ // Nothing can be written without a consultation to write it against. This
+ // used to return silently on the autosave path, which left the indicator
+ // promising a save that would never come — the doctor read "saving in a
+ // few seconds" for as long as they cared to look.
+ console.warn('💾 Save impossible:', { consultationId, hasReport: !!report })
+ if (!silent) {
  toast({
  title: "Cannot save",
  description: "Missing consultation ID or report data",
  variant: "destructive"
  })
- return
  }
- 
+ return false
+ }
+
  setSaveStatus('saving')
- 
+
  try {
  const response = await fetch('/api/save-draft', {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify({
  consultationId,
+ patientId: identity.patientId,
+ doctorId: identity.doctorId,
  reportContent: report,
  doctorInfo,
  modifiedSections: Array.from(modifiedSections),
@@ -1857,29 +2211,79 @@ const handleManualSave = useCallback(async () => {
  
  if (result.success) {
  setSaveStatus('saved')
+ setLastSavedAt(new Date())
  setHasUnsavedChanges(false)
  setModifiedSections(new Set())
- 
+
+ if (!silent) {
  toast({
- title: "✅ Saved successfully",
- description: "Your changes have been saved",
+ title: "✅ Modifications enregistrées",
+ description: "Le rapport a été sauvegardé.",
  duration: 2000
  })
- 
+ }
+
  setTimeout(() => setSaveStatus('idle'), 3000)
+ return true
  } else {
  throw new Error(result.error || 'Failed to save')
  }
  } catch (error) {
  console.error('Save error:', error)
+ // A report that cannot be written to the server exists in one browser tab
+ // and nowhere else. That is worth a record even when the doctor recovers.
+ reportBlocking('report_save_failed', error instanceof Error ? error.message : 'unknown error')
  setSaveStatus('idle')
+ // A failed autosave is reported too. Failing quietly would leave the
+ // doctor believing their work is safe when it is not, which is the whole
+ // reason this indicator exists.
  toast({
- title: "Save failed",
+ title: silent ? "⚠️ Enregistrement automatique échoué" : "Save failed",
  description: error instanceof Error ? error.message : "Failed to save changes",
  variant: "destructive"
  })
+ return false
  }
 }, [report, doctorInfo, modifiedSections, validationStatus])
+
+const handleManualSave = useCallback(() => persistReport(false), [persistReport])
+
+// ==================== AUTOSAVE ====================
+//
+// Nothing reached the server except by pressing the button, while the text
+// fields announced "Auto-saving…" — which only ever meant "copied into the
+// page's own state". A doctor who closed the tab lost the lot, and the one
+// who read the words believed the opposite.
+//
+// This delay stacks on the fields' own 3s debounce, so a report is written
+// about five seconds after the doctor stops typing rather than on every
+// keystroke. Nothing is written once the document is signed.
+//
+// Whether anything CAN be written: the report is saved against a consultation,
+// and opened without one (a preview URL, a lost query string) there is nothing
+// to save it to. Tracked so the indicator can say that plainly instead of
+// counting down to a save that will never happen.
+const canPersist = typeof window !== 'undefined'
+  && !!readLocalIdentity().consultationId
+
+// A debounce, which it was not.
+//
+// `hasUnsavedChanges` is a boolean: it goes true on the first keystroke and
+// stays true, so this effect did not re-run and the timer was never reset. The
+// save therefore fired 2.5 seconds after the doctor STARTED typing, in the
+// middle of a sentence — and each save re-rendered the page under them.
+// `editVersion` increments on every change instead, so the clock restarts with
+// each keystroke and the write happens once the doctor has stopped.
+const autosaveTimerRef = useRef<NodeJS.Timeout>()
+useEffect(() => {
+ if (!canPersist) return
+ if (!hasUnsavedChanges || validationStatus === 'validated' || saveStatus === 'saving') return
+ autosaveTimerRef.current = setTimeout(() => {
+   console.log('💾 Autosave firing')
+   void persistReport(true)
+ }, 2500)
+ return () => clearTimeout(autosaveTimerRef.current)
+}, [canPersist, hasUnsavedChanges, editVersion, validationStatus, saveStatus, persistReport])
  
  // ==================== LOAD DOCTOR DATA ====================
  useEffect(() => {
@@ -1978,10 +2382,12 @@ useEffect(() => {
 
 // ==================== LOAD DRAFT FROM DATABASE ====================
 useEffect(() => {
- // Prevent multiple loads
- const params = new URLSearchParams(window.location.search)
- const consultationId = params.get('consultationId')
- 
+ // Same resolver as the save. Reading the URL alone meant a draft written
+ // under a consultation id was never read back under that id, so a doctor
+ // returning to a consultation got a freshly generated report instead of the
+ // one they had already corrected.
+ const { consultationId } = readLocalIdentity()
+
  if (!consultationId) {
  setIsLoadingFromDb(false)
  setDbCheckComplete(true)
@@ -1993,7 +2399,7 @@ useEffect(() => {
  patientData.name !== '1 janvier 1970' &&
  !patientData.name?.includes('1970')
 
- console.log('📋 No consultationId in URL, checking for valid patient data:', hasValidPatientData)
+ console.log('📋 No consultation id resolved, checking for valid patient data:', hasValidPatientData)
  setShouldGenerateReport(hasValidPatientData)
  return
  }
@@ -2310,6 +2716,9 @@ if (isRenewal) {
  setDocumentSignatures({})
  setHasUnsavedChanges(false)
 
+  // The report generation is the longest wait in the consultation; the clock
+  // keeps running through it, so the bar says the model is the reason.
+  const aiCallDone = markAiCallStart()
  try {
  let currentDoctorInfo = doctorInfo
  if (currentDoctorInfo.nom === 'Dr. [DOCTOR NAME]' || currentDoctorInfo.nom === 'Dr. [Name Required]') {
@@ -2665,7 +3074,59 @@ if (isRenewal) {
  }
  
  console.log("✅ Structure mapping complete")
- 
+
+ // An emergency report carries no prescriptions.
+ //
+ // Telling a patient to go to hospital without delay while handing them a
+ // prescription, a lab form and three imaging requests contradicts itself,
+ // and sends them to a pharmacy instead of A&E. The hospital taking them in
+ // will order what it needs. The doctor is not blocked — the tabs stay
+ // editable and the add paths rebuild the structure — but the system stops
+ // proposing documents that work against its own instruction.
+ //
+ // Dropping the documents is not enough on its own. The narrative is written
+ // server-side FROM those documents, before this runs, so every section that
+ // was asked to describe a treatment goes on describing one in prose that no
+ // longer exists on paper. All three are rewritten here for the same reason
+ // the documents are dropped: the report must say one thing, and that thing
+ // is transfer.
+ //
+ // Three and not more. The history, the examination, the diagnostic synthesis
+ // and the diagnostic conclusion are the reason the hospital can act on this
+ // document — deleting them to be safe would leave the receiving team with a
+ // referral and no case. Those sections can still mention a treatment the
+ // model proposed; rule 10 of the review flags it for the doctor rather than
+ // having the machine edit clinical reasoning it does not understand.
+ const emergencyTriage = resolveTriage(diagnosisData)
+ if (emergencyTriage.level === 'emergency') {
+   console.log('🚨 Emergency case — dropping prescriptions, labs and imaging from the report')
+   // Kept in the console rather than the document: the doctor needs a report
+   // that reads straight, but a dropped plan should still be traceable when
+   // someone asks afterwards what the model had proposed.
+   for (const key of ['priseEnCharge', 'surveillance', 'conclusion'] as const) {
+     console.log(`🚨 ${key} replaced. Model proposal was:`,
+       reportData.compteRendu.rapport[key] || '(empty)')
+   }
+
+   reportData.compteRendu.rapport.urgenceHospitaliere =
+     buildEmergencyTransferNotice(emergencyTriage)
+   reportData.compteRendu.rapport.priseEnCharge =
+     buildEmergencyManagementPlan(emergencyTriage)
+   reportData.compteRendu.rapport.surveillance =
+     buildEmergencyFollowUpPlan(emergencyTriage)
+   reportData.compteRendu.rapport.conclusion =
+     buildEmergencyConclusion(emergencyTriage)
+   reportData.ordonnances.medicaments = null
+   reportData.ordonnances.biologie = null
+   reportData.ordonnances.imagerie = null
+ }
+
+ // Freeze the AI's proposal before the doctor can touch it. Everything the
+ // pre-signature review reports as "changed by the doctor" is measured
+ // against this snapshot.
+ aiBaselineRef.current = extractReviewSnapshot(reportData)
+ reviewClearedRef.current = false
+
  setReport(reportData)
  setValidationStatus('draft')
  setDocumentSignatures({})
@@ -2746,12 +3207,16 @@ if (isRenewal) {
  variant: "destructive"
  })
  } finally {
+ // Whatever happened, the bar must stop showing "AI working".
+ aiCallDone()
  setLoading(false)
  }
  }
  
  // ==================== VALIDATION & SIGNATURE ====================
- const handleValidation = async () => {
+ // `skipReview` is set by the review dialog once the doctor has answered it,
+ // so accepting the review resumes the same signature flow instead of looping.
+ const handleValidation = async (options?: { skipReview?: boolean }) => {
  const requiredFieldsMissing = []
  if (doctorInfo.nom.includes('[')) requiredFieldsMissing.push('Doctor name')
  if (doctorInfo.numeroEnregistrement.includes('[')) requiredFieldsMissing.push('Registration number')
@@ -2776,11 +3241,19 @@ if (isRenewal) {
  return
  }
  
+ // Clinical review of the doctor's edits, between "validate" and the actual
+ // signature. It opens a dialog and hands control back to it — the dialog
+ // calls handleValidation({ skipReview: true }) once the doctor has decided.
+ if (!options?.skipReview && !reviewClearedRef.current) {
+ await runPrescriptionReview()
+ return
+ }
+
  // Save any unsaved changes before validation
  if (hasUnsavedChanges) {
  await handleManualSave()
  }
- 
+
  let currentReportId = reportId
  if (!currentReportId) {
  currentReportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
@@ -2969,6 +3442,9 @@ const signatures = {
  setValidationStatus('validated')
  setModifiedSections(new Set())
  setHasUnsavedChanges(false)
+ // Stops the consultation clock. The doctor still has "Finalize and Send" to
+ // press, but the work being measured is over.
+ onSigned?.()
  
  toast({
  title: "✅ Document Validated",
@@ -2986,6 +3462,305 @@ const signatures = {
  setSaving(false)
 }
  }
+
+// ==================== AI CLINICAL REVIEW OF DOCTOR EDITS ====================
+// Runs once per signature attempt, on the WHOLE document rather than on the
+// edited line: the failure this exists to catch (a branded combination product
+// repeating a molecule already prescribed) is invisible line by line.
+
+const resolveReviewIds = () => {
+  const params = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search)
+    : new URLSearchParams()
+
+  let stored: any = {}
+  try {
+    stored = JSON.parse(sessionStorage.getItem('consultationPatientData') || '{}')
+  } catch { /* ignore */ }
+
+  return {
+    consultationId: propConsultationId
+      || consultationDataService.getCurrentConsultationId()
+      || stored.consultationId
+      || params.get('consultationId')
+      || null,
+    patientId: propPatientId
+      || patientData?.id
+      || patientData?.patientId
+      || stored.patientId
+      || params.get('patientId')
+      || null,
+    doctorId: propDoctorId || stored.doctorId || params.get('doctorId') || null,
+  }
+}
+
+// Records the doctor's answer and resumes the signature flow.
+const finaliseReview = async (
+  decision: 'accepted' | 'overridden',
+  justification: string,
+  currentReviewId: string | null,
+) => {
+  setReviewOpen(false)
+  reviewClearedRef.current = true
+
+  // Fire-and-forget: the audit row must not delay the signature, and a failed
+  // audit write must not fail the consultation.
+  if (currentReviewId) {
+    fetch('/api/prescription-review', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reviewId: currentReviewId,
+        decision,
+        justification,
+        doctorId: resolveReviewIds().doctorId,
+      }),
+    }).catch(err => console.error('⚠️ Could not record review decision:', err))
+  }
+
+  await handleValidation({ skipReview: true })
+}
+
+/**
+ * Keep the deterministic layer honest while the dialog is open.
+ *
+ * The alerts were computed once, when the review ran, and never again. A
+ * doctor who removed the duplicate paracetamol line kept reading an alert
+ * saying two medications contained it — the correction had worked, the screen
+ * said otherwise.
+ *
+ * The rules are a pure function of the document, so re-running them here costs
+ * nothing and an answered rule alert disappears the moment it is answered. The
+ * model's findings cannot be recomputed without another call, so they are
+ * carried over and the dialog marks the ones the doctor has acted on.
+ */
+useEffect(() => {
+  if (!reviewOpen || reviewLoading || !report) return
+
+  const snapshot = extractReviewSnapshot(report)
+  const rules = runDeterministicChecks(
+    snapshot,
+    extractPatientContext(report),
+    touchedMedicationLabels(diffSnapshots(aiBaselineRef.current, snapshot)),
+  )
+
+  setReviewAlerts((prev) => {
+    const next = mergeAlerts(rules, prev.filter((a) => a.source === 'ai'))
+    // Alert ids come from a module counter and differ on every run, so the
+    // comparison is on what an alert SAYS. Without it this would set state on
+    // every render and loop.
+    const signature = (list: ReviewAlert[]) =>
+      list.map((a) => `${a.severity}|${a.issue}|${a.item}`).join('§')
+    return signature(prev) === signature(next) ? prev : next
+  })
+}, [report, reviewOpen, reviewLoading])
+
+const runPrescriptionReview = async () => {
+  if (!report) return
+
+  setReviewAlerts([])
+  setReviewDegraded(false)
+  setReviewId(null)
+  setReviewLoading(true)
+  setReviewOpen(true)
+
+  let alerts: ReviewAlert[] = []
+  let degraded = false
+  let newReviewId: string | null = null
+
+  try {
+    const current = extractReviewSnapshot(report)
+    const ids = resolveReviewIds()
+
+    const response = await fetch('/api/prescription-review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...ids,
+        consultationType: 'general',
+        patient: extractPatientContext(report),
+        snapshot: current,
+        diff: diffSnapshots(aiBaselineRef.current, current),
+      }),
+    })
+
+    const data = await response.json()
+    alerts = Array.isArray(data?.alerts) ? data.alerts : []
+    degraded = data?.degraded === true
+    newReviewId = data?.reviewId ?? null
+    // Printed in full because the Vercel log API has repeatedly been
+    // unreachable when this needed diagnosing. `ai` carries the provider,
+    // the model that actually answered, the latency and the token count.
+    console.log('🩺 Prescription review:', {
+      alerts: alerts.length,
+      blocking: data?.blockingCount ?? 0,
+      aiStatus: data?.aiStatus,
+      ai: data?.ai,
+    })
+  } catch (error) {
+    // A failed review must never stand between the doctor and the patient.
+    console.error('❌ Prescription review failed:', error)
+    alerts = []
+    degraded = true
+  }
+
+  setReviewAlerts(alerts)
+  setReviewDegraded(degraded)
+  setReviewId(newReviewId)
+  setReviewLoading(false)
+
+  // Nothing to say: don't make the doctor dismiss a modal to be told so.
+  // The review is still recorded, and a degraded run says so in a toast
+  // rather than blocking — an infrastructure failure must not stop a
+  // consultation.
+  if (alerts.length === 0) {
+    toast({
+      title: degraded ? "⚠️ Contrôle clinique partiel" : "✅ Contrôle clinique",
+      description: degraded
+        ? "L'analyse IA n'a pas pu s'exécuter. Seules les vérifications automatiques ont été appliquées."
+        : "Aucune anomalie détectée dans vos modifications.",
+      duration: 4000
+    })
+    await finaliseReview('accepted', '', newReviewId)
+  }
+}
+
+const handleReviewProceed = async (justification: string) => {
+  await finaliseReview(
+    reviewAlerts.some(isBlocking) ? 'overridden' : 'accepted',
+    justification,
+    reviewId,
+  )
+}
+
+// What the review dialog offers to correct. Recomputed from the report itself
+// rather than frozen when the review ran, so a line the doctor has just fixed
+// from inside the dialog shows its new value if they open the editor again.
+const reviewSnapshot = useMemo(
+  () => (report ? extractReviewSnapshot(report) : { medications: [], laboratory: [], imaging: [], narrative: {} }),
+  [report],
+)
+
+// Apply a correction made from inside the review dialog. The dialog sends only
+// the fields the doctor touched; the rest of the line is preserved.
+const handleReviewMedicationEdit = (index: number, patch: Record<string, any>) => {
+  const current = report?.ordonnances?.medicaments?.prescription?.medicaments?.[index]
+  if (!current) {
+    console.error('⚠️ Review edit: no medication at index', index)
+    return
+  }
+  updateMedicamentBatch(index, { ...current, ...patch })
+  trackModification('medicaments')
+  toast({
+    title: "✅ Ligne corrigée",
+    description: `${patch.nom || current.nom || 'Médicament'} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+const handleReviewLabEdit = (category: string, index: number, patch: Record<string, any>) => {
+  const current = report?.ordonnances?.biologie?.prescription?.analyses?.[category]?.[index]
+  if (!current) {
+    console.error('⚠️ Review edit: no lab test at', category, index)
+    return
+  }
+  updateBiologyTestBatch(category, index, { ...current, ...patch })
+  trackModification(`biologie.${category}.${index}`)
+  toast({
+    title: "✅ Analyse corrigée",
+    description: `${patch.nom || current.nom || 'Analyse'} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+const handleReviewImagingEdit = (index: number, patch: Record<string, any>) => {
+  const current = report?.ordonnances?.imagerie?.prescription?.examens?.[index]
+  if (!current) {
+    console.error('⚠️ Review edit: no imaging study at index', index)
+    return
+  }
+  updateImagingExamBatch(index, { ...current, ...patch })
+  trackModification(`imagerie.${index}`)
+  toast({
+    title: "✅ Examen corrigé",
+    description: `${patch.type || current.type || 'Examen'} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+const handleReviewNarrativeEdit = (section: string, value: string) => {
+  updateRapportSection(section, value)
+  trackModification(`rapport.${section}`)
+  toast({
+    title: "✅ Section corrigée",
+    description: `${narrativeLabel(section, 'fr')} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+// Removal from inside the review. The dialog asks for confirmation before
+// calling this, so there is no second prompt here.
+const handleReviewRemoveMedication = (index: number) => {
+  const removed = report?.ordonnances?.medicaments?.prescription?.medicaments?.[index]
+  removeMedicament(index)
+  toast({
+    title: "🗑️ Ligne retirée",
+    description: `${removed?.nom || 'Médicament'} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+const handleReviewRemoveLab = (category: string, index: number) => {
+  const removed = report?.ordonnances?.biologie?.prescription?.analyses?.[category]?.[index]
+  removeBiologyTest(category, index)
+  toast({
+    title: "🗑️ Analyse retirée",
+    description: `${removed?.nom || 'Analyse'} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+const handleReviewRemoveImaging = (index: number) => {
+  const removed = report?.ordonnances?.imagerie?.prescription?.examens?.[index]
+  removeImagingExam(index)
+  toast({
+    title: "🗑️ Examen retiré",
+    description: `${removed?.type || 'Examen'} — pensez à revérifier.`,
+    duration: 2500,
+  })
+}
+
+// Last resort: the alert names a kind of item the document does not contain,
+// so there is nothing to open an editor on. Close, switch to edit mode, and
+// land the doctor on the right tab rather than leaving them to hunt for it.
+const handleReviewGoToTarget = (target: string) => {
+  setReviewOpen(false)
+  reviewClearedRef.current = false
+  setEditMode(true)
+  setActiveTab(
+    target === 'laboratory' ? 'biologie'
+    : target === 'imaging' ? 'imagerie'
+    : target === 'medication' ? 'medicaments'
+    : 'consultation',
+  )
+}
+
+const handleReviewCorrect = () => {
+  const currentReviewId = reviewId
+  setReviewOpen(false)
+  // Not cleared: the doctor is going back to edit, so the next signature
+  // attempt reviews the corrected document.
+  reviewClearedRef.current = false
+  setEditMode(true)
+
+  if (currentReviewId) {
+    fetch('/api/prescription-review', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reviewId: currentReviewId, decision: 'corrected' }),
+    }).catch(err => console.error('⚠️ Could not record review decision:', err))
+  }
+}
 
 // ==================== REFERRAL & FOLLOW-UP FUNCTIONS ====================
 // Load specialties from Supabase
@@ -3553,7 +4328,20 @@ const toggleFollowUpType = useCallback((type: string) => {
 }, [])
 
 // ==================== SEND DOCUMENTS ====================
+//
+// The spinner is switched on here and off in the `finally` at the very bottom,
+// and nowhere else.
+//
+// It used to be switched off by hand on each exit path, and six of them forgot
+// — report not validated, doctor name incomplete, chief complaint missing,
+// diagnosis missing, identifiers missing, save refused. Each left the button
+// disabled and "Sending documents…" turning for as long as the doctor cared to
+// wait. On 17/08/2026 one of them ran on a phone, the toast that explained it
+// vanished behind the video pane after a few seconds, and a doctor watched the
+// spinner for fifteen minutes before closing the tab. The report had never
+// been written anywhere, and the patient had paid.
 const handleSendDocuments = async () => {
+ try {
  console.log('📤 Starting handleSendDocuments...')
  setIsSendingDocuments(true)
 
@@ -3733,64 +4521,61 @@ const handleSendDocuments = async () => {
  description: "Preparing documents for patient dashboard"
  })
  
- // Get IDs from multiple sources with priority: props > consultationDataService > sessionStorage > URL params
  const params = new URLSearchParams(window.location.search)
 
- // Get consultationId: props > consultationDataService > sessionStorage > URL
- let consultationId = propConsultationId || consultationDataService.getCurrentConsultationId()
- if (!consultationId) {
-   const storedData = sessionStorage.getItem('consultationPatientData')
-   if (storedData) {
-     try {
-       const parsed = JSON.parse(storedData)
-       consultationId = parsed.consultationId
-     } catch (e) { /* ignore */ }
-   }
- }
- if (!consultationId) {
-   consultationId = params.get('consultationId')
- }
+ // Who this consultation belongs to.
+ //
+ // One resolver, shared with the autosave, and it asks the database for
+ // anything the browser lost. It used to be resolved here by hand from
+ // props, sessionStorage and the URL — and when that chain broke on a phone
+ // the send refused, with a message naming three internal identifiers, while
+ // the `consultations` row had carried the two missing ones since before the
+ // consultation began. The doctor is not asked and is not told: there is
+ // nothing they could do that the app cannot do for them.
+ const identity = await resolveIdentity({
+   consultationId: propConsultationId,
+   patientId: propPatientId || patientData?.id || patientData?.patientId,
+   doctorId: propDoctorId,
+ })
+ const consultationId = identity.consultationId
+ const patientId = identity.patientId
+ const doctorId = identity.doctorId
 
- // Get patientId: props > patientData > sessionStorage > URL
- let patientId = propPatientId || patientData?.id || patientData?.patientId
- if (!patientId) {
-   const storedData = sessionStorage.getItem('consultationPatientData')
-   if (storedData) {
-     try {
-       const parsed = JSON.parse(storedData)
-       patientId = parsed.patientId
-     } catch (e) { /* ignore */ }
-   }
- }
- if (!patientId) {
-   patientId = params.get('patientId')
- }
-
- // Get doctorId: props > sessionStorage > URL
- let doctorId = propDoctorId
- if (!doctorId) {
-   const storedData = sessionStorage.getItem('consultationPatientData')
-   if (storedData) {
-     try {
-       const parsed = JSON.parse(storedData)
-       doctorId = parsed.doctorId
-     } catch (e) { /* ignore */ }
-   }
- }
- if (!doctorId) {
-   doctorId = params.get('doctorId')
- }
-
- console.log('📍 IDs found:', { consultationId, patientId, doctorId, sources: { props: { propConsultationId, propPatientId, propDoctorId }, service: consultationDataService.getCurrentConsultationId() } })
+ console.log('📍 IDs resolved:', {
+   consultationId: !!consultationId,
+   patientId: !!patientId,
+   doctorId: !!doctorId,
+ })
 
  if (!consultationId || !patientId || !doctorId) {
- console.log('❌ Missing required IDs')
- toast({
- title: "Error",
- description: `Missing IDs - Consultation: ${consultationId}, Patient: ${patientId}, Doctor: ${doctorId}`,
- variant: "destructive"
+ console.log('❌ Missing required IDs after server lookup')
+ reportBlocking(
+   'identity_unresolved',
+   `send blocked: consultation=${!!consultationId} patient=${!!patientId} doctor=${!!doctorId}`,
+ )
+ setSendFailure({
+   kind: 'identity_unresolved',
+   detail: `consultation=${consultationId || 'null'} patient=${patientId || 'null'} doctor=${doctorId || 'null'}`,
  })
+ // Losing the send must not also lose the work.
+ void persistReport(true)
  return
+ }
+
+ // Written down before anything can go wrong with sending it.
+ //
+ // The order used to be the other way round: the report reached the server
+ // only as a consequence of a successful send. Anything that failed before
+ // that — a missing identifier, a refused save, a dropped connection — left
+ // the entire consultation in one browser tab and nowhere else. Awaited so
+ // it is genuinely on the server before the send is attempted, and
+ // deliberately not fatal: a draft that fails to save is a reason to warn,
+ // never a reason to abandon a send that might still succeed.
+ try {
+   await persistReport(true)
+   console.log('💾 Report secured before sending')
+ } catch (persistError) {
+   console.warn('⚠️ Pre-send save failed, continuing with the send:', persistError)
  }
 
  // Prepare doctor info with fallbacks
@@ -4136,14 +4921,32 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
    console.error('[VERIFY-OUTGOING-1] instrumentation error (non-blocking):', verifyErr?.message || verifyErr)
  }
 
- // Call Tibok endpoint for ALL consultation types
- const response = await fetch(`${tibokUrl}/api/send-to-patient-dashboard`, {
+ // Handed to our own server, not to TIBOK.
+ //
+ // The browser used to make this call itself, straight across the network to
+ // TIBOK, from a phone on mobile data inside an iframe during a video call —
+ // the longest and least reliable hop in the chain, carrying the one payload
+ // that must not be lost. When it failed nothing retried it and nobody knew.
+ //
+ // Now it only has to reach our own origin. That route writes the payload
+ // down before forwarding it, so from the moment it answers, the documents
+ // cannot be lost: the doctor can close the tab, lose signal or go home, and
+ // the server keeps trying until TIBOK takes them.
+ const response = await fetch('/api/deliver-documents', {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
- body: bodyStr
+ body: JSON.stringify({
+   consultationId,
+   patientId,
+   doctorId,
+   patientName,
+   doctorName: finalDoctorInfo.nom,
+   tibokUrl,
+   payload: JSON.parse(bodyStr),
+ })
  })
 
- console.log('📨 Tibok response status:', response.status)
+ console.log('📨 Delivery response status:', response.status)
 
  let responseText = ''
  try {
@@ -4176,7 +4979,16 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  }
 
  if (result?.success) {
- console.log('🎉 Documents sent successfully!')
+ // Two different promises, and the doctor is told which one was kept.
+ // `delivered` means TIBOK has the documents; `queued` means our server has
+ // them and is still trying. Both are safe — the consultation cannot be
+ // lost either way — but only one means the patient can see them now, and
+ // saying "sent" over a pending delivery is the kind of comfortable lie
+ // this whole day has been spent removing.
+ const deliveredNow = result?.delivered !== false
+ console.log(deliveredNow
+   ? '🎉 Documents delivered to the patient dashboard'
+   : '📦 Documents secured on the server, delivery still in progress')
 
  // Save referral if configured
  const supabaseClient = getSupabaseClient()
@@ -4258,6 +5070,16 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
      // Build scheduled_time as a full timestamp (date + time in Mauritius timezone)
      const scheduledTimestamp = `${doctorAppointmentData.appointmentDate}T${doctorAppointmentData.appointmentTime}`
 
+     // Because the appointment is now payment-gated, an urgent review the
+     // patient never pays for would sit invisible in nobody's schedule. TIBOK
+     // needs to find those and chase them, so the row carries the urgency.
+     // Same signal that raises the "Suivi rapproché requis" banner above.
+     const triageForAppointment = resolveTriage(diagnosisData)
+     const isUrgentAppointment = requiresUrgentFollowUp(
+       triageForAppointment.level,
+       hasUrgentLabs(diagnosisData, triageForAppointment.level),
+     )
+
      // 1. Create a new scheduled consultation record
      const { data: newConsultation, error: consultError } = await supabaseClient
        .from('consultations')
@@ -4274,6 +5096,7 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
          // Hold the slot until the appointment itself rather than for a short
          // window, so a patient who pays late does not find it gone.
          payment_hold_until: scheduledTimestamp,
+         is_urgent: isUrgentAppointment,
          // Phase 1 hybrid: inherit the mode of the parent consultation; default
          // to 'telemedicine' for back-compat when the URL didn't carry the param.
          consultation_type: consultationMode || 'telemedicine',
@@ -4412,14 +5235,16 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  setIsSendingDocuments(false)
 
  toast({
- title: "✅ Documents envoyés avec succès",
- description: specialistMode
-   ? "Le rapport spécialiste est maintenant disponible dans le tableau de bord du patient"
-   : "Les documents sont maintenant disponibles dans le tableau de bord du patient"
+ title: deliveredNow ? "✅ Documents envoyés avec succès" : "📦 Documents enregistrés",
+ description: deliveredNow
+   ? (specialistMode
+     ? "Le rapport spécialiste est maintenant disponible dans le tableau de bord du patient"
+     : "Les documents sont maintenant disponibles dans le tableau de bord du patient")
+   : "Ils sont conservés en sécurité et seront transmis au patient automatiquement."
  })
 
  // Show success modal
- showSuccessModal()
+ showSuccessModal(deliveredNow)
  
  } else {
  throw new Error(result?.error || "Failed to send documents - no success flag")
@@ -4427,24 +5252,48 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  
  } catch (error) {
  console.error("❌ Error in handleSendDocuments:", error)
+ // The documents did not reach the patient. Whatever the cause, that is the
+ // event worth having in the record — the automatic instrumentation only
+ // sees the failed request underneath it, if there was one at all.
+ const detail = error instanceof Error ? error.message : 'unknown error'
+ reportBlocking('send_failed', detail)
+ // Which of the three the doctor is looking at decides what they should do
+ // next, and each sentence differs. Guessed from the message because that
+ // is all the failure carries — anything unrecognised falls back to the
+ // wording that fits every case.
+ const kind: SendFailure['kind'] =
+   /failed to fetch|network|load failed|timeout/i.test(detail) ? 'network'
+   : /\b5\d\d\b|server|HTML instead of JSON|endpoint/i.test(detail) ? 'server'
+   : 'unknown'
+ setSendFailure({ kind, detail })
+ }
+ } finally {
+ // The one place the spinner goes off. Whatever happened above — a return,
+ // a throw, a validation refusal — the doctor gets their button back.
  setIsSendingDocuments(false)
- toast({
- title: "Error sending documents",
- description: error instanceof Error ? error.message : "An error occurred while sending documents",
- variant: "destructive"
- })
  }
 }
- const showSuccessModal = () => {
+ const showSuccessModal = (delivered = true) => {
  const modalContainer = document.createElement('div')
  modalContainer.id = 'success-modal'
+ // Top-anchored and scrollable, not vertically centred.
+ //
+ // Centred, on a phone inside the TIBOK iframe under the video pane, this
+ // panel is taller than the sliver of viewport left to it: the heading is
+ // pushed up behind the video and the close button below the fold. The
+ // doctor sees a fragment of a success message and no way to dismiss it —
+ // the same failure already fixed on the KYC and review dialogs.
  modalContainer.style.cssText = `
  position: fixed;
  inset: 0;
  background: rgba(0, 0, 0, 0.5);
  display: flex;
- align-items: center;
+ align-items: flex-start;
  justify-content: center;
+ overflow-y: auto;
+ -webkit-overflow-scrolling: touch;
+ overscroll-behavior: contain;
+ padding: 0.75rem;
  z-index: 9999;
  animation: fadeIn 0.3s ease-out;
  `
@@ -4452,13 +5301,15 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  const modalContent = document.createElement('div')
  modalContent.style.cssText = `
  background: white;
- padding: 2rem;
+ padding: 1.25rem;
  border-radius: 1rem;
+ width: 100%;
  max-width: 500px;
- margin: 1rem;
+ margin: 0.5rem 0;
  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
  animation: slideUp 0.3s ease-out;
  position: relative;
+ box-sizing: border-box;
  `
 
  modalContent.innerHTML = `
@@ -4483,22 +5334,26 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  </button>
  
  <div style="text-align: center;">
- <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: scaleIn 0.5s ease-out;">
+ <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; animation: scaleIn 0.5s ease-out;">
  <svg width="40" height="40" fill="white" viewBox="0 0 20 20">
  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
  </svg>
  </div>
  
- <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
- Documents envoyés avec succès!
+ <h2 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
+ ${delivered ? 'Documents envoyés avec succès!' : 'Documents enregistrés'}
  </h2>
  
- <p style="color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5;">
- Les documents médicaux ont été transmis au tableau de bord du patient.<br>
- Le patient recevra une notification pour valider son ordonnance.
+ <p style="color: #6b7280; margin-bottom: 1rem; line-height: 1.5; font-size: 0.875rem;">
+ ${delivered
+   ? `Les documents médicaux ont été transmis au tableau de bord du patient.<br>
+      Le patient recevra une notification pour valider son ordonnance.`
+   : `Les documents sont enregistrés en sécurité et seront transmis au patient
+      automatiquement dès que possible.<br>
+      Vous pouvez fermer cette consultation.`}
  </p>
  
- <div style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e7eb;">
+ <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; border: 1px solid #e5e7eb;">
  <p style="font-size: 0.875rem; color: #4b5563; margin: 0 0 0.5rem 0;">
  <strong>Prochaines étapes:</strong>
  </p>
@@ -4509,12 +5364,14 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  </ul>
  </div>
  
- <div style="background: #d1fae5; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #a7f3d0;">
+ <div style="background: #d1fae5; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; border: 1px solid #a7f3d0;">
  <p style="font-size: 0.875rem; color: #065f46; margin: 0; font-weight: 500;">
- ✅ Tous les documents ont été envoyés avec succès
+ ${delivered
+   ? '✅ Tous les documents ont été envoyés avec succès'
+   : '📦 Tous les documents sont enregistrés — transmission en cours'}
  </p>
- <p style="font-size: 0.75rem; color: #047857; margin: 0.25rem 0 0 0;">
- Consultation ID: ${reportId}
+ <p style="font-size: 0.75rem; color: #047857; margin: 0.25rem 0 0 0; word-break: break-all;">
+ Référence consultation : ${readLocalIdentity().consultationId || 'non disponible'}
  </p>
  </div>
  
@@ -4951,148 +5808,16 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  )
  }
  // ==================== DOCTOR INFO EDITOR ====================
- const DoctorInfoEditor = memo(() => {
- const hasRequiredFields = doctorInfo.nom !== 'Dr. [Name Required]' &&
- !doctorInfo.numeroEnregistrement.includes('[')
-
- const [localDoctorInfo, setLocalDoctorInfo] = useState(doctorInfo)
- const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
- 
- useEffect(() => {
- const timer = setTimeout(() => {
- if (editingDoctor && JSON.stringify(localDoctorInfo) !== JSON.stringify(doctorInfo)) {
- Object.keys(localDoctorInfo).forEach(key => {
- if (localDoctorInfo[key as keyof typeof localDoctorInfo] !== doctorInfo[key as keyof typeof doctorInfo]) {
- updateDoctorInfo(key, localDoctorInfo[key as keyof typeof localDoctorInfo])
- }
- })
- }
- }, 3000) // 3 seconds
- 
- return () => clearTimeout(timer)
- }, [localDoctorInfo, editingDoctor])
- 
-const handleDoctorFieldChange = useCallback((field: string, value: string) => {
- setLocalDoctorInfo(prev => ({ ...prev, [field]: value }))
- setHasUnsavedChanges(true)
- }, [])
- 
- return (
- <Card className="mb-6 print:hidden">
- <CardHeader className="pb-3">
- <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
- <Button
- variant="outline"
- size="sm"
- onClick={() => setEditingDoctor(!editingDoctor)}
- className="w-fit text-xs sm:text-sm"
- >
- {editingDoctor ? <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> : <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />}
- {editingDoctor ? 'Done' : 'Complete Profile'}
- </Button>
- <span className="flex items-center text-base sm:text-lg">
- <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
- Doctor Information
- </span>
- </CardTitle>
- </CardHeader>
- <CardContent>
- {editingDoctor ? (
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
- <div>
- <Label>Full name *</Label>
- <Input
- ref={(el) => { inputRefs.current['nom'] = el }}
- value={localDoctorInfo.nom}
- onChange={(e) => handleDoctorFieldChange('nom', e.target.value)}
- placeholder="Dr. Full Name"
- className={localDoctorInfo.nom.includes('[') ? 'border-blue-500' : ''}
- />
- </div>
- <div>
- <Label>Qualifications</Label>
- <Input
- ref={(el) => { inputRefs.current['qualifications'] = el }}
- value={localDoctorInfo.qualifications}
- onChange={(e) => handleDoctorFieldChange('qualifications', e.target.value)}
- placeholder="MBBS, MD"
- />
- </div>
- <div>
- <Label>Speciality</Label>
- <Input
- ref={(el) => { inputRefs.current['specialite'] = el }}
- value={localDoctorInfo.specialite}
- onChange={(e) => handleDoctorFieldChange('specialite', e.target.value)}
- placeholder="General Medicine"
- />
- </div>
- <div>
- <Label>Medical Council Registration No. *</Label>
- <Input
- ref={(el) => { inputRefs.current['numeroEnregistrement'] = el }}
- value={localDoctorInfo.numeroEnregistrement}
- onChange={(e) => handleDoctorFieldChange('numeroEnregistrement', e.target.value)}
- placeholder="MCM/12345"
- className={localDoctorInfo.numeroEnregistrement.includes('[') ? 'border-blue-500' : ''}
- />
- </div>
- <div>
- <Label>Email *</Label>
- <Input
- ref={(el) => { inputRefs.current['email'] = el }}
- value={localDoctorInfo.email}
- onChange={(e) => handleDoctorFieldChange('email', e.target.value)}
- placeholder="doctor@email.com"
- className={localDoctorInfo.email.includes('[') ? 'border-blue-500' : ''}
- />
- </div>
- <div className="col-span-2">
- <Label>Clinic Address</Label>
- <Input
- ref={(el) => { inputRefs.current['adresseCabinet'] = el }}
- value={localDoctorInfo.adresseCabinet}
- onChange={(e) => handleDoctorFieldChange('adresseCabinet', e.target.value)}
- placeholder="Clinic address or Teleconsultation"
- />
- </div>
- <div className="col-span-2">
- <Label>Consultation Hours</Label>
- <Input
- ref={(el) => { inputRefs.current['heuresConsultation'] = el }}
- value={localDoctorInfo.heuresConsultation}
- onChange={(e) => handleDoctorFieldChange('heuresConsultation', e.target.value)}
- placeholder="Teleconsultation Hours: 8:00 AM - 8:00 PM"
- />
- </div>
- <div className="col-span-2">
- <p className="text-sm text-blue-600">* Required fields must be completed before validation</p>
- </div>
- </div>
- ) : (
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
- <div><strong>Name:</strong> {doctorInfo.nom}</div>
- <div><strong>Qualifications:</strong> {doctorInfo.qualifications}</div>
- <div><strong>Speciality:</strong> {doctorInfo.specialite}</div>
- <div><strong>Medical Council No.:</strong> {doctorInfo.numeroEnregistrement}</div>
- <div><strong>Email:</strong> {doctorInfo.email}</div>
- {doctorInfo.adresseCabinet && !doctorInfo.adresseCabinet.toLowerCase().includes('tibok') && (
- <div className="col-span-2"><strong>Clinic Address:</strong> {doctorInfo.adresseCabinet}</div>
- )}
- {doctorInfo.heuresConsultation && (
- <div className="col-span-2"><strong>Consultation Hours:</strong> {doctorInfo.heuresConsultation.replace(/^Teleconsultation Hours:\s*/i, '').replace(/8:00\s*PM/gi, '00:00')}</div>
- )}
- </div>
- )}
- </CardContent>
- </Card>
- )
- })
-
-DoctorInfoEditor.displayName = 'DoctorInfoEditor'
 
 const ConsultationReport = () => {
  const sections = [
+ // First, when it exists: an emergency transfer is the only thing that
+ // matters on the page, and it explains the absence of prescriptions below.
+ ...(getReportRapport()?.urgenceHospitaliere
+   // English, like every other title on this page: the document is issued in
+   // English and a single French heading in the middle of it reads as a bug.
+   ? [{ key: 'urgenceHospitaliere', title: "⚠️ URGENT CARE REQUIRED — IMMEDIATE HOSPITAL TRANSFER" }]
+   : []),
  { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
  { key: 'anamnese', title: 'HISTORY OF PRESENT ILLNESS' },
  { key: 'antecedents', title: 'PAST MEDICAL HISTORY' },
@@ -5164,7 +5889,7 @@ const ConsultationReport = () => {
 
  // ADD THIS: Create stable local change handler
  const stableLocalChangeHandler = useCallback(() => {
- setHasUnsavedChanges(true)
+ markEdited()
  }, [])
 
  return (
@@ -5172,10 +5897,13 @@ const ConsultationReport = () => {
  <CardContent className="p-8 print:p-12" id="consultation-report">
  
  {/* 🚦 TRIAGE BANNER (emergency / urgent / triage-not-assessed) */}
+ {/* English, like the document it sits on: this banner is not
+     print:hidden, it goes out on the PDF the receiving hospital
+     reads, and it is the first thing on the page. */}
  <TriageBanner
    triage={resolvedTriage}
    followUp={followUpPlan}
-   language="fr"
+   language="en"
    action={
      followUpPlan ? (
        doctorAppointmentData ? (
@@ -5865,10 +6593,19 @@ const ConsultationReport = () => {
  <p className="text-sm text-gray-600">Generic (INN): {med.denominationCommune}</p>
  )}
  <p className="mt-1">
- <span className="font-medium">Form:</span> {med.forme} - {med.dosage}
+ <span className="font-medium">Form:</span> {med.forme}
+ {med.dosage ? ` - ${med.dosage}` : (
+ /* The strength used to be filled with the placeholder "Dose individuelle"
+    when the generator produced none, which printed as if it were a real
+    dose. An empty strength is now empty — and said out loud, because a
+    silent gap on a prescription is no safer than a fake one. */
+ <span className="ml-1 text-red-600 font-medium">— strength missing, to be completed</span>
+ )}
  </p>
  <p className="mt-1">
- <span className="font-medium">Frequency:</span> {med.posologie}
+ <span className="font-medium">Frequency:</span> {med.posologie || (
+ <span className="text-red-600 font-medium">to be completed</span>
+ )}
  </p>
  <p className="mt-1">
  <span className="font-medium">Route:</span> {med.modeAdministration}
@@ -5919,7 +6656,7 @@ const ConsultationReport = () => {
  <SectionBibliography
  references={prescriptionAllUsedRefs}
  globalReferences={evidenceRefs}
- title="Références citées dans cette prescription"
+ title="References cited in this prescription"
  />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
@@ -6163,7 +6900,7 @@ const ConsultationReport = () => {
  <SectionBibliography
  references={labUsedRefs}
  globalReferences={evidenceRefs}
- title="Références citées dans cette demande d'analyses"
+ title="References cited in this laboratory request"
  />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
@@ -6202,6 +6939,16 @@ const ConsultationReport = () => {
  const ImagingPrescription = () => {
  const examens = report?.ordonnances?.imagerie?.prescription?.examens || []
  const patient = getReportPatient()
+ // One short line, whichever source it comes from.
+ const rawClinicalDiagnosis =
+   report?.ordonnances?.imagerie?.prescription?.renseignementsCliniques
+   || report?.compteRendu?.rapport?.conclusionDiagnostique
+   || ''
+ const clinicalDiagnosisLine = !rawClinicalDiagnosis
+   ? 'N/A'
+   : rawClinicalDiagnosis.length > 160
+     ? `${rawClinicalDiagnosis.slice(0, 157).trimEnd()}…`
+     : rawClinicalDiagnosis
  const praticien = getReportPraticien()
  const evidenceRefs = (diagnosisData?.evidence_references as any[]) || []
  // Indications + diagnostic questions both may carry citations.
@@ -6255,7 +7002,13 @@ const ConsultationReport = () => {
  <div><strong>Examination Date:</strong> {patient.dateExamen}</div>
  <div><strong>Weight:</strong> {patient.poids}</div>
  <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
- <div><strong>Clinical Diagnosis:</strong> {report?.ordonnances?.imagerie?.prescription?.renseignementsCliniques || 'N/A'}</div>
+ {/* Falls back to the report's own diagnosis before giving up. "N/A" on a
+     radiology request is not a neutral placeholder: it tells the radiologist
+     the referrer had no question, and the study is protocolled blind.
+     Trimmed like the laboratory form's equivalent field: the fallback is a
+     whole paragraph of diagnostic reasoning, and a header line that runs to
+     fifteen hundred characters buries the request underneath it. */}
+ <div><strong>Clinical Diagnosis:</strong> {clinicalDiagnosisLine}</div>
  {report?.ordonnances?.imagerie?.patient?.allergiesConnues && (
  <div><strong>Known Allergies:</strong> {report.ordonnances.imagerie.patient.allergiesConnues}</div>
  )}
@@ -6326,7 +7079,7 @@ const ConsultationReport = () => {
  <SectionBibliography
  references={imagingUsedRefs}
  globalReferences={evidenceRefs}
- title="Références citées dans cette demande d'imagerie"
+ title="References cited in this imaging request"
  />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
@@ -6443,7 +7196,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  })
  
  trackModification('arretMaladie')
- setHasUnsavedChanges(true)
+ markEdited()
  setHasLocalChanges(false)
  }, 3000) // 3 seconds
  
@@ -6490,7 +7243,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  {hasLocalChanges && (
  <div className="text-xs text-cyan-600 flex items-center gap-1">
  <Loader2 className="h-3 w-3 animate-spin" />
- Auto-saving...
+ Modification en cours…
  </div>
  )}
  
@@ -6772,9 +7525,96 @@ const [localSickLeave, setLocalSickLeave] = useState({
  )
  }
 
+ /**
+  * What the doctor is told about their own edit, pinned to the bottom of the
+  * viewport.
+  *
+  * It answers the question they actually have while working — "has my change
+  * been taken into account?" — and not the one the code happens to know the
+  * answer to, "has it reached the database?". Those are different moments: the
+  * document takes the change three seconds after typing stops, and the
+  * database is written at signature. This banner reported the second and left
+  * the first, the one that matters, invisible.
+  *
+  * Worse, when the page carried no consultation to save against it announced
+  * "saving impossible" — technically true, entirely useless, and alarming
+  * about something the doctor was not asking about.
+  *
+  * At the bottom rather than the top: a doctor typing near the end of a long
+  * report needs to see their change land without scrolling up to look for it.
+  *
+  * It is portalled out of the tree because `position: fixed` does not work
+  * from inside the step card — `glass-card` sets `backdrop-filter`,
+  * `hover-lift` sets a `transform`, and either makes that card the containing
+  * block; `overflow-hidden` then clips whatever escapes.
+  */
+ const SaveStatus = () => {
+ if (validationStatus === 'validated') return null
+
+ // First and loudest: the change is in the document.
+ if (justApplied) {
+ return (
+ <span className="flex items-center gap-1.5 rounded-md bg-teal-50 px-3 py-1.5 text-sm font-medium text-teal-900 pointer-events-auto border border-teal-300 shadow-lg">
+ <CheckCircle className="h-4 w-4 shrink-0" />
+ Modification prise en compte
+ </span>
+ )
+ }
+
+ // Everything below is about the database, and is secondary. It is shown
+ // only where a write is actually expected: on a page with no consultation
+ // attached there is nothing to report and nothing to worry the doctor with.
+ if (!canPersist) return null
+
+ if (saveStatus === 'saving') {
+ return (
+ <span className="flex items-center gap-1.5 rounded-md bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-800 pointer-events-auto border border-blue-300 shadow-lg">
+ <Loader2 className="h-3.5 w-3.5 animate-spin" />
+ Enregistrement…
+ </span>
+ )
+ }
+
+ if (hasUnsavedChanges) {
+ return (
+ <span className="flex flex-wrap items-center gap-1.5 rounded-md bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-900 pointer-events-auto border border-amber-300 shadow-lg">
+ <Clock className="h-3.5 w-3.5 shrink-0" />
+ Enregistrement dans quelques secondes…
+ <Button
+   size="sm"
+   variant="outline"
+   onClick={handleManualSave}
+   className="ml-1 h-6 border-amber-400 bg-white px-2 text-xs text-amber-900"
+ >
+   <Save className="mr-1 h-3 w-3" />
+   Enregistrer maintenant
+ </Button>
+ </span>
+ )
+ }
+
+ if (lastSavedAt) {
+ return (
+ <span className="flex items-center gap-1.5 rounded-md bg-gray-50 px-3 py-1.5 text-sm font-medium text-gray-700 pointer-events-auto border border-gray-300 shadow-lg">
+ <CheckCircle className="h-3.5 w-3.5 shrink-0" />
+ Enregistré à {lastSavedAt.toLocaleTimeString('fr-FR')}
+ </span>
+ )
+ }
+
+ return null
+ }
+
+ /** Pinned above the page rather than in it — see SaveStatus. */
+ const FloatingSaveStatus = () => (
+   <ViewportLayer className="bottom-3 left-1/2 -translate-x-1/2 max-w-[96vw]">
+     <SaveStatus />
+   </ViewportLayer>
+ )
+
  const ActionsBar = () => {
  const metadata = getReportMetadata()
- 
+
  return (
  <Card className="print:hidden">
  <CardContent className="p-4">
@@ -6798,6 +7638,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <span className="text-sm text-gray-600">
  {metadata.wordCount} words
  </span>
+ <SaveStatus />
  </div>
  <div className="flex flex-wrap gap-2 w-full md:w-auto">
  <Button
@@ -6814,7 +7655,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <Button
  variant="default"
  size="sm"
- onClick={handleValidation}
+ onClick={() => handleValidation()}
  disabled={saving || validationStatus === 'validated'}
  className="flex-1 sm:flex-none"
  >
@@ -6836,19 +7677,6 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </div>
  </CardContent>
  </Card>
- )
- }
-
- const UnsavedChangesAlert = () => {
- if (!hasUnsavedChanges || validationStatus === 'validated') return null
-
- return (
- <Alert className="print:hidden">
- <AlertTriangle className="h-4 w-4" />
- <AlertDescription>
- You have unsaved changes. Click the Save button or press Ctrl+S to save.
- </AlertDescription>
- </Alert>
  )
  }
 
@@ -6909,9 +7737,56 @@ const [localSickLeave, setLocalSickLeave] = useState({
  // ==================== MAIN RENDER ====================
  return (
  <div className="space-y-6 print:space-y-4">
+ {/* Clinical review of the doctor's edits, shown between "Validate and
+     sign" and the signature itself. print:hidden is unnecessary — it only
+     exists while the doctor is answering it. */}
+ {/* Above everything, including the review dialog: this one reports that a
+     paid consultation may have been lost. */}
+ <SendFailureDialog
+   failure={sendFailure}
+   language="fr"
+   onClose={() => setSendFailure(null)}
+   onRetry={() => {
+     setSendFailure(null)
+     return handleSendDocuments()
+   }}
+   // Returns whether the report is genuinely on the server, so the button
+   // cannot say "saved" over a save that failed.
+   onSave={() => persistReport(true)}
+ />
+
+ <PrescriptionReviewDialog
+   open={reviewOpen}
+   loading={reviewLoading}
+   alerts={reviewAlerts}
+   degraded={reviewDegraded}
+   language="fr"
+   onProceed={handleReviewProceed}
+   onCorrect={handleReviewCorrect}
+   medications={reviewSnapshot.medications}
+   laboratory={reviewSnapshot.laboratory}
+   imaging={reviewSnapshot.imaging}
+   narrative={reviewSnapshot.narrative}
+   onApplyMedicationEdit={handleReviewMedicationEdit}
+   onApplyLabEdit={handleReviewLabEdit}
+   onApplyImagingEdit={handleReviewImagingEdit}
+   onApplyNarrativeEdit={handleReviewNarrativeEdit}
+   onRemoveMedication={handleReviewRemoveMedication}
+   onRemoveLab={handleReviewRemoveLab}
+   onRemoveImaging={handleReviewRemoveImaging}
+   reviewKey={reviewId}
+   onRecheck={() => runPrescriptionReview()}
+   onGoToTarget={handleReviewGoToTarget}
+ />
  <ActionsBar />
- <UnsavedChangesAlert />
- <DoctorInfoEditor />
+ <FloatingSaveStatus />
+ <DoctorInfoEditor
+   doctorInfo={doctorInfo}
+   updateDoctorInfo={updateDoctorInfo}
+   editingDoctor={editingDoctor}
+   setEditingDoctor={setEditingDoctor}
+   setHasUnsavedChanges={markEdited}
+ />
  <PrescriptionStats />
 
  <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
@@ -7426,8 +8301,18 @@ const [localSickLeave, setLocalSickLeave] = useState({
  prescription: {
  datePrescription: patient.dateExamen || new Date().toISOString().split('T')[0],
  examens: [],
- renseignementsCliniques: '',
- centreImagerie: ''
+ // Seeded from the report, not left blank.
+ //
+ // This branch runs when the AI ordered no imaging and the doctor adds
+ // the first study by hand. It used to build the form with empty
+ // clinical information, and the request then printed "Clinical
+ // Diagnosis: N/A" — a radiology request with no indication, which the
+ // radiologist cannot protocol. The diagnosis is already in the report;
+ // there is no reason to make the doctor retype it.
+ renseignementsCliniques: prev.compteRendu?.rapport?.conclusionDiagnostique
+ || prev.compteRendu?.rapport?.syntheseDiagnostique
+ || '',
+ centreImagerie: 'Any MoH approved imaging center'
  },
  authentification: {
  signature: "Medical Practitioner's Signature",
@@ -7518,42 +8403,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </div>
 )}
 
- {/* Manual Save Button (positioned left) */}
- {hasUnsavedChanges && (
- <div className="fixed bottom-4 left-4 z-50">
- <Button
- onClick={handleManualSave}
- className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
- size="lg"
- >
- <Save className="h-5 w-5 mr-2" />
- Save Changes
- </Button>
- </div>
- )}
-
- {/* Save Status Indicators (positioned left) */}
- {saveStatus === 'saving' && (
- <div className="fixed bottom-4 left-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
- <Loader2 className="h-4 w-4 animate-spin" />
- Saving...
- </div>
- )}
- {saveStatus === 'saved' && (
- <div className="fixed bottom-4 left-4 bg-teal-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
- <CheckCircle className="h-4 w-4" />
- Saved!
- </div>
- )}
-
- {/* Unsaved Changes Indicator (positioned top-left) */}
- {hasUnsavedChanges && (
- <div className="fixed top-4 left-4 bg-cyan-500 text-white px-3 py-1 rounded-full text-sm z-50">
- Unsaved changes
- </div>
- )}
-
-{/* TIBOK Medical Assistant is now integrated as a tab - see AI Assistant tab */}
+ {/* TIBOK Medical Assistant is now integrated as a tab - see AI Assistant tab */}
 
 {/* Referral Modal */}
 <Dialog open={showReferralModal} onOpenChange={setShowReferralModal}>

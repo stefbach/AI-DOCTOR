@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import * as React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -16,6 +16,8 @@ import {
   FileSignature
 } from "lucide-react"
 
+import { readLocalIdentity } from "@/lib/consultation-identity"
+import NavigationGuard from "@/components/navigation-guard"
 import PatientForm from "@/components/patient-form"
 import ClinicalForm from "@/components/clinical-form"
 import QuestionsForm from "@/components/questions-form"
@@ -25,6 +27,23 @@ import KycVerificationDialog from "@/components/kyc-verification-dialog"
 import { consultationDataService } from '@/lib/consultation-data-service'
 import { supabase } from '@/lib/supabase'
 import { useTibokBridge } from '@/hooks/use-tibok-bridge'
+import ConsultationTimerBar from '@/components/consultation-timer-bar'
+import ViewportLayer from '@/components/viewport-layer'
+import {
+  type TimerState,
+  SECTION_BY_STEP,
+  TOTAL_BUDGET_SECONDS,
+  allSectionSeconds,
+  clearState,
+  emptyState,
+  enterSection,
+  loadState,
+  saveState,
+  stopTimer,
+  subscribeAiBusy,
+  subscribeAiElapsed,
+  totalSeconds,
+} from '@/lib/consultation-timer'
 
 export type Language = 'fr' | 'en'
 
@@ -54,6 +73,177 @@ export default function MedicalAIExpert() {
   const [isSimulation, setIsSimulation] = useState(false)
   // KYC (patient identity) gate — mandatory at the start of every consultation
   const [kycApproved, setKycApproved] = useState<boolean>(false)
+
+  // ==================== CONSULTATION CLOCK ====================
+  //
+  // Driven from `currentStep` rather than from each navigation handler: the
+  // step is set from six different places, including the restore path that
+  // reopens a consultation where the doctor left it, and a clock that missed
+  // one of them would quietly under-report.
+  const [timer, setTimer] = useState<TimerState | null>(null)
+  const [aiBusy, setAiBusy] = useState(false)
+  const timerRef = React.useRef<TimerState | null>(null)
+  timerRef.current = timer
+
+  /**
+   * Send the current measurement. Called at every transition, not only at the
+   * end: a consultation abandoned halfway is exactly the one worth seeing, and
+   * writing only at signature would leave no trace of it at all.
+   */
+  const reportTiming = React.useCallback((state: TimerState, supersedes?: string) => {
+    fetch('/api/consultation-timings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        consultationId: state.consultationId,
+        doctorId: currentDoctorId,
+        patientId: currentPatientId,
+        consultationType: 'general',
+        startedAt: new Date(state.startedAt).toISOString(),
+        endedAt: state.endedAt ? new Date(state.endedAt).toISOString() : null,
+        totalSeconds: totalSeconds(state),
+        aiWaitSeconds: state.aiWaitSeconds,
+        sectionSeconds: allSectionSeconds(state),
+        questionCount: state.questionCount,
+        budgetSeconds: TOTAL_BUDGET_SECONDS,
+        // The row written under the temporary id describes the same
+        // consultation and must not survive as a phantom "abandoned at 49s".
+        supersedes: supersedes || null,
+      }),
+      keepalive: true,
+      // A measurement must never take a consultation down with it.
+    }).catch(() => {})
+  }, [currentDoctorId, currentPatientId])
+
+  /** Where the doctor was, per consultation. See the restore effect below. */
+  const STEP_KEY = 'consultation-step-'
+
+  // Replaying the same consultation on a test bench inherits the clock from the
+  // previous run, because it is meant to survive a reload. `?resetTimer=1`
+  // starts it over; done once per page load, not on every step.
+  const timerResetRef = React.useRef(false)
+
+  useEffect(() => {
+    const consultationId =
+      consultationDataService.getCurrentConsultationId() || currentConsultationId
+    if (!consultationId) return
+
+    const section = SECTION_BY_STEP[currentStep]
+    if (!section) return
+
+    if (!timerResetRef.current) {
+      timerResetRef.current = true
+      const params = new URLSearchParams(window.location.search)
+      // `?fresh=1` restarts a test consultation from nothing: the clock AND
+      // the saved position. `?resetTimer=1` is kept for the clock alone.
+      // Both exist for the test bench, where the same consultation is replayed
+      // over and over and inherits its own previous run — which is right in
+      // production and useless here.
+      const fresh = params.get('fresh') === '1'
+      if (fresh || params.get('resetTimer') === '1') {
+        console.log('⏱️ Timer reset requested for', consultationId)
+        clearState(consultationId)
+      }
+      if (fresh) {
+        try {
+          localStorage.removeItem(STEP_KEY + consultationId)
+          console.log('↩️ Saved position cleared for', consultationId)
+        } catch {
+          // Nothing to do: an unreadable store has nothing to clear.
+        }
+      }
+    }
+
+    setTimer((prev) => {
+      let base: TimerState
+      let supersededId: string | undefined
+
+      if (prev && prev.consultationId === consultationId) {
+        base = prev
+      } else if (prev && prev.endedAt == null) {
+        // The consultation is given its real identifier only when the doctor
+        // leaves the first step, so the clock starts under one id and finds
+        // itself under another. It used to read that as a different
+        // consultation and start over — the doctor watched the total fall back
+        // to zero on the way into Clinical Data, which is the one number they
+        // are meant to be able to trust. Re-key it; never restart it.
+        console.log('⏱️ Consultation re-keyed:', prev.consultationId, '→', consultationId)
+        clearState(prev.consultationId)
+        supersededId = prev.consultationId
+        base = { ...prev, consultationId }
+      } else {
+        // Fresh mount: resume what was stored, or start. Reload picks the clock
+        // back up rather than restarting it — losing it on a refresh would make
+        // every measurement a guess, and refreshes happen.
+        base = loadState(consultationId) || emptyState(consultationId)
+      }
+
+      if (base.endedAt != null) return base
+      const next = enterSection(base, section)
+      // `enterSection` returns the same object when the section has not
+      // changed, which happens on a plain re-key — but the new id still has to
+      // be persisted, or a reload would find nothing under it.
+      if (next === base && base === prev) return base
+
+      saveState(next)
+      reportTiming(next, supersededId)
+      return next
+    })
+  }, [currentStep, currentConsultationId, reportTiming])
+
+  // The clock does not stop for the models, so the bar says when they are the
+  // reason it is moving; their share is banked separately so a slow model can
+  // be told apart from a slow doctor.
+  useEffect(() => subscribeAiBusy(setAiBusy), [])
+  useEffect(
+    () =>
+      subscribeAiElapsed((seconds) => {
+        setTimer((prev) => {
+          if (!prev || prev.endedAt != null) return prev
+          const next = { ...prev, aiWaitSeconds: prev.aiWaitSeconds + seconds }
+          saveState(next)
+          return next
+        })
+      }),
+    [],
+  )
+
+  // The number of questions sets the budget for that step: one minute each,
+  // and the case produces three or five of them.
+  //
+  // The questions step reports `{ responses: [...] }` — neither of the two
+  // shapes this first guessed at, so the count never resolved and every
+  // consultation was recorded with zero questions, leaving the budget for
+  // that step uncomputable on the dashboard.
+  useEffect(() => {
+    const list = Array.isArray(questionsData?.responses)
+      ? questionsData.responses
+      : Array.isArray(questionsData?.questions)
+        ? questionsData.questions
+        : Array.isArray(questionsData)
+          ? questionsData
+          : null
+    // Zero is not a count, it is the state before the questions exist.
+    const count = list && list.length > 0 ? list.length : null
+    if (count == null) return
+    setTimer((prev) => {
+      if (!prev || prev.questionCount === count) return prev
+      const next = { ...prev, questionCount: count }
+      saveState(next)
+      return next
+    })
+  }, [questionsData])
+
+  /** The report was signed: freeze the clock and write the final record. */
+  const stopConsultationTimer = React.useCallback(() => {
+    setTimer((prev) => {
+      if (!prev || prev.endedAt != null) return prev
+      const next = stopTimer(prev)
+      saveState(next)
+      reportTiming(next)
+      return next
+    })
+  }, [reportTiming])
 
   // Load doctor data from URL params (from Tibok) and save to sessionStorage
   useEffect(() => {
@@ -405,6 +595,71 @@ export default function MedicalAIExpert() {
     loadSavedData()
   }, [currentStep, prefillData])
 
+  // ==================== WHERE THE DOCTOR WAS ====================
+  //
+  // The step index lived in React state and nowhere else, so any reload — a
+  // pull-to-refresh reaching TIBOK through our iframe, a browser reclaiming
+  // memory on a phone, a crash — sent the doctor back to "Patient information"
+  // with a consultation half done. The data survived in storage; only the
+  // position was thrown away, which is the one part that cannot be retyped
+  // from memory.
+  //
+  // Keyed by consultation so one consultation cannot restore into another,
+  // and only restored when the step it names has data behind it: a saved
+  // index of 4 on a consultation whose clinical data was cleared would open
+  // the medical record on nothing.
+  const stepRestoredRef = useRef(false)
+
+  useEffect(() => {
+    if (checkingReturningPatient) return
+    if (stepRestoredRef.current) return
+    stepRestoredRef.current = true
+
+    const restore = async () => {
+      try {
+        const { consultationId } = readLocalIdentity()
+        if (!consultationId) return
+
+        const raw = localStorage.getItem(STEP_KEY + consultationId)
+        const saved = raw === null ? NaN : Number(raw)
+        if (!Number.isFinite(saved) || saved <= 0) return
+
+        // How far the data actually goes. Restoring past it would open a step
+        // on an empty form and look like the work had been lost anyway.
+        const savedData = await consultationDataService.getAllData()
+        let reachable = 0
+        if (savedData?.patientData) reachable = 1
+        if (savedData?.clinicalData) reachable = 2
+        if (savedData?.questionsData) reachable = 3
+        if (savedData?.diagnosisData) reachable = 4
+
+        const target = Math.min(Math.round(saved), reachable, steps.length - 1)
+        if (target > 0) {
+          console.log(`↩️ Restoring the consultation at step ${target} (saved ${saved}, data reaches ${reachable})`)
+          setCurrentStep(target)
+        }
+      } catch (error) {
+        console.warn('↩️ Could not restore the workflow position:', error)
+      }
+    }
+
+    void restore()
+  }, [checkingReturningPatient])
+
+  useEffect(() => {
+    // Written after the restore has had its chance, so the initial 0 of a
+    // fresh mount cannot overwrite the position it is about to read.
+    if (!stepRestoredRef.current) return
+    try {
+      const { consultationId } = readLocalIdentity()
+      if (consultationId) {
+        localStorage.setItem(STEP_KEY + consultationId, String(currentStep))
+      }
+    } catch {
+      // A full or unavailable store costs the restore, not the consultation.
+    }
+  }, [currentStep])
+
   // Scroll to top when step changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -530,8 +785,21 @@ useEffect(() => {
   // Clinical Data, AI Questions). Step 3 (Diagnosis) and step 4 (Medical
   // Record) are doctor-only. The full `steps` array stays intact so
   // `steps[currentStep]` lookups still work — we just filter the chips.
-  const visibleSteps = isNurse ? steps.slice(0, 3) : steps
-  const progress = ((Math.min(currentStep, visibleSteps.length - 1) + 1) / visibleSteps.length) * 100
+  // Step 3 runs the diagnosis engine and is no longer a screen the doctor
+  // reads: it produced a page that repeated, uneditable, what the medical
+  // record shows next. The step still exists — it is what builds the
+  // prescriptions, the investigations and the triage — but it hands over on
+  // its own, so it is not offered as somewhere to go.
+  const HIDDEN_STEP_IDS = isNurse ? [] : [3]
+  const visibleSteps = (isNurse ? steps.slice(0, 3) : steps).filter(
+    (step) => !HIDDEN_STEP_IDS.includes(step.id),
+  )
+
+  // While the hidden step runs, the destination is what to highlight: the
+  // doctor is on their way to the record, not stalled between two chips.
+  const activeStepId = HIDDEN_STEP_IDS.includes(currentStep) ? currentStep + 1 : currentStep
+  const activePosition = Math.max(0, visibleSteps.findIndex((step) => step.id === activeStepId))
+  const progress = ((activePosition + 1) / visibleSteps.length) * 100
 
 const handleNext = async () => {
   const consultationId = consultationDataService.getCurrentConsultationId()
@@ -640,6 +908,9 @@ const handlePrevious = () => {
   
   const handleFinalReportComplete = async (data: any) => {
     console.log('Final report and documents completed:', data)
+    // Before anything else: the consultation is over, and how long it took
+    // should not include whatever the completion handler does next.
+    stopConsultationTimer()
     setFinalReport(data)
     
     const consultationId = consultationDataService.getCurrentConsultationId()
@@ -708,6 +979,8 @@ const handlePrevious = () => {
           data: diagnosisData,  // ✅ FIXED: Changed from initialData to data
           onDataChange: setDiagnosisData,
           onNext: handleNext,
+          // Runs and hands over; the doctor reads the medical record, not this.
+          autoAdvance: true,
           onPrevious: handlePrevious,
         }
       case 4:
@@ -719,6 +992,7 @@ const handlePrevious = () => {
           questionsData,
           diagnosisData,
           onComplete: handleFinalReportComplete,
+          onSigned: stopConsultationTimer,
           onPrevious: handlePrevious,
           isSimulation,
         }
@@ -868,7 +1142,7 @@ const handlePrevious = () => {
             </div>
             <div className="text-right">
               <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">
-                {Math.min(currentStep, visibleSteps.length - 1) + 1}/{visibleSteps.length}
+                {activePosition + 1}/{visibleSteps.length}
               </div>
               <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">
                 Étapes
@@ -876,38 +1150,54 @@ const handlePrevious = () => {
             </div>
           </div>
 
-          <Progress value={progress} className="mb-4 sm:mb-6 md:mb-8 h-2 sm:h-3 bg-blue-100" />
+          <Progress value={progress} className="mb-3 sm:mb-4 h-2 sm:h-3 bg-blue-100" />
+
+          {/* Pinned to the top of the viewport, so it stays in sight while the
+              doctor scrolls through a long form. It carries no controls and
+              the layer takes no pointer events, so it cannot intercept a
+              click meant for the page beneath it. */}
+          {timer && (
+            <ViewportLayer className="top-2 left-1/2 -translate-x-1/2 max-w-[96vw]">
+              <ConsultationTimerBar state={timer} aiBusy={aiBusy} language="fr" />
+            </ViewportLayer>
+          )}
+
+          {/* Armed once there is work to lose. On step 0 an accidental reload
+              costs nothing, and a browser confirmation on an empty form is
+              noise the doctor will learn to dismiss without reading — which is
+              exactly how it stops working on the step where it matters. */}
+          <NavigationGuard active={currentStep > 0} language="fr" />
 
           {/* Mobile: Horizontal scroll, Tablet+: Grid */}
-          <div className={`flex overflow-x-auto pb-2 gap-3 sm:grid ${isNurse ? 'sm:grid-cols-3 md:grid-cols-3' : 'sm:grid-cols-3 md:grid-cols-5'} sm:gap-4 sm:overflow-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0`}>
+          <div className={`flex overflow-x-auto pb-2 gap-3 sm:grid ${isNurse ? 'sm:grid-cols-3 md:grid-cols-3' : 'sm:grid-cols-2 md:grid-cols-4'} sm:gap-4 sm:overflow-visible sm:pb-0 -mx-1 px-1 sm:mx-0 sm:px-0`}>
             {visibleSteps.map((step, index) => (
               <div
                 key={step.id}
-                onClick={() => handleStepClick(index)}
+                onClick={() => handleStepClick(step.id)}
                 className={`relative flex flex-col items-center text-center p-3 sm:p-4 md:p-5 rounded-xl smooth-transition cursor-pointer transform min-w-[120px] sm:min-w-0 flex-shrink-0 sm:flex-shrink
-                  ${index === currentStep
+                  ${step.id === activeStepId
                     ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-xl sm:scale-105 step-active'
-                    : index < currentStep
+                    : step.id < activeStepId
                     ? 'bg-gradient-to-br from-teal-500 to-teal-500 text-white shadow-lg hover:scale-105 hover:shadow-xl'
                     : 'bg-white/50 backdrop-blur-sm border-2 border-gray-200 opacity-70 cursor-not-allowed'
                   }`}
               >
                 {/* Step Number Badge */}
                 <div className={`absolute -top-2 -right-2 sm:-top-3 sm:-right-3 w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold shadow-lg
-                  ${index === currentStep
+                  ${step.id === activeStepId
                     ? 'bg-white text-blue-600 ring-2 sm:ring-4 ring-blue-200'
-                    : index < currentStep
+                    : step.id < activeStepId
                     ? 'bg-white text-teal-600 ring-2 sm:ring-4 ring-teal-200'
                     : 'bg-gray-300 text-gray-600'
                   }`}>
-                  {index < currentStep ? '✓' : index + 1}
+                  {step.id < activeStepId ? '✓' : index + 1}
                 </div>
 
                 {/* Icon Circle */}
                 <div className={`w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-3 md:mb-4 smooth-transition
-                  ${index === currentStep
+                  ${step.id === activeStepId
                     ? 'bg-white/20 backdrop-blur-sm shadow-inner'
-                    : index < currentStep
+                    : step.id < activeStepId
                     ? 'bg-white/20 backdrop-blur-sm'
                     : 'bg-gray-200 text-gray-500'
                   }`}>
@@ -916,7 +1206,7 @@ const handlePrevious = () => {
 
                 {/* Title */}
                 <h3 className={`font-bold mb-1 sm:mb-2 text-[11px] sm:text-xs md:text-sm leading-tight
-                  ${index === currentStep || index < currentStep
+                  ${step.id === activeStepId || step.id < activeStepId
                     ? 'text-white'
                     : 'text-gray-600'
                   }`}>
@@ -925,9 +1215,9 @@ const handlePrevious = () => {
 
                 {/* Description - Hidden on mobile */}
                 <p className={`text-[10px] sm:text-xs leading-relaxed hidden sm:block
-                  ${index === currentStep
+                  ${step.id === activeStepId
                     ? 'text-blue-100'
-                    : index < currentStep
+                    : step.id < activeStepId
                     ? 'text-teal-100'
                     : 'text-gray-500'
                   }`}>

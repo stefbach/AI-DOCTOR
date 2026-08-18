@@ -1,0 +1,597 @@
+import { randomUUID } from "node:crypto"
+import { createClient } from "@supabase/supabase-js"
+import { type NextRequest, NextResponse } from "next/server"
+import { callLLM } from "@/lib/llm-client"
+import {
+  type PatientContext,
+  type ReviewAlert,
+  type ReviewSeverity,
+  type ReviewSnapshot,
+  type SnapshotDiff,
+  countBlocking,
+  mergeAlerts,
+  resolveComposition,
+  runDeterministicChecks,
+  sortAlerts,
+  touchedMedicationLabels,
+} from "@/lib/prescription-review"
+
+// Clinical review of a doctor-edited report, run just before signature.
+//
+// Two layers, in this order:
+//   1. deterministic rules (lib/prescription-review.ts) — arithmetic and
+//      composition facts, always computed, never overridden;
+//   2. an LLM pass for the judgement calls rules cannot make (is this drug
+//      appropriate for THIS presentation? is this lab relevant? does the
+//      rewritten diagnosis still match the findings?).
+//
+// The route is advisory: it returns alerts, it does not decide. The doctor
+// signs, and a doctor who overrides must justify — that decision is recorded
+// through PATCH below. If the LLM fails we still return the deterministic
+// alerts rather than nothing: a degraded review beats no review, and an
+// error here must never stop a consultation.
+
+export const maxDuration = 60
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+
+// The audit trail is written with the service role, never the anon key.
+//
+// prescription_reviews grants INSERT and UPDATE to anon but no SELECT, so that
+// nobody holding the public key can read back a patient's review. Under RLS
+// that also makes the row invisible to the anon role itself, and PostgreSQL
+// applies SELECT policies to any statement that READS rows — including the
+// WHERE of an UPDATE and any RETURNING clause. The consequences were silent:
+// the insert was refused with an error the route swallowed, and the update
+// that records the doctor's decision matched zero rows while reporting
+// success. The table was empty all day and nothing said so.
+//
+// This route is server-only, so the service key never reaches a browser.
+// Falls back to anon when the key is absent: an insert still works there.
+const supabase = supabaseUrl && (supabaseServiceKey || supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey)
+  : null
+const auditCanUpdate = Boolean(supabaseUrl && supabaseServiceKey)
+
+const VALID_SEVERITIES: ReviewSeverity[] = ["critical", "major", "minor", "info"]
+const VALID_TARGETS = ["medication", "laboratory", "imaging", "diagnosis"] as const
+
+const s = (v: any): string => (typeof v === "string" ? v.trim() : "")
+
+/**
+ * Each line carries the ingredients resolved from our own Mauritius brand
+ * table, because the model guesses otherwise — and guessed wrong. Asked about
+ * Norgesic it answered "contains aspirin", which is the US formulation; the
+ * Commonwealth and therefore Mauritian product is orphenadrine + paracetamol.
+ * That put two alerts on the doctor's screen contradicting each other about
+ * the same box, which costs more trust than either alert is worth.
+ */
+function describeMedications(snapshot: ReviewSnapshot): string {
+  if (!snapshot.medications.length) return "(none)"
+  return snapshot.medications
+    .map((m, i) => {
+      const { ingredients, source } = resolveComposition(m)
+      // Only claim authority where there is any. When the composition was not
+      // resolved the fallback is just the product's own name, and presenting
+      // that as its ingredients would invite the model to reason from a label
+      // as though it were a molecule.
+      const composition =
+        source === "known"
+          ? `ACTIVE INGREDIENTS (Mauritius formulary, authoritative — do not substitute another country's formulation): ${ingredients.join(" + ")}`
+          : `COMPOSITION NOT RESOLVED — the system does not know what this product contains. Reason from the name if you can, and say plainly that you are unsure`
+      return `${i + 1}. name="${m.nom}" | INN/dci="${m.dci}" | ${composition} | strength="${m.dosage}" | form="${m.forme}" | route="${m.modeAdministration}" | posology="${m.posologie}" | duration="${m.dureeTraitement}" | instructions="${m.instructions}" | stated indication="${m.justification}"`
+    })
+    .join("\n")
+}
+
+function describeLabs(snapshot: ReviewSnapshot): string {
+  if (!snapshot.laboratory.length) return "(none)"
+  return snapshot.laboratory
+    .map(
+      (t, i) =>
+        `${i + 1}. "${t.nom}" [${t.category}]${t.urgence ? " URGENT" : ""} | indication="${t.motifClinique}"`,
+    )
+    .join("\n")
+}
+
+function describeImaging(snapshot: ReviewSnapshot): string {
+  if (!snapshot.imaging.length) return "(none)"
+  return snapshot.imaging
+    .map(
+      (e, i) =>
+        `${i + 1}. "${e.type}" ${e.modalite} ${e.region}${e.urgence ? " URGENT" : ""} | indication="${e.indicationClinique}"`,
+    )
+    .join("\n")
+}
+
+/**
+ * Sections that record what was DECIDED, as opposed to what was observed.
+ * These always go to the model, whether or not the doctor edited them: they
+ * are what an added drug can contradict.
+ *
+ * Learned the hard way. Trimming the narrative to edited sections only cut
+ * the payload — and with it the management plan, which is where a report says
+ * things like "strict avoidance of NSAIDs pending dengue exclusion". A
+ * Norgesic added to exactly such a report went unremarked by the model, while
+ * the previous run, which still received the plan, had caught the equivalent
+ * contradiction. Latency was bought with detection.
+ */
+const DECISION_SECTIONS = ["priseEnCharge", "surveillance"]
+
+/**
+ * `only === undefined` means the baseline is unknown, so the whole report has
+ * to go. Otherwise: the sections the doctor edited, plus the decision-bearing
+ * ones above. Everything else — history, examination, diagnostic reasoning —
+ * stays out; the patient context the model needs is already in the PATIENT
+ * block, and shipping the full report added thousands of words to every call.
+ */
+function describeNarrative(snapshot: ReviewSnapshot, only?: string[]): string {
+  const keep = only === undefined ? null : new Set([...only, ...DECISION_SECTIONS])
+  const entries = Object.entries(snapshot.narrative).filter(([k]) => !keep || keep.has(k))
+  if (!entries.length) return "(none)"
+  return entries.map(([k, v]) => `### ${k}\n${v}`).join("\n\n")
+}
+
+function describeChanges(diff: SnapshotDiff | null): string {
+  if (!diff || diff.baselineMissing) {
+    return "The AI baseline for this report is not available, so the exact doctor edits cannot be isolated. Review the WHOLE prescription and report as it stands."
+  }
+  if (!diff.hasChanges) {
+    return "No difference detected between the AI proposal and the current document."
+  }
+  const lines: string[] = []
+  if (diff.medicationsAdded.length) lines.push(`Medications ADDED by the doctor: ${diff.medicationsAdded.join("; ")}`)
+  if (diff.medicationsRemoved.length) lines.push(`Medications REMOVED by the doctor: ${diff.medicationsRemoved.join("; ")}`)
+  for (const m of diff.medicationsModified) {
+    lines.push(`Medication MODIFIED: ${m.item} (fields changed: ${m.fields.join(", ")})`)
+  }
+  if (diff.labsAdded.length) lines.push(`Lab tests ADDED: ${diff.labsAdded.join("; ")}`)
+  if (diff.labsRemoved.length) lines.push(`Lab tests REMOVED: ${diff.labsRemoved.join("; ")}`)
+  if (diff.imagingAdded.length) lines.push(`Imaging ADDED: ${diff.imagingAdded.join("; ")}`)
+  if (diff.imagingRemoved.length) lines.push(`Imaging REMOVED: ${diff.imagingRemoved.join("; ")}`)
+  if (diff.narrativeModified.length) lines.push(`Narrative sections REWRITTEN: ${diff.narrativeModified.join(", ")}`)
+  return lines.join("\n")
+}
+
+function buildPrompt(
+  patient: PatientContext,
+  snapshot: ReviewSnapshot,
+  diff: SnapshotDiff | null,
+  ruleAlerts: ReviewAlert[],
+): string {
+  const alreadyFlagged = ruleAlerts.length
+    ? ruleAlerts.map((a) => `- [${a.severity}] ${a.issue} on "${a.item}"`).join("\n")
+    : "(none)"
+
+  return `You are a senior clinical pharmacologist reviewing a teleconsultation report in Mauritius, immediately BEFORE the doctor signs it.
+
+The report was drafted by an AI, then edited by the doctor. Your job is to catch clinically unsound edits before they reach the patient. You are a safety net, not a second opinion on style: report only things that could harm the patient, mislead the pharmacist, or make the document clinically incoherent.
+
+PATIENT
+- Age: ${patient.age || "unknown"}
+- Sex: ${patient.sexe || "unknown"}
+- Weight: ${patient.poids || "unknown"}
+- Allergies: ${patient.allergies || "not documented"}
+- Past medical history: ${patient.medicalHistory || "not documented"}
+- Current medications (before this consultation): ${patient.currentMedications || "not documented"}
+- Chief complaint: ${patient.chiefComplaint || "not documented"}
+- Diagnostic conclusion in the report: ${patient.diagnosis || "not documented"}
+
+WHAT THE DOCTOR CHANGED
+${describeChanges(diff)}
+
+CURRENT MEDICATION PRESCRIPTION
+${describeMedications(snapshot)}
+
+CURRENT LABORATORY REQUESTS
+${describeLabs(snapshot)}
+
+CURRENT RADIOLOGY REQUESTS
+${describeImaging(snapshot)}
+
+CURRENT NARRATIVE REPORT
+${describeNarrative(snapshot, diff && !diff.baselineMissing ? diff.narrativeModified : undefined)}
+
+ALREADY DETECTED BY DETERMINISTIC RULES — already shown to the doctor
+${alreadyFlagged}
+
+This list excludes those SPECIFIC PROBLEMS, not the medications they name. A
+medication that already appears above can and should be reported again for a
+DIFFERENT problem — a sedating or anticholinergic ingredient in a patient at
+risk of falls, an ingredient breaching a precaution the plan states, an
+interaction with another line. Only stay silent when the problem you would
+raise is the same one already listed.
+
+A problem counts as already listed even if you would rate it MORE SEVERE than
+the rule did, and even if you would group into one alert several lines the
+rules reported separately.
+
+Four things are computed exhaustively and arithmetically before you are called,
+and are NEVER yours to report, whatever name you would give them:
+  - the same active ingredient appearing twice, under any names;
+  - a cumulative daily dose exceeding a maximum;
+  - a missing posology, strength, route or duration;
+  - a galenic form that does not match its stated route.
+Restating any of those adds nothing and costs the doctor a second alert about
+a problem already on their screen. Report what needs clinical judgement:
+whether a drug suits THIS patient and THIS diagnosis, whether it breaches a
+precaution the report itself states, whether an investigation is relevant,
+whether the narrative still holds together.
+
+None of this silences the relevance question below. A line may be perfectly
+complete — every field filled, nothing arithmetically wrong — and still have
+no business being on the document. That judgement is yours alone; no rule can
+make it.
+
+FIRST, FOR EVERY ORDERED ITEM: DOES THE CASE JUSTIFY IT?
+
+Before anything else, take each medication, each laboratory test and each
+imaging study above, one at a time, and answer one question: does the
+documented presentation, history and diagnosis justify ordering THIS, for THIS
+patient, today? Not "is it written correctly" — is it warranted at all.
+
+A blank, vague or copied indication field is NOT the finding. It is the reason
+you have to judge the item on the case itself. Asking the doctor to "add an
+indication" for an investigation the case does not warrant sends them to
+write a justification for something that should be removed. If the case does
+not support it, say that; mention the missing indication only where the item
+is otherwise reasonable and the wording is genuinely all that is missing.
+
+A real review failed exactly here: a cerebral CT was added for a febrile
+headache with no neurological sign, and the only alert returned was that its
+indication was not specified. The question the doctor needed answered was
+whether the scan was warranted.
+
+Hold an investigation to a higher bar the more it costs the patient: ionising
+radiation, iodinated contrast, an invasive sample, a long wait for a result
+that changes nothing. A test whose result cannot change today's management is
+not indicated, however harmless it is.
+
+Say the same for the reverse: an investigation the diagnosis plainly demands
+and that nobody ordered.
+
+And watch for the right act on the wrong document. A report sent "blood
+pressure measurement" to the laboratory, under HEMATOLOGY, with a tube type
+and a turnaround time — a blood pressure cannot be drawn from a sample, so
+the laboratory could never honour it and the doctor believed they had ordered
+something that would never happen. That one is now caught before you are
+called, but the family is wider than any list: an act ordered from a service
+that does not perform it is wrong however well indicated it is.
+
+WHAT TO LOOK FOR
+1. Medication safety: therapeutic duplication (including a branded combination product that repeats a molecule already prescribed), drug-drug interaction with the prescribed list or the patient's existing medications, contraindication given the age/sex/history/allergies, dose or duration inappropriate for the indication, wrong galenic form or route for the stated posology.
+2. A drug that contradicts a precaution the report itself states. The management plan below may explicitly rule a drug class out — "avoid NSAIDs pending dengue exclusion", "no muscle relaxant because of drowsiness" — and a prescription line may breach it. Pay particular attention when the breach is hidden inside a combination product whose name names none of its ingredients, and say which ingredient creates the conflict. Where a brand has different formulations by country, say so rather than assuming one.
+3. Clinical relevance — the pass described above, and the one most often skipped. A drug, lab test or imaging study that the documented presentation and diagnosis do not support, or one they plainly demand and nobody ordered. An investigation ordered without a case for it is at least "major" when it exposes the patient to radiation, contrast or an invasive sample; "minor" only when it is harmless and merely useless.
+4. Diagnostic and narrative coherence: a diagnosis or a rewritten section that contradicts the documented symptoms, examination findings, or the treatment actually prescribed. Only flag a genuine clinical contradiction — never a matter of wording, length or style.
+
+SEVERITY
+- "critical": could seriously harm the patient (overdose, contraindication, dangerous interaction, wrong route for the form).
+- "major": clinically wrong or incoherent, needs correction before signing (drug not indicated for this case, diagnosis contradicting the findings, missing essential monitoring).
+- "minor": imprecision or incompleteness that should be tidied but is not dangerous.
+- "info": worth the doctor's attention, no action strictly required.
+
+RULES
+- Judge the WHOLE prescription together, not each line in isolation.
+- Be specific: name the medication/test and say what is wrong and why, in clinical terms.
+- Prefer silence over noise. If the edits are clinically sound, return an empty list. An empty list is a perfectly good answer and is the expected answer most of the time.
+- When the doctor's edits are listed above, do NOT raise "minor" or "info" alerts about parts of the document they did not change — that content is the AI's own draft and is not what the doctor is being asked to answer for. "critical" and "major" safety findings still apply to the whole document, whoever wrote the line.
+- The doctor is responsible and may have context you do not. Word alerts as findings to check, never as orders.
+- Never invent a patient detail that is not stated above.
+- "message" must be in FRENCH, "messageEn" in ENGLISH, and both must say the same thing.
+
+Respond with ONLY a JSON object, no markdown fence, exactly in this shape:
+{"alerts":[{"severity":"critical|major|minor|info","target":"medication|laboratory|imaging|diagnosis","item":"<the prescription line, test or section concerned>","issue":"<short-kebab-case-code>","message":"<French explanation>","messageEn":"<English explanation>","suggestion":"<French: what to do>","suggestionEn":"<English: what to do>"}]}`
+}
+
+function parseAiAlerts(raw: string): ReviewAlert[] {
+  const clean = (raw || "").replace(/```json/gi, "").replace(/```/g, "").trim()
+  if (!clean) return []
+
+  let parsed: any
+  try {
+    parsed = JSON.parse(clean)
+  } catch {
+    // Some models wrap the object in prose despite the instruction.
+    const start = clean.indexOf("{")
+    const end = clean.lastIndexOf("}")
+    if (start === -1 || end <= start) throw new Error("no JSON object in model output")
+    parsed = JSON.parse(clean.slice(start, end + 1))
+  }
+
+  const list = Array.isArray(parsed?.alerts) ? parsed.alerts : []
+  const alerts: ReviewAlert[] = []
+
+  list.forEach((a: any, i: number) => {
+    const severity = VALID_SEVERITIES.includes(a?.severity) ? (a.severity as ReviewSeverity) : "minor"
+    const target = VALID_TARGETS.includes(a?.target) ? a.target : "medication"
+    const message = s(a?.message) || s(a?.messageEn)
+    if (!message) return
+    alerts.push({
+      id: `ai-${i + 1}`,
+      severity,
+      target,
+      item: s(a?.item) || "Document",
+      issue: s(a?.issue) || "clinical-review",
+      message,
+      messageEn: s(a?.messageEn) || message,
+      suggestion: s(a?.suggestion),
+      suggestionEn: s(a?.suggestionEn) || s(a?.suggestion),
+      source: "ai",
+    })
+  })
+
+  return alerts
+}
+
+async function persistReview(payload: {
+  consultationId: string | null
+  patientId: string | null
+  doctorId: string | null
+  consultationType: string | null
+  alerts: ReviewAlert[]
+  aiStatus: string
+  snapshot: ReviewSnapshot
+  diff: SnapshotDiff | null
+}): Promise<string | null> {
+  if (!supabase) return null
+  if (!payload.consultationId || payload.consultationId.startsWith("sim-")) return null
+
+  // The id is generated here rather than read back from the insert. Asking
+  // Supabase for it (.select('id')) turns the statement into
+  // INSERT ... RETURNING, and a RETURNING clause needs a SELECT policy — which
+  // this table deliberately does not grant, so that nobody holding the public
+  // key can read back a patient's prescription review. Every audit row was
+  // being refused for that reason and the failure swallowed by the guard
+  // below, so the table stayed empty while the feature looked like it worked.
+  const reviewId = randomUUID()
+
+  const { error } = await supabase
+    .from("prescription_reviews")
+    .insert({
+      id: reviewId,
+      consultation_id: payload.consultationId,
+      patient_id: payload.patientId,
+      doctor_id: payload.doctorId,
+      consultation_type: payload.consultationType,
+      alerts: payload.alerts,
+      blocking_count: countBlocking(payload.alerts),
+      ai_status: payload.aiStatus,
+      decision: "pending",
+      snapshot: {
+        medications: payload.snapshot.medications,
+        laboratory: payload.snapshot.laboratory,
+        imaging: payload.snapshot.imaging,
+        changes: payload.diff,
+      },
+      reviewed_at: new Date().toISOString(),
+    })
+
+  if (error) {
+    // Never fail the review because the audit row could not be written — but
+    // say so loudly. This exact failure went unnoticed for a day precisely
+    // because it was warned about and moved past.
+    console.error("⚠️ prescription-review: AUDIT ROW NOT WRITTEN:", error.message)
+    return null
+  }
+
+  console.log(`🗄️ prescription-review: audit row ${reviewId} written`)
+  return reviewId
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    let body: any
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ success: false, error: "Invalid JSON in request body" }, { status: 400 })
+    }
+
+    const {
+      consultationId = null,
+      patientId = null,
+      doctorId = null,
+      consultationType = null,
+      patient,
+      snapshot,
+      diff = null,
+    } = body || {}
+
+    if (!snapshot || typeof snapshot !== "object") {
+      return NextResponse.json({ success: false, error: "Missing snapshot" }, { status: 400 })
+    }
+
+    const safeSnapshot: ReviewSnapshot = {
+      medications: Array.isArray(snapshot.medications) ? snapshot.medications : [],
+      laboratory: Array.isArray(snapshot.laboratory) ? snapshot.laboratory : [],
+      imaging: Array.isArray(snapshot.imaging) ? snapshot.imaging : [],
+      narrative: snapshot.narrative && typeof snapshot.narrative === "object" ? snapshot.narrative : {},
+    }
+
+    const safePatient: PatientContext = {
+      age: s(patient?.age),
+      sexe: s(patient?.sexe),
+      poids: s(patient?.poids),
+      allergies: s(patient?.allergies),
+      medicalHistory: s(patient?.medicalHistory),
+      currentMedications: s(patient?.currentMedications),
+      chiefComplaint: s(patient?.chiefComplaint),
+      diagnosis: s(patient?.diagnosis),
+    }
+
+    // Layer 1 — always runs, cannot fail on a model outage.
+    const ruleAlerts = runDeterministicChecks(
+      safeSnapshot,
+      safePatient,
+      touchedMedicationLabels(diff),
+    )
+
+    const nothingToReview =
+      safeSnapshot.medications.length === 0 &&
+      safeSnapshot.laboratory.length === 0 &&
+      safeSnapshot.imaging.length === 0
+
+    // Layer 2 — clinical judgement.
+    let aiAlerts: ReviewAlert[] = []
+    let aiStatus = "ok"
+    // Echoed back to the browser so the review can be diagnosed from the
+    // doctor's console. The Vercel log API has been unreachable exactly when
+    // it was needed, and "which model actually answered, and how fast" is the
+    // one question this feature keeps raising.
+    let aiDiagnostics: Record<string, unknown> = {}
+
+    if (nothingToReview && Object.keys(safeSnapshot.narrative).length === 0) {
+      aiStatus = "skipped_empty"
+    } else {
+      try {
+        const result = await callLLM({
+          useCase: "prescription_review",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a clinical pharmacology safety reviewer. You return strict JSON only. You raise an alert only when a real clinical problem exists.",
+            },
+            { role: "user", content: buildPrompt(safePatient, safeSnapshot, diff, ruleAlerts) },
+          ],
+          responseFormat: "json_object",
+          maxTokens: 1500,
+          // This runs with a doctor and a patient waiting on the line, so the
+          // model is chosen for latency, not depth.
+          //
+          // gpt-5.5 at medium effort took over 30s. DeepSeek v4-pro at low
+          // effort took 29s — barely better, because v4-pro is a REASONING
+          // model and still emits thinking tokens before answering. The task
+          // does not need that: it is coherence checking between a drug list
+          // and a management plan, not multi-step deduction. deepseek-chat is
+          // the non-reasoning variant, which is what llm-client already
+          // documents as the escape hatch for auxiliary calls like this one.
+          //
+          // LLM_PROVIDER_PRESCRIPTION_REVIEW still overrides the provider in
+          // both directions; the model override is ignored when it does, so
+          // a flip to OpenAI cannot send a DeepSeek model name to OpenAI.
+          provider: "deepseek",
+          model: "deepseek-chat",
+          reasoningEffort: "none",
+          timeoutMs: 20_000,
+        })
+        aiAlerts = parseAiAlerts(result.text)
+        aiDiagnostics = {
+          provider: result.provider,
+          model: result.model,
+          latencyMs: result.latencyMs,
+          fallbackUsed: result.fallbackUsed,
+          totalTokens: result.usage?.totalTokens ?? null,
+          aiAlertCount: aiAlerts.length,
+        }
+        console.log(
+          `[prescription-review] provider=${result.provider} model=${result.model} latency=${result.latencyMs}ms rules=${ruleAlerts.length} ai=${aiAlerts.length}`,
+        )
+      } catch (err: any) {
+        aiStatus = `failed: ${err?.message || "unknown error"}`
+        aiDiagnostics = { error: err?.message || "unknown error" }
+        console.error("⚠️ prescription-review: AI layer failed:", err?.message || err)
+      }
+    }
+
+    const alerts = sortAlerts(mergeAlerts(ruleAlerts, aiAlerts))
+
+    const reviewId = await persistReview({
+      consultationId,
+      patientId,
+      doctorId,
+      consultationType,
+      alerts,
+      aiStatus,
+      snapshot: safeSnapshot,
+      diff,
+    })
+
+    return NextResponse.json({
+      success: true,
+      reviewId,
+      alerts,
+      blockingCount: countBlocking(alerts),
+      // Surfaced so the dialog can tell the doctor the review is partial
+      // rather than letting a silent model outage read as "all clear".
+      aiStatus,
+      degraded: aiStatus !== "ok" && aiStatus !== "skipped_empty",
+      ai: aiDiagnostics,
+    })
+  } catch (error: any) {
+    console.error("❌ prescription-review error:", error?.message || error)
+    // The doctor must never be stuck behind a broken review.
+    return NextResponse.json(
+      {
+        success: false,
+        error: error?.message || "Review failed",
+        alerts: [],
+        blockingCount: 0,
+        degraded: true,
+      },
+      { status: 200 },
+    )
+  }
+}
+
+/**
+ * Record what the doctor did with the alerts. Called once, right after they
+ * accept the review or override it with a justification. This is the audit
+ * trail the clinic asked for: an override without a reason is not possible
+ * from the UI, and the reason lands here.
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json().catch(() => null)
+    const { reviewId, decision, justification = "", doctorId = null } = body || {}
+
+    if (!reviewId) {
+      return NextResponse.json({ success: false, error: "Missing reviewId" }, { status: 400 })
+    }
+    if (decision !== "accepted" && decision !== "overridden" && decision !== "corrected") {
+      return NextResponse.json({ success: false, error: "Invalid decision" }, { status: 400 })
+    }
+    if (decision === "overridden" && s(justification).length < 10) {
+      return NextResponse.json(
+        { success: false, error: "A justification is required to override a clinical alert" },
+        { status: 400 },
+      )
+    }
+    if (!supabase || !auditCanUpdate) {
+      console.error("❌ prescription-review PATCH: SUPABASE_SERVICE_ROLE_KEY missing, decision not recorded")
+      return NextResponse.json({ success: false, error: "Audit storage not configured" }, { status: 503 })
+    }
+
+    // select() so the update reports what it actually touched. Without it a
+    // zero-row update returns no error, which is exactly how this recorded
+    // nothing while answering success.
+    const { data, error } = await supabase
+      .from("prescription_reviews")
+      .update({
+        decision,
+        override_justification: s(justification) || null,
+        decided_by: doctorId,
+        decided_at: new Date().toISOString(),
+      })
+      .eq("id", reviewId)
+      .select("id")
+
+    if (error) {
+      console.error("❌ prescription-review PATCH failed:", error.message)
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    }
+
+    if (!data || data.length === 0) {
+      console.error(`❌ prescription-review PATCH matched no row for ${reviewId} — decision NOT recorded`)
+      return NextResponse.json({ success: false, error: "Review not found" }, { status: 404 })
+    }
+
+    console.log(`✅ prescription-review decision recorded: ${reviewId} -> ${decision}`)
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
+    console.error("❌ prescription-review PATCH error:", error?.message || error)
+    return NextResponse.json({ success: false, error: error?.message || "Unexpected error" }, { status: 500 })
+  }
+}

@@ -141,18 +141,31 @@ export interface FollowUpInput {
 }
 
 /**
+ * Does this case need a review on an urgent timescale?
+ *
+ * The single definition of "urgent follow-up", used both to decide whether to
+ * propose an appointment at all and to mark the created appointment urgent so
+ * TIBOK can chase an unpaid one. Nothing is proposed when triage failed — the
+ * doctor decides. A routine case qualifies only when urgent labs are pending:
+ * those must be read within days, not deferred to a 7-day routine follow-up.
+ *
+ * Kept as one exported function rather than repeated at each call site, so the
+ * appointment cannot be marked non-urgent while the banner above it says
+ * "Suivi rapproché requis".
+ */
+export function requiresUrgentFollowUp(level: TriageLevel, urgentLabs = false): boolean {
+  if (level === "unassessed") return false
+  return level === "emergency" || level === "urgent" || urgentLabs
+}
+
+/**
  * Decide whether and when a second (result-review) consultation is needed.
  * The AI proposes; these rules dispose.
  */
 export function computeFollowUp(input: FollowUpInput): FollowUpPlan | null {
   const { level, proposedDelayHours, urgentLabs = false, now = new Date() } = input
 
-  // Nothing is auto-proposed when triage failed — the doctor decides.
-  if (level === "unassessed") return null
-
-  // Routine cases only get a proposal when urgent labs are pending.
-  const required = level === "emergency" || level === "urgent" || urgentLabs
-  if (!required) return null
+  if (!requiresUrgentFollowUp(level, urgentLabs)) return null
 
   // Urgent investigations pull a routine case into the urgent window: pending
   // urgent labs must be reviewed within days, not deferred to a 7-day routine
@@ -190,6 +203,200 @@ export function computeFollowUp(input: FollowUpInput): FollowUpPlan | null {
       : "Consultation de contrôle")
 
   return { required: true, delayHours: delay, targetDate, deadlineDate, reason, adjustedForLabs, clamped }
+}
+
+/**
+ * The narrative section that replaces the prescriptions on an emergency case.
+ *
+ * A report that says "go to hospital without delay" while also handing out a
+ * prescription, a lab form and three imaging requests contradicts itself, and
+ * sends the patient to a pharmacy instead of A&E. So on an emergency those
+ * documents are not produced — and this text says so, and says why, rather
+ * than leaving the doctor and the patient to wonder where they went.
+ */
+export function buildEmergencyTransferNotice(triage: ResolvedTriage): string {
+  const lines: string[] = [
+    "IMMEDIATE MEDICAL CARE REQUIRED — HOSPITAL TRANSFER WITHOUT DELAY.",
+    "",
+    "This consultation issues no prescription, and no community laboratory or imaging request. Investigation and treatment are the responsibility of the receiving hospital: prescribing in parallel would delay the transfer and commit the patient to a treatment decided without the investigations that must guide it.",
+  ]
+
+  if (triage.justification) {
+    lines.push("", `Reason for referral: ${triage.justification}`)
+  }
+
+  if (triage.criteriaMet.length > 0) {
+    lines.push("", "Emergency criteria met:")
+    for (const criterion of triage.criteriaMet) lines.push(`• ${criterion}`)
+  }
+
+  lines.push(
+    "",
+    "The patient must be instructed to attend Accident & Emergency immediately, or ambulance transport arranged according to their condition.",
+  )
+
+  return lines.join("\n")
+}
+
+/**
+ * The MANAGEMENT PLAN of an emergency report.
+ *
+ * The narrative is written server-side from the medications the diagnostic
+ * model proposed, and the emergency policy drops those medications afterwards,
+ * client-side. Left alone, the report then states in prose that a four-drug
+ * regimen "has been prescribed" while carrying no prescription at all — the
+ * most dangerous kind of inconsistency, because the prose is what a hospital
+ * reads to know what the patient has already been given.
+ *
+ * So on an emergency the plan is replaced by what the plan actually is:
+ * transfer. Deliberately short — the criteria and the justification are set
+ * out in the transfer notice at the top of the report and repeating them here
+ * turns a decision into noise.
+ */
+export function buildEmergencyManagementPlan(_triage: ResolvedTriage): string {
+  return [
+    "Immediate transfer to hospital is the management of this case.",
+    "",
+    "No medication has been prescribed and no investigation has been requested at this teleconsultation. Any treatment already taken by the patient is recorded in the history above; nothing has been added to it here. The receiving unit is to order the investigations and start the treatment its own assessment indicates.",
+    "",
+    "Should the transfer be refused or delayed for any reason, the case must be reassessed by a physician in person — it cannot be managed remotely on the basis of this consultation.",
+  ].join("\n")
+}
+
+/**
+ * The FOLLOW-UP PLAN of an emergency report.
+ *
+ * Same reasoning as the management plan, with one addition: this service may
+ * still schedule a review consultation on an emergency case (see
+ * `computeFollowUp`), and that appointment must never read as an alternative
+ * to attending A&E. It comes after hospital care, not instead of it.
+ */
+export function buildEmergencyFollowUpPlan(_triage: ResolvedTriage): string {
+  return [
+    "Follow-up is the responsibility of the receiving hospital for as long as the patient is in its care.",
+    "",
+    "Any review consultation scheduled through this service is intended to take stock once that care has taken place. It is not an alternative to attending, and must not be waited for.",
+    "",
+    "If the patient's condition worsens on the way, or if they have not been seen at hospital, emergency services are to be called without further delay.",
+  ].join("\n")
+}
+
+/**
+ * The FINAL REMARKS of an emergency report.
+ *
+ * The generation prompt asks for a synthesis of the whole case, and a case
+ * whose therapeutic section listed four drugs gets synthesised as a case with
+ * a treatment. Closing a report that carries no prescription on a paragraph
+ * summarising one undoes both replacements above, on the last thing the reader
+ * sees.
+ */
+export function buildEmergencyConclusion(_triage: ResolvedTriage): string {
+  return [
+    "This consultation concludes on a referral, not on a treatment.",
+    "",
+    "The clinical assessment, the diagnostic reasoning and the differential diagnoses set out above are provided for the receiving team. No prescription, laboratory request or imaging request accompanies this report, and none should be inferred from it.",
+    "",
+    "The single instruction arising from this consultation is that the patient attends hospital immediately.",
+  ].join("\n")
+}
+
+// ---------------------------------------------------------------------------
+// Emergency: keeping the generated narrative honest
+// ---------------------------------------------------------------------------
+//
+// The three report endpoints all ask their model to describe the therapeutic
+// approach and to say how many medications and tests were ordered. On an
+// emergency the report component then withdraws those documents, so the prose
+// was written from a treatment that was about to disappear — a report carrying
+// nothing at all announced four drugs "prescribed".
+//
+// Repairing that afterwards, section by section, is repairing text that should
+// never have been written. These two are applied BEFORE the model is called,
+// and they live here rather than in each route so the three flows cannot drift
+// apart on what an emergency report is allowed to say.
+
+/**
+ * Said in words as well as in data.
+ *
+ * Zero counts alone leave the model free to fill the gap from the diagnosis it
+ * was given, and "given the presentation, aspirin would be indicated" reads,
+ * to a receiving hospital, exactly like a prescription.
+ */
+export const EMERGENCY_NARRATIVE_DIRECTIVE = `
+EMERGENCY CASE — NO TREATMENT IS BEING ISSUED (OVERRIDES ANY INSTRUCTION BELOW):
+This patient is being transferred to hospital immediately. This consultation issues NO prescription, NO laboratory request and NO imaging request.
+- Do not name, propose, recommend or imply any medication, dose or investigation as coming from this consultation.
+- Do not write that anything "has been prescribed", "has been ordered" or "is recommended".
+- The management plan is the transfer itself; the follow-up plan belongs to the receiving hospital.
+- Medication the patient was ALREADY taking before this consultation is history: report it in the history sections only, and say plainly that it predates this consultation.
+- The clinical reasoning, the differential diagnoses and the examination are still to be written in full: the receiving team needs them.
+`
+
+/**
+ * Empty the treatment out of the data handed to a report model, in place.
+ *
+ * Returns what was withdrawn, so the route can log it: a silent withdrawal is
+ * indistinguishable from a case that never had a treatment, and the difference
+ * matters when someone asks afterwards why the report is bare.
+ */
+export function withdrawTreatmentForEmergency(enrichedData: any): {
+  medications: number
+  labTests: number
+  imaging: number
+} {
+  const withdrawn = {
+    medications: Number(enrichedData?.summary?.medicationsCount) || 0,
+    labTests: Number(enrichedData?.summary?.labTestsCount) || 0,
+    imaging: Number(enrichedData?.summary?.imagingCount) || 0,
+  }
+
+  const NO_TREATMENT =
+    "Immediate hospital transfer. No medication is prescribed and no investigation is requested at this teleconsultation."
+  const HOSPITAL_INVESTIGATES = "Investigation is the responsibility of the receiving hospital."
+  const HOSPITAL_FOLLOWS_UP =
+    "Immediate attendance at Accident & Emergency. Follow-up is the responsibility of the receiving hospital."
+
+  // Only keys the shape already has are touched. The three routes name these
+  // fields differently — `treatment.approach` here, `treatment.managementPlan`
+  // there, investigations under `treatment` in one and under `followUp` in
+  // another — and inventing a key a prompt never reads would look like it had
+  // been handled when it had not.
+  const clear = (container: any, values: Record<string, unknown>) => {
+    if (!container || typeof container !== "object") return
+    for (const [key, value] of Object.entries(values)) {
+      if (key in container) container[key] = value
+    }
+  }
+
+  clear(enrichedData?.treatment, {
+    medications: [],
+    labTests: [],
+    imaging: [],
+    approach: NO_TREATMENT,
+    managementPlan: NO_TREATMENT,
+    investigationStrategy: HOSPITAL_INVESTIGATES,
+    // A diet plan and a self-monitoring schedule describe months of outpatient
+    // management that is not happening today.
+    dietaryPlan: "",
+    selfMonitoring: "",
+  })
+
+  // Warning signs are kept everywhere: they tell the patient what to do on the
+  // way to hospital, which is the one instruction that still applies.
+  clear(enrichedData?.followUp, {
+    immediate: HOSPITAL_FOLLOWS_UP,
+    schedule: HOSPITAL_FOLLOWS_UP,
+    labTests: [],
+    imaging: [],
+  })
+
+  clear(enrichedData?.summary, {
+    medicationsCount: 0,
+    labTestsCount: 0,
+    imagingCount: 0,
+  })
+
+  return withdrawn
 }
 
 /** Human-readable delay, e.g. "48 h" / "3 jours". */

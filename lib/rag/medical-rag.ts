@@ -1383,13 +1383,22 @@ export function expandRefCitations(
 ): string {
   if (!text || displayMap.size === 0) return text
   return text
-    .replace(/\[ref-(\d+)\]/g, (_match, num) => {
-      const k = displayMap.get(`ref-${num}`)
+    // Both shapes. The prompt asks for [ref-N] and the models mostly comply,
+    // but not always: a real report printed "neuroimaging is not routinely
+    // indicated (ref-5, ref-6)" — the model's own parentheses, no brackets, so
+    // the bracket-only pattern walked straight past it and an internal
+    // pipeline token went out on a medical document.
+    .replace(/\[ref-(\d+)\]|\bref-(\d+)\b/g, (_match, bracketed, bare) => {
+      const k = displayMap.get(`ref-${bracketed ?? bare}`)
       return k ? `[${k}]` : ''
     })
     // Tidy whitespace/punctuation introduced by drops above.
     .replace(/\s+([,.;:!?)])/g, '$1')
-    .replace(/\(\s*\)/g, '')
+    // "(ref-5, ref-6)" with both tokens dropped leaves "(,)", which the
+    // empty-parenthesis rule alone does not catch. Anything left between
+    // brackets with no letter or digit in it was punctuation holding the
+    // dropped citations apart.
+    .replace(/\(\s*[^A-Za-z0-9]*\s*\)/g, '')
     .replace(/\s{2,}/g, ' ')
     .trim()
 }
@@ -1493,7 +1502,11 @@ export function expandRefCitationsAsSourceYear(
     })
     // Tidy whitespace/punctuation introduced by drops or insertions above.
     .replace(/\s+([,.;:!?)])/g, '$1')
-    .replace(/\(\s*\)/g, '')
+    // "(ref-5, ref-6)" with both tokens dropped leaves "(,)", which the
+    // empty-parenthesis rule alone does not catch. Anything left between
+    // brackets with no letter or digit in it was punctuation holding the
+    // dropped citations apart.
+    .replace(/\(\s*[^A-Za-z0-9]*\s*\)/g, '')
     .replace(/\s{2,}/g, ' ')
     .trim()
 }
@@ -1583,14 +1596,17 @@ export function scrubAndEnrichEvidenceRefs(
   }
 
   const validRefIds = new Set(ragContext.references.map(r => r.ref_id))
-  const REF_TOKEN = /\[ref-(\d+)\]/g
+  // Brackets optional — see expandRefCitations for why. A token the model
+  // wrote as "(ref-5, ref-6)" is the same token, and left unscrubbed it both
+  // escapes validation and prints raw.
+  const REF_TOKEN = /\[ref-(\d+)\]|\bref-(\d+)\b/g
   const strippedTokens: string[] = []
   let stringsScanned = 0
   let stringsModified = 0
 
   const recordUsage = (id: string, path: string, source: string) => {
     const arr = refUsageByPath.get(id) ?? []
-    const idx = source.indexOf(`[${id}]`)
+    const idx = source.indexOf(`[${id}]`) >= 0 ? source.indexOf(`[${id}]`) : source.indexOf(id)
     const start = Math.max(0, idx - 60)
     const end = Math.min(source.length, idx + 80)
     arr.push({ path, excerpt: source.slice(start, end).replace(/\s+/g, ' ').trim() })
@@ -1600,12 +1616,14 @@ export function scrubAndEnrichEvidenceRefs(
   const scrubString = (s: string, path: string): string => {
     stringsScanned++
     let modified = false
-    const cleaned = s.replace(REF_TOKEN, (match, num) => {
-      const id = `ref-${num}`
+    const cleaned = s.replace(REF_TOKEN, (match, bracketed, bare) => {
+      const id = `ref-${bracketed ?? bare}`
       if (validRefIds.has(id)) {
         usedValidRefs.add(id)
         recordUsage(id, path, s)
-        return match
+        // Normalise to the bracketed form on the way through, so everything
+        // downstream — expansion, grounding verification — sees one shape.
+        return `[${id}]`
       }
       modified = true
       strippedTokens.push(id)
@@ -1615,7 +1633,11 @@ export function scrubAndEnrichEvidenceRefs(
     stringsModified++
     return cleaned
       .replace(/\s+([,.;:!?)])/g, '$1')
-      .replace(/\(\s*\)/g, '')
+      // "(ref-5, ref-6)" with both tokens dropped leaves "(,)", which the
+      // empty-parenthesis rule alone does not catch. Anything left between
+      // brackets with no letter or digit in it was punctuation holding the
+      // dropped citations apart.
+      .replace(/\(\s*[^A-Za-z0-9]*\s*\)/g, '')
       .replace(/\s{2,}/g, ' ')
       .trim()
   }

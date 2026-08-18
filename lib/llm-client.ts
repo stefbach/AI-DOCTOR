@@ -53,6 +53,13 @@ export interface LLMCallParams {
    * DEEPSEEK_MODEL / OPENAI_MODEL env vars applies.
    */
   model?: string
+  /**
+   * Provider this call prefers when no LLM_PROVIDER_<USECASE> env var is set.
+   * The env var still wins in both directions, so ops keeps the last word;
+   * this only moves the default off OpenAI for a use case that needs it —
+   * e.g. one running in front of a waiting doctor, where latency decides.
+   */
+  provider?: LLMProvider
 }
 
 export interface LLMUsage {
@@ -103,10 +110,13 @@ function getDeepSeekClient(): OpenAI {
   return deepseekClient
 }
 
-function resolveProvider(useCase: string): LLMProvider {
+function resolveProvider(useCase: string, preferred?: LLMProvider): LLMProvider {
   const flag = process.env[`LLM_PROVIDER_${useCase.toUpperCase()}`]
   if (flag === 'deepseek') return 'deepseek'
-  return 'openai'
+  // Explicit 'openai' in the env is now honoured too, so ops can force a
+  // use-case back to OpenAI without editing the call site.
+  if (flag === 'openai') return 'openai'
+  return preferred ?? 'openai'
 }
 
 function resolveModel(provider: LLMProvider): string {
@@ -212,8 +222,12 @@ function isRetriableError(err: any): boolean {
 
 export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
   const startedAt = Date.now()
-  const primaryProvider = resolveProvider(params.useCase)
-  const primaryModel = params.model ?? resolveModel(primaryProvider)
+  const primaryProvider = resolveProvider(params.useCase, params.provider)
+  // A model override only applies when the provider actually resolved to the
+  // one the caller had in mind. Otherwise an env flag flipping the provider
+  // would send e.g. a DeepSeek model name to OpenAI and fail every call.
+  const modelOverrideApplies = !params.provider || params.provider === primaryProvider
+  const primaryModel = (modelOverrideApplies ? params.model : undefined) ?? resolveModel(primaryProvider)
   // When LLM_DISABLE_FALLBACK=true we never silently fall back to OpenAI on
   // a DeepSeek error. Useful during A/B testing so DeepSeek is judged on its
   // own merits without the safety net masking outages or timeouts.

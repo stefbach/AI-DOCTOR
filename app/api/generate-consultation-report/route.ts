@@ -4,6 +4,8 @@ import { callLLM, type LLMMessage } from "@/lib/llm-client"
 import { CRITICAL_RULES_BLOCK_NARRATIVE } from "@/lib/critical-rules"
 import { detectFabricatedExam } from "@/lib/anti-fabrication"
 import { buildRefDisplayMap, buildRefSourceYearMap, expandRefsInTree, expandRefsAsSourceYearInTree } from "@/lib/rag/medical-rag"
+import { compositionKey } from "@/lib/prescription-review"
+import { resolveTriage, withdrawTreatmentForEmergency, EMERGENCY_NARRATIVE_DIRECTIVE } from "@/lib/triage"
 
 export const runtime = 'nodejs'
 // 300s: DeepSeek V4-Pro thinking on the 10-section narrative blew through
@@ -919,11 +921,204 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
 }
 
 // ==================== PRESCRIPTION EXTRACTION ====================
+
+/**
+ * Reduce a route to the family that matters for duplication.
+ *
+ * Two lines of the same molecule by the same route are one prescription
+ * written twice; the same molecule by two different routes (a salbutamol
+ * inhaler plus salbutamol nebules, an oral antibiotic plus its eye drops) is
+ * a legitimate pair. Free text varies — "Oral", "Oral route", "PO", "voie
+ * orale" — so it is folded onto a small closed set before comparison.
+ */
+function routeFamily(route: string): string {
+  const r = String(route || "").toLowerCase()
+  if (/topic|cutan|derma|skin|local/.test(r)) return "topical"
+  if (/inhal|nebul|aeros|respir/.test(r)) return "inhaled"
+  if (/ophtal|ophthal|eye|oculaire|collyre/.test(r)) return "ophthalmic"
+  if (/auricul|otic|ear/.test(r)) return "otic"
+  if (/nasal|nose/.test(r)) return "nasal"
+  if (/rectal|suppos/.test(r)) return "rectal"
+  if (/vagin/.test(r)) return "vaginal"
+  if (/\biv\b|\bim\b|\bsc\b|intraven|intramus|subcut|inject|perfus|parenter/.test(r)) return "parenteral"
+  return "oral"
+}
+
+/**
+ * The prescription the doctor signs is assembled here, and only here: the
+ * patient's validated current treatment first, then everything newly
+ * prescribed. Nothing upstream ever compared the two lists, so a patient
+ * already on Amlodipine 10mg whose case triggered the automatic
+ * "hypertension without antihypertensive" correction walked out with
+ * amlodipine twice on the same form.
+ *
+ * Identity here is the composition, not the written name: "Amlodipine",
+ * "Amlodipine 5mg" and "Norvasc" are the same drug. A line whose composition
+ * cannot be resolved keeps its place rather than colliding with every other
+ * unnamed line.
+ */
+function prescriptionLineKey(med: any): string {
+  const key = compositionKey(
+    med?.name || med?.medication_name || med?.drug || med?.nom,
+    med?.genericName || med?.dci || med?.denominationCommune,
+  )
+  if (!key) return ""
+  return `${key}|${routeFamily(med?.route)}`
+}
+
+/**
+ * When a field comes back empty, the pipeline fills it with a label that
+ * describes the field — "Dose individuelle", "Instructions d'administration",
+ * "Format UK", "Dose totale/jour". Those are developer defaults, written in
+ * French, and they print on the prescription exactly where a strength or an
+ * instruction belongs: a real form went out reading "Paracetamol — Form:
+ * tablet - Dose individuelle", with no strength anywhere on the line.
+ *
+ * A blank field is a hole the doctor can see. A label that reads like content
+ * is a hole nobody sees. So the labels are removed here, at the single point
+ * where the printed prescription is assembled.
+ */
+const FIELD_PLACEHOLDERS = new Set([
+  "dose individuelle", "dose totale/jour", "dose totale/j", "format uk",
+  "instructions d'administration", "instructions d administration",
+  "prendre selon prescription", "posologie à déterminer", "posologie a determiner",
+  "selon prescription", "as prescribed",
+  "dosage", "dosage non spécifié", "dosage non specifie", "dose", "posologie",
+  "indication thérapeutique", "indication therapeutique",
+  "investigation thérapeutique", "investigation therapeutique",
+  "médicament", "medicament", "médicament actuel", "medicament actuel",
+  "dci", "surveillance standard", "standard monitoring",
+  "aucune spécifiée", "aucun spécifié", "aucune specifiee", "aucun specifie",
+  "non spécifié", "non specifie", "à déterminer", "a determiner",
+  "mécanisme d'action spécifique pour le patient",
+  "effets secondaires à surveiller", "aucune contre-indication identifiée",
+  "interactions vérifiées", "agent thérapeutique",
+  "n/a", "none", "-", "—",
+])
+
+/**
+ * The strength written inside a drug name — "Paracetamol 500mg" → "500mg".
+ *
+ * The diagnostic model sometimes fills the name and leaves `dosage_strength`
+ * empty, and the prescription then prints a line with no strength at all,
+ * which no pharmacy can dispense. The strength is right there in the name; not
+ * copying it across was the whole defect.
+ *
+ * This is the ONLY place a strength may be recovered from. Reading it out of
+ * the posology was tried and removed: on "QDS as needed, do not exceed 4g in
+ * 24 hours" the first figure is the daily ceiling, and printing it as the unit
+ * dose quadruples the prescription. A name is a name; a sentence is not.
+ *
+ * Silent on combinations ("875/125mg", "amoxicillin + clavulanic acid") and on
+ * names carrying two figures — there is no single strength to copy, and
+ * guessing which one belongs in the field is exactly the mistake above.
+ */
+function strengthFromName(name: string): string {
+  const text = String(name || "")
+  if (/\d\s*\/\s*\d/.test(text) || text.includes("+")) return ""
+  const matches = text.match(/\d+(?:[.,]\d+)?\s*(?:mg|g|mcg|µg|ug|ml|iu|ui)\b/gi)
+  if (!matches || matches.length !== 1) return ""
+  return matches[0].replace(/\s+/g, "").trim()
+}
+
+function stripPlaceholder(value: any): string {
+  const v = String(value ?? "").trim()
+  return FIELD_PLACEHOLDERS.has(v.toLowerCase()) ? "" : v
+}
+
+/** Fields printed on the prescription, where a placeholder does real damage. */
+const PLACEHOLDER_PRONE_FIELDS = [
+  "genericName", "dosage", "frequency", "instructions", "indication", "monitoring",
+]
+
+const DOSE_UNITS = "mg|g|mcg|µg|ug|ml|l|iu|ui|units?"
+const DOSE_TOKEN = new RegExp(`\\d+(?:[.,]\\d+)?\\s*(?:${DOSE_UNITS})\\b`, "i")
+
+/**
+ * The corrected strength an AI validation note announces — when it announces
+ * one at all.
+ *
+ * The validator writes what it changed into a free-text note: "Dose adjusted
+ * from 100mg to standard maintenance dose of 500mg OD". That note was the only
+ * place the correction ever landed. The structured fields kept the original,
+ * so a form printed "Metformin 100mg" on every line with a footnote saying it
+ * should be 500mg — a strength metformin is not even sold in.
+ *
+ * Only an explicit replacement is read: "from X to Y", or the arrow form
+ * "Dosology: '10 od' → '10mg OD'". A note that merely mentions a figure
+ * ("maximum 4g/day", "target <130/80") changes nothing, by construction.
+ */
+function correctedDoseFrom(note: any): string {
+  const text = String(note ?? "")
+  if (!text) return ""
+
+  // Every pattern is anchored on a dose word, stops at the end of its own
+  // sentence, and requires the ORIGINAL value to be a strength too. Without
+  // that last condition "changed from tablet to capsule form, max 4g" would
+  // read as a correction to 4g.
+  const patterns = [
+    // "Dose adjusted/reduced/increased from 100mg to ... 500mg".
+    new RegExp(
+      `dos(?:e|age|olog\\w*)[^.;\\n]*?\\bfrom\\b\\s*\\d+(?:[.,]\\d+)?\\s*(?:${DOSE_UNITS})\\b[^.;\\n]*?\\bto\\b([^.;\\n]*)`,
+      "i",
+    ),
+    // French: "Dose ajustée de 100mg à 500mg". (\b does not work against "à",
+    // which is not a word character, so the spaces are matched explicitly.)
+    new RegExp(
+      `dos(?:e|age)\\s+(?:ajust|corrig|modifi|augment|réduit|reduit|diminu|port)\\S*\\s+de\\s+\\d+(?:[.,]\\d+)?\\s*(?:${DOSE_UNITS})\\b[^.;\\n]*?\\sà\\s([^.;\\n]*)`,
+      "i",
+    ),
+    // Arrow form: "Dosology: '10 od' → '10mg OD'".
+    /(?:dos(?:e|age|olog\w*)|posolog\w*)[^→\n]{0,60}→([^.;\n]*)/i,
+  ]
+
+  for (const pattern of patterns) {
+    const tail = text.match(pattern)?.[1]
+    if (!tail) continue
+    const dose = tail.match(DOSE_TOKEN)?.[0]
+    if (dose) return dose.replace(/\s+/g, "").toLowerCase()
+  }
+  return ""
+}
+
+/** Same strength written two ways — "500 MG" and "500mg" — is one strength. */
+function sameDose(a: string, b: string): boolean {
+  const norm = (v: string) => String(v || "").replace(/\s+/g, "").replace(",", ".").toLowerCase()
+  return !!norm(a) && norm(a) === norm(b)
+}
+
+/** "500mg" × 3/day → "1500mg/day". Returns "" when it cannot be computed. */
+function dailyTotalFrom(individualDose: string, frequencyPerDay: number): string {
+  if (!individualDose || !frequencyPerDay || frequencyPerDay <= 0) return ""
+  const parsed = individualDose.match(new RegExp(`^(\\d+(?:[.,]\\d+)?)\\s*(${DOSE_UNITS})$`, "i"))
+  if (!parsed) return ""
+  const total = parseFloat(parsed[1].replace(",", ".")) * frequencyPerDay
+  if (!isFinite(total)) return ""
+  return `${Number(total.toFixed(3))}${parsed[2]}/day`
+}
+
 function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStatus?: string) {
   const medications: any[] = []
   const labTests: any[] = []
   const imagingStudies: any[] = []
-  
+
+  // Current treatment is pushed first and therefore wins a clash: it is what
+  // the patient actually takes, at the dose they actually take it. A newly
+  // prescribed line carrying the same molecule by the same route is dropped
+  // and named in the logs, so a disappearing line can be traced.
+  const seenCompositions = new Set<string>()
+  const droppedDuplicates: string[] = []
+  const pushMedication = (entry: any) => {
+    for (const field of PLACEHOLDER_PRONE_FIELDS) entry[field] = stripPlaceholder(entry[field])
+    const key = prescriptionLineKey(entry)
+    if (key && seenCompositions.has(key)) {
+      droppedDuplicates.push(`${entry.name} (${entry.medication_type})`)
+      return
+    }
+    if (key) seenCompositions.add(key)
+    medications.push(entry)
+  }
+
   console.log("💊 ========== PRESCRIPTION EXTRACTION FROM DIAGNOSIS API ==========")
   console.log("📦 diagnosisData received:", {
     hasCurrentMedicationsValidated: !!diagnosisData?.currentMedicationsValidated,
@@ -950,25 +1145,47 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   validatedCurrentMeds.forEach((med: any, idx: number) => {
     // Extract detailed dosing information if available
     const dosingDetails = med.dosing_details || {}
-    const individualDose = dosingDetails.individual_dose || ''
     const frequencyPerDay = dosingDetails.frequency_per_day || 0
-    const dailyTotalDose = dosingDetails.daily_total_dose || ''
-    const ukFormat = med.posology || med.frequency || med.how_to_take || 'As prescribed'
-    
+    const individualDose = stripPlaceholder(dosingDetails.individual_dose)
+    let dailyTotalDose = stripPlaceholder(dosingDetails.daily_total_dose)
+    const ukFormat = stripPlaceholder(med.posology || med.frequency || med.how_to_take)
+
     // Build complete dosage string
-    let completeDosage = getString(med.dosage || '')
+    let completeDosage = stripPlaceholder(getString(med.dosage || ''))
     if (!completeDosage && individualDose) {
       completeDosage = individualDose
     }
-    
+
+    // The validator announced a dose correction in prose; apply it to the
+    // fields that are actually printed, so the line and its footnote agree.
+    let displayName = getString(med.name || med.medication_name || `Current medication ${idx + 1}`)
+    const correctedDose = correctedDoseFrom(med.validated_corrections)
+    if (correctedDose && !sameDose(correctedDose, completeDosage)) {
+      console.log(`💊 Dose correction applied to "${displayName}": ${completeDosage || '(none)'} → ${correctedDose}`)
+      displayName = DOSE_TOKEN.test(displayName)
+        ? displayName.replace(DOSE_TOKEN, correctedDose)
+        : `${displayName} ${correctedDose}`.trim()
+      completeDosage = correctedDose
+      // The old total was computed from the old strength; recompute it, and
+      // print nothing rather than a stale figure when it cannot be recomputed.
+      dailyTotalDose = dailyTotalFrom(correctedDose, frequencyPerDay)
+    }
+
+    // Same last resort as the newly-prescribed path: a current treatment the
+    // patient names as "Amlodipine 10mg" must not print with an empty strength
+    // just because the validator returned none.
+    if (!completeDosage) {
+      completeDosage = strengthFromName(displayName)
+    }
+
     // Build detailed frequency with total daily dose
     let detailedFrequency = ukFormat
-    if (frequencyPerDay > 0 && dailyTotalDose) {
+    if (ukFormat && frequencyPerDay > 0 && dailyTotalDose) {
       detailedFrequency = `${ukFormat} (${frequencyPerDay}×/jour, total: ${dailyTotalDose})`
     }
-    
-    medications.push({
-      name: getString(med.name || med.medication_name || `Current medication ${idx + 1}`),
+
+    pushMedication({
+      name: displayName,
       genericName: getString(med.dci || med.name || `Current medication ${idx + 1}`),
       dosage: completeDosage,
       form: getString(med.form || 'tablet'),
@@ -987,7 +1204,7 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
       pregnancyCategory: '',
       pregnancySafety: '',
       breastfeedingSafety: '',
-      completeLine: `${getString(med.name || med.medication_name)} ${completeDosage}\n${detailedFrequency}\n[Current treatment - AI validated]`
+      completeLine: `${displayName} ${completeDosage}\n${detailedFrequency}\n[Current treatment - AI validated]`
     })
   })
   
@@ -1006,10 +1223,10 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     console.log(`💊 Dermatology medications: ${topical.length} topical + ${oral.length} oral = ${allDermMeds.length} total`)
     
     allDermMeds.forEach((med: any, idx: number) => {
-      medications.push({
+      pushMedication({
         name: getString(med.medication || med.name || `Medication ${idx + 1}`),
         genericName: getString(med.dci || med.medication || `Medication ${idx + 1}`),
-        dosage: getString(med.dosage || ''),
+        dosage: getString(med.dosage || '') || strengthFromName(med.medication || med.name),
         form: getString(med.form || (topical.includes(med) ? 'topical' : 'tablet')),
         frequency: getString(med.application || med.frequency || 'As prescribed'),
         route: getString(med.route || (topical.includes(med) ? 'Topical' : 'Oral')),
@@ -1056,24 +1273,34 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   primaryTreatments.forEach((med: any, idx: number) => {
     // Extract detailed dosing information
     const dosingDetails = med.dosing_regimen?.adult || med.dosing_details || {}
-    const individualDose = dosingDetails.individual_dose || ''
+    const individualDose = stripPlaceholder(dosingDetails.individual_dose)
     const frequencyPerDay = dosingDetails.frequency_per_day || 0
-    const dailyTotalDose = dosingDetails.daily_total_dose || ''
-    const ukFormat = dosingDetails.en || dosingDetails.fr || dosingDetails.uk_format || med.how_to_take || 'As prescribed'
-    
+    const dailyTotalDose = stripPlaceholder(dosingDetails.daily_total_dose)
+    const ukFormat = stripPlaceholder(
+      dosingDetails.en || dosingDetails.fr || dosingDetails.uk_format || med.how_to_take,
+    )
+
     // Build complete dosage string with detailed information
-    let completeDosage = getString(med.dosage_strength || med.dosage || med.strength || '')
+    let completeDosage = stripPlaceholder(getString(med.dosage_strength || med.dosage || med.strength || ''))
     if (!completeDosage && individualDose) {
       completeDosage = individualDose
     }
-    
+    if (!completeDosage) {
+      // Last resort before printing a line with no strength: the name itself.
+      completeDosage = strengthFromName(med.nom || med.medication_name || med.drug || med.name)
+    }
+    // No guessing the strength out of the posology text: on a real line reading
+    // "QDS as needed... Do not exceed 4g in 24 hours", the first figure is the
+    // DAILY CEILING, and printing it as the unit dose would quadruple the dose.
+    // A missing strength stays missing, and stays visible.
+
     // Build detailed frequency with total daily dose
     let detailedFrequency = ukFormat
-    if (frequencyPerDay > 0 && dailyTotalDose) {
+    if (ukFormat && frequencyPerDay > 0 && dailyTotalDose) {
       detailedFrequency = `${ukFormat} (${frequencyPerDay}×/jour, total: ${dailyTotalDose})`
     }
-    
-    medications.push({
+
+    pushMedication({
       name: getString(med.nom || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
       genericName: getString(med.denominationCommune || med.dci || med.medication_dci || med.drug || med.medication_name || med.name || `Medication ${idx + 1}`),
       dosage: completeDosage,
@@ -1096,7 +1323,12 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
     })
   }
   
-  console.log(`✅ COMBINED PRESCRIPTION: ${validatedCurrentMeds.length} current + ${medications.length - validatedCurrentMeds.length} newly prescribed = ${medications.length} total medications`)
+  const keptCurrent = medications.filter(m => m.medication_type === 'current_continued').length
+  const keptNew = medications.length - keptCurrent
+  console.log(`✅ COMBINED PRESCRIPTION: ${keptCurrent} current + ${keptNew} newly prescribed = ${medications.length} total medications`)
+  if (droppedDuplicates.length > 0) {
+    console.log(`🔄 ${droppedDuplicates.length} duplicate line(s) removed from the prescription: ${droppedDuplicates.join(', ')}`)
+  }
 
   // =========== 2. LAB TESTS (COMMON FOR ALL CONSULTATION TYPES) ===========
   const extractedData = extractRealDataFromDiagnosis(diagnosisData, {}, {})
@@ -1980,7 +2212,39 @@ export async function POST(request: NextRequest) {
     
     // ===== ENRICHED GPT DATA PREPARATION =====
     const enrichedGPTData = prepareEnrichedGPTData(realData, anonymizedPatientData, clinicalData)
-    
+
+    // ===== EMERGENCY: THERE IS NO TREATMENT TO DESCRIBE =====
+    //
+    // An emergency case is sent to hospital and issues no prescription, no
+    // laboratory request and no imaging request — the report component drops
+    // those documents for exactly that reason.
+    //
+    // It could not drop the prose. This prompt asks the model to describe the
+    // therapeutic approach and to state how many medications and tests were
+    // ordered, so the narrative was written from a treatment that was about to
+    // be withdrawn: a report carrying nothing at all still announced four
+    // drugs "prescribed". Patching that afterwards, section by section, is
+    // repairing text that should never have been written.
+    //
+    // So the treatment is withdrawn HERE, before the model sees it. The
+    // narrative comes out right instead of coming out wrong and being
+    // corrected. The client-side replacement stays as the guarantee — a model
+    // can always disobey — but it should now have nothing left to do.
+    //
+    // Only the general flow can reach this today: dermatology and chronic
+    // disease do not emit a triage block, so `resolveTriage` returns
+    // "unassessed" there and this is inert. It is written flow-agnostic on
+    // purpose, so that adding triage to those endpoints makes them coherent
+    // without a second change here.
+    const reportTriage = resolveTriage(diagnosisData)
+    const isEmergencyReport = reportTriage.level === 'emergency'
+
+    if (isEmergencyReport) {
+      console.log('🚨 EMERGENCY case — generating the narrative without a treatment plan')
+      const withdrawn = withdrawTreatmentForEmergency(enrichedGPTData)
+      console.log(`   - Withdrawn: ${withdrawn.medications} medications, ${withdrawn.labTests} lab tests, ${withdrawn.imaging} imaging studies`)
+    }
+
     // ===== PRESCRIPTION EXTRACTION WITH TRANSLATION =====
     const { medications, labTests, imagingStudies } = extractPrescriptionsFromDiagnosisData(
       translatedDiagnosisData,
@@ -2076,8 +2340,10 @@ export async function POST(request: NextRequest) {
         userPrompt = createEnhancedUserPrompt(enrichedGPTData)
       }
       
-      const reportSystemPrompt = `${CRITICAL_RULES_BLOCK_NARRATIVE}
+      const emergencyDirective = isEmergencyReport ? EMERGENCY_NARRATIVE_DIRECTIVE : ''
 
+      const reportSystemPrompt = `${CRITICAL_RULES_BLOCK_NARRATIVE}
+${emergencyDirective}
 ${systemPrompt}
 
 ANTI-HALLUCINATION RULE (STRICT): Stay strictly within the provided diagnostic analysis. Never invent diagnoses, drugs, doses, lab values or findings absent from the input. If a section has no source data, write a short factual placeholder rather than fabricating content.`
