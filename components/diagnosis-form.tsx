@@ -44,6 +44,53 @@ import {
 import { getTranslation, Language } from "@/lib/translations"
 import PatientAdviceCarousel from './patient-advice-carousel'
 
+// ============================================================================
+// Waiting for the analysis, and surviving a link that drops mid-wait
+// ============================================================================
+//
+// /api/openai-diagnosis runs 90-150s on a normal case. The doctor waits on a
+// phone, on mobile data, inside an iframe on tibok.mu, under a live video
+// pane. That link drops — and when it does the server keeps working and
+// answers into a socket nobody is listening on.
+//
+// 18/08, consultation 05dc475f: the function finished in 92.5s and returned a
+// complete analysis. The phone noticed nothing until 354s, when the OS gave up
+// on the connection. Six minutes of spinner, and the analysis discarded.
+//
+// So: bound the wait, and when it fails ask the server for the result it
+// already has instead of recomputing (or inventing) one.
+
+/**
+ * How long to wait on a single request before treating the connection as lost.
+ * The route is capped at 600s server-side, but p95 is ~150s — waiting past
+ * this only delays a recovery that is going to succeed anyway.
+ */
+const DIAGNOSIS_TIMEOUT_MS = 210_000
+
+/**
+ * How long to keep asking for a lost result. Sized to cover a call that was
+ * still running when the link went down, not just one that had finished.
+ */
+const RECOVERY_WINDOW_MS = 150_000
+const RECOVERY_POLL_MS = 5_000
+
+/** An answer from the server, as opposed to never reaching it. The difference
+ *  decides whether recovering and retrying is worth anything: a 400 will say
+ *  the same thing twice, a dropped connection will not. */
+class DiagnosisHttpError extends Error {
+  constructor(public status: number, message: string) {
+    super(message)
+    this.name = 'DiagnosisHttpError'
+  }
+}
+
+/** Worth recovering/retrying: the request never got an answer, or the answer
+ *  was a server-side failure that a second attempt could survive. */
+function isWorthRecovering(error: unknown): boolean {
+  if (error instanceof DiagnosisHttpError) return error.status >= 500
+  return true
+}
+
 interface DiagnosisFormProps {
  patientData: any
  clinicalData: any
@@ -509,6 +556,11 @@ export default function DiagnosisForm({
  const handoffTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
  const handoffScheduledRef = useRef(false)
 
+ // True from the moment the request is known lost until the attempt resolves.
+ // A ref, not state: the scripted progress timers read it when they fire, and
+ // must not keep overwriting the recovery message with a normal-progress one.
+ const recoveringRef = useRef(false)
+
  // ========== CRITICAL FIX: Add state for prescription data ==========
  // These fields MUST be saved to localStorage so they persist across step changes
  const [currentMedicationsValidated, setCurrentMedicationsValidated] = useState<any[]>([])
@@ -705,20 +757,34 @@ export default function DiagnosisForm({
  setAnalysisProgress(0)
  let progress = 0
  
+ // Timed to the call this screen is actually waiting on. The old timeline
+ // ran out at 50 seconds and left the bar pinned at 95% on "Finalizing
+ // analysis and documents…" — so a doctor at 5:50 was reading a message
+ // written for the 50th second, with no way to tell work from a hang.
+ // A normal case finishes around 90-150s, so the bar keeps moving that far
+ // and says plainly when it is running long. It never reaches 100% here:
+ // only the real result completes it.
  const messages = [
- { time: 0, msg: "Connecting to IA by Tibok...", progress: 5 },
- { time: 2000, msg: "Analyzing symptoms and medical history...", progress: 15 },
- { time: 5000, msg: "Identifying clinical syndrome...", progress: 25 },
- { time: 10000, msg: "Formulating diagnostic hypotheses...", progress: 40 },
- { time: 20000, msg: "Developing investigation strategy...", progress: 60 },
- { time: 30000, msg: "Generating personalized treatment plan...", progress: 75 },
- { time: 40000, msg: "Adapting to Mauritian healthcare context...", progress: 85 },
- { time: 50000, msg: "Finalizing analysis and documents...", progress: 95 }
+ { time: 0, msg: "Connecting to IA by Tibok...", progress: 4 },
+ { time: 2000, msg: "Analyzing symptoms and medical history...", progress: 10 },
+ { time: 5000, msg: "Identifying clinical syndrome...", progress: 18 },
+ { time: 12000, msg: "Formulating diagnostic hypotheses...", progress: 28 },
+ { time: 22000, msg: "Searching the clinical guidelines...", progress: 38 },
+ { time: 35000, msg: "Developing investigation strategy...", progress: 48 },
+ { time: 50000, msg: "Generating personalized treatment plan...", progress: 58 },
+ { time: 70000, msg: "Adapting to Mauritian healthcare context...", progress: 66 },
+ { time: 90000, msg: "Checking prescriptions and interactions...", progress: 74 },
+ { time: 110000, msg: "Verifying citations against the guidelines...", progress: 80 },
+ { time: 130000, msg: "Finalizing analysis and documents...", progress: 86 },
+ { time: 160000, msg: "Still working — a detailed case can take up to 3 minutes...", progress: 90 },
+ { time: 200000, msg: "Longer than usual. The analysis is still running, nothing is lost...", progress: 94 }
  ]
- 
+
  const timers = messages.map(({ time, msg, progress }) => {
  return setTimeout(() => {
- if (loading) {
+ // Once the connection has dropped, this timeline is no longer telling
+ // the truth — the recovery path owns the message from that point on.
+ if (loading && !recoveringRef.current) {
  setProgressMessage(msg)
  setAnalysisProgress(progress)
  }
@@ -873,6 +939,128 @@ export default function DiagnosisForm({
  
  saveData()
  }, [diagnosis, diagnosticReasoning, expertAnalysis, mauritianDocuments, documentsGenerated, currentMedicationsValidated, medications, combinedPrescription, evidenceReferences, ragUsed, ragMetadata, triageAssessment])
+
+ /**
+  * The key both halves of a recovery agree on.
+  *
+  * Resolved once per attempt and reused, so the poll asks for the same
+  * consultation the request was filed under even if the real UUID lands from
+  * TIBOK while the call is in flight.
+  */
+ const resolveConsultationKey = (): string | null => {
+   const fromProp = String(consultationId || '').trim()
+   if (fromProp) return fromProp
+   try {
+     const fromService = consultationDataService.getCurrentConsultationId()
+     const cleaned = String(fromService || '').trim()
+     return cleaned || null
+   } catch {
+     return null
+   }
+ }
+
+ /**
+  * Identifies one run of the analysis.
+  *
+  * The consultation id alone is not enough to key a recovery: a doctor can
+  * edit the clinical data and regenerate, and a request that died before ever
+  * reaching the server would then recover the *previous* run's analysis into
+  * the record. The server stamps its cached result with this, and we refuse
+  * anything carrying a different one.
+  */
+ const newResultToken = (): string => {
+   try {
+     if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+       return crypto.randomUUID()
+     }
+   } catch { /* fall through */ }
+   return `run-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+ }
+
+ /** One attempt at the diagnosis, bounded in time. Throws on anything that is
+  *  not a usable response. */
+ const postDiagnosis = async (requestBody: any): Promise<any> => {
+   const controller = new AbortController()
+   // Without this the fetch hangs until the operating system gives up on the
+   // socket — which on 18/08 took very nearly six minutes.
+   const timer = setTimeout(() => controller.abort(), DIAGNOSIS_TIMEOUT_MS)
+
+   try {
+     const response = await fetch("/api/openai-diagnosis", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify(requestBody),
+       signal: controller.signal,
+     })
+
+     console.log("📨 Response status:", response.status)
+
+     if (!response.ok) {
+       const errorText = await response.text().catch(() => '')
+       console.error('❌ API Error:', errorText)
+       throw new DiagnosisHttpError(
+         response.status,
+         `API Error ${response.status}: ${errorText.substring(0, 200)}`,
+       )
+     }
+
+     return await response.json()
+   } finally {
+     clearTimeout(timer)
+   }
+ }
+
+ /**
+  * Ask the server for a result our own request lost.
+  *
+  * The route caches its analysis before answering, so a response that never
+  * arrived is not work that never happened. Polls until the window closes;
+  * returns null if there is genuinely nothing to recover.
+  */
+ const recoverCachedDiagnosis = async (
+   key: string | null,
+   token: string,
+ ): Promise<any | null> => {
+   if (!key) {
+     console.warn('♻️ No consultation id — cannot recover a lost analysis')
+     return null
+   }
+
+   const deadline = Date.now() + RECOVERY_WINDOW_MS
+   let attempt = 0
+
+   while (Date.now() < deadline) {
+     attempt++
+     const secondsLeft = Math.max(0, Math.round((deadline - Date.now()) / 1000))
+     setProgressMessage(
+       `Connection interrupted — recovering the analysis from the server (${secondsLeft}s)…`,
+     )
+
+     try {
+       const response = await fetch(
+         `/api/ai-result?consultationId=${encodeURIComponent(key)}&step=diagnosis` +
+           `&token=${encodeURIComponent(token)}`,
+         { cache: 'no-store' },
+       )
+       if (response.ok) {
+         const body = await response.json()
+         if (body?.found && body?.payload) {
+           console.log(`♻️ Recovered the diagnosis from the server on poll #${attempt}`)
+           return body.payload
+         }
+       }
+     } catch (pollError) {
+       // The link may still be down. Keep asking until the window closes —
+       // giving up on the first failed poll would waste the whole point.
+       console.warn(`♻️ Recovery poll #${attempt} failed:`, pollError)
+     }
+
+     await new Promise((resolve) => setTimeout(resolve, RECOVERY_POLL_MS))
+   }
+
+   console.warn('♻️ Recovery window closed with nothing to recover')
+   return null
+ }
 
  // Test API function
  const testAPI = async () => {
@@ -1083,6 +1271,12 @@ export default function DiagnosisForm({
  setLoading(true)
  setError(null)
  setDocumentsGenerated(false)
+ recoveringRef.current = false
+
+ // One key and one token for the whole attempt, resolved before the request
+ // leaves, so a recovery asks for exactly the run that was lost.
+ const consultationKey = resolveConsultationKey()
+ const resultToken = newResultToken()
 
  const aiCallDone = markAiCallStart()
  try {
@@ -1105,6 +1299,10 @@ export default function DiagnosisForm({
  questionsData: effectiveQuestionsData?.responses || [],
  doctorNotes, // ⚕️ Hypothèses et notes du médecin
  language,
+ // What the server files its result under, so we can ask for it back if
+ // this response never reaches us.
+ consultationId: consultationKey,
+ resultToken,
  }
  
  // ========== DEBUG LOGGING FOR API REQUEST ==========
@@ -1112,23 +1310,40 @@ export default function DiagnosisForm({
  console.log('   📋 requestBody.patientData.currentMedications:', requestBody.patientData?.currentMedications)
  console.log('   📋 requestBody.patientData.current_medications:', requestBody.patientData?.current_medications)
  
- const response = await fetch("/api/openai-diagnosis", {
- method: "POST",
- headers: {
- "Content-Type": "application/json",
- },
- body: JSON.stringify(requestBody),
- })
+ let data: any
+ try {
+ data = await postDiagnosis(requestBody)
+ } catch (transportError) {
+ if (!isWorthRecovering(transportError)) throw transportError
 
- console.log("📨 Response status:", response.status)
+ // The request died on the way. It does not follow that the work did:
+ // the route runs 90-150s and answers into whatever socket is left. Ask
+ // for the result before spending another two minutes recomputing it.
+ console.warn('⚠️ Diagnosis request lost — attempting recovery:', transportError)
+ recoveringRef.current = true
 
- if (!response.ok) {
- const errorText = await response.text()
- console.error('❌ API Error:', errorText)
- throw new Error(`API Error ${response.status}: ${errorText.substring(0, 100)}`)
+ data = await recoverCachedDiagnosis(consultationKey, resultToken)
+
+ if (!data) {
+ // Nothing cached: the call never got far enough, so run it again.
+ // One retry, not a loop — a second failure belongs on screen.
+ console.log('🔁 Nothing to recover — running the analysis once more')
+ setProgressMessage("Retrying the analysis…")
+ try {
+ data = await postDiagnosis(requestBody)
+ } catch (retryError) {
+ if (!isWorthRecovering(retryError)) throw retryError
+ // The retry may well have completed server-side before the link
+ // dropped again. Same question, one last time.
+ console.warn('⚠️ Retry also lost — final recovery attempt:', retryError)
+ data = await recoverCachedDiagnosis(consultationKey, resultToken)
+ if (!data) throw retryError
+ }
  }
 
- const data = await response.json()
+ recoveringRef.current = false
+ }
+
  console.log("✅ API Response received:", {
  success: data.success,
  hasDiagnosis: !!data.diagnosis,
@@ -1186,16 +1401,30 @@ export default function DiagnosisForm({
  } catch (err) {
  console.error("❌ Generation error:", err)
 
- console.log("⚠️ Generating fallback data...")
- const fallbackData = generateCompleteFallback()
+ // No invented diagnosis. Until 18/08 this catch silently substituted a
+ // placeholder — "Clinical syndrome", ICD-10 R53, a differential of "Viral
+ // syndrome 40%", a Paracetamol line and "Dr. EXPERT PHYSICIAN" — with
+ // nothing on screen to say the real analysis had failed. The doctor saw a
+ // normal diagnosis page and could sign and send it. On 18/08 the genuine
+ // analysis (dengue fever, six labs, an imaging study) existed on the
+ // server at that very moment.
+ //
+ // An honest error the doctor can retry is worth more than a filled screen.
+ const detail = err instanceof Error ? err.message : String(err)
+ const lostConnection =
+ !(err instanceof DiagnosisHttpError) &&
+ /abort|failed to fetch|networkerror|load failed/i.test(detail)
+
+ recoveringRef.current = false
+ setDiagnosis(null)
+ setDocumentsGenerated(false)
+ setError(
+ lostConnection
+ ? "The connection was lost while the analysis was running, and the result could not be recovered. Nothing has been saved and nothing has been sent — check your connection and press Try Again."
+ : detail,
+ )
+ setAnalysisProgress(0)
  setLoading(false)
- // Set diagnosis immediately to prevent error page flash
- // (animateProgressiveAppearance sets it after 4s delay via setTimeout,
- // which would leave diagnosis=null and trigger the error screen)
- setDiagnosis(fallbackData.diagnosis)
- setDiagnosticReasoning(fallbackData.diagnosticReasoning)
- setExpertAnalysis(fallbackData.expertAnalysis)
- animateProgressiveAppearance(fallbackData)
 
  } finally {
   // Whatever happened, the clock must stop showing "AI working".
@@ -1228,124 +1457,11 @@ export default function DiagnosisForm({
  generateCompleteDiagnosisAndDocuments()
  }
 
- const generateCompleteFallback = () => {
- console.log(' Generating fallback diagnosis...')
- 
- const fallbackDiagnosis = {
- primary: {
- condition: `Clinical syndrome - ${clinicalData?.chiefComplaint || "Medical consultation"}`,
- icd10: "R53",
- confidence: 70,
- severity: "moderate",
- detailedAnalysis: "Analysis based on presented symptoms requiring further investigation",
- clinicalRationale: `Symptoms: ${clinicalData?.chiefComplaint}. Requires thorough history and clinical examination`,
- prognosis: "Favorable evolution expected with appropriate management",
- diagnosticCriteriaMet: ["Compatible symptoms", "Suggestive clinical context"],
- certaintyLevel: "Moderate"
- },
- differential: [
- {
- condition: "Viral syndrome",
- probability: 40,
- reasoning: "Common cause of non-specific symptoms",
- discriminating_test: "Viral serology"
- }
- ]
- }
-
- const fallbackDiagnosticReasoning = {
- key_findings: {
- from_history: "Basic clinical data available",
- from_symptoms: clinicalData?.chiefComplaint || "Symptoms to be specified",
- from_ai_questions: "AI questionnaire responses",
- red_flags: "No alarm signs identified"
- },
- syndrome_identification: {
- clinical_syndrome: "Syndrome to be specified",
- supporting_features: ["Reported symptoms"],
- inconsistent_features: ["To be evaluated"]
- }
- }
-
- const fallbackExpertAnalysis = {
- expert_investigations: {
- investigation_strategy: {
- diagnostic_approach: "Systematic diagnostic approach",
- tests_by_purpose: {
- to_confirm_primary: [],
- to_exclude_differentials: [],
- to_assess_severity: []
- },
- test_sequence: {
- immediate: "Urgent tests if necessary",
- urgent: "Workup within 24-48h",
- routine: "Follow-up according to evolution"
- }
- },
- immediate_priority: [
- {
- category: "biology",
- examination: "Complete blood count + CRP",
- specific_indication: "Search for inflammatory syndrome",
- urgency: "urgent",
- mauritius_availability: {
- where: "C-Lab, Green Cross",
- cost: "Rs 600-1200",
- turnaround: "2-6h urgent"
- }
- }
- ],
- tests_by_purpose: {},
- test_sequence: {}
- },
- expert_therapeutics: {
- primary_treatments: [
- {
- medication_dci: "Paracetamol",
- therapeutic_class: "Analgesic-Antipyretic",
- precise_indication: "Symptomatic treatment pain/fever",
- mechanism: "Inhibition of prostaglandin synthesis at central level",
- dosing_regimen: {
- adult: { en: "1g x 3-4/day" }
- },
- mauritius_availability: {
- public_free: true,
- estimated_cost: "Rs 50-100"
- }
- }
- ]
- }
- }
-
- const dateFormat = new Date().toLocaleDateString("en-US")
- 
- const fallbackDocuments = {
- consultation: {
- header: {
- title: "CONSULTATION REPORT",
- date: dateFormat,
- physician: "Dr. EXPERT PHYSICIAN"
- },
- patient: {
- firstName: patientData?.firstName || "Patient",
- lastName: patientData?.lastName || "",
- age: `${patientData?.age || "?"} years`
- },
- diagnostic_reasoning: fallbackDiagnosticReasoning,
- clinical_summary: {
- chief_complaint: clinicalData?.chiefComplaint || "To be specified",
- diagnosis: fallbackDiagnosis.primary.condition
- }
- }
- }
-
- return {
- diagnosis: fallbackDiagnosis,
- diagnosticReasoning: fallbackDiagnosticReasoning,
- expertAnalysis: fallbackExpertAnalysis,
- mauritianDocuments: fallbackDocuments
- }
- }
+ // generateCompleteFallback lived here. It manufactured a plausible-looking
+ // diagnosis whenever the API call failed — placeholder condition, ICD-10 R53,
+ // a Paracetamol line, "Dr. EXPERT PHYSICIAN" — and the doctor was never told.
+ // Removed rather than left unused: a signed medical record must contain what
+ // the analysis actually produced, or say plainly that it produced nothing.
 
  const sections = [
  { id: "reasoning", title: "Diagnostic Reasoning", icon: Brain, status: sectionStatus.reasoning },
