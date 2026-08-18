@@ -22,6 +22,10 @@ const VALID_KINDS = new Set([
   "api_error",
   "slow_request",
   "boot_stall",
+  // A gate refused to proceed. Nothing threw, so nothing else would have
+  // recorded it — and a consultation that cannot finish is the incident that
+  // matters most.
+  "consultation_blocked",
 ])
 
 const MAX_BREADCRUMBS = 50

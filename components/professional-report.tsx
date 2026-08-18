@@ -43,6 +43,8 @@ import {
 } from '@/lib/prescription-review'
 import EvidenceReferencesSection from './rag/evidence-references-section'
 import { renderWithCitations, aggregateReferences, SectionBibliography } from './rag/citation-renderer'
+import { readLocalIdentity, resolveIdentity } from '@/lib/consultation-identity'
+import { reportBlocking } from '@/lib/blackbox'
 
 // ==================== HELPER FUNCTIONS ====================
 // Helper function to safely handle DCI fields
@@ -1944,8 +1946,20 @@ const handleAIAddImaging = useCallback((exam: any) => {
 // `silent` suppresses the toast: an autosave firing every few seconds must not
 // stack toasts over the report the doctor is reading.
 const persistReport = useCallback(async (silent = false) => {
- const params = new URLSearchParams(window.location.search)
- const consultationId = params.get('consultationId')
+ // The same resolver the send uses — not the URL.
+ //
+ // This read `params.get('consultationId')` alone, and the workflow page is
+ // reached through a `router.push('/')` that strips the query string. So on
+ // every real TIBOK consultation there was no id here, the autosave returned
+ // immediately, and `consultation_drafts` stayed empty — for months, silently,
+ // while the interface said the report was being saved. A consultation lived
+ // in one browser tab until the doctor pressed send, and if the send failed
+ // there was nothing left anywhere.
+ // Resolved, not just read: a draft row created without the patient and
+ // doctor ids is inserted with `patient_id: 'unknown'` by the save route,
+ // which orphans it from the consultation it belongs to.
+ const identity = await resolveIdentity()
+ const { consultationId } = identity
 
  if (!consultationId || !report) {
  // Nothing can be written without a consultation to write it against. This
@@ -1971,6 +1985,8 @@ const persistReport = useCallback(async (silent = false) => {
  headers: { 'Content-Type': 'application/json' },
  body: JSON.stringify({
  consultationId,
+ patientId: identity.patientId,
+ doctorId: identity.doctorId,
  reportContent: report,
  doctorInfo,
  modifiedSections: Array.from(modifiedSections),
@@ -2030,7 +2046,7 @@ const handleManualSave = useCallback(() => persistReport(false), [persistReport]
 // to save it to. Tracked so the indicator can say that plainly instead of
 // counting down to a save that will never happen.
 const canPersist = typeof window !== 'undefined'
-  && !!new URLSearchParams(window.location.search).get('consultationId')
+  && !!readLocalIdentity().consultationId
 
 const autosaveTimerRef = useRef<NodeJS.Timeout>()
 useEffect(() => {
@@ -2140,10 +2156,12 @@ useEffect(() => {
 
 // ==================== LOAD DRAFT FROM DATABASE ====================
 useEffect(() => {
- // Prevent multiple loads
- const params = new URLSearchParams(window.location.search)
- const consultationId = params.get('consultationId')
- 
+ // Same resolver as the save. Reading the URL alone meant a draft written
+ // under a consultation id was never read back under that id, so a doctor
+ // returning to a consultation got a freshly generated report instead of the
+ // one they had already corrected.
+ const { consultationId } = readLocalIdentity()
+
  if (!consultationId) {
  setIsLoadingFromDb(false)
  setDbCheckComplete(true)
@@ -2155,7 +2173,7 @@ useEffect(() => {
  patientData.name !== '1 janvier 1970' &&
  !patientData.name?.includes('1970')
 
- console.log('📋 No consultationId in URL, checking for valid patient data:', hasValidPatientData)
+ console.log('📋 No consultation id resolved, checking for valid patient data:', hasValidPatientData)
  setShouldGenerateReport(hasValidPatientData)
  return
  }
@@ -4084,7 +4102,20 @@ const toggleFollowUpType = useCallback((type: string) => {
 }, [])
 
 // ==================== SEND DOCUMENTS ====================
+//
+// The spinner is switched on here and off in the `finally` at the very bottom,
+// and nowhere else.
+//
+// It used to be switched off by hand on each exit path, and six of them forgot
+// — report not validated, doctor name incomplete, chief complaint missing,
+// diagnosis missing, identifiers missing, save refused. Each left the button
+// disabled and "Sending documents…" turning for as long as the doctor cared to
+// wait. On 17/08/2026 one of them ran on a phone, the toast that explained it
+// vanished behind the video pane after a few seconds, and a doctor watched the
+// spinner for fifteen minutes before closing the tab. The report had never
+// been written anywhere, and the patient had paid.
 const handleSendDocuments = async () => {
+ try {
  console.log('📤 Starting handleSendDocuments...')
  setIsSendingDocuments(true)
 
@@ -4264,64 +4295,64 @@ const handleSendDocuments = async () => {
  description: "Preparing documents for patient dashboard"
  })
  
- // Get IDs from multiple sources with priority: props > consultationDataService > sessionStorage > URL params
  const params = new URLSearchParams(window.location.search)
 
- // Get consultationId: props > consultationDataService > sessionStorage > URL
- let consultationId = propConsultationId || consultationDataService.getCurrentConsultationId()
- if (!consultationId) {
-   const storedData = sessionStorage.getItem('consultationPatientData')
-   if (storedData) {
-     try {
-       const parsed = JSON.parse(storedData)
-       consultationId = parsed.consultationId
-     } catch (e) { /* ignore */ }
-   }
- }
- if (!consultationId) {
-   consultationId = params.get('consultationId')
- }
+ // Who this consultation belongs to.
+ //
+ // One resolver, shared with the autosave, and it asks the database for
+ // anything the browser lost. It used to be resolved here by hand from
+ // props, sessionStorage and the URL — and when that chain broke on a phone
+ // the send refused, with a message naming three internal identifiers, while
+ // the `consultations` row had carried the two missing ones since before the
+ // consultation began. The doctor is not asked and is not told: there is
+ // nothing they could do that the app cannot do for them.
+ const identity = await resolveIdentity({
+   consultationId: propConsultationId,
+   patientId: propPatientId || patientData?.id || patientData?.patientId,
+   doctorId: propDoctorId,
+ })
+ const consultationId = identity.consultationId
+ const patientId = identity.patientId
+ const doctorId = identity.doctorId
 
- // Get patientId: props > patientData > sessionStorage > URL
- let patientId = propPatientId || patientData?.id || patientData?.patientId
- if (!patientId) {
-   const storedData = sessionStorage.getItem('consultationPatientData')
-   if (storedData) {
-     try {
-       const parsed = JSON.parse(storedData)
-       patientId = parsed.patientId
-     } catch (e) { /* ignore */ }
-   }
- }
- if (!patientId) {
-   patientId = params.get('patientId')
- }
-
- // Get doctorId: props > sessionStorage > URL
- let doctorId = propDoctorId
- if (!doctorId) {
-   const storedData = sessionStorage.getItem('consultationPatientData')
-   if (storedData) {
-     try {
-       const parsed = JSON.parse(storedData)
-       doctorId = parsed.doctorId
-     } catch (e) { /* ignore */ }
-   }
- }
- if (!doctorId) {
-   doctorId = params.get('doctorId')
- }
-
- console.log('📍 IDs found:', { consultationId, patientId, doctorId, sources: { props: { propConsultationId, propPatientId, propDoctorId }, service: consultationDataService.getCurrentConsultationId() } })
+ console.log('📍 IDs resolved:', {
+   consultationId: !!consultationId,
+   patientId: !!patientId,
+   doctorId: !!doctorId,
+ })
 
  if (!consultationId || !patientId || !doctorId) {
- console.log('❌ Missing required IDs')
+ console.log('❌ Missing required IDs after server lookup')
+ reportBlocking(
+   'identity_unresolved',
+   `send blocked: consultation=${!!consultationId} patient=${!!patientId} doctor=${!!doctorId}`,
+ )
  toast({
- title: "Error",
- description: `Missing IDs - Consultation: ${consultationId}, Patient: ${patientId}, Doctor: ${doctorId}`,
+ title: "Impossible d'envoyer les documents",
+ description: "Les informations de la consultation n'ont pas pu être retrouvées. Le rapport a été enregistré — prévenez le support avant de fermer.",
  variant: "destructive"
  })
+ // Losing the send must not also lose the work. The report is already on
+ // the server from the line below; this only makes sure a late failure
+ // cannot leave it behind.
+ void persistReport(true)
  return
+ }
+
+ // Written down before anything can go wrong with sending it.
+ //
+ // The order used to be the other way round: the report reached the server
+ // only as a consequence of a successful send. Anything that failed before
+ // that — a missing identifier, a refused save, a dropped connection — left
+ // the entire consultation in one browser tab and nowhere else. Awaited so
+ // it is genuinely on the server before the send is attempted, and
+ // deliberately not fatal: a draft that fails to save is a reason to warn,
+ // never a reason to abandon a send that might still succeed.
+ try {
+   await persistReport(true)
+   console.log('💾 Report secured before sending')
+ } catch (persistError) {
+   console.warn('⚠️ Pre-send save failed, continuing with the send:', persistError)
  }
 
  // Prepare doctor info with fallbacks
@@ -4969,12 +5000,16 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  
  } catch (error) {
  console.error("❌ Error in handleSendDocuments:", error)
- setIsSendingDocuments(false)
  toast({
  title: "Error sending documents",
  description: error instanceof Error ? error.message : "An error occurred while sending documents",
  variant: "destructive"
  })
+ }
+ } finally {
+ // The one place the spinner goes off. Whatever happened above — a return,
+ // a throw, a validation refusal — the doctor gets their button back.
+ setIsSendingDocuments(false)
  }
 }
  const showSuccessModal = () => {

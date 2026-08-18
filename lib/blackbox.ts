@@ -38,6 +38,11 @@ export type IncidentKind =
   | "api_error"
   | "slow_request"
   | "boot_stall"
+  // Nothing crashed and no request failed — the app declined to proceed. This
+  // is the shape of the 17/08 loss: a validation gate refused the send, said
+  // so in a toast that vanished, and left no trace anywhere. A consultation
+  // that cannot finish is an incident whether or not anything threw.
+  | "consultation_blocked"
 
 const MAX_BREADCRUMBS = 50
 const MAX_REPORTS_PER_PAGE = 5
@@ -521,6 +526,25 @@ export function installBlackBox(): void {
   } catch {
     /* a recorder that cannot install must still not break the app */
   }
+}
+
+/**
+ * The app has refused to complete something the doctor asked for.
+ *
+ * Distinct from an error: there is no exception, no failed request, nothing
+ * for the automatic instrumentation to notice. The only witness is the code
+ * that decided to stop, so it has to say so itself.
+ *
+ * `code` is a short stable slug ("identity_unresolved") so the same block can
+ * be counted across consultations; `detail` carries the specifics.
+ */
+export function reportBlocking(code: string, detail: string): void {
+  addBreadcrumb("error", `blocked: ${code}`)
+  report({
+    kind: "consultation_blocked",
+    severity: "error",
+    message: `${code}: ${detail}`.slice(0, 1000),
+  })
 }
 
 /** Called by the error boundary when React unmounts the tree. */
