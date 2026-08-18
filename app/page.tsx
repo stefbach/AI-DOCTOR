@@ -115,6 +115,9 @@ export default function MedicalAIExpert() {
     }).catch(() => {})
   }, [currentDoctorId, currentPatientId])
 
+  /** Where the doctor was, per consultation. See the restore effect below. */
+  const STEP_KEY = 'consultation-step-'
+
   // Replaying the same consultation on a test bench inherits the clock from the
   // previous run, because it is meant to survive a reload. `?resetTimer=1`
   // starts it over; done once per page load, not on every step.
@@ -130,9 +133,24 @@ export default function MedicalAIExpert() {
 
     if (!timerResetRef.current) {
       timerResetRef.current = true
-      if (new URLSearchParams(window.location.search).get('resetTimer') === '1') {
+      const params = new URLSearchParams(window.location.search)
+      // `?fresh=1` restarts a test consultation from nothing: the clock AND
+      // the saved position. `?resetTimer=1` is kept for the clock alone.
+      // Both exist for the test bench, where the same consultation is replayed
+      // over and over and inherits its own previous run — which is right in
+      // production and useless here.
+      const fresh = params.get('fresh') === '1'
+      if (fresh || params.get('resetTimer') === '1') {
         console.log('⏱️ Timer reset requested for', consultationId)
         clearState(consultationId)
+      }
+      if (fresh) {
+        try {
+          localStorage.removeItem(STEP_KEY + consultationId)
+          console.log('↩️ Saved position cleared for', consultationId)
+        } catch {
+          // Nothing to do: an unreadable store has nothing to clear.
+        }
       }
     }
 
@@ -590,7 +608,6 @@ export default function MedicalAIExpert() {
   // and only restored when the step it names has data behind it: a saved
   // index of 4 on a consultation whose clinical data was cleared would open
   // the medical record on nothing.
-  const STEP_KEY = 'consultation-step-'
   const stepRestoredRef = useRef(false)
 
   useEffect(() => {
