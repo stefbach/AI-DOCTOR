@@ -5247,13 +5247,24 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  const showSuccessModal = () => {
  const modalContainer = document.createElement('div')
  modalContainer.id = 'success-modal'
+ // Top-anchored and scrollable, not vertically centred.
+ //
+ // Centred, on a phone inside the TIBOK iframe under the video pane, this
+ // panel is taller than the sliver of viewport left to it: the heading is
+ // pushed up behind the video and the close button below the fold. The
+ // doctor sees a fragment of a success message and no way to dismiss it —
+ // the same failure already fixed on the KYC and review dialogs.
  modalContainer.style.cssText = `
  position: fixed;
  inset: 0;
  background: rgba(0, 0, 0, 0.5);
  display: flex;
- align-items: center;
+ align-items: flex-start;
  justify-content: center;
+ overflow-y: auto;
+ -webkit-overflow-scrolling: touch;
+ overscroll-behavior: contain;
+ padding: 0.75rem;
  z-index: 9999;
  animation: fadeIn 0.3s ease-out;
  `
@@ -5261,13 +5272,15 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  const modalContent = document.createElement('div')
  modalContent.style.cssText = `
  background: white;
- padding: 2rem;
+ padding: 1.25rem;
  border-radius: 1rem;
+ width: 100%;
  max-width: 500px;
- margin: 1rem;
+ margin: 0.5rem 0;
  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
  animation: slideUp 0.3s ease-out;
  position: relative;
+ box-sizing: border-box;
  `
 
  modalContent.innerHTML = `
@@ -5292,22 +5305,22 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  </button>
  
  <div style="text-align: center;">
- <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: scaleIn 0.5s ease-out;">
+ <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; animation: scaleIn 0.5s ease-out;">
  <svg width="40" height="40" fill="white" viewBox="0 0 20 20">
  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
  </svg>
  </div>
  
- <h2 style="font-size: 1.5rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
+ <h2 style="font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem;">
  Documents envoyés avec succès!
  </h2>
  
- <p style="color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5;">
+ <p style="color: #6b7280; margin-bottom: 1rem; line-height: 1.5; font-size: 0.875rem;">
  Les documents médicaux ont été transmis au tableau de bord du patient.<br>
  Le patient recevra une notification pour valider son ordonnance.
  </p>
  
- <div style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e7eb;">
+ <div style="background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; border: 1px solid #e5e7eb;">
  <p style="font-size: 0.875rem; color: #4b5563; margin: 0 0 0.5rem 0;">
  <strong>Prochaines étapes:</strong>
  </p>
@@ -5318,12 +5331,12 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  </ul>
  </div>
  
- <div style="background: #d1fae5; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #a7f3d0;">
+ <div style="background: #d1fae5; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; border: 1px solid #a7f3d0;">
  <p style="font-size: 0.875rem; color: #065f46; margin: 0; font-weight: 500;">
  ✅ Tous les documents ont été envoyés avec succès
  </p>
- <p style="font-size: 0.75rem; color: #047857; margin: 0.25rem 0 0 0;">
- Consultation ID: ${reportId}
+ <p style="font-size: 0.75rem; color: #047857; margin: 0.25rem 0 0 0; word-break: break-all;">
+ Référence consultation : ${readLocalIdentity().consultationId || 'non disponible'}
  </p>
  </div>
  
