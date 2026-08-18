@@ -24,6 +24,7 @@
 //      anything.
 
 import * as React from "react"
+import { createPortal } from "react-dom"
 import { AlertTriangle, Loader2, RefreshCw, Save, X, Check } from "lucide-react"
 
 export type SendFailureKind =
@@ -122,6 +123,10 @@ export default function SendFailureDialog({
   const [saving, setSaving] = React.useState(false)
   const [saved, setSaved] = React.useState(false)
 
+  // document does not exist while rendering on the server.
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => setMounted(true), [])
+
   // A new failure is a new conversation: the previous outcome must not carry
   // over and tell the doctor a fresh report is already safe.
   React.useEffect(() => {
@@ -130,7 +135,7 @@ export default function SendFailureDialog({
     setSaving(false)
   }, [failure])
 
-  if (!failure) return null
+  if (!failure || !mounted || typeof document === "undefined") return null
 
   const copy = COPY[failure.kind] || COPY.unknown
   const text = language === "fr" ? copy.fr : copy.en
@@ -172,15 +177,27 @@ export default function SendFailureDialog({
     }
   }
 
-  return (
+  // Rendered into <body>, not where it is written.
+  //
+  // `position: fixed` is not enough here. This dialog is written inside the
+  // report card, and that card carries `glass-card` — `backdrop-filter` — which
+  // makes it a containing block for fixed descendants. So "fixed inset-0"
+  // anchored to the CARD, which is several screens tall, and the dialog
+  // appeared at the top of it. A doctor pressing "Finalize and send" at the
+  // bottom of the page got no visible response at all and had to scroll up to
+  // find out why — which nobody would think to do.
+  //
+  // A portal to <body> escapes the card entirely, so the overlay covers the
+  // viewport wherever the doctor happens to be. Same reason ViewportLayer
+  // exists; this one needs its own because it must take pointer events.
+  return createPortal(
     // z-[60]: above the review dialog at z-50. This one reports that a paid
     // consultation may have been lost, and nothing may cover it.
     //
-    // Top-anchored and scrollable rather than centred: this renders inside the
-    // TIBOK iframe under a video pane, where a vertically centred panel is
-    // pushed off the visible sliver and its buttons become unreachable —
-    // exactly the failure this dialog exists to stop repeating.
-    <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/50 p-3 print:hidden">
+    // Top-anchored and scrollable rather than centred: under the TIBOK video
+    // pane a vertically centred panel is pushed off the visible sliver and its
+    // buttons become unreachable.
+    <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto overscroll-contain bg-black/50 p-3 print:hidden">
       <div className="my-4 w-full max-w-md rounded-xl bg-white p-4 shadow-2xl sm:p-5">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100">
@@ -250,6 +267,7 @@ export default function SendFailureDialog({
           </details>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
