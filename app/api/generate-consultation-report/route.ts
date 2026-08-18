@@ -2066,8 +2066,9 @@ export async function POST(request: NextRequest) {
         birthDate: patientData?.dateOfBirth || 'Not provided',
         gender: patientData?.gender || 'Not specified',
         address: patientData?.address || 'Not provided',
-        phone: patientData?.phone || 'Not provided',
-        email: patientData?.email || 'Not provided',
+        // Same reason as above: a blank is recoverable, a placeholder is not.
+        phone: patientData?.phone || '',
+        email: patientData?.email || '',
         weight: patientData?.weight || 'Not provided',
         examinationDate: examDate
       }
@@ -2308,8 +2309,16 @@ export async function POST(request: NextRequest) {
       lastMenstrualPeriod: getString(patientData?.lastMenstrualPeriod || ''),
       gestationalAge: getString(patientData?.gestationalAge || ''),
       address: getString(originalIdentity.address || 'Not provided'),
-      phone: getString(originalIdentity.phone || 'Not provided'),
-      email: getString(originalIdentity.email || 'Not provided'),
+      // Empty, never "Not provided".
+      //
+      // A placeholder that reads like a value is worse than a blank: it is
+      // truthy, so every downstream fallback steps over it, and it travels all
+      // the way to the save route which counts digits, finds none, and refuses
+      // the whole consultation with "Phone number required". A report was lost
+      // exactly that way — while the patients table held a verified number.
+      // A blank is honest and lets the recovery do its work.
+      phone: getString(originalIdentity.phone || ''),
+      email: getString(originalIdentity.email || ''),
       weight: getString(anonymizedPatientData.weight || 'Not provided'),
       height: getString(anonymizedPatientData.height || ''),
       nationalId: getString(originalIdentity.nationalId || ''),

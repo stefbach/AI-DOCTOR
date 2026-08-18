@@ -82,13 +82,14 @@ const COPY: Record<
   },
   validation: {
     fr: {
-      title: "Le rapport est incomplet",
+      title: "Une information obligatoire manque",
       body:
-        "Un élément obligatoire manque dans le dossier. Corrigez-le, puis relancez l'envoi.",
+        "Le dossier ne peut pas être transmis tant qu'elle n'est pas renseignée — le plus souvent le numéro de téléphone du patient, à l'étape « Informations patient ». Le détail exact est indiqué ci-dessous. Enregistrez le rapport pour ne rien perdre, corrigez l'information, puis relancez l'envoi.",
     },
     en: {
-      title: "The report is incomplete",
-      body: "Something required is missing from the record. Fill it in, then send again.",
+      title: "A required detail is missing",
+      body:
+        "The record cannot be sent until it is filled in — most often the patient's phone number, on the Patient information step. The exact detail is shown below. Save the report so nothing is lost, fill it in, then send again.",
     },
   },
   unknown: {
@@ -256,7 +257,16 @@ export default function SendFailureDialog({
           </button>
         </div>
 
-        {failure.detail && (
+        {/* On a validation failure the detail names the missing field, which is
+            the one thing the doctor has to act on — so it is shown, not folded
+            away behind a disclosure nobody opens. */}
+        {failure.detail && failure.kind === "validation" && (
+          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">
+            {failure.detail}
+          </p>
+        )}
+
+        {failure.detail && failure.kind !== "validation" && (
           <details className="mt-3 border-t border-gray-100 pt-3">
             <summary className="cursor-pointer text-xs text-gray-500">
               {labels.detail}
