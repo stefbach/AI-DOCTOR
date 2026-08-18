@@ -160,13 +160,27 @@ export default function MedicalAIExpert() {
 
       if (prev && prev.consultationId === consultationId) {
         base = prev
-      } else if (prev && prev.endedAt == null) {
-        // The consultation is given its real identifier only when the doctor
-        // leaves the first step, so the clock starts under one id and finds
-        // itself under another. It used to read that as a different
-        // consultation and start over — the doctor watched the total fall back
-        // to zero on the way into Clinical Data, which is the one number they
-        // are meant to be able to trust. Re-key it; never restart it.
+      } else if (
+        prev &&
+        prev.endedAt == null &&
+        // ONLY from a temporary identifier to a real one.
+        //
+        // The consultation is given its TIBOK identifier only when the doctor
+        // leaves the first step, so the clock starts under a locally generated
+        // id and finds itself under another. Read as a different consultation
+        // that would restart the total on the way into Clinical Data, which is
+        // the one number the doctor is meant to be able to trust — hence the
+        // re-key.
+        //
+        // But re-keying on ANY change of id was wrong, and it showed: a doctor
+        // opening a new consultation while an earlier one was still running in
+        // the same browser had the old clock adopted by the new consultation.
+        // 34bc481b was created at 11:54 and recorded as started at 09:44 —
+        // two hours and ten minutes before it existed. One real identifier
+        // giving way to another is not a hand-over, it is a different patient.
+        prev.consultationId.startsWith('consultation_') &&
+        !consultationId.startsWith('consultation_')
+      ) {
         console.log('⏱️ Consultation re-keyed:', prev.consultationId, '→', consultationId)
         clearState(prev.consultationId)
         supersededId = prev.consultationId
