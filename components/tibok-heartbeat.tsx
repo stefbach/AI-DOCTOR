@@ -60,9 +60,33 @@ export default function TibokHeartbeat() {
     // a heartbeat carries a consultation id, and that is not something to
     // broadcast with '*'.
     let targetOrigin: string | null = null
+
+    // Remembered first, because the referrer is only right on the FIRST
+    // document. Navigate inside the iframe — and this app navigates, to the
+    // hub, to a specialty flow, on any full reload — and the referrer becomes
+    // our own origin, which is not whitelisted. We would fall silent on a page
+    // that is perfectly alive, and TIBOK's watchdog would reload us for it.
+    // sessionStorage is scoped to this frame and survives those navigations.
+    try {
+      const remembered = sessionStorage.getItem('tibokParentOrigin')
+      if (remembered && isAllowedOrigin(remembered)) targetOrigin = remembered
+    } catch {
+      // No session storage: the referrer and TIBOK's own messages still work.
+    }
+
+    const learnOrigin = (origin: string) => {
+      if (!origin || targetOrigin === origin || !isAllowedOrigin(origin)) return
+      targetOrigin = origin
+      try {
+        sessionStorage.setItem('tibokParentOrigin', origin)
+      } catch {
+        // Not being able to remember it costs the next navigation, not this one.
+      }
+    }
+
     try {
       const referrer = document.referrer ? new URL(document.referrer).origin : ''
-      if (referrer && isAllowedOrigin(referrer)) targetOrigin = referrer
+      if (referrer) learnOrigin(referrer)
     } catch {
       // An unparseable referrer just means we wait for a message instead.
     }
@@ -95,7 +119,7 @@ export default function TibokHeartbeat() {
       if (!data || typeof data !== 'object') return
       if (data.type !== 'tibok-context-init' && data.type !== 'tibok-handoff-state') return
       if (targetOrigin !== event.origin) {
-        targetOrigin = event.origin
+        learnOrigin(event.origin)
         beat()
       }
     }
