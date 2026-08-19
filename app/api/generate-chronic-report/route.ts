@@ -3,6 +3,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { sanitisePrescriptionEntry, stripCitations } from "@/lib/prescription-sanitise"
 import {
   buildRefDisplayMap,
   buildRefSourceYearMap,
@@ -594,13 +595,15 @@ function extractRealDataFromDiagnosis(diagnosisData: any, clinicalData: any, pat
     clinicalConfidence: clinicalConfidence,
     
     // Detailed prescription data
+    // Same strip as the prescription itself: this copy feeds the narrative,
+    // and a citation is no more at home in a dosing line here than on the form.
     detailedMedications: medications.map((med: any) => ({
       name: getString(med.nom || med.medication_dci || med.drug || med.medication_name || med.name || 'Medication'),
-      indication: getString(med.precise_indication || med.indication || ''),
-      mechanism: getString(med.mechanism || ''),
-      dosing: getString(med.dosing_regimen?.adult || med.dosing?.adult || 'As prescribed'),
-      duration: getString(med.duration || '7 days'),
-      monitoring: getString(med.monitoring || '')
+      indication: stripCitations(med.precise_indication || med.indication || ''),
+      mechanism: stripCitations(med.mechanism || ''),
+      dosing: stripCitations(med.dosing_regimen?.adult || med.dosing?.adult || '') || 'As prescribed',
+      duration: stripCitations(med.duration || '') || '7 days',
+      monitoring: stripCitations(med.monitoring || '')
     })),
     
     // Smart categorized lab tests
@@ -756,6 +759,20 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   console.log(`   - Lab tests: ${labTests.length}`)
   console.log(`   - Imaging: ${imagingStudies.length}`)
   
+  // A prescription field answers one question each — how much, how often, for
+  // how long. The model, reasoning from guideline extracts, sometimes writes
+  // its source into the answer: "7 days (ASPS, 2020)" reached a Duration field
+  // and was printed on a document a pharmacist reads. Stripped here, at the
+  // one point every construction path above goes through.
+  const citationsRemoved: string[] = []
+  for (const med of medications) {
+    const changed = sanitisePrescriptionEntry(med)
+    if (changed.length) citationsRemoved.push(`${med.name}: ${changed.join(', ')}`)
+  }
+  if (citationsRemoved.length) {
+    console.log(`🧽 Citations stripped from prescription fields — ${citationsRemoved.join(' | ')}`)
+  }
+
   return { medications, labTests, imagingStudies }
 }
 
