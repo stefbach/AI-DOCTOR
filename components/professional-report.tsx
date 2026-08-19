@@ -972,6 +972,286 @@ const ImagingExamEditForm = memo(({
 // Set display names for debugging
 DebouncedTextarea.displayName = 'DebouncedTextarea'
 MedicationEditForm.displayName = 'MedicationEditForm'
+
+// Declared at module level, like every other form on this page.
+//
+// Inside the parent it was a new component type on every render, so React
+// unmounted and rebuilt it — and the doctor's half-typed dates and remarks
+// went with it. Unlike the prescription blocks this one holds real state, so
+// it cannot simply be inlined: it takes what it needs as props instead.
+const SickLeaveCertificate = ({
+ report,
+ setReport,
+ validationStatus,
+ editMode,
+ getReportPatient,
+ getReportPraticien,
+ getReportRapport,
+ trackModification,
+ markEdited,
+}: {
+ report: any
+ setReport: React.Dispatch<React.SetStateAction<any>>
+ validationStatus: string
+ editMode: boolean
+ getReportPatient: () => any
+ getReportPraticien: () => any
+ getReportRapport: () => any
+ trackModification: (key: string) => void
+ markEdited: () => void
+}) => {
+ const patient = getReportPatient()
+ const praticien = getReportPraticien()
+ const certificat = report?.ordonnances?.arretMaladie?.certificat
+ 
+ // Use local state for form fields
+const rapport = getReportRapport()
+const [localSickLeave, setLocalSickLeave] = useState({
+ dateDebut: certificat?.dateDebut || '',
+ dateFin: certificat?.dateFin || '',
+ nombreJours: certificat?.nombreJours || 0,
+ fitnessStatus: certificat?.fitnessStatus || 'unfit',
+ remarques: certificat?.remarques || '',
+})
+ 
+ // Track if there are unsaved changes
+ const [hasLocalChanges, setHasLocalChanges] = useState(false)
+ const saveTimeoutRef = useRef<NodeJS.Timeout>()
+ 
+ // Handle field changes locally
+ const handleFieldChange = useCallback((field: string, value: any) => {
+ setLocalSickLeave(prev => {
+ const updated = { ...prev, [field]: value }
+ 
+ // Auto-calculate days if both dates are set
+ if (field === 'dateDebut' || field === 'dateFin') {
+ const startDate = field === 'dateDebut' ? value : prev.dateDebut
+ const endDate = field === 'dateFin' ? value : prev.dateFin
+ 
+ if (startDate && endDate) {
+ const start = new Date(startDate)
+ const end = new Date(endDate)
+ const diffTime = Math.abs(end.getTime() - start.getTime())
+ const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
+ updated.nombreJours = diffDays
+ }
+ }
+ 
+ return updated
+ })
+ setHasLocalChanges(true)
+ }, [])
+ 
+ // Auto-save with debouncing
+ useEffect(() => {
+ if (!hasLocalChanges || validationStatus === 'validated') return
+ 
+ if (saveTimeoutRef.current) {
+ clearTimeout(saveTimeoutRef.current)
+ }
+ 
+ saveTimeoutRef.current = setTimeout(() => {
+ // Update the main report
+ setReport(prev => {
+ if (!prev) return null
+ 
+ const newReport = { ...prev }
+ 
+ if (!newReport.ordonnances) newReport.ordonnances = {}
+ 
+ if (!newReport.ordonnances.arretMaladie) {
+ newReport.ordonnances.arretMaladie = {
+ enTete: praticien,
+ patient: patient,
+ certificat: localSickLeave,
+ authentification: {
+ signature: "Medical Practitioner's Signature",
+ nomEnCapitales: praticien.nom.toUpperCase(),
+ numeroEnregistrement: praticien.numeroEnregistrement,
+ cachetProfessionnel: "Official Medical Stamp",
+ date: new Date().toISOString().split('T')[0]
+ }
+ }
+ } else {
+ newReport.ordonnances.arretMaladie.certificat = localSickLeave
+ }
+ 
+ return newReport
+ })
+ 
+ trackModification('arretMaladie')
+ markEdited()
+ setHasLocalChanges(false)
+ }, 3000) // 3 seconds
+ 
+ return () => {
+ if (saveTimeoutRef.current) {
+ clearTimeout(saveTimeoutRef.current)
+ }
+ }
+ }, [localSickLeave, hasLocalChanges, validationStatus, praticien, patient, trackModification])
+ 
+ return (
+ <div id="sick-leave-certificate" className="bg-white p-8 rounded-lg shadow print:shadow-none">
+ <div className="border-b-2 border-cyan-600 pb-4 mb-6 header">
+ <div className="flex justify-between items-start">
+ <div>
+ <h2 className="text-2xl font-bold">SICK LEAVE CERTIFICATE</h2>
+ <p className="text-gray-600 mt-1">Medical Leave Certificate</p>
+ </div>
+ <div className="flex gap-2 print:hidden">
+ <Button
+ variant="outline"
+ size="sm"
+ onClick={() => exportSectionToPDF('sick-leave-certificate', `sick_leave_${patient.nom}_${new Date().toISOString().split('T')[0]}.pdf`)}
+ >
+ <Download className="h-4 w-4 mr-2" />
+ Export PDF
+ </Button>
+ </div>
+ </div>
+ </div>
+
+ <div className="mb-6 p-4 bg-cyan-50 rounded info-box">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
+ <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
+ <div><strong>Date of Birth:</strong> {patient.dateNaissance}</div>
+ <div><strong>Address:</strong> {patient.adresse}</div>
+ <div><strong>Examination Date:</strong> {patient.dateExamen}</div>
+ <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
+ </div>
+ </div>
+
+ {editMode && validationStatus !== 'validated' ? (
+ <div className="space-y-4">
+ {hasLocalChanges && (
+ <div className="text-xs text-cyan-600 flex items-center gap-1">
+ <Loader2 className="h-3 w-3 animate-spin" />
+ Modification en cours…
+ </div>
+ )}
+ 
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+ <div>
+ <Label>Start Date *</Label>
+ <Input
+ type="date"
+ value={localSickLeave.dateDebut}
+ onChange={(e) => handleFieldChange('dateDebut', e.target.value)}
+ />
+ </div>
+ <div>
+ <Label>End Date *</Label>
+ <Input
+ type="date"
+ value={localSickLeave.dateFin}
+ onChange={(e) => handleFieldChange('dateFin', e.target.value)}
+ min={localSickLeave.dateDebut}
+ />
+ </div>
+ <div>
+ <Label>Number of Days</Label>
+ <Input
+ type="number"
+ value={localSickLeave.nombreJours}
+ readOnly
+ className="bg-gray-50"
+ />
+ </div>
+ </div>
+
+ <div className="space-y-2">
+ <Label>Fitness Status *</Label>
+ <div className="flex gap-4">
+ <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-colors ${localSickLeave.fitnessStatus === 'unfit' ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-gray-300'}`}>
+ <input
+  type="radio"
+  name="fitnessStatus"
+  value="unfit"
+  checked={localSickLeave.fitnessStatus === 'unfit'}
+  onChange={() => handleFieldChange('fitnessStatus', 'unfit')}
+  className="accent-red-600"
+ />
+ <span className={`font-medium ${localSickLeave.fitnessStatus === 'unfit' ? 'text-red-700' : 'text-gray-700'}`}>Unfit for work</span>
+ </label>
+ <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-colors ${localSickLeave.fitnessStatus === 'fit' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
+ <input
+  type="radio"
+  name="fitnessStatus"
+  value="fit"
+  checked={localSickLeave.fitnessStatus === 'fit'}
+  onChange={() => handleFieldChange('fitnessStatus', 'fit')}
+  className="accent-green-600"
+ />
+ <span className={`font-medium ${localSickLeave.fitnessStatus === 'fit' ? 'text-green-700' : 'text-gray-700'}`}>Fit for work</span>
+ </label>
+ </div>
+ </div>
+ 
+ </div>
+ ) : certificat ? (
+ <div className="space-y-4">
+ <div className="p-4 bg-cyan-100 rounded-lg border-2 border-cyan-400">
+ <p className="text-lg font-bold mb-2">
+ SICK LEAVE FOR {certificat.nombreJours} DAY{certificat.nombreJours > 1 ? 'S' : ''}
+ </p>
+ <p className="text-sm">
+ From <strong>{new Date(certificat.dateDebut).toLocaleDateString('en-GB')}</strong> to{' '}
+ <strong>{new Date(certificat.dateFin).toLocaleDateString('en-GB')}</strong> inclusive
+ </p>
+ </div>
+ 
+ <div className="mt-4 p-3 bg-gray-50 rounded text-sm">
+ <p className="font-medium">MEDICAL CERTIFICATE</p>
+ <p className="mt-2">
+ I, the undersigned, {praticien.nom}, {praticien.qualifications}, certify that I have examined {patient.nomComplet || patient.nom} today
+ and confirm that the patient is <strong>{certificat.fitnessStatus === 'fit' ? 'fit for work' : 'unfit for work'}</strong>{certificat.fitnessStatus === 'unfit' ? ` from ${new Date(certificat.dateDebut).toLocaleDateString('en-GB')} to ${new Date(certificat.dateFin).toLocaleDateString('en-GB')} (${certificat.nombreJours} day${certificat.nombreJours > 1 ? 's' : ''})` : ''}.
+ </p>
+ </div>
+ </div>
+ ) : (
+ <div className="text-center py-8 text-gray-500">
+ <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+ <p>No sick leave prescribed</p>
+ {editMode && (
+ <p className="text-sm mt-2">Fill in the fields above to create a certificate</p>
+ )}
+ </div>
+ )}
+
+ {(certificat?.dateDebut || (editMode && validationStatus !== 'validated')) && (
+ <div className="mt-8 pt-6 border-t border-gray-300">
+ <div className="text-right signature">
+ <p className="text-sm mb-2">Issued in Mauritius, on {new Date().toLocaleDateString('en-GB')}</p>
+ <p className="font-semibold">{praticien.nom}</p>
+ <p className="text-sm text-gray-600">{praticien.qualifications}</p>
+ <p className="text-sm text-gray-600">Medical Council No.: {praticien.numeroEnregistrement}</p>
+ 
+ {validationStatus === 'validated' && documentSignatures.sickLeave ? (
+ <div className="mt-4">
+ <img 
+ src={documentSignatures.sickLeave} 
+ alt="Doctor's Signature" 
+ className="ml-auto h-20 w-auto"
+ style={{ maxWidth: '300px' }}
+ />
+ <p className="text-sm text-gray-600 mt-2">
+ Digitally signed on {new Date().toLocaleDateString('en-GB')}
+ </p>
+ </div>
+ ) : (
+ <div className="mt-8">
+ <p className="text-sm">_______________________________</p>
+ <p className="text-sm">Doctor's Signature and Stamp</p>
+ </div>
+ )}
+ </div>
+ </div>
+ )}
+ </div>
+ )
+ }
+
 BiologyTestEditForm.displayName = 'BiologyTestEditForm'
 ImagingExamEditForm.displayName = 'ImagingExamEditForm'
 // ==================== MAIN COMPONENT ====================
@@ -5897,7 +6177,12 @@ const ConsultationReport = () => {
 
  // Pre-fill the existing "RDV Médecin" modal with the SAME doctor and the
  // clinically recommended date, then let the doctor confirm.
- const handleScheduleRecommendedFollowUp = useCallback(() => {
+ // Plain functions, not hooks. This block is inlined into the parent's render
+ // (see the call sites), so a hook here would be a hook called conditionally —
+ // TabsContent only mounts the active tab. Nothing is lost: the component was
+ // recreated on every parent render, so these caches were thrown away every
+ // time and memoised nothing.
+ const handleScheduleRecommendedFollowUp = () => {
    if (!followUpPlan) return
    loadDoctorsList()
    const sameDoctorId = propDoctorId || doctorData?.id || ''
@@ -5907,25 +6192,24 @@ const ConsultationReport = () => {
    if (sameDoctorId) loadDoctorAvailableSlots(sameDoctorId, target)
    setDoctorApptReason(followUpPlan.reason)
    setShowDoctorApptModal(true)
- }, [followUpPlan, loadDoctorsList, loadDoctorAvailableSlots, propDoctorId, doctorData])
+ }
 
  // 🏥 CHECK SPECIALIST REFERRAL
  const specialistReferral = diagnosisData?.follow_up_plan?.specialist_referral || null
  const needsSpecialistReferral = specialistReferral?.required === true
 
  // Create stable handlers for each section
- const stableUpdateHandlers = useMemo(() => {
+ const stableUpdateHandlers = (() => {
  const handlers: { [key: string]: (value: string) => void } = {}
  sections.forEach(section => {
  handlers[section.key] = (value: string) => updateRapportSection(section.key, value)
  })
  return handlers
- }, [updateRapportSection])
+ })()
 
- // ADD THIS: Create stable local change handler
- const stableLocalChangeHandler = useCallback(() => {
+ const stableLocalChangeHandler = () => {
  markEdited()
- }, [])
+ }
 
  return (
  <Card className="shadow-xl print:shadow-none">
@@ -7150,259 +7434,7 @@ const ConsultationReport = () => {
  )
  }
 
-const SickLeaveCertificate = () => {
- const patient = getReportPatient()
- const praticien = getReportPraticien()
- const certificat = report?.ordonnances?.arretMaladie?.certificat
- 
- // Use local state for form fields
-const rapport = getReportRapport()
-const [localSickLeave, setLocalSickLeave] = useState({
- dateDebut: certificat?.dateDebut || '',
- dateFin: certificat?.dateFin || '',
- nombreJours: certificat?.nombreJours || 0,
- fitnessStatus: certificat?.fitnessStatus || 'unfit',
- remarques: certificat?.remarques || '',
-})
- 
- // Track if there are unsaved changes
- const [hasLocalChanges, setHasLocalChanges] = useState(false)
- const saveTimeoutRef = useRef<NodeJS.Timeout>()
- 
- // Handle field changes locally
- const handleFieldChange = useCallback((field: string, value: any) => {
- setLocalSickLeave(prev => {
- const updated = { ...prev, [field]: value }
- 
- // Auto-calculate days if both dates are set
- if (field === 'dateDebut' || field === 'dateFin') {
- const startDate = field === 'dateDebut' ? value : prev.dateDebut
- const endDate = field === 'dateFin' ? value : prev.dateFin
- 
- if (startDate && endDate) {
- const start = new Date(startDate)
- const end = new Date(endDate)
- const diffTime = Math.abs(end.getTime() - start.getTime())
- const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
- updated.nombreJours = diffDays
- }
- }
- 
- return updated
- })
- setHasLocalChanges(true)
- }, [])
- 
- // Auto-save with debouncing
- useEffect(() => {
- if (!hasLocalChanges || validationStatus === 'validated') return
- 
- if (saveTimeoutRef.current) {
- clearTimeout(saveTimeoutRef.current)
- }
- 
- saveTimeoutRef.current = setTimeout(() => {
- // Update the main report
- setReport(prev => {
- if (!prev) return null
- 
- const newReport = { ...prev }
- 
- if (!newReport.ordonnances) newReport.ordonnances = {}
- 
- if (!newReport.ordonnances.arretMaladie) {
- newReport.ordonnances.arretMaladie = {
- enTete: praticien,
- patient: patient,
- certificat: localSickLeave,
- authentification: {
- signature: "Medical Practitioner's Signature",
- nomEnCapitales: praticien.nom.toUpperCase(),
- numeroEnregistrement: praticien.numeroEnregistrement,
- cachetProfessionnel: "Official Medical Stamp",
- date: new Date().toISOString().split('T')[0]
- }
- }
- } else {
- newReport.ordonnances.arretMaladie.certificat = localSickLeave
- }
- 
- return newReport
- })
- 
- trackModification('arretMaladie')
- markEdited()
- setHasLocalChanges(false)
- }, 3000) // 3 seconds
- 
- return () => {
- if (saveTimeoutRef.current) {
- clearTimeout(saveTimeoutRef.current)
- }
- }
- }, [localSickLeave, hasLocalChanges, validationStatus, praticien, patient, trackModification])
- 
- return (
- <div id="sick-leave-certificate" className="bg-white p-8 rounded-lg shadow print:shadow-none">
- <div className="border-b-2 border-cyan-600 pb-4 mb-6 header">
- <div className="flex justify-between items-start">
- <div>
- <h2 className="text-2xl font-bold">SICK LEAVE CERTIFICATE</h2>
- <p className="text-gray-600 mt-1">Medical Leave Certificate</p>
- </div>
- <div className="flex gap-2 print:hidden">
- <Button
- variant="outline"
- size="sm"
- onClick={() => exportSectionToPDF('sick-leave-certificate', `sick_leave_${patient.nom}_${new Date().toISOString().split('T')[0]}.pdf`)}
- >
- <Download className="h-4 w-4 mr-2" />
- Export PDF
- </Button>
- </div>
- </div>
- </div>
 
- <div className="mb-6 p-4 bg-cyan-50 rounded info-box">
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
- <div><strong>Patient:</strong> {patient.nomComplet || patient.nom}</div>
- <div><strong>Date of Birth:</strong> {patient.dateNaissance}</div>
- <div><strong>Address:</strong> {patient.adresse}</div>
- <div><strong>Examination Date:</strong> {patient.dateExamen}</div>
- <div><strong>Examination Time:</strong> {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</div>
- </div>
- </div>
-
- {editMode && validationStatus !== 'validated' ? (
- <div className="space-y-4">
- {hasLocalChanges && (
- <div className="text-xs text-cyan-600 flex items-center gap-1">
- <Loader2 className="h-3 w-3 animate-spin" />
- Modification en cours…
- </div>
- )}
- 
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
- <div>
- <Label>Start Date *</Label>
- <Input
- type="date"
- value={localSickLeave.dateDebut}
- onChange={(e) => handleFieldChange('dateDebut', e.target.value)}
- />
- </div>
- <div>
- <Label>End Date *</Label>
- <Input
- type="date"
- value={localSickLeave.dateFin}
- onChange={(e) => handleFieldChange('dateFin', e.target.value)}
- min={localSickLeave.dateDebut}
- />
- </div>
- <div>
- <Label>Number of Days</Label>
- <Input
- type="number"
- value={localSickLeave.nombreJours}
- readOnly
- className="bg-gray-50"
- />
- </div>
- </div>
-
- <div className="space-y-2">
- <Label>Fitness Status *</Label>
- <div className="flex gap-4">
- <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-colors ${localSickLeave.fitnessStatus === 'unfit' ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-gray-300'}`}>
- <input
-  type="radio"
-  name="fitnessStatus"
-  value="unfit"
-  checked={localSickLeave.fitnessStatus === 'unfit'}
-  onChange={() => handleFieldChange('fitnessStatus', 'unfit')}
-  className="accent-red-600"
- />
- <span className={`font-medium ${localSickLeave.fitnessStatus === 'unfit' ? 'text-red-700' : 'text-gray-700'}`}>Unfit for work</span>
- </label>
- <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-colors ${localSickLeave.fitnessStatus === 'fit' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
- <input
-  type="radio"
-  name="fitnessStatus"
-  value="fit"
-  checked={localSickLeave.fitnessStatus === 'fit'}
-  onChange={() => handleFieldChange('fitnessStatus', 'fit')}
-  className="accent-green-600"
- />
- <span className={`font-medium ${localSickLeave.fitnessStatus === 'fit' ? 'text-green-700' : 'text-gray-700'}`}>Fit for work</span>
- </label>
- </div>
- </div>
- 
- </div>
- ) : certificat ? (
- <div className="space-y-4">
- <div className="p-4 bg-cyan-100 rounded-lg border-2 border-cyan-400">
- <p className="text-lg font-bold mb-2">
- SICK LEAVE FOR {certificat.nombreJours} DAY{certificat.nombreJours > 1 ? 'S' : ''}
- </p>
- <p className="text-sm">
- From <strong>{new Date(certificat.dateDebut).toLocaleDateString('en-GB')}</strong> to{' '}
- <strong>{new Date(certificat.dateFin).toLocaleDateString('en-GB')}</strong> inclusive
- </p>
- </div>
- 
- <div className="mt-4 p-3 bg-gray-50 rounded text-sm">
- <p className="font-medium">MEDICAL CERTIFICATE</p>
- <p className="mt-2">
- I, the undersigned, {praticien.nom}, {praticien.qualifications}, certify that I have examined {patient.nomComplet || patient.nom} today
- and confirm that the patient is <strong>{certificat.fitnessStatus === 'fit' ? 'fit for work' : 'unfit for work'}</strong>{certificat.fitnessStatus === 'unfit' ? ` from ${new Date(certificat.dateDebut).toLocaleDateString('en-GB')} to ${new Date(certificat.dateFin).toLocaleDateString('en-GB')} (${certificat.nombreJours} day${certificat.nombreJours > 1 ? 's' : ''})` : ''}.
- </p>
- </div>
- </div>
- ) : (
- <div className="text-center py-8 text-gray-500">
- <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
- <p>No sick leave prescribed</p>
- {editMode && (
- <p className="text-sm mt-2">Fill in the fields above to create a certificate</p>
- )}
- </div>
- )}
-
- {(certificat?.dateDebut || (editMode && validationStatus !== 'validated')) && (
- <div className="mt-8 pt-6 border-t border-gray-300">
- <div className="text-right signature">
- <p className="text-sm mb-2">Issued in Mauritius, on {new Date().toLocaleDateString('en-GB')}</p>
- <p className="font-semibold">{praticien.nom}</p>
- <p className="text-sm text-gray-600">{praticien.qualifications}</p>
- <p className="text-sm text-gray-600">Medical Council No.: {praticien.numeroEnregistrement}</p>
- 
- {validationStatus === 'validated' && documentSignatures.sickLeave ? (
- <div className="mt-4">
- <img 
- src={documentSignatures.sickLeave} 
- alt="Doctor's Signature" 
- className="ml-auto h-20 w-auto"
- style={{ maxWidth: '300px' }}
- />
- <p className="text-sm text-gray-600 mt-2">
- Digitally signed on {new Date().toLocaleDateString('en-GB')}
- </p>
- </div>
- ) : (
- <div className="mt-8">
- <p className="text-sm">_______________________________</p>
- <p className="text-sm">Doctor's Signature and Stamp</p>
- </div>
- )}
- </div>
- </div>
- )}
- </div>
- )
- }
- 
  const InvoiceComponent = () => {
  const invoice = report?.invoice
  if (!invoice) return null
@@ -7643,7 +7675,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  /** Pinned above the page rather than in it — see SaveStatus. */
  const FloatingSaveStatus = () => (
    <ViewportLayer className="bottom-3 left-1/2 -translate-x-1/2 max-w-[96vw]">
-     <SaveStatus />
+     {SaveStatus()}
    </ViewportLayer>
  )
 
@@ -7673,7 +7705,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
  <span className="text-sm text-gray-600">
  {metadata.wordCount} words
  </span>
- <SaveStatus />
+ {SaveStatus()}
  </div>
  <div className="flex flex-wrap gap-2 w-full md:w-auto">
  <Button
@@ -7813,8 +7845,8 @@ const [localSickLeave, setLocalSickLeave] = useState({
    onRecheck={() => runPrescriptionReview()}
    onGoToTarget={handleReviewGoToTarget}
  />
- <ActionsBar />
- <FloatingSaveStatus />
+ {ActionsBar()}
+ {FloatingSaveStatus()}
  <DoctorInfoEditor
    doctorInfo={doctorInfo}
    updateDoctorInfo={updateDoctorInfo}
@@ -7822,7 +7854,7 @@ const [localSickLeave, setLocalSickLeave] = useState({
    setEditingDoctor={setEditingDoctor}
    setHasUnsavedChanges={markEdited}
  />
- <PrescriptionStats />
+ {PrescriptionStats()}
 
  <Tabs value={activeTab} onValueChange={setActiveTab} className="print:hidden">
  {/* Mobile: Dropdown */}
@@ -7951,27 +7983,37 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </TabsList>
 
  <TabsContent value="consultation">
- <ConsultationReport />
+ {ConsultationReport()}
  </TabsContent>
  
  <TabsContent value="medicaments">
- <MedicationPrescription />
+ {MedicationPrescription()}
  </TabsContent>
  
  <TabsContent value="biologie">
- <BiologyPrescription />
+ {BiologyPrescription()}
  </TabsContent>
  
 <TabsContent value="imagerie">
- <ImagingPrescription />
+ {ImagingPrescription()}
  </TabsContent>
  
  <TabsContent value="sickleave">
- <SickLeaveCertificate />
+ <SickLeaveCertificate
+ report={report}
+ setReport={setReport}
+ validationStatus={validationStatus}
+ editMode={editMode}
+ getReportPatient={getReportPatient}
+ getReportPraticien={getReportPraticien}
+ getReportRapport={getReportRapport}
+ trackModification={trackModification}
+ markEdited={markEdited}
+/>
  </TabsContent>
 
  <TabsContent value="invoice">
- <InvoiceComponent />
+ {InvoiceComponent()}
  </TabsContent>
 
  {/* Referral Tab Content */}
@@ -8381,34 +8423,44 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </Tabs>
 
  <div className="hidden print:block">
- <ConsultationReport />
+ {ConsultationReport()}
  {includeFullPrescriptions && report?.ordonnances && (
  <>
  {report.ordonnances.medicaments && (
  <div className="page-break-before mt-8">
- <MedicationPrescription />
+ {MedicationPrescription()}
  </div>
  )}
  {report.ordonnances.biologie && (
  <div className="page-break-before mt-8">
- <BiologyPrescription />
+ {BiologyPrescription()}
  </div>
  )}
 {report.ordonnances.imagerie && (
  <div className="page-break-before mt-8">
- <ImagingPrescription />
+ {ImagingPrescription()}
  </div>
  )}
  {report.ordonnances.arretMaladie && (
  <div className="page-break-before mt-8">
- <SickLeaveCertificate />
+ <SickLeaveCertificate
+ report={report}
+ setReport={setReport}
+ validationStatus={validationStatus}
+ editMode={editMode}
+ getReportPatient={getReportPatient}
+ getReportPraticien={getReportPraticien}
+ getReportRapport={getReportRapport}
+ trackModification={trackModification}
+ markEdited={markEdited}
+/>
  </div>
  )}
  </>
  )}
  {report?.invoice && (
  <div className="page-break-before mt-8">
- <InvoiceComponent />
+ {InvoiceComponent()}
  </div>
  )}
  </div>
