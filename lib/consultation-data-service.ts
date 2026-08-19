@@ -29,8 +29,46 @@ class ConsultationDataService {
 
   // Set current consultation ID
   setCurrentConsultationId(id: string): void {
+    const previous = this.currentConsultationId
+
+    // Saved step data belongs to ONE consultation, and this store keeps a
+    // single blob under a single key. A doctor opening a new consultation
+    // while an earlier one is still in the store would otherwise inherit its
+    // patient, its clinical data and — most dangerously — its diagnosis: the
+    // diagnosis form restores from here on mount and hands straight over to
+    // the medical record, so a previous patient's analysis can reach a new
+    // patient's report before the fresh one has even been computed.
+    //
+    // Same rule as the consultation clock: a temporary identifier giving way
+    // to the real TIBOK one is the SAME consultation being named properly, so
+    // the data is kept. One real identifier replacing another is a different
+    // patient, so it is not.
+    const isTemporaryHandover =
+      !!previous && previous.startsWith('consultation_') && !id.startsWith('consultation_')
+
+    if (previous && previous !== id && !isTemporaryHandover && this.currentConsultation.size > 0) {
+      console.log(
+        `🧹 Dropping ${this.currentConsultation.size} step(s) from consultation ${previous} — ${id} is a different consultation`,
+      )
+      this.currentConsultation.clear()
+      void this.persistToStorage()
+    }
+
     this.currentConsultationId = id
     console.log(`📋 Consultation ID set: ${id}`)
+  }
+
+  /**
+   * Forget the saved steps, keep the identifier.
+   *
+   * For the test bench (`?fresh=1`), where the same consultation is replayed
+   * over and over: without this the run reopens carrying the previous run's
+   * answers, and a test that passes proves nothing about a real first run.
+   */
+  async clearStepData(): Promise<void> {
+    this.currentConsultation.clear()
+    await this.persistToStorage()
+    console.log('🧹 Saved step data cleared')
   }
 
   // ADD THESE NEW METHODS AFTER setCurrentConsultationId

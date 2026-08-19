@@ -151,6 +151,13 @@ export default function MedicalAIExpert() {
         } catch {
           // Nothing to do: an unreadable store has nothing to clear.
         }
+        // And the answers themselves. Clearing the clock and the position but
+        // leaving the saved steps made `?fresh=1` a lie: the run reopened at
+        // step 0 carrying the previous run's patient, clinical data and
+        // diagnosis, and the restored diagnosis then won the race against the
+        // fresh call — so a test could pass on data no first run would ever
+        // have. A test bench that flatters the code is worse than none.
+        void consultationDataService.clearStepData()
       }
     }
 
