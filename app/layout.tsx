@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { PatientDataLoader } from "@/components/patient-data-loader"
 import { EmbeddedModeProvider } from "@/components/embedded-mode-provider"
 import BlackBoxProvider from "@/components/black-box-provider"
+import TibokHeartbeat from "@/components/tibok-heartbeat"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -38,6 +39,11 @@ export default function RootLayout({
         {/* Outside the providers on purpose: it must record a crash in one of
             them, not disappear with it. */}
         <BlackBoxProvider />
+        {/* In the layout, not on the workflow page: the process can be killed
+            on any screen, and a heartbeat that only covers one of them leaves
+            the rest looking dead. Outside the providers for the same reason as
+            the black box — it must outlive a crash in one of them. */}
+        <TibokHeartbeat />
         <ThemeProvider
           attribute="class" 
           defaultTheme="light" 
