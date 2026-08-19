@@ -5,6 +5,7 @@ import { resolveTriage, withdrawTreatmentForEmergency, EMERGENCY_NARRATIVE_DIREC
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s for DeepSeek-V4-Pro narrative generation (10-section dermato report)
+import { sanitisePrescriptionEntry } from "@/lib/prescription-sanitise"
 import {
   buildRefDisplayMap,
   buildRefSourceYearMap,
@@ -1087,6 +1088,20 @@ function extractPrescriptionsFromDiagnosisData(diagnosisData: any, pregnancyStat
   console.log(`   - Lab tests: ${labTests.length}`)
   console.log(`   - Imaging: ${imagingStudies.length}`)
   
+  // A prescription field answers one question each — how much, how often, for
+  // how long. The model, reasoning from guideline extracts, sometimes writes
+  // its source into the answer: "7 days (ASPS, 2020)" reached a Duration field
+  // and was printed on a document a pharmacist reads. Stripped here, at the
+  // one point every construction path above goes through.
+  const citationsRemoved: string[] = []
+  for (const med of medications) {
+    const changed = sanitisePrescriptionEntry(med)
+    if (changed.length) citationsRemoved.push(`${med.name}: ${changed.join(', ')}`)
+  }
+  if (citationsRemoved.length) {
+    console.log(`🧽 Citations stripped from prescription fields — ${citationsRemoved.join(' | ')}`)
+  }
+
   return { medications, labTests, imagingStudies }
 }
 
