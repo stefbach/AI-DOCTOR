@@ -62,7 +62,7 @@ type TibokMessage = TibokContextInit | TibokHandoffEvent
  * rather than wildcard string includes, so a path like
  * `https://attacker.com/x.vercel.app` doesn't sneak through.
  */
-function isAllowedOrigin(origin: string): boolean {
+export function isAllowedOrigin(origin: string): boolean {
   if (!origin) return false
   if (origin === 'https://tibok.mu') return true
   if (origin === 'https://staging.tibok.mu') return true
