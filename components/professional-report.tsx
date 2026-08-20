@@ -989,6 +989,8 @@ const SickLeaveCertificate = ({
  getReportRapport,
  trackModification,
  markEdited,
+ documentSignatures,
+ exportSectionToPDF,
 }: {
  report: any
  setReport: React.Dispatch<React.SetStateAction<any>>
@@ -999,6 +1001,11 @@ const SickLeaveCertificate = ({
  getReportRapport: () => any
  trackModification: (key: string) => void
  markEdited: () => void
+ // Both read from the parent's closure while this lived inside it. Moving it
+ // to module level without passing them left two ReferenceErrors waiting for
+ // the first doctor to sign a report containing a sick-leave certificate.
+ documentSignatures: { sickLeave?: string } & Record<string, string | undefined>
+ exportSectionToPDF: (sectionId: string, filename: string) => void
 }) => {
  const patient = getReportPatient()
  const praticien = getReportPraticien()
@@ -1541,6 +1548,10 @@ export default function ProfessionalReportEditable({
  prescription?: string
  laboratory?: string
  imaging?: string
+ // Set at signature time along with the others; it was missing from this
+ // type while being both written and read, which is exactly the kind of gap
+ // a working type-check would have refused.
+ sickLeave?: string
  invoice?: string
  }>({})
 
@@ -8009,6 +8020,8 @@ const ConsultationReport = () => {
  getReportRapport={getReportRapport}
  trackModification={trackModification}
  markEdited={markEdited}
+ documentSignatures={documentSignatures}
+ exportSectionToPDF={exportSectionToPDF}
 />
  </TabsContent>
 
@@ -8453,6 +8466,8 @@ const ConsultationReport = () => {
  getReportRapport={getReportRapport}
  trackModification={trackModification}
  markEdited={markEdited}
+ documentSignatures={documentSignatures}
+ exportSectionToPDF={exportSectionToPDF}
 />
  </div>
  )}
