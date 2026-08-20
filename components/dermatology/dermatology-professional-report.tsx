@@ -6805,6 +6805,21 @@ const [localSickLeave, setLocalSickLeave] = useState({
  )
  }
 
+  // Read by the follow-up appointment date picker in the main render below.
+  // It only ever existed inside an inner component, so the picker referenced a
+  // name that was not in scope: opening "RDV Medecin" crashed the whole report
+  // page with "followUpPlan is not defined". Declared here, exactly as the
+  // general flow already does (components/professional-report.tsx).
+  //
+  // Deliberately a different name from the inner `followUpPlan`, so nothing
+  // above is shadowed and no existing behaviour changes.
+  const followUpPlanForAppointment = computeFollowUp({
+    level: resolveTriage(diagnosisData).level,
+    proposedDelayHours: (diagnosisData as any)?.follow_up_plan?.next_consultation_delay_hours,
+    urgentLabs: hasUrgentLabs(diagnosisData || {}, resolveTriage(diagnosisData).level),
+    reason: (diagnosisData as any)?.follow_up_plan?.second_consultation_reason,
+  })
+
  // ==================== MAIN RENDER ====================
  return (
  <div className="space-y-6 print:space-y-4">
@@ -7581,8 +7596,8 @@ const [localSickLeave, setLocalSickLeave] = useState({
                     >
                       <option value="">Sélectionner une date</option>
                       {doctorAvailableDates.map(d => {
-                        const beyondWindow = followUpPlan
-                          ? d > toDateInputValue(followUpPlan.deadlineDate)
+                        const beyondWindow = followUpPlanForAppointment
+                          ? d > toDateInputValue(followUpPlanForAppointment.deadlineDate)
                           : false
                         return (
                           <option key={d} value={d}>
