@@ -64,12 +64,27 @@ export default function TibokHeartbeat() {
     // Remembered first, because the referrer is only right on the FIRST
     // document. Navigate inside the iframe — and this app navigates, to the
     // hub, to a specialty flow, on any full reload — and the referrer becomes
-    // our own origin, which is not whitelisted. We would fall silent on a page
-    // that is perfectly alive, and TIBOK's watchdog would reload us for it.
-    // sessionStorage is scoped to this frame and survives those navigations.
+    // OUR OWN origin. Without the remembered value we would fall silent on a
+    // page that is perfectly alive, and TIBOK's watchdog would reload us for
+    // it. sessionStorage is scoped to this frame and survives those
+    // navigations.
+    //
+    // Our own origin is now refused outright (see isAllowedOrigin). It used to
+    // pass — the whitelist accepts any *.vercel.app, ours included — so the
+    // referrer of that second document overwrote the remembered parent and the
+    // beat went to ourselves. TIBOK heard nothing, decided we were dead, and
+    // reloaded the iframe under a doctor who was mid-sentence.
     try {
       const remembered = sessionStorage.getItem('tibokParentOrigin')
-      if (remembered && isAllowedOrigin(remembered)) targetOrigin = remembered
+      if (remembered && isAllowedOrigin(remembered)) {
+        targetOrigin = remembered
+      } else if (remembered) {
+        // A session that ran the broken build has our own origin stored here.
+        // Drop it rather than carry it: TIBOK re-sends its context on every
+        // iframe load, so the right origin comes back on its own.
+        sessionStorage.removeItem('tibokParentOrigin')
+        console.warn('💓 [heartbeat] discarded a stored origin that is not a valid parent')
+      }
     } catch {
       // No session storage: the referrer and TIBOK's own messages still work.
     }
