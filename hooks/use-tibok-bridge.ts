@@ -64,6 +64,22 @@ type TibokMessage = TibokContextInit | TibokHandoffEvent
  */
 export function isAllowedOrigin(origin: string): boolean {
   if (!origin) return false
+  // Never ourselves. The `.vercel.app` rule below is what lets a TIBOK preview
+  // talk to us — and it also matches our OWN deployment, which is not a parent
+  // and must never be treated as one. This app navigates inside its own iframe
+  // (hub → workflow), and on that second document `document.referrer` is our
+  // own origin: without this line it passed the whitelist, the heartbeat
+  // started beating at itself, TIBOK stopped hearing us and reloaded the
+  // iframe mid-consultation.
+  try {
+    if (typeof window !== 'undefined' && origin === window.location.origin) return false
+    // And no deployment of ours, not just the exact one we are served from:
+    // production, branch previews and one-off deploys all answer to this name,
+    // and none of them is ever the page containing us.
+    if (new URL(origin).hostname.startsWith('v0-medical-ai-expert')) return false
+  } catch {
+    // Unparseable, or no window (SSR): fall through to the rules below.
+  }
   if (origin === 'https://tibok.mu') return true
   if (origin === 'https://staging.tibok.mu') return true
   if (origin === 'http://localhost:3001') return true
