@@ -2,8 +2,6 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-output/*.json
 logs/*.log
-!output/.gitkeep
 !logs/.gitkeep
 .env
