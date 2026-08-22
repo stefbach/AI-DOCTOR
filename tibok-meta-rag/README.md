@@ -8,13 +8,13 @@ pathologies / 16 catégories), le pipeline interroge des APIs publiques
 gratuites (Europe PMC en priorité, PubMed en complément, Unpaywall en
 enrichissement optionnel), extrait abstracts + métadonnées (+ full-text
 quand disponible en open access), déduplique, score et produit un fichier
-JSON par pathologie prêt pour une étape d'embedding ultérieure (hors scope
-de ce pipeline).
+JSON par pathologie (`ingest.py`, voir plus bas). Un second script
+(`ingest_supabase.py`) découpe ces documents en chunks et les pousse dans
+les mêmes tables Supabase de production que les guidelines officielles
+(voir [Ingestion Supabase & embeddings](#ingestion-supabase--embeddings)).
 
 ## Ce que ce pipeline NE fait PAS
 
-- Pas d'embedding ni d'insertion en base vectorielle (étape suivante,
-  pipeline séparé).
 - Pas de résumé/reformulation des abstracts par LLM.
 - Pas de téléchargement de PDF non open-access. Unpaywall n'est utilisé que
   pour vérifier l'existence d'une copie OA légale et enregistrer son URL —
@@ -167,8 +167,57 @@ pytest -q
 ```
 
 Un test d'intégration mocké (via `respx`) par source (`europepmc.py`,
-`pubmed.py`, `unpaywall.py`) plus une suite de tests unitaires pour le
-scoring (dédoublonnage, exclusion, pondération, idempotence).
+`pubmed.py`, `unpaywall.py`) plus des suites de tests unitaires pour le
+scoring (dédoublonnage, exclusion, pondération, idempotence), le chunking
+(`chunking.py`) et le mapping de spécialité (`specialty_map.py`).
+
+## Ingestion Supabase & embeddings
+
+`ingest_supabase.py` pousse `output/*.json` vers les **mêmes tables
+Supabase de production** que les guidelines officielles (celles que
+`lib/rag/medical-rag.ts` interroge en direct pour les diagnostics) :
+`guidelines_raw` → `guidelines_validated` → `guidelines_chunks` (+
+`guideline_content_kind`). Il mirrore exactement le pattern de
+`scripts/rag-ingest/ingest.py` (upsert idempotent par
+`(source_id, guideline_external_id)`, cleanup + réinsertion des chunks à
+chaque re-run).
+
+**Point de sécurité patient le plus important du script** : chaque ligne
+insérée est taguée `content_kind = 'recherche'` dans
+`guideline_content_kind` — jamais `'referentiel'`. Une méta-analyse
+rapporte une synthèse d'études, elle ne porte pas l'autorité d'une
+recommandation de société savante ; c'est ce tag qui empêche le modèle de
+la citer comme telle dans un rapport (voir `contentKindWarning()` dans
+`lib/rag/medical-rag.ts`).
+
+Découpage en chunks (`chunking.py`, notre JSON n'est pas pré-chunké
+contrairement à l'export de Stéphane) : chunk 0 = titre + abstract (+
+conclusion si absente de l'abstract) ; chunks 1..N = texte intégral
+découpé en fenêtres de ~3500 caractères sur des frontières de paragraphe,
+avec un léger recouvrement. Sur les 136 pathologies déjà récupérées :
+3400 documents → **74 829 chunks** (`embedding` laissé `NULL`).
+
+```bash
+python ingest_supabase.py --dry-run                    # simulation (défaut)
+python ingest_supabase.py --pathology dt2 --dry-run     # une pathologie
+python ingest_supabase.py --no-dry-run                  # écriture réelle
+```
+
+Variables d'environnement requises pour `--no-dry-run` : `SUPABASE_URL`
+(ou `NEXT_PUBLIC_SUPABASE_URL`), `SUPABASE_SERVICE_ROLE_KEY` — identiques
+à celles de `scripts/rag-ingest/ingest.py`.
+
+**Étape suivante obligatoire** : `guidelines_chunks.embedding` reste `NULL`
+après ce script. Lancer ensuite `scripts/rag-ingest/generate-embeddings.mjs`
+(déjà générique sur toute la table, aucun nouveau script d'embedding requis)
+— ou son wrapper GitHub Actions **RAG — Embed missing chunks**.
+
+**Exécution recommandée** : workflow GitHub Actions **RAG Ingest
+Meta-Analyses (tibok-meta-rag)** (`.github/workflows/rag-ingest-meta-analyses.yml`),
+qui réutilise les secrets `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` déjà
+configurés pour le pipeline de guidelines. `dry_run=true` par défaut —
+toujours valider en dry-run puis sur une seule pathologie
+(`pathology=dt2 --max-docs=3`) avant un run complet.
 
 ## Cron mensuel (mode incrémental)
 
@@ -191,7 +240,10 @@ DOI, relancer plus souvent que nécessaire ne crée aucun doublon.
 ```
 tibok-meta-rag/
 ├── pathologies.json      # catalogue d'entrée (136 pathologies, 16 catégories)
-├── ingest.py             # orchestrateur principal (CLI)
+├── ingest.py             # orchestrateur de récupération (CLI)
+├── ingest_supabase.py    # pousse output/*.json vers Supabase (production)
+├── chunking.py           # découpage d'un Document en chunks embeddables
+├── specialty_map.py      # pathology_id/category -> SpecialtyCode
 ├── models.py             # schémas Pydantic v2
 ├── scoring.py            # dédoublonnage, exclusion, scoring
 ├── ratelimit.py           # rate limiter async partagé
@@ -199,7 +251,7 @@ tibok-meta-rag/
 │   ├── europepmc.py
 │   ├── pubmed.py
 │   └── unpaywall.py
-├── output/                # 1 JSON par pathologie + _summary.json (généré, gitignored)
+├── output/                # 1 JSON par pathologie + _summary.json (committé)
 ├── logs/                  # logs structurés (généré, gitignored)
 ├── tests/
 ├── requirements.txt

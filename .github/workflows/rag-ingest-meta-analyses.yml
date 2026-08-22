@@ -1,0 +1,108 @@
+name: RAG Ingest Meta-Analyses (tibok-meta-rag)
+
+# Manual workflow to ingest the tibok-meta-rag/output/*.json meta-analyses
+# (3400 docs across 136 pathologies, retrieved from Europe PMC + PubMed)
+# into the TIBOK Supabase RAG — the SAME production tables the live AI
+# Doctor queries (guidelines_raw / guidelines_validated / guidelines_chunks
+# / guideline_content_kind).
+#
+# Every row this pipeline writes is tagged content_kind='recherche' (never
+# 'referentiel') — see tibok-meta-rag/ingest_supabase.py header for why
+# that matters. embedding is left NULL; run "RAG — Embed missing chunks"
+# (rag-embed-runner.yml) afterwards to fill it — it's already generic
+# across the whole guidelines_chunks table, no new script needed.
+#
+# Required GitHub Actions secrets (same ones rag-ingest-tibok.yml uses):
+#   SUPABASE_URL                 — https://yyxmqositmmyyeyuryln.supabase.co
+#   SUPABASE_SERVICE_ROLE_KEY    — Vercel env of v0-medical-ai-expert
+
+"on":
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Simulate without writing to the DB'
+        type: boolean
+        default: true
+      pathology:
+        description: 'Optional: space-separated pathology_id(s) to limit the run (e.g. "dt2 hta"). Empty = all 136.'
+        type: string
+        default: ''
+      max_docs:
+        description: 'Optional: cap docs ingested per pathology (0 = no cap). Use a small value for a first test.'
+        type: string
+        default: '0'
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify source files
+        run: |
+          n=$(ls tibok-meta-rag/output/*.json | grep -v _summary | wc -l)
+          echo "Found $n pathology JSON files (expected 136)"
+          cat tibok-meta-rag/output/_summary.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(f\"{d['total_documents']} documents across {len(d['pathologies'])} pathologies\")"
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'tibok-meta-rag/requirements.txt'
+
+      - name: Install dependencies
+        working-directory: tibok-meta-rag
+        run: pip install --quiet -r requirements.txt
+
+      - name: Build CLI flags
+        env:
+          INPUT_DRY_RUN: ${{ github.event.inputs.dry_run }}
+          INPUT_PATHOLOGY: ${{ github.event.inputs.pathology }}
+          INPUT_MAX_DOCS: ${{ github.event.inputs.max_docs }}
+        run: |
+          FLAGS=""
+          if [ "${INPUT_DRY_RUN}" = "true" ]; then
+            FLAGS="${FLAGS} --dry-run"
+          else
+            FLAGS="${FLAGS} --no-dry-run"
+          fi
+          if [ -n "${INPUT_PATHOLOGY}" ]; then
+            FLAGS="${FLAGS} --pathology ${INPUT_PATHOLOGY}"
+          fi
+          if [ -n "${INPUT_MAX_DOCS}" ] && [ "${INPUT_MAX_DOCS}" != "0" ]; then
+            FLAGS="${FLAGS} --max-docs=${INPUT_MAX_DOCS}"
+          fi
+          echo "FLAGS=${FLAGS}" >> "$GITHUB_ENV"
+          echo "Resolved FLAGS: ${FLAGS}"
+
+      - name: Run ingestion
+        working-directory: tibok-meta-rag
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python ingest_supabase.py $FLAGS
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## RAG Meta-Analyses Ingestion Result"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| dry_run | ${{ github.event.inputs.dry_run }} |"
+            echo "| pathology filter | \`${{ github.event.inputs.pathology || '(all 136)' }}\` |"
+            echo "| max_docs | ${{ github.event.inputs.max_docs }} |"
+            echo "| Status | ${{ job.status }} |"
+            echo ""
+            echo "Next step if this was a real (non-dry-run) write: run the"
+            echo "**RAG — Embed missing chunks** workflow to fill the NULL"
+            echo "embeddings this run left behind."
+          } >> $GITHUB_STEP_SUMMARY
