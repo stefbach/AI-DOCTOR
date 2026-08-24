@@ -919,11 +919,28 @@ const COMMON_SYMPTOMS = useMemo(() => [
  // the correct one (e.g. a retaken photo superseding a bad OCR read).
  useEffect(() => {
  const onVitalsMessage = (event: MessageEvent) => {
+ // TEMP DIAGNOSTIC (remove once the real TIBOK payload shape is confirmed):
+ // log every object-shaped postMessage this window receives, before any
+ // filtering, so a mismatch (origin, field names, nesting) is visible
+ // instead of being silently dropped.
+ if (event.data && typeof event.data === 'object') {
+ console.log('🔍 [tibok-vitals][debug] raw message received:', {
+ origin: event.origin,
+ originAllowed: isAllowedOrigin(event.origin),
+ data: event.data
+ })
+ }
+
  if (!isAllowedOrigin(event.origin)) return
 
  const msg = event.data as { source?: string; type?: string; payload?: any } | null
  if (!msg || typeof msg !== 'object') return
- if (msg.source !== 'tibok' || msg.type !== 'vitals') return
+ if (msg.source !== 'tibok' || msg.type !== 'vitals') {
+ if (msg.type || msg.source) {
+ console.warn('🔍 [tibok-vitals][debug] object message did not match expected shape (source=\'tibok\', type=\'vitals\'):', msg)
+ }
+ return
+ }
 
  const v = msg.payload || {}
  console.log('🌡️ [tibok-vitals] reading received:', v)
