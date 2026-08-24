@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { supabase } from '@/lib/supabase'
 import { saveTibokDraft } from '@/lib/tibok-draft-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -959,6 +960,51 @@ const COMMON_SYMPTOMS = useMemo(() => [
  window.addEventListener('message', onVitalsMessage)
  return () => window.removeEventListener('message', onVitalsMessage)
  }, [updateVitalSigns, convertGlycemieToGL])
+
+ // TIBOK's actual capture UI writes vitals to consultation_records.clinical_data.vitals
+ // instead of sending the postMessage above — confirmed by direct DB inspection while
+ // debugging why the listener above never fired for a real "Envoyer à AI-DOCTOR" capture.
+ // Poll that row instead. Same semantics as the postMessage path (a null field is never
+ // applied; a changed non-null field overwrites), but keyed off "did the DB value change
+ // since the last poll" rather than "a new event arrived" — so a doctor's manual edit made
+ // after the last capture survives later polls that see the same, unchanged DB reading.
+ useEffect(() => {
+ if (!consultationId) return
+
+ let lastSeenVitals: Record<string, any> | null = null
+
+ const pollVitals = async () => {
+ const { data: record, error } = await supabase
+ .from('consultation_records')
+ .select('clinical_data')
+ .eq('consultation_id', consultationId)
+ .maybeSingle()
+
+ if (error || !record?.clinical_data?.vitals) return
+ const v = record.clinical_data.vitals
+
+ const changed = (key: string) => v[key] != null && v[key] !== lastSeenVitals?.[key]
+
+ if (changed('tension_systolique')) updateVitalSigns('bloodPressureSystolic', v.tension_systolique.toString())
+ if (changed('tension_diastolique')) updateVitalSigns('bloodPressureDiastolic', v.tension_diastolique.toString())
+ if (changed('pouls')) updateVitalSigns('heartRate', v.pouls.toString())
+ if (changed('temperature')) updateVitalSigns('temperature', v.temperature.toString())
+ if (changed('spo2')) updateVitalSigns('oxygenSaturation', v.spo2.toString())
+ if (changed('poids')) updateVitalSigns('weight', v.poids.toString())
+ if (v.glycemie != null && (v.glycemie !== lastSeenVitals?.glycemie || v.glycemie_unite !== lastSeenVitals?.glycemie_unite)) {
+ updateVitalSigns('bloodGlucose', convertGlycemieToGL(v.glycemie, v.glycemie_unite))
+ }
+
+ if (JSON.stringify(v) !== JSON.stringify(lastSeenVitals)) {
+ console.log('🌡️ [tibok-vitals][db-poll] new reading applied:', v)
+ }
+ lastSeenVitals = v
+ }
+
+ pollVitals()
+ const interval = setInterval(pollVitals, 4000)
+ return () => clearInterval(interval)
+ }, [consultationId, updateVitalSigns, convertGlycemieToGL])
 
  // Load from database only if no TIBOK data and no props data
  useEffect(() => {
