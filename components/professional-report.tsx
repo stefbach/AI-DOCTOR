@@ -153,6 +153,8 @@ interface MauritianReport {
  bloodPressureSystolic?: string
  bloodPressureDiastolic?: string
  bloodGlucose?: string
+ heartRate?: string
+ oxygenSaturation?: string
  // Medical Profile
  allergies?: string
  medicalHistory?: string
@@ -265,6 +267,8 @@ const createEmptyReport = (): MauritianReport => ({
  bloodPressureSystolic: "",
  bloodPressureDiastolic: "",
  bloodGlucose: "",
+ heartRate: "",
+ oxygenSaturation: "",
  // Medical Profile
  allergies: "",
  medicalHistory: "",
@@ -3118,7 +3122,10 @@ if (isRenewal) {
  adresse: apiReport.medicalReport?.patient?.address || validPatientData.address || '',
  telephone: apiReport.medicalReport?.patient?.phone || validPatientData.phone || '',
  email: apiReport.medicalReport?.patient?.email || validPatientData.email || '',
- poids: apiReport.medicalReport?.patient?.weight || validPatientData.weight || '',
+ // Same-consultation weight (TIBOK vitals photo, doctor-validated) takes
+ // priority over the patient's on-file registration weight, which can be
+ // stale by months — falls back to it only when no fresh reading exists.
+ poids: clinicalData?.vitalSigns?.weight || apiReport.medicalReport?.patient?.weight || validPatientData.weight || '',
  taille: apiReport.medicalReport?.patient?.height || validPatientData.height || '',
  identifiantNational: apiReport.medicalReport?.patient?.nationalId || '',
  dateExamen: apiReport.medicalReport?.patient?.examinationDate || new Date().toISOString().split('T')[0],
@@ -3127,6 +3134,8 @@ if (isRenewal) {
  bloodPressureSystolic: clinicalData?.vitalSigns?.bloodPressureSystolic || '',
  bloodPressureDiastolic: clinicalData?.vitalSigns?.bloodPressureDiastolic || '',
  bloodGlucose: clinicalData?.vitalSigns?.bloodGlucose || '',
+ heartRate: clinicalData?.vitalSigns?.heartRate || '',
+ oxygenSaturation: clinicalData?.vitalSigns?.oxygenSaturation || '',
  // Medical Profile
  allergies: (() => {
  const allergies = validPatientData?.allergies || []
@@ -6541,6 +6550,32 @@ const ConsultationReport = () => {
  className="h-8 text-sm"
  />
  </div>
+
+ {/* Pouls - Editable */}
+ <div>
+ <Label htmlFor="patient-heart-rate" className="text-xs">Heart Rate (bpm)</Label>
+ <Input
+ id="patient-heart-rate"
+ type="number"
+ value={patient.heartRate || ''}
+ onChange={(e) => updatePatientField('heartRate', e.target.value)}
+ placeholder="75"
+ className="h-8 text-sm"
+ />
+ </div>
+
+ {/* SpO2 - Editable */}
+ <div>
+ <Label htmlFor="patient-spo2" className="text-xs">SpO2 (%)</Label>
+ <Input
+ id="patient-spo2"
+ type="number"
+ value={patient.oxygenSaturation || ''}
+ onChange={(e) => updatePatientField('oxygenSaturation', e.target.value)}
+ placeholder="98"
+ className="h-8 text-sm"
+ />
+ </div>
  </div>
  ) : (
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
@@ -6573,6 +6608,18 @@ const ConsultationReport = () => {
  {parseFloat(patient.bloodGlucose) < 0.7 && ' (Hypoglycemia)'}
  {parseFloat(patient.bloodGlucose) > 1.26 && parseFloat(patient.bloodGlucose) < 2.0 && ' (Moderate hyperglycemia)'}
  {parseFloat(patient.bloodGlucose) >= 2.0 && ' (Severe hyperglycemia)'}
+ </div>
+ )}
+ {patient.heartRate && (
+ <div>
+ <span className="font-medium">Heart Rate:</span> {patient.heartRate} bpm
+ {(parseFloat(patient.heartRate) < 60 || parseFloat(patient.heartRate) > 100) && ' ⚠️'}
+ </div>
+ )}
+ {patient.oxygenSaturation && (
+ <div>
+ <span className="font-medium">SpO2:</span> {patient.oxygenSaturation}%
+ {parseFloat(patient.oxygenSaturation) < 95 && ' ⚠️'}
  </div>
  )}
  </div>
