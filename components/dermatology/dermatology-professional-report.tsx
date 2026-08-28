@@ -27,7 +27,7 @@ import {
 } from "lucide-react"
 import { createClient } from '@supabase/supabase-js'
 import TriageBanner from '@/components/triage-banner'
-import { resolveTriage, computeFollowUp, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
+import { resolveTriage, computeFollowUp, requiresUrgentFollowUp, buildEmergencyTransferNotice, buildEmergencyManagementPlan, buildEmergencyFollowUpPlan, buildEmergencyConclusion, hasUrgentLabs, formatDelay, toDateInputValue, formatAppointmentDate } from '@/lib/triage'
 
 // ==================== HELPER FUNCTIONS ====================
 // Helper function to safely handle DCI fields
@@ -103,6 +103,8 @@ interface MauritianReport {
  lastMenstrualPeriod?: string
  }
  rapport: {
+ // Present only on an emergency case, and rendered first when it is.
+ urgenceHospitaliere?: string
  motifConsultation: string
  anamnese: string
  antecedents: string
@@ -2607,7 +2609,41 @@ if (isRenewal) {
  }
  
  console.log(" Structure mapping complete")
- 
+
+ // An emergency report carries no prescriptions.
+ //
+ // Same policy as the general flow, for the same reason: a report that tells
+ // the patient to go to hospital without delay while handing them a
+ // prescription and a lab form contradicts itself, and sends them to a
+ // pharmacy instead of A&E. Dermatology has its own short list of conditions
+ // that kill within days — SJS/TEN, necrotising fasciitis, DRESS,
+ // meningococcaemia — and those are exactly the cases where a topical steroid
+ // on the printout is worst.
+ //
+ // The narrative is rewritten alongside the documents because it was written
+ // from them, server-side, before this runs. The history, examination and
+ // diagnostic reasoning are kept: they are what makes the referral actionable.
+ const emergencyTriage = resolveTriage(diagnosisData)
+ if (emergencyTriage.level === 'emergency') {
+ console.log(' Emergency case — dropping prescriptions, labs and imaging from the report')
+ for (const key of ['priseEnCharge', 'surveillance', 'conclusion'] as const) {
+ console.log(` ${key} replaced. Model proposal was:`,
+ reportData.compteRendu.rapport[key] || '(empty)')
+ }
+
+ reportData.compteRendu.rapport.urgenceHospitaliere =
+ buildEmergencyTransferNotice(emergencyTriage)
+ reportData.compteRendu.rapport.priseEnCharge =
+ buildEmergencyManagementPlan(emergencyTriage)
+ reportData.compteRendu.rapport.surveillance =
+ buildEmergencyFollowUpPlan(emergencyTriage)
+ reportData.compteRendu.rapport.conclusion =
+ buildEmergencyConclusion(emergencyTriage)
+ reportData.ordonnances.medicaments = null
+ reportData.ordonnances.biologie = null
+ reportData.ordonnances.imagerie = null
+ }
+
  setReport(reportData)
  setValidationStatus('draft')
  setDocumentSignatures({})
@@ -4174,6 +4210,17 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
    try {
      const scheduledTimestamp = `${doctorAppointmentData.appointmentDate}T${doctorAppointmentData.appointmentTime}`
 
+     // Same as the general flow: a payment-gated urgent review that is never
+     // paid for would be invisible to everyone, so TIBOK needs to be able to
+     // find it and chase the patient. Computed here rather than reused from
+     // the banner, whose followUpPlan lives in a nested component and is not
+     // in scope at this point.
+     const triageForAppointment = resolveTriage(diagnosisData)
+     const isUrgentAppointment = requiresUrgentFollowUp(
+       triageForAppointment.level,
+       hasUrgentLabs(diagnosisData, triageForAppointment.level),
+     )
+
      const { data: newConsultation, error: consultError } = await supabaseClient
        .from('consultations')
        .insert({
@@ -4186,6 +4233,7 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
          status: 'pending_payment',
          payment_status: 'pending',
          payment_hold_until: scheduledTimestamp,
+         is_urgent: isUrgentAppointment,
          // Phase 1 hybrid: inherit the parent consultation's mode.
          consultation_type: consultationMode || 'telemedicine',
          scheduled_time: scheduledTimestamp,
@@ -4337,7 +4385,14 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
  inset: 0;
  background: rgba(0, 0, 0, 0.5);
  display: flex;
- align-items: center;
+      /* Top-anchored and scrollable, not vertically centred: on a phone inside
+         the TIBOK iframe, under the video pane, a centred panel is taller than
+         the viewport left to it and its close button lands below the fold. */
+ align-items: flex-start;
+ overflow-y: auto;
+ -webkit-overflow-scrolling: touch;
+ overscroll-behavior: contain;
+ padding: 0.75rem;
  justify-content: center;
  z-index: 9999;
  animation: fadeIn 0.3s ease-out;
@@ -4348,8 +4403,10 @@ console.log('👤 Patient data in payload:', documentsPayload.patientData)
  background: white;
  padding: 2rem;
  border-radius: 1rem;
+ width: 100%;
  max-width: 500px;
- margin: 1rem;
+ margin: 0.5rem 0;
+ box-sizing: border-box;
  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
  animation: slideUp 0.3s ease-out;
  position: relative;
@@ -4983,6 +5040,11 @@ DoctorInfoEditor.displayName = 'DoctorInfoEditor'
 
 const ConsultationReport = () => {
  const sections = [
+ // First, when it exists: an emergency transfer is the only thing that
+ // matters on the page, and it explains the absence of prescriptions below.
+ ...(getReportRapport()?.urgenceHospitaliere
+ ? [{ key: 'urgenceHospitaliere', title: "⚠️ URGENT CARE REQUIRED — IMMEDIATE HOSPITAL TRANSFER" }]
+ : []),
  { key: 'motifConsultation', title: 'CHIEF COMPLAINT' },
  { key: 'anamnese', title: 'HISTORY OF PRESENT ILLNESS' },
  { key: 'antecedents', title: 'PAST MEDICAL HISTORY' },
@@ -5036,10 +5098,13 @@ const ConsultationReport = () => {
  <CardContent className="p-8 print:p-12" id="consultation-report">
  
  {/* 🚦 TRIAGE BANNER (emergency / urgent / triage-not-assessed) */}
+ {/* English, like the document it sits on: this banner is not
+     print:hidden, it goes out on the PDF the receiving hospital
+     reads, and it is the first thing on the page. */}
  <TriageBanner
    triage={resolvedTriage}
    followUp={followUpPlan}
-   language="fr"
+   language="en"
    action={
      followUpPlan ? (
        doctorAppointmentData ? (
@@ -5770,7 +5835,7 @@ const ConsultationReport = () => {
  <SectionBibliography
  references={prescriptionAllUsedRefs}
  globalReferences={evidenceRefs}
- title="Références citées dans cette prescription"
+ title="References cited in this prescription"
  />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
@@ -5998,7 +6063,7 @@ const ConsultationReport = () => {
  <SectionBibliography
  references={labUsedRefs}
  globalReferences={evidenceRefs}
- title="Références citées dans cette demande d'analyses"
+ title="References cited in this laboratory request"
  />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
@@ -6161,7 +6226,7 @@ const ConsultationReport = () => {
  <SectionBibliography
  references={imagingUsedRefs}
  globalReferences={evidenceRefs}
- title="Références citées dans cette demande d'imagerie"
+ title="References cited in this imaging request"
  />
 
  <div className="mt-8 pt-6 border-t border-gray-300">
@@ -6739,6 +6804,21 @@ const [localSickLeave, setLocalSickLeave] = useState({
  </Card>
  )
  }
+
+  // Read by the follow-up appointment date picker in the main render below.
+  // It only ever existed inside an inner component, so the picker referenced a
+  // name that was not in scope: opening "RDV Medecin" crashed the whole report
+  // page with "followUpPlan is not defined". Declared here, exactly as the
+  // general flow already does (components/professional-report.tsx).
+  //
+  // Deliberately a different name from the inner `followUpPlan`, so nothing
+  // above is shadowed and no existing behaviour changes.
+  const followUpPlanForAppointment = computeFollowUp({
+    level: resolveTriage(diagnosisData).level,
+    proposedDelayHours: (diagnosisData as any)?.follow_up_plan?.next_consultation_delay_hours,
+    urgentLabs: hasUrgentLabs(diagnosisData || {}, resolveTriage(diagnosisData).level),
+    reason: (diagnosisData as any)?.follow_up_plan?.second_consultation_reason,
+  })
 
  // ==================== MAIN RENDER ====================
  return (
@@ -7516,8 +7596,8 @@ const [localSickLeave, setLocalSickLeave] = useState({
                     >
                       <option value="">Sélectionner une date</option>
                       {doctorAvailableDates.map(d => {
-                        const beyondWindow = followUpPlan
-                          ? d > toDateInputValue(followUpPlan.deadlineDate)
+                        const beyondWindow = followUpPlanForAppointment
+                          ? d > toDateInputValue(followUpPlanForAppointment.deadlineDate)
                           : false
                         return (
                           <option key={d} value={d}>

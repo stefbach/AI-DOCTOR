@@ -2,6 +2,7 @@
 // Uses EXACT SAME LOGIC as generate-consultation-report for consistency (NO EMOJIS, NO COLORS)
 import { type NextRequest, NextResponse } from "next/server"
 import { callLLM } from '@/lib/llm-client'
+import { resolveTriage, withdrawTreatmentForEmergency, EMERGENCY_NARRATIVE_DIRECTIVE } from '@/lib/triage'
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s: chronic-report fans out to 4 LLM calls (meds/labs/imaging extraction + narrative). DeepSeek total can run 250-500s.
@@ -734,6 +735,27 @@ export async function POST(req: NextRequest) {
     // ===== STEP 2: PREPARE ENRICHED DATA (like consultation-report) =====
     console.log("STEP 2: Preparing enriched GPT data...")
     const enrichedData = prepareChronicDiseaseGPTData(extractedData, patientData)
+
+    // ===== EMERGENCY: THERE IS NO TREATMENT TO DESCRIBE =====
+    //
+    // See lib/triage.ts. The report component withdraws the prescription, the
+    // lab form and the imaging request on an emergency; this withdraws them
+    // from the prompt too, so the narrative comes out right instead of coming
+    // out wrong and being corrected afterwards.
+    //
+    // A chronic review is rarely an emergency, which is exactly why one goes
+    // unnoticed here: a hypertensive emergency or a ketoacidosis arrives
+    // inside a routine three-monthly follow-up, and the report would otherwise
+    // close on a diet plan and a titration schedule while the patient needs an
+    // ambulance.
+    const reportTriage = resolveTriage(diagnosisData)
+    const isEmergencyReport = reportTriage.level === 'emergency'
+
+    if (isEmergencyReport) {
+      console.log('🚨 EMERGENCY case — generating the narrative without a treatment plan')
+      const withdrawn = withdrawTreatmentForEmergency(enrichedData)
+      console.log(`   - Withdrawn: ${withdrawn.medications} medications, ${withdrawn.labTests} lab tests, ${withdrawn.imaging} imaging studies`)
+    }
     
     // ===== STEP 3 + 5 in PARALLEL: narrative + prescription extracts =====
     // The narrative LLM call and the 3 extract LLM calls (medications, labs,
@@ -744,7 +766,7 @@ export async function POST(req: NextRequest) {
     // extracts) ≈ 1-2 min total.
     console.log("STEP 3+5: Generating narrative + extracting prescriptions in PARALLEL on deepseek-chat...")
 
-    const systemPrompt = createChronicDiseaseSystemPrompt()
+    const systemPrompt = `${isEmergencyReport ? EMERGENCY_NARRATIVE_DIRECTIVE + '\n' : ''}${createChronicDiseaseSystemPrompt()}`
     const userPrompt = createChronicDiseaseUserPrompt(enrichedData, patientData, doctorData, followUpContext)
 
     const narrativePromise = (async () => {

@@ -692,6 +692,35 @@ You MUST actively correlate the visual observations from the IMAGE ANALYSIS abov
 
 DO NOT treat the image analysis as optional context - it is PRIMARY clinical evidence that must inform EVERY aspect of your assessment.
 
+═══════════════════════════════════════════════════════════════════════════════
+DERMATOLOGICAL EMERGENCY CRITERIA (used to populate triage_assessment)
+═══════════════════════════════════════════════════════════════════════════════
+
+Most skin disease is not urgent. A handful of presentations kill within days, and they are the reason this block exists. Classify from features you can name, never from the diagnosis label alone.
+
+▶ severity = "emergency", disposition = "ambulance_immediate" or "A&E_same_day":
+  - Stevens-Johnson syndrome / toxic epidermal necrolysis: painful skin, mucosal involvement (≥1 site), Nikolsky sign, epidermal detachment, dusky targetoid lesions, recent new drug
+  - Necrotising fasciitis: pain out of proportion to appearance, rapid spread over hours, dusky or anaesthetic skin, crepitus, systemic toxicity
+  - Anaphylaxis or angioedema with airway involvement: lip/tongue/throat swelling, stridor, dyspnoea, hypotension
+  - DRESS: widespread rash + fever + facial oedema + lymphadenopathy 2-8 weeks after a new drug
+  - Purpura fulminans / meningococcaemia: non-blanching purpura with fever, especially rapidly spreading
+  - Eczema herpeticum: monomorphic punched-out erosions over eczema, fever, unwell
+  - Erythroderma: >90% body surface erythema with systemic upset, hypothermia or haemodynamic instability
+  - Staphylococcal scalded skin syndrome in a child, or any blistering disease with fluid loss
+
+▶ severity = "urgent", disposition = "gp_review_24h":
+  - Rapidly spreading cellulitis, or cellulitis with systemic features but no necrotising signs
+  - Suspected melanoma or aggressive cutaneous malignancy (needs a specialist within days, not an ambulance)
+  - Herpes zoster involving the ophthalmic division, within the antiviral window
+  - Acute severe flare with secondary infection in an immunosuppressed patient
+
+▶ severity = "routine", disposition = "outpatient":
+  - Everything else. Chronic and subacute dermatoses, stable lesions, well patient.
+
+A worrying-looking rash is NOT an emergency on appearance alone. Extent, pain out of proportion, mucosal involvement, systemic features and speed of progression are what decide it — list whichever of them you used.
+
+If severity = "emergency": the patient is transferred to hospital, so do NOT prescribe definitive outpatient treatment and do NOT order community investigations; the receiving unit does that. If severity = "routine", do not use the words "emergency", "urgent" or "stat" anywhere — they trigger downstream alerts inappropriately.
+
 CLINICAL HISTORY (from questions):
 ${questionsAnswers}
 
@@ -794,8 +823,15 @@ TASK: Provide a comprehensive dermatological assessment with appropriate consult
 
 Return ONLY a valid JSON object with this EXACT structure (no markdown, no explanations):
 {
+  "triage_assessment": {
+    "severity": "MANDATORY - one of: routine | urgent | emergency. Use the DERMATOLOGICAL EMERGENCY CRITERIA in the system prompt. Never inflate on keywords; never deflate when a criterion is met.",
+    "disposition": "MANDATORY - one of: outpatient | gp_review_24h | A&E_same_day | ambulance_immediate. Must be coherent with severity.",
+    "criteria_met": ["MANDATORY - the OBJECTIVE features that decided it (e.g. 'Nikolsky sign positive', 'mucosal involvement at two sites', '18% body surface detachment'). If routine, list the emergency features CHECKED AND ABSENT (e.g. 'no mucosal involvement', 'no skin pain out of proportion', 'no systemic features')."],
+    "justification": "MANDATORY - 1 to 3 sentences of clinical reasoning for the level chosen. No boilerplate."
+  },
+
   "clinicalSummary": "Comprehensive summary of case presentation with key clinical features (minimum 50 characters)",
-  
+
   "primaryDiagnosis": {
     "name": "Specific dermatological condition name",
     "icd10": "L20.9 (exact ICD-10 code)",
@@ -1488,7 +1524,16 @@ GENERATE your EXPERT dermatological assessment with MAXIMUM clinical specificity
         lastName: originalIdentity.lastName,
         age: anonymizedPatient.age
       },
-      
+
+      // Triage, at the top level and under the same key as the general flow —
+      // `resolveTriage` looks for it there, and the emergency policy in the
+      // report component is driven entirely by what it finds.
+      //
+      // Null when the model omitted it, never a defaulted "routine": a
+      // defaulted routine reads as "assessed and safe", which is the one thing
+      // a missing triage must never be allowed to say.
+      triage_assessment: diagnosisData?.triage_assessment || null,
+
       // ========== TOP-LEVEL MEDICATIONS (MATCH NORMAL WORKFLOW) ==========
       currentMedicationsValidated: currentMedicationsValidated,
       medications: medications,

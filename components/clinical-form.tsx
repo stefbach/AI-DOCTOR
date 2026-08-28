@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { consultationDataService } from '@/lib/consultation-data-service'
+import { supabase } from '@/lib/supabase'
 import { saveTibokDraft } from '@/lib/tibok-draft-service'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -32,6 +33,7 @@ import {
  Info
 } from "lucide-react"
 import { useTibokPatientData } from "@/hooks/use-tibok-patient-data"
+import { isAllowedOrigin } from "@/hooks/use-tibok-bridge"
 import { getTranslation, Language } from "@/lib/translations"
 import { VoiceDictationButton } from "@/components/voice-dictation-button"
 import VitalSignsDisclaimer, { useVitalAlerts } from "@/components/vital-signs-disclaimer"
@@ -42,6 +44,9 @@ interface VitalSigns {
  bloodPressureSystolic: string
  bloodPressureDiastolic: string
  bloodGlucose: string // Test de glycémie en g/L (optionnel)
+ heartRate: string // Pouls (bpm)
+ oxygenSaturation: string // SpO2 (%)
+ weight: string // Poids (kg)
 }
 
 interface WorkplaceIncident {
@@ -84,7 +89,10 @@ const INITIAL_CLINICAL_DATA: ClinicalData = {
  temperature: "",
  bloodPressureSystolic: "",
  bloodPressureDiastolic: "",
- bloodGlucose: "" // Test de glycémie optionnel
+ bloodGlucose: "", // Test de glycémie optionnel
+ heartRate: "",
+ oxygenSaturation: "",
+ weight: ""
  },
  workplaceIncident: {
  illnessAtWork: false,
@@ -192,7 +200,11 @@ export default function ModernClinicalForm({
  vitalSigns: {
  temperature: validatedTemperature,
  bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
- bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
+ bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || "",
+ bloodGlucose: "",
+ heartRate: tibokPatient.vitalSigns?.pulse?.toString() || "",
+ oxygenSaturation: tibokPatient.vitalSigns?.oxygenSaturation?.toString() || "",
+ weight: tibokPatient.weight?.toString() || ""
  },
  workplaceIncident: {
  illnessAtWork: false,
@@ -367,6 +379,16 @@ const COMMON_SYMPTOMS = useMemo(() => [
  if (bg >= 2.0) return "Hyperglycémie sévère"
  
  return ""
+ }, [])
+
+ // TIBOK sends blood glucose in mmol/L or mg/dL (doctor's meter units); this
+ // form has always displayed/validated glycémie in g/L (see bloodGlucose
+ // field + validateBloodGlucose above), so an incoming reading has to be
+ // converted before it lands in the input.
+ const convertGlycemieToGL = useCallback((value: number, unit: 'mmol/L' | 'mg/dL' | null | undefined): string => {
+ if (unit === 'mg/dL') return (value * 0.01).toFixed(2) // 100 mg/dL = 1 g/L
+ if (unit === 'mmol/L') return (value * 0.18016).toFixed(2) // glucose molar mass 180.16 g/mol
+ return value.toString()
  }, [])
 
  // ========== Event handlers ==========
@@ -864,7 +886,11 @@ const COMMON_SYMPTOMS = useMemo(() => [
  vitalSigns: {
  temperature: validatedTemperature,
  bloodPressureSystolic: tibokPatient.vitalSigns?.bloodPressureSystolic?.toString() || "",
- bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || ""
+ bloodPressureDiastolic: tibokPatient.vitalSigns?.bloodPressureDiastolic?.toString() || "",
+ bloodGlucose: "",
+ heartRate: tibokPatient.vitalSigns?.pulse?.toString() || "",
+ oxygenSaturation: tibokPatient.vitalSigns?.oxygenSaturation?.toString() || "",
+ weight: tibokPatient.weight?.toString() || ""
  },
  workplaceIncident: {
  illnessAtWork: false,
@@ -884,6 +910,101 @@ const COMMON_SYMPTOMS = useMemo(() => [
  hasLoadedTibokData.current = true
  }
  }, [tibokPatient, isFromTibok, COMMON_SYMPTOMS])
+
+ // TIBOK → AI-DOCTOR vitals postMessage bridge. The doctor validates
+ // constants (photo of a monitor/meter, OCR'd and confirmed) at any point
+ // during the consultation, and TIBOK re-sends the full reading each time —
+ // including on a retake. A field the doctor didn't read comes through as
+ // null and must NOT clear whatever is already in that input; a field that
+ // IS present overwrites, because TIBOK's message says the newest reading is
+ // the correct one (e.g. a retaken photo superseding a bad OCR read).
+ useEffect(() => {
+ const onVitalsMessage = (event: MessageEvent) => {
+ // TEMP DIAGNOSTIC (remove once the real TIBOK payload shape is confirmed):
+ // log every object-shaped postMessage this window receives, before any
+ // filtering, so a mismatch (origin, field names, nesting) is visible
+ // instead of being silently dropped.
+ if (event.data && typeof event.data === 'object') {
+ console.log('🔍 [tibok-vitals][debug] raw message received:', {
+ origin: event.origin,
+ originAllowed: isAllowedOrigin(event.origin),
+ data: event.data
+ })
+ }
+
+ if (!isAllowedOrigin(event.origin)) return
+
+ const msg = event.data as { source?: string; type?: string; payload?: any } | null
+ if (!msg || typeof msg !== 'object') return
+ if (msg.source !== 'tibok' || msg.type !== 'vitals') {
+ if (msg.type || msg.source) {
+ console.warn('🔍 [tibok-vitals][debug] object message did not match expected shape (source=\'tibok\', type=\'vitals\'):', msg)
+ }
+ return
+ }
+
+ const v = msg.payload || {}
+ console.log('🌡️ [tibok-vitals] reading received:', v)
+
+ if (v.tension_systolique != null) updateVitalSigns('bloodPressureSystolic', v.tension_systolique.toString())
+ if (v.tension_diastolique != null) updateVitalSigns('bloodPressureDiastolic', v.tension_diastolique.toString())
+ if (v.pouls != null) updateVitalSigns('heartRate', v.pouls.toString())
+ if (v.temperature != null) updateVitalSigns('temperature', v.temperature.toString())
+ if (v.spo2 != null) updateVitalSigns('oxygenSaturation', v.spo2.toString())
+ if (v.poids != null) updateVitalSigns('weight', v.poids.toString())
+ if (v.glycemie != null) {
+ updateVitalSigns('bloodGlucose', convertGlycemieToGL(v.glycemie, v.glycemie_unite))
+ }
+ }
+
+ window.addEventListener('message', onVitalsMessage)
+ return () => window.removeEventListener('message', onVitalsMessage)
+ }, [updateVitalSigns, convertGlycemieToGL])
+
+ // TIBOK's actual capture UI writes vitals to consultation_records.clinical_data.vitals
+ // instead of sending the postMessage above — confirmed by direct DB inspection while
+ // debugging why the listener above never fired for a real "Envoyer à AI-DOCTOR" capture.
+ // Poll that row instead. Same semantics as the postMessage path (a null field is never
+ // applied; a changed non-null field overwrites), but keyed off "did the DB value change
+ // since the last poll" rather than "a new event arrived" — so a doctor's manual edit made
+ // after the last capture survives later polls that see the same, unchanged DB reading.
+ useEffect(() => {
+ if (!consultationId) return
+
+ let lastSeenVitals: Record<string, any> | null = null
+
+ const pollVitals = async () => {
+ const { data: record, error } = await supabase
+ .from('consultation_records')
+ .select('clinical_data')
+ .eq('consultation_id', consultationId)
+ .maybeSingle()
+
+ if (error || !record?.clinical_data?.vitals) return
+ const v = record.clinical_data.vitals
+
+ const changed = (key: string) => v[key] != null && v[key] !== lastSeenVitals?.[key]
+
+ if (changed('tension_systolique')) updateVitalSigns('bloodPressureSystolic', v.tension_systolique.toString())
+ if (changed('tension_diastolique')) updateVitalSigns('bloodPressureDiastolic', v.tension_diastolique.toString())
+ if (changed('pouls')) updateVitalSigns('heartRate', v.pouls.toString())
+ if (changed('temperature')) updateVitalSigns('temperature', v.temperature.toString())
+ if (changed('spo2')) updateVitalSigns('oxygenSaturation', v.spo2.toString())
+ if (changed('poids')) updateVitalSigns('weight', v.poids.toString())
+ if (v.glycemie != null && (v.glycemie !== lastSeenVitals?.glycemie || v.glycemie_unite !== lastSeenVitals?.glycemie_unite)) {
+ updateVitalSigns('bloodGlucose', convertGlycemieToGL(v.glycemie, v.glycemie_unite))
+ }
+
+ if (JSON.stringify(v) !== JSON.stringify(lastSeenVitals)) {
+ console.log('🌡️ [tibok-vitals][db-poll] new reading applied:', v)
+ }
+ lastSeenVitals = v
+ }
+
+ pollVitals()
+ const interval = setInterval(pollVitals, 4000)
+ return () => clearInterval(interval)
+ }, [consultationId, updateVitalSigns, convertGlycemieToGL])
 
  // Load from database only if no TIBOK data and no props data
  useEffect(() => {
@@ -1506,6 +1627,61 @@ const COMMON_SYMPTOMS = useMemo(() => [
  placeholder="80"
  disabled={bpNotApplicable}
  className={bpNotApplicable ? 'opacity-50' : ''}
+ />
+ </div>
+
+ {/* Heart rate / Pouls */}
+ <div className="space-y-2">
+ <div className="flex items-center gap-2">
+ <Heart className="h-5 w-5 text-blue-500" />
+ <Label htmlFor="heartRate" className="font-medium">
+ Heart rate (bpm)
+ </Label>
+ </div>
+ <Input
+ id="heartRate"
+ type="number"
+ min="30"
+ max="220"
+ value={localData.vitalSigns.heartRate}
+ onChange={(e) => updateVitalSigns("heartRate", e.target.value)}
+ onKeyDown={handleKeyDown}
+ placeholder="75"
+ />
+ </div>
+
+ {/* Oxygen saturation / SpO2 */}
+ <div className="space-y-2">
+ <Label htmlFor="oxygenSaturation" className="font-medium">
+ SpO2 (%)
+ </Label>
+ <Input
+ id="oxygenSaturation"
+ type="number"
+ min="50"
+ max="100"
+ value={localData.vitalSigns.oxygenSaturation}
+ onChange={(e) => updateVitalSigns("oxygenSaturation", e.target.value)}
+ onKeyDown={handleKeyDown}
+ placeholder="98"
+ />
+ </div>
+
+ {/* Weight / Poids */}
+ <div className="space-y-2">
+ <Label htmlFor="weight" className="font-medium">
+ Weight (kg)
+ </Label>
+ <Input
+ id="weight"
+ type="number"
+ step="0.1"
+ min="1"
+ max="400"
+ value={localData.vitalSigns.weight}
+ onChange={(e) => updateVitalSigns("weight", e.target.value)}
+ onKeyDown={handleKeyDown}
+ placeholder="70"
  />
  </div>
  </div>

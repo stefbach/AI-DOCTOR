@@ -3065,7 +3065,14 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  inset: 0;
  background: rgba(0, 0, 0, 0.5);
  display: flex;
- align-items: center;
+      /* Top-anchored and scrollable, not vertically centred: on a phone inside
+         the TIBOK iframe, under the video pane, a centred panel is taller than
+         the viewport left to it and its close button lands below the fold. */
+ align-items: flex-start;
+ overflow-y: auto;
+ -webkit-overflow-scrolling: touch;
+ overscroll-behavior: contain;
+ padding: 0.75rem;
  justify-content: center;
  z-index: 9999;
  animation: fadeIn 0.3s ease-out;
@@ -3076,8 +3083,10 @@ sickLeaveCertificate: report?.ordonnances?.arretMaladie ? {
  background: white;
  padding: 2rem;
  border-radius: 1rem;
+ width: 100%;
  max-width: 500px;
- margin: 1rem;
+ margin: 0.5rem 0;
+ box-sizing: border-box;
  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
  animation: slideUp 0.3s ease-out;
  position: relative;
