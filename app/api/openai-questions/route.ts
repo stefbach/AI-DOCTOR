@@ -1872,8 +1872,21 @@ function anonymizeData(patient: PatientData): {
 // ==================== MAIN API HANDLER ====================
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  
+
   try {
+    // ---- Optional trusted server-to-server caller identification (additive only) ----
+    // Recognises a Bearer token matching AGENT_SHARED_SECRET (e.g. the Eva voice
+    // agent) purely for logging/traceability. This NEVER blocks or alters the
+    // response: a request without this header, or with the wrong value, is
+    // handled exactly as before this change. See EVA_VOICE_AGENT_INTEGRATION.md.
+    {
+      const agentSecret = process.env.AGENT_SHARED_SECRET
+      const authHeader = request.headers.get('authorization') || ''
+      if (agentSecret && authHeader === `Bearer ${agentSecret}`) {
+        console.log('[openai-questions] trusted server-to-server call (AGENT_SHARED_SECRET matched)')
+      }
+    }
+
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey || !apiKey.startsWith('sk-')) {
       throw new Error('Invalid or missing OpenAI API key')

@@ -207,6 +207,19 @@ ${systemMessage}
 
 export async function POST(request: NextRequest) {
   try {
+    // ---- Optional trusted server-to-server caller identification (additive only) ----
+    // Recognises a Bearer token matching AGENT_SHARED_SECRET (e.g. the Eva voice
+    // agent) purely for logging/traceability. This NEVER blocks or alters the
+    // response: a request without this header, or with the wrong value, is
+    // handled exactly as before this change. See EVA_VOICE_AGENT_INTEGRATION.md.
+    {
+      const agentSecret = process.env.AGENT_SHARED_SECRET
+      const authHeader = request.headers.get('authorization') || ''
+      if (agentSecret && authHeader === `Bearer ${agentSecret}`) {
+        console.log('[dermatology-questions] trusted server-to-server call (AGENT_SHARED_SECRET matched)')
+      }
+    }
+
     const body = await request.json()
     const { patientData, imageData, ocrAnalysisData } = body
 

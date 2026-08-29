@@ -402,8 +402,21 @@ Generate exactly 8 questions. Response must be valid JSON only.`
 // ==================== MAIN API HANDLER ====================
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
-  
+
   try {
+    // ---- Optional trusted server-to-server caller identification (additive only) ----
+    // Recognises a Bearer token matching AGENT_SHARED_SECRET (e.g. the Eva voice
+    // agent) purely for logging/traceability. This NEVER blocks or alters the
+    // response: a request without this header, or with the wrong value, is
+    // handled exactly as before this change. See EVA_VOICE_AGENT_INTEGRATION.md.
+    {
+      const agentSecret = process.env.AGENT_SHARED_SECRET
+      const authHeader = request.headers.get('authorization') || ''
+      if (agentSecret && authHeader === `Bearer ${agentSecret}`) {
+        console.log('[chronic-questions] trusted server-to-server call (AGENT_SHARED_SECRET matched)')
+      }
+    }
+
     // Credential validation is delegated to callLLM (which resolves the
     // active provider via LLM_PROVIDER_CHRONIC_QUESTIONS).
     const body = await request.json()
