@@ -102,6 +102,19 @@ async function callOpenAI(
 export async function POST(req: NextRequest) {
   // Credential validation delegated to callLLM (LLM_PROVIDER_CHRONIC_DIAGNOSIS).
   try {
+    // ---- Optional trusted server-to-server caller identification (additive only) ----
+    // Recognises a Bearer token matching AGENT_SHARED_SECRET (e.g. the Eva voice
+    // agent) purely for logging/traceability. This NEVER blocks or alters the
+    // response: a request without this header, or with the wrong value, is
+    // handled exactly as before this change. See EVA_VOICE_AGENT_INTEGRATION.md.
+    {
+      const agentSecret = process.env.AGENT_SHARED_SECRET
+      const authHeader = req.headers.get('authorization') || ''
+      if (agentSecret && authHeader === `Bearer ${agentSecret}`) {
+        console.log('[chronic-diagnosis] trusted server-to-server call (AGENT_SHARED_SECRET matched)')
+      }
+    }
+
     const { patientData, clinicalData, questionsData } = await req.json()
 
     // Anonymize patient data before sending to AI

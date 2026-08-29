@@ -5465,8 +5465,21 @@ function convertToSimpleFormat(dosing: string): string {
 export async function POST(request: NextRequest) {
   console.log('🚀 MAURITIUS MEDICAL AI - VERSION 4.3 LOGIQUE COMPLÈTE + DCI PRÉCIS')
   const startTime = Date.now()
-  
+
   try {
+    // ---- Optional trusted server-to-server caller identification (additive only) ----
+    // Recognises a Bearer token matching AGENT_SHARED_SECRET (e.g. the Eva voice
+    // agent) purely for logging/traceability. This NEVER blocks or alters the
+    // response: a request without this header, or with the wrong value, is
+    // handled exactly as before this change. See EVA_VOICE_AGENT_INTEGRATION.md.
+    {
+      const agentSecret = process.env.AGENT_SHARED_SECRET
+      const authHeader = request.headers.get('authorization') || ''
+      if (agentSecret && authHeader === `Bearer ${agentSecret}`) {
+        console.log('[openai-diagnosis] trusted server-to-server call (AGENT_SHARED_SECRET matched)')
+      }
+    }
+
     const [body, apiKey] = await Promise.all([
       request.json(),
       Promise.resolve(process.env.OPENAI_API_KEY)
