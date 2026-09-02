@@ -27,9 +27,24 @@ import { verifyCitationGrounding, stripRefTokens } from '@/lib/rag/verify-citati
 // analysis is lost. Writing the result down before answering makes it
 // recoverable — see lib/ai-result-cache.ts.
 import { saveStepResult } from '@/lib/ai-result-cache'
+import { normaliseJsonFraming, parseJsonLossless } from '@/lib/llm/json-recovery'
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s: DeepSeek-V4-Pro on the Phase 1 enriched system prompt + Phase 2 boosted RAG context regularly runs 250-350s; 600 gives headroom without burning more compute than the call actually uses (Vercel bills real runtime, not the cap).
+
+// How long this route may already have been running before a second LLM pass
+// stops being worth starting.
+//
+// The ceiling is the doctor's patience, not the 600s function cap: the browser
+// aborts at 210s (DIAGNOSIS_TIMEOUT_MS) and then polls the result cache for
+// another 150s, so anything we finish past ~360s is written down for nobody.
+// A pass costs 45-250s, and reaching this point already includes ~40s of RAG,
+// so 180s keeps the worst case inside that window.
+//
+// The previous value was 70s, sized for the old 300s Vercel cap. With calls
+// running 45-250s it disqualified the retry on every slow case — including the
+// one it exists for.
+const RETRY_BUDGET_MS = 180_000
 
 // ==================== TYPES AND INTERFACES ====================
 interface PatientContext {
@@ -2036,79 +2051,70 @@ function ensureCompleteStructure(analysis: any): any {
 }
 
 function validateAndParseJSON(rawContent: string): { success: boolean, data?: any, error?: string } {
-  try {
-    let cleanContent = rawContent.trim()
-
-    // Remove markdown code blocks
-    cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
-
-    // GPT-5.5 may include reasoning/thinking text before JSON - extract JSON object
-    if (!cleanContent.startsWith('{')) {
-      const firstBrace = cleanContent.indexOf('{')
-      if (firstBrace !== -1) {
-        console.log(`⚠️ JSON doesn't start at position 0, found '{' at position ${firstBrace}. Extracting JSON...`)
-        cleanContent = cleanContent.substring(firstBrace)
-      }
-    }
-
-    // Find the last closing brace (in case there's trailing text)
-    if (!cleanContent.endsWith('}')) {
-      const lastBrace = cleanContent.lastIndexOf('}')
-      if (lastBrace !== -1) {
-        console.log(`⚠️ JSON doesn't end with '}', found last '}' at position ${lastBrace}. Trimming trailing text...`)
-        cleanContent = cleanContent.substring(0, lastBrace + 1)
-      }
-    }
-
-    if (!cleanContent.startsWith('{') || !cleanContent.endsWith('}')) {
-      return {
-        success: false,
-        error: `Invalid JSON structure - doesn't start with { or end with }. Content preview: ${rawContent.substring(0, 200)}...`
-      }
-    }
-
-    const parsed = JSON.parse(cleanContent)
-    
-    const criticalFields = [
-      'clinical_analysis',
-      'diagnostic_reasoning', 
-      'investigation_strategy',
-      'treatment_plan',
-      'follow_up_plan'
-    ]
-    
-    const missingFields = criticalFields.filter(field => !parsed[field])
-    
-    if (missingFields.length > 2) {
-      return { 
-        success: false, 
-        error: `Too many critical fields missing: ${missingFields.join(', ')}. This suggests incomplete JSON structure.` 
-      }
-    }
-    
-    return { success: true, data: parsed }
-    
-  } catch (parseError) {
-    // Last resort: try to find and parse any JSON object in the content
-    try {
-      const jsonMatch = rawContent.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        console.log('🔄 Attempting last-resort JSON extraction...')
-        const parsed = JSON.parse(jsonMatch[0])
-        if (parsed && typeof parsed === 'object') {
-          console.log('✅ Last-resort JSON extraction succeeded')
-          return { success: true, data: parsed }
-        }
-      }
-    } catch (e) {
-      // Fall through to error return
-    }
-
+  // An empty answer and a malformed one are different failures with different
+  // fixes, and until 02/09 both surfaced as "Invalid JSON structure — doesn't
+  // start with {", the second one printing 200 characters of whitespace as its
+  // evidence. Say which one happened.
+  if (!rawContent || !rawContent.trim()) {
     return {
       success: false,
-      error: `JSON parsing failed: ${parseError}. Raw content length: ${rawContent.length}. Preview: ${rawContent.substring(0, 200)}`
+      error: `Empty model response (${rawContent?.length ?? 0} characters, nothing but whitespace). ` +
+             `Nothing was generated — this is a provider failure, not malformed JSON.`,
     }
   }
+
+  // Framing repairs: strip markdown fences, and drop anything the model wrote
+  // before the first '{' or after the last '}' (reasoning preambles, sign-off
+  // sentences). Lossless with respect to the JSON document itself.
+  const cleanContent = normaliseJsonFraming(rawContent)
+
+  if (!cleanContent.startsWith('{') || !cleanContent.endsWith('}')) {
+    return {
+      success: false,
+      error: `No JSON object found in the response (${rawContent.length} characters). ` +
+             `Content preview: ${rawContent.substring(0, 200)}...`,
+    }
+  }
+
+  // Lossless recovery ladder — re-escapes stray control characters and drops
+  // trailing commas, both of which DeepSeek emits intermittently in
+  // json_object mode. Deliberately does NOT trim back to the last clean
+  // boundary: on a diagnosis, a "repaired" truncation means investigations or
+  // prescriptions silently disappearing, and ensureCompleteStructure would
+  // then fill the gap with generic text the doctor cannot tell apart from a
+  // real analysis. See lib/llm/json-recovery.ts.
+  const parsed = parseJsonLossless(cleanContent)
+
+  if (!parsed.ok) {
+    return {
+      success: false,
+      error: `JSON parsing failed: ${parsed.error.message}. Raw content length: ${rawContent.length}. ` +
+             `Preview: ${rawContent.substring(0, 200)}`,
+    }
+  }
+
+  if (parsed.repair !== 'none') {
+    console.log(`✅ JSON parsed after a lossless repair (${parsed.repair}) — no clinical content dropped`)
+  }
+
+  const criticalFields = [
+    'clinical_analysis',
+    'diagnostic_reasoning',
+    'investigation_strategy',
+    'treatment_plan',
+    'follow_up_plan',
+  ]
+
+  const missingFields = criticalFields.filter(field => !parsed.value[field])
+
+  if (missingFields.length > 2) {
+    return {
+      success: false,
+      error: `Too many critical fields missing: ${missingFields.join(', ')}. This suggests incomplete JSON structure.`,
+    }
+  }
+
+  return { success: true, data: parsed.value }
 }
 
 // ==================== MAURITIUS OPENAI CALL WITH QUALITY RETRY + DCI ====================
@@ -2125,9 +2131,13 @@ async function callOpenAIWithMauritiusQuality(
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      // Check elapsed time - don't retry if we've used more than 70 seconds
+      // Budget check before spending another full generation. The old 70s
+      // ceiling dated from the 300s Vercel cap; maxDuration is 600s now, and a
+      // single DeepSeek pass runs 45-250s, so 70s silently disqualified the
+      // retry on any slow case. 300s leaves room for a second pass plus the
+      // ~40s of post-processing (validation, RAG scrub, citation verify).
       const elapsed = Date.now() - functionStartTime
-      if (attempt > 0 && elapsed > 70000) {
+      if (attempt > 0 && elapsed > RETRY_BUDGET_MS) {
         console.log(`⏰ Elapsed ${Math.round(elapsed/1000)}s - skipping retry to avoid timeout`)
         break
       }
@@ -2473,7 +2483,10 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
       })
 
       let rawContent = completion.text || ''
-      const finishReason = 'unknown'
+      // Comes from the provider now (lib/llm-client.ts). It used to be the
+      // literal 'unknown', which made the truncation branch below unreachable
+      // and left us unable to tell a cut-off response from an empty one.
+      const finishReason = completion.finishReason ?? 'unknown'
 
       // AI Doctor is a teleconsultation. Inputs never include a real physical
       // examination, so we hard-code hasExamData=false. We log when the model
@@ -2500,7 +2513,11 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
 
       // If the response was truncated (length limit hit), the JSON may be incomplete
       if (finishReason === 'length') {
-        console.log('⚠️ Response was truncated (finish_reason: length) - increasing max_completion_tokens may help')
+        console.warn(
+          `⚠️ Response truncated (finish_reason=length): the model hit maxTokens=16000 after ` +
+            `${completion.usage?.completionTokens ?? 'n/a'} completion tokens. The JSON is incomplete by ` +
+            `construction — raising maxTokens or shortening the prompt is the fix, not a retry.`,
+        )
       }
       
       const jsonValidation = validateAndParseJSON(rawContent)
@@ -2538,7 +2555,7 @@ You are practicing in Mauritius with UK medical standards. Generate ENCYCLOPEDIC
       
       if (attempt < maxRetries) {
         const elapsedSoFar = Date.now() - functionStartTime
-        if (elapsedSoFar > 70000) {
+        if (elapsedSoFar > RETRY_BUDGET_MS) {
           console.log(`⏰ Elapsed ${Math.round(elapsedSoFar/1000)}s - skipping retry to avoid timeout`)
           break
         }
