@@ -29,7 +29,7 @@ import { supabase } from '@/lib/supabase'
 import { useTibokBridge } from '@/hooks/use-tibok-bridge'
 import ConsultationTimerBar from '@/components/consultation-timer-bar'
 import ViewportLayer from '@/components/viewport-layer'
-import { normalisePatientRecord } from '@/lib/patient-normalisation'
+import { mergePatientRecords, normalisePatientRecord } from '@/lib/patient-normalisation'
 import {
   type TimerState,
   SECTION_BY_STEP,
@@ -366,13 +366,29 @@ export default function MedicalAIExpert() {
             if (payload?.consultationId) {
               console.log('🩺 [Page] Hydrating from nurse handoff:', payload.consultationId)
               consultationDataService.setCurrentConsultationId(payload.consultationId)
-              if (payload.patientData) {
-                // The nurse draft carries the patient under TIBOK's field names,
-                // not the patient form's: age can arrive only as a date of birth
-                // and the regular medicines only as free text. Normalise once,
-                // here, so the doctor's screen, the documents and the model all
-                // see the same patient. See lib/patient-normalisation.ts.
-                await consultationDataService.saveStepData(0, normalisePatientRecord(payload.patientData))
+              if (payload.patientData || payload.tibokPatientData) {
+                // Two partial records make one patient. The nurse draft holds
+                // what she recorded — on 02/09 that was six fields with no name
+                // and no date of birth, which is why the report refused to
+                // generate and the model got no age. TIBOK's own record, staged
+                // by the hub, carries the identity. Hers wins wherever she
+                // filled something in.
+                //
+                // Normalising after the merge means age and current medications
+                // are resolved from whichever record actually carried them, so
+                // the doctor's screen, the documents and the model all see the
+                // same patient. See lib/patient-normalisation.ts.
+                const patient = normalisePatientRecord(
+                  mergePatientRecords(payload.tibokPatientData, payload.patientData),
+                )
+                console.log('🩺 [Page] Patient assembled from handoff:', {
+                  hasName: !!(patient.firstName || patient.lastName || patient.name),
+                  age: patient.age ?? '(unknown)',
+                  currentMedications: patient.currentMedications?.length ?? 0,
+                  fromNurseDraft: Object.keys(payload.patientData || {}).length,
+                  fromTibok: Object.keys(payload.tibokPatientData || {}).length,
+                })
+                await consultationDataService.saveStepData(0, patient)
               }
               if (payload.clinicalData) {
                 await consultationDataService.saveStepData(1, payload.clinicalData)
