@@ -84,9 +84,28 @@ class DiagnosisHttpError extends Error {
   }
 }
 
-/** Worth recovering/retrying: the request never got an answer, or the answer
- *  was a server-side failure that a second attempt could survive. */
-function isWorthRecovering(error: unknown): boolean {
+/**
+ * The request never reached an answer of its own: the fetch threw (network
+ * down, abort, timeout), or a gateway answered for a function we cannot see
+ * the outcome of. Only these are worth polling the cache for.
+ *
+ * A 500 carrying our route's own error body is NOT one of them: the route ran,
+ * failed, and writes to the cache only on its success path — so the poll is a
+ * guaranteed miss. On 01/09 it cost the doctor 150 seconds of "recovering the
+ * analysis" between the 14:50:19 failure and the 14:52:51 retry, for nothing.
+ */
+function isLostInFlight(error: unknown): boolean {
+  if (error instanceof DiagnosisHttpError) {
+    // 502/503/504 come from the platform, not from our handler: the function
+    // may well have finished and cached its result before the link gave up.
+    return error.status === 502 || error.status === 503 || error.status === 504
+  }
+  return true
+}
+
+/** Worth spending another generation on: anything but a request we know the
+ *  server rejected on its merits (4xx). */
+function isWorthRetrying(error: unknown): boolean {
   if (error instanceof DiagnosisHttpError) return error.status >= 500
   return true
 }
@@ -1314,15 +1333,20 @@ export default function DiagnosisForm({
  try {
  data = await postDiagnosis(requestBody)
  } catch (transportError) {
- if (!isWorthRecovering(transportError)) throw transportError
+ if (!isWorthRetrying(transportError)) throw transportError
 
+ if (isLostInFlight(transportError)) {
  // The request died on the way. It does not follow that the work did:
  // the route runs 90-150s and answers into whatever socket is left. Ask
  // for the result before spending another two minutes recomputing it.
- console.warn('⚠️ Diagnosis request lost — attempting recovery:', transportError)
+ console.warn('⚠️ Diagnosis request lost in flight — attempting recovery:', transportError)
  recoveringRef.current = true
-
  data = await recoverCachedDiagnosis(consultationKey, resultToken)
+ } else {
+ // The server answered, and what it answered was a failure. There is
+ // nothing cached to go and fetch — go straight to the second attempt.
+ console.warn('⚠️ Diagnosis failed server-side — retrying without polling the cache:', transportError)
+ }
 
  if (!data) {
  // Nothing cached: the call never got far enough, so run it again.
@@ -1332,10 +1356,13 @@ export default function DiagnosisForm({
  try {
  data = await postDiagnosis(requestBody)
  } catch (retryError) {
- if (!isWorthRecovering(retryError)) throw retryError
+ // Only a request lost in flight is worth polling for; a failure the
+ // server reported belongs on screen now. (isLostInFlight is the stricter
+ // of the two tests — a 4xx fails it as well.)
+ if (!isLostInFlight(retryError)) throw retryError
  // The retry may well have completed server-side before the link
  // dropped again. Same question, one last time.
- console.warn('⚠️ Retry also lost — final recovery attempt:', retryError)
+ console.warn('⚠️ Retry also lost in flight — final recovery attempt:', retryError)
  data = await recoverCachedDiagnosis(consultationKey, resultToken)
  if (!data) throw retryError
  }
