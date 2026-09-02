@@ -28,6 +28,7 @@ import { verifyCitationGrounding, stripRefTokens } from '@/lib/rag/verify-citati
 // recoverable — see lib/ai-result-cache.ts.
 import { saveStepResult } from '@/lib/ai-result-cache'
 import { normaliseJsonFraming, parseJsonLossless } from '@/lib/llm/json-recovery'
+import { resolveCurrentMedications, resolvePatientAge } from '@/lib/patient-normalisation'
 
 export const runtime = 'nodejs'
 export const maxDuration = 600 // 600s: DeepSeek-V4-Pro on the Phase 1 enriched system prompt + Phase 2 boosted RAG context regularly runs 250-350s; 600 gives headroom without burning more compute than the call actually uses (Vercel bills real runtime, not the cap).
@@ -5546,13 +5547,31 @@ export async function POST(request: NextRequest) {
       return 'inconnu'
     })()
 
+    // Age and medications come in under whichever name the sending flow uses.
+    // Reading `age` alone sent a 62-year-old to the model as 0 on 01/09, and
+    // reading `currentMedications` alone hid his three regular medicines
+    // because the handoff carries them as text. See lib/patient-normalisation.
+    const resolvedAge = resolvePatientAge(anonymizedPatientData)
+    const resolvedMedications = resolveCurrentMedications(anonymizedPatientData)
+
+    if (resolvedAge === null) {
+      console.warn(
+        '⚠️ No usable patient age (checked age, dateOfBirth, birthDate). ' +
+          'Dosing, differentials and guideline retrieval will run without it.',
+      )
+    }
+
     const patientContext: PatientContext = {
-      age: parseInt(anonymizedPatientData?.age) || 0,
+      // Empty, never 0, when the age is unknown: 0 is a valid age (a neonate)
+      // and every downstream reader treated it as one — the RAG query announced
+      // a "paediatric patient", the evidence filter raised its isChild flag.
+      // An empty value parses to NaN and is skipped instead of being believed.
+      age: resolvedAge ?? '',
       sex: normalisedSex,
       weight: anonymizedPatientData?.weight,
       height: anonymizedPatientData?.height,
       medical_history: anonymizedPatientData?.medicalHistory || [],
-      current_medications: anonymizedPatientData?.currentMedications || [],
+      current_medications: resolvedMedications,
       allergies: anonymizedPatientData?.allergies || [],
       pregnancy_status: anonymizedPatientData?.pregnancyStatus,
       last_menstrual_period: anonymizedPatientData?.lastMenstrualPeriod,

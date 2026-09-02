@@ -1,5 +1,6 @@
 // app/api/generate-consultation-report/route.ts - VERSION 2.6 WITH PRAGMATIC TRANSLATION AND IMPROVEMENTS
 import { type NextRequest, NextResponse } from "next/server"
+import { resolvePatientAge } from '@/lib/patient-normalisation'
 import { callLLM, type LLMMessage } from "@/lib/llm-client"
 import { CRITICAL_RULES_BLOCK_NARRATIVE } from "@/lib/critical-rules"
 import { detectFabricatedExam } from "@/lib/anti-fabrication"
@@ -14,6 +15,17 @@ export const runtime = 'nodejs'
 // Vercel Pro and gives enough headroom even when reasoning_effort='low'
 // produces a longer-than-expected response.
 export const maxDuration = 600 // 600s for parity with /api/openai-diagnosis: DeepSeek-V4-Pro on the report LLM with maxTokens=12000 can run 150-250s on rich cases; 600 absorbs variance without timing out mid-JSON (which is what previously triggered the fallback content path)
+
+/**
+ * "62 years", or "Age not provided" — never a bare " years".
+ *
+ * The handoff can carry the age only as a date of birth, and reading `age`
+ * alone printed an empty age on every document of that consultation.
+ */
+function formatPatientAge(patient: Record<string, any> | null | undefined): string {
+  const age = resolvePatientAge(patient)
+  return age === null ? 'Age not provided' : `${age} years`
+}
 
 // ==================== "HORS GUIDELINE RAG" JARGON SANITISER ====================
 // Internal pipeline vocabulary (the prompt previously asked the LLM to write
@@ -1437,7 +1449,7 @@ function prepareEnrichedGPTData(realData: any, patientData: any, clinicalData?: 
   return {
     // Patient info
     patient: {
-      age: `${getString(patientData.age) || ''} years`,
+      age: formatPatientAge(patientData),
       gender: getString(patientData.gender || patientData.sex || 'Not specified'),
       weight: getString(patientData.weight || 'Not provided'),
       pregnancyStatus: getString(patientData?.pregnancyStatus || 'Not specified'),
@@ -2079,7 +2091,7 @@ export async function POST(request: NextRequest) {
       const patient = {
         name: patientData?.name || `${patientData?.firstName} ${patientData?.lastName}` || 'PATIENT',
         fullName: patientData?.name || `${patientData?.firstName} ${patientData?.lastName}` || 'PATIENT',
-        age: `${patientData?.age || ''} years`,
+        age: formatPatientAge(patientData),
         birthDate: patientData?.dateOfBirth || 'Not provided',
         gender: patientData?.gender || 'Not specified',
         address: patientData?.address || 'Not provided',
@@ -2319,7 +2331,7 @@ export async function POST(request: NextRequest) {
     const patient = {
       name: getString(originalIdentity.name || originalIdentity.fullName || 'PATIENT'),
       fullName: getString(originalIdentity.fullName || originalIdentity.name || 'PATIENT'),
-      age: `${getString(anonymizedPatientData.age) || ''} years`,
+      age: formatPatientAge(anonymizedPatientData),
       birthDate: getString(originalIdentity.birthDate || 'Not provided'),
       gender: getString(anonymizedPatientData.gender || anonymizedPatientData.sex || 'Not specified'),
       pregnancyStatus: pregnancyInfo.display,
