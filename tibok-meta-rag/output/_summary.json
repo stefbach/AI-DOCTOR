@@ -1,0 +1,1265 @@
+{
+  "generated_at": "2026-08-22T08:27:10.727114Z",
+  "pathologies": [
+    {
+      "pathology_id": "acne",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "acouphenes",
+      "doc_count": 25,
+      "pct_full_text_oa": 76.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "allergie_alimentaire",
+      "doc_count": 25,
+      "pct_full_text_oa": 48.0,
+      "median_year": 2023.0,
+      "sources": {
+        "europepmc": 22,
+        "pubmed": 3
+      }
+    },
+    {
+      "pathology_id": "alopecie",
+      "doc_count": 25,
+      "pct_full_text_oa": 56.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "alzheimer",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "anaphylaxie",
+      "doc_count": 25,
+      "pct_full_text_oa": 60.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "anemie_ferriprive",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2023.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "aomi",
+      "doc_count": 25,
+      "pct_full_text_oa": 72.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "arthrose",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "asthme",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2026.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "asthme_enfant",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "avc",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2026.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "bipolaire",
+      "doc_count": 25,
+      "pct_full_text_oa": 80.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "bpco",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "bronchiolite",
+      "doc_count": 25,
+      "pct_full_text_oa": 60.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "bronchite_aigue",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "canal_carpien",
+      "doc_count": 25,
+      "pct_full_text_oa": 64.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "candidose_vulvovaginale",
+      "doc_count": 25,
+      "pct_full_text_oa": 8.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 9,
+        "pubmed": 16
+      }
+    },
+    {
+      "pathology_id": "capsulite",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "cardiomyopathies",
+      "doc_count": 25,
+      "pct_full_text_oa": 80.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "carence_b12",
+      "doc_count": 25,
+      "pct_full_text_oa": 28.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 9,
+        "pubmed": 16
+      }
+    },
+    {
+      "pathology_id": "carence_vit_d",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "cataracte",
+      "doc_count": 25,
+      "pct_full_text_oa": 68.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "cephalee_tension",
+      "doc_count": 25,
+      "pct_full_text_oa": 80.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "cervicalgie",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "chikungunya",
+      "doc_count": 25,
+      "pct_full_text_oa": 60.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 18,
+        "pubmed": 7
+      }
+    },
+    {
+      "pathology_id": "cirrhose",
+      "doc_count": 25,
+      "pct_full_text_oa": 68.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "conjonctivite",
+      "doc_count": 25,
+      "pct_full_text_oa": 64.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "constipation",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "contraception",
+      "doc_count": 25,
+      "pct_full_text_oa": 44.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "coronaropathie",
+      "doc_count": 25,
+      "pct_full_text_oa": 100.0,
+      "median_year": 2026.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "covid19",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "crohn",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "cystite",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "dengue",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "depistage_col",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "depistage_colorectal",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "depistage_poumon",
+      "doc_count": 25,
+      "pct_full_text_oa": 72.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "depistage_prostate",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 23,
+        "pubmed": 2
+      }
+    },
+    {
+      "pathology_id": "depistage_sein",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "depression",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "dermatite_atopique",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 23,
+        "pubmed": 2
+      }
+    },
+    {
+      "pathology_id": "diabete_gestationnel",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "diverticulose",
+      "doc_count": 25,
+      "pct_full_text_oa": 24.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 6,
+        "pubmed": 19
+      }
+    },
+    {
+      "pathology_id": "dmla",
+      "doc_count": 25,
+      "pct_full_text_oa": 72.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "drepanocytose",
+      "doc_count": 25,
+      "pct_full_text_oa": 68.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 23,
+        "pubmed": 2
+      }
+    },
+    {
+      "pathology_id": "dt1",
+      "doc_count": 25,
+      "pct_full_text_oa": 80.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "dt2",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2026.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "dysfonction_erectile",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "dyslipidemie",
+      "doc_count": 25,
+      "pct_full_text_oa": 100.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "dysmenorrhee",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "endometriose",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "enuresie",
+      "doc_count": 25,
+      "pct_full_text_oa": 64.0,
+      "median_year": 2023.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "epilepsie",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "fa",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "fibromes",
+      "doc_count": 25,
+      "pct_full_text_oa": 60.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "fibromyalgie",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "fibrose_pulmonaire",
+      "doc_count": 25,
+      "pct_full_text_oa": 76.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "fievre_enfant",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "gastroenterite",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "glaucome",
+      "doc_count": 25,
+      "pct_full_text_oa": 72.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "goutte",
+      "doc_count": 25,
+      "pct_full_text_oa": 68.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "grippe",
+      "doc_count": 25,
+      "pct_full_text_oa": 68.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 23,
+        "pubmed": 2
+      }
+    },
+    {
+      "pathology_id": "hbp",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "hepatite_b",
+      "doc_count": 25,
+      "pct_full_text_oa": 72.0,
+      "median_year": 2023.0,
+      "sources": {
+        "europepmc": 23,
+        "pubmed": 2
+      }
+    },
+    {
+      "pathology_id": "hepatite_c",
+      "doc_count": 25,
+      "pct_full_text_oa": 44.0,
+      "median_year": 2021.0,
+      "sources": {
+        "europepmc": 22,
+        "pubmed": 3
+      }
+    },
+    {
+      "pathology_id": "hta",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2026.0,
+      "sources": {
+        "europepmc": 23,
+        "pubmed": 2
+      }
+    },
+    {
+      "pathology_id": "hyperthyroidie",
+      "doc_count": 25,
+      "pct_full_text_oa": 68.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "hypotension_orthostatique",
+      "doc_count": 25,
+      "pct_full_text_oa": 12.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 8,
+        "pubmed": 17
+      }
+    },
+    {
+      "pathology_id": "hypothyroidie",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "incontinence_urinaire",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "infertilite",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "insomnie",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 22,
+        "pubmed": 3
+      }
+    },
+    {
+      "pathology_id": "insuffisance_cardiaque",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2026.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "ist",
+      "doc_count": 25,
+      "pct_full_text_oa": 100.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "leptospirose",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "lithiase_urinaire",
+      "doc_count": 25,
+      "pct_full_text_oa": 68.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "lombalgie",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "lupus",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "maladie_coeliaque",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "menopause",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "migraine",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 23,
+        "pubmed": 2
+      }
+    },
+    {
+      "pathology_id": "mrc",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "mtev",
+      "doc_count": 25,
+      "pct_full_text_oa": 72.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "mycoses_cutanees",
+      "doc_count": 25,
+      "pct_full_text_oa": 12.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 5,
+        "pubmed": 20
+      }
+    },
+    {
+      "pathology_id": "nafld",
+      "doc_count": 25,
+      "pct_full_text_oa": 100.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "neuropathie_peripherique",
+      "doc_count": 25,
+      "pct_full_text_oa": 60.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 20,
+        "pubmed": 5
+      }
+    },
+    {
+      "pathology_id": "nodules_thyroidiens",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "obesite",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2026.0,
+      "sources": {
+        "europepmc": 21,
+        "pubmed": 4
+      }
+    },
+    {
+      "pathology_id": "osteoporose",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "otite_moyenne",
+      "doc_count": 25,
+      "pct_full_text_oa": 60.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "paludisme",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "pancreatite",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "parkinson",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "pericardite",
+      "doc_count": 25,
+      "pct_full_text_oa": 68.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "pharyngite",
+      "doc_count": 25,
+      "pct_full_text_oa": 60.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "pneumonie",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "ppr",
+      "doc_count": 25,
+      "pct_full_text_oa": 68.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "pr",
+      "doc_count": 25,
+      "pct_full_text_oa": 76.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "prediabete",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "psoriasis",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "ptsd",
+      "doc_count": 25,
+      "pct_full_text_oa": 76.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "pyelonephrite",
+      "doc_count": 25,
+      "pct_full_text_oa": 44.0,
+      "median_year": 2023.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "rch",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "rgo",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "rhinite_allergique",
+      "doc_count": 25,
+      "pct_full_text_oa": 76.0,
+      "median_year": 2023.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "rosacee",
+      "doc_count": 25,
+      "pct_full_text_oa": 76.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "saos",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "sca",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "schizophrenie",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "sep",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "sevrage_tabagique",
+      "doc_count": 25,
+      "pct_full_text_oa": 40.0,
+      "median_year": 2023.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "sii",
+      "doc_count": 25,
+      "pct_full_text_oa": 100.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "sinusite",
+      "doc_count": 25,
+      "pct_full_text_oa": 64.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "sopk",
+      "doc_count": 25,
+      "pct_full_text_oa": 96.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "spondylarthrite",
+      "doc_count": 25,
+      "pct_full_text_oa": 88.0,
+      "median_year": 2021.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "syndrome_metabolique",
+      "doc_count": 25,
+      "pct_full_text_oa": 100.0,
+      "median_year": 2026.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "tag",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "tdah",
+      "doc_count": 25,
+      "pct_full_text_oa": 56.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 19,
+        "pubmed": 6
+      }
+    },
+    {
+      "pathology_id": "tendinopathies",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "thalassemie",
+      "doc_count": 25,
+      "pct_full_text_oa": 80.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "thrombophilie",
+      "doc_count": 25,
+      "pct_full_text_oa": 40.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "toc",
+      "doc_count": 25,
+      "pct_full_text_oa": 92.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "tremblement_essentiel",
+      "doc_count": 25,
+      "pct_full_text_oa": 100.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "trouble_panique",
+      "doc_count": 25,
+      "pct_full_text_oa": 72.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "trouble_usage_alcool",
+      "doc_count": 25,
+      "pct_full_text_oa": 48.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "tuberculose",
+      "doc_count": 25,
+      "pct_full_text_oa": 100.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "typhoide",
+      "doc_count": 25,
+      "pct_full_text_oa": 80.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 22,
+        "pubmed": 3
+      }
+    },
+    {
+      "pathology_id": "ulcere_hpylori",
+      "doc_count": 25,
+      "pct_full_text_oa": 40.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "urticaire",
+      "doc_count": 25,
+      "pct_full_text_oa": 68.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "vaginose",
+      "doc_count": 25,
+      "pct_full_text_oa": 44.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 15,
+        "pubmed": 10
+      }
+    },
+    {
+      "pathology_id": "valvulopathies",
+      "doc_count": 25,
+      "pct_full_text_oa": 68.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "vih",
+      "doc_count": 25,
+      "pct_full_text_oa": 100.0,
+      "median_year": 2025.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "vitiligo",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    },
+    {
+      "pathology_id": "vppb",
+      "doc_count": 25,
+      "pct_full_text_oa": 84.0,
+      "median_year": 2023.0,
+      "sources": {
+        "europepmc": 24,
+        "pubmed": 1
+      }
+    },
+    {
+      "pathology_id": "zona",
+      "doc_count": 25,
+      "pct_full_text_oa": 68.0,
+      "median_year": 2024.0,
+      "sources": {
+        "europepmc": 25
+      }
+    }
+  ],
+  "total_documents": 3400,
+  "errors": []
+}
