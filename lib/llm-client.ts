@@ -176,6 +176,14 @@ export class LLMUnusableResponseError extends Error {
  *
  * Returns the text to use. Throws `LLMUnusableResponseError` otherwise —
  * never returns partial or salvaged clinical content.
+ *
+ * `canRegenerate` says whether refusing this response actually buys anything:
+ * it is true only when another provider is still going to be tried. With no
+ * fallback left, several callers have their own recovery ladder and are better
+ * placed to decide (chronic and dermatology parse through
+ * parseLLMJsonSafely), so the response is handed over untouched exactly as it
+ * was before this check existed. Refusing there would replace a degraded
+ * answer with no answer.
  */
 function vetResponse(
   text: string,
@@ -184,11 +192,19 @@ function vetResponse(
   provider: LLMProvider,
   model: string,
   finishReason: string | null | undefined,
+  canRegenerate: boolean,
 ): string {
   // A tool call legitimately carries no message content.
   if (toolCalls && toolCalls.length > 0) return text
 
   if (!text.trim()) {
+    if (!canRegenerate) {
+      console.error(
+        `[llm] use=${params.useCase} provider=${provider} model=${model} returned an empty response ` +
+          `(${text.length} chars, finish=${finishReason ?? 'n/a'}) and there is no fallback left to try`,
+      )
+      return text
+    }
     throw new LLMUnusableResponseError(
       'empty',
       provider,
@@ -212,6 +228,15 @@ function vetResponse(
     return parsed.text
   }
 
+  if (!canRegenerate) {
+    console.error(
+      `[llm] use=${params.useCase} provider=${provider} model=${model} returned unparsable JSON ` +
+        `(${text.length} chars, finish=${finishReason ?? 'n/a'}: ${parsed.error.message}) and there is ` +
+        `no fallback left to try — handing it to the caller's own recovery`,
+    )
+    return text
+  }
+
   throw new LLMUnusableResponseError(
     'unparsable_json',
     provider,
@@ -225,6 +250,7 @@ async function callProvider(
   provider: LLMProvider,
   model: string,
   params: LLMCallParams,
+  canRegenerate: boolean,
 ): Promise<RawCompletion> {
   const client = provider === 'deepseek' ? getDeepSeekClient() : getOpenAIClient()
   const timeoutMs = params.timeoutMs ?? DEFAULT_TIMEOUT_MS
@@ -300,7 +326,7 @@ async function callProvider(
 
   // Vetting happens here, inside the provider call, so both the primary and
   // the fallback path are held to the same bar.
-  const vettedText = vetResponse(text, toolCalls, params, provider, model, finishReason)
+  const vettedText = vetResponse(text, toolCalls, params, provider, model, finishReason, canRegenerate)
 
   return { text: vettedText, toolCalls, usage, finishReason }
 }
@@ -335,7 +361,15 @@ export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
 
   try {
     attempts++
-    const { text, toolCalls, usage, finishReason } = await callProvider(primaryProvider, primaryModel, params)
+    // Refusing an unusable response is only worth it while the OpenAI fallback
+    // is still ahead of us.
+    const canRegenerate = primaryProvider === 'deepseek' && !fallbackDisabled
+    const { text, toolCalls, usage, finishReason } = await callProvider(
+      primaryProvider,
+      primaryModel,
+      params,
+      canRegenerate,
+    )
     const latencyMs = Date.now() - startedAt
     console.log(
       `[llm] use=${params.useCase} provider=${primaryProvider} model=${primaryModel} latency=${latencyMs}ms ` +
@@ -367,7 +401,8 @@ export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
   // Fallback path: only triggered when primary was DeepSeek and error is retriable.
   const fallbackModel = resolveModel('openai')
   attempts++
-  const { text, toolCalls, usage, finishReason } = await callProvider('openai', fallbackModel, params)
+  // Last provider standing: whatever it returns goes to the caller.
+  const { text, toolCalls, usage, finishReason } = await callProvider('openai', fallbackModel, params, false)
   const latencyMs = Date.now() - startedAt
   console.log(
     `[llm] use=${params.useCase} provider=openai(fallback) model=${fallbackModel} latency=${latencyMs}ms ` +
