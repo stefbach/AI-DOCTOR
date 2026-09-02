@@ -5,6 +5,7 @@ import {
   mergePatientRecords,
   normalisePatientRecord,
   parseTibokPatientParam,
+  resolveBirthDate,
   resolveCurrentMedications,
   resolvePatientAge,
 } from '../lib/patient-normalisation.ts'
@@ -173,5 +174,29 @@ describe('parseTibokPatientParam', () => {
     assert.strictEqual(parseTibokPatientParam(''), null)
     assert.strictEqual(parseTibokPatientParam(null), null)
     assert.strictEqual(parseTibokPatientParam('not json'), null)
+  })
+})
+
+describe('resolveBirthDate', () => {
+  it('reads the spelling TIBOK sends', () => {
+    assert.strictEqual(resolveBirthDate({ dateOfBirth: '1993-03-17' }), '1993-03-17')
+  })
+
+  it('reads the spellings the patient form writes', () => {
+    assert.strictEqual(resolveBirthDate({ birthDate: '1993-03-17' }), '1993-03-17')
+    assert.strictEqual(resolveBirthDate({ dateNaissance: '1993-03-17' }), '1993-03-17')
+    assert.strictEqual(resolveBirthDate({ date_of_birth: '1993-03-17' }), '1993-03-17')
+  })
+
+  it('returns null when there is none', () => {
+    assert.strictEqual(resolveBirthDate({ birthDate: '   ' }), null)
+    assert.strictEqual(resolveBirthDate({}), null)
+    assert.strictEqual(resolveBirthDate(null), null)
+  })
+
+  it('is filled in by normalisePatientRecord under both names', () => {
+    const out = normalisePatientRecord({ dateOfBirth: '1993-03-17' })
+    assert.strictEqual(out.birthDate, '1993-03-17')
+    assert.strictEqual(out.dateOfBirth, '1993-03-17')
   })
 })

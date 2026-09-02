@@ -97,6 +97,24 @@ export function resolvePatientAge(patient: Record<string, any> | null | undefine
   return null
 }
 
+/**
+ * The patient's date of birth, whatever the payload calls it.
+ *
+ * TIBOK sends `dateOfBirth`; the patient form writes `birthDate` (and four
+ * other spellings); the report read only `birthDate` and printed "Not
+ * provided" on every consultation that came straight from TIBOK.
+ */
+export function resolveBirthDate(patient: Record<string, any> | null | undefined): string | null {
+  if (!patient || typeof patient !== 'object') return null
+
+  for (const key of BIRTH_DATE_KEYS) {
+    const raw = patient[key]
+    if (typeof raw === 'string' && raw.trim()) return raw.trim()
+  }
+
+  return null
+}
+
 /** Split a free-text medication list on the separators patients and nurses use. */
 function splitMedicationText(text: string): string[] {
   return text
@@ -155,6 +173,13 @@ export function normalisePatientRecord<T extends Record<string, any>>(patient: T
   // every other reader either parses it or interpolates it.
   const age = resolvePatientAge(patient)
   if (age !== null) normalised.age = String(age)
+
+  // Both spellings, so a reader that knows only one of them still finds it.
+  const birthDate = resolveBirthDate(patient)
+  if (birthDate) {
+    normalised.birthDate = birthDate
+    normalised.dateOfBirth = birthDate
+  }
 
   const medications = resolveCurrentMedications(patient)
   if (medications.length > 0) {
