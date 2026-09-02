@@ -1,6 +1,6 @@
 // app/api/generate-consultation-report/route.ts - VERSION 2.6 WITH PRAGMATIC TRANSLATION AND IMPROVEMENTS
 import { type NextRequest, NextResponse } from "next/server"
-import { resolvePatientAge } from '@/lib/patient-normalisation'
+import { resolveBirthDate, resolvePatientAge } from '@/lib/patient-normalisation'
 import { callLLM, type LLMMessage } from "@/lib/llm-client"
 import { CRITICAL_RULES_BLOCK_NARRATIVE } from "@/lib/critical-rules"
 import { detectFabricatedExam } from "@/lib/anti-fabrication"
@@ -270,7 +270,8 @@ function anonymizePatientData(patientData: any): {
     phone: getString(patientData?.phone) || '',
     email: getString(patientData?.email) || '',
     nationalId: getString(patientData?.nationalId) || '',
-    birthDate: getString(patientData?.birthDate) || ''
+    // Every spelling, not just the form's: TIBOK sends dateOfBirth.
+    birthDate: resolveBirthDate(patientData) || ''
   }
 
   // DEBUG: Verify birthDate is being received correctly
@@ -2092,7 +2093,7 @@ export async function POST(request: NextRequest) {
         name: patientData?.name || `${patientData?.firstName} ${patientData?.lastName}` || 'PATIENT',
         fullName: patientData?.name || `${patientData?.firstName} ${patientData?.lastName}` || 'PATIENT',
         age: formatPatientAge(patientData),
-        birthDate: patientData?.dateOfBirth || 'Not provided',
+        birthDate: resolveBirthDate(patientData) || 'Not provided',
         gender: patientData?.gender || 'Not specified',
         address: patientData?.address || 'Not provided',
         // Same reason as above: a blank is recoverable, a placeholder is not.

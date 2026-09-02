@@ -11,6 +11,7 @@ import { HubWorkflowSelector } from '@/components/consultation-hub/hub-workflow-
 import { HistoryList, ConsultationDetailModal } from '@/lib/follow-up/shared'
 import type { ConsultationHistoryItem } from '@/lib/follow-up/shared'
 import { fetchTibokConsultationData } from '@/lib/tibok-consultation-service'
+import { parseTibokPatientParam } from '@/lib/patient-normalisation'
 import { loadTibokDraft } from '@/lib/tibok-draft-service'
 
 type WorkflowStep = 'search' | 'summary' | 'workflow'
@@ -207,10 +208,22 @@ export default function ConsultationHubPage() {
               drafts.questionsData
             )
             if (isComplete && drafts) {
+              // The nurse draft is a partial record — on 02/09 it held six
+              // fields and no identity, which left the doctor's report with no
+              // patient name to generate from and the model with no age. TIBOK
+              // sends the full patient in the URL, so stage it alongside and
+              // let app/page.tsx lay the draft over it.
+              const tibokPatientData = parseTibokPatientParam(
+                urlParams.get('patientData') || urlParams.get('medicalData')
+              )
+              if (!tibokPatientData) {
+                console.warn('⚠️ [Hub] No TIBOK patient record in the URL to complete the nurse draft')
+              }
               sessionStorage.setItem(
                 'tibokHandoffPayload',
                 JSON.stringify({
                   consultationId,
+                  tibokPatientData,
                   patientData: drafts.patientData,
                   clinicalData: drafts.clinicalData,
                   questionsData: drafts.questionsData,
@@ -390,58 +403,17 @@ export default function ConsultationHubPage() {
       const patientDataParam = urlParams.get('patientData') || urlParams.get('medicalData')
 
       // Parse Tibok patient info from URL (handle multi-encoded data)
-      let tibokPatientInfo: any = null
+      let tibokPatientInfo: any = parseTibokPatientParam(patientDataParam)
       if (patientDataParam) {
         console.log('👤 Raw patientData/medicalData param length:', patientDataParam.length)
-
-        try {
-          let decodedPatientData = patientDataParam
-
-          // Try parsing directly first (in case it's already valid JSON)
-          if (decodedPatientData.startsWith('{')) {
-            try {
-              tibokPatientInfo = JSON.parse(decodedPatientData)
-              console.log('👤 Parsed patientData directly without decoding')
-            } catch {
-              console.log('👤 Direct parse failed, will try decoding...')
-            }
-          }
-
-          // If not parsed yet, keep decoding until we can parse
-          if (!tibokPatientInfo) {
-            for (let attempt = 1; attempt <= 5; attempt++) {
-              try {
-                decodedPatientData = decodeURIComponent(decodedPatientData)
-                console.log(`👤 Decode attempt ${attempt}, starts with:`, decodedPatientData.substring(0, 50))
-
-                if (decodedPatientData.startsWith('{')) {
-                  // Fix: Tibok sometimes appends extra URL after the JSON - extract just the JSON
-                  let jsonString = decodedPatientData
-                  const lastBrace = jsonString.lastIndexOf('}')
-                  if (lastBrace !== -1 && lastBrace < jsonString.length - 1) {
-                    console.log('👤 Found extra content after JSON, trimming')
-                    jsonString = jsonString.substring(0, lastBrace + 1)
-                  }
-
-                  tibokPatientInfo = JSON.parse(jsonString)
-                  console.log(`👤 Successfully parsed patientData after ${attempt} decode(s):`, tibokPatientInfo)
-                  break
-                }
-              } catch (e) {
-                console.log(`👤 Decode attempt ${attempt} failed:`, e instanceof Error ? e.message : e)
-                if (attempt === 5) {
-                  console.error('👤 Could not parse patientData after 5 attempts')
-                }
-              }
-            }
-          }
-
+        if (tibokPatientInfo) {
+          console.log('👤 Successfully parsed patientData:', tibokPatientInfo)
           // Extract patientId from tibokPatientInfo if not in URL directly
-          if (tibokPatientInfo && !patientId && tibokPatientInfo.id) {
+          if (!patientId && tibokPatientInfo.id) {
             patientId = tibokPatientInfo.id
           }
-        } catch (e) {
-          console.log('⚠️ Could not parse patientData from URL:', e)
+        } else {
+          console.error('👤 Could not parse patientData from URL')
         }
       }
 

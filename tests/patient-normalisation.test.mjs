@@ -2,7 +2,10 @@ import { describe, it } from 'node:test'
 import assert from 'node:assert'
 import {
   ageFromBirthDate,
+  mergePatientRecords,
   normalisePatientRecord,
+  parseTibokPatientParam,
+  resolveBirthDate,
   resolveCurrentMedications,
   resolvePatientAge,
 } from '../lib/patient-normalisation.ts'
@@ -100,5 +103,100 @@ describe('normalisePatientRecord', () => {
   it('leaves a record it cannot improve unchanged', () => {
     const out = normalisePatientRecord({ firstName: 'Test' })
     assert.deepStrictEqual(out, { firstName: 'Test' })
+  })
+})
+
+describe('mergePatientRecords', () => {
+  it('completes the nurse draft with TIBOK identity — the 02/09 case', () => {
+    // What the nurse draft actually held: six fields, no identity.
+    const draft = {
+      allergies: ['Non'],
+      currentMedicationsText: 'Aucun',
+      gender: 'F',
+      height: '165',
+      weight: '65',
+      lifeHabits: { smoking: 'no' },
+    }
+    const tibok = {
+      firstName: 'Megane Claudia',
+      lastName: 'Quenette',
+      dateOfBirth: '1993-03-17',
+      age: 33,
+      gender: 'F',
+      height: 165,
+      weight: 60,
+    }
+
+    const merged = mergePatientRecords(tibok, draft)
+
+    assert.strictEqual(merged.firstName, 'Megane Claudia')
+    assert.strictEqual(merged.lastName, 'Quenette')
+    assert.strictEqual(merged.dateOfBirth, '1993-03-17')
+    // What the nurse recorded wins: she weighed the patient today.
+    assert.strictEqual(merged.weight, '65')
+    assert.deepStrictEqual(merged.allergies, ['Non'])
+  })
+
+  it('never lets a blank overlay value erase a real one', () => {
+    const merged = mergePatientRecords(
+      { firstName: 'Megane', allergies: ['Pénicilline'], weight: 65 },
+      { firstName: '', allergies: [], weight: null },
+    )
+    assert.strictEqual(merged.firstName, 'Megane')
+    assert.deepStrictEqual(merged.allergies, ['Pénicilline'])
+    assert.strictEqual(merged.weight, 65)
+  })
+
+  it('copes with either side missing', () => {
+    assert.deepStrictEqual(mergePatientRecords(null, { a: 1 }), { a: 1 })
+    assert.deepStrictEqual(mergePatientRecords({ a: 1 }, null), { a: 1 })
+    assert.deepStrictEqual(mergePatientRecords(null, null), {})
+  })
+})
+
+describe('parseTibokPatientParam', () => {
+  it('parses a doubly-encoded record, as TIBOK sends it', () => {
+    const record = { firstName: 'Megane Claudia', age: 33 }
+    const doubly = encodeURIComponent(encodeURIComponent(JSON.stringify(record)))
+    assert.deepStrictEqual(parseTibokPatientParam(doubly), record)
+  })
+
+  it('parses plain JSON', () => {
+    assert.deepStrictEqual(parseTibokPatientParam('{"age":33}'), { age: 33 })
+  })
+
+  it('trims the extra URL TIBOK sometimes appends', () => {
+    const raw = encodeURIComponent('{"age":33}https://tibok.mu/whatever')
+    assert.deepStrictEqual(parseTibokPatientParam(raw), { age: 33 })
+  })
+
+  it('returns null on anything unusable', () => {
+    assert.strictEqual(parseTibokPatientParam(''), null)
+    assert.strictEqual(parseTibokPatientParam(null), null)
+    assert.strictEqual(parseTibokPatientParam('not json'), null)
+  })
+})
+
+describe('resolveBirthDate', () => {
+  it('reads the spelling TIBOK sends', () => {
+    assert.strictEqual(resolveBirthDate({ dateOfBirth: '1993-03-17' }), '1993-03-17')
+  })
+
+  it('reads the spellings the patient form writes', () => {
+    assert.strictEqual(resolveBirthDate({ birthDate: '1993-03-17' }), '1993-03-17')
+    assert.strictEqual(resolveBirthDate({ dateNaissance: '1993-03-17' }), '1993-03-17')
+    assert.strictEqual(resolveBirthDate({ date_of_birth: '1993-03-17' }), '1993-03-17')
+  })
+
+  it('returns null when there is none', () => {
+    assert.strictEqual(resolveBirthDate({ birthDate: '   ' }), null)
+    assert.strictEqual(resolveBirthDate({}), null)
+    assert.strictEqual(resolveBirthDate(null), null)
+  })
+
+  it('is filled in by normalisePatientRecord under both names', () => {
+    const out = normalisePatientRecord({ dateOfBirth: '1993-03-17' })
+    assert.strictEqual(out.birthDate, '1993-03-17')
+    assert.strictEqual(out.dateOfBirth, '1993-03-17')
   })
 })

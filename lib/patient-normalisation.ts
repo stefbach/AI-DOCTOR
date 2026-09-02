@@ -97,6 +97,24 @@ export function resolvePatientAge(patient: Record<string, any> | null | undefine
   return null
 }
 
+/**
+ * The patient's date of birth, whatever the payload calls it.
+ *
+ * TIBOK sends `dateOfBirth`; the patient form writes `birthDate` (and four
+ * other spellings); the report read only `birthDate` and printed "Not
+ * provided" on every consultation that came straight from TIBOK.
+ */
+export function resolveBirthDate(patient: Record<string, any> | null | undefined): string | null {
+  if (!patient || typeof patient !== 'object') return null
+
+  for (const key of BIRTH_DATE_KEYS) {
+    const raw = patient[key]
+    if (typeof raw === 'string' && raw.trim()) return raw.trim()
+  }
+
+  return null
+}
+
 /** Split a free-text medication list on the separators patients and nurses use. */
 function splitMedicationText(text: string): string[] {
   return text
@@ -156,6 +174,13 @@ export function normalisePatientRecord<T extends Record<string, any>>(patient: T
   const age = resolvePatientAge(patient)
   if (age !== null) normalised.age = String(age)
 
+  // Both spellings, so a reader that knows only one of them still finds it.
+  const birthDate = resolveBirthDate(patient)
+  if (birthDate) {
+    normalised.birthDate = birthDate
+    normalised.dateOfBirth = birthDate
+  }
+
   const medications = resolveCurrentMedications(patient)
   if (medications.length > 0) {
     normalised.currentMedications = medications
@@ -163,4 +188,80 @@ export function normalisePatientRecord<T extends Record<string, any>>(patient: T
   }
 
   return normalised as T
+}
+
+/**
+ * Parse the patient record TIBOK puts in the `patientData` (or `medicalData`)
+ * URL parameter.
+ *
+ * The value can arrive singly or multiply URL-encoded, and TIBOK sometimes
+ * appends another URL after the closing brace, so this decodes up to five
+ * times and trims anything past the JSON. Returns null when nothing usable
+ * comes out — callers must treat that as "no record", never as an error.
+ */
+export function parseTibokPatientParam(raw: string | null | undefined): any | null {
+  if (!raw) return null
+
+  let decoded = String(raw)
+
+  if (decoded.startsWith('{')) {
+    try {
+      return JSON.parse(decoded)
+    } catch {
+      // Not valid JSON yet — fall through to the decode loop.
+    }
+  }
+
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      decoded = decodeURIComponent(decoded)
+      if (!decoded.startsWith('{')) continue
+
+      // TIBOK sometimes appends an extra URL after the JSON.
+      const lastBrace = decoded.lastIndexOf('}')
+      const jsonString =
+        lastBrace !== -1 && lastBrace < decoded.length - 1
+          ? decoded.substring(0, lastBrace + 1)
+          : decoded
+
+      return JSON.parse(jsonString)
+    } catch {
+      // Keep decoding; a failure on the last attempt means we give up.
+    }
+  }
+
+  return null
+}
+
+/** A value that carries no information and must never overwrite one that does. */
+function isBlank(value: unknown): boolean {
+  if (value === null || value === undefined) return true
+  if (typeof value === 'string') return value.trim() === ''
+  if (Array.isArray(value)) return value.length === 0
+  return false
+}
+
+/**
+ * Lay one patient record over another, keeping every field the overlay
+ * actually fills in and falling back to the base for the rest.
+ *
+ * This exists because the nurse draft is a partial record — on 02/09 it held
+ * six fields (allergies, medications text, gender, height, weight, lifestyle)
+ * and no identity at all, so the doctor's report refused to generate for want
+ * of a name, and the patient had no age. The overlay is what the nurse
+ * actually recorded and wins wherever she filled something in; the base is
+ * TIBOK's own patient record, which carries the identity.
+ */
+export function mergePatientRecords(
+  base: Record<string, any> | null | undefined,
+  overlay: Record<string, any> | null | undefined,
+): Record<string, any> {
+  if (!base || typeof base !== 'object') return { ...(overlay || {}) }
+  if (!overlay || typeof overlay !== 'object') return { ...base }
+
+  const merged: Record<string, any> = { ...base }
+  for (const [key, value] of Object.entries(overlay)) {
+    if (!isBlank(value)) merged[key] = value
+  }
+  return merged
 }
