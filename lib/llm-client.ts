@@ -6,6 +6,7 @@
 // back automatically to OpenAI so the consultation flow never breaks.
 
 import OpenAI from 'openai'
+import { normaliseJsonFraming, parseJsonLossless } from '@/lib/llm/json-recovery'
 
 export type LLMProvider = 'openai' | 'deepseek'
 export type LLMReasoningEffort = 'none' | 'low' | 'medium' | 'high'
@@ -71,6 +72,13 @@ export interface LLMUsage {
 export interface LLMResult {
   text: string
   toolCalls?: LLMToolCall[]
+  /**
+   * Raw `finish_reason` from the provider ('stop' | 'length' | 'tool_calls' | …).
+   * Until 02/09 this was dropped here and hard-coded to 'unknown' at the
+   * diagnosis call site, which made every truncation indistinguishable from a
+   * clean completion. Callers now get the real value.
+   */
+  finishReason?: string | null
   provider: LLMProvider
   model: string
   usage?: LLMUsage
@@ -130,12 +138,119 @@ interface RawCompletion {
   text: string
   toolCalls?: LLMToolCall[]
   usage?: LLMUsage
+  finishReason?: string | null
+}
+
+/**
+ * A response that arrived with HTTP 200 and is nonetheless unusable.
+ *
+ * Two shapes, both observed in production on DeepSeek in `json_object` mode:
+ *
+ *   - 'empty'           — content is blank or pure whitespace. On 01/09 at
+ *                         14:48 the retry came back in 4.3s with 186
+ *                         characters of spaces.
+ *   - 'unparsable_json'  — JSON that no lossless repair can parse. Same
+ *                         consultation, first attempt: 22 440 characters
+ *                         with a syntax error at position 15418.
+ *
+ * Both used to sail through as successes, so the automatic DeepSeek → OpenAI
+ * fallback never fired and the failure surfaced to the doctor as "Invalid
+ * JSON structure". Modelled as an error so the existing safety net catches
+ * them like any provider outage.
+ */
+export class LLMUnusableResponseError extends Error {
+  constructor(
+    public kind: 'empty' | 'unparsable_json',
+    public provider: LLMProvider,
+    public model: string,
+    message: string,
+  ) {
+    super(message)
+    this.name = 'LLMUnusableResponseError'
+  }
+}
+
+/**
+ * Decide whether what came back can be handed to the caller, and repair it
+ * losslessly when that is enough.
+ *
+ * Returns the text to use. Throws `LLMUnusableResponseError` otherwise —
+ * never returns partial or salvaged clinical content.
+ *
+ * `canRegenerate` says whether refusing this response actually buys anything:
+ * it is true only when another provider is still going to be tried. With no
+ * fallback left, several callers have their own recovery ladder and are better
+ * placed to decide (chronic and dermatology parse through
+ * parseLLMJsonSafely), so the response is handed over untouched exactly as it
+ * was before this check existed. Refusing there would replace a degraded
+ * answer with no answer.
+ */
+function vetResponse(
+  text: string,
+  toolCalls: LLMToolCall[] | undefined,
+  params: LLMCallParams,
+  provider: LLMProvider,
+  model: string,
+  finishReason: string | null | undefined,
+  canRegenerate: boolean,
+): string {
+  // A tool call legitimately carries no message content.
+  if (toolCalls && toolCalls.length > 0) return text
+
+  if (!text.trim()) {
+    if (!canRegenerate) {
+      console.error(
+        `[llm] use=${params.useCase} provider=${provider} model=${model} returned an empty response ` +
+          `(${text.length} chars, finish=${finishReason ?? 'n/a'}) and there is no fallback left to try`,
+      )
+      return text
+    }
+    throw new LLMUnusableResponseError(
+      'empty',
+      provider,
+      model,
+      `${provider}/${model} returned an empty response (${text.length} chars of whitespace, finish_reason=${finishReason ?? 'n/a'})`,
+    )
+  }
+
+  if (params.responseFormat !== 'json_object') return text
+
+  // Framing first, so this check is never stricter than what the callers
+  // already tolerate on their side (fenced blocks, a stray closing sentence).
+  const parsed = parseJsonLossless(normaliseJsonFraming(text))
+  if (parsed.ok) {
+    if (parsed.repair !== 'none') {
+      console.warn(
+        `[llm] use=${params.useCase} provider=${provider} model=${model} ` +
+          `json repaired losslessly (${parsed.repair}) — no content dropped`,
+      )
+    }
+    return parsed.text
+  }
+
+  if (!canRegenerate) {
+    console.error(
+      `[llm] use=${params.useCase} provider=${provider} model=${model} returned unparsable JSON ` +
+        `(${text.length} chars, finish=${finishReason ?? 'n/a'}: ${parsed.error.message}) and there is ` +
+        `no fallback left to try — handing it to the caller's own recovery`,
+    )
+    return text
+  }
+
+  throw new LLMUnusableResponseError(
+    'unparsable_json',
+    provider,
+    model,
+    `${provider}/${model} returned JSON that will not parse (${text.length} chars, ` +
+      `finish_reason=${finishReason ?? 'n/a'}): ${parsed.error.message}`,
+  )
 }
 
 async function callProvider(
   provider: LLMProvider,
   model: string,
   params: LLMCallParams,
+  canRegenerate: boolean,
 ): Promise<RawCompletion> {
   const client = provider === 'deepseek' ? getDeepSeekClient() : getOpenAIClient()
   const timeoutMs = params.timeoutMs ?? DEFAULT_TIMEOUT_MS
@@ -207,10 +322,19 @@ async function callProvider(
       }
     : undefined
 
-  return { text, toolCalls, usage }
+  const finishReason = (choice?.finish_reason ?? null) as string | null
+
+  // Vetting happens here, inside the provider call, so both the primary and
+  // the fallback path are held to the same bar.
+  const vettedText = vetResponse(text, toolCalls, params, provider, model, finishReason, canRegenerate)
+
+  return { text: vettedText, toolCalls, usage, finishReason }
 }
 
 function isRetriableError(err: any): boolean {
+  // A 200 that carries nothing usable is a provider failure like any other:
+  // asking the other provider is exactly the right move.
+  if (err instanceof LLMUnusableResponseError) return true
   // Retry/fallback on: network timeouts, 5xx, rate limits, JSON parse, abort.
   const status = err?.status ?? err?.response?.status
   if (typeof status === 'number' && (status >= 500 || status === 429)) return true
@@ -237,12 +361,25 @@ export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
 
   try {
     attempts++
-    const { text, toolCalls, usage } = await callProvider(primaryProvider, primaryModel, params)
+    // Refusing an unusable response is only worth it while the OpenAI fallback
+    // is still ahead of us.
+    const canRegenerate = primaryProvider === 'deepseek' && !fallbackDisabled
+    const { text, toolCalls, usage, finishReason } = await callProvider(
+      primaryProvider,
+      primaryModel,
+      params,
+      canRegenerate,
+    )
     const latencyMs = Date.now() - startedAt
-    console.log(`[llm] use=${params.useCase} provider=${primaryProvider} model=${primaryModel} latency=${latencyMs}ms tokens=${usage?.totalTokens ?? 'n/a'} toolCalls=${toolCalls?.length ?? 0}`)
+    console.log(
+      `[llm] use=${params.useCase} provider=${primaryProvider} model=${primaryModel} latency=${latencyMs}ms ` +
+        `tokens=${usage?.totalTokens ?? 'n/a'} completion_tokens=${usage?.completionTokens ?? 'n/a'} ` +
+        `finish=${finishReason ?? 'n/a'} chars=${text.length} toolCalls=${toolCalls?.length ?? 0}`,
+    )
     return {
       text,
       toolCalls,
+      finishReason,
       provider: primaryProvider,
       model: primaryModel,
       usage,
@@ -257,18 +394,25 @@ export async function callLLM(params: LLMCallParams): Promise<LLMResult> {
       }
       throw err
     }
-    console.warn(`[llm] DeepSeek failed for use=${params.useCase}: ${err?.message || err}. Falling back to OpenAI.`)
+    const cause = err instanceof LLMUnusableResponseError ? `unusable_response:${err.kind}` : 'error'
+    console.warn(`[llm] DeepSeek failed for use=${params.useCase} (${cause}): ${err?.message || err}. Falling back to OpenAI.`)
   }
 
   // Fallback path: only triggered when primary was DeepSeek and error is retriable.
   const fallbackModel = resolveModel('openai')
   attempts++
-  const { text, toolCalls, usage } = await callProvider('openai', fallbackModel, params)
+  // Last provider standing: whatever it returns goes to the caller.
+  const { text, toolCalls, usage, finishReason } = await callProvider('openai', fallbackModel, params, false)
   const latencyMs = Date.now() - startedAt
-  console.log(`[llm] use=${params.useCase} provider=openai(fallback) model=${fallbackModel} latency=${latencyMs}ms tokens=${usage?.totalTokens ?? 'n/a'} toolCalls=${toolCalls?.length ?? 0}`)
+  console.log(
+    `[llm] use=${params.useCase} provider=openai(fallback) model=${fallbackModel} latency=${latencyMs}ms ` +
+      `tokens=${usage?.totalTokens ?? 'n/a'} completion_tokens=${usage?.completionTokens ?? 'n/a'} ` +
+      `finish=${finishReason ?? 'n/a'} chars=${text.length} toolCalls=${toolCalls?.length ?? 0}`,
+  )
   return {
     text,
     toolCalls,
+    finishReason,
     provider: 'openai',
     model: fallbackModel,
     usage,
